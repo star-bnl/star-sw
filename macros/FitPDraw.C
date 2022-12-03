@@ -492,5 +492,14 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     MuDraw("mu:x","PI", 70, 3, 10, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01)", "prof", -0.1,  0.6, "All", "log(nP)","#mu of log(((dN/dx)*dX)/(nP)) versus log(nP)");
   } else if (Name.BeginsWith("dNNp"))      {
     MuDraw("mu:x","PI", 120, 4, 10, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01)/dmu**2", "profg", -0.2,  -0.05, "All", "log(dN/dx*dx)","#mu of log(Np/(dN/dx*dx)) versus log((dN/dx)*dX))");
+  } else if (Name.BeginsWith("NPoin"))      {
+    muPlot = "mu"; 
+    TString muTitle = "#mu versus ";
+    Double_t min = -0.2;
+    Double_t max =  0.2;
+    if (plot.Contains("sigma",TString::kIgnoreCase)) {muPlot = "sigma"; muTitle = "#sigma versus "; min = 0;}
+    if (plot.Contains("y",TString::kIgnoreCase)) {muPlot += ":y"; muTitle += "#eta";}
+    else                                         {muPlot += ":x"; muTitle += "No. dEdx Points";}
+    MuDraw(muPlot,"P", 100, 0, 100, "i&&j&&dmu<0.01&&dsigma<0.01", "profg", min,  max, "All", "No. dE/dx points",muTitle);
   }
 }

@@ -85,7 +85,10 @@
 #include "StBichsel/StdEdxPull.h"
 #include "TLegend.h"
 #include "TROOT.h"
+#else 
+class Bichsel;
 #endif
+Bichsel *m_Bichsel = 0;
 const Int_t NMasses = 20;
 const Double_t kAu2Gev=0.9314943228;
 struct Part_t {
@@ -95,6 +98,7 @@ struct Part_t {
   Int_t         Index;
   Double_t      Mass;
 };
+const Int_t kpionIdx = 2;
 Part_t Part[NMasses] = {// https://periodictable.com/Isotopes/
   //name,   PiD, Charge,  Index, Mass 
   {"e",       0,      1,      0, 0.51099907e-3},     	      // 3 e   
@@ -122,8 +126,6 @@ const Int_t NF =   9; //          0,      1,  2,    3,    4,     5.     6,   7, 
 const Char_t *FNames[11] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM", "zN", "70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
-class Bichsel;
-Bichsel *m_Bichsel = 0;
 //________________________________________________________________________________
 Double_t bichselZ(Double_t *x,Double_t *par) {
   Double_t pove   = TMath::Power(10.,x[0]);
@@ -329,11 +331,13 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 #endif /* __CINT__ */
 //________________________________________________________________________________
 void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
-  if (gClassTable->GetID("StBichsel") < 0) {
-    gSystem->Load("libTable");
-    gSystem->Load("St_base");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StBichsel");
+  if (! m_Bichsel) { 
+    if (gClassTable->GetID("StBichsel") < 0) {
+      gSystem->Load("libTable");
+      gSystem->Load("St_base");
+      gSystem->Load("StarClassLibrary");
+      gSystem->Load("StBichsel");
+    }
     m_Bichsel = Bichsel::Instance();
   }
   TString Type(type);
@@ -348,6 +352,7 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
   }
   if (Nhyps < 9) Nhyps = 9;
   if (Nhyps > NMasses)  Nhyps = NMasses;
+  TH1D *FHyps[20] = {0};
   for (int h = 0; h < Nhyps; h++) { // Masses
   //  for (int h = 0; h < 7; h++) { // Masses
     Int_t dx = 1;
@@ -391,6 +396,30 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     fA->Draw("same");
     leg->AddEntry(fA,Part[h].Name);
 #endif
+    FHyps[h] = (TH1D *) func->GetHistogram();
+    FHyps[h]->SetName(func->GetName());
   }
   leg->Draw();
+#if 1
+  TH1D *FHypsFromPion[20] = {0};
+  if (FHyps[kpionIdx]) {
+    TCanvas *csep = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(Form("sep%s",type));
+    if (! csep) csep = new TCanvas(Form("csep%s",type),Form("Separation %s",type));
+    else        csep->Clear();
+    TLegend *legS = new TLegend(0.85,0.45,0.95,0.9,"");
+    TH1F *frame = csep->DrawFrame(-1,-1,5,2);
+    // separation from pion
+    for (int h = 0; h < Nhyps; h++) { // Masses
+      if (! FHyps[h] ) continue;
+      FHypsFromPion[h] = new TH1D(*FHyps[h]);
+      FHypsFromPion[h]->SetName(Form("%s-%s",FHyps[h]->GetName(),FHyps[kpionIdx]->GetName()));
+      FHypsFromPion[h]->Add(FHyps[kpionIdx],-1);
+      if (Type.Contains("dNdx",TString::kIgnoreCase)) FHypsFromPion[h]->Scale(1.1);
+      FHypsFromPion[h]->Draw("samel");
+      legS->AddEntry(FHypsFromPion[h],FHypsFromPion[h]->GetName());
+    }
+    legS->Draw();
+    csep->Update();
+  }
+#endif
 }
