@@ -1,6 +1,6 @@
 /*
   root.exe Eta3GF*.root MakeTpcEtaCorrectionB.C+
-  root.exe Eta3G4E*.root MakeTpcEtaCorrectionB.C+
+  root.exe EtaB3G4E*.root MakeTpcEtaCorrectionB.C+
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -59,13 +59,13 @@ TCanvas *c2 = 0;
 void MakeTpcEtaCorrection1() {
   const Char_t *tableName = "TpcEtaCorrectionB";
   TString fileIn(gDirectory->GetName());
-  if (! fileIn.BeginsWith("Eta3")) return;
+  if (! fileIn.BeginsWith("EtaB3")) return;
   TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
   if (! FitP) return;
-  fileIn.ReplaceAll("Eta3C+Eta3PCG4EY","");
-  fileIn.ReplaceAll("Eta3+Eta3PG4EY","");
-  fileIn.ReplaceAll("Eta3CG4EY","");
-  fileIn.ReplaceAll("Eta3G4EY","");
+  fileIn.ReplaceAll("EtaB3C+EtaB3PCG4EY","");
+  fileIn.ReplaceAll("EtaB3+EtaB3PG4EY","");
+  fileIn.ReplaceAll("EtaB3CG4EY","");
+  fileIn.ReplaceAll("EtaB3G4EY","");
 
   fileIn.ReplaceAll(".root","");
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
@@ -81,7 +81,12 @@ void MakeTpcEtaCorrection1() {
   Double_t maxOuter =  max;
   Double_t minInner =  min;
   Double_t maxInner =  max;
-#if 0
+#if 1
+  if      (fileIn == "")                                  {nrows = 0;}
+  else if (fileIn.Contains("9p8GeV_fixedTarget_2020"))    {nrows = 0;} 
+  else if (fileIn.Contains("pp500GeV_2022"))              {nrows = 2; np = 1;}           //ok 
+  else if (fileIn.Contains("ps_OO_200GeV_2021"))          {nrows = 2; np = 1;}           //ok 
+#else 
   if      (fileIn == "")                                  {nrows = 0;}
   else if (fileIn.Contains("GeV_20"))                     {nrows = 2;}           //ok 
   else if (fileIn.Contains("GeVb_20"))                    {nrows = 2;}           //ok 
@@ -251,7 +256,7 @@ void MakeTpcEtaCorrectionB() {
   Int_t n = 0;
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
-    if (! F.Contains("Eta3")) continue;
+    if (! F.Contains("EtaB3")) continue;
     F.ReplaceAll(".root","");
     f->cd();
     TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");

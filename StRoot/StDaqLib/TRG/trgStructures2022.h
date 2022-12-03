@@ -49,8 +49,9 @@
 #define y22QT4_CONF_NUM      14
 #define y22EQ1_CONF_NUM      15
 #define y22EQ2_CONF_NUM      16
+#define y22EQ4_CONF_NUM      17
+#define y22CLK_CONF_NUM      19
 #define y22INF_CONF_NUM      20
-
 
 #define y22ADD_BIT_PREPILEUP      0              /* pileup present */
 #define y22ADD_BIT_POSTPILEUP     1
