@@ -88,6 +88,7 @@
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
 
 #include "StETofMatchMaker.h"
+#include "StETofHitMaker/StETofHitMaker.h"
 #include "StETofUtil/StETofGeometry.h"
 #include "StETofUtil/StETofConstants.h"
 
@@ -138,6 +139,7 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mMuDst( nullptr ),
   mETofGeom( nullptr ),
   mFileNameMatchParam( "" ),
+  mFileNameAlignParam( "" ),
   mIsStEventIn( false ),
   mIsMuDstIn( false ),
   mOuterTrackGeometry( true ),
@@ -165,6 +167,9 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
     mTrackCuts.push_back( 0. ); // nHitsRatio
     mTrackCuts.push_back( 0. ); // low pt
 
+    mClockJumpCand.clear();
+    mClockJumpDirection.clear();
+    
     mHistograms.clear();
     mHistograms2d.clear();
 }
@@ -175,6 +180,7 @@ StETofMatchMaker::~StETofMatchMaker()
 {
     /* nope */
 }
+
 
 
 //---------------------------------------------------------------------------
@@ -287,6 +293,11 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
+	if (mFileNameAlignParam !=  ""){
+	  LOG_DEBUG << " gGeoManager: Setting alignment file: " << mFileNameAlignParam << endm;
+	  mETofGeom->setFileNameAlignParam(mFileNameAlignParam);
+	}
+	
         mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
     }
 
@@ -295,6 +306,17 @@ StETofMatchMaker::InitRun( Int_t runnumber )
         return kStFatal;
     }
 
+    
+    // --------------------------------------------------------------------------------------------
+    // pointer to eTOF hit maker
+    // --------------------------------------------------------------------------------------------
+    LOG_INFO << "StETofMatchMaker::InitRun() -- setting pointer to hit maker: " << endm;
+    mETofHitMaker = ( StETofHitMaker* ) GetMaker( "etofHit" );
+
+    LOG_INFO << "StETofMatchMaker::InitRun() -- pointer to eTOF hit maker: " << mETofHitMaker << endm;
+
+
+    
     if( mDoQA ) {
         // for geometry debugging
         for( unsigned int i=0; i<mETofGeom->nValidModules(); i++ ) {
@@ -443,6 +465,8 @@ StETofMatchMaker::Make()
         return kStOk;
     }
 
+    
+
     //.........................................................................
     // B. loop over global tracks & determine all track intersections with active eTof volumes
     //
@@ -471,7 +495,7 @@ StETofMatchMaker::Make()
     }
 
     mHistograms.at( "intersectionMult_etofMult" )->Fill( detectorHitVec.size(), intersectionVec.size() );
-
+    
     //.........................................................................
     // C. match detector hits to track intersections
     //
@@ -484,7 +508,7 @@ StETofMatchMaker::Make()
 
         return kStOk;
     }
-    
+  
     //.........................................................................
     // D. sort matchCand vector and deal with (discard) hits matched by multiple tracks
     //
@@ -499,7 +523,7 @@ StETofMatchMaker::Make()
 
         return kStOk;
     }
-
+   
     //.........................................................................
     // E. sort singleTrackMatchVector for multiple hits associated to single tracks and determine the best match
     //
@@ -515,7 +539,7 @@ StETofMatchMaker::Make()
     else{
         //LOG_INFO << "Make() -- number of found matches of eTOF hits with tracks: " << finalMatchVec.size() << endm;        
     }
-
+    
     //.........................................................................
     // F. fill ETofPidTraits for global and primary tracks and assign associated track to hits
     //
@@ -533,11 +557,13 @@ StETofMatchMaker::Make()
     //.........................................................................
     // H. fill QA histograms
     //
+  
     fillQaHistograms( finalMatchVec );
-
+  
     fillSlewHistograms( finalMatchVec );
-
-
+  
+    checkClockJumps();
+  
     //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
     return kStOk;
@@ -765,6 +791,10 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
                 continue;
             }
 
+	    if( fabs(aHit->localY()) > 16.0 ) {//reject unphysical hits outside of detector surface from mismatches PW
+	      continue;
+            }
+	    
             StructETofHit detectorHit;
 
             detectorHit.sector         = aHit->sector();
@@ -793,6 +823,10 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
 
             if( !aHit ) {
                 continue;
+            }
+
+	    if( fabs(aHit->localY()) > 16.0 ) {//reject unphysical hits outside of detector surface from mismatches PW
+	      continue;
             }
 
             StructETofHit detectorHit;
@@ -2509,6 +2543,23 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
                 std::string histName_t0corr_strip = "matchCand_t0corr_strip_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
                 mHistograms.at( histName_t0corr_strip )->Fill( matchCand.localX, tof - tofpi );
             }
+
+	    if( nSigmaPion < 2. ) {
+                if( matchCand.clusterSize < 100 ) {
+                    // hits without clock jump based on local Y position
+                  /*  std::string histName_t0corr_strip = "matchCand_t0corr_strip_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+                    mHistograms.at( histName_t0corr_strip )->Fill( matchCand.localX, tof - tofpi ); */
+                }
+                else {
+                    // hits with clock jump based on local Y position
+		  std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
+		  mHistograms.at( histName_t0corr_jump )->Fill( matchCand.localX, tof - tofpi ); //cutdownYS
+		  
+		  int get4Index = matchCand.sector * 1000 + matchCand.plane * 100 + matchCand.counter * 10 + ( matchCand.localX + 16 ) / 4 + 1;
+		  mClockJumpCand[ get4Index ]++;
+                }
+            }
+	    
             
             if( sqrt( pow( matchCand.deltaX, 2 ) + pow( matchCand.deltaY, 2 ) ) < etofProjection::deltaRcut ) {
 
@@ -2700,6 +2751,13 @@ StETofMatchMaker::bookHistograms()
 
                     // eta vs. phi per counter
                     mHistograms[ histName_hit_eta_phi ]  = new TH2F( Form( "A_eTofHits_phi_eta_s%dm%dc%d",  sector, plane, counter ), Form( "eta vs. phi  sector %d module %d counter %d; #phi; #eta", sector, plane, counter ), 200, 0., 2 * M_PI, 200, -1.7, -0.9 );
+
+
+		    std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+		    mHistograms[ histName_t0corr_jump ] = new TH2F( Form( "H_matchCand_t0corr_jump_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;localX (cm) grouped by Get4;#Delta time (ns)", sector, plane, counter ), 8, -16., 16., 80, -20., 20. );
+          
+
+
                 }
             }
         }
@@ -2854,7 +2912,7 @@ StETofMatchMaker::bookHistograms()
         // ----------
         // step - H -
         // ----------
-        mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "H_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.8, 2. );
+        mHistograms[ "matchCand_beta_mom"     ] = new TH2F( "H_matchCand_beta_mom"     , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta",         400,   0., 10., 1000, 0.0, 2. );
 
         mHistograms[ "matchCand_beta_mom_matchDistCut" ] = new TH2F( "H_matchCand_beta_mom_matchDistCut" , "match candidate 1/beta vs. momentum;p (GeV/c);1/#beta", 400, 0., 10., 1000, 0.8, 2. );
 
@@ -2872,7 +2930,7 @@ StETofMatchMaker::bookHistograms()
                 for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
 
                     std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-                    mHistograms[ histName_beta_mom ] = new TH2F( Form( "H_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.8, 2. );
+                    mHistograms[ histName_beta_mom ] = new TH2F( Form( "H_matchCand_beta_mom_s%dm%dc%d", sector, plane, counter ), Form( "match candidate 1/beta vs. momentum in sector %d module %d counter %d;p (GeV/c);1/#beta", sector, plane, counter), 200, 0., 10., 500, 0.0, 2. );
 
                     std::string histName_t0corr_mom  = "matchCand_t0corr_mom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
                     mHistograms[ histName_t0corr_mom ] = new TH2F( Form( "H_matchCand_t0corr_mom_s%dm%dc%d", sector, plane, counter ),  Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)",  sector, plane, counter ), 400,     0.,  10., 1000, -500., 500. );
@@ -3015,4 +3073,76 @@ ETofTrack::ETofTrack( const StMuTrack* mutrack )
 
         if ( phi < 0. ) phi += 2. * M_PI;
     }
+}
+
+//---------------------------------------------------------------------------
+void
+StETofMatchMaker::checkClockJumps()
+{
+
+    if( mClockJumpCand.size() == 0 ) return;
+
+
+   
+
+	// histogram filled with all hits including clock jump candidates.
+    int   binmax     = mHistograms.at( "matchCand_t0corr_1d" )->GetMaximumBin();
+    float mainPeakT0 = mHistograms.at( "matchCand_t0corr_1d" )->GetXaxis()->GetBinCenter( binmax );
+
+    
+
+    LOG_DEBUG << "mainPeakT0: " << mainPeakT0 << endm;
+
+    bool needsUpdate = false;
+
+    for( const auto& kv : mClockJumpCand ) {
+        LOG_DEBUG << "clock jump candidate: " << kv.first << "   " << kv.second << endm;
+
+        int sector  = kv.first / 1000;
+        int plane   = ( kv.first % 1000 ) / 100;
+        int counter = ( kv.first %  100 ) /  10;
+        int binX    = kv.first % 10;
+        
+        std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+        TH2D* h = ( TH2D* ) mHistograms.at( histName_t0corr_jump );
+
+        int binYmain_neg  = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 );
+        int binYmain_pos  = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 );
+        int binYearly_neg = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 - eTofConst::coarseClockCycle );
+        int binYearly_pos = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 - eTofConst::coarseClockCycle );
+        int binYlate_neg  = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 + eTofConst::coarseClockCycle );//tight cut to reduce interference with slow particles of the main band
+        int binYlate_pos  = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 + eTofConst::coarseClockCycle );
+
+        LOG_DEBUG << "binYmain_neg " << binYmain_neg << " " << binYmain_pos << " binYmain_pos " << binYearly_neg << " binYearly_neg " << binYearly_pos << " binYearly_pos "<< endm;
+
+        int nMain  = h->Integral( binX, binX, binYmain_neg,  binYmain_pos  );
+        int nEarly = h->Integral( binX, binX, binYearly_neg, binYearly_pos );
+        int nLate  = h->Integral( binX, binX, binYlate_neg, binYlate_pos );
+
+        LOG_DEBUG << "nMain " << nMain << "  " << nEarly << " nEarly " << endm;
+
+        if( nEarly > nMain && nEarly >= 2 ) { //first two clock jumped hits in one Get4 IN EACH FILE are not are not detected. Could be changed by changing default direction of jumps, but then wrongly corrected clock jumps are LATE! Cut on late hits being above 1.5 GeV or Pion dEdX could help separate late hits from slow particles.
+            LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
+
+            mClockJumpDirection[ kv.first ] = -1.;
+            needsUpdate = true;
+        }
+
+        if( nLate > nMain && nLate >= 2 ) { //allows to change default to correct backwards in time, as it is electronically most likely. Unlikely to find real proton at wrong position, but correct time.
+            LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
+
+            mClockJumpDirection[ kv.first ] = 1.;
+            needsUpdate = true;
+        }  
+
+    }
+ 
+    mClockJumpCand.clear();
+
+    //if there was a new entry to the map --> push it to the hit maker (if available)
+    if( needsUpdate && mETofHitMaker ) {
+        mETofHitMaker->updateClockJumpMap( mClockJumpDirection );	
+    } 
+ 
+    
 }
