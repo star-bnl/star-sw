@@ -2079,7 +2079,8 @@ my $step = 0;
 #$hist = "RunXX100"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/16/2022 start with current .DEV2
 #$hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/02/2022 new dEdxModel
 #$hist = "RunXX201"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/02/2022 new dEdxModel from RunXIX_XXII_59
-$hist = "RunXX202"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/03/2022 new dEdxModel from RunXIX_XXII_72
+#$hist = "RunXX202"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/03/2022 new dEdxModel from RunXIX_XXII_72
+$hist = "RunXX203"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/2022 new TpcSecRowB from RunXX202
 # restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
 # TpcAdcCorrectionB.y2020.C
 # TpcAvgPowerSupply.y2020.C
@@ -2717,7 +2718,7 @@ print "Total size = $GB GB for $#Files event.root files  $count scripts have bee
 }
 __END__
   foreach f (`ls -1d job*.xml`)
-    set d = `echo ${f} | sed -e 's/jobs.RunXX201_//' -e 's/.xml//'`
+    set d = `echo ${f} | sed -e 's/jobs.RunXX203_//' -e 's/.xml//'`
   if (! -d ${d})   mkdir ${d}
   cd ${d}
   lsf ../job*${d}*.xml

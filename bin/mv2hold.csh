@@ -1,9 +1,10 @@
 #! /bin/tcsh -f
-set D = ~/work/Histograms/RunXIX_XXII_71 
-#set T = TpcSecRowB; 
+#set D = ~/work/Histograms/RunXIX_XXII_71 
+set D = ~/work/Histograms/RunXX202
+set T = TpcSecRowB; 
 #set T = TpcZCorrectionC;  
 #set T = TpcEtaCorrectionB; 
-set T = TpcLengthCorrectionMDN;
+#set T = TpcLengthCorrectionMDN;
 set H = hold.`basename ${D}`
 echo "D = ${D}, T = ${T}, H = ${H}"
 if (! -d ${H}) mkdir ${H}
