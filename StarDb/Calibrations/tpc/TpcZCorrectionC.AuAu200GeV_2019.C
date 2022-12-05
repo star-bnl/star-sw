@@ -9,11 +9,11 @@ TDataSet *CreateTable() {
   row.min =  22.5;
   row.max = 208.0;
   row.npar =            5;// AuAu200GeV_2019
-  row.a[0] =      0.14998;
-  row.a[1] =   -0.0043205;
-  row.a[2] =   4.5173e-05;
-  row.a[3] =  -1.9875e-07;
-  row.a[4] =   3.1314e-10;
+  row.a[0] =      0.14815;
+  row.a[1] =   -0.0042261;
+  row.a[2] =   4.4063e-05;
+  row.a[3] =  -1.9432e-07;
+  row.a[4] =   3.0825e-10;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
@@ -21,11 +21,11 @@ TDataSet *CreateTable() {
   row.min =  16.5;
   row.max = 208.0;
   row.npar =            5;// AuAu200GeV_2019
-  row.a[0] =     -0.11271;
-  row.a[1] =    0.0067239;
-  row.a[2] =   -9.019e-05;
-  row.a[3] =   4.4395e-07;
-  row.a[4] =  -7.4091e-10;
+  row.a[0] =     -0.10555;
+  row.a[1] =    0.0065846;
+  row.a[2] =  -8.8302e-05;
+  row.a[3] =   4.2905e-07;
+  row.a[4] =  -7.0081e-10;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }

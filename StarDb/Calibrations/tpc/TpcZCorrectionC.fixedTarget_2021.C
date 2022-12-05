@@ -8,47 +8,48 @@ TDataSet *CreateTable() {
   row.nrows = nrows;
   row.min =  22.5;
   row.max = 208.0;
-  row.npar =            5;// fixedTarget_2021
-  row.a[0] =     -0.14284;
-  row.a[1] =    0.0040967;
-  row.a[2] =  -4.5323e-05;
-  row.a[3] =   2.1683e-07;
-  row.a[4] =  -3.6293e-10;
+  row.npar =            5;// fixetTarget_2021
+  row.a[0] =    -0.027837;
+  row.a[1] =  -0.00057298;
+  row.a[2] =   1.8366e-05;
+  row.a[3] =  -1.3961e-07;
+  row.a[4] =   3.4262e-10;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
   row.nrows = nrows;
   row.min =  16.5;
   row.max = 208.0;
-  row.npar =            5;// fixedTarget_2021
-  row.a[0] =   -0.0083529;
-  row.a[1] =  -0.00019138;
-  row.a[2] =   1.4298e-05;
-  row.a[3] =  -1.3844e-07;
-  row.a[4] =   3.7494e-10;
+  row.npar =            5;// fixetTarget_2021
+  row.a[0] =    -0.022897;
+  row.a[1] =   0.00056069;
+  row.a[2] =   4.9776e-06;
+  row.a[3] =  -9.4903e-08;
+  row.a[4] =   3.0544e-10;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 3;
   row.nrows = nrows;
   row.min =  22.5;
   row.max = 208.0;
-  row.npar =            4;// fixedTarget_2021
-  row.a[0] =     -0.01102;
-  row.a[1] =   0.00026904;
-  row.a[2] =  -2.3025e-06;
-  row.a[3] =   6.9681e-09;
+  row.npar =            5;// fixetTarget_2021
+  row.a[0] =    -0.019492;
+  row.a[1] =   0.00073304;
+  row.a[2] =  -1.0407e-05;
+  row.a[3] =   5.9903e-08;
+  row.a[4] =  -1.1613e-10;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 4;
   row.nrows = nrows;
   row.min =  16.5;
   row.max = 208.0;
-  row.npar =            5;// fixedTarget_2021
-  row.a[0] =     -0.20687;
-  row.a[1] =    0.0088456;
-  row.a[2] =  -0.00011374;
-  row.a[3] =   5.7222e-07;
-  row.a[4] =  -9.9077e-10;
+  row.npar =            5;// fixetTarget_2021
+  row.a[0] =     -0.16042;
+  row.a[1] =    0.0076195;
+  row.a[2] =  -0.00010429;
+  row.a[3] =   5.4822e-07;
+  row.a[4] =  -9.8822e-10;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }

@@ -68,7 +68,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
   /* printf*/ ("*********** Event Info **********************")
          << endm;
    LOG_INFO << Form 
-  /* printf*/ ("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %d:%d"
+  /* printf*/ ("\tRun: \t%5d  Event %5d  TimeStamp %08d.%06d  Bunch %d:%d"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
          ,mBunchCrossingNumber[0],mBunchCrossingNumber[1])
          << endm;
