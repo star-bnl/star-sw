@@ -501,5 +501,7 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     if (plot.Contains("y",TString::kIgnoreCase)) {muPlot += ":y"; muTitle += "#eta";}
     else                                         {muPlot += ":x"; muTitle += "No. dEdx Points";}
     MuDraw(muPlot,"P", 100, 0, 100, "i&&j&&dmu<0.01&&dsigma<0.01", "profg", min,  max, "All", "No. dE/dx points",muTitle);
+  } else if (Name.BeginsWith("Time"))      {
+    MuDraw("mu:x","T", 280, 7.6e8, 9.0e8, "(i&&j&&dmu>0&&dmu<0.01)", "profg", -0.4,  0.4, "All", "Time","#mu");
   }
 }

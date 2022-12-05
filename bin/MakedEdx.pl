@@ -2511,7 +2511,9 @@ my $step = 0;
 #$hist = "RunXIX_XXII_69"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/30/2022  new TpcSecRowB
 #$hist = "RunXIX_XXII_70"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/01/2022  new TpcZCorrectionC
 #$hist = "RunXIX_XXII_71"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/02/2022  TpcPadCorrectionMDF.20190225.202320.C
-$hist = "RunXIX_XXII_72"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/03/2022  new TpcSecRowB, TpcEtaCorrectionB, TpcZCorrectionC, TpcLengthCorrectionMDN
+#$hist = "RunXIX_XXII_72"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/03/2022  new TpcSecRowB, TpcEtaCorrectionB, TpcZCorrectionC, TpcLengthCorrectionMDN
+#$hist = "RunXIX_XXII_73"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/04/2022  old (71) TpcEtaCorrectionB, TpcZCorrectionC
+$hist = "RunXIX_XXII_74"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/05/2022  new TpcLengthCorrectionMDN
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2718,7 +2720,7 @@ __END__
     set d = `echo ${f} | sed -e 's/jobs.RunXIX_XXII_.._//' -e 's/.xml//'`
   if (! -d ${d})   mkdir ${d}
   cd ${d}
-  lsf6X ../job*${d}*.xml
+  lsf ../job*${d}*.xml
   cd -
 end
 #  3p85GeV_fixedTarget_2019 
@@ -2749,5 +2751,7 @@ end
 hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
 
 fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C GP=NPointsF,NPointsN,TPointsF,TPointsN
-fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70
+fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC,Time,TimeC
 fit.pl *.root GP=NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP
+
+9p2GeV_2020
