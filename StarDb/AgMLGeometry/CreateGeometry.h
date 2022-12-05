@@ -1,4 +1,6 @@
+#ifdef __CLING__
 #include "StBFChain/StBFChain.h"
+#endif
 
 extern StBFChain* chain;
 
