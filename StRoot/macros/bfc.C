@@ -139,6 +139,15 @@ void bfc(Int_t First, Int_t Last,
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
+
+  // Set common search locations for header files when using ROOT interpreter
+  gInterpreter->AddIncludePath(".");
+  gInterpreter->AddIncludePath("./.$STAR_HOST_SYS/include");
+  gInterpreter->AddIncludePath("./StRoot");
+  gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
+  gInterpreter->AddIncludePath("$STAR/StRoot");
+  gInterpreter->AddIncludePath("/usr/include/mysql");
+
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
   chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
