@@ -230,6 +230,7 @@ public:
   int barrelHighTowerTh(int i) const;
 
   int barrelJetPatchAdc(int jp) const;
+  int barrelPartialJetPatchAdc(int jp) const;
   int barrelHighTowerAdc(int towerId) const { return getHT6bitAdc(towerId); }
 
 public:

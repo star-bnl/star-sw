@@ -792,6 +792,7 @@ int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister
 int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegister(i); }
 
 int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[jp%3]; }
+int StEemcTriggerSimu::endcapPartialJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[3+jp%3]; }
 
 int StEemcTriggerSimu::getOutHT(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
 int StEemcTriggerSimu::getOutTPsum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }
