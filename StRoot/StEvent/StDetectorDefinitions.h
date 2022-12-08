@@ -155,6 +155,11 @@
 #define kFstIdentifier                45
 
 /*
+ ** RHICf
+ */
+#define kRHICfIdentifier              46
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)

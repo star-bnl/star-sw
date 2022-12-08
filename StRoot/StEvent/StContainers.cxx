@@ -144,6 +144,9 @@
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
+#include "StRHICfRawHit.h"
+#include "StRHICfHit.h"
+#include "StRHICfPoint.h"
 #include "StFpsSlat.h"
 #include "StFtpcHit.h"
 #include "StHltBEmcTowerHit.h"
@@ -216,6 +219,9 @@ StCollectionImp(FgtStrip)
 StCollectionImp(FmsCluster)
 StCollectionImp(FmsHit)
 StCollectionImp(FmsPoint)
+StCollectionImp(RHICfRawHit)
+StCollectionImp(RHICfHit)
+StCollectionImp(RHICfPoint)
 StCollectionImp(FpsSlat)
 StCollectionImp(FtpcHit)
 StCollectionImp(Hit)
