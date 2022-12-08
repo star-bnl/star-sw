@@ -7,59 +7,60 @@
  *
  */
 
-#include <vector>
-#include <StThreeVectorD.hh>
 #include <StPhysicalHelixD.hh>
-#include "StGenericVertexFinder.h"
+#include <StThreeVectorD.hh>
+#include <vector>
+
 #include "StCtbUtility.h"
+#include "StGenericVertexFinder.h"
 
 class StEvent;
 class StTrack;
 
-class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
+class StppLMVVertexFinder : public StGenericVertexFinder, StCtbUtility {
  public:
-    StppLMVVertexFinder();
+  StppLMVVertexFinder();
 
-    // mandatory implementations
-    virtual         ~StppLMVVertexFinder();
-    int             fit(StEvent*);         
-    void            printInfo(ostream& = cout) const;
-    void            Clear();
+  // mandatory implementations
+  virtual ~StppLMVVertexFinder();
+  int fit(StEvent*);
+  void printInfo(ostream& = cout) const;
+  void Clear();
 
-    // over-written method
-    virtual void    Init();
-    void addFakeVerex(float z);
+  // over-written method
+  virtual void Init();
+  void addFakeVerex(float z);
 
  private:
+  virtual void UseVertexConstraint();
 
-    virtual void    UseVertexConstraint();
-  
-    unsigned int           mMinNumberOfFitPointsOnTrack;
-    StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
+  unsigned int mMinNumberOfFitPointsOnTrack;
+  StPhysicalHelixD* mBeamHelix;  // Beam Line helix
 
-    //jan--------------------
-    bool   matchTrack2CTB (StTrack* rTrack, float & sigma);
-    bool   ppLMV5();
-    double mMaxTrkDcaRxy;    //DCA to nominal beam line for each track
-    double mMinTrkPt;        //~ pT=0.16(GeV/c) == R=2 (m )in 2001
-    float  mMatchCtbMax_eta;
-    float  mMatchCtbMax_phi;
-    float  mDVtxMax;
-    unsigned int   mMinMatchTr; // minimal # of tracks matched to CTB for valid vertex
-    float  mMaxZrange;// for tracks used by the vertex finder.
-    int    mBLequivNtr;
-    int    n1,n2,n3,n4,n5,n6; // private counters
-    float  mBfield;// magnetic field
-    int    mTotEve;
-    int    eveID;
-    int    NCtbMatches();
+  // jan--------------------
+  bool matchTrack2CTB(StTrack* rTrack, float& sigma);
+  bool ppLMV5();
+  double mMaxTrkDcaRxy;  // DCA to nominal beam line for each track
+  double mMinTrkPt;      //~ pT=0.16(GeV/c) == R=2 (m )in 2001
+  float mMatchCtbMax_eta;
+  float mMatchCtbMax_phi;
+  float mDVtxMax;
+  unsigned int mMinMatchTr;  // minimal # of tracks matched to CTB for valid vertex
+  float mMaxZrange;          // for tracks used by the vertex finder.
+  int mBLequivNtr;
+  int n1, n2, n3, n4, n5, n6;  // private counters
+  float mBfield;               // magnetic field
+  int mTotEve;
+  int eveID;
+  int NCtbMatches();
 
-    struct JHelix {StPhysicalHelixD helix; float sigma; };
+  struct JHelix {
+    StPhysicalHelixD helix;
+    float sigma;
+  };
 
-    std::vector<JHelix> mPrimCand;
+  std::vector<JHelix> mPrimCand;
 };
-
-
 
 /***************************************************************************
  *
@@ -186,11 +187,10 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
  *
  * ppLMV use new set of params
  *  INT:  CtbThres/ch=2   MinTrkPonits=10   i2=0   i3=0   i4=0   i5=0   i6=0   i7=0   i8=0   i9=9999
- *  FLOAT:  CtbThres/MeV=1.000000  MaxTrkDcaRxy=3.900000  MinTrkPt/GeV=0.200000  
- *          CtbEtaErr=0.020000  CtbPhiErr/deg=1.000000  
- *          MaxTrkDcaZ=180.000000  
+ *  FLOAT:  CtbThres/MeV=1.000000  MaxTrkDcaRxy=3.900000  MinTrkPt/GeV=0.200000
+ *          CtbEtaErr=0.020000  CtbPhiErr/deg=1.000000
+ *          MaxTrkDcaZ=180.000000
  *          f6=0.000000  f7=0.000000  f8=0.000000  f9=8888.000000
  *
  *
  **************************************************************************/
-
