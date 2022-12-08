@@ -5,6 +5,7 @@
 #pragma link C++ enum emcTypes;
 #pragma link C++ enum fgtTypes;
 #pragma link C++ enum fmsTypes;
+#pragma link C++ enum rhicfTypes;
 //#ifndef __NO_STRANGE_MUDST__
 //#pragma link C++ enum strangeTypes;
 //#endif
