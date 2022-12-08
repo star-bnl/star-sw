@@ -1,5 +1,8 @@
 ---
 BasedOnStyle: Google
+BraceWrapping:
+  AfterFunction:   true
+BreakBeforeBraces: Custom
 ColumnLimit: '120'
 IndentPPDirectives: None
 IndentWidth: '2'
