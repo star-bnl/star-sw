@@ -2,10 +2,10 @@
 BasedOnStyle: Google
 ColumnLimit: '120'
 IndentPPDirectives: None
-IndentWidth: '3'
+IndentWidth: '2'
 MaxEmptyLinesToKeep: '1'
 SpacesInParentheses: 'false'
-TabWidth: '3'
+TabWidth: '8'
 UseTab: Never
 
 ...
