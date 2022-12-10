@@ -63,6 +63,13 @@ void StMuRHICfUtil::fillRHICf(StRHICfCollection* coll, StMuRHICfCollection* muCo
     fillRHICfPoint(coll, muColl);
 }
 
+Int_t StMuRHICfUtil::checkGSOBarSize(Int_t tower)
+{
+    if(tower==0){return kRHICfNbarSmall;}
+    else if(tower==1){return kRHICfNbarLarge;}
+    else{return 0;}
+}
+
 void StMuRHICfUtil::fillMuRHICfRawHit(StMuRHICfCollection* muColl, StRHICfCollection* coll)
 {
     StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();

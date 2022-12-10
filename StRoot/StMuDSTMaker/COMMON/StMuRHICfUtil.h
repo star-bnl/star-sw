@@ -3,13 +3,12 @@
 
 #include "StObject.h"
 #include "StRoot/StEvent/StEnumerations.h"
-#include "StRoot/StRHICfUtil/StRHICfFunction.h"
 
 class StRHICfCollection;
 class StMuRHICfCollection;
 class StMuDst;
 
-class StMuRHICfUtil : public StObject, StRHICfFunction
+class StMuRHICfUtil : public StObject
 {
     public:
         StMuRHICfUtil();
@@ -22,6 +21,8 @@ class StMuRHICfUtil : public StObject, StRHICfFunction
         void fillRHICf(StRHICfCollection*,StMuRHICfCollection*);
 
     private:
+        Int_t checkGSOBarSize(Int_t tower);
+
         void fillMuRHICfRawHit(StMuRHICfCollection*, StRHICfCollection*);
         void fillMuRHICfHit(StMuRHICfCollection*, StRHICfCollection*);
         void fillMuRHICfPoint(StMuRHICfCollection*, StRHICfCollection*);
