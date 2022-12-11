@@ -2513,7 +2513,12 @@ my $step = 0;
 #$hist = "RunXIX_XXII_71"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/02/2022  TpcPadCorrectionMDF.20190225.202320.C
 #$hist = "RunXIX_XXII_72"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/03/2022  new TpcSecRowB, TpcEtaCorrectionB, TpcZCorrectionC, TpcLengthCorrectionMDN
 #$hist = "RunXIX_XXII_73"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/04/2022  old (71) TpcEtaCorrectionB, TpcZCorrectionC
-$hist = "RunXIX_XXII_74"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/05/2022  new TpcLengthCorrectionMDN
+#$hist = "RunXIX_XXII_74"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/05/2022  new TpcLengthCorrectionMDN
+#$hist = "RunXIX_XXII_75"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/06/2022  Clean up codes, dNdx_eff
+#$hist = "RunXIX_XXII_76"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/07/2022  more Clean up codes with ggaus, dNdx_eff
+#$hist = "RunXIX_XXII_77"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/08/2022  new TpcSecRowB, SkindNdx
+#$hist = "RunXIX_XXII_78"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/09/2022  new TpcSecRowB, TpcLengthCorrectionMDN
+$hist = "RunXIX_XXII_79"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/10/2022  new TpcLengthCorrectionMDN
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2724,11 +2729,12 @@ __END__
   cd -
 end
 #  3p85GeV_fixedTarget_2019 
-foreach d (  7p7GeV_2021  100GeV_fixedTarget_2021  17p3GeV_2021  26p5GeV_fixedTarget_2021  3p85GeV_fixedTarget_2021  \
+foreach d (  9p2GeV_2020  9p2GeVb_2020  9p2GeVc_2020 11p5GeV_2020 \
+             7p7GeV_2021  100GeV_fixedTarget_2021  17p3GeV_2021  26p5GeV_fixedTarget_2021  3p85GeV_fixedTarget_2021  \
   	     44p5GeV_fixedTarget_2021  70GeV_fixedTarget_2021 dAu200GeV_2021  OO_200GeV_2021  ps_OO_200GeV_2021 \
   	     pp500GeV_2022 \
-  	     11p5GeV_2020  13p5GeV_fixedTarget_2020  19p5GeV_fixedTarget_2020  26p5GeV_fixedTarget_2020  31p2GeV_fixedTarget_2020  \
-  	     5p75GeV_fixedTarget_2020  7p3GeV_fixedTarget_2020  7p7GeV_2020  9p2GeV_2020  9p2GeVb_2020  9p2GeVc_2020  9p8GeV_fixedTarget_2020 \
+  	     13p5GeV_fixedTarget_2020  19p5GeV_fixedTarget_2020  26p5GeV_fixedTarget_2020  31p2GeV_fixedTarget_2020  \
+  	     5p75GeV_fixedTarget_2020  7p3GeV_fixedTarget_2020  7p7GeV_2020    9p8GeV_fixedTarget_2020 \
   	     14p5GeV_2019  19GeV_2019  31GeV_fixedTarget_2019   4p59GeV_fixedTarget_2019  7.3GeV_fixedTarget_2019  \
   	     7p7GeV_2019  9p2GeV_2019  AuAu200GeV_2019)
   if (! -d ${d})   mkdir ${d}
@@ -2743,6 +2749,11 @@ end
 foreach d (`ls -1d *`)
     dir -ltr ${d}/*.root | tail -1 | grep All
 end
+set list = ""
+foreach d (`ls -1d *`)
+    set list = "${list} `ls -1tr ${d}/*.root | tail -1 | grep All`"
+end
+dir -ltr ${list}
 
 foreach y (2019 2020 2021)
    hadd colGeV_${y}.root [0-9]*GeV_${y}.root >&  colGeV_${y}.log &
@@ -2751,7 +2762,25 @@ end
 hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
 
 fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C GP=NPointsF,NPointsN,TPointsF,TPointsN
-fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC,Time,TimeC
+fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C,Time,TimeC GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC
 fit.pl *.root GP=NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP
+fit.pl *.root G4EY=TimeC
 
 9p2GeV_2020
+
+
+@ count = 0
+foreach all (`ls -1d */All*.csh`)
+  set d = `dirname ${all}`
+  set b = `basename ${all} .csh`
+  set r = ${b}.root
+  if (-r ${d}/${r}) continue;
+  cd ${d}; pwd;
+  csh -x ${b}.csh >& ${b}.csh.log &
+  @ count++;  echo "count $count";
+  if ($count > 36) then 
+     cd -
+     break;
+  endif
+  cd -;
+end
