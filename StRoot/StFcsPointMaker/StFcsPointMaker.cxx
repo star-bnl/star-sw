@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <limits>
+#include <array>
 #include "TMath.h"
 #include "TVector2.h"
 

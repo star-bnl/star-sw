@@ -17,7 +17,7 @@
 
 ClassImp(StrangeMuDstPlayer)
 
-char empty = '\0';
+char empty_dir = '\0';
 char slash = '/';
 void ParseFileName(const Char_t *output, const Char_t **file, const Char_t **dir) {
   if ((*file = std::strrchr(output,slash))) {
@@ -27,7 +27,7 @@ void ParseFileName(const Char_t *output, const Char_t **file, const Char_t **dir
     *dir = _dir;
   } else {
     *file = output;
-    *dir = &empty;
+    *dir = &empty_dir;
   }
 }
 

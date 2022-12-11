@@ -11,7 +11,7 @@
 #endif
 
 #include <vector>
-
+#include <array>
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 #include "StGenericVertexMaker/StiPPVertex/TrackData.h"
 #include "StGenericVertexMaker/StiPPVertex/VertexData.h"
