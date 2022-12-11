@@ -16,7 +16,7 @@
   echo "${b}"
   root.exe -q -b NPoints*U+*${b}.root  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
   end 
-  foreach b (`ls -1d NPoints*U*.root | sed -e 's/.*GP//' -e 's/.root//'`)
+  foreach b (`ls -1d NPoints*UGP*.root | sed -e 's/.*GP//' -e 's/.root//' | sort -u `)
   echo "${b}"
   root.exe -q -b NPoints*UGP${b}.root  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
   end 
