@@ -18,17 +18,21 @@
 class StGlobalTrack;
 class StdEdxStatus {
  public:
-  StdEdxStatus(StDedxPidTraits *pid = 0) : fPiD(pid) {}
+ StdEdxStatus(StDedxPidTraits *pid = 0) : fPiD(pid) {Clear();}
   virtual ~StdEdxStatus() {}
   StDedxPidTraits *fPiD; //!
-  Double_t I() {return (fPiD) ? fPiD->mean() : 0;}
-  Double_t D() {return (fPiD) ? fPiD->errorOnMean() : 0;}
-  Double_t TrackLength() {return (fPiD) ? fPiD->length() : 0;}
-  Double_t log2dX() {return (fPiD) ? fPiD->log2dX() : 0;}
-  Int_t    N() {return (fPiD) ? fPiD->numberOfPoints() : 0;}
+  Double_t I() const {return (fPiD) ? fPiD->mean() : 0;}
+  Double_t D() const {return (fPiD) ? fPiD->errorOnMean() : 0;}
+  Double_t TrackLength() const {return (fPiD) ? fPiD->length() : 0;}
+  Double_t log2dX() const {return (fPiD) ? fPiD->log2dX() : 0;}
+  Int_t    N() const {return (fPiD) ? fPiD->numberOfPoints() : 0;}
+  void Clear() {memset(mBeg,0,mEnd-mBeg+1);}
+  void Print(Option_t *option = "") const;
+  Char_t                mBeg[1];                   //!
   Double_t Pred[KPidParticles];
   Double_t dev[KPidParticles];
   Double_t devS[KPidParticles];
+  Char_t                mEnd[1];        //!
 };
 class StBTofStatus {
  public:
@@ -108,13 +112,14 @@ class StPidStatus {
   void Set();
   
   Int_t        PiDStatus; //!
-  StdEdxStatus* fStatus[kOtherMethodId2+1];
+  void        Print(Option_t *option="") const;
   //  StGlobalTrack *gTrack; //!
   StThreeVectorD g3; //!
   Bool_t fUsedx2;
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
-  StdEdxStatus *fI70; //!
+  StdEdxStatus *fStatus[kOtherMethodId2+1];
+  StdEdxStatus *fI70;
   StdEdxStatus *fFit; //!
   StdEdxStatus *fI70U; //!
   StdEdxStatus *fFitU; //!

@@ -23,6 +23,7 @@ class StdEdxModel {
   TH1D                *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
   static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
+  static Double_t      ggausD(Double_t *x, Double_t *p, Double_t *der = 0);  // versus mu, sigm, alpha wth derivatives
   static Double_t      gausexp(Double_t *x, Double_t *p); // versus mu, sigma, k 
   static Double_t      gausexpD(Double_t *x, Double_t *p, Double_t *der = 0); // versus mu, sigma, k 
   Double_t             dNdx(Double_t poverm, Double_t charge = 1.0);								      
@@ -52,7 +53,13 @@ class StdEdxModel {
   Double_t 	       LogdEMPVeV (Double_t Np)   {return LogdEMPVkeV(Np) + TMath::Log(1e3);}
   Double_t 	       LogdEMPVkeV(Double_t Np)   {return MukeV(Np);} // log(dE) (keV)  
   Double_t 	       LogdEMPVGeV(Double_t Np)   {return MukeV(Np) + TMath::Log(1e-6);} // log(dE) (keV)  
-  Double_t 	       Prob(Double_t ee, Double_t Np, Double_t *der = 0); // probability for give log(dE/Np) versus Np					       
+  Double_t             Prob(Double_t ee, Double_t Np, Double_t *der = 0); // probability for give log(dE/Np) versus Np					       
+  static Double_t      funcProb(Double_t *x, Double_t *p);
+  TF1                 *FProb();
+  static Double_t      funcProbP(Double_t *p, Double_t *x);
+  TF1                 *FProbP();
+  static Double_t      funcProbDer(Double_t *x, Double_t *p);
+  TF1                 *FProbDer();
   Double_t 	       ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der = 0); // probability for give log(dE(GeV)) versus Np			       
   void     	       SetScale(Double_t scale = 1.0) {fScale = scale;}								       
   Double_t 	       dNdxScale() {return fScale;}											       

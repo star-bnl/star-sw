@@ -397,7 +397,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
-  Double_t gc, ADC = 0, xL2, dXCorr, gcRMS;
+  Double_t gc, ADC = 0, xL2, dXCorr;//, gcRMS;
   Double_t slope = 0;
   Int_t nrows = 0;
   Double_t VarXs[kTpcLast] = {-999.};

@@ -126,9 +126,15 @@ const Int_t NF =   9; //          0,      1,  2,    3,    4,     5.     6,   7, 
 const Char_t *FNames[11] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM", "zN", "70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
+static Bool_t fgRigidity = kFALSE;
+//________________________________________________________________________________
+Double_t pOverM(Double_t x) {
+  if (! fgRigidity) return TMath::Power(10.,x);
+  return TMath::Power(10.,TMath::Abs(x) - 1.5);
+}
 //________________________________________________________________________________
 Double_t bichselZ(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -146,7 +152,7 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t dEdxModelZ(Double_t *x,Double_t *par) { //new dEdxModel
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -157,7 +163,7 @@ Double_t dEdxModelZ(Double_t *x,Double_t *par) { //new dEdxModel
 }
 //________________________________________________________________________________
 Double_t bichselZM(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -173,7 +179,7 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t bichsel70(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -189,7 +195,7 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t bichsel70M(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -206,7 +212,7 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
 #if 0
 //________________________________________________________________________________
 Double_t bichsel70Trs(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale  = 1;
   Double_t mass   = par[0];
   Int_t    charge = par[1];
@@ -222,7 +228,7 @@ Double_t bichsel70Trs(Double_t *x,Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t bichselZTrs(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   Int_t    part = par[2];
@@ -242,7 +248,7 @@ Double_t bichselZTrs(Double_t *x,Double_t *par) {
 #endif
 //________________________________________________________________________________
 Double_t dNdx(Double_t *x,Double_t *par) {
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t scale = 1;
   Double_t mass = par[0];
   if (mass < 0) {mass = - mass; scale = 2;}
@@ -252,6 +258,19 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
   return TMath::Log10(scale*StdEdxPull::EvalPred(poverm, 2, charge));
+}
+//________________________________________________________________________________
+Double_t dNdxOld(Double_t *x,Double_t *par) {
+  Double_t pove   = pOverM(x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = 1.;
+  Double_t dx2 = 1;
+  if (par[1] > 1.0) charge = par[1];
+  poverm *= charge;
+  return TMath::Log10(scale*StdEdxPull::EvalPred2(poverm, dx2, 2, charge));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
@@ -300,7 +319,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
     h = -h;
     ScaleL10 = TMath::Log10(2.);
   }
-  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t pove   = pOverM(x[0]);
   Double_t mass = Part[hyp].Mass;
   Double_t poverm = pove/mass; 
   Double_t charge = 1.;
@@ -330,7 +349,8 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 }
 #endif /* __CINT__ */
 //________________________________________________________________________________
-void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
+void bichselG10(const Char_t *type="z", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
+  fgRigidity = rigidity;
   if (! m_Bichsel) { 
     if (gClassTable->GetID("StBichsel") < 0) {
       gSystem->Load("libTable");
@@ -358,7 +378,7 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Part[h].Name,(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
-    Double_t xmin = -2.0;
+    Double_t xmin = -xmax;
     //    if (h == 0 || h >= 5) xmin = -0.75;
     //    if (h == 4) xmin = -0.70;
     //    if (h == 6) xmin = -0.50;
@@ -400,14 +420,14 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     FHyps[h]->SetName(func->GetName());
   }
   leg->Draw();
-#if 1
+#if 0
   TH1D *FHypsFromPion[20] = {0};
   if (FHyps[kpionIdx]) {
-    TCanvas *csep = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(Form("sep%s",type));
-    if (! csep) csep = new TCanvas(Form("csep%s",type),Form("Separation %s",type));
+    TCanvas *csep = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(Form("c2",type));
+    if (! csep) csep = new TCanvas(Form("c2",type),Form("Separation %s",type));
     else        csep->Clear();
     TLegend *legS = new TLegend(0.85,0.45,0.95,0.9,"");
-    TH1F *frame = csep->DrawFrame(-1,-1,5,2);
+    TH1F *frame = csep->DrawFrame(-1,-1,4,2);
     // separation from pion
     for (int h = 0; h < Nhyps; h++) { // Masses
       if (! FHyps[h] ) continue;

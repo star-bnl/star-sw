@@ -10,6 +10,15 @@
 #include "TMath.h"
 #include "StdEdxModel.h"
 #include "Bichsel.h"
+#include "TCallf77.h"
+#ifndef WIN32
+#define ggderiv ggderiv_
+#else
+#define ggderiv GGDERIV
+#endif
+extern "C" {
+  void type_of_call ggderiv(Double_t &, Double_t &, Double_t &, Double_t &, Double_t &, Double_t *);
+};
 //#include "StMessMgr.h" 
 using namespace std;
 ClassImp(StdEdxModel)
@@ -99,11 +108,23 @@ Double_t StdEdxModel::gausw(Double_t *x, Double_t *p) {
   Double_t t = (X  - ksi)/w;
   Double_t v = t/TMath::Sqrt2();
   Double_t G = TMath::Exp(NormL)*TMath::Gaus(t,0,1,kTRUE);
+  Double_t GA =                  TMath::Gaus(alpha*t,0,1,kTRUE);
   Double_t E = (1. + TMath::Erf(alpha*v));
   Double_t V = G/w*E;
   if (k == 0) return V;
   Double_t dVdNormL = V;
   if (k == 1) return dVdNormL;
+  /*
+    dV/V = dG/G - dw/w + dE/E
+    dG/G = d(-t**2/2) = -t * dt;
+    dt  = d((X - ksi)/w) = -dksi/w -dw *t/w 
+    GA = 1/sqrt(2*pi) exp(-(alpha*t)**2/)
+    dE/E = GA/E*((alpha*t)*(dalpha*t + alpha*dt) = GA/E*((alpha*t)*(dalpha*t + alpha*(-dksi/w -dw *t/w)))
+    dV/V =  -t * dt -dw/w +  GA/E*((alpha*t)*(dalpha*t + alpha*(-dksi/w -dw *t/w)))
+
+    dlog(V)/
+
+   */
   /*
     V            =  G / w * E
     dt           = - 1/w * dksi  - t/w *dw = - (dksi + dw)/w
@@ -135,7 +156,6 @@ trigsimp(%);
 fortran(%);
 
 */
-  Double_t GA = TMath::Gaus(alpha*v,0,1,kTRUE);
   Double_t dVdksi = - V/w*(1 + GA/E*alpha/TMath::Sqrt2());
   if (k == 2) return dVdksi;
   Double_t dVdw   = - V/w*(2 + GA/E*alpha/TMath::Sqrt2());
@@ -145,6 +165,10 @@ fortran(%);
 }
 //_______________________________________________________________________________
 Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
+  return ggausD(x,p,0);
+}
+//_______________________________________________________________________________
+  Double_t StdEdxModel::ggausD(Double_t *x, Double_t *p, Double_t *der) {
   //  Int_t    k     = p[4];
   Double_t NormL = p[0];
   Double_t mu    = p[1]; // Mode = ksi + w *m_0(alpha); most propable value
@@ -164,7 +188,8 @@ Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
     //    Double_t mean = ksi + w * muz;
   }
   Double_t par[4] = {NormL, ksi, w, alpha};
-  return gausw(x, par);
+  Double_t V = gausw(x, par);
+  if (der) {
 #if 0 /* Derivatives */
   /* Maxima 
      load (f90) $
@@ -181,7 +206,16 @@ Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
      
      F : jacobian([  ksi(mu,sigma,alpha), w(sigma,alpha), alpha], [mu, sigma, alpha]);
      trigsimp(%);
-     f90(%);
+     f90(%);%(1,1) = 1
+%(1,2) = -(sqrt(%pi*alpha**2+%pi)*exp(-(2*%pi)/abs(alpha))*(sqrt(%pi)*sqrt(alpha**2+1)*((6*%pi**2-24*%pi+16)*alpha**5+(10*%pi**2-24*%pi)*alpha**3+4*%pi**2*alpha)*exp((2*%pi)/abs(alpha))*abs(alpha)+((-sqrt(2)*%pi**3)+2**(5.0d+0/2.0d+0)*%pi**2-2**(5.0d+0/2.0d+0)*%pi)*alpha**7+((-3*sqrt(2)*%pi**3)+2**(7.0d+0/2.0d+0)*%pi**2-2**(5.0d+0/2.0d+0)*%pi)*alpha**5+(2**(5.0d+0/2.0d+0)*%pi**2-3*sqrt(2)*%pi**3)*alpha**3-sqrt(2)*%pi**3*alpha))/(sqrt((%pi-2)*alpha**2+%pi)*((2**(3.0d+0/2.0d+0)*%pi**3-2**(7.0d+0/2.0d+0)*%pi**2+2**(7.0d+0/2.0d+0)*%pi)*alpha**6+(3*2**(3.0d+0/2.0d+0)*%pi**3-2**(9.0d+0/2.0d+0)*%pi**2+2**(7.0d+0/2.0d+0)*%pi)*alpha**4+(3*2**(3.0d+0/2.0d+0)*%pi**3-2**(7.0d+0/2.0d+0)*%pi**2)*alpha**2+2**(3.0d+0/2.0d+0)*%pi**3)*abs(alpha))
+%(1,3) = (sqrt((%pi-2)*alpha**2+%pi)*sqrt(%pi*alpha**2+%pi)*exp(-(2*%pi)/abs(alpha))*(sqrt(%pi)*sqrt(alpha**2+1)*(((2*%pi**4-12*%pi**3+24*%pi**2-16*%pi)*alpha**8+(8*%pi**4-36*%pi**3+48*%pi**2-16*%pi)*alpha**6+(12*%pi**4-36*%pi**3+24*%pi**2)*alpha**4+(8*%pi**4-12*%pi**3)*alpha**2+2*%pi**4)*abs(alpha)+(2*%pi**2-8*%pi+8)*alpha**8+(4*%pi**2-8*%pi)*alpha**6+2*%pi**2*alpha**4)*sigma+(((-5*sqrt(2)*%pi**3)+2**(9.0d+0/2.0d+0)*%pi**2+2**(7.0d+0/2.0d+0)*%pi)*alpha**8+((-3*2**(5.0d+0/2.0d+0)*%pi**3)+9*2**(5.0d+0/2.0d+0)*%pi**2+2**(7.0d+0/2.0d+0)*%pi)*alpha**6+(5*2**(5.0d+0/2.0d+0)*%pi**2-9*sqrt(2)*%pi**3)*alpha**4-2**(3.0d+0/2.0d+0)*%pi**3*alpha**2)*exp((2*%pi)/abs(alpha))*abs(alpha)*sigma))/(sqrt(%pi)*sqrt(alpha**2+1)*((2*%pi**4-16*%pi**3+48*%pi**2-64*%pi+32)*alpha**12+(10*%pi**4-64*%pi**3+144*%pi**2-128*%pi+32)*alpha**10+(20*%pi**4-96*%pi**3+144*%pi**2-64*%pi)*alpha**8+(20*%pi**4-64*%pi**3+48*%pi**2)*alpha**6+(10*%pi**4-16*%pi**3)*alpha**4+2*%pi**4*alpha**2)*abs(alpha))
+%(2,1) = 0
+%(2,2) = sqrt(%pi*alpha**2+%pi)/sqrt((%pi-2)*alpha**2+%pi)
+%(2,3) = (2*alpha*sqrt(%pi*alpha**2+%pi)*sigma)/(sqrt((%pi-2)*alpha**2+%pi)*((%pi-2)*alpha**4+(2*%pi-2)*alpha**2+%pi))
+%(3,1) = 0
+%(3,2) = 0
+%(3,3) = 1
+
      
      t(ksi,w) := (x - ksi)/w;
      v(ksi,w) := t(ksi,w)/sqrt(2);
@@ -200,6 +234,10 @@ Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
      with_stdout ("A.txt",  f90(A));
   */
 #endif
+    der[0] = der[1] = der[2] = 0;
+    ggderiv(x[0], ksi, sigma, w, alpha, der);
+  }
+  return V;
 }
 //_______________________________________________________________________________
 Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
@@ -294,6 +332,7 @@ void StdEdxModel::Parameters(Double_t Np, Double_t *parameters, Double_t *dPardN
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::Parameter(Double_t Np, Int_t l, Double_t *dPardNp) {
+  // parameters from dEdxFit::FitGG4
   static Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
   static Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
   static Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
@@ -356,7 +395,81 @@ TF1 *StdEdxModel::FParam(Int_t l) {
   
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) {
+Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) { // GG: ggaus
+  Double_t params[4] = {0};
+  Double_t V = 0;
+  if (! der) {
+    Parameters(Np, &params[1]);
+    V = ggaus(&ee, params);
+  } else {
+    Double_t dPardNp[3] = {0};
+    Parameters(Np, &params[1], dPardNp);
+    Double_t dVdP[3] = {0};
+    V = ggausD(&ee, params, dVdP);
+    der[0] = 0;
+    for (Int_t l = 0; l < 3; l++) der[0] += dVdP[l]*dPardNp[l];
+    Double_t xP = TMath::Log(Np);
+    Double_t D = instance()->FProbP()->Derivative(xP,&ee)/Np;
+    static Int_t _debug = 0;
+    if (_debug) {
+      cout << "estimated derivative (xP = " << xP << ", ee = " << ee << ") = " << der[0] << " calculated derivative = " << D << endl;
+    }
+  }
+  return V;
+}
+//--------------------------------------------------------------------------------
+Double_t StdEdxModel::funcProb(Double_t *x, Double_t *p) {
+  return instance()->Prob(x[0],p[0]);
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::FProb() {
+  const Char_t *name = "GGProb";
+  TF1 *f =  (TF1 *) gROOT->GetListOfFunctions()->FindObject(name);
+  if (! f) {
+    f = new TF1(name,funcProb,-1,4,1);
+    f->SetParName(0,"Np");
+    f->SetParameter(0,32);
+    cout << "Create FProb with name " << f->GetName() << endl;
+  }
+  return f;
+}
+//--------------------------------------------------------------------------------
+Double_t StdEdxModel::funcProbP(Double_t *x, Double_t *p) {
+  return instance()->Prob(TMath::Log(p[0]),x[0]);
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::FProbP() {
+  const Char_t *name = "GGProbP";
+  TF1 *f =  (TF1 *) gROOT->GetListOfFunctions()->FindObject(name);
+  if (! f) {
+    f = new TF1(name,funcProbP,2,12,1);
+    f->SetParName(0,"x");
+    f->SetParameter(0,1);
+    cout << "Create FProbP with name " << f->GetName() << endl;
+  }
+  return f;
+}
+//--------------------------------------------------------------------------------
+Double_t StdEdxModel::funcProbDer(Double_t *x, Double_t *p) {
+  Double_t der;
+  instance()->Prob(x[0], p[0], &der);
+  return der;
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::FProbDer() {
+  const Char_t *name = "GGProbDer";
+  TF1 *f =  (TF1 *) gROOT->GetListOfFunctions()->FindObject(name);
+  if (! f) {
+    f = new TF1(name,funcProbDer,-1,4,1);
+    f->SetParName(0,"Np");
+    f->SetParameter(0,32);
+    cout << "Create FProb with name " << f->GetName() << endl;
+  }
+  return f;
+}
+#if 0
+//________________________________________________________________________________
+Double_t StdEdxModel::ProbEx(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) { // GEX : gausexp
   Double_t params[4] = {0};
   Double_t V = 0;
   if (! der) {
@@ -372,6 +485,7 @@ Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *
   }
   return V;
 }
+#endif
 //________________________________________________________________________________
 Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der) {
   Double_t ee = Logne(dEGeVLog) - TMath::Log(Np);

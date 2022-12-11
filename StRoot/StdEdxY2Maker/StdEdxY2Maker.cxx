@@ -213,14 +213,15 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     }
     QAPlots(0);
     // Switch between usage prediction dependence of log2(dX), new option is not to use it in predicetion due to PicoDst
-#ifndef __TFG__VERSION__
-    fUsedx2 = kTRUE;
-    if (m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMD2)) {
+    fUsedx2 = kFALSE;
+    if (m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMD2) ||
+	m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMDF) ||
+	m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrection   )) {
+      fUsedx2 = kTRUE;
+    } 
+    if (m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMDN)) {
       fUsedx2 = kFALSE;
     }
-#else
-    fUsedx2 = kFALSE;
-#endif
     LOG_WARN << "StdEdxY2Maker::InitRun Force ";
     if (fUsedx2) {
       LOG_WARN << "to USE"; 
@@ -1246,8 +1247,9 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
   if (PiD.dEdxStatus(kMethod) && PiD.dEdxStatus(kMethod)->TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
     Int_t k;
+    Double_t betagamma = pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass();
 #if 0
-    Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+    Double_t bgL10 = TMath::Log10(betagamma);
 #endif
     for (k = 0; k < NdEdx; k++) {
       Int_t sector = FdEdx[k].sector;
@@ -1262,9 +1264,13 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
       Double_t predB  = 1.e-6*TMath::Exp(FdEdx[k].zP);
       FdEdx[k].F.dEdxN  = TMath::Log(FdEdx[k].F.dEdx /predB);
 #else
+#if 0
       if (! PiD.fdNdx)  continue; // 
       Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
       //      Double_t zdEMPV = StdEdxModel::instance()->LogdEMPVGeV(n_P);//LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
+#else
+      Double_t n_P = FdEdx[k].dxC*StdEdxModel::instance()->dNdxEff(betagamma);
+#endif
       Double_t zdEMPV = StdEdxModel::instance()->LogdEMPVGeV(n_P);//LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
       FdEdx[k].zP = zdEMPV;
       FdEdx[k].sigmaP = StdEdxModel::instance()->Sigma(n_P);
@@ -1854,6 +1860,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t Np = dNdx*dX;
     Double_t derivative = 0;
     Double_t Prob = StdEdxModel::instance()->ProbdEGeVlog(TMath::Log(dE),Np, &derivative);
+#ifdef __DEBUG_dNdx__
     if (_debug && iflag == 3) {
       Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
       E.push_back(ee);
@@ -1861,13 +1868,15 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
       I.push_back(In);
     }
+#endif /* __DEBUG_dNdx__ */
     if (Prob <= 0.0) {
       f += 100;
       FdEdx[i].Prob = 0;
       continue;
     }
     f -= TMath::Log(Prob);
-    gin[0] -= derivative/Prob;
+    // d(dNdx) = dNp/dx
+    gin[0] -= derivative/dX/Prob;
     FdEdx[i].Prob = Prob;
   }
   if (_debug > 0) {
@@ -1917,16 +1926,15 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
-  Double_t dNdx = 1e9*TMath::Exp(fitZ)/92.24; // 0.080; // 80 eV per primary interaction
+  Double_t dNdx = 1e9*TMath::Exp(fitZ)/92.24/1.1; // 0.080; // 80 eV per primary interaction
   //  Double_t dNdx = 1e9*TMath::Exp(fitZ)/80.; // 0.080; // 80 eV per primary interaction
-  
-  Double_t arglist[10] = {0};
   Int_t ierflg = 0;
   m_Minuit->SetFCN(fcnN);
+  Double_t arglist[10] = {0};
   if (Debug() < 2) {
     arglist[0] = -1;
-    m_Minuit->mnexcm("set print",arglist, 1, ierflg);
   }
+  m_Minuit->mnexcm("set print",arglist, 1, ierflg);
   arglist[0] = 0.0;
   m_Minuit->mnexcm("set NOW",arglist, 0, ierflg);
   m_Minuit->mnexcm("CLEAR",arglist, 0, ierflg);

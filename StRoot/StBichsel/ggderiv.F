@@ -49,7 +49,7 @@
       do i = 1, 3
          D(i) = 0;
          do k = 1, 3
-            D(i) = D(i) + F(i,k) * J(k)
+            D(i) = D(i) + J(k) * F(k,i) 
          end do
       end do
       end
