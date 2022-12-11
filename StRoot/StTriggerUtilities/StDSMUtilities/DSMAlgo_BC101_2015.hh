@@ -7,5 +7,5 @@
 struct DSMAlgo_BC101_2015 : public DSMAlgo {
   void operator()(DSM& dsm);
 };
-void getBemcJetPatchSums2015A(const DSM& bc101, unsigned int& jpx, unsigned int& jpy, unsigned int& jpz, unsigned int& jpPartial, int& highTowerBits);
+void getBemcJetPatchSums2015A(const DSM& bc101, int& jpx, int& jpy, int& jpz, int& jpPartial, int& highTowerBits);
 #endif	// DSM_ALGO_BC101_2015_HH

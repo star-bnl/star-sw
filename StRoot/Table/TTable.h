@@ -185,7 +185,6 @@ public:
          const TTable *fThisTable;
          vec_iterator  fCurrentRow;
       public:
-         iterator(): fRowSize(0), fThisTable(0) {;}
          iterator(const TTable &table, vec_iterator &arowPtr) :
             fRowSize(table.GetRowSize()), fThisTable(&table), fCurrentRow(arowPtr) {;}
          iterator(const TTable &table, vec_const_iterator &arowPtr) :
@@ -194,20 +193,20 @@ public:
             //fCurrentRow(* const_cast<std::vector<Long_t>::iterator *>(&arowPtr) ) {;}
          iterator(const iterator& iter) : fRowSize (iter.fRowSize), fThisTable(iter.fThisTable),fCurrentRow(iter.fCurrentRow){}
          iterator &operator=(const iterator& iter)   { fRowSize = iter.fRowSize; fThisTable = iter.fThisTable; fCurrentRow=iter.fCurrentRow; return *this; }
-         void operator++()    { ++fCurrentRow;   }
-         void operator++(int) {   fCurrentRow++; }
-         void operator--()    { --fCurrentRow;   }
-         void operator--(int) {   fCurrentRow--; }
-         iterator operator+(Int_t idx)   { std::vector<Long_t>::iterator addition   = fCurrentRow+idx; return  iterator(*fThisTable,addition); }
-         iterator operator-(Int_t idx)   { std::vector<Long_t>::iterator subtraction = fCurrentRow-idx; return  iterator(*fThisTable,subtraction); }
-         void operator+=(Int_t idx)  {  fCurrentRow+=idx; }
-         void operator-=(Int_t idx)  {  fCurrentRow-=idx; }
-         void *rowPtr() const { return  (void *)(((const char *)fThisTable->GetArray()) + (*fCurrentRow)*fRowSize ); }
-         operator void *() const { return rowPtr(); }
-         Int_t operator-(const iterator &it) const { return (*fCurrentRow)-(*(it.fCurrentRow)); }
-         Long_t operator *() const { return  *fCurrentRow; }
-         Bool_t operator==(const iterator &t) const { return  ( (fCurrentRow == t.fCurrentRow) && (fThisTable == t.fThisTable) ); }
-         Bool_t operator!=(const iterator &t) const { return !operator==(t); }
+         void operator++();
+         void operator++(int);
+         void operator--();
+         void operator--(int);
+         iterator operator+(Int_t idx);
+         iterator operator-(Int_t idx);
+         void operator+=(Int_t idx);
+         void operator-=(Int_t idx);
+         void *rowPtr() const;
+         operator void *() const;
+         Int_t operator-(const iterator &it) const;
+         Long_t operator *() const;
+         Bool_t operator==(const iterator &t) const;
+         Bool_t operator!=(const iterator &t) const;
 
          const TTable &Table()   const { return *fThisTable;}
          const Long_t &RowSize() const { return fRowSize;}
