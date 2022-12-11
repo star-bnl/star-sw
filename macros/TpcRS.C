@@ -231,6 +231,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
+  //  cout << "FileIn\t" << FileIn.Data() << "========================================" << endl;
   if (FileIn == "") { //  && fileOut == 0) {
     if (RunOpt.Contains("pythia",TString::kIgnoreCase)) {
       RootFile += "pythia";
@@ -270,15 +271,17 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     } else if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
       ChainOpt += "in,";
       RootFile.ReplaceAll(".geant.root","");
-    } else if (Root4Star && FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
+    } else if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
       ChainOpt += "mtin,";
       RootFile.ReplaceAll(".MuDst.root","");
+      //      cout << "RootFile = " << RootFile.Data() << " ========================================" << endl;
     } else {
       if (gSystem->AccessPathName(FileIn.Data())) FileIn ="";
     }
   }
   //  ChainOpt = RunOpt + ChainOpt;
-  if (FileIn = "") {
+  //  cout << "FileIn\t" << FileIn.Data() << "========================================" << endl;
+  if (FileIn == "") {
     if (RootFile != "") RootFile += "_";
     RootFile += Form("%s_%i_%i",Opt.Data(),First,Last);
   }
@@ -300,6 +303,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //  output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
+  //  cout << "FileIn\t" << FileIn.Data() << "========================================" << endl;
   cout << "Run  bfc(-1,\"" << ChainOpt.Data() << "\",\"" << FileIn.Data() << "\",\"" << output.Data() << "\",\"" << RootFile.Data() << "\")" << endl;
   bfc(-1,ChainOpt.Data(),FileIn.Data(),output.Data(),RootFile.Data());
   StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
@@ -378,7 +382,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  cout << "FileIn = " << FileIn.Data() << " ====================" << endl;
+  //  cout << "FileIn = " << FileIn.Data() << " ====================" << endl;
   if (FileIn == "") {
     if (SetPartGun(RootFile, RunOpt, Opt)) return;
     
