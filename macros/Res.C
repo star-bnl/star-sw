@@ -309,8 +309,8 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       if (plot == "sigma") {
 	if (IsLength ) {
 	  //	ltit += Form(" : #sigma(@76cm) = %5.2f%%\%",100*powfit->Eval(76));
-	  Double_t L = 77.34;
-	  ltit = Form("#sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(L)); 
+	  //	  Double_t L = 77.34;
+	  //	  ltit = Form("#sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(L)); 
 	  L = 124.4;
 	  ltit = Form("#sigma(@%5.1fcm) = %5.2f%\%",Title.Data(),L,100*powfit->Eval(L));
 	} else {
@@ -326,7 +326,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       ltit += Title;
       //      ltit += Form(" : #sigma(@128cm) = %5.2f%%\%",100*powfit->Eval(128));
       //      ltit.Strip();
-      cout << gDirectory->GetName() << " " << ltit << endl;
+      cout << gDirectory->GetName() << endl << ltit << endl;
       leg->AddEntry(Hist,ltit.Data());
       Summary += ltit; Summary += "\n";
     }

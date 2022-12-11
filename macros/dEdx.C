@@ -66,7 +66,7 @@ void dEdx(Int_t First, Int_t Last,
     gSystem->Load("libStarRoot");
   }
   gROOT->LoadMacro("bfc.C");
-  TString Chain("in,dEdxY2,magF,StEvent,mysql,NoDefault");
+  TString Chain("in,dEdxY2,magF,StEvent,mysql,NoDefault";//,SkipdNdx");
   if        (Year.Contains("2019")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2019
   } else if (Year.Contains("202"))  { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
   } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";

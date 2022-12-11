@@ -3582,42 +3582,12 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
-#if 0
-#if 0
-  Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
-  Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
-  g->FixParameter(2, sigma);
-  // tChain->Draw("a0:x>>alpha(40,3,7)","i&&j&&dmu<0.01&&a0>-0.1&&a0<3.9&&mu>0.65","prof")
-  Double_t alpha =    -22.6936   + xx*(    16.2998   + xx*(   -3.28817   + xx*   0.209148 ));
-  g->FixParameter(3, alpha);
-  // tChain->Draw("mu:x>>mu(58,3.1,8.9)","i&&j&&dmu<0.01","prof")
-  // mu->Fit("pol5","er","",3.1,7.)
-  xx = TMath::Max(3.1, TMath::Min(7.0, fitX));
-  Double_t mu =  -2.08815e+01 + xx*(  2.57192e+01 + xx*( -1.17647e+01 + xx*(  2.59742e+00 + xx*( -2.77836e-01 + xx*  1.15642e-02))));
-  g->FixParameter(1, mu);
-#else /* 09/26/2022 */
-  Double_t xx = TMath::Log(fitX);
-  Double_t parsS[3] = {    2.1392,    -1.7129,    0.34465}; // log(x)
-  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
-  Double_t parsA[4] = {   -55.709,     106.35,    -62.082,     11.565}; // log(x)
-  Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
-  Double_t parsM[6] = {    78.047,    -199.11,     203.54,    -103.58,     26.358,    -2.6949}; //log(x)
-  Double_t mu     = parsM[0] + xx * ( parsM[1] + xx * (parsM[2] + xx * (parsM[3] + xx * (parsM[4] + xx * parsM[5]))));
-  g->FixParameter(1, mu);
-  g->FixParameter(2, sigma);
-  g->FixParameter(3, alpha);
-#endif
-#else /* 10/27/22 */
+  /* 10/27/22 */
   Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
   Double_t alpha  = parsA[0] + fitX *  parsA[1];
   Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
   Double_t xx = (fitX > 0) ? TMath::Log(fitX) : 0;
   Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
-#if 0
-  Double_t parsM[4] = {   -1.9767,     3.0618,    -1.4888,   0.093299}; //mu log(x) ex1 : [0]+[1]*(1.0-TMath::Exp([2]*(x-[3])))
-  if (xx > 2.0) xx = 2.0;
-  Double_t mu = parsM[0]+parsM[1]*(1.0-TMath::Exp(parsM[2]*(xx-parsM[3])));
-#else
   TF1 *pol7 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol7");
   if (! pol7) {
     TF1::InitStandardFunctions();
@@ -3625,11 +3595,9 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   }
   Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
   Double_t mu = pol7->EvalPar(&fitX, parsM);
-#endif
   g->FixParameter(1, mu);
   g->FixParameter(2, sigma);
   g->FixParameter(3, alpha);
-#endif
   proj->Fit(g,opt);
   return g;
 }
@@ -5190,18 +5158,21 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else if (TString(FitName) == "G4F") g = FitG4F(proj,opt);
       else if (TString(FitName) == "G4E" || TString(FitName) == "G4EX" || TString(FitName) == "G4EY" || TString(FitName) == "G4EG") {
-	Int_t Sign = 0;
-	if (HName.Contains("3P")) {
-	  if (HName.Contains("+")) Sign = 2;
-	  else                     Sign = 1;
-	} 
+	Int_t Sign = 2;
 	Int_t IO = 1;
-	if (nx == 72 || nx == 145) {
-	  IO = 0;
-	  if (TMath::Abs(Fit.x) > 40.5) IO = 1;
-	} else if (ny == 72 || ny == 145) {
-	  IO = 0;
-	  if (TMath::Abs(Fit.y) > 40.5) IO = 1;
+	if (dim == 3) {
+	  Sign = 0;
+	  if (HName.Contains("3P")) {
+	    if (HName.Contains("+")) Sign = 2;
+	    else                     Sign = 1;
+	  } 
+	  if (nx == 72 || nx == 145) {
+	    IO = 0;
+	    if (TMath::Abs(Fit.x) > 40.5) IO = 1;
+	  } else if (ny == 72 || ny == 145) {
+	    IO = 0;
+	    if (TMath::Abs(Fit.y) > 40.5) IO = 1;
+	  }
 	}
 	if (TString(FitName) == "G4E")  	g = FitG4E(proj,opt,IO, Sign);
 	if (TString(FitName) == "G4EX") 	g = FitG4EX(proj,opt,IO, Sign);
