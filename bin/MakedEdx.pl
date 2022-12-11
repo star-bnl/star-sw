@@ -2771,6 +2771,7 @@ fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyP
 fit.pl *.root GP=NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP
 fit.pl *.root G4EY=TimeC
 fit.pl *.root GP=NPoints70P,TPoints70P
+fit.pl *.root GP=NPoints70,TPoints70
 
 9p2GeV_2020
 
