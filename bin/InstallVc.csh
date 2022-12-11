@@ -31,7 +31,8 @@ endsw
 #    -DCMAKE_CXX_COMPILER=`root-config --cxx`                  \
 #    -DCMAKE_CXX_FLAGS=$LDFLAGS \
 which cmake
-set cflags = `root-config --cflags | sed -e 's/ -I.*//' -e '-s/ -mss.*//'`;
+#set cflags = `root-config --cflags | sed -e 's/ -I.*//' -e 's/ -mss.*//'`;
+set cflags = `root-config --ldflags`
 set cxxflags = `root-config --ldflags`
 cmake -L                                        \
     -DCMAKE_INSTALL_PREFIX=$XOPTSTAR    \
