@@ -2083,7 +2083,7 @@ my $step = 0;
 #$hist = "RunXX203"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/2022 new TpcSecRowB from RunXX202
 #$hist = "RunXX203"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/2022 new TpcSecRowB from RunXX202
 #$hist = "RunXX204"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/05/2022 check RunXIX_XXI_74
-#$hist = "RunXX205"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/11/2022 check RunXIX_XXI_79
+$hist = "RunXX205"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/11/2022 check RunXIX_XXI_79 tables from MySQL
 # restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
 # TpcAdcCorrectionB.y2020.C
 # TpcAvgPowerSupply.y2020.C
@@ -2525,7 +2525,7 @@ my $step = 0;
 #$hist = "RunXIX_XXII_77"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/08/2022  new TpcSecRowB, SkindNdx
 #$hist = "RunXIX_XXII_78"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/09/2022  new TpcSecRowB, TpcLengthCorrectionMDN
 #$hist = "RunXIX_XXII_79"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/10/2022  new TpcLengthCorrectionMDN
-$hist = "RunXIX_XXII_80"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/11/2022  use MySQL tables
+#$hist = "RunXIX_XXII_80"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/11/2022  use MySQL tables
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2729,7 +2729,7 @@ print "Total size = $GB GB for $#Files event.root files  $count scripts have bee
 }
 __END__
   foreach f (`ls -1d job*.xml`)
-    set d = `echo ${f} | sed -e 's/jobs.RunXX203_//' -e 's/.xml//'`
+    set d = `echo ${f} | awk -F_ '{print $2}' | awk -F. '{print $1}'`
   if (! -d ${d})   mkdir ${d}
   cd ${d}
   lsf ../job*${d}*.xml
