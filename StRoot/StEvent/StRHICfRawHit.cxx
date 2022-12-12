@@ -31,39 +31,39 @@ void StRHICfRawHit::setGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar, 
     if(tower==1){mGSOLargeADC[layer][xy][bar] = adc;}
 }
 
-void StRHICfRawHit::setTDC(Int_t idx, unsigned int val){mTDC[idx] = val;}
-void StRHICfRawHit::setCAD0(Int_t idx, unsigned int val){mCAD0[idx] = val;}
-void StRHICfRawHit::setGPI0(Int_t idx, unsigned int val){mGPI0[idx] = val;}
-void StRHICfRawHit::setGPI1(Int_t idx, unsigned int val){mGPI1[idx] = val;}
+void StRHICfRawHit::setTDC(Int_t idx, UInt_t val){mTDC[idx] = val;}
+void StRHICfRawHit::setCAD0(Int_t idx, UInt_t val){mCAD0[idx] = val;}
+void StRHICfRawHit::setGPI0(Int_t idx, UInt_t val){mGPI0[idx] = val;}
+void StRHICfRawHit::setGPI1(Int_t idx, UInt_t val){mGPI1[idx] = val;}
 
-Int_t StRHICfRawHit::getPlateADC(Int_t tower, Int_t plate, Int_t range) {return mPlateADC[tower][plate][range];}
-Int_t StRHICfRawHit::getPlateADCDelay(Int_t tower, Int_t plate, Int_t range) {return mPlateADCDelay[tower][plate][range];}
-Int_t StRHICfRawHit::getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
+UShort_t StRHICfRawHit::getPlateADC(Int_t tower, Int_t plate, Int_t range) {return mPlateADC[tower][plate][range];}
+UShort_t StRHICfRawHit::getPlateADCDelay(Int_t tower, Int_t plate, Int_t range) {return mPlateADCDelay[tower][plate][range];}
+UShort_t StRHICfRawHit::getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
 {
     if(tower==0){return mGSOSmallADC[layer][xy][bar];}
     if(tower==1){return mGSOLargeADC[layer][xy][bar];}
     return 0;
 }
 
-unsigned int StRHICfRawHit::getTDC(Int_t idx)
+UInt_t StRHICfRawHit::getTDC(Int_t idx)
 {
     if(idx<kRHICfNtdc){return mTDC[idx];}
     return 0;
 }
 
-unsigned int StRHICfRawHit::getCAD0(Int_t idx)
+UInt_t StRHICfRawHit::getCAD0(Int_t idx)
 {
     if(idx<kRHICfNcad0){return mCAD0[idx];}
     return 0;
 }
 
-unsigned int StRHICfRawHit::getGPI0(Int_t idx)
+UInt_t StRHICfRawHit::getGPI0(Int_t idx)
 {
     if(idx<kRHICfNgpi0){return mGPI0[idx];}
     return 0;
 }
 
-unsigned int StRHICfRawHit::getGPI1(Int_t idx)
+UInt_t StRHICfRawHit::getGPI1(Int_t idx)
 {
     if(idx<kRHICfNgpi1){return mGPI1[idx];}
     return 0;

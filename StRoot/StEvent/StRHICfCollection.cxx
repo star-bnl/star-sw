@@ -16,8 +16,6 @@ void StRHICfCollection::clear()
 	mRHICfRawHitColl = new StRHICfRawHit();
 	mRHICfHitColl = 0;
 
-	mRunNumber = 0;
-	mEventNumber = 0;
 	mBunchNumber = 0;
 	mRHICfTrigger = 0;
 	mRunTime[0] = 0;
@@ -36,20 +34,16 @@ const std::vector<StRHICfPoint*>& StRHICfCollection::pointCollection() const {re
 void StRHICfCollection::isAllSave(){mRHICfHitColl = new StRHICfHit();}
 
 //=========== Set ===========//
-void StRHICfCollection::setRunNumber(unsigned int run){mRunNumber = run;}
-void StRHICfCollection::setEventNumber(unsigned int event){mEventNumber = event;}
-void StRHICfCollection::setBunchNumber(unsigned int bunch){mBunchNumber = bunch;}
-void StRHICfCollection::setRunType(unsigned int type){mRunType = type;}
-void StRHICfCollection::setTriggerNumber(unsigned int trigger){mRHICfTrigger = trigger;}
-void StRHICfCollection::setRunTime(Int_t idx, unsigned int time){mRunTime[idx] = time;}
-void StRHICfCollection::setRunTRGM(unsigned int trgm){mRunTRGM = trgm;}
+void StRHICfCollection::setBunchNumber(UInt_t bunch){mBunchNumber = bunch;}
+void StRHICfCollection::setRunType(UInt_t type){mRunType = type;}
+void StRHICfCollection::setTriggerNumber(UInt_t trigger){mRHICfTrigger = trigger;}
+void StRHICfCollection::setRunTime(Int_t idx, UInt_t time){mRunTime[idx] = time;}
+void StRHICfCollection::setRunTRGM(UInt_t trgm){mRunTRGM = trgm;}
 
 //=========== Get ===========//
-unsigned int StRHICfCollection::numberOfPoints() const {return mRHICfPointColl.size();}
-unsigned int StRHICfCollection::getRunNumber(){return mRunNumber;}
-unsigned int StRHICfCollection::getEventNumber(){return mEventNumber;}
-unsigned int StRHICfCollection::getBunchNumber(){return mBunchNumber;}
-unsigned int StRHICfCollection::getRunType(){return mRunType;}
-unsigned int StRHICfCollection::getTriggerNumber(){return mRHICfTrigger;}
-unsigned int StRHICfCollection::getRunTime(Int_t idx){return mRunTime[idx];}
-unsigned int StRHICfCollection::getRunTRGM(){return mRunTRGM;}
+UInt_t StRHICfCollection::numberOfPoints() const {return mRHICfPointColl.size();}
+UInt_t StRHICfCollection::getBunchNumber(){return mBunchNumber;}
+UInt_t StRHICfCollection::getRunType(){return mRunType;}
+UInt_t StRHICfCollection::getTriggerNumber(){return mRHICfTrigger;}
+UInt_t StRHICfCollection::getRunTime(Int_t idx){return mRunTime[idx];}
+UInt_t StRHICfCollection::getRunTRGM(){return mRunTRGM;}

@@ -30,37 +30,33 @@ class StRHICfCollection : public StObject
 
 		// run header 
 		void isAllSave();
-		void setRunNumber(unsigned int run);
-		void setEventNumber(unsigned int event);
-		void setBunchNumber(unsigned int bunch);
-		void setRunType(unsigned int type);
-		void setTriggerNumber(unsigned int trigger);
-		void setRunTime(Int_t idx, unsigned int time);
-		void setRunTRGM(unsigned int trgm);
+		void setBunchNumber(UInt_t bunch);
+		void setRunType(UInt_t type);
+		void setTriggerNumber(UInt_t trigger);
+		void setRunTime(Int_t idx, UInt_t time);
+		void setRunTRGM(UInt_t trgm);
 
-		unsigned int numberOfPoints() const;
-		unsigned int getRunNumber();
-		unsigned int getEventNumber();
-		unsigned int getBunchNumber();
-		unsigned int getRunType();
-		unsigned int getTriggerNumber();
-		unsigned int getRunTime(Int_t idx);
-		unsigned int getRunTRGM();
+		UInt_t numberOfPoints() const;
+		UInt_t getRunNumber();
+		UInt_t getEventNumber();
+		UInt_t getBunchNumber();
+		UInt_t getRunType();
+		UInt_t getTriggerNumber();
+		UInt_t getRunTime(Int_t idx);
+		UInt_t getRunTRGM();
 
 	private:
 		StRHICfRawHit* mRHICfRawHitColl; 
 		StRHICfHit* mRHICfHitColl; 
 		std::vector<StRHICfPoint*> mRHICfPointColl; 
 
-		unsigned int mRunNumber;
-		unsigned int mEventNumber;
-		unsigned int mBunchNumber;
-		unsigned int mRunType;
-		unsigned int mRHICfTrigger;
-		unsigned int mRunTime[kRHICfNorder];
-		unsigned int mRunTRGM;
+		UInt_t mBunchNumber;
+		UInt_t mRunType;
+		UInt_t mRHICfTrigger;
+		UInt_t mRunTime[kRHICfNorder];
+		UInt_t mRunTRGM;
 
-	ClassDef(StRHICfCollection,1)
+	ClassDef(StRHICfCollection,2)
 };
 
 #endif

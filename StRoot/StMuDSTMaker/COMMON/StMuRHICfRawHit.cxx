@@ -13,8 +13,6 @@ StMuRHICfRawHit::~StMuRHICfRawHit()
 
 void StMuRHICfRawHit::clear()
 {	
-    mRunNumber = 0;
-	mEventNumber = 0;
 	mBunchNumber = 0;
 	mRHICfTrigger = 0;
 	mRunTime[0] = 0;
@@ -32,13 +30,11 @@ void StMuRHICfRawHit::clear()
 	memset(mGPI1, 0, sizeof(mGPI1));
 }
 
-void StMuRHICfRawHit::setRunNumber(unsigned int run){mRunNumber = run;}
-void StMuRHICfRawHit::setEventNumber(unsigned int event){mEventNumber = event;}
-void StMuRHICfRawHit::setBunchNumber(unsigned int bunch){mBunchNumber = bunch;}
-void StMuRHICfRawHit::setRunType(unsigned int type){mRunType = type;}
-void StMuRHICfRawHit::setTriggerNumber(unsigned int trigger){mRHICfTrigger = trigger;}
-void StMuRHICfRawHit::setRunTime(Int_t idx, unsigned int time){mRunTime[idx] = time;}
-void StMuRHICfRawHit::setRunTRGM(unsigned int trgm){mRunTRGM = trgm;}
+void StMuRHICfRawHit::setBunchNumber(UInt_t bunch){mBunchNumber = bunch;}
+void StMuRHICfRawHit::setRunType(UInt_t type){mRunType = type;}
+void StMuRHICfRawHit::setTriggerNumber(UInt_t trigger){mRHICfTrigger = trigger;}
+void StMuRHICfRawHit::setRunTime(Int_t idx, UInt_t time){mRunTime[idx] = time;}
+void StMuRHICfRawHit::setRunTRGM(UInt_t trgm){mRunTRGM = trgm;}
 
 void StMuRHICfRawHit::setPlateADC(Int_t tower, Int_t plate, Int_t range, Int_t adc) {mPlateADC[tower][plate][range] = adc;}
 void StMuRHICfRawHit::setPlateADCDelay(Int_t tower, Int_t plate, Int_t range, Int_t adc) {mPlateADCDelay[tower][plate][range] = adc;}
@@ -48,29 +44,27 @@ void StMuRHICfRawHit::setGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar
     if(tower==1){mGSOLargeADC[layer][xy][bar] = adc;}
 }
 
-void StMuRHICfRawHit::setTDC(Int_t idx, unsigned int val){mTDC[idx] = val;}
-void StMuRHICfRawHit::setCAD0(Int_t idx, unsigned int val){mCAD0[idx] = val;}
-void StMuRHICfRawHit::setGPI0(Int_t idx, unsigned int val){mGPI0[idx] = val;}
-void StMuRHICfRawHit::setGPI1(Int_t idx, unsigned int val){mGPI1[idx] = val;}
+void StMuRHICfRawHit::setTDC(Int_t idx, UInt_t val){mTDC[idx] = val;}
+void StMuRHICfRawHit::setCAD0(Int_t idx, UInt_t val){mCAD0[idx] = val;}
+void StMuRHICfRawHit::setGPI0(Int_t idx, UInt_t val){mGPI0[idx] = val;}
+void StMuRHICfRawHit::setGPI1(Int_t idx, UInt_t val){mGPI1[idx] = val;}
 
-unsigned int StMuRHICfRawHit::getRunNumber(){return mRunNumber;}
-unsigned int StMuRHICfRawHit::getEventNumber(){return mEventNumber;}
-unsigned int StMuRHICfRawHit::getBunchNumber(){return mBunchNumber;}
-unsigned int StMuRHICfRawHit::getRunType(){return mRunType;}
-unsigned int StMuRHICfRawHit::getTriggerNumber(){return mRHICfTrigger;}
-unsigned int StMuRHICfRawHit::getRunTime(Int_t idx){return mRunTime[idx];}
-unsigned int StMuRHICfRawHit::getRunTRGM(){return mRunTRGM;}
+UInt_t StMuRHICfRawHit::getBunchNumber(){return mBunchNumber;}
+UInt_t StMuRHICfRawHit::getRunType(){return mRunType;}
+UInt_t StMuRHICfRawHit::getTriggerNumber(){return mRHICfTrigger;}
+UInt_t StMuRHICfRawHit::getRunTime(Int_t idx){return mRunTime[idx];}
+UInt_t StMuRHICfRawHit::getRunTRGM(){return mRunTRGM;}
 
-Int_t StMuRHICfRawHit::getPlateADC(Int_t tower, Int_t plate, Int_t range) {return mPlateADC[tower][plate][range];}
-Int_t StMuRHICfRawHit::getPlateADCDelay(Int_t tower, Int_t plate, Int_t range) {return mPlateADCDelay[tower][plate][range];}
-Int_t StMuRHICfRawHit::getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
+UShort_t StMuRHICfRawHit::getPlateADC(Int_t tower, Int_t plate, Int_t range) {return mPlateADC[tower][plate][range];}
+UShort_t StMuRHICfRawHit::getPlateADCDelay(Int_t tower, Int_t plate, Int_t range) {return mPlateADCDelay[tower][plate][range];}
+UShort_t StMuRHICfRawHit::getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
 {
     if(tower==0){return mGSOSmallADC[layer][xy][bar];}
     if(tower==1){return mGSOLargeADC[layer][xy][bar];}
     return 0;
 }
 
-unsigned int StMuRHICfRawHit::getTDC(Int_t idx){return mTDC[idx];}
-unsigned int StMuRHICfRawHit::getCAD0(Int_t idx){return mCAD0[idx];}
-unsigned int StMuRHICfRawHit::getGPI0(Int_t idx){return mGPI0[idx];}
-unsigned int StMuRHICfRawHit::getGPI1(Int_t idx){return mGPI1[idx];}
+UInt_t StMuRHICfRawHit::getTDC(Int_t idx){return mTDC[idx];}
+UInt_t StMuRHICfRawHit::getCAD0(Int_t idx){return mCAD0[idx];}
+UInt_t StMuRHICfRawHit::getGPI0(Int_t idx){return mGPI0[idx];}
+UInt_t StMuRHICfRawHit::getGPI1(Int_t idx){return mGPI1[idx];}

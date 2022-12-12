@@ -15,28 +15,28 @@ class StRHICfRawHit : public TObject
         void setPlateADC(Int_t tower, Int_t plate, Int_t range, Int_t adc);
         void setPlateADCDelay(Int_t tower, Int_t plate, Int_t range, Int_t adc);
 		void setGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar, Int_t adc);
-		void setTDC(Int_t idx, unsigned int val);
-		void setCAD0(Int_t idx, unsigned int val);
-		void setGPI0(Int_t idx, unsigned int val);
-		void setGPI1(Int_t idx, unsigned int val);
+		void setTDC(Int_t idx, UInt_t val);
+		void setCAD0(Int_t idx, UInt_t val);
+		void setGPI0(Int_t idx, UInt_t val);
+		void setGPI1(Int_t idx, UInt_t val);
 
-		Int_t getPlateADC(Int_t tower, Int_t plate, Int_t range);
-		Int_t getPlateADCDelay(Int_t tower, Int_t plate, Int_t range);
-        Int_t getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar);
-		unsigned int getTDC(Int_t idx);
-		unsigned int getCAD0(Int_t idx);
-		unsigned int getGPI0(Int_t idx);
-		unsigned int getGPI1(Int_t idx);
+		UShort_t getPlateADC(Int_t tower, Int_t plate, Int_t range);
+		UShort_t getPlateADCDelay(Int_t tower, Int_t plate, Int_t range);
+        UShort_t getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar);
+		UInt_t getTDC(Int_t idx);
+		UInt_t getCAD0(Int_t idx);
+		UInt_t getGPI0(Int_t idx);
+		UInt_t getGPI1(Int_t idx);
 
 	private:
-		Int_t mPlateADC[kRHICfNtower][kRHICfNplate][kRHICfNrange];      // ADC of GSO plate
-		Int_t mPlateADCDelay[kRHICfNtower][kRHICfNplate][kRHICfNrange]; // Delayed ADC of GSO plate (for pedestal)
-		Int_t mGSOSmallADC[kRHICfNlayer][kRHICfNxy][kRHICfNbarSmall];   // ADC of GSO bar of small tower 
-		Int_t mGSOLargeADC[kRHICfNlayer][kRHICfNxy][kRHICfNbarLarge];   // ADC of GSO bar of large tower
-		unsigned int mTDC[kRHICfNtdc];   // TDC 
-		unsigned int mCAD0[kRHICfNcad0]; // CAD0
-		unsigned int mGPI0[kRHICfNgpi0]; // GPI0
-		unsigned int mGPI1[kRHICfNgpi1]; // GPI1
+		UShort_t mPlateADC[kRHICfNtower][kRHICfNplate][kRHICfNrange];      // ADC of GSO plate
+		UShort_t mPlateADCDelay[kRHICfNtower][kRHICfNplate][kRHICfNrange]; // Delayed ADC of GSO plate (for pedestal)
+		UShort_t mGSOSmallADC[kRHICfNlayer][kRHICfNxy][kRHICfNbarSmall];   // ADC of GSO bar of small tower 
+		UShort_t mGSOLargeADC[kRHICfNlayer][kRHICfNxy][kRHICfNbarLarge];   // ADC of GSO bar of large tower
+		UInt_t mTDC[kRHICfNtdc];   // TDC 
+		UInt_t mCAD0[kRHICfNcad0]; // CAD0
+		UInt_t mGPI0[kRHICfNgpi0]; // GPI0
+		UInt_t mGPI1[kRHICfNgpi1]; // GPI1
 
     ClassDef(StRHICfRawHit,1)
 };
