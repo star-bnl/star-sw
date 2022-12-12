@@ -1,6 +1,6 @@
 #ifndef StPath2itpcGain_h
 #define StPath2itpcGain_h
-#ifdef __TFG__VERSION__
+
 #include "St_FilePathC.h"
 
 class StPath2itpcGain : public St_FilePathC {
@@ -12,5 +12,5 @@ class StPath2itpcGain : public St_FilePathC {
   static StPath2itpcGain* fgInstance;
   ClassDef(StPath2itpcGain,1) //C++ TChair for SsdOnGlobal
 };
-#endif /* __TFG__VERSION__ */
+
 #endif
