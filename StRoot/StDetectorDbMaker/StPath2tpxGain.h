@@ -12,4 +12,5 @@ class StPath2tpxGain : public St_FilePathC {
   static StPath2tpxGain* fgInstance;
   ClassDef(StPath2tpxGain,1) //C++ TChair for SsdOnGlobal
 };
+
 #endif

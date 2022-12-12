@@ -88,7 +88,7 @@
 #else 
 class Bichsel;
 #endif
-Bichsel *m_Bichsel = 0;
+//Bichsel *m_Bichsel = 0;
 const Int_t NMasses = 20;
 const Double_t kAu2Gev=0.9314943228;
 struct Part_t {
@@ -146,8 +146,8 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  return  TMath::Log10(scale*charge*charge*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
-  //  Charge*Charge* (TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
+  return  TMath::Log10(scale*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
   // return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
@@ -224,7 +224,7 @@ Double_t bichsel70Trs(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  return TMath::Log10(scale*TMath::Exp(m_Bichsel->I70Trs(part,TMath::Log10(poverm))));
+  return TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->I70Trs(part,TMath::Log10(poverm))));
 }
 //________________________________________________________________________________
 Double_t bichselZTrs(Double_t *x,Double_t *par) {
@@ -243,7 +243,7 @@ Double_t bichselZTrs(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
+  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
 }
 #endif
 //________________________________________________________________________________
@@ -351,15 +351,13 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 //________________________________________________________________________________
 void bichselG10(const Char_t *type="z", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
   fgRigidity = rigidity;
-  if (! m_Bichsel) { 
-    if (gClassTable->GetID("StBichsel") < 0) {
-      gSystem->Load("libTable");
-      gSystem->Load("St_base");
-      gSystem->Load("StarClassLibrary");
-      gSystem->Load("StBichsel");
-    }
-    m_Bichsel = Bichsel::Instance();
+  if (gClassTable->GetID("StBichsel") < 0) {
+    gSystem->Load("libTable");
+    gSystem->Load("St_base");
+    gSystem->Load("StarClassLibrary");
+    gSystem->Load("StBichsel");
   }
+  //  m_Bichsel = Bichsel::Instance();
   TString Type(type);
   TLegend *leg = new TLegend(0.85,0.45,0.95,0.9,"");
   Double_t xmax = 4;
