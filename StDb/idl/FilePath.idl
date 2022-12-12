@@ -1,0 +1,7 @@
+/*   FilePath_st.h
+ * Table containg parameters for slow simulator running.
+*/
+   struct FilePath{
+       char      file[256];/* path to file */
+   };
+

@@ -18,6 +18,7 @@ struct tpcCorrection {
                 // type = 10 (== log(1. + OffSet/x) + poly(x,npar))                  -"-
                 // type = 11 (== log(1. + OffSet/x) + poly(x,npar) for log(ADC) and |Z|
                 // type = 20 has extra 2 parameters to add expo => a[npar]*exp(a[npar+1]*x) to polynomical fit 
+                // type = 30 TanH saturation function: [0]+[1]*TMath::TanH([2]*(x-[3]))
                 // type = 200 cut on range [min,max]
                 // type = 300 don't correct out of range [min,max]
                 // type = 400 special for TpcZCorrectionB, to enable Gating Grid correction
