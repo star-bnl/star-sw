@@ -1,0 +1,14 @@
+---
+BasedOnStyle: Google
+BraceWrapping:
+  AfterFunction:   true
+BreakBeforeBraces: Custom
+ColumnLimit: '120'
+IndentPPDirectives: None
+IndentWidth: '2'
+MaxEmptyLinesToKeep: '1'
+SpacesInParentheses: 'false'
+TabWidth: '8'
+UseTab: Never
+
+...

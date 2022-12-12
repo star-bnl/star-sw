@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   build:
+    if: "!contains(toJSON(github.event.pull_request.body), '[skip build]')"
     runs-on: ubuntu-latest
     strategy:
       matrix:
