@@ -1363,7 +1363,7 @@ int St_geant_Maker::Make() {
   AddHits<St_g2t_fts_hit>( "FTSH",{"FTSA","FSIA", "FSIB", "FSIC"}, "g2t_fts_hit", g2t_fts ); 
 
   AddHits<St_g2t_fts_hit>( "FSTH",{"FTOS","FTIS","FTUS"},          "g2t_fsi_hit", g2t_fts );
-  AddHits<St_g2t_fts_hit>( "STGH",{"TGCG"},                        "g2t_stg_hit", g2t_stg );
+  AddHits<St_g2t_fts_hit>( "STGH",{"STGP","STGL","STGS"},          "g2t_stg_hit", g2t_stg );
   AddHits<St_g2t_emc_hit>( "WCAH",{"WSCI"},                        "g2t_wca_hit", g2t_wca );
   AddHits<St_g2t_hca_hit>( "HCAH",{"HSCI"},                        "g2t_hca_hit", g2t_hca );
   AddHits<St_g2t_emc_hit>( "PREH",{"PSCI"},                        "g2t_pre_hit", g2t_pre );

@@ -4,7 +4,8 @@ set day=$1
 set startrun={$1}000
 set endrun={$1}999
 
-set dbserver=onldb.starp.bnl.gov
+set dbserver=onldb2.starp.bnl.gov # online
+#set dbserver=heston.star.bnl.gov # offline
 set dbport=3501
 
 if ( ! -e $day ) then

@@ -50,7 +50,7 @@ class St_l3_Coordinate_Transformer{
   St_l3_Coordinate_Transformer() ;  // Init parameters and variables
   virtual ~St_l3_Coordinate_Transformer() ; // Delete variables
 
-  int LoadTPCLookupTable(char * filename = "/L3/etc/map.bin");
+  int LoadTPCLookupTable(const char * filename = "/L3/etc/map.bin");
   
   // Memberfunctions
   // raw -> global

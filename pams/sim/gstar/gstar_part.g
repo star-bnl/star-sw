@@ -1,251 +1,3 @@
-* $Id: gstar_part.g,v 1.64 2021/04/30 19:37:58 jwebb Exp $
-*
-* $Log: gstar_part.g,v $
-* Revision 1.64  2021/04/30 19:37:58  jwebb
-* Use the eta lifetime, so that energy smearing in gdecay does not (completely) break energy conservation
-*
-* Revision 1.63  2021/04/14 19:45:18  jwebb
-* Tweaks to mass, lifetime requested as part of the quasi two body decay
-*
-* Revision 1.62  2021/04/09 15:49:01  jwebb
-* Add particle definitions to support H3lambda quasi two body decay
-*
-* Revision 1.61  2021/01/29 17:30:15  jwebb
-* Remove the STOP, as we may be passed stable nuclei here
-*
-* Revision 1.60  2021/01/12 14:34:20  jwebb
-* Update to gstar_part.g and StarClassLibrary to support simulation of
-* H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
-*
-* Revision 1.59  2020/06/12 14:10:12  jwebb
-* Fix cut-n-paste error on K0short definition
-*
-* Revision 1.58  2020/05/06 20:33:38  jwebb
-* Pentaquark decay chain, all daughters decay to charged states
-*
-* Revision 1.57  2020/05/05 21:34:33  jwebb
-* Add two pentaquark states... small hack for single decay mode.
-*
-* Revision 1.56  2020/05/05 21:24:10  jwebb
-* Add two pentaquark states
-*
-* Revision 1.55  2018/03/30 14:11:07  jwebb
-* Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
-* StarClassLibrary...)
-*
-* Revision 1.54  2017/10/30 15:23:54  jwebb
-* Add K*0(892) aka pdg 313 to gstar with g3id = 10013
-*
-* Revision 1.53  2016/11/28 21:52:43  jwebb
-* Add psi(2s) --> mu+mu- with 100% branching ratio.
-*
-* Revision 1.52  2015/07/31 21:32:58  jwebb
-* Attempt to propagate a PDG id for antideuteron.
-*
-* Revision 1.51  2015/06/23 14:41:56  jwebb
-* Define H0 strangelet (m=2210 MeV) with 100% BR to Sigma- proton
-*
-* Revision 1.50  2014/07/17 15:17:44  jwebb
-* Added (Xi0Xi-) dibaryon with hacked decay modes... should be 4 body phase space, but G3 doesn't support easily.
-*
-* Revision 1.49  2014/07/16 21:30:40  jwebb
-* Added J/Psi --> mu+m- 100% branching ratio with geant ID 168.
-*
-* Revision 1.48  2014/07/09 18:29:28  jwebb
-* Added (pnXi-) "dibaryon" and it's antiparticle to gstar_part.g.  Required
-* modification of gdecay.F in order to accept arbitrary geant IDs for decay
-* daughters.
-*
-* Revision 1.47  2014/07/07 20:10:04  jwebb
-* Forgot to specify particle tracking type (used to determine which routine
-* is used to handle physics processes, e.g. decays, for the particle).
-*
-* Revision 1.46  2014/06/25 14:19:25  jwebb
-* Added psi prime --> e+e-
-*
-* Revision 1.45  2014/01/29 16:21:43  jwebb
-* Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
-*
-* Revision 1.44  2014/01/28 15:12:57  jwebb
-* Corrected charge states for two hypernuclei
-*
-* Revision 1.43  2013/07/22 20:45:56  jwebb
-* Changed lifetime... previous values were the width of the particle in GeV
-* not the time in seconds.
-*
-* Revision 1.42  2013/06/19 22:17:48  jwebb
-* Improved properties of lambda xi hyperon.
-*
-* Revision 1.41  2013/06/19 22:15:27  jwebb
-* Fixed decay modes.
-*
-* Revision 1.40  2013/06/13 18:44:03  jwebb
-* Added Lambda Xi dibaryon.
-*
-* Revision 1.39  2013/04/08 19:57:20  jwebb
-* Updated mass and lifetime of the phi to more recent PDG values.
-*
-* Revision 1.38  2013/03/14 18:27:29  jwebb
-* Added pi0    --> e+e- gamma 100% gid=10007
-* Added K0long --> nu e- pi+  100% gid=10010
-* Added K0long --> nu e+ pi-  100% gid=10110
-*
-* http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
-*
-* Revision 1.37  2013/02/04 20:41:15  jwebb
-* Update to H-Dibaryon mass, to provide sufficient CMS energy for phase space
-* decay.
-*
-* Revision 1.36  2013/01/31 18:21:50  jwebb
-* Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
-*
-* Revision 1.35  2012/06/25 16:02:09  jwebb
-* Added Xi0(1530).
-*
-* Revision 1.34  2011/08/29 20:30:54  jwebb
-* Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
-* request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
-*
-* Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
-*
-* 10011 : K+ --> m+ nu
-* 11011 : K+ --> pi+ pi0
-* 12011 : K+ --> pi+ pi+ pi-
-* 13011 : K+ --> e+ nu pi0
-* 14011 : K+ --> m+ nu pi0
-* 15011 : K+ --> pi+ pi0 pi0
-*
-* and similar for K- decay modes
-*
-* Revision 1.33  2011/08/12 15:33:40  jwebb
-*
-* Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
-* geant IDs 6[12]053 and 6[12]054, with two decay modes:
-*
-*     H3(lambda) --> He3 pi-    61053    antiparticle=61054
-*     H3(lambda) --> d p pi-    62053    antiparticle=62054
-*
-* Added antideuteron (gid=53) and antitriton (gid=54) to enable inclusion
-* in hypertriton decays.
-*
-* Revision 1.32  2011/03/15 22:39:54  jwebb
-* (1) Corrected mistakes in the Omega_plus, Omega_minus and XiMinus and XiPlus
-*     definitions of particles.
-* (2) Removed pdg ID from all embedding versions of particles, as these
-*     conflict with pythia simulations.
-*
-* Revision 1.31  2010/11/18 15:12:04  jwebb
-* Added omega(728) w/ 100% decay to e+e-.
-*
-* Revision 1.30  2010/09/07 15:09:21  jwebb
-* RT 1999: Adding XiMinus, XiMinusBar, XiZero and XiZeroBar
-*
-* Revision 1.29  2010/09/02 19:25:53  jwebb
-* Increased the precision of the lambda and lambdabar masses in gstar_part.g,
-* requested by Xianglei Zhu.
-*
-* Revision 1.28  2010/07/20 15:32:43  jwebb
-* Correcting gstar_part.g for problems discussed here:
-* http://www.star.bnl.gov/HyperNews-star/protected/get/heavy/2819/1/2.html
-*
-* 1) Corrected the D*- decay
-* 2) Did not change branching ratios, as this would adversly impact standard
-*    simulations.
-* 3) The mass of the D*+/- and D0 now have full precision quoted in PDG (2009).
-*
-* Revision 1.27  2010/06/24 22:37:39  jwebb
-* Say no to Mortran90.
-*
-* Revision 1.26  2010/06/24 18:35:20  jwebb
-* Corrected mistake in Omega+- definition and forced daughter lamda to decay to specific channel.
-*
-* Revision 1.25  2010/06/24 18:05:12  jwebb
-* Update of gstar_part.g for embedding (ticket 1928).  Added test macro.
-*
-* Revision 1.24  2010/05/05 21:54:17  perev
-* K0S->Pi+ Pi- only added
-*
-* Revision 1.23  2010/04/06 14:16:25  jwebb
-* Redefined the geant ID of the lambda(1520) from 706 to 995, to make
-* consistent with usage in embedding group.
-*
-* Revision 1.22  2010/03/19 22:10:47  perev
-* Lambda1520 added (Hiroshi request)
-*
-* Revision 1.21  2009/11/10 19:54:54  fisyak
-* pams Cleanup
-*
-* Revision 1.20  2009/01/10 02:45:04  perev
-* Hypertriton added
-*
-* Revision 1.19  2007/05/18 16:37:39  potekhin
-* a) shifted the PDG code for the Dalitz particle by adding a large
-* integer, thus hoping to resolve the previous clash
-* b) Introduced 3 particles corresponding to 2 states of the Upsilon,
-* albeit with decays exclusively into th mu+/mu- channel
-*
-* Revision 1.18  2007/05/15 21:20:42  potekhin
-* The introduction of the Dalitz particle
-* had unforeseen consequence in that all
-* pi0's in Pythia simulations were counted
-* as Dalitz, which we clearly don't want.
-* I disable this feature until a better
-* solution is found.
-*
-* Revision 1.17  2007/04/02 18:09:27  potekhin
-* For the pi0 "embedding" studies, we need to enrich the
-* pi0 sample with Dalitz decays to enhance statistics.
-* To this end, we have created a particle "DALITZ", which
-* is identical to pi0 except that it goes into gamma gamma
-* and Dalitz in 50%/50% proprotion
-*
-* Revision 1.16  2007/03/05 20:53:57  potekhin
-* Corrected the B decay definitions as per Mark Heinz
-*
-* Revision 1.15  2007/03/02 21:13:16  potekhin
-* Corrected wrong masses for B-mesons, and adding the
-* omitted comment about moving the stranglet definitions
-* into a separate file in the same directory (stranglet.txt).
-*
-* Revision 1.14  2007/03/02 19:41:57  potekhin
-* Added D0bar, Dstar+-0 and 0 bar, B+-0 and 0bar
-*
-* Revision 1.13  2007/02/06 16:48:21  potekhin
-* Bring the particle definitions up to date,
-* with new Upsilon levels and strange lambda plus
-*
-* Revision 1.12  2004/12/20 18:04:22  potekhin
-* Corrected a typo (missing comma)
-*
-* Revision 1.11  2004/12/20 17:55:31  potekhin
-* Requested by Sevil and heavily used in embedding,
-* sigma(1385) family has been added to the particle list
-*
-* Revision 1.10  2004/06/06 14:08:35  fisyak
-* make LASERINO charged
-*
-* Revision 1.9  2003/12/19 17:51:11  potekhin
-* Added the CVS tag, and repeating the comment from the previous check-in:
-* Including the straglet nomenclature developed by Ron, with a few corresctions.
-* The PDG codes assigned are essentialy our declared GEANT codes for
-* simplicity.
-*
-***********************************************************************
-*
-* Remark: the particle ID numbers used by the original STAR Geant v3.15 
-* can no longer be used in v3.21 because of a significant expansion of 
-* idenitfied particles in the core Geant (CONS300-1). 
-* Gstar uses particles codes up to 50 as defined by GEANT standards
-* All remaining particles (including quarks) are unknown to GEANT, 
-* BUT nevertheless, they all ARE loaded in the program KINE bank
-* as geantinos with IPART=1000000+Icode
-* You can redefine their properties BEFORE tracking in aGuTRAC routine
-* You can decay particles provided without decay modes in aGuDCAY routine
-*
-* Branching ratios taken from Particle Data Book of July '94. pmj 15/2/95
-***********************************************************************
-*
-
 INTEGER FUNCTION PDG_ION_ID( Z, A )
    PDG_ION_ID = 1000000000 + 
                      10000 * Z +
@@ -527,6 +279,15 @@ MODULE gstar_part Is the STAR Particle Database
                        trktyp=4, bratio={1.0,} mode={1109,} charge=0
    PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89555 tlife=khbar/0.0473 ,
                        trktyp=4, bratio={1.0,} mode={1208,} charge=0
+
+
+   PARTICLE Kplus_STAR_892  code=10014 pdg=323 mass=0.89170 tlife=khbar/0.0498 ,
+                       trktyp=4, bratio={1.0,} mode={9508,} charge=+1
+
+   PARTICLE Kminus_STAR_892 code=10015 pdg=-323 mass=0.89170 tlife=khbar/0.0498 ,
+                       trktyp=4, bratio={1.0,} mode={9509,} charge=-1
+
+
 
 
 * KAON 0 LONG GID=10
@@ -963,7 +724,7 @@ Particle H_dibaryon               code      = 60001,
    PARTICLE KAON_PLUS code=96 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
                       trktyp=4 bratio={1.0,} mode={080809,}
 
-  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife=0.89260E-10,
                      pdg=311  bratio= { 0.5, 0.5}    mode= { 809, 908 }
 
 
@@ -1027,3 +788,251 @@ Particle H_dibaryon               code      = 60001,
 *
  
  
+* $Id: gstar_part.g,v 1.64 2021/04/30 19:37:58 jwebb Exp $
+*
+* $Log: gstar_part.g,v $
+* Revision 1.64  2021/04/30 19:37:58  jwebb
+* Use the eta lifetime, so that energy smearing in gdecay does not (completely) break energy conservation
+*
+* Revision 1.63  2021/04/14 19:45:18  jwebb
+* Tweaks to mass, lifetime requested as part of the quasi two body decay
+*
+* Revision 1.62  2021/04/09 15:49:01  jwebb
+* Add particle definitions to support H3lambda quasi two body decay
+*
+* Revision 1.61  2021/01/29 17:30:15  jwebb
+* Remove the STOP, as we may be passed stable nuclei here
+*
+* Revision 1.60  2021/01/12 14:34:20  jwebb
+* Update to gstar_part.g and StarClassLibrary to support simulation of
+* H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+*
+* Revision 1.59  2020/06/12 14:10:12  jwebb
+* Fix cut-n-paste error on K0short definition
+*
+* Revision 1.58  2020/05/06 20:33:38  jwebb
+* Pentaquark decay chain, all daughters decay to charged states
+*
+* Revision 1.57  2020/05/05 21:34:33  jwebb
+* Add two pentaquark states... small hack for single decay mode.
+*
+* Revision 1.56  2020/05/05 21:24:10  jwebb
+* Add two pentaquark states
+*
+* Revision 1.55  2018/03/30 14:11:07  jwebb
+* Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
+* StarClassLibrary...)
+*
+* Revision 1.54  2017/10/30 15:23:54  jwebb
+* Add K*0(892) aka pdg 313 to gstar with g3id = 10013
+*
+* Revision 1.53  2016/11/28 21:52:43  jwebb
+* Add psi(2s) --> mu+mu- with 100% branching ratio.
+*
+* Revision 1.52  2015/07/31 21:32:58  jwebb
+* Attempt to propagate a PDG id for antideuteron.
+*
+* Revision 1.51  2015/06/23 14:41:56  jwebb
+* Define H0 strangelet (m=2210 MeV) with 100% BR to Sigma- proton
+*
+* Revision 1.50  2014/07/17 15:17:44  jwebb
+* Added (Xi0Xi-) dibaryon with hacked decay modes... should be 4 body phase space, but G3 doesn't support easily.
+*
+* Revision 1.49  2014/07/16 21:30:40  jwebb
+* Added J/Psi --> mu+m- 100% branching ratio with geant ID 168.
+*
+* Revision 1.48  2014/07/09 18:29:28  jwebb
+* Added (pnXi-) "dibaryon" and it's antiparticle to gstar_part.g.  Required
+* modification of gdecay.F in order to accept arbitrary geant IDs for decay
+* daughters.
+*
+* Revision 1.47  2014/07/07 20:10:04  jwebb
+* Forgot to specify particle tracking type (used to determine which routine
+* is used to handle physics processes, e.g. decays, for the particle).
+*
+* Revision 1.46  2014/06/25 14:19:25  jwebb
+* Added psi prime --> e+e-
+*
+* Revision 1.45  2014/01/29 16:21:43  jwebb
+* Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
+*
+* Revision 1.44  2014/01/28 15:12:57  jwebb
+* Corrected charge states for two hypernuclei
+*
+* Revision 1.43  2013/07/22 20:45:56  jwebb
+* Changed lifetime... previous values were the width of the particle in GeV
+* not the time in seconds.
+*
+* Revision 1.42  2013/06/19 22:17:48  jwebb
+* Improved properties of lambda xi hyperon.
+*
+* Revision 1.41  2013/06/19 22:15:27  jwebb
+* Fixed decay modes.
+*
+* Revision 1.40  2013/06/13 18:44:03  jwebb
+* Added Lambda Xi dibaryon.
+*
+* Revision 1.39  2013/04/08 19:57:20  jwebb
+* Updated mass and lifetime of the phi to more recent PDG values.
+*
+* Revision 1.38  2013/03/14 18:27:29  jwebb
+* Added pi0    --> e+e- gamma 100% gid=10007
+* Added K0long --> nu e- pi+  100% gid=10010
+* Added K0long --> nu e+ pi-  100% gid=10110
+*
+* http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+*
+* Revision 1.37  2013/02/04 20:41:15  jwebb
+* Update to H-Dibaryon mass, to provide sufficient CMS energy for phase space
+* decay.
+*
+* Revision 1.36  2013/01/31 18:21:50  jwebb
+* Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+*
+* Revision 1.35  2012/06/25 16:02:09  jwebb
+* Added Xi0(1530).
+*
+* Revision 1.34  2011/08/29 20:30:54  jwebb
+* Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
+* request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
+*
+* Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
+*
+* 10011 : K+ --> m+ nu
+* 11011 : K+ --> pi+ pi0
+* 12011 : K+ --> pi+ pi+ pi-
+* 13011 : K+ --> e+ nu pi0
+* 14011 : K+ --> m+ nu pi0
+* 15011 : K+ --> pi+ pi0 pi0
+*
+* and similar for K- decay modes
+*
+* Revision 1.33  2011/08/12 15:33:40  jwebb
+*
+* Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
+* geant IDs 6[12]053 and 6[12]054, with two decay modes:
+*
+*     H3(lambda) --> He3 pi-    61053    antiparticle=61054
+*     H3(lambda) --> d p pi-    62053    antiparticle=62054
+*
+* Added antideuteron (gid=53) and antitriton (gid=54) to enable inclusion
+* in hypertriton decays.
+*
+* Revision 1.32  2011/03/15 22:39:54  jwebb
+* (1) Corrected mistakes in the Omega_plus, Omega_minus and XiMinus and XiPlus
+*     definitions of particles.
+* (2) Removed pdg ID from all embedding versions of particles, as these
+*     conflict with pythia simulations.
+*
+* Revision 1.31  2010/11/18 15:12:04  jwebb
+* Added omega(728) w/ 100% decay to e+e-.
+*
+* Revision 1.30  2010/09/07 15:09:21  jwebb
+* RT 1999: Adding XiMinus, XiMinusBar, XiZero and XiZeroBar
+*
+* Revision 1.29  2010/09/02 19:25:53  jwebb
+* Increased the precision of the lambda and lambdabar masses in gstar_part.g,
+* requested by Xianglei Zhu.
+*
+* Revision 1.28  2010/07/20 15:32:43  jwebb
+* Correcting gstar_part.g for problems discussed here:
+* http://www.star.bnl.gov/HyperNews-star/protected/get/heavy/2819/1/2.html
+*
+* 1) Corrected the D*- decay
+* 2) Did not change branching ratios, as this would adversly impact standard
+*    simulations.
+* 3) The mass of the D*+/- and D0 now have full precision quoted in PDG (2009).
+*
+* Revision 1.27  2010/06/24 22:37:39  jwebb
+* Say no to Mortran90.
+*
+* Revision 1.26  2010/06/24 18:35:20  jwebb
+* Corrected mistake in Omega+- definition and forced daughter lamda to decay to specific channel.
+*
+* Revision 1.25  2010/06/24 18:05:12  jwebb
+* Update of gstar_part.g for embedding (ticket 1928).  Added test macro.
+*
+* Revision 1.24  2010/05/05 21:54:17  perev
+* K0S->Pi+ Pi- only added
+*
+* Revision 1.23  2010/04/06 14:16:25  jwebb
+* Redefined the geant ID of the lambda(1520) from 706 to 995, to make
+* consistent with usage in embedding group.
+*
+* Revision 1.22  2010/03/19 22:10:47  perev
+* Lambda1520 added (Hiroshi request)
+*
+* Revision 1.21  2009/11/10 19:54:54  fisyak
+* pams Cleanup
+*
+* Revision 1.20  2009/01/10 02:45:04  perev
+* Hypertriton added
+*
+* Revision 1.19  2007/05/18 16:37:39  potekhin
+* a) shifted the PDG code for the Dalitz particle by adding a large
+* integer, thus hoping to resolve the previous clash
+* b) Introduced 3 particles corresponding to 2 states of the Upsilon,
+* albeit with decays exclusively into th mu+/mu- channel
+*
+* Revision 1.18  2007/05/15 21:20:42  potekhin
+* The introduction of the Dalitz particle
+* had unforeseen consequence in that all
+* pi0's in Pythia simulations were counted
+* as Dalitz, which we clearly don't want.
+* I disable this feature until a better
+* solution is found.
+*
+* Revision 1.17  2007/04/02 18:09:27  potekhin
+* For the pi0 "embedding" studies, we need to enrich the
+* pi0 sample with Dalitz decays to enhance statistics.
+* To this end, we have created a particle "DALITZ", which
+* is identical to pi0 except that it goes into gamma gamma
+* and Dalitz in 50%/50% proprotion
+*
+* Revision 1.16  2007/03/05 20:53:57  potekhin
+* Corrected the B decay definitions as per Mark Heinz
+*
+* Revision 1.15  2007/03/02 21:13:16  potekhin
+* Corrected wrong masses for B-mesons, and adding the
+* omitted comment about moving the stranglet definitions
+* into a separate file in the same directory (stranglet.txt).
+*
+* Revision 1.14  2007/03/02 19:41:57  potekhin
+* Added D0bar, Dstar+-0 and 0 bar, B+-0 and 0bar
+*
+* Revision 1.13  2007/02/06 16:48:21  potekhin
+* Bring the particle definitions up to date,
+* with new Upsilon levels and strange lambda plus
+*
+* Revision 1.12  2004/12/20 18:04:22  potekhin
+* Corrected a typo (missing comma)
+*
+* Revision 1.11  2004/12/20 17:55:31  potekhin
+* Requested by Sevil and heavily used in embedding,
+* sigma(1385) family has been added to the particle list
+*
+* Revision 1.10  2004/06/06 14:08:35  fisyak
+* make LASERINO charged
+*
+* Revision 1.9  2003/12/19 17:51:11  potekhin
+* Added the CVS tag, and repeating the comment from the previous check-in:
+* Including the straglet nomenclature developed by Ron, with a few corresctions.
+* The PDG codes assigned are essentialy our declared GEANT codes for
+* simplicity.
+*
+***********************************************************************
+*
+* Remark: the particle ID numbers used by the original STAR Geant v3.15 
+* can no longer be used in v3.21 because of a significant expansion of 
+* idenitfied particles in the core Geant (CONS300-1). 
+* Gstar uses particles codes up to 50 as defined by GEANT standards
+* All remaining particles (including quarks) are unknown to GEANT, 
+* BUT nevertheless, they all ARE loaded in the program KINE bank
+* as geantinos with IPART=1000000+Icode
+* You can redefine their properties BEFORE tracking in aGuTRAC routine
+* You can decay particles provided without decay modes in aGuDCAY routine
+*
+* Branching ratios taken from Particle Data Book of July '94. pmj 15/2/95
+***********************************************************************
+*
+

@@ -139,7 +139,7 @@ void CanvasImageBuilder::writeIndexFiles(FILE *f, DisplayNode *node, int page, i
     }
 }
 
-int CanvasImageBuilder::writeIndexFromNode(FILE *f, DisplayNode *node, char *currdir, int page, int tabs) {
+int CanvasImageBuilder::writeIndexFromNode(FILE *f, DisplayNode *node, const char *currdir, int page, int tabs) {
     int npages = 0;
     if(node->leaf) {
 	fprintf(f,"%s : %d\n", currdir, page); 
@@ -302,20 +302,27 @@ int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, con
     XX(0);
     time_t writeTime = time(NULL);
 
-    //LOG("JEFF", "sendToImageWriter 0x%x", imageWriter);
+    LOG("JEFF", "sendToImageWriter 0x%x", imageWriter);
     int nwriting = imageWriter->getNWriting();
     if((nwriting > 0) && !force) {
-	//	LOG("JEFF", "skip... nwriting = %d", nwriting);
+	LOG("JEFF", "skip... nwriting = %d", nwriting);
 	return 0;
     }
 
-    //LOG("JEFF", "Write to image writer: nWriting=%d writeIdx=%d", nwriting, writeIdx);
+    while(nwriting > 0) {
+	LOG("JEFF", "waiting for nwriting to be == 0, nwriting=%d", nwriting);
+	sleep(1);
+	nwriting = imageWriter->getNWriting();
+    }
+
+    LOG("JEFF", "Write to image writer: nWriting=%d writeIdx=%d", nwriting, writeIdx);
     XX(2);      // writeIdx is guarenteed to be updated before the mux returns!
     pthread_mutex_lock(&imageWriter->mux);
     XX(1);
-    
+    LOG("JEFF", "a run=%d", rs->run);
     if(rs->run == 0) {
 	pthread_mutex_unlock(&imageWriter->mux);
+	LOG("JEFF", "a");
 	return 0;
     }
 
@@ -330,13 +337,17 @@ int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, con
 	}
     }
 
+    LOG("JEFF", "a");
     writeIndex();
     XX(1);
+    LOG("JEFF", "a");
     writeRunStatus(rs, numberOfEvents, serverTags, writeTime);
     XX(1);
+    LOG("JEFF", "a");
     int cnt = writeImages();
     XX(1);
     writeIdx++;
+    LOG("JEFF", "a");
     pthread_mutex_unlock(&imageWriter->mux);
     XX(999);
     return cnt;

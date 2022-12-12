@@ -42,7 +42,7 @@ public:
  private:
 
   union {
-      TH1 *array[];
+      TH1 *array[1];
       
       struct {
 	  TH1* h76_zdc_time_east;
@@ -86,8 +86,44 @@ public:
 	  TH1* h334_zdcsmd_w_h_A;
 	  TH1* h335_zdcsmd_e_v_A;
 	  TH1* h336_zdcsmd_e_h_A;
-	  
-	  // L2UpsilonCounts...
+	  TH2* h337_zdcsmd_w_v_A_2D;
+	  TH2* h338_zdcsmd_w_h_A_2D;
+	  TH2* h339_zdcsmd_e_v_A_2D;
+	  TH2* h340_zdcsmd_e_h_A_2D;
+	  TH1* h341_zdcsmd_w_v_A_strip1;
+	  TH1* h342_zdcsmd_w_v_A_strip2;
+	  TH1* h343_zdcsmd_w_v_A_strip3;
+	  TH1* h344_zdcsmd_w_v_A_strip4;
+	  TH1* h345_zdcsmd_w_v_A_strip5;
+	  TH1* h346_zdcsmd_w_v_A_strip6;
+	  TH1* h347_zdcsmd_w_v_A_strip7;
+	  TH1* h348_zdcsmd_w_v_A_strip8;
+	  TH1* h349_zdcsmd_w_h_A_strip1;
+	  TH1* h350_zdcsmd_w_h_A_strip2;
+	  TH1* h351_zdcsmd_w_h_A_strip3;
+	  TH1* h352_zdcsmd_w_h_A_strip4;
+	  TH1* h353_zdcsmd_w_h_A_strip5;
+	  TH1* h354_zdcsmd_w_h_A_strip6;
+	  TH1* h355_zdcsmd_w_h_A_strip7;
+	  TH1* h356_zdcsmd_w_h_A_strip8;
+	  TH1* h357_zdcsmd_e_v_A_strip1;
+	  TH1* h358_zdcsmd_e_v_A_strip2;
+	  TH1* h359_zdcsmd_e_v_A_strip3;
+	  TH1* h360_zdcsmd_e_v_A_strip4;
+	  TH1* h361_zdcsmd_e_v_A_strip5;
+	  TH1* h362_zdcsmd_e_v_A_strip6;
+	  TH1* h363_zdcsmd_e_v_A_strip7;
+	  TH1* h364_zdcsmd_e_v_A_strip8;
+	  TH1* h365_zdcsmd_e_h_A_strip1;
+	  TH1* h366_zdcsmd_e_h_A_strip2;
+	  TH1* h367_zdcsmd_e_h_A_strip3;
+	  TH1* h368_zdcsmd_e_h_A_strip4;
+	  TH1* h369_zdcsmd_e_h_A_strip5;
+	  TH1* h370_zdcsmd_e_h_A_strip6;
+	  TH1* h371_zdcsmd_e_h_A_strip7;
+	  TH1* h372_zdcsmd_e_h_A_strip8;
+
+          // L2UpsilonCounts...
 	  TH1* hL2ups_Tag;
 	  TH1* hL2ups_Time;
 	  TH1* hL2ups_Event;

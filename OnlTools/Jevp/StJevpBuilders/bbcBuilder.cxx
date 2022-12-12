@@ -22,7 +22,8 @@
 // It has no plots (currently)
 //
 
-double h452_bbc_vertex_offset = 10.28 -.55;
+//double h452_bbc_vertex_offset = 10.28 -.55;
+double h452_bbc_vertex_offset = 0.0;
 
 ClassImp(bbcBuilder);
   
@@ -202,14 +203,10 @@ void bbcBuilder::event(daqReader *rdr)
     contents.h203_bbc_earliest_tac_west->Fill(trgd->bbcEarliestTDC(west));
   }
 
-  if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
-      trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
-    bbcTimeDiff = trgd->bbcTimeDifference()-4096;
-    //mBbcVertex   = mBbcTimeDiff/3/10.0;     
-    bbcVertex   = bbcTimeDiff/2 *0.02*30;      
-    contents.h204_bbc_tac_difference_ew->Fill(bbcTimeDiff);
-    contents.h452_bbc_tac_difference_ew->Fill(bbcVertex + h452_bbc_vertex_offset);
-  }
+  bbcTimeDiff = trgd->bbcTimeDifference()-4096;
+  bbcVertex   = bbcTimeDiff/2.0*0.016*30;      
+  contents.h204_bbc_tac_difference_ew->Fill(bbcTimeDiff);
+  contents.h452_bbc_tac_difference_ew->Fill(bbcVertex + h452_bbc_vertex_offset);
   contents.h205_bbc_tac_e_w->Fill(trgd->bbcEarliestTDC(east), trgd->bbcEarliestTDC(west));
 
   if(trgd) delete trgd;

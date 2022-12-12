@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<!DOCTYPE note [
+<!ENTITY PRODNAME   "pythia8.200GeV.pp.HFjets">
+<!ENTITY RECOCHAIN  "P16idAuAu200hft">
+
+<!ENTITY NEVENTS    "1000">
+<!ENTITY STRIDE     "100">
+
+<!ENTITY NFILES     "5000">
+<!ENTITY WORKINGDIR "/gpfs/mnt/gpfs01/star/simu/simu/jwebb/2022/pp-200GeV-HF-jets-detroit/">
+<!ENTITY DATASET    "filelist:&WORKINGDIR;/simulation.y2014x.pythia8.HFjets.input.list" >
+
+
+<!ENTITY OUTDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/out_production/" >
+<!ENTITY LOGDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/log_production/" >
+<!ENTITY JOBFILES   "/star/simu/simu/jwebb/2022/Simulation.HFjets/job_production/" > 
+
+<!ENTITY GEOMETRY      "y2014x"> 
+<!ENTITY TIMESTAMP     "sdt20140530"> 
+<!ENTITY DBVTIMESTAMP  "DbV20150316"> 
+
+<!ENTITY RECLIB     "SL16d_embed">
+<!ENTITY SIMLIB     "dev">
+<!ENTITY SIMULATE      "false">
+
+]>
+
+<!-- 
+
+   Embed single particles into min bias data set 
+
+   DATASET:    list of daq files into which we embed MC events
+   WORKINGDIR: directory where job is submitted from and sources resiee
+   TAGDIR:     contains the .tag.root files corresponding to each daq file
+   OUTDIR:     directory into which embeding output is written
+   RECDIR:     directory into which standard reconstruction of data is written
+   SIMDIR:     directory into which standard reconstruction of simu is written
+   LOGDIR:     directory into which logs are written
+   GEOMETRY:   geometry tag to simulate
+   TIMESTAMP:  date/time at which the run occurred
+   DBVTIMESTAMP: ignore database entries made after this date 
+   NEVENTS:    max number of events to mix (simu will do full stats of tags file)
+
+-->
+
+<job  name               = "&PRODNAME;" 
+      maxFilesPerProcess = "1"
+      fileListSyntax     = "paths"  
+      filesPerHour       = "0.1"
+      simulateSubmission = "&SIMULATE;">
+
+  <!--logControl="UCM"-->
+  <stdout   URL="file:&JOBFILES;$JOBID_$FILEBASENAME.log" />
+  <stderr   URL="file:&JOBFILES;$JOBID_$FILEBASENAME.err" />
+  <input    URL="&DATASET;" nFiles="&NFILES;" />
+
+  <Generator><Location>&JOBFILES;</Location></Generator>
+  <ResourceUsage><Priority>100</Priority></ResourceUsage>
+
+  <command>       
+
+    echo "JobStartTime="`/bin/date`
+#    setenv datevalue `cat ${SUBMITTINGDIRECTORY}/date.txt`    
+
+ 
+    #########################################################
+    #  Check that the SRM script can be found      
+    #########################################################
+    #  echo `which SUMScopy2.sh`
+       source /star/u/starreco/.cshrc
+       unsetenv NODEBUG
+    #setenv DB_SERVER_LOCAL_CONFIG /afs/rhic.bnl.gov/star/packages/conf/dbLoadBalancerLocalConfig_nightly.xml
+
+    setup 32b
+    starver &SIMLIB;    
+
+    set production = &PRODNAME;
+    set site       = rcf
+
+    echo "SUMS_prodTag=${production}"
+    echo "SUMS_site=${site}"
+    echo "SUMS_prodType=reco"
+
+    cd $SCRATCH
+
+    #########################################################
+    # Transfer files needed to run the simulation
+    #########################################################
+    mkdir StRoot/StarGenerator/macros/ -p
+    cd StRoot/StarGenerator/macros/ 
+    cp -R &WORKINGDIR;/StRoot/StarGenerator/macros/* .
+    cd -
+    cp -R &WORKINGDIR;/starsim.C .
+    cp -R &WORKINGDIR;/runBfc.C .
+
+
+    cp -R &WORKINGDIR;/.$STAR_HOST_SYS .
+
+    # Check to see that everything is setup and making sense
+    ls -la
+
+    rehash
+
+cat &lt;&lt;+++
+    ######################################################### 
+    # Run starsim `date` 
+    #########################################################
++++
+    which starsim	
+
+    set runfile   = $INPUTFILE0
+#   set runnumber = `basename $runfile:t .txt`
+    set runnumber = `echo $runfile:t | awk -F "_" '// { print $1 }'`
+    set chunk     = `echo $runfile:t | awk -F "_" '// { print $2 }'`
+
+    echo RUNNUMBER = ${runnumber}
+
+    set   EMBEDDING_START_TIME = `date`
+    # Run starsim and create 10 output fzd files
+
+    echo ${runfile} 
+    echo ${runfile} &gt; mc_${runnumber}_${chunk}.log
+    echo SIMULATION_START_TIME = `date` &gt;&gt; mc_${runnumber}_${chunk}.log
+    root4star -q -b starsim.C\(&NEVENTS;,${runnumber},\"${runfile}\",1,&STRIDE;\) &gt;&gt; mc_${runnumber}_${chunk}.log
+    echo SIMULATION_END_TIME = `date` &gt;&gt; mc_${runnumber}_${chunk}.log
+
+    set fzdin=`ls *.fzd`
+
+    # Run reconstruction
+    starver &RECLIB;
+      mv .$STAR_HOST_SYS meh
+
+    echo RECONSTRUCTION_START_TIME = `date` &gt; rc_${runnumber}_${chunk}.log
+    root4star -q -b runBfc.C\(&NEVENTS;,\"${fzdin}\"\)             &gt;&gt; rc_${runnumber}_${chunk}.log
+    echo RECONSTRUCTION_END_TIME = `date` &gt;&gt; rc_${runnumber}_${chunk}.log
+
+    set   EMBEDDING_END_TIME = `date`
+
+    echo EMBEDDING_START_TIME = ${EMBEDDING_START_TIME} &gt; stats_${runnumber}_${chunk}.lo
+    echo EMBEDDING_END_TIME = ${EMBEDDING_END_TIME} &gt; stats_${runnumber}_${chunk}.log
+    grep SIMU*_TIME mc*_${chunk}.log &gt;&gt; stats_${runnumber}_${chunk}.log 
+    grep RECO*_TIME rc*_${chunk}.log &gt;&gt; stats_${runnumber}_${chunk}.log
+    ls -l --human-readable *.root *.fzd &gt;&gt; stats_${runnumber}_${chunk}.log
+
+    cp *.MuDst.root &OUTDIR;
+    cp *.pico*.root &OUTDIR;
+    if ( &NEVENTS; &lt; 11 ) then
+       cp *.fzd &OUTDIR;
+       cp *.log*        &LOGDIR;   
+     else
+       gzip --best *.log
+       cp *.log*        &LOGDIR;
+     endif
+
+   </command>
+
+
+</job>

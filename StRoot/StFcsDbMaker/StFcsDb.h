@@ -105,9 +105,11 @@
 #include "tables/St_fcsHcalGainCorr_Table.h"
 #include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
+#include "tables/St_g2t_track_Table.h"
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
+using namespace std;
 
 class StFcsDb : public TDataSet {
 
@@ -149,6 +151,10 @@ public:
   void getName(int ehp, int ns, int dep, int ch, char name[]); //! Get Name of a channel 
   static void getFromName(const char name[], int& det, int& id); //! Get det/id from name
   static int getDetFromName(const std::string& detname);  //! Get det from name
+  static unsigned short getKey(unsigned short detid, unsigned short id);//This key matches the 'mDetId' in StFcsHit but without "zs" value (@[June 21, 2022](David Kapukchyan)>Move static method to StFcsHit?)
+  static void getDetIdFromKey(unsigned short key, unsigned short& detid, unsigned short& id);
+  static unsigned short getDetFromKey(unsigned short key);
+  static unsigned short getIdFromKey(unsigned short key);
 
   //! Utility functions related to DetectorPosition
   StThreeVectorD getDetectorOffset(int det) const;  //! get the offset of the detector
@@ -174,7 +180,8 @@ public:
   //! get the STAR frame cooridnates from other way
   StThreeVectorD getStarXYZfromColumnRow(int det,float col, float row, float FcsZ=-1.0) const; //from column/row[cell size unit]
   StThreeVectorD getStarXYZ(int det, int col, int row, float FcsZ=-1.0) const;   //from column/row [cell unit]
-  StThreeVectorD getStarXYZ(StFcsHit* hit, float FcsZ=-1.0) const;                   //from StFcsHit
+  StThreeVectorD getStarXYZ(const StFcsHit* hit, float FcsZ=-1.0) const;         //from StFcsHit
+  StThreeVectorD getStarXYZ(const StFcsCluster* clu, float FcsZ=-1.0) const;     //from StFcsCluster
   StThreeVectorD getStarXYZ(int det, int id, float FcsZ=-1.0) const;             //center of the cell
   
   //! Get the STAR frame cooridnates for 4x4 sum
@@ -219,8 +226,8 @@ public:
   } 
 
   //! reading gain from text files
-  void setReadGainFromText(char* file="fcsgain.txt")         {mGainFilename=file;     mGainMode=GAINMODE::TXT;}
-  void setReadGainCorrFromText(char* file="fcsgaincorr.txt") {mGainCorrFilename=file; mGainCorrMode=GAINMODE::TXT;}
+  void setReadGainFromText(const char* file="fcsgain.txt")         {strcpy(mGainFilename,file);     mGainMode=GAINMODE::TXT;}
+  void setReadGainCorrFromText(const char* file="fcsgaincorr.txt") {strcpy(mGainCorrFilename,file); mGainCorrMode=GAINMODE::TXT;}
 
   //ETGain factor= 1(ET Match), 0(E Match), 0.5(halfway)
   float getEtGain(int det, int id, float factor=1.0) const;  //! ET gain
@@ -255,6 +262,19 @@ public:
   void setPedestal(int ehp, int ns, int dep, int ch, float ped); //! setting pedestal
   void readPedFromText(const char* file="fcsped.txt"); //! reading pedestal from text
   
+  // Tracing back from a given g2t_track_id to primary track's g2t_track_id
+  unsigned int backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk);
+
+  /// Getting pointer to parent & primary g2t_track from StFcsHit & StFcsCluster
+  /// User need to provide g2t_track_st table from geant.root file
+  /// order=0 (default) gives the top contributing g2t_track for the hit/cluster. 1,2... for lower contributer
+  /// It also returns fraction of dE from the g2t_track to the hit/cluster
+  /// It also returns number of g2t_tracks contributing to the hit/cluster 
+  const g2t_track_st* getParentG2tTrack(StFcsHit* h,      g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getParentG2tTrack(StFcsCluster* c,  g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#
@@ -266,14 +286,14 @@ public:
   float mForceUniformGainEcal=-1.0;       //! forcing a value
   float mForceUniformGainHcal=-1.0;       //! forcing a value
   float mForceUniformGainPres=-1.0;       //! forcing a value
-  char* mGainFilename=0;                  //! gain file name
+  char  mGainFilename[256];               //! gain file name
   void readGainFromText();
 
   GAINMODE mGainCorrMode = GAINMODE::DB;      //! GainCorr mode selection 
   float mForceUniformGainCorrectionEcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionHcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionPres=-1.0; //! forcing a value
-  char* mGainCorrFilename=0;                  //! gaincorr filename
+  char  mGainCorrFilename[256];               //! gaincorr filename
   void readGainCorrFromText();
  
   //DEP sorted ped/gain/corr
@@ -298,7 +318,12 @@ public:
   fcsHcalGainCorr_st      mFcsHcalGainCorr;
   fcsPresValley_st        mFcsPresValley;
 
+  /// Getting pointer to parent & primary g2t_track from StFcsCluster
+  /// mode=0 for parent, and mode=1 for primary
+  const g2t_track_st* getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0, int mode=0);
+
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
+
   ClassDef(StFcsDb,1)   //StAF chain virtual base class for Makers        
 };
 

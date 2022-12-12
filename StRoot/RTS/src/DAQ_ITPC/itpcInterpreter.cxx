@@ -1666,6 +1666,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	u_int err = 0 ;
 	u_int soft_err = 0 ;
 	int fee_cou = 0 ;
+	u_int evt_status = 0 ;
 
 	int expect_fee_cou = itpc_config[sector_id].rdo[rdo_id-1].fee_count ;
 
@@ -1896,7 +1897,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 				}
 			}
 #endif
-			//soft_err |= 0x100 ;
+			// 26-Jan-2022: enabling
+			soft_err |= 0x100 ;
 			//err |= 0x400 ;
 			//goto done ;
 		}
@@ -2050,11 +2052,13 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		LOG(ERR,"%d:#%02d(id %d,cou %d) evt %d: error 0x%X 0x%X",
 		    rdo_id,fee_port,fee_id,fee_cou,evt_ix,err,soft_err) ;
 
-		for(int i=-4;i<8;i++) {
-			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
+		if(dbg_level>=1) {
+			for(int i=-4;i<8;i++) {
+				LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
+			}
 		}
-		
-		if(err || soft_err) return -1 ;
+
+		if(err || soft_err) return -1 ;	// this is a bit harsh to return already here???
 	}
 
 	// this only works online
@@ -2072,8 +2076,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	switch(data[0]) {
 	case 0x98001000 :	// start of trailer
-		if(data[1]!=0) {	// event status
+		evt_status = data[1] ;
+		if(evt_status!=0) {	// event status
 			run_err_add(rdo_id,8) ;
+
 			LOG(ERR,"RDO %d: bad event status 0x%08X",rdo_id,data[1]) ;
 		}
 
@@ -2129,6 +2135,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			data++ ;
 		}
 		break ;
+	}
+
+	if(evt_status) {
+		LOG(ERR,"%d: evt_status 0x%08X",rdo_id,evt_status) ;
 	}
 
 	return 0 ;
@@ -2213,13 +2223,14 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 	sampa_bx = -1 ;
 	ascii_cou = 0 ;
 	memset(evt_err,0,sizeof(evt_err)) ;
+	evt_status = 0 ;
 
 	// move forward until I hit start-comma
 	int w_cou = (words<16)?words:16 ;
 
 	// the data is already SWAPPED if processed in the sector brokers!!!
 	for(int i=0;i<w_cou;i++) {
-		LOG(NOTE,"...%d/%d = 0x%08X",i,words,data[i]) ;
+//		LOG(TERR,"...%d/%d = 0x%08X",i,words,data[i]) ;
 
 		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
 			data = data + i ;
@@ -2230,7 +2241,7 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 	w_cou = data_end - data ;
 
 	if(data[0]==0xCCCC001C) {	// need swapping!!!!
-		LOG(NOTE,"swapping") ;
+//		LOG(TERR,"swapping: data 0x%08X, w_cou %d",data[0],w_cou) ;
 		for(int i=0;i<w_cou;i++) {
 			data[i] = sw16(data[i]) ;
 		}
@@ -2247,6 +2258,70 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 		return -1 ;
 	}
 
+
+	int no_fees = 0 ;
+	//ds is of the form 0x98000014
+
+
+
+	if((data[0]&0xFF00000F)==0x98000004) {
+		rdo_version = (data[0]>>4)&0xFF ;	// aka 1
+	}
+	else {
+		// I'll also be here if the data is from the new FY2023 iTPC Upgrade!
+		no_fees = 1 ;	// not a triggered event - no FEEs
+	}
+
+//	if(dbg_level>1) LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
+//	LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
+
+	// I need the event status ala get_l2
+
+	int trl_ix = -1 ;
+	int trl_stop_ix = -1 ;
+	
+
+//	for(int i=(words-6);i>=0;i--) {
+	for(int i=(words-12);i>=0;i--) {
+		if(dbg_level>1) LOG(TERR,"%d: 0x%08X",i,data[i]) ;
+
+		if(data[i]==0x98001000) {
+			trl_ix = i ;
+			break ;
+		}
+		if(data[i]==0x58001001) {
+			trl_stop_ix = i ;
+		}
+	}
+
+	if(no_fees==0) {	// triggered event with FEEs
+		if(trl_ix < 0) {
+			LOG(ERR,"%d: no trailer found, trl_stop_ix %d",rdo_id,trl_stop_ix) ;
+		}
+		else {
+			trl_ix++ ;
+
+			evt_status = (data[trl_ix++]) ;
+			int trg_cou = (data[trl_ix++]) & 0xFFFF ;
+
+			//if(dbg_level>1) LOG(TERR,"%d: evt_status 0x%08X, trg_cou %d, words %d",rdo_id,evt_status,trg_cou,words) ;
+			if(evt_status != 0 || trl_stop_ix<0) {	// FEE timeout
+				LOG(ERR,"%d: evt_status 0x%08X, trg_cou %d, words %d, trl_ix %d, trl_stop_ix %d",rdo_id,evt_status,trg_cou,words,trl_ix,trl_stop_ix) ;
+
+#if 0
+				for(int i=0;i<8;i++) {
+					LOG(TERR,"%d = 0x%08X",i,data[i]) ;
+				}
+				for(int i=(words-32);i<words;i++) {
+					LOG(TERR,"%d = 0x%08X",i,data[i]) ;
+				}
+#endif
+
+				//return -1 ;
+			}
+		}
+	}
+	
 	
 //	for(int i=0;i<16;i++) {
 //		LOG(TERR,"%d/%d = 0x%08X",i,words,data[i]) ;
@@ -2294,6 +2369,8 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 			}
 			else {
 				ret = ana_triggered(data,data_end) ;
+
+				
 			}
 			break ;
 		}

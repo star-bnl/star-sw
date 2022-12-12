@@ -131,30 +131,30 @@ class fs_index {
   char *pwd() { return cwd; };
 
   // directory functions
-  fs_dir *opendir(char *dir);
+  fs_dir *opendir(const char *dir);
   void closedir(fs_dir *dir);
   fs_dirent *readdir(fs_dir *dir, fs_dirent *storage=NULL);
-  fs_dirent *readdirent(char *name, fs_dirent *storage=NULL);
+  fs_dirent *readdirent(const char *name, fs_dirent *storage=NULL);
 
   // meant for users that have memory mapped/memory sfs indexes
   // and want to use the buffers in place to avoid memcpy
   // access the data through the dirent's offset / size
   // 
-  inline fs_dirent *opendirent(char *name) { return readdirent(name); };
+  inline fs_dirent *opendirent(const char *name) { return readdirent(name); };
 
   int mem_ls(fs_filelist *filelist, int recurse, fs_dir *dir);
 
   // File operations
-  int read(char *fn, char *buff, int sz);
+  int read(const char *fn, char *buff, int sz);
   virtual int write(char *fn, char *buff, int sz) { return -1; };
   virtual int getwritevsz(fs_iovec *fsiovec, int n) { return 0; };
   virtual int writev(fs_iovec *iovec, int n) { return -1; };
   virtual int writev_sticky(fs_iovec *iovec, int n, int *sticky) { return -1; };
 
-  int fileSize(char *fn);
+  int fileSize(const char *fn);
   
   int n_inodes;
-  void getFullPath(char *fullname, char *name);
+  void getFullPath(char *fullname, const char *name);
   virtual void dump(int fd)=0;
  
   wrapfile wfile;

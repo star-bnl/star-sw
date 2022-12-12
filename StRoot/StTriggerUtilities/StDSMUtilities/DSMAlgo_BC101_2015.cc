@@ -28,10 +28,10 @@ void DSMAlgo_BC101_2015::operator()(DSM& dsm)
 
   // ACTION:
 
-  unsigned int jpx;			// East (-1 < eta < 0)
-  unsigned int jpy;			// Middle (-0.6 < eta < 0.4)
-  unsigned int jpz;			// West (0 < eta < 1)
-  unsigned int jpPartial;		// Partial (0.4 < eta < 1)
+  int jpx;			// East (-1 < eta < 0)
+  int jpy;			// Middle (-0.6 < eta < 0.4)
+  int jpz;			// West (0 < eta < 1)
+  int jpPartial;		// Partial (0.4 < eta < 1)
 
   int highTowerBits;
 
@@ -101,8 +101,10 @@ void DSMAlgo_BC101_2015::operator()(DSM& dsm)
   dsm.info[0] = jpx;
   dsm.info[1] = jpy;
   dsm.info[2] = jpz;
+  //partial sum
+  dsm.info[3] = jpPartial;
 }
-void getBemcJetPatchSums2015A(const DSM& bc101, unsigned int& jpx, unsigned int& jpy, unsigned int& jpz, unsigned int& jpPartial, int& highTowerBits)
+void getBemcJetPatchSums2015A(const DSM& bc101, int& jpx, int& jpy, int& jpz, int& jpPartial, int& highTowerBits)
 {
   jpx = 0;
   jpy = 0;

@@ -106,34 +106,10 @@ namespace etofProjection {
     const float maxEtaProjCut = -1.7;
 
 
-    // --> TODO: move to database once alignment procedure is in place
-    const double deltaXoffset[ 108 ] = {
-        2.01,  2.46,  2.91,  2.09,  2.68,  3.34,  2.08,  2.82,  3.46,
-        1.68,  2.21,  2.97,  2.03,  2.53,  3.52,  1.99,  2.64,  3.59,
-        1.67,  2.17,  2.68,  1.99,  2.69,  3.33,  2.11,  2.80,  3.43,
-        1.53,  2.10,  2.59,  1.89,  2.47,  3.19,  2.17,  2.86,  3.60,
-        1.35,  1.89,  2.40,  1.75,  2.39,  3.06,  1.97,  2.63,  3.43,
-        1.04,  1.78,  2.18,  1.85,  2.34,  3.09,  1.93,  2.56,  3.27,
-        1.14,  1.76,  2.27,  1.75,  2.39,  3.05,  1.91,  2.68,  3.28,
-        1.34,  1.96,  2.28,  2.02,  2.46,  3.02,  1.88,  2.54,  3.14,
-        1.70,  2.22,  2.51,  2.08,  2.65,  3.24,  2.05,  2.78,  3.32,
-        1.91,  2.41,  2.86,  2.20,  2.79,  3.35,  2.20,  2.91,  3.50,
-        1.97,  2.40,  2.87,  2.08,  2.64,  3.28,  2.06,  2.77,  3.35,
-        2.08,  2.52,  3.07,  2.03,  2.67,  3.31,  2.04,  2.74,  3.39 };
+    // Legacy hardcoded alignment. Moved to database. 
+    const double deltaXoffset[ 108 ] = { 0 };
 
-    const double deltaYoffset[ 108 ] = {
-        0.79,  0.83,  0.65,  0.18,  0.62,  1.03, -0.22, -0.10, -0.15,
-        0.50,  0.63,  0.77,  0.11,  0.53,  1.11, -0.10, -0.24,  0.08,
-        0.35,  0.49,  0.36, -0.03,  0.26,  0.84, -0.24, -0.28, -0.15,
-        0.20,  0.05,  0.08, -0.24,  0.04,  0.37, -0.41, -0.62, -0.75,
-        0.50,  0.63,  0.48, -0.08,  0.28,  0.47, -0.36, -0.39, -0.39,
-        0.62,  0.67,  1.03,  0.13,  0.49,  0.75, -0.36, -0.29, -0.30,
-        1.05,  1.12,  1.06,  0.15,  0.50,  0.69, -0.29, -0.05, -0.23,
-        1.39,  1.17,  1.22,  0.39,  0.63,  0.93, -0.17, -0.50, -0.36,
-        1.27,  1.22,  0.89,  0.29,  0.22,  1.06, -0.35, -0.57, -0.54,
-        1.67,  1.51,  1.16,  0.33,  0.70,  1.04,  0.09, -0.11, -0.28,
-        1.38,  1.31,  0.94,  0.22,  0.49,  0.54, -0.21, -0.26, -0.28,
-        1.06,  1.12,  1.29,  0.30,  0.70,  1.34, -0.01,  0.16, -0.03 };
+    const double deltaYoffset[ 108 ] = { 0 };
 
     const double deltaRcut = 4.;
 }
@@ -166,7 +142,7 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mIsMuDstIn( false ),
   mOuterTrackGeometry( true ),
   mUseHelixSwimmer( false ),
-  mUseOnlyBTofHeaderStartTime( false ),
+  mUseOnlyBTofHeaderStartTime( true ),
   mIsSim( false ),
   mDoQA( false ),
   mDebug( false ),
@@ -306,12 +282,17 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         if( !gGeoManager ) {
             LOG_ERROR << "Cannot get GeoManager" << endm;
-            return kStErr;
+            return kStFatal;
         }
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
-        mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer );
+        mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
+    }
+
+    if ( mETofGeom && !mETofGeom->isInitDone() ) { //if initialization attempt above failed.
+        LOG_ERROR << "Initialization of StEtofGeometry failed" << endm;
+        return kStFatal;
     }
 
     if( mDoQA ) {
@@ -394,13 +375,31 @@ StETofMatchMaker::Make()
     mIsMuDstIn   = false;
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
+   // mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
 
     if ( mEvent ) {
         LOG_DEBUG << "Make() - running on StEvent" << endm;
 
-        mIsStEventIn = true;
+          StETofCollection* etofCollection = mEvent->etofCollection();
 
-        cleanUpTraits();
+          if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+             LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+             mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+
+             if( mMuDst ) {
+             LOG_DEBUG << "Make() - running on MuDsts" << endm;
+
+             mIsMuDstIn = true;
+
+             fillIndexToPrimaryMap();
+
+             cleanUpTraits();
+             }
+          }else{
+             mIsStEventIn = true;
+
+             cleanUpTraits();
+         }
     }
     else {
         LOG_DEBUG << "Make(): no StEvent found" << endm;
@@ -439,7 +438,7 @@ StETofMatchMaker::Make()
     readETofDetectorHits( detectorHitVec );
 
     if( detectorHitVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -466,7 +465,7 @@ StETofMatchMaker::Make()
     findTrackIntersections( intersectionVec, nPrimaryWithIntersection );
 
     if( intersectionVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -481,7 +480,7 @@ StETofMatchMaker::Make()
     matchETofHits( detectorHitVec, intersectionVec, matchCandVec );
 
     if( matchCandVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -496,7 +495,7 @@ StETofMatchMaker::Make()
     sortSingleMultipleHits( matchCandVec, singleTrackMatchVec, multiTrackMatchVec );
 
     if( singleTrackMatchVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -509,12 +508,12 @@ StETofMatchMaker::Make()
     finalizeMatching( singleTrackMatchVec, finalMatchVec );
 
     if( finalMatchVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
     else{
-        LOG_INFO << "Make() -- number of found matches of eTOF hits with tracks: " << finalMatchVec.size() << endm;        
+        //LOG_INFO << "Make() -- number of found matches of eTOF hits with tracks: " << finalMatchVec.size() << endm;        
     }
 
     //.........................................................................
@@ -539,7 +538,7 @@ StETofMatchMaker::Make()
     fillSlewHistograms( finalMatchVec );
 
 
-    LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+    //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
     return kStOk;
 }
@@ -726,16 +725,16 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
     // event selection ... only continue with events that have eTOF hits
     if( mIsStEventIn ) {
         if( !mEvent->etofCollection() ) {
-            LOG_INFO << "readETofDetectorHits() - no etof collection --> nothing to do ... bye-bye" << endm;
+            LOG_WARN << "readETofDetectorHits() - no etof collection --> nothing to do ... bye-bye" << endm;
             return;
         }
         if( !mEvent->etofCollection()->hitsPresent() ) {
-            LOG_INFO << "readETofDetectorHits() - no etof hits present --> nothing to do ... bye-bye" << endm;
+            LOG_WARN << "readETofDetectorHits() - no etof hits present --> nothing to do ... bye-bye" << endm;
             return;
         }
         
         nHits = mEvent->etofCollection()->etofHits().size();
-        LOG_INFO << " number of ETOF hits: " << nHits << endm;
+        //LOG_INFO << " number of ETOF hits: " << nHits << endm;
     }
     else if( mIsMuDstIn ) {
         if( !mMuDst->etofArray( muETofHit ) ) {
@@ -749,7 +748,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
         }
 
         nHits = mMuDst->numberOfETofHit();
-        LOG_INFO << " number of ETOF hits: " << nHits << endm;
+        //LOG_INFO << " number of ETOF hits: " << nHits << endm;
     }
 
     if( mDoQA ) {
@@ -1058,7 +1057,7 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
         }
     }   // end of MuDst processing
 
-    LOG_INFO << "# tracks in the event: " << nNodes << "  ... out of which " << intersectionVec.size() << " intersect with eTOF" << endm;
+    //LOG_INFO << "# tracks in the event: " << nNodes << "  ... out of which " << intersectionVec.size() << " intersect with eTOF" << endm;
 
     if( mDoQA ) {
         mHistograms.at( "intersectionMult" )->Fill( intersectionVec.size() );
@@ -1450,7 +1449,7 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
         }
     }
 
-    LOG_INFO << "nSingleTrackMatch: " << nSingleTrackMatch << " ... nMultiTrackMatch: " << nMultiTrackMatch << endm;
+    //LOG_INFO << "nSingleTrackMatch: " << nSingleTrackMatch << " ... nMultiTrackMatch: " << nMultiTrackMatch << endm;
 
     if( mDoQA ) {
         mHistograms.at( "singleTrackMatchMult" )->Fill( singleTrackMatchVec.size() );
@@ -2251,8 +2250,8 @@ StETofMatchMaker::startTime( const eTofHitVec& finalMatchVec ) {
 
     double t0Diff = moduloDist( tstartETof - tstartBTof, eTofConst::bTofClockCycle );
 
-    LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
-    LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
+    //LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
+    //LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
 
     if( mDoQA && tstartBTof != -9999. && tstartETof != -9999. ) {
         mHistograms.at( "startTimeDiff"       )->Fill( t0Diff );
@@ -2483,7 +2482,7 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             float pathlength = matchCand.pathLength;
             float m2         = mom * mom * ( -1 + 1 / ( beta * beta ) );
 
-            LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
+            //LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
             //LOG_DEBUG << "pathlength: " << pathlength << " ... time-of-flight: " << matchCand.tof << " ... mom: " << mom << " ... beta: " << beta << " ...  charge: " << charge << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
 
             if( fabs( tof+999. ) < 1.e-5 || fabs( pathlength+999. ) < 1.e-5 ) {

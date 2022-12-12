@@ -7,6 +7,8 @@ class daqReader;
 #include <TH2F.h>
 #include <math.h>
 
+// 6/3/21 12:34
+// 
 class daqBuilder : public JevpBuilder {
 public:
   int run;
@@ -32,7 +34,7 @@ public:
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *h2_tpc;
       TH1 *h2_itpc;

@@ -190,8 +190,10 @@ StEemcTriggerSimu::InitRun(int runnumber){
   fill(highTowerMask,highTowerMask+90,1); // all channels good
   fill(patchSumMask,patchSumMask+90,1); // all channels good
 
+#if 0  // loading local mask files - no actual effect for jobs running on clusters - working on DB solution
   EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
   EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
+#endif
 
   switch (mPedMode) {
   case kOnline:
@@ -790,6 +792,7 @@ int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister
 int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegister(i); }
 
 int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[jp%3]; }
+int StEemcTriggerSimu::endcapPartialJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[3+jp%3]; }
 
 int StEemcTriggerSimu::getOutHT(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
 int StEemcTriggerSimu::getOutTPsum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }

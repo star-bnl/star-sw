@@ -157,6 +157,8 @@ void DSMAlgo_EM201_2017::operator()(DSM& dsm)
   
   dsm.output = out;
 
+  dsm.info[0] = jpSum1;
+  dsm.info[1] = jpSum2;
 }
 void DSMAlgo_EM201_2017::getHybridJetPatchSums(const DSM& dsm, int& jpSum1, int& jpSum2)
 {
