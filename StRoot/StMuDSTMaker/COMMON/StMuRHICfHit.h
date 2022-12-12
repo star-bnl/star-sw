@@ -80,7 +80,7 @@ class StMuRHICfHit : public TObject
 		Float_t mMultiEnergySum[kRHICfNtower][kRHICfNlayer][kRHICfNxy][kRHICfNorder];
 		Float_t mMultiChiSquare[kRHICfNtower][kRHICfNlayer][kRHICfNxy];
 
-	ClassDef(StMuRHICfHit,3)
+	ClassDef(StMuRHICfHit,1)
 };
 
 #endif

@@ -3,8 +3,6 @@
 #include "StMuRHICfHit.h"
 #include "StMuRHICfPoint.h"
 
-#include <iostream> // test
-
 ClassImp(StMuRHICfCollection)
 
 StMuRHICfCollection::StMuRHICfCollection()

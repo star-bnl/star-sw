@@ -32,7 +32,7 @@ class StMuRHICfPoint : public TObject
 		Float_t mPointEnergy[kRHICfNorder];
 		Float_t mTowerSumEnergy[kRHICfNorder];
 
-	ClassDef(StMuRHICfPoint,3)
+	ClassDef(StMuRHICfPoint,1)
 };
 
 #endif
