@@ -2770,7 +2770,7 @@ end
 hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
 
 fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C GP=NPointsF,NPointsN,TPointsF,TPointsN
-fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C,Time,TimeC GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC
+fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C,Time,TimeC GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC,TimeC
 fit.pl *.root GP=NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP
 fit.pl *.root G4EY=TimeC
 fit.pl *.root GP=NPoints70P,TPoints70P
