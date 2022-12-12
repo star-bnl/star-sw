@@ -7,6 +7,7 @@
 class St_tpcPadGainT0BC : public TObject {
  public:
   static St_tpcPadGainT0BC* 	instance();
+  Float_t      *Gains(Int_t sector, Int_t row);
   Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const;
   Float_t 	  T0(Int_t sector, Int_t row, Int_t pad) const;
   Bool_t    livePadrow(Int_t sector, Int_t row) const;
