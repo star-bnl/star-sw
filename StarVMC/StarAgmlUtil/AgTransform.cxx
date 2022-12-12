@@ -277,7 +277,7 @@ double roundOffPhi( const double _phi ) // phi [0,360]
   double phi = _phi;
   while ( phi >=  360.0 ) phi -= 360.0;
   while ( phi <= -360.0 ) phi += 360.0;
-  if ( abs(phi) < 2.0E-16 ) phi = 0.;
+  if ( std::abs(phi) < 2.0E-16 ) phi = 0.;
   return phi;
 };
 
