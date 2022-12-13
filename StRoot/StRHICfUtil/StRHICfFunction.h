@@ -12,9 +12,12 @@
 #ifndef StRHICfFunction_H
 #define StRHICfFunction_H
 
+#include <algorithm>
 #include <iostream>
-#include <TString.h>
+#include <string>
 #include "StRoot/StEvent/StEnumerations.h"
+
+using namespace std;
 
 class StEnumerations;
 
@@ -45,28 +48,26 @@ class StRHICfFunction
 
         void initChecker();
 
-		void setRunType(Int_t type){mRunType = type;}
-		Int_t getRunType(){return mRunType;}
-		Int_t checkRunTypeForRHICf2017(Int_t runNum);
-		Int_t checkGSOBarSize(Int_t tower); // 0 = small, 1 = large
+		void setRunType(int type){mRunType = type;}
+		int getRunType(){return mRunType;}
+		int checkRunTypeForRHICf2017(int runNum);
+		int checkGSOBarSize(int tower); // 0 = small, 1 = large
 
-		Float_t rescaleEnergyFactor(Int_t tower, Int_t layer);
+		float rescaleEnergyFactor(int tower, int layer);
         
-		Bool_t checkGSOBarEnergy(Float_t val);
-		Bool_t checkGSOBarTable(Float_t val);
-		Bool_t checkPlateEnergy(Float_t val);
-		Bool_t checkRecoValue(TString opt, Float_t val);
-		Bool_t checkLeakageTable(TString opt, Bool_t val);
+		bool checkGSOBarEnergy(float val);
+		bool checkGSOBarTable(float val);
+		bool checkPlateEnergy(float val);
+		bool checkRecoValue(string opt, float val);
+		bool checkLeakageTable(string opt, bool val);
 
 	private:
-		Int_t mRunType;
-		Int_t mGSOBarNum;
-		Int_t mGSOBarTableNum;
-		Int_t mPlateNum;
-		Int_t mValueForRecoNum[5]; // in StRHICfRecoEnergy, check setting parameter[ResultHitPos, ResultHitNum, MultiHitPos, MultiPeakHeight, Overlap]
-		Int_t mLeakageNum[3];
-
-    ClassDef(StRHICfFunction,0);
+		int mRunType;
+		int mGSOBarNum;
+		int mGSOBarTableNum;
+		int mPlateNum;
+		int mValueForRecoNum[5]; // in StRHICfRecoEnergy, check setting parameter[ResultHitPos, ResultHitNum, MultiHitPos, MultiPeakHeight, Overlap]
+		int mLeakageNum[3];
 };
 
 #endif
