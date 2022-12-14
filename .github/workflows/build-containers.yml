@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        starenv: [root5, root6]
-        compiler: [gcc485, gcc11]
+        starenv: [root5]
+        compiler: [gcc485]
     env:
       STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
