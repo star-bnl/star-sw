@@ -71,7 +71,6 @@ class StRHICfDbMaker : public StMaker
 		TH2D* getLeakInPhoton(unsigned int tower, unsigned int plate);
 
 	private:
-		void deleteArrays();
 		Int_t mDebug=0; //! >0 dump tables to text files
 
 		rhicfPedestal_st *mPedestal=0;

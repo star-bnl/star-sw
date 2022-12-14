@@ -34,7 +34,6 @@ StRHICfDbMaker::StRHICfDbMaker(const Char_t *name) : StMaker(name)
 
 StRHICfDbMaker::~StRHICfDbMaker()
 {
-    deleteArrays();
 }
 
 Int_t StRHICfDbMaker::Init()
@@ -49,11 +48,7 @@ Int_t StRHICfDbMaker::Make()
 
 void StRHICfDbMaker::Clear(const Char_t*)
 {
-    deleteArrays(); StMaker::Clear();
-}
-
-void StRHICfDbMaker::deleteArrays()
-{
+    StMaker::Clear();
 }
 
 Int_t StRHICfDbMaker::Finish()
