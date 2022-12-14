@@ -53,30 +53,14 @@ Int_t StRHICfRawHitMaker::Make()
 	StEvent* eventPtr=0;
 	eventPtr= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
 
-	if(eventPtr){
-		LOG_INFO <<"found StEvent" <<endm;
-		mRHICfCollection=eventPtr->rhicfCollection();
-		if(mRHICfCollection==0) LOG_INFO <<"No RHICfCollection in StEvent" <<endm;
-		else{setupRHICfCollection();}
-	}
-	else{
-		LOG_ERROR <<"found no StEvent"<<endm;
-		return kStFatal;
-	}
-	if(!mRHICfCollection){
-		LOG_INFO <<"creating new StRHICfCollection" <<endm;
-		mRHICfCollection=new StRHICfCollection;
-		if(!mRHICfCollection){
-			LOG_ERROR <<"could not create StRHICfCollection" <<endm;
-			return kStFatal;
-		}
-		LOG_INFO <<"setting new StRHICfCollection to StEvent" <<endm;
+	if(!eventPtr) return kStFatal;
+	mRHICfCollection = new StRHICfCollection;
+	if(!mRHICfCollection){return kStFatal;}
 
-		setupRHICfCollection();
-		eventPtr->setRHICfCollection(mRHICfCollection);
-	}
+	mRHICfRawHitColl=mRHICfCollection->rawHitCollection();
+	if(!mRHICfRawHitColl){return kStFatal;}
 
-	if(mRHICfCollection==0) LOG_INFO <<"No RHICfCollection in StEvent" <<endm; 
+	eventPtr->setRHICfCollection(mRHICfCollection);
 
 	StRtsTable *daqData = GetNextRaw();
 	if(daqData){
@@ -152,13 +136,6 @@ Int_t StRHICfRawHitMaker::Make()
 
 Int_t StRHICfRawHitMaker::Finish()
 {
-	return kStOk;
-}
-
-Int_t StRHICfRawHitMaker::setupRHICfCollection()
-{
-	mRHICfRawHitColl = mRHICfCollection -> rawHitCollection();
-	if(!mRHICfRawHitColl){return kStFatal;}
 	return kStOk;
 }
 

@@ -30,8 +30,6 @@ class StRHICfRawHitMaker : public StRTSBaseMaker, StRHICfFunction
 		Int_t Finish();
 
 	private:
-		Int_t setupRHICfCollection();
-
 		StRHICfDbMaker* mRHICfDbMaker = 0; 
 		StRHICfCollection* mRHICfCollection = 0; 
 		StRHICfRawHit* mRHICfRawHitColl = 0;
