@@ -94,39 +94,32 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mETofGeom( nullptr ),       /// pointer to EToF-Geo
   mFileNameHitParam( "" ),
   mFileNameSignalVelocity( "" ),
-  mFileNameAlignParam( "" ),
   mFileNameModMatrix( "" ),
-  mMaxYPos( 15. ),
+  mFileNameAlignParam( "" ),
+  mStoreDigi(),
+  mMapDigiIndex(),
+  mStoreHit(),
+  mMapHitDigiIndices(),
+  mMapHitIndexDigiIndices(),
+  mMaxYPos( 15. ), 
   mMergingRadius( 1. ),
+  mSigVel(),
   mSoftwareDeadTime( 50. ),
   mDoClockJumpShift( true ),
   mDoDoubleClockJumpShift( true ),
+  mClockJumpDirection(),
+  mModMatrix(),
+  mGet4doublejumpTmin(-1.0),
+  mGet4doublejumpFlag(),
+  mGet4doublejumpTimes(),  
   mIsSim( false ), 
   mDoQA( false ),
   mDebug( false ),
   mHistFileName( "" ),
-  mGet4doublejumpTmin(-1.0)
-  //jumped(false)
+  mHistograms(),
+  mCounterActive()
 {
     LOG_DEBUG << "StETofHitMaker::ctor"  << endm;
-
-    mStoreDigi.clear();
-    mStoreHit.clear();
-    mMapDigiIndex.clear();
-    mMapHitDigiIndices.clear();
-    mMapHitIndexDigiIndices.clear();
-
-    mSigVel.clear();
-
-    mClockJumpDirection.clear();
-    mGet4doublejumpFlag.clear();
-    mGet4doublejumpTimes.clear();
-    //mGet4doublejumpTmin.clear();
-
-    mHistograms.clear();
-    mCounterActive.clear();
-
-    mModMatrix.clear();
 }
 
 //_____________________________________________________________
@@ -536,9 +529,7 @@ StETofHitMaker::processStEvent()
     }
 
     if( etofCollection->hitsPresent() ) {
-        StSPtrVecETofHit& etofHits = etofCollection->etofHits();
-        //LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
-
+   
         fillHitQA( isMuDst, tstart );
     }
     else {
@@ -606,9 +597,7 @@ StETofHitMaker::processMuDst()
 
 
     if( mMuDst->numberOfETofHit() ) {
-        size_t nHits = mMuDst->numberOfETofHit();
-        //LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
-
+    
         fillHitQA( isMuDst, tstart );
     }
     else {
@@ -1013,7 +1002,6 @@ StETofHitMaker::matchSides()
         double timeDiff = 0.0;
         double totSum   = 0.0;
         double t_corr_afterpulse   = 0.0;
-	int    IdTruth             =   0; 
 
 
         if( mDoQA && digiVec->size() == 1 ) {
@@ -1217,7 +1205,6 @@ StETofHitMaker::matchSides()
 	    
 	    //check for position jumps -> get clock jumps
 	    bool leftjump  = false;
-	    bool rightjump = false;
 	    bool outsider  = false;
 	    double dt = 0;	   
 
@@ -1231,9 +1218,6 @@ StETofHitMaker::matchSides()
 	    }
 	    if(dt < 8.5 && dt > 0){
 	      leftjump = true;
-	    }
-	    if(dt > -8.5 && dt < 0){
-	      rightjump = true;
 	    }
 
             //---------------------------------------------------------
@@ -1300,8 +1284,7 @@ StETofHitMaker::matchSides()
 	    
 	    if( starttime > 0){
 
-		   double tof = fmod( constructedHit->time() , eTofConst::bTofClockCycle ) - starttime;
-		   int Get4Nr = (72*( sector - 13 ) + 24*( plane - 1 ) + 8*(counter-1)) + ((( detIndex * 10 + ( strip - 1 ) / 4 + 1)%10));        
+		   double tof = fmod( constructedHit->time() , eTofConst::bTofClockCycle ) - starttime;       
 		   double exptof = 0;	
 
 		   if(mETofGeom){
@@ -1366,7 +1349,7 @@ StETofHitMaker::matchSides()
 	      int DigiIdB = xDigiB->rawTot();
 
 	      if(DigiIdB==DigiIdA){constructedHit->setIdTruth(DigiIdA);}
-	      else{constructedHit->setIdTruth(999999);}
+	      else{constructedHit->setIdTruth(9999);}
 	    }
 	    
             LOG_DEBUG << *( mStoreHit.at( detIndex ).back() ) << endm;
@@ -1406,9 +1389,6 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
     // ---------------------------------------
 
     int nHitsPrinted = 0;
-
-    int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
-    //LOG_INFO << "fillUnclusteredHitQA(): -- event time: " << eventTime << endm;
 
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;

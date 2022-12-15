@@ -98,7 +98,7 @@ calculateVpdTstart( const StBTofHeader* btofHeader, const double& pVtxZ, const d
 // *******************************************************************************************************
 
 double
-updateCyclicRunningMean( const double& mean, const double& value, int& count, const double& bTofClockRange )
+updateCyclicRunningMean( double mean, double value, int& count, double bTofClockRange )
 {
     double valIn = value;
     if( mean - value < -0.9 * bTofClockRange ) {
@@ -127,10 +127,8 @@ double
 tofPathLength( const StThreeVectorD&  beginPoint, const StThreeVectorD& endPoint, const double& curvature )
 {
 
-  double xdif =  endPoint.x() - beginPoint.x();
-  double ydif =  endPoint.y() - beginPoint.y();
-  
-  double C = sqrt( xdif * xdif + ydif * ydif );
+  StThreeVectorD vdif = endPoint - beginPoint;
+  double C = vdif.perp();  
   double s_perp = C;
   if ( curvature ) {
     double R = 1 / curvature;

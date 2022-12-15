@@ -164,7 +164,7 @@ private:
 
     double mGet4doublejumpTmin;                                            // cutoff for double jump correction
     std::map< Int_t, bool  >                    mGet4doublejumpFlag;      // get4  jumpflag
-    std::map< Int_t, std::vector < double > >   mGet4doublejumpTimes;     // get4  time of last n hits
+    std::map< Int_t, std::vector < float > >    mGet4doublejumpTimes;     // get4  time of last n hits
      
     
     // histograms for QA --------------------------------------------------------
