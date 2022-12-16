@@ -24,8 +24,7 @@ COPY . ${STAR}
 SHELL ["/bin/bash", "-l", "-c"]
 
 RUN <<EOF
-	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="-Werror" || EXTRA_CXXFLAGS=""
-	SKIP_DIRS="pams/sim/g2r OnlTools StRoot/StShadowMaker" cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
+	SKIP_DIRS="pams/sim/g2r OnlTools StRoot/StShadowMaker" cons
 	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 EOF
 
