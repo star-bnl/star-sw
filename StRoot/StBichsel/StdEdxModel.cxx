@@ -156,9 +156,11 @@ trigsimp(%);
 fortran(%);
 
 */
-  Double_t dVdksi = - V/w*(1 + GA/E*alpha/TMath::Sqrt2());
+//Double_t dVdksi = - V/w*(1 + GA/E*alpha/TMath::Sqrt2());
+  Double_t dVdksi = - (V + G/w*GA*alpha/TMath::Sqrt2())/w;
   if (k == 2) return dVdksi;
-  Double_t dVdw   = - V/w*(2 + GA/E*alpha/TMath::Sqrt2());
+//Double_t dVdw   = - V/w*(2 + GA/E*alpha/TMath::Sqrt2());
+  Double_t dVdw   = - (2*V + G/w*GA*alpha/TMath::Sqrt2())/w;
   if (k == 3) return dVdw;
   Double_t dVdalpha = GA*v;
   return dVdalpha;
@@ -408,10 +410,10 @@ Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *
     V = ggausD(&ee, params, dVdP);
     der[0] = 0;
     for (Int_t l = 0; l < 3; l++) der[0] += dVdP[l]*dPardNp[l];
-    Double_t xP = TMath::Log(Np);
-    Double_t D = instance()->FProbP()->Derivative(xP,&ee)/Np;
     static Int_t _debug = 0;
     if (_debug) {
+      Double_t xP = TMath::Log(Np);
+      Double_t D = instance()->FProbP()->Derivative(xP,&ee)/Np;
       cout << "estimated derivative (xP = " << xP << ", ee = " << ee << ") = " << der[0] << " calculated derivative = " << D << endl;
     }
   }
@@ -435,6 +437,7 @@ TF1 *StdEdxModel::FProb() {
 }
 //--------------------------------------------------------------------------------
 Double_t StdEdxModel::funcProbP(Double_t *x, Double_t *p) {
+  if (p[0] < 1) return 0;
   return instance()->Prob(TMath::Log(p[0]),x[0]);
 }
 //________________________________________________________________________________
