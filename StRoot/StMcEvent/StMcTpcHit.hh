@@ -82,7 +82,8 @@ public:
 		 mAdc(0),
 		 mMcl_x(0),
 		 mMcl_t(0),
-		 mnP(0)
+		 mnP(0), mne(0), mAdc0(0), mAdc1(0), mAdc2(0), mdNdx(0)
+		 
   {}
 //   StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
 // 	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0, 
@@ -92,13 +93,22 @@ public:
     StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
 	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
 	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0), 
-    mLgamma(pt->lgam), mAdc(pt->adc), mMcl_x(pt->pad), mMcl_t(pt->timebucket), mnP(pt->np) {}
+    mLgamma(pt->lgam), mLength(pt->length), mAdc(pt->adc), mMcl_x(pt->pad), mMcl_t(pt->timebucket), mnP(pt->np),
+    mne(pt->ne) {
+    mAdc0 = pt->adcs[0];
+    mAdc1 = pt->adcs[1];
+    mAdc2 = pt->adcs[2];
+    mdNdx = pt->dNdx;
+    mdSSum = pt->dSSum;
+    mdESum = pt->dESum;;
+  }
   virtual ~StMcTpcHit() {}
   ULong_t sector()     const { return (mVolumeId%10000)/100; }// 1-24
   ULong_t padrow()     const { return (mVolumeId%100); }      // 1-45
 
   ULong_t isDet()      const { return mVolumeId/100000; }     // pseudo pad row
   Float_t lgamma()     const { return mLgamma;}
+  Float_t length()     const { return mLength;}
   Float_t adc()        const { return mAdc;}
   Float_t pad()        const { return mMcl_x;}
   Float_t timeBucket() const { return mMcl_t;}
@@ -107,11 +117,17 @@ public:
   
 private:
   Float_t     mLgamma; //  ALOG10(GEKin/AMass) from g2t_tpc_hit
+  Float_t     mLength; //  track length up to this hit
   Float_t     mAdc;        
   Float_t     mMcl_x;      /* average pad */
   Float_t     mMcl_t;      /* average timebucket */
   Int_t       mnP;         /* no. of primary electrons */
-  ClassDef(StMcTpcHit,3)
+  Int_t       mne;         /* no. of conducting electrons */
+  Float_t     mAdc0, mAdc1, mAdc2;    /* adc signal in 0 => row - 1, 1 => row, 2 => row+1 */
+  Float_t     mdNdx;
+  Float_t     mdSSum;
+  Float_t     mdESum;
+  ClassDef(StMcTpcHit,5)
 };
 
 ostream&  operator<<(ostream& os, const StMcTpcHit&);
