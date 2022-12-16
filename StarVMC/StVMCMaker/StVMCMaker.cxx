@@ -62,7 +62,8 @@
 #include "StChain.h"
 #include "Stiostream.h"
 #include "StarMagField.h"
-#include "AthenaMagField.h"
+	       //#include "AthenaMagField.h"
+#include "MARCOMagField.h"
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
@@ -149,13 +150,15 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       LOG_WARN << "StVMCMaker::InitRun: Can't get VMC geometry, try AgiGeometry" <<endm;
       geom = (TObjectSet *) GetDataBase("AgiGeometry/Geometry");
     }
-    assert(geom);
-    TObjectSet *o = (TObjectSet *) geom->Find("configGeom");
-    if (o) {
-      TEnv *env = (TEnv *) (o->GetObject());
-      StarVMCDetector::SetConfigEnv(env);
+    if (geom) {
+      TObjectSet *o = (TObjectSet *) geom->Find("configGeom");
+      if (o) {
+	TEnv *env = (TEnv *) (o->GetObject());
+	StarVMCDetector::SetConfigEnv(env);
+      }
     }
   }
+  assert(gGeoManager);
   if (!fVolume) {
     fVolume = (TDataSet *) GetDataBase("StarDb/AgiGeometry/HALL");
   }
@@ -171,7 +174,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 	     << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
     fgGeant3->SetMagField(StarMagField::Instance());
   } else {
-    fgGeant3->SetMagField(AthenaMagField::Instance());
+    fgGeant3->SetMagField(MARCOMagField::Instance());
   }
   if (IAttr("VMCPassive"))  {LOG_INFO << "StVMCMaker::InitRun Passive   mode" << endm;} 
   else                      {LOG_INFO << "StVMCMaker::InitRun Active    mode" << endm;
@@ -309,26 +312,33 @@ Int_t StVMCMaker::Make(){
       Vz = new TH1D("Vz","Geant primary vertex Z",50,-100,100);
     }
     St_g2t_vertex *geantVertex=(St_g2t_vertex *) GetDataSet("g2t_vertex"); 
-    g2t_vertex_st *gvt=geantVertex->GetTable();
-    Vx->Fill(gvt->ge_x[0]);
-    Vy->Fill(gvt->ge_x[1]);
-    Vz->Fill(gvt->ge_x[2]);
-    if (! BbcC) {
-      BbcC = new TH2D("BbcC","BBC East versus BBC West",100,-1,9,100,-1,9);
+    if (geantVertex) {
+      g2t_vertex_st *gvt=geantVertex->GetTable();
+      Vx->Fill(gvt->ge_x[0]);
+      Vy->Fill(gvt->ge_x[1]);
+      Vz->Fill(gvt->ge_x[2]);
+      if (! BbcC) {
+	BbcC = new TH2D("BbcC","BBC East versus BBC West",100,-1,9,100,-1,9);
+      }
+      Double_t BbcW = 0, BbcE = 0;
+      St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
+      if (! g2t_bbc_hit) return kStOK;
+      Int_t N = g2t_bbc_hit->GetNRows();
+      g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
+      for (Int_t i = 0; i < N; i++, bbc++) {
+	if (bbc->tof > 100e-9) continue;
+	if (bbc->volume_id < 2000) BbcW++;
+	else                       BbcE++;
+      }
+      if (BbcW  <= 0) BbcW = 0.1;
+      if (BbcE  <= 0) BbcE = 0.1;
+      BbcC->Fill(TMath::Log10(BbcW),TMath::Log10(BbcE));
+    } else {
+      TVector3 &orig = StarMCPrimaryGenerator::Instance()->GetOrigin();
+      Vx->Fill(orig.X());
+      Vy->Fill(orig.Y());
+      Vz->Fill(orig.Z());
     }
-    Double_t BbcW = 0, BbcE = 0;
-    St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
-    if (! g2t_bbc_hit) return kStOK;
-    Int_t N = g2t_bbc_hit->GetNRows();
-    g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
-    for (Int_t i = 0; i < N; i++, bbc++) {
-      if (bbc->tof > 100e-9) continue;
-      if (bbc->volume_id < 2000) BbcW++;
-      else                       BbcE++;
-    }
-    if (BbcW  <= 0) BbcW = 0.1;
-    if (BbcE  <= 0) BbcE = 0.1;
-    BbcC->Fill(TMath::Log10(BbcW),TMath::Log10(BbcE));
   }
   return kStOK;
 }
