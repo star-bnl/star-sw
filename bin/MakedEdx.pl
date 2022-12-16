@@ -2725,7 +2725,7 @@ close (XML);
 
 #close (CONDOR);
 my $GB = $Total_Size/1024/1024/1024;
-print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; 
+print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; x[
 }
 __END__
   foreach f (`ls -1d job*.xml`)
@@ -2772,6 +2772,7 @@ hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
 fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C GP=NPointsF,NPointsN,TPointsF,TPointsN
 fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C,xyPad3,xyPad3C,Time,TimeC GP=NPointsF,NPointsN,TPointsF,TPointsN,NPointsI70,TPointsI70,NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP,Pressure,PressureC,TimeC
 fit.pl *.root GP=NPoints70U,TPoints70U,NPoints70UP,TPoints70UP,NPointsFU,TPointsFU,NPointsFUP,TPointsFUP,NPointsNU,TPointsNU,NPointsNUP,TPointsNUP
+fit.pl *.root GP=NPoints70,TPoints70,NPoints70P,TPoints70P,NPointsF,TPointsF,NPointsFP,TPointsFP,NPointsN,TPointsN,NPointsNP,TPointsNP
 fit.pl *.root G4EY=TimeC
 fit.pl *.root GP=NPoints70P,TPoints70P
 fit.pl *.root GP=NPoints70,TPoints70

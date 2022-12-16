@@ -928,9 +928,9 @@ TH2F *Flux(Int_t part = -1, Int_t type = -1, Double_t RateN = 1e6, Bool_t plot =
       Name = Types2[t].name.Name; Name += Particles[p].Name; 
       Double_t rate = RateN; // 1 MHz
       if (t == 5) {
-	if (RateN == 1e6) 
+	if (RateN <= 10e6) // per second
 	  rate = 1e-3*rate*1e7/(6.2415e10); // 1 MHz * 1e7 seconds; 1 krad = 1e-3*6.2415e10 MeV/kg = 6.2415e10 keV/g;
-	else 
+	else               // per year
 	  rate = 1e-3*rate/(6.2415e10); // per run ; 1 krad = 1e-3*6.2415e10 MeV/kg = 6.2415e10 keV/g;
       }
       TH1 *h = (TH1 *) gDirectory->Get(Name);
