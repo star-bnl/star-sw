@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./$JOBID.log" />
+<stderr URL="file:./$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setup debug
+  starver .DEV2
+  set b = `basename ${INPUTFILE0} .root`
+  set file = flux${b}.root
+  set logFile  = flux${b}.log
+  echo "${file}"
+  if ( ! -r ${file}) then
+    root.exe -q -b 'bfc.C(10000,"noRunco,noHistos,ePIC,EIC,VMC,fluxVMC,nodefault,mysql","'${INPUTFILE0}'","","'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="command:fluxPythia.pl" /> -->
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbiasHe3*.nt" /> -->
+<input URL="file:/net/l404/data/fisyak/pythia.ep.18x275.1Mevents/pythia.ep.*.root" />
+</job>

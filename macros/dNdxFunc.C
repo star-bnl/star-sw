@@ -38,7 +38,7 @@ void dNdxFunctions(Int_t col = 0) {
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
   TH1F *frame = c1->DrawFrame(-2.5,0.5,5,6);
-  frame->SetTitle("The most probable log(dE/dx[keV/cm]) versu log_{10}(#beta #gamma)");
+  frame->SetTitle("The most probable log(dE/dx[keV/cm]) versus log_{10}(#beta #gamma)");
   frame->SetXTitle("log_{10}(#beta #gamma)");
   //  for (Int_t color = 1; color < 8; color++) {
   Int_t col1 = 1;
