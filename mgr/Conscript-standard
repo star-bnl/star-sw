@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
+Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ warnoff_dirs);
 ( my $build = $OBJ ) =~ s/\#//g;
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
@@ -11,11 +11,7 @@ my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
-my $ROOT_FEATURES = `root-config --features`;
-
 @Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
-
-
 
 print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
 print "+-+-+- cwd=".$CWD."\n"                  if $param::debug;
@@ -94,6 +90,7 @@ my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
+my $EXTRA_CXXFLAGS = $env1->{EXTRA_CXXFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
 my $ROOTCINT_CPPFLAGS = "";
@@ -248,20 +245,19 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
     #}
 }
 
+# Disable all compiler warnings if $Dir matches any value from @$warnoff_dirs
+if ( index($EXTRA_CXXFLAGS, "-Werror") != -1 ) {
+  if ( grep($Dir =~ m/^$_$/, @$warnoff_dirs) ) {
+    $EXTRA_CXXFLAGS =~ s/-Werror//;
+  }
+}
+
 #+
 # Now we treat anything which is neither sim nor gen
 # This will include all makers
 #-
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
-
-
-
-    if ( $Dir =~ m/Table$/ ) { 
-	if ( $ROOT_FEATURES =~ m/table/ ){ print "[ROOT has table support]\n";@srcL=();@h_filesL = (); }
-	else                             { print "[ROOT has no table support, compile Table] \n"; }
-    }
-
 
     # if user requested debug, print some info on what was found
     if ($param::debug) {
@@ -982,6 +978,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #print "DEBUG Passing $ROOTCINT_CPPFLAGS\n";
     $env2 = $env1->clone('Package'  => $pkg,
 			 'EXTRA_CPPFLAGS'    => $EXTRA_CPPFLAGS,
+			 'EXTRA_CXXFLAGS'    => $EXTRA_CXXFLAGS,
 			 'CPPPATH'  => $CPPPATH,
 			 'CFLAGS'   => $CFLAGS,
 			 'CXXFLAGS' => $CXXFLAGS,
@@ -1011,6 +1008,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
 			    'CPPPATH'  => $Cint_CPPPATH,
 			    'CPPFLAGS' => $CPPFLAGS,
+			    'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 			    'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
 
     print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},

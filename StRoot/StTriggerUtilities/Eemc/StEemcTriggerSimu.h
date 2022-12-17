@@ -146,6 +146,7 @@ public:
 
   int endcapJetPatchAdc(int jp) const;
   int endcapHighTowerAdc(int towerId) const { return 0; }
+  int endcapPartialJetPatchAdc(int jp) const;
 
   int getOutHT(int tp) const;
   int getOutTPsum(int tp) const;
