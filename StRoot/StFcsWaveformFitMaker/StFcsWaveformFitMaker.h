@@ -170,6 +170,7 @@ public:
     void printArray() const;
     void drawFitter(Option_t* opt){ if(mPulseFit!=0){mPulseFit->Draw(opt);} }
     void drawCh(UInt_t detid, UInt_t ch) const;
+    void drawDualFit(UInt_t detid, UInt_t ch);
 
  protected:
     TClonesArray mChWaveData;  //Contains all graph data
@@ -188,6 +189,7 @@ public:
        - 5 = test timing of gausFit() vs. PulseFit1()
        - 6 = like test==3 but for PulseFit2()
        - 7 = test PulseFit2() for overall quality doesn't include preshower
+       - 8 = test PulseFit2() sum to gausFit() sum when fitting even single peak cases
     */
     int mTest = 0;
 
@@ -200,7 +202,7 @@ public:
     TH1F* mH1_NPeaksAkio = 0;                       //Number of peaks found by gausFit
     TH1F* mH1_NPeaksFilteredAkio = 0;               //Number of peaks found by gausFit for signals that had a triggered crossing
     TH2F* mH2F_AdcTbAkio[6];     //Adc vs. Tb for different number of peaks Akio method
-    TH2F* mH2F_AdcTbMine[6];   //Adc vs. Tb for different number of peaks my method
+    TH2F* mH2F_AdcTbMine[6];     //Adc vs. Tb for different number of peaks my method
     TH2F* mH2F_AdcTbValidPeak[7];//Adc vs. Tb from my algorithm that had a peak at centerTb (Need an extra one for non-valid peaks)
     TH2F* mH2F_SumFitvSumWin[6]; //Sum from Akio's Fit function vs. Sum from my found peak window for different number of peaks
     TH2F* mH2F_APeakvMPeak[6];   //PeakLocations from Akio vs. Mine
