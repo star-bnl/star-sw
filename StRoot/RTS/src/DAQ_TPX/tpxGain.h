@@ -139,7 +139,7 @@ public:
 		return (gains[s-1] + r*TPX_MAX_PAD + (p-1)) ;
 	}
 
-	int from_file(char *fname, int sector = 0) ;
+	int from_file(const char *fname, int sector = 0) ;
 
 
 	// [sector 1-24][RDO 1-6][fee-index 0-35]
@@ -193,7 +193,7 @@ public:
 
 
 	// below used only during calculation
-	int to_file(char *fname) ;
+	int to_file(const char *fname) ;
 
 	void init(int sec=0) ;			// zap's structs; assume all TPX
 	void accum(char *evbuff, int bytes) ;	// parses one RDO's worth of pulser data
