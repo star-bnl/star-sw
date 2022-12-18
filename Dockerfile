@@ -24,6 +24,7 @@ COPY . ${STAR}
 SHELL ["/bin/bash", "-l", "-c"]
 
 RUN <<EOF
+	set -e
 	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="-Werror" || EXTRA_CXXFLAGS=""
 	cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
 	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
