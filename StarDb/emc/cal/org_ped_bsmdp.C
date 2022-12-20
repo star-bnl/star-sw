@@ -1,3 +1,5 @@
+#include "tables/St_emc_pedestal_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_ped_bsmdp Allocated rows: 18000  Used rows: 18000  Row size: 4 bytes

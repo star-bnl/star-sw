@@ -1,3 +1,5 @@
+#include "tables/St_ctg_slat_phi_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/tof_slat_phi Allocated rows: 300  Used rows: 300  Row size: 16 bytes

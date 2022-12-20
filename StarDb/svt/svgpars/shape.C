@@ -1,3 +1,5 @@
+#include "tables/St_svg_shape_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/svgpars/shape Allocated rows: 2  Used rows: 2  Row size: 88 bytes

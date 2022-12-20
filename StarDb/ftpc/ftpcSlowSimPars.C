@@ -1,3 +1,5 @@
+#include "tables/St_ftpcSlowSimPars_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcSlowSimPars Allocated rows: 1  Used rows: 1  Row size: 44 bytes

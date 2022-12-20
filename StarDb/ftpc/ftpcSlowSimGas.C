@@ -1,3 +1,5 @@
+#include "tables/St_ftpcSlowSimGas_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcSlowSimGas Allocated rows: 132  Used rows: 132  Row size: 24 bytes

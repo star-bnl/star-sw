@@ -1,3 +1,5 @@
+#include "tables/St_MDFCorrection3_Table.h"
+
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_MDFCorrection3")) return 0;
   Int_t nrows = 1;

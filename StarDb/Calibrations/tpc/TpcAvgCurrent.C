@@ -1,3 +1,5 @@
+#include "tables/St_TpcAvgCurrent_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_TpcAvgCurrent")) return 0;
   TpcAvgCurrent_st row;

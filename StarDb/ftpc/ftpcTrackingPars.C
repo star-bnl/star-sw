@@ -1,3 +1,5 @@
+#include "tables/St_ftpcTrackingPars_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcTrackingPars Allocated rows: 1  Used rows: 1  Row size: ??? bytes

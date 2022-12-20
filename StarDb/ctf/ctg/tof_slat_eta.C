@@ -1,3 +1,5 @@
+#include "tables/St_ctg_slat_eta_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/tof_slat_eta Allocated rows: 18  Used rows: 18  Row size: 36 bytes

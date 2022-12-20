@@ -1,3 +1,5 @@
+#include "tables/St_ftpcClusterPars_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 156 bytes

@@ -1,3 +1,5 @@
+#include "tables/St_emc_adcslope_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_slp_bemc Allocated rows: 4800  Used rows: 4800  Row size: 4 bytes

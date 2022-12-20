@@ -1,3 +1,5 @@
+#include "tables/St_ftpcdEdxPars_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcdEdxPars Allocated rows: 1  Used rows: 1  Row size: 40 bytes

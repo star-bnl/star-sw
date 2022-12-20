@@ -1,3 +1,5 @@
+#include "tables/St_GatingGrid_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_GatingGrid")) return 0;
 /* 

@@ -1,3 +1,5 @@
+#include "tables/St_mwc_cal_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/mwcpars/cal Allocated rows: 384  Used rows: 384  Row size: 12 bytes

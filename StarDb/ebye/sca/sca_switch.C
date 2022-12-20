@@ -1,3 +1,5 @@
+#include "tables/St_sca_switch_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sca/sca_switch Allocated rows: 1  Used rows: 1  Row size: 16 bytes

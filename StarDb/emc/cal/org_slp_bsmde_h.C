@@ -1,3 +1,5 @@
+#include "tables/St_emc_calib_header_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_slp_bsmde_h Allocated rows: 1  Used rows: 1  Row size: 24 bytes
