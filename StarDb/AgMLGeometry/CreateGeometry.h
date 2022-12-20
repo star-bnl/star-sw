@@ -1,3 +1,9 @@
+#ifndef __CINT__
+#include "StBFChain/StBFChain.h"
+#endif
+
+extern StBFChain* chain;
+
 /**
  * Adapted from StarDb/VmcGeometry/CreateGeometry.h
  */
@@ -11,24 +17,29 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   }
 
   // Cache geometry to a TFile.  Geometry will be restored from TFile on subsequent calls.
-  TString filename = "agmlcache.root";  
+  TString filename = "";  
+  if  (chain)  { filename = chain->GetFileOut(); if ( filename=="" ) filename = chain->GetFileIn();  }
+  else { filename = name;  }
 
-  static int count = 0;
+  // Strip out @ symbol
+  filename = filename.ReplaceAll("@",""); 
+  // Strip off the last extention in the filename
+  filename = filename( 0, filename.Last('.') );
+  // Append geom.root to the extentionless filename
+  filename+=".geom.root";
 
-  // Detect second call to the system (I believe this never gets called?)
+  // Detect second call to the system
   if ( AgModule::Find("HALL") ) {
-
-    count++;
-    // Warn that we have reloaded the geometry from cache
-    std::cout << "Info: [AgML geometry] HALL exists.  Restore from cache file [x" << count << "] " << filename.Data() << std::endl;
-
-    assert(count<100); // should never be done in ::Make
-  
-    gGeoManager = 0;
-    TGeoManager::Import( filename );
-    assert(gGeoManager);
-    
-      
+    if ( chain->GetOption("Sti")    ||
+	 chain->GetOption("StiCA")  ||
+	 chain->GetOption("StiVMC") ){
+      cout << "AgML geometry:  HALL exists.  Restore from cache file " 
+	   << filename.Data() << endl;
+      gGeoManager = 0;
+      assert(0);
+      TGeoManager::Import( filename );
+      assert(gGeoManager);
+    }
     return geom;
   }
 
