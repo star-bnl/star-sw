@@ -1,4 +1,4 @@
-#ifdef __CLING__
+#ifndef __CINT__
 #include "StBFChain/StBFChain.h"
 #endif
 
