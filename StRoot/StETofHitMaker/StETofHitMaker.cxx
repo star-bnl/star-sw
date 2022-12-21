@@ -988,7 +988,6 @@ StETofHitMaker::matchSides()
 	    deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
 	  }
         }
-	
         //--------------------------------------------------------------------------------
 	
 
@@ -1223,7 +1222,6 @@ StETofHitMaker::matchSides()
             //           --> deal with too early hits in the matchMaker --> feed-back via mClockJumpDirection map
             //---------------------------------------------------------
             if( mDoClockJumpShift && hasClockJump ) {
-	      
                 if( mDoQA ) {
                     LOG_INFO << "shifted hit time in direction: " << mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ) << endm;
                 }
@@ -2033,7 +2031,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             }
 
             // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 || mIsSim ) { 
+            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 || mIsSim ) {
                 double tof = aHit->time() - tstart;
                 if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
@@ -2075,7 +2073,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             updateCyclicRunningMean( aHit->leadingEdgeTime(), averageBTofHitTime, nHitsBTof, eTofConst::bTofClockCycle );
 
             // if doQA && tstart exists
-            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 || mIsSim ) { 
+            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 || mIsSim ) {
                 double tof = aHit->leadingEdgeTime() - tstart;
                 if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
