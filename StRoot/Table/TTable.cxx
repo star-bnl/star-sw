@@ -2465,3 +2465,17 @@ TTable::piterator::piterator(const TTable *t,EColumnType type): fCurrentRowIndex
    }
 } // piterator(TTable *)
 
+void TTable::iterator::operator++()    { ++fCurrentRow;   }
+void TTable::iterator::operator++(int) {   fCurrentRow++; }
+void TTable::iterator::operator--()    { --fCurrentRow;   }
+void TTable::iterator::operator--(int) {   fCurrentRow--; }
+TTable::iterator TTable::iterator::operator+(Int_t idx)   { std::vector<Long_t>::iterator addition   = fCurrentRow+idx; return TTable::iterator(*fThisTable,addition); }
+TTable::iterator TTable::iterator::operator-(Int_t idx)   { std::vector<Long_t>::iterator subtraction = fCurrentRow-idx; return TTable::iterator(*fThisTable,subtraction); }
+void TTable::iterator::operator+=(Int_t idx)  {  fCurrentRow+=idx; }
+void TTable::iterator::operator-=(Int_t idx)  {  fCurrentRow-=idx; }
+void *TTable::iterator::rowPtr() const { return  (void *)(((const char *)fThisTable->GetArray()) + (*fCurrentRow)*fRowSize ); }
+TTable::iterator::operator void *() const { return rowPtr(); }
+Int_t TTable::iterator::operator-(const iterator &it) const { return (*fCurrentRow)-(*(it.fCurrentRow)); }
+Long_t TTable::iterator::operator *() const { return  *fCurrentRow; }
+Bool_t TTable::iterator::operator==(const iterator &t) const { return  ( (fCurrentRow == t.fCurrentRow) && (fThisTable == t.fThisTable) ); }
+Bool_t TTable::iterator::operator!=(const iterator &t) const { return !operator==(t); }

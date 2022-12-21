@@ -354,11 +354,7 @@ Int_t StJetSkimEventMaker::Make()
 
 		if (trigSimu->emc) {
 			for (int i = 0; i < 3; ++i) mEvent->setOverlapJetPatchTh(i,trigSimu->emc->overlapJetPatchTh(i));
-			for (int i = 0; i < 2; ++i) {
-				int jp, adc;
-				trigSimu->emc->getOverlapJetPatchAdc(i,jp,adc);
-				mEvent->setOverlapJetPatchAdc(jp,adc);
-			}
+			for (int jp = 0; jp < 6; ++jp) mEvent->setOverlapJetPatchAdc(jp, trigSimu->emc->overlapJetPatchAdc(jp));
 		}
 
 		mEvent->setEmcLayer2(trigSimu->emc->EM201output());

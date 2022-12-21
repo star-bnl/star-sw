@@ -4,8 +4,6 @@ use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
 
-my $ROOT_FEATURES = `root-config --features`;
-
 #my $xx=$ENV{ConstructLocation};
 #print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
 
@@ -167,7 +165,8 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   print "---> looking for include in $dir\n" if ($param::debug);
   next if ! -r $dir;
 
-  next if ( ($ROOT_FEATURES=~/table/) && ($dir =~ /Table$/) );   # Do not export Table headers if ROOT provides table support
+  # Do not export StRoot/Table headers if ROOT_VERSION < 6
+  next if ($dir =~ /StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
 
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
@@ -286,6 +285,10 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
     next if ( $sub_dir =~ $excludeDirList);
     my $sub_Dir = $dir . "/" . $sub_dir; 
     next if !-d $sub_Dir and !-l $sub_Dir;
+
+    # Do not build StRoot/Table if ROOT_VERSION < 6
+    next if ($sub_Dir =~ m/StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
 #    print "$sub_dir => $items\n";
 #      if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $items\n"; next;}
@@ -345,6 +348,22 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
   }
 }
 print "subdirs = @subdirs\n" if $param::debug;
+
+if ( index($env->{EXTRA_CXXFLAGS}, "-Werror") != -1 ) {
+  # Read regex expressions from the file into an array. The patterns are matched against the names
+  # of source directories in order to disable compiler warnings
+  open(warnoff_dirs_file, "mgr/warnoff_dirs.txt") or print "Warning: Can't open mgr/warnoff_dirs.txt\n";
+  chomp(@warnoff_dirs = <warnoff_dirs_file>);
+  close(warnoff_dirs_file);
+
+  if (@warnoff_dirs) {
+    print "Compiler warnings will be inhibited for directories matching the following patterns:\n";
+    foreach $dir (@warnoff_dirs) {
+      print "\t$dir\n";
+    }
+  }
+}
+
 my @Targets = ();
 
 # List of targets
@@ -405,7 +424,9 @@ if ($param::debug){
     print "Packages $#packages : @packages\n";
     print "Targets $#Targets   : @Targets\n" ;
 }
-Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
+
+$warnoff_dirs = \@warnoff_dirs;
+Export qw( env CWD INCLUDE LIB BIN BUILD OBJ warnoff_dirs);
 Default qw (   .  );
 
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
