@@ -82,8 +82,8 @@
 #include "tables/St_etofSignalVelocity_Table.h"
 #include "tables/St_etofModCounter_Table.h"
 
-#include "SystemOfUnits.h"
-#include "PhysicalConstants.h"
+#include "StarClassLibrary/SystemOfUnits.h"
+#include "StarClassLibrary/PhysicalConstants.h"
 
 
 //_____________________________________________________________
@@ -311,10 +311,6 @@ StETofHitMaker::InitRun( Int_t runnumber )
       if( !etofModCounter ) {
 	LOG_WARN << "unable to get the ModMap from the database" << endm;
         return kStFatal;
-	  
-	for( size_t i=0; i<eTofConst::nCountersInSystem; i++ ) {
-	  mModMatrix[ detectorToKey( i ) ] = 0;
-	}
 
       }else{
 
@@ -2382,34 +2378,42 @@ StETofHitMaker::updateClockJumpMap( const std::map< int, int >& clockJumpDir )
 void
 StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& time )
 {
-  if(modMode == 0) {return;}
+   switch(modMode){
+
+    double x;
+    
+  case 0:
+    return;
+
+  case 1:
+    localX *= -1;
+    localY *= -1;
+    break;
+    
+  case 2:
+    localX *= -1;
+    break;
+
+  case 3:
+    localY *= -1;
+    break;
+
+  case 4:
+    x        = localX;
+    localX   =   localY;
+    localY   = -1*x;
+    break;
+
+  case 5:
+    x        = localX;
+    localX   = -1*localY;
+    localY   =    x;
+    break;
   
-  if(modMode == 1){    
-    localX *= -1;
-    localY *= -1;
-  }
-  if(modMode == 2){
-   
-    localX *= -1;
-  }
-  if(modMode == 3){    
-    localY *= -1;
-  }
-  if(modMode == 4){
-    double x = localX;
-    double y = localY;
-    localX =    y;
-    localY = -1*x;
-  }
-  if(modMode == 5){
-    double x = localX;
-    double y = localY;
-    localX = -1*y;
-    localY =    x;
-  }
-  if(modMode == 99){
+  case 99:
     localX = 9999;
-    localY = 9999; 
+    localY = 9999;
+    break;
   }
   
 }

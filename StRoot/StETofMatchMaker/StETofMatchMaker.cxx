@@ -310,12 +310,9 @@ StETofMatchMaker::InitRun( Int_t runnumber )
     // --------------------------------------------------------------------------------------------
     // pointer to eTOF hit maker
     // --------------------------------------------------------------------------------------------
-    LOG_INFO << "StETofMatchMaker::InitRun() -- setting pointer to hit maker: " << endm;
+
     mETofHitMaker = ( StETofHitMaker* ) GetMaker( "etofHit" );
-
-    LOG_INFO << "StETofMatchMaker::InitRun() -- pointer to eTOF hit maker: " << mETofHitMaker << endm;
-
-
+    LOG_DEBUG << "StETofMatchMaker::InitRun() -- pointer to eTOF hit maker: " << mETofHitMaker << endm;
     
     if( mDoQA ) {
         // for geometry debugging

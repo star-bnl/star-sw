@@ -162,7 +162,7 @@ private:
 
     std::map< Int_t, int >     mModMatrix;  // stores mode of modification for hits on striplevel (flip)
 
-    double mGet4doublejumpTmin;                                            // cutoff for double jump correction
+    float mGet4doublejumpTmin;                                            // cutoff for double jump correction
     std::map< Int_t, bool  >                    mGet4doublejumpFlag;      // get4  jumpflag
     std::map< Int_t, std::vector < float > >    mGet4doublejumpTimes;     // get4  time of last n hits
      
