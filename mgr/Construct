@@ -252,8 +252,15 @@ if ($ROOT_LEVEL !~ /^5/ ){
 #push @items, "GenFit";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
-if ( $#items){
-  if (! $item) {$items  =       join("|",@items);}
+
+if ( defined($SKIP_DIRS) ) {
+  $items = join("|", split(" ", $SKIP_DIRS));
+} else {
+  $items = "StShadowMaker";
+}
+
+if ( $#items > -1){
+  if (!$items) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
 }
 #print "SKIP_DIRS = $SKIP_DIRS\n";
@@ -379,10 +386,13 @@ if ($STAR_HOST_SYS !~ /darwin/) {
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
+@skip_dirs = split(/\|/, $items);
+
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir or -l $dir ) {
         print "Add dir : $dir\n" if $param::debug;
         #push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        next if grep($dir =~ m/$_/, @skip_dirs);
         push @packages, $dir;
     }
 }
