@@ -13,7 +13,6 @@ StRoot/StEEmcPool.*
 StRoot/StEEmcSimulatorMaker
 StRoot/StEEmcUtil
 StRoot/StEStructPool.*
-StRoot/StETofHitMaker
 StRoot/StEmbeddingUtilities
 StRoot/StEmcADCtoEMaker
 StRoot/StEmcCalibrationMaker
