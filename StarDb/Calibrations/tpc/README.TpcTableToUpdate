@@ -2840,3 +2840,12 @@ MySQL [Calibrations_tpc]> select dataID,entryTime,elementID,beginTime,flavor,dea
 |   3169 | 2019-04-16 19:41:11 |         1 | 2019-02-01 00:00:03 | ofl    |        0 |
 |   3193 | 2019-04-28 20:49:12 |         1 | 2019-02-01 00:07:07 | ofl    |        0 |
 +--------+---------------------+-----------+---------------------+--------+----------+
+==========================================================================================
+08/19/22
+Reset all calibrations 
+ /net/l402/data/fisyak/STAR/packages/.DEV2/StarDb/Calibrations/tpc $
+foreach f ( `ls -1d holdLinks/*.*` ) 
+   set b  = `basename ${f}`
+   ls -1d ${b}
+   if (! $?) mv ${b} hold.081922/
+end
