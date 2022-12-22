@@ -146,7 +146,7 @@ Int_t StFstHitMaker::Make()
 					phiInner = kFstphiStop[moduleIdx-1]*TMath::Pi()/6.0  - 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
 					phiOuter = kFstphiStart[moduleIdx-1]*TMath::Pi()/6.0 + 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
 				}
-				double local[3];
+				double local[3] = {0};
 				if(meanRStrip < kFstNumRStripsPerWedge/2)
 				{ // inner
 					local[0] = kFstrStart[meanRStrip] + 0.5*kFstStripPitchR;
