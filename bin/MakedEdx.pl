@@ -2525,7 +2525,8 @@ my $step = 0;
 #$hist = "RunXIX_XXII_77"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/08/2022  new TpcSecRowB, SkindNdx
 #$hist = "RunXIX_XXII_78"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/09/2022  new TpcSecRowB, TpcLengthCorrectionMDN
 #$hist = "RunXIX_XXII_79"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/10/2022  new TpcLengthCorrectionMDN
-$hist = "RunXIX_XXII_80"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/11/2022  use MySQL tables
+#$hist = "RunXIX_XXII_80"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/11/2022  use MySQL tables
+$hist = "RunXIX_XXII_81"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/16/2022  one more test with MySQL
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2725,7 +2726,7 @@ close (XML);
 
 #close (CONDOR);
 my $GB = $Total_Size/1024/1024/1024;
-print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; x[
+print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n";
 }
 __END__
   foreach f (`ls -1d job*.xml`)
