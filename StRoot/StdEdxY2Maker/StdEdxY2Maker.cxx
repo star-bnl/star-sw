@@ -1,13 +1,14 @@
 // $Id: StdEdxY2Maker.cxx,v 1.101 2021/05/10 16:54:45 fisyak Exp $
+//#define __NEGATIVE_ONLY__
+  #ifndef  __NEGATIVE_ONLY__
+     #define __NEGATIVE_AND_POSITIVE__
+  #endif /* ! __NEGATIVE_ONLY__ */
+  #define __BEST_VERTEX__
 #ifdef __TFG__VERSION__
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
 //#define __TEST_DX__
   #define __SpaceCharge__
-//#define __NEGATIVE_ONLY__
-  #ifndef  __NEGATIVE_ONLY__
-     #define __NEGATIVE_AND_POSITIVE__
-  #endif /* ! __NEGATIVE_ONLY__ */
 //#define __LogProb__
 //#define __DEBUG_dEdx__
   #define __DEBUG_dNdx__
@@ -15,7 +16,6 @@
 //#define __BENCHMARKS__DOFIT_ZN__
   #define __FIT_PULLS__
   #define __CHECK_RDOMAP_AND_VOLTAGE__
-  #define __BEST_VERTEX__
   #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
      #include "TProfile3D.h"
   #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
