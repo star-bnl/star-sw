@@ -76,7 +76,8 @@ endsw
 #set list = "perl-5.34.0 cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 #set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 #set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
-set list = "perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
+#set list = "perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
+
 #set list = "KiTrack"
 #set list = "qt-everywhere-opensource-src-4.8.7"
 #set list = "gsl-2.1";
@@ -88,6 +89,10 @@ set list = "perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fas
 #set list = "pythia6"
 #set list = "eigen3"
 #set list = "qt-everywhere-opensource-src-4.8.6"
+#set list = "xrootd"
+#set list = "gsl"
+#set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3  boost_1_66_0"
+set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8  eigen3  boost_1_66_0"
 #if ($#argv != 0) set list = $argv[1];
 setenv DIR ~/sources/.${STAR_HOST_SYS}
 if ($?NODEBUG) setenv DIR ~/sources/.${STAR_HOST_SYS}_opt
