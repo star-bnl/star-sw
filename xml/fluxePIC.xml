@@ -11,10 +11,11 @@
   set logFile  = flux${b}.log
   echo "${file}"
   if ( ! -r ${file}) then
-    root.exe -q -b 'bfc.C(10000,"noRunco,noHistos,ePIC,EIC,VMC,fluxVMC,nodefault,mysql","'${INPUTFILE0}'","","'${file}'")' &gt;&amp; ${logFile}
+    root.exe -q -b 'bfc.C(1000,"noRunco,noHistos,ePIC,EIC,VMC,fluxVMC,nodefault,mysql","'${INPUTFILE0}'","","'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="command:fluxPythia.pl" /> -->
 <!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbiasHe3*.nt" /> -->
-<input URL="file:/net/l404/data/fisyak/pythia.ep.18x275.1Mevents/pythia.ep.*.root" />
+<!-- <input URL="file:/net/l404/data/fisyak/pythia.ep.18x275.1Mevents/pythia.ep.*.root" /> -->
+<input URL="file:/gpfs02/eic/DATA/PYTHIA/ep/YellowReport/TREES/pythia.ep.18x275.1Mevents.RadCor=0.Q2=0.00001-1.0.kT=1.0*root" />
 </job>
