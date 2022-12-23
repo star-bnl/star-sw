@@ -10,44 +10,22 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <strings.h>
-#include <math.h>
+#include <TNtuple.h>
 
+#include "StEvent/StEvent.h"
+#include "StGenericVertexMaker/Minuit/StMinuitVertexFinder.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
-#include "Star2Root/St_DataSetIter.h"
-#include "StEvent/StEventTypes.h"
-#include "StEvent/StPrimaryVertex.h"
-#include "TH2.h"
-#include "TNtuple.h"
+#include "StGenericVertexMaker/StiPPVertex/StPPVertexFinder.h"
+#include "StGenericVertexMaker/StppLMVVertexFinder.h"
+#include "StGenericVertexMaker/StvPPVertex/StPPVertexFinder.h"
 #include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
-
-#include "StGenericVertexMaker/StGenericVertexFinder.h"
-#include "StGenericVertexMaker/StppLMVVertexFinder.h"
-#include "StGenericVertexMaker/StFixedVertexFinder.h"
-
-#include "StTreeMaker/StTreeMaker.h"
-
-// Vertex finder implemtations
-#include "Minuit/StMinuitVertexFinder.h"
-#include "StiPPVertex/StPPVertexFinder.h"
-#include "StvPPVertex/StPPVertexFinder.h"
-
-
-#include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
-#include "tables/St_vertexSeed_Table.h" //
+#include "tables/St_g2t_vertex_Table.h"
 
 class StMuDst;
 class TClonesArray;
-
-// for Helix model
-#include "St_base/StarCallf77.h"
-extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
-#define gufld F77_NAME(gufld,GUFLD)
-#include "StarClassLibrary/SystemOfUnits.h"
-#ifndef ST_NO_NAMESPACES
-using namespace units;
-#endif
 
 
 //___________________________________________________________

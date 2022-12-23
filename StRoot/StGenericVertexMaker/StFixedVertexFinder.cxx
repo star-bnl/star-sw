@@ -6,15 +6,11 @@
  *
  */
 
-#include <StEvent/StEventTypes.h>
-#include <StEvent/StEnumerations.h>
-#include <St_base/StMessMgr.h>
-
-
+#include "StChain/StMaker.h"
 #include "StGenericVertexMaker/StFixedVertexFinder.h"
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcVertex.hh"
-#include "StChain/StMaker.h"
+#include "St_base/StMessMgr.h"
 
 
 StFixedVertexFinder::StFixedVertexFinder() : 
