@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #endif
 
+#include <array>
+#include <ostream>
 #include <vector>
 #include <array>
 #include "StGenericVertexMaker/StGenericVertexFinder.h"

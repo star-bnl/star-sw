@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <cmath>
 #include "math_constants.h"
 #include "TString.h"

@@ -1,9 +1,0 @@
-*
-*  himevt1.inc
-*
-      INTEGER    KATT
-      REAL  PATT, VATT
-      COMMON/HIMAIN2/KATT(100000,6), PATT(100000,5), VATT(100000,5)
-      SAVE  /HIMAIN2/
-
-

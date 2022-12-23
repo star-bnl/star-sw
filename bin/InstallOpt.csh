@@ -77,7 +77,7 @@ endsw
 #set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 #set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
 #set list = "perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
-
+#set list = "perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin quoter  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49 KiTrack";
 #set list = "KiTrack"
 #set list = "qt-everywhere-opensource-src-4.8.7"
 #set list = "gsl-2.1";
@@ -92,7 +92,9 @@ endsw
 #set list = "xrootd"
 #set list = "gsl"
 #set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3  boost_1_66_0"
-set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8  eigen3  boost_1_66_0"
+#set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8  eigen3  boost_1_66_0"
+set list = "qt-everywhere-opensource-src-4.8.7 coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl xrootd  pythia6 pythia8  eigen3  boost_1_66_0"
+#set list = pythia8
 #if ($#argv != 0) set list = $argv[1];
 setenv DIR ~/sources/.${STAR_HOST_SYS}
 if ($?NODEBUG) setenv DIR ~/sources/.${STAR_HOST_SYS}_opt
@@ -108,7 +110,7 @@ setenv CFLAGSd   "$cflags"
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done || -r ${pkg}.Failed) continue
 #    if (! -r ${pkg}) then
-      if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3" && $pkg != "VecGeom" && pkg != "tbb") then
+      if ($pkg != "xrootd" && $pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3" && $pkg != "VecGeom" && pkg != "tbb") then
         if (-r ~/sources/${pkg}) then
           dirsync  ~/sources/${pkg} ${pkg}
         else 
@@ -159,7 +161,9 @@ setenv CFLAGSd   "$cflags"
       case "VecGeom*":
       case "veccore":
       case "tbb":
-      case "KiTrack":
+      case "coin":
+      case "quarter":
+      case "KiTrack":x
 #      case "pythia83*":
 	cmake -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} ../../${pkg}
 	if ( $?) break;
@@ -300,7 +304,8 @@ EOF
           if ( $?) break;
           touch ../${pkg}.Done
           breaksw
-      case "pythia8*":
+#      case "pythia8*":
+      case "pythia8":
           ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
 	  make install
           if ( $?) break;

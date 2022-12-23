@@ -1,9 +1,0 @@
-//
-//        description: crs unpacking program
-//
-#include "PAM.idl"
-
-interface cr_star: amiModule {
-        STAFCV_T call
-                ( );
-};

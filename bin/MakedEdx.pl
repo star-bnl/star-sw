@@ -2084,7 +2084,8 @@ my $step = 0;
 #$hist = "RunXX203"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/04/2022 new TpcSecRowB from RunXX202
 #$hist = "RunXX204"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/05/2022 check RunXIX_XXI_74
 #$hist = "RunXX205"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/11/2022 check RunXIX_XXI_79 tables from MySQL
-$hist = "RunXX206"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/22/2022 check with dev
+#$hist = "RunXX206"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/22/2022 check with dev
+$hist = "RunXX207"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 12/23/2022 check with dev and locally rebuild StdEdxY2
 # restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
 # TpcAdcCorrectionB.y2020.C
 # TpcAvgPowerSupply.y2020.C
@@ -2527,6 +2528,7 @@ $hist = "RunXX206"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/Reversed
 #$hist = "RunXIX_XXII_78"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/09/2022  new TpcSecRowB, TpcLengthCorrectionMDN
 #$hist = "RunXIX_XXII_79"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/10/2022  new TpcLengthCorrectionMDN
 #$hist = "RunXIX_XXII_80"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/11/2022  use MySQL tables
+#$hist = "RunXIX_XXII_81"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  12/16/2022  one more test with MySQL
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

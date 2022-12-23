@@ -11,7 +11,7 @@ foreach root (root6 root5)
     case "*bnl.gov":
     #    set list = "gcc482 gcc492 gcc/6.3 gcc/10";
 #	set list = "gcc" #  gcc/6.3  gcc/10.1.0"
-	set list = "gcc" #  gcc/6.3  gcc/11"
+	set list = "gcc/12 gcc" #  gcc/6.3  gcc/11"
     breaksw
   endsw
   set gcc_list = "${list}"

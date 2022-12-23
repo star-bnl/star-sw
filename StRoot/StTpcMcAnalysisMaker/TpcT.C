@@ -1,7 +1,7 @@
 #if 0
 set star = '*';
 foreach d (`ls -1d *GeV*`)
-  root.exe -q -b 'TpcT.C+("'${d}'/'${star}'/st*.tags.root","P","'${d}'.Plots.root")' >& ${d}.log &
+  root.exe -q -b lBichsel.C 'TpcT.C+("'${d}'/'${star}'/st*.tags.root","P","'${d}'.Plots.root")' >& ${d}.log &
 end
   
   foreach f (`ls -1d  /hlt/cephfs/reco/2020/TFG20h/RF/'${star}'.root`)
@@ -15,12 +15,12 @@ end
 
 foreach d (`ls -1dr TpcRS_[1-9]*GeV*`)
 cd ${d}; pwd;
-root.exe -q *.Plots.root FitTpcT.C
+root.exe -q -lBichsel.C *.Plots.root FitTpcT.C
 cd -
 end
 #endif
-// To build profile histograms: root.exe -q -b TpcT.C+
-// To fit them                : root.exe -q *H.root FitTpcT.C
+// To build profile histograms: root.exe -q -b lBichsel.C  TpcT.C+
+// To fit them                : root.exe -q *H.root lBichsel.C  FitTpcT.C
 // To draw all of them        : root.exe */'${star}'Fit.root
 //                              .L DrawList.C+
 //                              DrawFAll()
