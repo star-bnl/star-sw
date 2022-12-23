@@ -91,12 +91,12 @@ TDataSet *CreateTable() {
   row.tauCO                 =   0;  
   row.SigmaJitterTI         = 0.0; //1.5*0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
   row.SigmaJitterTO         = 0.52; //1.5*0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
+  row.SigmaJitterXI         = 0.1027785/2./1.5;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
-  row.longitudinalDiffusionI= row.longitudinalDiffusion*0.63;
-  row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.transverseDiffusionI  = 0.66  *row.transverseDiffusion;
+  row.longitudinalDiffusionI= row.longitudinalDiffusion*0.51;
+  row.transverseDiffusion   = 0.02263*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
+  row.transverseDiffusionI  = 0.63  *row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
