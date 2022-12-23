@@ -116,7 +116,6 @@
  $CXX_VERSION  = `$CXX -dumpversion`;
  chomp($CXX_VERSION);
  ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
-
  my $cxx_version = $CXX_MAJOR . ".". $CXX_MINOR;
  my $CXXFLAGS     = `root-config --auxcflags`; chomp($CXXFLAGS); #$CXXFLAGS  =~ s/-I.*//; 
 # print "CXXFLAGS = $CXXFLAGS\n";
@@ -253,7 +252,7 @@
  if ($ROOT_MAIN > 6.0) {$NOOPT = $DEBUG;}
  if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
-   if ($DEBUG !~ /-g/) {$DEBUG = $$DEBUG . " -g";}
+   if ($DEBUG !~ /-g/) {$DEBUG = $DEBUG . " -g";}
    $FDEBUG= $DEBUG;
    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
  }
@@ -584,7 +583,7 @@
        if $QTLIBDIR && ! $param::quiet;
    }
    # Coin3D - WHAT??! JL 2009
-   if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
+#   if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
    if ( defined($IVROOT) &&  -d $IVROOT) {
      # This is an initial logic relying on IVROOT to be defined
      if (-e $IVROOT . "/bin/coin-config") {
@@ -667,6 +666,11 @@
    }
  } else {
    print "Could not find xml libs\n" if (! $param::quiet);
+ }
+ if ($CXX_MAJOR >= 12) {
+   $FDEBUG =~ s/-O2//; $FDEBUG =~ s/-O//;
+   if ($FDEBUG !~ /-g/) {$FDEBUG .=  " -g";}
+#   print "CXX_VERSION = $CXX_VERSION reset FDEBUG = $FDEBUG ========================================\n";
  }
  $CXXCOM = 
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
