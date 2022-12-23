@@ -14,7 +14,6 @@
 
 #include <vector>
 
-//#include "StEventTypes.h"
 #include "TMinuit.h"
 
 #include "StPrimaryVertex.h"
