@@ -106,10 +106,10 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	clusterSizeR 	= nToMerge;
 	clusterSizePhi 	= 1;
 
-	float tempCharge[nToMerge], tempChargeErr[nToMerge], tempRStrip[nToMerge];
+	float tempChargeErr[nToMerge], tempRStrip[nToMerge];
 
 	for (int i = 0; i < nToMerge; i++) {
-	  tempCharge[i] = 0.; tempChargeErr[i] = 0.; tempRStrip[i] = 0.;
+	  tempChargeErr[i] = 0.; tempRStrip[i] = 0.;
 	}
 
 	float tempSumCharge = 0, tempSumChargeErrSquare = 0.;
@@ -118,7 +118,6 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	int nToSeedhit = 0;
 
 	for (rawHitsToMergePtr = rawHitsToMerge.begin(); rawHitsToMergePtr != rawHitsToMerge.end() && mergeIdx < nToMerge; ++rawHitsToMergePtr, ++mergeIdx) {
-	  tempCharge[mergeIdx]    = (*rawHitsToMergePtr)->getCharge(usedTb);
 	  tempChargeErr[mergeIdx] = (*rawHitsToMergePtr)->getChargeErr(usedTb);
 	  tempRStrip[mergeIdx]    = (float)(*rawHitsToMergePtr)->getRStrip();
 	  tempSumCharge += (*rawHitsToMergePtr)->getCharge(usedTb);
