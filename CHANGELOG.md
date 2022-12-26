@@ -1,5 +1,15 @@
 # Changelog
 
+## SL21c_8 - 2022-12-26
+
+- [SL21c] Backport cons, CI, and tests from main to SL21c by @plexoos in  ([#465](https://github.com/star-bnl/star-sw/pull/465))
+
+  - Moved the CI, tests, and build machinery from `main` (5424c348) in order to
+    assemble Docker images at https://github.com/star-bnl/star-sw/pkgs/container/star-sw
+
+- [SL21c] Backport TPC RS changes by @plexoos in  ([#466](https://github.com/star-bnl/star-sw/pull/466))
+
+
 ## SL21c_7 - 2022-02-02
 
 - Backport the latest TpcRS code and Run19 parameters to SL21c ([#294](https://github.com/star-bnl/star-sw/pull/294))
