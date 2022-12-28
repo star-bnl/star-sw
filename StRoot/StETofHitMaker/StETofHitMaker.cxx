@@ -75,7 +75,6 @@
 
 #include "StETofHitMaker.h"
 #include "StETofUtil/StETofConstants.h"
-#include "StETofUtil/etofHelperFunctions.h"
 #include "StETofUtil/StETofGeometry.h"
 
 #include "tables/St_etofHitParam_Table.h"
@@ -84,6 +83,7 @@
 
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StarClassLibrary/PhysicalConstants.h"
+#include "StBTofUtil/tofPathLength.hh"
 
 
 //_____________________________________________________________
@@ -1286,10 +1286,10 @@ StETofHitMaker::matchSides()
 		   if(mETofGeom){
 		   
 		     StMuPrimaryVertex* pVtx = mMuDst->primaryVertex( 0 );
-		     StThreeVectorD posGlo = mETofGeom->hitLocal2Master( constructedHit );
-		     
+		     StThreeVectorD*  posGlo = new StThreeVectorD( mETofGeom->hitLocal2Master( constructedHit ));
+
 		     if( pVtx ) {
-		       StThreeVectorD vtxPos = pVtx->position();		
+		       StThreeVectorD* vtxPos = new StThreeVectorD( pVtx->position());	
 		       exptof =  tofPathLength(vtxPos , posGlo , 0) / ( nanosecond * c_light );
 		     }
 		   }
@@ -1563,7 +1563,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 LOG_DEBUG << "mergeClusters() - checking hit vector for possible hits to merge with..." << endm;
             }
 
-	    bool IsMissmatch = 0; 
+	    bool IsMissmatch = false; 
 	    int  IdTruth     = 0; 
 	    
             StETofHit* pHit = hitVec->at( 0 );

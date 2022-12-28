@@ -2542,12 +2542,7 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             }
 
 	    if( nSigmaPion < 2. ) {
-                if( matchCand.clusterSize < 100 ) {
-                    // hits without clock jump based on local Y position
-                  /*  std::string histName_t0corr_strip = "matchCand_t0corr_strip_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
-                    mHistograms.at( histName_t0corr_strip )->Fill( matchCand.localX, tof - tofpi ); */
-                }
-                else {
+		  if( matchCand.clusterSize >= 100 ) {
                     // hits with clock jump based on local Y position
 		  std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
 		  mHistograms.at( histName_t0corr_jump )->Fill( matchCand.localX, tof - tofpi ); //cutdownYS
