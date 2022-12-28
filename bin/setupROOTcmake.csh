@@ -27,7 +27,7 @@ setenv QT_MOC_EXECUTABLE ${QTDIR}/bin/moc
 setenv Qt4 ${QTDIR}
 rm -f CMakeCache.txt
 #cmake cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD_TYPE=Debug -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=ON -Drootfit=ON -Dtable=ON -Dvc=ON 
-cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD_TYPE="${ROOT_BUILD}" \
+cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD_TYPE="${ROOT_BUILD}" -Wno-dev \
 -DCMAKE_C_COMPILER="${CC}" -DCMAKE_CXX_COMPILER="${CXX}" -DCMAKE_Fortran_COMPILER="${FC}" -Dfortran=ON \
 -Dall=ON \
 -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=OFF -Drootfit=ON -Dvc=OFF -Dunuran=oFF \
