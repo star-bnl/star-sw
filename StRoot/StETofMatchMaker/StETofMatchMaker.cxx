@@ -182,7 +182,6 @@ StETofMatchMaker::~StETofMatchMaker()
 }
 
 
-
 //---------------------------------------------------------------------------
 Int_t
 StETofMatchMaker::Init()
@@ -462,8 +461,6 @@ StETofMatchMaker::Make()
         return kStOk;
     }
 
-    
-
     //.........................................................................
     // B. loop over global tracks & determine all track intersections with active eTof volumes
     //
@@ -554,7 +551,6 @@ StETofMatchMaker::Make()
     //.........................................................................
     // H. fill QA histograms
     //
-  
     fillQaHistograms( finalMatchVec );
   
     fillSlewHistograms( finalMatchVec );
