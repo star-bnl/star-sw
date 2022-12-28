@@ -572,15 +572,6 @@ TGraphAsymmErrors* StFcsWaveformFitMaker::getGraph(int det, int id)
   return 0;
 }
 
-/*
-void StFcsWaveformFitMaker::setTGraphAsymmErrors(TGraphAsymmErrors* gae, const int &i, const double &adc){
-    double HighY = 0;
-    if(adc<mAdcSaturation) { HighY=mError; }
-    else                   { HighY=mErrorSaturated; }
-    gae->SetPointError(i,0,0,mError,HighY);
-}
-*/
-
 TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(int n, double* tb, double* adc){
     TGraphAsymmErrors* gae = resetGraph();
     for(int i=0; i<n; ++i){
@@ -642,6 +633,7 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
     case 11: integral = gausFitWithPed(g, res, func); break;
     case 12: integral = PulseFit1(g,res,func); break;
     case 13: integral = PulseFit2(g,res,func); break;
+    case 14: integral = PulseFitAll(g,res,func); break;
     case 21: integral = PedFit(g, res, func); break;
     case 31: integral = LedFit(g, res, func); break;
     default: 
@@ -1108,40 +1100,35 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	  Int_t compidx = ana->FoundPeakIndex();
 	  if( compidx<0 ){ compidx = ana->AnalyzeForPeak(); }
 	  int npeaks = ana->NPeaks();
-	  std::cout << "|det:"<<det << "ch:"<<ch << std::endl;
-	  std::cout << " + |B::npeaks:"<<npeaks << "|compidx:"<<compidx << std::endl;
+	  //std::cout << "|det:"<<det << "|ch:"<<ch << std::endl;
+	  //std::cout << " + |B::npeaks:"<<npeaks << "|compidx:"<<compidx << std::endl;
 	  if( compidx<npeaks ){
-	    Double_t xmin=0, xmax=300;
 	    int trigfitidx = compidx;//this is starting condition is needed to pick out the right index
-	    //@[December 13, 2022]>Hack to replicate NPeaksPre2Post1(trigfitidx,xmin,xmax);
+	    //Hack to replicate NPeaksPrePost function
 	    //make initial window 1 RHIC crossing
-	    //xmin = mCenterTB - mDbPulse->TBPerRC()/2;
-	    //xmax = mCenterTB + mDbPulse->TBPerRC()/2;
-	    int npeaksxing=0;
+	    Double_t xmin = mCenterTB - mDbPulse->TBPerRC()/2;
+	    Double_t xmax = mCenterTB + mDbPulse->TBPerRC()/2;
 	    //@[August 25, 2022](David Kapukchyan)>In future use varaiables as opposed to constants??
 	    int prexing = 3*mDbPulse->TBPerRC();//Pre-crossing more important than post-crossing so use wider range for pre-crossing
 	    int postxing = 2*mDbPulse->TBPerRC();
 	    bool foundtrigidx = false;
+	    std::vector<int> validpeakidx;  //store all valid indexes for peaks around the triggered crossing
 	    for( int i=0; i<ana->NPeaks(); ++i ){
-	      //int peakx = static_cast<int>();//Since converting to int check equality as well since downcasting
 	      if( (mCenterTB-prexing) < ana->GetPeak(i).mPeakX && ana->GetPeak(i).mPeakX < (mCenterTB+postxing) ){
-		//if pre crossing peak hits zero then don't need to fit pre-crossing (this can be done by checking if pre-endx==trig-startx??
-		if( !foundtrigidx && trigfitidx==i ){ foundtrigidx = true; trigfitidx = npeaksxing; }//Should be before ++npeaksxing
-		++npeaksxing;
-		//if( xmin > ana->GetPeak(i).mStartX ){ xmin = ana->GetPeak(i).mStartX; }
-		//if( xmax < ana->GetPeak(i).mEndX ){ xmax = ana->GetPeak(i).mEndX; }
+		if( !foundtrigidx && trigfitidx==i ){ foundtrigidx = true; trigfitidx = validpeakidx.size(); }//do before adding i to vector so that when i does get added the triggered crossing index matches
+		if( !validpeakidx.empty() && validpeakidx.back()!=(i-1) ){ LOG_ERROR << "StFcsWaveformFitMaker::dualFit: Found indices are not linear" << endm;  }
+		validpeakidx.push_back(i);
+		if( xmin > ana->GetPeak(i).mStartX ){ xmin = ana->GetPeak(i).mStartX; }
+		if( xmax < ana->GetPeak(i).mEndX ){ xmax = ana->GetPeak(i).mEndX; }
 	      }
 	    }
-	    if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeakPre2Post1: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
-	    std::cout << "foundtrigidx:"<<foundtrigidx <<"|trigfitidx:"<<trigfitidx << "|npeaksxing:"<<npeaksxing<< "|xmin:"<<xmin << "|xmax:"<<xmax << std::endl;
-	    npeaks=npeaksxing;
+	    if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::dualFit: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
 	    //End of Hack
-	    //res[0] = ana->FitSignal(mMinTb,mMaxTb);
-	    //if( npeaks>0 && npeaks<mMaxPeak ){
-	    std::cout << " + |A::npeaks:"<<npeaks << "|compidx:"<<compidx << "|trigfitidx:"<<trigfitidx << std::endl;
-	    if( npeaks>0 ){
+	    npeaks = validpeakidx.size();
+	    if( npeaks>0 && npeaks<mMaxPeak ){
 	      TF1* func_PulseFit = mDbPulse->createPulse(xmin,xmax,2+npeaks*3);//only fit inside the range of valid peaks
-	      ana->SetFitPars(func_PulseFit);
+	      ana->SetFitPars(func_PulseFit,validpeakidx.front(),validpeakidx.back());
+	      if( func_PulseFit->GetParameter(0)==0 ){ LOG_ERROR << "StFcsWaveformFitMaker::drawDualFit: Unable to set function parameters, bad peak indicies" << endl; }	      
 	      //ana->SetSignal(func);
 	      TFitResultPtr result = ggdraw->Fit(func_PulseFit,"BNRQ");
 	      //compidx no longer equal to index to triggered crossing peak
@@ -1155,7 +1142,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	TF1* func_gaus = 0;
 	float gausres[8] = {0};
 	gausFit( ggdraw , gausres, func_gaus );
-	if( func_gaus!=0 ){ 
+	if( func_gaus!=0 ){
 	  func_gaus->SetLineColor(kGreen);
 	  func_gaus->SetLineWidth(1);
 	  func_gaus->SetBit(kCanDelete);
@@ -1472,8 +1459,8 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
     mH1F_NPeaks[6]->Fill(npeaks);
   }
   if( compidx==npeaks ){ res[0] = 0; }//no found peak case sum is 0
-  //else if( (mTest==8?(npeaks<1):(npeaks<=1)) ){ //0 or 1 peak case with a valid peak;  do sum 8; if test==8 then do for all peaks
-  else if( npeaks<=1 ){
+  else if( (mTest==8?(npeaks<1):(npeaks<=1)) ){ //0 or 1 peak case with a valid peak;  do sum 8; if test==8 then do for all peaks
+  //else if( npeaks<=1 ){
     res[0] = sum8(gae,res);
     //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
     if( det0==0 || det0==1 ){res[0]/=1.226;}
@@ -1486,19 +1473,19 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   }
   else{ //More than 1 peak and valid peak found
     Double_t xmin=0;
-    Double_t xmax=300;
+    Double_t xmax=1;
     int trigfitidx = compidx;//this is starting condition is needed to pick out the right index
-    //npeaks = NPeaksPre2Post1(trigfitidx,xmin,xmax);//Check for peaks near triggered crossing (counts triggered crosing peak)
+    std::vector<int> validindex = NPeaksPrePost(trigfitidx,xmin,xmax);//Check for peaks near triggered crossing (counts triggered crosing peak)
+    npeaks = validindex.size();
     if( mTest==6 || mTest==7 || mTest==8 ){
       mH1F_NPeaksFiltered[det0]->Fill(npeaks);
       mH1F_NPeaksFiltered[6]->Fill(npeaks);
     }
-    //if( ((mTest==8)?(npeaks>=1 && npeaks<mMaxPeak):(npeaks>1)) ){//If equal to one then still don't need to fit, unless mTest==8 then fit 1 peak cases
-    if( npeaks>1 && npeaks<mMaxPeak ){
-      //res[0] = mPulseFit->FitSignal(mMinTb,mMaxTb);
+    if( ((mTest==8)?(npeaks>=1 && npeaks<mMaxPeak):(npeaks>1)) ){//If equal to one then still don't need to fit, unless mTest==8 then fit 1 peak cases
       auto start=std::chrono::high_resolution_clock::now();//for timing studies can be commented out as long as not testing
       func = mDbPulse->createPulse(xmin,xmax,2+npeaks*3);//only fit inside the range of valid peaks
-      mPulseFit->SetFitPars(func);
+      mPulseFit->SetFitPars( func, validindex.front(), validindex.back() );
+      if( func->GetParameter(0)==0 ){ LOG_ERROR << "StFcsWaveformFitMaker::PulseFit2: Unable to set function parameters, bad peak indicies" << endl; }
       //mPulseFit->SetSignal(func);
       TFitResultPtr result = gae->Fit(func,"BNRQ");
       //compidx no longer equal to index to triggered crossing peak
@@ -1584,6 +1571,51 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   return res[0];
 }
 
+float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1*& func){
+  if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
+  else{mPulseFit->SetData(gae);}//Resets finder
+  if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
+
+  Int_t compidx = mPulseFit->FoundPeakIndex();
+  if( compidx<0 ){ compidx = mPulseFit->AnalyzeForPeak(); }
+  int npeaks = mPulseFit->NPeaks();
+
+  int det0 = 0; int ch0=0;
+  mDb->getFromName( gae->GetName(), det0,ch0 );
+
+  //std::cout << "det0:"<<det0 << "|ch0:"<<ch0 << "|npeaks:"<<npeaks << std::endl;
+  if( compidx==npeaks || npeaks==0 ){
+    res[0] = sum8(gae,res);
+    //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
+    res[1] = mPulseFit->Baseline()+mPulseFit->BaselineSigma()*mPulseFit->BaselineSigmaScale();
+    res[2] = mCenterTB;
+    res[3] = mDbPulse->GSigma();
+    res[4] = -1;
+    res[5] = npeaks;
+    return res[0];
+  }
+  Double_t xmin=mPulseFit->GetPeak(0).mStartX;
+  Double_t xmax=mPulseFit->GetPeak(npeaks-1).mEndX;
+
+  func = mDbPulse->createPulse(xmin,xmax,2+npeaks*3);//only fit inside the range of valid peaks
+  mPulseFit->SetFitPars( func );
+  if( func->GetParameter(0)==0 ){ LOG_ERROR << "StFcsWaveformFitMaker::PulseFitAll: Unable to set function parameters, bad peak indicies" << endl; }
+  TFitResultPtr result = gae->Fit(func,"BNRQ");
+  //compidx no longer equal to index to triggered crossing peak
+  res[1] = func->GetParameter(compidx*3 + 2);
+  res[2] = func->GetParameter(compidx*3 + 3);
+  res[3] = func->GetParameter(compidx*3 + 4);
+  res[4] = func->GetChisquare()/func->GetNDF();
+  res[0] = res[1]*res[3]*StFcsDbPulse::sqrt2pi();
+
+  res[5] = npeaks;//number of fitted peaks
+  
+  return res[0];
+}
+
 float StFcsWaveformFitMaker::PedFit(TGraphAsymmErrors* gae, float* res, TF1*& func){
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae);}
   else{mPulseFit->SetData(gae);}//Resets finder
@@ -1633,7 +1665,6 @@ float StFcsWaveformFitMaker::LedFit(TGraphAsymmErrors* gae, float* res, TF1*& fu
 }
 
 int StFcsWaveformFitMaker::GenericPadPos(int value, int Nvals, int PadNums )
-//PadNums is not total pads but number pads in the row or column, Nvals is number of stuff per column or row to put on same pad
 {
   if( value<=0 ){return ceil( static_cast<double>(value+(Nvals*PadNums))/static_cast<double>(Nvals) );}
   else{ return GenericPadPos(value-(Nvals*PadNums), Nvals, PadNums); }
@@ -1643,16 +1674,14 @@ int StFcsWaveformFitMaker::PadNum4x4(int det, int col, int row)
 {
   int ncol = 0;
   int nrow = 0;
-  if( det<=1 )
-    {
-      ncol = 2;
-      nrow = 3;
-    }
-  else if( det<=3 )
-    {
-      ncol = 2;
-      nrow = 2;
-    }
+  if( det<=1 ){
+    ncol = 2;
+    nrow = 3;
+  }
+  else if( 1<det && det<=3 ){
+    ncol = 2;
+    nrow = 2;
+  }
   else{ LOG_ERROR << "StFcsWaveformFitMaker::PadNum4x4: This only works for Ecal and Hcal" << endm; return 0;}
   int padcol = GenericPadPos(col,ncol,4);
   int padrow = GenericPadPos(row,nrow,4);
@@ -1675,27 +1704,32 @@ int StFcsWaveformFitMaker::PeakCompare(const PeakWindow& pwin1, const PeakWindow
   return result;
 }
 
-int StFcsWaveformFitMaker::NPeaksPre2Post1(int& trigidx,Double_t& xmin, Double_t &xmax) const
+std::vector<int> StFcsWaveformFitMaker::NPeaksPrePost(int& trigidx,Double_t& xmin, Double_t &xmax) const
 {
   //make initial window 1 RHIC crossing
   xmin = mCenterTB - mDbPulse->TBPerRC()/2;
   xmax = mCenterTB + mDbPulse->TBPerRC()/2;
-  int npeaksxing=0;
   //@[August 25, 2022](David Kapukchyan)>In future use varaiables as opposed to constants??
   int prexing = 3*mDbPulse->TBPerRC();//Pre-crossing more important than post-crossing so use wider range for pre-crossing
   int postxing = 2*mDbPulse->TBPerRC();
   bool foundtrigidx = false;
+  std::vector<int> valididx;  //store all valid indexes for peaks around the triggered crossing
+  //std::cout << "|prexing:" << mCenterTB-prexing << "|postxing:"<<mCenterTB+postxing << std::endl;
   for( int i=0; i<mPulseFit->NPeaks(); ++i ){
+    //std::cout << "-|i:" << i << "|peakx:"<<mPulseFit->GetPeak(i).mPeakX << std::endl;
     if( (mCenterTB-prexing) < mPulseFit->GetPeak(i).mPeakX && mPulseFit->GetPeak(i).mPeakX < (mCenterTB+postxing) ){
-      //if pre crossing peak hits zero then don't need to fit pre-crossing (this can be done by checking if pre-endx==trig-startx??
-      if( !foundtrigidx && trigidx==i ){ foundtrigidx = true; trigidx = npeaksxing; }//Should be before ++npeaksxing
-      ++npeaksxing;
+      //if pre crossing peak hits zero then don't need to fit pre-crossing (this can be done by checking if pre-endx==trigB-startx??
+      if( !foundtrigidx && trigidx==i ){ foundtrigidx = true; trigidx = valididx.size(); }//do before adding i to vector so that when i does get added the triggered crossing index matches
+      if( !valididx.empty() && valididx.back()!=(i-1) ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeaksPrePost: Found indices are not linear" << endm;  }
+      valididx.push_back(i);
       if( xmin > mPulseFit->GetPeak(i).mStartX ){ xmin = mPulseFit->GetPeak(i).mStartX; }
       if( xmax < mPulseFit->GetPeak(i).mEndX ){ xmax = mPulseFit->GetPeak(i).mEndX; }
     }
   }
-  if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeakPre2Post1: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
-  return npeaksxing;
+  //std::cout << "|fountrigidx:"<<foundtrigidx << "|trigidx:"<<trigidx << std::endl;
+  //for( unsigned int i=0; i<valididx.size(); ++i ){ std::cout << " - |valididx|i:" << i << "|at:"<< valididx.at(i) << std::endl; }
+  if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeaksPrePost: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
+  return valididx;
 }
 
 StFcsPulseAna* StFcsWaveformFitMaker::InitFitter(Double_t ped)
