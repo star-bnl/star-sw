@@ -542,8 +542,14 @@
 #    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
 #    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
 #end
-foreach f (`ls -1d SecRow3G4EY*.root`) 
-    set b = `echo ${f} | sed -e 's/SecRow3G4EY//' -e 's/\.root//'`
-    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#foreach f (`ls -1d SecRow3G4EY*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3G4EY//' -e 's/\.root//'`
+#    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
+#end
+foreach f (`ls -1d SecRow3CG4EY*.root`) 
+    set b = `echo ${f} | sed -e 's/SecRow3CG4EY//' -e 's/\.root//'`
+    dir $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root
+    root.exe -q -b lDb.C  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
     mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
 end
