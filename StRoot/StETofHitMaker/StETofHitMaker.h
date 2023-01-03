@@ -93,7 +93,6 @@ public:
 
     void modifyHit(int modMode, double& localX, double& localY, double& time);
 
-    
 private:
     // internal subfunctions ----------------------------------------------------------------------
     void bookHistograms();

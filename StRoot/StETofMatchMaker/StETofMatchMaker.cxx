@@ -3060,73 +3060,63 @@ ETofTrack::ETofTrack( const StMuTrack* mutrack )
 }
 
 //---------------------------------------------------------------------------
-void
-StETofMatchMaker::checkClockJumps()
+void StETofMatchMaker::checkClockJumps()
 {
+  if (mClockJumpCand.size() == 0) return;
 
-    if( mClockJumpCand.size() == 0 ) return;
+  // histogram filled with all hits including clock jump candidates.
+  int   binmax     = mHistograms.at("matchCand_t0corr_1d")->GetMaximumBin();
+  float mainPeakT0 = mHistograms.at("matchCand_t0corr_1d")->GetXaxis()->GetBinCenter(binmax);
 
+  LOG_DEBUG << "mainPeakT0: " << mainPeakT0 << endm;
 
-   
+  bool needsUpdate = false;
 
-	// histogram filled with all hits including clock jump candidates.
-    int   binmax     = mHistograms.at( "matchCand_t0corr_1d" )->GetMaximumBin();
-    float mainPeakT0 = mHistograms.at( "matchCand_t0corr_1d" )->GetXaxis()->GetBinCenter( binmax );
+  for (const auto& kv : mClockJumpCand) {
+    LOG_DEBUG << "clock jump candidate: " << kv.first << "   " << kv.second << endm;
 
-    
+    int sector  = kv.first / 1000;
+    int plane   = (kv.first % 1000) / 100;
+    int counter = (kv.first %  100) /  10;
+    int binX    = kv.first % 10;
 
-    LOG_DEBUG << "mainPeakT0: " << mainPeakT0 << endm;
+    std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string(sector) + "m" + std::to_string(plane) + "c" + std::to_string(counter);
+    TH2D* h = (TH2D*) mHistograms.at(histName_t0corr_jump);
 
-    bool needsUpdate = false;
+    int binYmain_neg  = h->GetYaxis()->FindBin(mainPeakT0 - 1.5);
+    int binYmain_pos  = h->GetYaxis()->FindBin(mainPeakT0 + 3.0);
+    int binYearly_neg = h->GetYaxis()->FindBin(mainPeakT0 - 1.5 - eTofConst::coarseClockCycle);
+    int binYearly_pos = h->GetYaxis()->FindBin(mainPeakT0 + 3.0 - eTofConst::coarseClockCycle);
+    int binYlate_neg  = h->GetYaxis()->FindBin(mainPeakT0 - 1.5 + eTofConst::coarseClockCycle); // tight cut to reduce interference with slow particles of the main band
+    int binYlate_pos  = h->GetYaxis()->FindBin(mainPeakT0 + 3.0 + eTofConst::coarseClockCycle);
 
-    for( const auto& kv : mClockJumpCand ) {
-        LOG_DEBUG << "clock jump candidate: " << kv.first << "   " << kv.second << endm;
+    LOG_DEBUG << "binYmain_neg " << binYmain_neg << " " << binYmain_pos << " binYmain_pos " << binYearly_neg << " binYearly_neg " << binYearly_pos << " binYearly_pos " << endm;
 
-        int sector  = kv.first / 1000;
-        int plane   = ( kv.first % 1000 ) / 100;
-        int counter = ( kv.first %  100 ) /  10;
-        int binX    = kv.first % 10;
-        
-        std::string histName_t0corr_jump = "matchCand_t0corr_jump_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-        TH2D* h = ( TH2D* ) mHistograms.at( histName_t0corr_jump );
+    int nMain  = h->Integral(binX, binX, binYmain_neg,  binYmain_pos);
+    int nEarly = h->Integral(binX, binX, binYearly_neg, binYearly_pos);
+    int nLate  = h->Integral(binX, binX, binYlate_neg,  binYlate_pos);
 
-        int binYmain_neg  = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 );
-        int binYmain_pos  = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 );
-        int binYearly_neg = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 - eTofConst::coarseClockCycle );
-        int binYearly_pos = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 - eTofConst::coarseClockCycle );
-        int binYlate_neg  = h->GetYaxis()->FindBin( mainPeakT0 - 1.5 + eTofConst::coarseClockCycle );//tight cut to reduce interference with slow particles of the main band
-        int binYlate_pos  = h->GetYaxis()->FindBin( mainPeakT0 + 3.0 + eTofConst::coarseClockCycle );
+    LOG_DEBUG << "nMain " << nMain << "  " << nEarly << " nEarly " << endm;
 
-        LOG_DEBUG << "binYmain_neg " << binYmain_neg << " " << binYmain_pos << " binYmain_pos " << binYearly_neg << " binYearly_neg " << binYearly_pos << " binYearly_pos "<< endm;
+    if (nEarly > nMain && nEarly >= 2) { // first two clock jumped hits in one Get4 IN EACH FILE are not are not detected. Could be changed by changing default direction of jumps, but then wrongly corrected clock jumps are LATE! Cut on late hits being above 1.5 GeV or Pion dEdX could help separate late hits from slow particles.
+      LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
 
-        int nMain  = h->Integral( binX, binX, binYmain_neg,  binYmain_pos  );
-        int nEarly = h->Integral( binX, binX, binYearly_neg, binYearly_pos );
-        int nLate  = h->Integral( binX, binX, binYlate_neg, binYlate_pos );
-
-        LOG_DEBUG << "nMain " << nMain << "  " << nEarly << " nEarly " << endm;
-
-        if( nEarly > nMain && nEarly >= 2 ) { //first two clock jumped hits in one Get4 IN EACH FILE are not are not detected. Could be changed by changing default direction of jumps, but then wrongly corrected clock jumps are LATE! Cut on late hits being above 1.5 GeV or Pion dEdX could help separate late hits from slow particles.
-            LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
-
-            mClockJumpDirection[ kv.first ] = -1.;
-            needsUpdate = true;
-        }
-
-        if( nLate > nMain && nLate >= 2 ) { //allows to change default to correct backwards in time, as it is electronically most likely. Unlikely to find real proton at wrong position, but correct time.
-            LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
-
-            mClockJumpDirection[ kv.first ] = 1.;
-            needsUpdate = true;
-        }  
-
+      mClockJumpDirection[ kv.first ] = -1.;
+      needsUpdate = true;
     }
- 
-    mClockJumpCand.clear();
 
-    //if there was a new entry to the map --> push it to the hit maker (if available)
-    if( needsUpdate && mETofHitMaker ) {
-        mETofHitMaker->updateClockJumpMap( mClockJumpDirection );	
-    } 
- 
-    
+    if (nLate > nMain && nLate >= 2) { //allows to change default to correct backwards in time, as it is electronically most likely. Unlikely to find real proton at wrong position, but correct time.
+      LOG_DEBUG << "clock jump detected --> give it to hit maker" << endm;
+
+      mClockJumpDirection[ kv.first ] = 1.;
+      needsUpdate = true;
+    }
+  }
+
+  mClockJumpCand.clear();
+
+  // if there was a new entry to the map --> push it to the hit maker (if available)
+  if( needsUpdate && mETofHitMaker ) {
+      mETofHitMaker->updateClockJumpMap( mClockJumpDirection );
+  }
 }

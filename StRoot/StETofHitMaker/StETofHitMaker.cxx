@@ -321,21 +321,21 @@ StETofHitMaker::InitRun( Int_t runnumber )
         }	
       }
     }
-    
+
     // --------------------------------------------------------------------------------------------
     for( int i=0; i<eTofConst::nCountersInSystem * 8; i++ ) {
       int key = detectorToKey( i / 8 ) * 10 + ( i % 8 ) + 1;
       mClockJumpDirection[ key ] = -1; //changed default to -1, read: backwards in time, to reduce losses before algoritm identifies direction.
 
       LOG_DEBUG << key << "  " << mClockJumpDirection.at( key ) << endm;
-      
+
       mGet4doublejumpFlag[ key ] = 0;
-      
+
       for(int k=0; k<3; k++){
-	mGet4doublejumpTimes[key].push_back(-999); 
+        mGet4doublejumpTimes[key].push_back(-999);
       }
     }
-    
+
     // --------------------------------------------------------------------------------------------
     for( int i=0; i<eTofConst::nCountersInSystem; i++ ) {
         mCounterActive.push_back( false );
@@ -343,32 +343,31 @@ StETofHitMaker::InitRun( Int_t runnumber )
     // --------------------------------------------------------------------------------------------
     // initializie etof geometry
     // --------------------------------------------------------------------------------------------
-    
+
     if( !mETofGeom ) {
       LOG_INFO << " creating a new eTOF geometry . . . " << endm;
       mETofGeom = new StETofGeometry( "etofGeometry", "etofGeometry in HitMaker" );
     }
-    
+
     if( mETofGeom && !mETofGeom->isInitDone() ) {
       LOG_INFO << " eTOF geometry initialization ... " << endm;
-      
+
       if( !gGeoManager ) GetDataBase( "VmcGeometry" );
-      
+
       if( !gGeoManager ) {
-	LOG_ERROR << "Cannot get GeoManager" << endm;
-	return kStFatal;
+        LOG_ERROR << "Cannot get GeoManager" << endm;
+        return kStFatal;
       }
-        
+
       LOG_DEBUG << " gGeoManager: Should set alignment file now! " << mFileNameAlignParam <<" ! "<< endm;
-	if (mFileNameAlignParam !=  ""){
-	  LOG_INFO << " gGeoManager: Setting alignment file: " << mFileNameAlignParam << endm;
-	  mETofGeom->setFileNameAlignParam(mFileNameAlignParam);
-	}
-	const double safetyMargins[ 2 ] = { 0., 0. };
-	mETofGeom->init( gGeoManager, safetyMargins, 0 ); //don't use helix swimmer here. Probably needs an additional include
-       	LOG_DEBUG << " init done " << endm;
+      if (mFileNameAlignParam !=  ""){
+        LOG_INFO << " gGeoManager: Setting alignment file: " << mFileNameAlignParam << endm;
+        mETofGeom->setFileNameAlignParam(mFileNameAlignParam);
+      }
+      const double safetyMargins[ 2 ] = { 0., 0. };
+      mETofGeom->init( gGeoManager, safetyMargins, 0 ); //don't use helix swimmer here. Probably needs an additional include
+      LOG_DEBUG << " init done " << endm;
     }
-    
 
     return kStOk;
 }
@@ -392,7 +391,6 @@ StETofHitMaker::FinishRun( Int_t runnumber )
     if( mETofGeom ) {
       mETofGeom->reset();
     }
-
 
     return kStOk;
 }
@@ -596,7 +594,7 @@ StETofHitMaker::processMuDst()
 
 
 //_____________________________________________________________
-// get the start time -- from bTOF header from bTOF header for now
+// get the start time -- from bTOF header for now
 double
 StETofHitMaker::startTime()
 {
@@ -2365,10 +2363,10 @@ StETofHitMaker::updateClockJumpMap( const std::map< int, int >& clockJumpDir )
 void
 StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& time )
 {
-   switch(modMode){
+  switch (modMode) {
 
     double x;
-    
+
   case 0:
     return;
 
@@ -2376,7 +2374,7 @@ StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& t
     localX *= -1;
     localY *= -1;
     break;
-    
+
   case 2:
     localX *= -1;
     break;
@@ -2402,5 +2400,4 @@ StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& t
     localY = 9999;
     break;
   }
-  
 }
