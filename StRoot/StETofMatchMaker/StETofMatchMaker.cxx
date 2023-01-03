@@ -765,7 +765,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
                 continue;
             }
 
-            StructETofHit detectorHit;
+            StructETofHit detectorHit{};
 
             detectorHit.sector         = aHit->sector();
             /*
@@ -795,7 +795,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
                 continue;
             }
 
-            StructETofHit detectorHit;
+            StructETofHit detectorHit{};
 
             detectorHit.sector         = aHit->sector();
             /*
@@ -1176,7 +1176,7 @@ StETofMatchMaker::extrapolateTrackToETof( eTofHitVec& intersectionVec, const StP
             LOG_INFO << "local coordinates: "  << localVec.at( i ).x() << ", " << localVec.at( i ).y() << ", " << localVec.at( i ).z() << endm;
         }
 
-        StructETofHit intersect;
+        StructETofHit intersect{};
 
         mETofGeom->decodeVolumeIndex( idVec.at( i ), intersect.sector, intersect.plane, intersect.counter, intersect.strip );
 
@@ -1267,7 +1267,7 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
             }
 
             if( isMatch ) {
-                StructETofHit matchCand;
+                StructETofHit matchCand{};
 
                 matchCand.sector        = detHitIter->sector;
                 matchCand.plane         = detHitIter->plane;
