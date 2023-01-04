@@ -356,7 +356,7 @@ StETofHitMaker::InitRun( Int_t runnumber )
       
       if( !gGeoManager ) {
 	LOG_ERROR << "Cannot get GeoManager" << endm;
-	return kStErr;
+	return kStFatal;
       }
         
       LOG_DEBUG << " gGeoManager: Should set alignment file now! " << mFileNameAlignParam <<" ! "<< endm;
@@ -364,8 +364,7 @@ StETofHitMaker::InitRun( Int_t runnumber )
 	  LOG_INFO << " gGeoManager: Setting alignment file: " << mFileNameAlignParam << endm;
 	  mETofGeom->setFileNameAlignParam(mFileNameAlignParam);
 	}
-	const double safetyMargins[ 2 ] = { 0., 0. };
-        mETofGeom->init( gGeoManager, safetyMargins, 0 ); //don't use helix swimmer here. Probably needs an additional include
+        mETofGeom->init( gGeoManager); //don't use helix swimmer here. Probably needs an additional include
 	LOG_DEBUG << " init done " << endm;
     }
     

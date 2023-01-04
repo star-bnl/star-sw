@@ -151,27 +151,23 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mMatchDistX(  5. ),
   mMatchDistY( 10. ),
   mMatchDistT( 99999. ),
+  mT0corrVec(),
   mT0corr( 0. ),
   mT0switch( 0 ),
   mNupdatesT0( 0 ),
+  mIndex2Primary(),
   mMatchRadius( 0. ),
-  mHistFileName( "" )
+  mLocalYmax(16.),
+  mClockJumpCand(),
+  mClockJumpDirection(),
+  mHistFileName( "" ),
+  mHistograms(),
+  mHistograms2d()
 {
-    mT0corrVec.clear();
     mT0corrVec.reserve( 500 );
-
-
-    mIndex2Primary.clear();
-
     mTrackCuts.push_back( 0. ); // nHitsFit
     mTrackCuts.push_back( 0. ); // nHitsRatio
     mTrackCuts.push_back( 0. ); // low pt
-
-    mClockJumpCand.clear();
-    mClockJumpDirection.clear();
-    
-    mHistograms.clear();
-    mHistograms2d.clear();
 }
 
 
@@ -784,7 +780,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
                 continue;
             }
 
-	    if( fabs(aHit->localY()) > 16.0 ) {//reject unphysical hits outside of detector surface from mismatches PW
+	    if( fabs(aHit->localY()) > mLocalYmax ) {//reject unphysical hits outside of detector surface from mismatches PW
 	      continue;
             }
 	    
@@ -818,7 +814,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
                 continue;
             }
 
-	    if( fabs(aHit->localY()) > 16.0 ) {//reject unphysical hits outside of detector surface from mismatches PW
+	    if( fabs(aHit->localY()) > mLocalYmax ) {//reject unphysical hits outside of detector surface from mismatches PW
 	      continue;
             }
 
