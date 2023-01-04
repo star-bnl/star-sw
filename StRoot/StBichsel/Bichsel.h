@@ -63,7 +63,7 @@ class Bichsel {
   }
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z) {
     return m_dEdxParameterization->GetProbability(log10bg,log2dx,z);}
-  const dEdxParameterization *Parameterization() const {return m_dEdxParameterization;}
+  const dEdxParameterization *Parameterization() {return m_dEdxParameterization;}
   virtual void Print();
   const Char_t      *Tag() const {return    m_dEdxParameterization->Tag();}   
   const TProfile2D  *P()   const {return     m_dEdxParameterization->P();}     
@@ -86,6 +86,10 @@ class Bichsel {
   Double_t IfitTrs (Int_t part, Double_t log10bg) const {return m_dEdxParameterization->Get(IfitTrs (part), log10bg);}  // Estimation for Ifit from TpcRS
   Double_t IfitTrsB(Int_t part, Double_t log10bg) const {return m_dEdxParameterization->Get(IfitTrsB(part), log10bg);}  // Estimation for Ifit - Bichsel from TpcRS
   Double_t IfitTrsS(Int_t part, Double_t log10bg) const {return m_dEdxParameterization->Get(IfitTrsS(part), log10bg);}  // Estimation for relative sigma beta*gamma dependence for Ifit from TpcRS normalized to MIP
+  Double_t MostProbableZShift() {return m_dEdxParameterization->MostProbableZShift();}  //!
+  Double_t AverageZShift     () {return m_dEdxParameterization->AverageZShift();}       //!
+  Double_t I70Shift          () {return m_dEdxParameterization->I70Shift();}            //!
+  Double_t I60Shift          () {return m_dEdxParameterization->I60Shift();}            //!
 
   ClassDef(Bichsel,0)
 };

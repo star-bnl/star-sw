@@ -13,7 +13,6 @@ StRoot/StEEmcPool.*
 StRoot/StEEmcSimulatorMaker
 StRoot/StEEmcUtil
 StRoot/StEStructPool.*
-StRoot/StETofHitMaker
 StRoot/StEmbeddingUtilities
 StRoot/StEmcADCtoEMaker
 StRoot/StEmcCalibrationMaker
@@ -42,9 +41,6 @@ StRoot/StFlowMaker
 StRoot/StFmsHitMaker
 StRoot/StFmsPointMaker
 StRoot/StFmsUtil
-StRoot/StFstClusterMaker
-StRoot/StFstHitMaker
-StRoot/StFstSimMaker
 StRoot/StFtpcClusterMaker
 StRoot/StFtpcDriftMapMaker
 StRoot/StFtpcSlowSimMaker
