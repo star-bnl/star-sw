@@ -23,6 +23,10 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v6
 
+      - name: Define complete image tag
+        run: |
+          echo "TAG=${{ steps.branch-name.outputs.current_branch || steps.branch-name.outputs.tag }}-${{ env.STARENV }}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -40,23 +44,29 @@ jobs:
             starenv=${{ matrix.starenv }}
             compiler=${{ matrix.compiler }}
           load: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }}
 
       - name: Push container image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }}
 
       - name: Create latest tag for default branch
-        if: ${{ steps.branch-name.outputs.is_default == 'true' && env.STARENV == 'root5-gcc485' }}
+        if: ${{ steps.branch-name.outputs.is_tag == 'false' && steps.branch-name.outputs.is_default == 'true' && env.STARENV == 'root5-gcc485' }}
         run: |
-          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }} ghcr.io/${{ github.repository_owner }}/star-sw:latest
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:latest
           docker push ghcr.io/${{ github.repository_owner }}/star-sw:latest
 
       - name: Create latest tag for SL* branches
-        if: ${{ steps.branch-name.outputs.is_default == 'false' && env.STARENV == 'root5-gcc485' }}
+        if: ${{ steps.branch-name.outputs.is_tag == 'false' && steps.branch-name.outputs.is_default == 'false' && env.STARENV == 'root5-gcc485' }}
         run: |
-          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
           docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+
+      - name: Create image tag based on pushed tag
+        if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.tag }}
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.tag }}
 
   build-cleanup:
     runs-on: ubuntu-latest

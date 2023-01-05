@@ -1,4 +1,6 @@
+#ifndef __CINT__
 #include "StBFChain/StBFChain.h"
+#endif
 
 extern StBFChain* chain;
 

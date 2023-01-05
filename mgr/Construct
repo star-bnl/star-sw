@@ -268,7 +268,7 @@ if ( defined($SKIP_DIRS) ) {
 }
 
 if ( $#items > -1){
-  if (! $item) {$items  =       join("|",@items);}
+  if (!$items) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
   print "SKIP_DIRS is now: $#items $items\n";
 }
@@ -399,12 +399,15 @@ if ($STAR_SYS !~ /x86_darwin/) {
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
+@skip_dirs = split(/\|/, $items);
+
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir or -l $dir ) {
 #	next if $param::include && $dir !~ /$param::include/o;
 #	next if $param::exclude && $dir =~ /$param::exclude/o;
         print "Add dir : $dir\n" if $param::debug;
         #push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        next if grep($dir =~ m/$_/, @skip_dirs);
         push @packages, $dir;
     }
 }

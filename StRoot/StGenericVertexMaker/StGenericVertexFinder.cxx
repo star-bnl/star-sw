@@ -7,21 +7,21 @@
  * Description: Base class for vertex finders
  *
  ***************************************************************************/
-#include <algorithm>
 #include <cmath>
+#include <vector>
 
-#include "TH1F.h"
-#include "TSpectrum.h"
-#include "TClonesArray.h"
+#include <TClonesArray.h>
+#include <TH1F.h>
+#include <TSpectrum.h>
 
-#include "StarRoot/TRMatrix.h"
-#include "StarRoot/TRSymMatrix.h"
+#include "StEvent/StDcaGeometry.h"
+#include "StEvent/StEvent.h"
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
-#include "StEvent/StDcaGeometry.h"
-#include "StEvent/StEventTypes.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StarRoot/TRMatrix.h"
+#include "StarRoot/TRSymMatrix.h"
 
 
 // Initialize static variable with default values
