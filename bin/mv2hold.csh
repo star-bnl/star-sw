@@ -1,5 +1,6 @@
 #! /bin/tcsh -f
-set D = ~/work/Histograms/RunXIX_XXII_78
+#set D = ~/work/Histograms/RunXIX_XXII_78
+set D = ~/work/Histograms/RunXX210
 #set T = TpcSecRowB; 
 #set T = TpcZCorrectionC;  
 #set T = TpcEtaCorrectionB; 
