@@ -139,7 +139,6 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 
 	StRnDHitCollection *fsicollection = event->rndHitCollection();
 
-	const int NDISC = 6;
 	const int MAXR = mNumR;
 	const int MAXPHI = mNumPHI * mNumSEC;
 

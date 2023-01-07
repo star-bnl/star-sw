@@ -9,6 +9,7 @@ class St_tpcPadGainT0C : public TChair {
   static St_tpcPadGainT0C* 	instance();
   tpcPadGainT0_st 	*Struct() 	const {return ((St_tpcPadGainT0 *) Table())->GetTable();}
   Int_t 	run()           	const {return Struct()->run;}
+  Float_t      *Gains(Int_t sector, Int_t row)  {return (((St_tpcPadGainT0 *) Table())->GetTable())->Gain[sector-1][row-1];}
   Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const {
     Float_t gain = 0;
     if ((sector > 0 && sector <= 24) && (row > 0 && row <= St_tpcPadConfigC::instance()->padRows(sector)) && (pad > 0 && pad <= 182)) { 

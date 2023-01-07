@@ -412,13 +412,7 @@ StETofHitMaker::processStEvent()
     }
 
     if( etofCollection->hitsPresent() ) {
-        StSPtrVecETofHit& etofHits = etofCollection->etofHits();
-        //LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
-
         fillHitQA( isMuDst, tstart );
-    }
-    else {
-       // LOG_INFO << "processStEvent() - no hits" << endm;
     }
 }
 
@@ -482,13 +476,7 @@ StETofHitMaker::processMuDst()
 
 
     if( mMuDst->numberOfETofHit() ) {
-        size_t nHits = mMuDst->numberOfETofHit();
-        //LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
-
         fillHitQA( isMuDst, tstart );
-    }
-    else {
-        //LOG_INFO << "processMuDst() - no hits" << endm;
     }
 }
 //_____________________________________________________________
@@ -1200,9 +1188,6 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
 
     int nHitsPrinted = 0;
 
-    int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
-    //LOG_INFO << "fillUnclusteredHitQA(): -- event time: " << eventTime << endm;
-
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;
 
@@ -1284,9 +1269,6 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
 
             std::string histNamePosJump = "unclusteredHit_jump_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
             if( hit->clusterSize() > 100 ) mHistograms.at( histNamePosJump )->Fill( hit->localX(), hit->localY() );
-
-            //std::string histNamePosTime = "unclusteredHit_pos_time_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-            //mHistograms.at( histNamePosTime )->Fill( eventTime, hit->localY() );
 
             // ---------------------------------------
             if( fabs( tstart + 9999. ) < 1.e-5 ) continue;
