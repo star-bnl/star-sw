@@ -1717,10 +1717,6 @@ Bfc_st BFC[] = { // standard chains
   // RHICf
   {"rhicfDat" ,"","", "StEvent,RhicfUtil,rhicfdb",
    "StRHICfRawHitMaker","StRHICfRawHitMaker","Fill RHICf raw data", kFALSE},
-  {"rhicfCali" ,"","", "StEvent,RhicfUtil,rhicfdb",
-   "StRHICfHitMaker","StRHICfHitMaker","RHICf calibration", kFALSE},
-  {"rhicfRec" ,"","", "StEvent,RhicfUtil,rhicfdb",
-   "StRHICfPointMaker","StRHICfPointMaker","RHICf reconstruction", kFALSE},
   // FCS
   {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint",         "StMaker","StChain","FCS chain",kFALSE},
   {"fcsSim",""    ,"fcsChain","StEvent,fcsDb",
