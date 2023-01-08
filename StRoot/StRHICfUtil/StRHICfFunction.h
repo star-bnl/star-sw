@@ -19,8 +19,6 @@
 
 using namespace std;
 
-class StEnumerations;
-
 enum RHICfRunType
 {
 	kRHICfTL = 0, 

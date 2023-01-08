@@ -19,7 +19,6 @@
 #include "StChain/StRtsTable.h"
 #include "StEvent/StEvent.h"
 
-#include "StEvent/StEnumerations.h"
 #include "StRHICfDbMaker/StRHICfDbMaker.h"
 #include "StEvent/StRHICfCollection.h"
 #include "StEvent/StRHICfRawHit.h"
@@ -61,7 +60,7 @@ Int_t StRHICfRawHitMaker::Make()
 	if(!mRHICfRawHitColl){return kStFatal;}
 
 	eventPtr->setRHICfCollection(mRHICfCollection);
-
+	
 	StRtsTable *daqData = GetNextRaw();
 	if(daqData){
 		unsigned int* gendata = (unsigned int*) daqData->GetTable();
