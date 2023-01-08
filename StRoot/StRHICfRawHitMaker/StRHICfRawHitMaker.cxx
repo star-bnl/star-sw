@@ -55,7 +55,7 @@ Int_t StRHICfRawHitMaker::Make()
 	if(!eventPtr) return kStFatal;
 	mRHICfCollection = new StRHICfCollection;
 	if(!mRHICfCollection){return kStFatal;}
-
+	
 	mRHICfRawHitColl=mRHICfCollection->rawHitCollection();
 	if(!mRHICfRawHitColl){return kStFatal;}
 
@@ -67,8 +67,6 @@ Int_t StRHICfRawHitMaker::Make()
 		unsigned short* rawdata = (unsigned short*) daqData->GetTable();
 
 		// Insert general data
-		mRHICfCollection -> setRunNumber(gendata[0]);
-		mRHICfCollection -> setEventNumber(gendata[1]);
 		mRHICfCollection -> setRunType(getRunType());
 
 		unsigned int bunchIdx = mRHICfDbMaker->getBunchNumberAddress();
