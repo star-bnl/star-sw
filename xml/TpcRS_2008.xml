@@ -41,7 +41,8 @@ setenv STARFPE NO
   ls -l *${fileB}*.root Done/*${fileB}*.root
   if (! $?) exit 0;
 # root.exe -q -b 'bfc.C(200,"mtin,MC.2020,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'",0,"'${fileB}'.root")' &gt;&amp; ${logFile}
-     root.exe -q -b 'bfc.C('${f}','${l}',"mtin,TpcRS,P2020a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,evout,NoHistos,noTags,noRunco,StiCA,McTpcAna,PicoVtxDefault","'${evtsFile}'","'${fileB}'.root")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C('${f}','${l}',"mtin,TpcRS,P2020a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,-in","'${evtsFile}'","'${fileB}'.root")' &gt;&amp; ${logFile}
+     root.exe -q -b 'bfc.C('${f}','${l}',"mtin,TpcRS,pp2008a,TpxRaw,TpxClu,evout,NoHistos,noTags,noRunco,StiCA,McTpcAna,PicoVtxDefault,-in","'${evtsFile}'","'${fileB}'.root")' &gt;&amp; ${logFile}
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <input URL="command:daq2020TpcRS.pl" />

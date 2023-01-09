@@ -39,8 +39,9 @@
 #  cp ${evtsFile} ${evtsFileB}
 # TFG19m, TFG20a 12/26/2019 12/29/2019
 # OFL
-         root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#         root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 # ONL     root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+         root.exe -b -q 'bfc.C('${f}','${l}',"pp2008a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
 #  gzip ${logFile}
 #  rm ${muFile}
@@ -61,5 +62,6 @@
 <!-- <input URL="command:daq_2020d.pl" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2020/254/*/st_physics_adc_*.daq" /> -->
 <!-- <input URL="command:daq_2020TpcRS.pl" /> -->
-<input URL="file:/hlt/cephfs/daq/2020/11p5GeV_2020/*adc*.daq"  />
+<!-- <input URL="file:/hlt/cephfs/daq/2020/11p5GeV_2020/*adc*.daq"  /> -->
+<input URL="file:/hlt/cephfs/daq/2008/*/*/*adc*.daq"  />
 </job>
