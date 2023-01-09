@@ -43,7 +43,8 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 -Dtable=ON \
 -Dvmc=ON \
 -Dimt=OFF \
--Druntime_cxxmodules=ON
+-Druntime_cxxmodules=ON \
+-Dr=OFF
 #-Dcxx11=ON 
 #-DCMAKE_CXX_STANDARD
 # problems with tbb => -Dimt=OFF 

@@ -6,6 +6,10 @@ else
 endif
 if (! -r Recover.log) root.exe -q -b lMuDst.C 'Recover.C("./*'${list}'")' | tee Recover.log
 if (! -d Zombie) mkdir Zombie
-foreach f (` grep Zombie Recover.log | awk '{print $3}'`)
+foreach f (` grep 'is Zombie' Recover.log | awk '{print $3}'`)
   set b = `basename ${f} ${list}`; mv ${b}* Zombie/
+end
+if (! -d Done) mkdir Done
+foreach f (` grep 'is o.k.'  Recover.log | awk '{print $3}'`)
+  set b = `basename ${f} ${list}`; mv ${b}* Done/
 end
