@@ -41,11 +41,11 @@ void Cint2Root(TString topDir = ".") {
       cout << "\tFail to make TTable from " << path.Data() << endl;
       continue;
     } else {
-      newdat->Print(0,10);
+      //      newdat->Print(0,10);
     }
     TFile *f = new TFile(rootf,"recreate");
     newdat->Write();
-    //    delete f;
+    delete f;
     delete newdat;
     delete gGeoManager;
     gGeoManager = 0;

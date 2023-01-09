@@ -20,6 +20,7 @@
   echo "${b}"
   root.exe -q -b NPoints*UGP${b}.root  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
   end 
+  dir TpcSec*.20*root | awk -F\. '{printf("ln -s TpcLengthCorrectionMDN.%s.C TpcLengthCorrectionMDN.%s.%s.C\n",$5,$2,$3)}'
 */
 #ifndef __CINT__
 #include <stdlib.h>
