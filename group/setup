@@ -52,6 +52,13 @@ setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
 source $GROUP_DIR/unix_programs.csh
 
 switch ($pkg)
+    case "spack":
+    case "SPACK":
+      set SPACK_SETUP="/cvmfs/star.sdcc.bnl.gov/star-spack/setup.csh"
+      if ( -e $SPACK_SETUP ) then
+       source $SPACK_SETUP 
+      endif
+        breaksw
     case "NEW_ENV*":
     case "new_env*":
       if (! $?STAR_NEW_ENVIRONMENT) then
