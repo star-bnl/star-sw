@@ -468,40 +468,30 @@ int StFcsWaveformFitMaker::Make() {
     if(mEnergySelect[0]==0) return kStOK;  // don't touch energy, directly from MC
 
     //Loop over all hits and run waveform analysis of the choice
-    float res[8];
+    float res[8] = {0};
     TF1* func=0;
     for(int det=0; det<kFcsNDet; det++) {      
 	StSPtrVecFcsHit& hits = mFcsCollection->hits(det);
 	int ehp = det/2;
 	int nhit=hits.size();
 	for(int i=0; i<nhit; i++){ //loop over all hits  	    
-	  
+	    memset(res,0,sizeof(res));
 	  auto start=std::chrono::high_resolution_clock::now();
 
 	  //if we are geting pedestal from data
-	  float ped=0.0;
 	  if(mPedMin>=0){
-	    StFcsHit* hit = hits[i];
-	    int p=0;
-	    int n = hit->nTimeBin();
-	    for(int i=0; i<n; i++){
-	      int tb=hit->timebin(i);
-	      if(tb>=mPedMin) p+=hit->adc(i);
-	      if(tb>=mPedMax) break;
-	    }       
-	    ped = float(p)/(mPedMax-mPedMin+1.0);
-	    mDb->setPedestal(hit->ehp(), hit->ns(), hit->dep(), hit->channel(), ped);
+	    AnaPed( hits[i], res[6], res[7] );
+	    mDb->setPedestal(hits[i]->ehp(), hits[i]->ns(), hits[i]->dep(), hits[i]->channel(), res[6] );
 	    if(GetDebug()>1){
 	      char name[100];
-	      mDb->getName(hit->ehp(), hit->ns(), hit->dep(), hit->channel(),name);
-	      printf("%s Pedestal=%d/(%d-%d+1)=%8.2f\n",name,p,mPedMax,mPedMin,ped);
+	      mDb->getName(hits[i]->ehp(), hits[i]->ns(), hits[i]->dep(), hits[i]->channel(),name);
+	      printf("%s Pedestal (%d-%d+1)=%8.2f\n",name,mPedMax,mPedMin,res[6] );
 	    }
 	  }
 	  
 	  //run waveform analysis of the choice and store as AdcSum	  
-	  memset(res,0,sizeof(res));
-	  float integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,ped);
-	  hits[i]->setAdcSum(integral);	    
+	  float integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,res[6]);
+	  hits[i]->setAdcSum(integral);
 	  hits[i]->setFitPeak(res[2]);	    
 	  hits[i]->setFitSigma(res[3]);	    
 	  hits[i]->setFitChi2(res[4]);	    
@@ -520,11 +510,11 @@ int StFcsWaveformFitMaker::Make() {
 	  }
 	  if( mTest==5 ){
 	    auto startg = std::chrono::high_resolution_clock::now();
-	    integral = analyzeWaveform(10,hits[i],res,func,ped);
+	    integral = analyzeWaveform(10,hits[i],res,func,res[6]);
 	    auto stopg = std::chrono::high_resolution_clock::now();
 	    long long usecg = chrono::duration_cast<chrono::microseconds>(stopg-startg).count();
 	    auto startp = std::chrono::high_resolution_clock::now();
-	    integral = analyzeWaveform(12,hits[i],res,func,ped);
+	    integral = analyzeWaveform(12,hits[i],res,func,res[6]);
 	    auto stopp = std::chrono::high_resolution_clock::now();
 	    long long usecp = chrono::duration_cast<chrono::microseconds>(stopp-startp).count();
 	    mH1_PeakTimingGaus->Fill(float(usecg)/1000.0);
@@ -620,6 +610,45 @@ TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(StFcsHit* hit){
     return gae;
 }
 
+
+float StFcsWaveformFitMaker::AnaPed( TGraphAsymmErrors* g, float& ped, float& pedstd )
+{
+  int n = g->GetN();
+  double *t = g->GetX();
+  double *a = g->GetY();    
+  int p=0;
+  double sumsq = 0;//For variance
+  for(int i=0; i<n; i++){
+    int tb1=t[i];
+    if(mPedMin<=tb1 && tb1<=mPedMax){    
+      p+=a[i];
+      sumsq += a[i]*a[i];
+    }
+  }
+  ped = float(p)/(mPedMax-mPedMin+1.0);
+  pedstd = sqrt( ( sumsq-((double(p)*double(p))/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+  return ped;
+}
+
+float StFcsWaveformFitMaker::AnaPed( StFcsHit* hit, float& ped, float& pedstd )
+{
+  int p=0;
+  int n = hit->nTimeBin();
+  double sumsq = 0;//For variance
+  for(int i=0; i<n; i++){
+    int tb=hit->timebin(i);
+    if(mPedMin<=tb && tb<=mPedMax ){
+      int adc = hit->adc(i);
+      p+=adc;
+      sumsq += adc*adc;
+    }
+    if(tb>=mPedMax) break;
+  }
+  ped = float(p)/(mPedMax-mPedMin+1.0);
+  pedstd = sqrt( ( sumsq-((double(p)*double(p))/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+  return ped;
+}
+
 float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, float* res, TF1*& func, float ped){
     if(func) delete func;
     func=0;
@@ -631,11 +660,12 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
     case  4: integral = highest3(g, res); break;
     case 10: integral = gausFit(g, res, func, ped); break;
     case 11: integral = gausFitWithPed(g, res, func); break;
-    case 12: integral = PulseFit1(g,res,func); break;
-    case 13: integral = PulseFit2(g,res,func); break;
-    case 14: integral = PulseFitAll(g,res,func); break;
-    case 21: integral = PedFit(g, res, func); break;
-    case 31: integral = LedFit(g, res, func); break;
+    case 12: integral = PulseFit1(g,res,func,ped); break;
+    case 13: integral = PulseFit2(g,res,func,ped); break;
+    case 14: integral = PulseFitAll(g,res,func,ped); break;
+    case 15: integral = PulseFit2WithPed(g, res, func); break;
+    case 16: integral = PulseFitAllWithPed(g, res, func); break;
+    case 17: integral = PedFitPulseFit(g, res, func); break;
     default: 
       LOG_WARN << "Unknown fit/sum method select=" << select << endm;
     }
@@ -1155,23 +1185,9 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 }
 
 float StFcsWaveformFitMaker::gausFitWithPed(TGraphAsymmErrors* g, float* res, TF1*& func){
-  int n = g->GetN();
-  double *t = g->GetX();
-  double *a = g->GetY();    
-  int p=0;
-  double sumsq = 0;//For variance
-  for(int i=0; i<n; i++){
-    int tb1=t[i];
-    if(tb1>=mPedMin && tb1<=mPedMax){    
-      p+=a[i];
-      sumsq += a[i]*a[i];
-    }
-  }
-  float ped = float(p)/(mPedMax-mPedMin+1.0);
-  res[6] = ped;
-  res[7] = sqrt( ( sumsq-((double(p)*double(p))/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-  printf("Pedestal=%6.2f/(%6.2f-%6.2f+1)=%6.2f +- %6.2f\n",float(p),float(mPedMax),float(mPedMin),ped,res[7]);
-  return gausFit(g, res, func, ped);
+  AnaPed( g, res[6], res[7] );
+  printf("Pedestal (%6.2f-%6.2f+1)=%6.2f +- %6.2f\n",float(mPedMax),float(mPedMin),res[6],res[7]);
+  return gausFit(g, res, func, res[6]);
 }
 
 void StFcsWaveformFitMaker::drawRegion(int det, int col_low, int row_low, int col_high, int row_high, int event){
@@ -1275,9 +1291,11 @@ void StFcsWaveformFitMaker::printArray() const{
   }
 }
 
-float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*& func){
+float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*& func, float ped)
+{
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
-  else{mPulseFit->SetData(gae);}//Resets finder
+  else{ mPulseFit->SetData(gae); }//Resets finder
+  if( fabs(res[7]) > 0.000001 ){ mPulseFit->SetBaseline(ped,res[7]); }//only change pedestal if standard deviation is greater than 0, which only happens if a pedestal is calculated
   if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
 
   Int_t compidx = mPulseFit->FoundPeakIndex();
@@ -1442,9 +1460,11 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
   return res[0];
 }
 
-float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*& func){
+float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*& func, float ped)
+{
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
-  else{mPulseFit->SetData(gae);}//Resets finder
+  else{ mPulseFit->SetData(gae); }//Resets finder
+  if( fabs(res[7]) > 0.000001 ){ mPulseFit->SetBaseline(ped,res[7]); }//only change pedestal if standard deviation is greater than 0, which only happens if a pedestal is calculated
   if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
 
   Int_t compidx = mPulseFit->FoundPeakIndex();
@@ -1571,9 +1591,11 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   return res[0];
 }
 
-float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1*& func){
+float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1*& func, float ped)
+{
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
-  else{mPulseFit->SetData(gae);}//Resets finder
+  else{ mPulseFit->SetData(gae); }//Resets finder
+  if( fabs(res[7]) > 0.000001 ){ mPulseFit->SetBaseline(ped,res[7]); }//only change pedestal if standard deviation is greater than 0, which only happens if a pedestal is calculated
   if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
 
   Int_t compidx = mPulseFit->FoundPeakIndex();
@@ -1616,52 +1638,29 @@ float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1
   return res[0];
 }
 
-float StFcsWaveformFitMaker::PedFit(TGraphAsymmErrors* gae, float* res, TF1*& func){
-  if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae);}
-  else{mPulseFit->SetData(gae);}//Resets finder
-  if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
-  
-  mPulseFit->SetRange(-4,0,2000,5000);
-  mPulseFit->SetBaselineFit(func);//Need to do this since func gets deleted outside
-  mPulseFit->SetData(gae);
-  mPulseFit->AnalyzeForPedestal();//Must be called before anything else otherwise crash
-  func = mPulseFit->BaselineFit();
-  res[0] = mPulseFit->Baseline();
-  res[1] = mPulseFit->BaselineSigma();
-  if( func==0 ){ res[2]=0.0; return res[0];}
-  res[2] = func->GetChisquare()/func->GetNDF();   //chi2 from signal fit
-  return res[0];
+float StFcsWaveformFitMaker::PulseFit2WithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
+{
+  AnaPed(gae,res[6],res[7]);
+  return PulseFit2(gae,res,func,res[6]);
 }
 
-float StFcsWaveformFitMaker::LedFit(TGraphAsymmErrors* gae, float* res, TF1*& func)
+float StFcsWaveformFitMaker::PulseFitAllWithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
 {
-  if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae);}
+  AnaPed(gae,res[6],res[7]);
+  return PulseFitAll(gae,res,func,res[6]);
+}
+
+float StFcsWaveformFitMaker::PedFitPulseFit(TGraphAsymmErrors* gae, float* res, TF1*& func)
+{
+  if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
   else{mPulseFit->SetData(gae);}//Resets finder
   if( GetDebug()>2){mPulseFit->SetDebug(1);}
 
-  mPulseFit->SetBaselineSigmaScale(5);
-  mPulseFit->SetRange(-4,0,2000,5000);
-  mPulseFit->SetSearchWindow(centerTB(),4);//Check +- 4tb around triggered crossing. Mmay need to be adjusted based on data
-  //Since LED data is raw (not pedestal subtracted) determine baseline first
-  mPulseFit->AnalyzeForPedestal();//Must be called before anything else otherwise crash
+  mPulseFit->AnalyzeForPedestal();
+  res[6] = mPulseFit->Baseline();
+  res[7] = mPulseFit->BaselineSigma();
 
-  Int_t compidx = mPulseFit->FoundPeakIndex();
-  if( compidx<0 ){ compidx = mPulseFit->AnalyzeForPeak(); }
-  int npeaks = mPulseFit->NPeaks();
-
-  if( compidx==npeaks ){ res[0] = 0; }//no found peak case sum is 0
-  else{//At least 1 peak found
-    func = mDbPulse->createPulse(mMinTB,mMaxTB,2+npeaks*3);
-    mPulseFit->SetFitPars(func);
-    TFitResultPtr result = gae->Fit(func,"BNRQ");
-    res[5] = npeaks;
-    res[1] = func->GetParameter(compidx*3 + 2);
-    res[2] = func->GetParameter(compidx*3 + 3);
-    res[3] = func->GetParameter(compidx*3 + 4);
-    res[4] = func->GetChisquare()/func->GetNDF();
-    res[0] = res[1]*res[3]*StFcsDbPulse::sqrt2pi();
-  }
-  return res[0];
+  return PulseFitAll(gae,res,func,res[6]);
 }
 
 int StFcsWaveformFitMaker::GenericPadPos(int value, int Nvals, int PadNums )

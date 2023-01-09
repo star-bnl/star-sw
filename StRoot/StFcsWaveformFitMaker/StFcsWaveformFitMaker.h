@@ -143,6 +143,8 @@ public:
        - res[3] = pulse peak sigma [timebin]
        - res[4] = pulse fit chi2/NDF
        - res[5] = number of peaks
+       - res[6] = pedestal Value
+       - res[7] = pedestal Standard Deviation
 	      
        @param f TF1 function to use for fitting if needed, gets deleted on function call so analysis method must create a new one each time
        @param ped pedestal value to use in the analysis method
@@ -152,31 +154,22 @@ public:
     float analyzeWaveform(int select, TGraph* g, float* res, TF1*& f,float ped=0.0);                      //!< same as #analyzeWaveform(int, TGraphAsymmErrors*, float*, TF1*&, float) except will generate TGraphAsymmErrors object from timebin and adc data in a TGraph
     float analyzeWaveform(int select, StFcsHit* hit, float* res, TF1*& f,float ped=0.0);                  //!< same as #analyzeWaveform(int, TGraphAsymmErrors*, float*, TF1*&, float) except will generate TGraphAsymmErrors object from #StFcsHit
 
+    //Pedestal analysis methods
+    float AnaPed( TGraphAsymmErrors* g, float& ped, float& pedstd );
+    float AnaPed( StFcsHit* hit, float& ped, float& pedstd );
     //actual analysis methods
-    float sum8    (TGraphAsymmErrors* g, float *res);                          //!< mEnergySelect=1
-    float sum16   (TGraphAsymmErrors* g, float *res);                          //!< mEnergySelect=2
-    float highest (TGraphAsymmErrors* g, float *res);                          //!< mEnergySelect=3
-    float highest3(TGraphAsymmErrors* g, float *res);                          //!< mEnergySelect=4
-    float gausFit (TGraphAsymmErrors* g, float *res, TF1*& f, float ped=0.0);  //!< mEnergySelect=10
-    float gausFitWithPed (TGraphAsymmErrors* g, float *res, TF1*& f);          //!< mEnergySelect=11
-    float PulseFit1(TGraphAsymmErrors* g, float* res, TF1*& f);                //!< mEnergySelect=12
-    float PulseFit2(TGraphAsymmErrors* g, float* res, TF1*& f);                //!< mEnergySelect=13
-    float PulseFitAll(TGraphAsymmErrors* g, float* res, TF1*& f);              //!< mEnergySelect=14
-    //Pedestal Analysis methods
-    //res[0] pedestal Value
-    //res[1] pedestal Error
-    //res[2] pedestal Chi2/NDF
-    float PedFit(TGraphAsymmErrors* g, float* res, TF1*& f );//!< mEnergySelect=21
-   
-    //LED Analysis methods
-    // res[1] pulse peak height [ch]
-    // res[2] pulse peak position [timebin]
-    // res[3] pulse peak sigma [timebin]
-    // res[4] pulse fit chi2
-    // res[5] pedestal Value
-    // res[6] pedestal Sigma
-    // res[7] pedestal Chi2/NDF
-    float LedFit( TGraphAsymmErrors* g, float* res, TF1*& f);//!< mEnergySelect=31 (TF1 is for LED pulse fit)
+    float sum8    (TGraphAsymmErrors* g, float *res);                             //!< mEnergySelect=1
+    float sum16   (TGraphAsymmErrors* g, float *res);                             //!< mEnergySelect=2
+    float highest (TGraphAsymmErrors* g, float *res);                             //!< mEnergySelect=3
+    float highest3(TGraphAsymmErrors* g, float *res);                             //!< mEnergySelect=4
+    float gausFit (TGraphAsymmErrors* g, float *res, TF1*& f, float ped=0.0);     //!< mEnergySelect=10
+    float gausFitWithPed (TGraphAsymmErrors* g, float *res, TF1*& f);             //!< mEnergySelect=11
+    float PulseFit1(TGraphAsymmErrors* g, float* res, TF1*& f, float ped=0.0);    //!< mEnergySelect=12, find and fit selected peaks around triggered crossing using #PeakCompare()
+    float PulseFit2(TGraphAsymmErrors* g, float* res, TF1*& f, float ped=0.0);    //!< mEnergySelect=13, (default) find and fit selected peaks around triggered crossing using #NPeaksPrePost()
+    float PulseFitAll(TGraphAsymmErrors* g, float* res, TF1*& f, float ped=0.0);  //!< mEnergySelect=14, fit all peaks less than mMaxPeak
+    float PulseFit2WithPed( TGraphAsymmErrors* g, float* res, TF1*& f);           //!< mEnergySelect=15, first find pedestal using #AnaPed(), then call #PulseFit2()
+    float PulseFitAllWithPed( TGraphAsymmErrors* g, float* res, TF1*& f);         //!< mEnergySelect=16, first find pedestal using #AnaPed(), then call #PulseFitAll()
+    float PedFitPulseFit( TGraphAsymmErrors* g, float* res, TF1*& f);             //!< mEnergySelect=17, first find pedestal using #StFcsPulseAna::AnalyzePedestal() then call #PulseFitAll()
   
     //Draw fits    
     void setMaxPage(int v){mMaxPage=v;}         //!< Max pages to draw
@@ -266,7 +259,7 @@ public:
      */
     void drawDualFit(UInt_t detid, UInt_t ch);
 
-  void printArray() const;                 //!< Print contents of #mChWaveData, excluding timebin and adc information
+    void printArray() const;                 //!< Print contents of #mChWaveData, excluding timebin and adc information
 
  protected:
     TClonesArray mChWaveData;  //!< Contains all graph data
@@ -379,7 +372,7 @@ public:
     //gausFit
     int mMinAdc=5;                       //!< minimum adc to be a peak
     int mTail=2;                         //!< pulse tail shape (0=none, 1=summer2020) 
-    int mMaxPeak=5;                      //!< max number of peak for trying to fit, if number of peaks >= #mMaxPeak do #sum8()
+    int mMaxPeak=5;                      //!< max number of peak for trying to fit in #gausFit() and #PulseFit2(), if number of peaks >= #mMaxPeak do #sum8()
 
     //Drawing fits
     TCanvas* mCanvas=0;                  //!< Canvas to draw channels on when drawing events

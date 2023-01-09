@@ -83,7 +83,7 @@ class StFcsPulseAna : public PeakAna
   void SetFitSignal(TF1* func){mF1_SignalFit=func;}      //!< @param func sets #mF1_SignalFit
   void SetBaselineFit(TF1* func){mF1_BaselineFit=func;}  //!< @param func sets #mF1_BaselineFit
 
-  void SetZS(){SetBaseline(0,0.6);}//Call this for ZS data which uses thresholds that are relevant for that. (like 0 baseline and 0.5 sigma so thereshold is at 2 since ZS is pedestal subtracted. Maybe even 0.3 so it is above one.
+  void SetZS(){SetBaseline(0,0.39);} //!< Call this for ZS data which uses thresholds that are relevant for that. (like 0 baseline and 0.5 sigma so thereshold is at 2 since ZS is pedestal subtracted. Maybe even 0.3 so it is above one.
 
   void AnalyzeForPedestal(); //!< Analyze graph data to determine baseline internally
   
