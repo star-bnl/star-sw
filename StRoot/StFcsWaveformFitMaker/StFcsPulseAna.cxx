@@ -620,17 +620,22 @@ Double_t StFcsPulseAna::PulseFit(Int_t Start, Int_t End)
   else{ mFitSum = true; return mSumAdcFit; }//If fit failed return 0 don't do a histogram sum
 }
 
-void StFcsPulseAna::SetFitPars(TF1* func)
+void StFcsPulseAna::SetFitPars(TF1*& func, int start, int end)
 {
-  if( mDbPulse==0 ){
-    if( func!=0 ){
-      func->FixParameter(0,0);
-      func->FixParameter(1,0);
-    }
-    return;
+  if( func!=0 ){
+    func->FixParameter(0,0);
+    func->FixParameter(1,0);
   }
+  if( mDbPulse==0 ){ return; }
   if( FoundPeakIndex()<0 ){ this->AnalyzeForPeak(); }
   int npeaks = NPeaks();
+  if( start>=npeaks ){ return; }
+  if( end>=npeaks ){ return; }
+  if( start<0 ){ start = 0; }
+  if( end<0 ){ end = npeaks-1; }
+  if( start>end ){ return; }
+
+  npeaks = end-start+1;  //Number of peaks to be used in function is end-start+1 since including end
   if( func==0 ){
     func = mDbPulse->createPulse(mXRangeMin,mXRangeMax,2+npeaks*3);
   }
@@ -640,25 +645,26 @@ void StFcsPulseAna::SetFitPars(TF1* func)
   para[1] = Baseline();
   func->SetParName(0,"NPeaks");
   func->SetParName(1,"Ped");
-  for( Int_t i=0; i<npeaks; ++i ){
+  for( int i=0; i<npeaks; ++i ){
     int j = 1+i*3+1;
     char name[10];
-    sprintf(name,"P%d_A",i);
+    sprintf(name,"P%d_A",start+i);
     func->SetParName(j,name);
-    para[j++] = GetPeak(i).mPeakY;
-    sprintf(name,"P%d_M",i);
+    para[j++] = GetPeak(start+i).mPeakY;
+    sprintf(name,"P%d_M",start+i);
     func->SetParName(j,name);
-    para[j++] = GetPeak(i).mPeakX;
-    sprintf(name,"P%d_S",i);
+    para[j++] = GetPeak(start+i).mPeakX;
+    sprintf(name,"P%d_S",start+i);
     func->SetParName(j,name);
     para[j] = mDbPulse->GSigma();
   }
   func->SetParameters(para);
+  
   func->FixParameter(0,npeaks);
   func->FixParameter(1,Baseline());
   for(int i=0; i<npeaks; i++){
     int j=1+i*3+1;
-    func->SetParLimits(j++,0.0,50000.0);       //limit peak not to go negative
+    func->SetParLimits(j++,0.0,50000.0);           //limit peak not to go negative
     func->SetParLimits(j,para[j]-2.0,para[j]+2.0); //limit peak position to +- 2TB
     func->SetParLimits(++j,0.5,10.0);              //limit sigma to go too narrow or wide
   }
