@@ -2364,8 +2364,6 @@ StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& t
 {
   switch (modMode) {
 
-    double x;
-
   case 0:
     return;
 
