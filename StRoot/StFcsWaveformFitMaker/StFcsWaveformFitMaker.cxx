@@ -98,6 +98,8 @@ StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mEnergySelect[1]=13; //default PulseFit2 for Hcal
     mEnergySelect[2]=1;  //default sum8 for Pres
 
+    mAnaWaveform = true; //default is to compute integral for the waveform
+
     for( UShort_t i=0; i<7; ++i ){
       if( i<3 ){
 	mH2_Dep0DepMod[i]=0;
@@ -489,9 +491,12 @@ int StFcsWaveformFitMaker::Make() {
 	    }
 	  }
 	  
-	  //run waveform analysis of the choice and store as AdcSum	  
-	  float integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,res[6]);
-	  hits[i]->setAdcSum(integral);
+	  //run waveform analysis of the choice and store as AdcSum
+	  float integral = hits[i]->adcSum();
+	  if( mAnaWaveform ){
+	    integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,res[6]);
+	    hits[i]->setAdcSum(integral);
+	  }
 	  hits[i]->setFitPeak(res[2]);	    
 	  hits[i]->setFitSigma(res[3]);	    
 	  hits[i]->setFitChi2(res[4]);	    

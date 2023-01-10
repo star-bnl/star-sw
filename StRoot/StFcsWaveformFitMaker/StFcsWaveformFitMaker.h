@@ -86,6 +86,7 @@ public:
     void setTail(int v);                            //!< Set tail parameters to use for #mDbPulse, see #StFcsDbPulse::setTail()
     void setMaxPeak(int v)        {mMaxPeak=v;}     //!< Set maximum number of peaks to fit, see #mMaxPeak
     void setPedTimeBins(int min, int max) {mPedMin=min; mPedMax=max;} //!< Set the timebin region where the pedestal occurs, for non-pedestal subtracted data
+    void setAnaWaveform(bool value=true){ mAnaWaveform=value; }   //!< Set whether to compute integral of waveform (true); or just recompute energy (false); see #mAnaWaveform
 
     TGraphAsymmErrors* resetGraph();    //!< Create or Reset TGraphAsymmErrors (at #mHitIdx)
   
@@ -358,6 +359,7 @@ public:
     char *mMeasureTime=0;                //!< output file for measuring fitting time
 
     int mEnergySelect[3];                //!< 0=MC (straight from dE), >0 see #analyzeWaveform()
+    bool mAnaWaveform;                   //!< if true (default) call #anlayzeWaveform() to integrate the waveform data, if false read integral from StFcsHit and only recompute energy using gain, and gain correction factors
     int mCenterTB=50;                    //!< center timebin for triggered crossing
     int mMinTB=0;                        //!< center timebin for triggered crossing
     int mMaxTB=512;                      //!< center timebin for triggered crossing
