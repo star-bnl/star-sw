@@ -285,7 +285,7 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
-    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
+    void init( TGeoManager* geoManager, const double* safetyMargins = 0, const bool useHelixSwimmer = false );
 
     void reset();
 
