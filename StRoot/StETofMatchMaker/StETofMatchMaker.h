@@ -99,11 +99,6 @@ private:
         Double_t        beta;
         Double_t        pathLength;
         Double_t        tof;
-
-        Int_t           idTruth;
-        Int_t           idTruthHit; 
-	Int_t           nHitsFit;   
-	bool            isMissMatch; 
     };
 
     typedef std::vector< StructETofHit > eTofHitVec;

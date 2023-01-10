@@ -1274,11 +1274,11 @@ StETofHitMaker::matchSides()
 		   if(mETofGeom){
 		   
 		     StMuPrimaryVertex* pVtx = mMuDst->primaryVertex( 0 );
-		     StThreeVectorD*  posGlo = new StThreeVectorD( mETofGeom->hitLocal2Master( constructedHit ));
-
+		     StThreeVectorD posGlo = mETofGeom->hitLocal2Master( constructedHit );
+		    
 		     if( pVtx ) {
-		       StThreeVectorD* vtxPos = new StThreeVectorD( pVtx->position());	
-		       exptof =  tofPathLength(vtxPos , posGlo , 0) / ( nanosecond * c_light );
+		       StThreeVectorF vtxPos = pVtx->position();	
+		       exptof =  tofPathLength(&vtxPos , &posGlo , 0) / ( nanosecond * c_light );
 		     }
 		   }
 		           		   
@@ -1306,9 +1306,9 @@ StETofHitMaker::matchSides()
 		     }
 		     
 		     if(mGet4doublejumpFlag.at(get4Nr) == 1){
-		       constructedHit->setTime(constructedHit->time() + 6.25);
+		       constructedHit->setTime(constructedHit->time() + eTofConst::coarseClockCycle);
 		       constructedHit->setClusterSize(constructedHit->clusterSize() + 200);
-		       tof += 6.25;
+		       tof += eTofConst::coarseClockCycle;
 		     }		        
 	    }
 	    }   
@@ -1548,8 +1548,8 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 LOG_DEBUG << "mergeClusters() - checking hit vector for possible hits to merge with..." << endm;
             }
 
-	    bool IsMissmatch = false; 
-	    int  IdTruth     = 0; 
+	    bool isMissmatch = false; 
+	    int  idTruth     = 0; 
 	    
             StETofHit* pHit = hitVec->at( 0 );
 
@@ -1660,11 +1660,11 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 		    if(mIsSim){
 		      
 		      if(pMergeHit->idTruth() !=pHit->idTruth()){
-			IdTruth = -99999;
-			IsMissmatch = 1;
+			idTruth = -99999;
+			isMissmatch = 1;
 		      }
-		      else if(!IsMissmatch){
-			IdTruth = pHit->idTruth();	
+		      else if(!isMissmatch){
+			idTruth = pHit->idTruth();	
 		      }
 		    }
 		    
@@ -1692,8 +1692,8 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
 	    // set idTruth if nothing to merge
 	    if(mIsSim){
-	      if(IdTruth == 0){
-		IdTruth = pHit->idTruth();
+	      if(idTruth == 0){
+		idTruth = pHit->idTruth();
 	      }
 	    }
 	    
@@ -1724,7 +1724,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             StETofHit* combinedHit = new StETofHit( sector, plane, counter, weightedTime, weightsTotSum, clusterSize, weightedPosX, weightedPosY );
 	    
 	    if(mIsSim){
-	      combinedHit->setIdTruth(IdTruth);
+	      combinedHit->setIdTruth(idTruth);
 	    }
 
 	    
@@ -2384,15 +2384,11 @@ StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& t
     break;
 
   case 4:
-    x        = localX;
-    localX   =   localY;
-    localY   = -1*x;
+    std::swap(localX, localY), localY = -localY;
     break;
 
   case 5:
-    x        = localX;
-    localX   = -1*localY;
-    localY   =    x;
+    std::swap(localX, localY), localX = -localX;    
     break;
   
   case 99:

@@ -80,7 +80,7 @@ public:
     void setFileNameModMatrix( const char* fileName );
     void setFileNameAlignParam( const char* fileName );
 
-    void setGet4MinTime( const double& minTime );
+    void setGet4MinTime( const double minTime );
     void setSoftwareDeadTime( const double& deadTime );
     void setDoClockJumpShift( const bool    doShift  );
     void setDoDoubleClockJumpShift( const bool    doDoubleShift  );
@@ -188,7 +188,7 @@ inline void StETofHitMaker::setFileNameModMatrix(      const char* fileName )   
 inline void StETofHitMaker::setFileNameAlignParam(     const char* fileName )     { mFileNameAlignParam  = fileName;   }
 
 
-inline void StETofHitMaker::setGet4MinTime(      const  double& minTime )         { mGet4doublejumpTmin     = minTime; }
+inline void StETofHitMaker::setGet4MinTime(      const double  minTime )          { mGet4doublejumpTmin     = minTime; }
 inline void StETofHitMaker::setSoftwareDeadTime( const double& deadTime )         { mSoftwareDeadTime       = deadTime; }
 inline void StETofHitMaker::setDoClockJumpShift( const bool    doShift  )         { mDoClockJumpShift       = doShift;  }
 inline void StETofHitMaker::setDoDoubleClockJumpShift( const bool doDoubleShift ) { mDoDoubleClockJumpShift       = doDoubleShift;  }
