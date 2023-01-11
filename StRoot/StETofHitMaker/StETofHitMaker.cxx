@@ -104,7 +104,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mMaxYPos( 15. ), 
   mMergingRadius( 1. ),
   mSigVel(),
-  mSoftwareDeadTime( 50. ),
+  mSoftwareDeadTime( 5. ),
   mDoClockJumpShift( true ),
   mDoDoubleClockJumpShift( true ),
   mClockJumpDirection(),
