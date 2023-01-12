@@ -305,7 +305,6 @@ static Int_t _debug = 0;
 static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
 						    "tpc_hits","tpx_hits","itpc_hits",
 						    "TpcPulser","TpxPulser","iTPCPulser",
-						    "TpcDumpPxls2Nt","TpxDumpPxls2Nt",
 						    "TpcRaw","TpxRaw","iTPCRaw",
 						    "TpcAvLaser","TpxAvLaser"};
 //_____________________________________________________________
@@ -506,8 +505,6 @@ Int_t StTpcHitMaker::Make() {
 		else 	          TpxAvLaser(sector);
 		fSectCounts->Fill(sector);
 		break;
-	      case kTpcDumpPxls2Nt:  
-	      case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
 	      case kTpcRaw: 
 	      case kTpxRaw: 
 	      case kiTPCRaw: 
@@ -888,75 +885,28 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
   }
 }
 //________________________________________________________________________________
-void StTpcHitMaker::DumpPixels2Ntuple(Int_t sector) {
+void StTpcHitMaker::DumpPixels2Ntuple(Int_t sector, Int_t row, Int_t pad) {
   struct BPoint_t {
-    Float_t sector, row, pad, tb, adc, ped, t0, peak;
+    Float_t event, sector, row, pad, tb, adc, idt;
   };
-  static const Char_t *BName = "sector:row:pad:tb:adc:ped:t0:peak";
+  static const Char_t *BName = "event:sector:row:pad:tb:adc:idt";
   static TNtuple *adcP = 0;
-  if (! adcP) {
-    assert(GetTFile());
+  if (! adcP && GetTFile() ) {
     GetTFile()->cd();
     adcP = new TNtuple("adcP","Pulser ADC",BName);
   }
+  if (! adcP) return;
   static BPoint_t P;
-  if (! fTpc) return;
-  Int_t r, p, tb, tbmax;
-  //  if (! fTpc->channels_sector) return;
-  for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
-    r = row - 1;
-    for (Int_t pad = 1; pad <= 182; pad++) {
-      p = pad - 1;
-      Int_t ncounts = fTpc->counts[r][p];
-      if (! ncounts) continue;
-      static UShort_t adc[512];
-      memset (adc, 0, sizeof(adc));
-      tbmax = 513;
-      UShort_t adcmax = 0;
-      for (Int_t i = 0; i < ncounts; i++) {
-	tb = fTpc->timebin[r][p][i];
-	adc[tb] = log8to10_table[fTpc->adc[r][p][i]]; 
-	if (adc[tb] > adcmax) {
-	  tbmax = tb;
-	  adcmax = adc[tb];
-	}
-      }
-      if (tbmax < 2 || tbmax > 504) continue;
-      Int_t npeak = 0, nped = 0;
-      Int_t i1s = TMath::Max(  0, tbmax - 2);
-      Int_t i2s = TMath::Min(511, tbmax + 7);
-      Int_t i1  = TMath::Max(0  ,i1s - 20);
-      Int_t i2  = TMath::Min(511,i2s + 20);
-      Double_t peak = 0;
-      Double_t ped = 0;
-      Double_t t0 = 0;
-      for (Int_t i = i1; i <= i2; i++) {
-	if (i >= i1s && i <= i2s) continue;
-	nped++;
-	ped += adc[i];
-      }
-      if (nped) ped /= nped;
-      for (Int_t i = i1s; i <= i2s; i++) {
-	npeak++;
-	peak += adc[i] - ped;
-	t0   += i*(adc[i] - ped);
-      }
-      if (peak <= 0) continue;
-      t0    /= peak;
-      i1 = (Int_t) TMath::Max(0.,t0 - 20);
-      i2 = (Int_t) TMath::Min(511., t0 + 80);
-      for (Int_t i = i1; i <= i2; i++) {
-	P.sector = sector;
-	P.row    = row;
-	P.pad    = pad;
-	P.tb     = i - t0;
-	P.adc    = adc[i];
-	P.ped    = ped;
-	P.t0     = t0;
-	P.peak   = peak;
-	adcP->Fill(&P.sector);
-      }
-    }
+  P.event = GetEventNumber();
+  P.sector = sector;
+  P.row    = row;
+  P.pad    = pad;
+  for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
+    if (! ADCs[i]) continue;
+    P.tb = i;
+    P.adc = ADCs[i];
+    P.idt = IDTs[i];
+    adcP->Fill(&P.event);
   }
 }
 //________________________________________________________________________________
@@ -1067,6 +1017,9 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 	}
       }
       digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
+      if (IAttr("TpxDumpPxls2Nt")) {
+	DumpPixels2Ntuple(sector,r_old+1,p_old+1);
+      }
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
     }
@@ -1131,6 +1084,9 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
 #endif
          }
          digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+	 if (IAttr("TpxDumpPxls2Nt")) {
+	   DumpPixels2Ntuple(sector,row,pad);
+	 }
       }
     }									
     if (Total_data) {

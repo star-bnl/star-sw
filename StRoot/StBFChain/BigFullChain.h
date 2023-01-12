@@ -1618,10 +1618,9 @@ Bfc_st BFC[] = { // standard chains
   {"TpxPadMonitor","","","",                             "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"TpxAvLaser","TpxAvLaser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
    ,                        "TPC+TPX averaging laser events into Sparse histogram on pixels level", kFALSE},
-  {"TpxDumpPxls2Nt","TpxDumpPxls2Nt","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
-   ,                                                                "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    ,              "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
+  {"TpxDumpPxls2Nt","","tpcChain","TpxRaw","","",                   "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf,MakeEvent","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},

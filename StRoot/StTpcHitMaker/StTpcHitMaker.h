@@ -104,7 +104,6 @@ class StTpcHitMaker : public StRTSBaseMaker {
   enum EMode {kUndefined, 
 	      kTpc, kTpx, kiTPC,
 	      kTpcPulser, kTpxPulser, kiTPCPulser, 
-	      kTpcDumpPxls2Nt, kTpxDumpPxls2Nt, 
 	      kTpcRaw, kTpxRaw, kiTPCRaw,
 	      kTpcAvLaser, kTpxAvLaser,      // averaging on pixel level
 	      kAll};
@@ -119,7 +118,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   void    TpcAvLaser(Int_t sector);
   void    PadMonitor(Int_t sector);
   Int_t   UpdateHitCollection(Int_t sector);
-  void    DumpPixels2Ntuple(Int_t sector);
+  void    DumpPixels2Ntuple(Int_t sector, Int_t row, Int_t pad);
   void    PrintSpecial(Int_t sector);
   Int_t   RawTpcData(Int_t sector);
   Int_t   RawTpxData(Int_t sector);

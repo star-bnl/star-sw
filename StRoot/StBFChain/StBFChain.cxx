@@ -900,6 +900,9 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcHitMaker"  && GetOption("NoAnnotateCL")) {
       mk->SetAttr("UseTonkoClusterAnnotation", kFALSE);
     }
+    if (maker == "StTpcHitMaker"  && GetOption("TpxDumpPxls2Nt")) {
+      mk->SetAttr("TpxDumpPxls2Nt", kTRUE);
+    }
     if (GetOption("Cosmics") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) mk->SetAttr("Cosmics"    ,kTRUE);
     
     if (maker == "StTpcDbMaker"){
