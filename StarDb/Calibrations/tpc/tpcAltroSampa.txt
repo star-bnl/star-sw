@@ -1,0 +1,22 @@
+Jeff Langraf, 01/13/2023
+
+
+Hi Yuri, Guannan,
+
+The thresholds are consistent by year, except the iTPC did change during commissioning in 2018 on day 160
+
+Year          TPC                iTPC
+Year    Thr_lo    Seq_lo    Thr_lo   Seq_lo
+2015      3          2         -        -
+2016      4          2         -        -
+2017      4          2         -        -
+(2018      4          2         4        2       Before day 160)
+2018      4          2         4        1
+2019      3          2         3        1
+2020      3          2         3        1
+2021      3          2         3        1
+2022      3          2         4        1
+
+The only way to figure out what was in the chips directly would be to look at adc files and look at the minimum 1-d cluster shapes.   This should be straightforward if truly needed, but I won't do it unless you believe there are inconsistencies...   and you point to specific time periods you want to check out...
+
+-Jeff
