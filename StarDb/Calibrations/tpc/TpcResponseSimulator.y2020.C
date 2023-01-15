@@ -103,7 +103,7 @@ TDataSet *CreateTable() {
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
-if 0
+#if 0
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
   row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 +1.14433e-01 -3.57593e-01 -3.95075e-02 -2.12902e-02 -2.43764e-03 +1.92592e-01; // hijingAuAu200.DEV2X5.StiCA.Minuit
@@ -150,6 +150,7 @@ if 0
     No. cut on 3 first wires => -9.21881e-02 ; X9
     row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
    */
+
   row.RecombinationI =  row.RecombinationO = 2;
   row.Sigma_xWI = row.Sigma_xWO = row.Slope_zWI = row.Slope_zWO = 0.0100; 
   tableSet->AddAt(&row);
