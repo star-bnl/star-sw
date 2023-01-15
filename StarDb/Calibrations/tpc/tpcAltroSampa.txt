@@ -20,3 +20,23 @@ Year    Thr_lo    Seq_lo    Thr_lo   Seq_lo
 The only way to figure out what was in the chips directly would be to look at adc files and look at the minimum 1-d cluster shapes.   This should be straightforward if truly needed, but I won't do it unless you believe there are inconsistencies...   and you point to specific time periods you want to check out...
 
 -Jeff
+================================================================================
+Jeff Langraf, 01/14/2023
+
+Hi Tonko, Yuri, Guannan,
+
+I checked runs from each year from the ADC data in the .daq files.   The TPX is consistent with the DB.  ITPC is not consistent with the DB.  In the data, the thr is the smallest maximum ADC seen.   The seq is the minimum length of a sequence (not overlapping the 0 or 420 timebin)
+
+                          TPX                       ITPC
+                     DB          Data        DB           Data                  
+Year  Run #      Thr/Seq      Thr/Seq    Thr/Seq    Thr/Seq
+----  --------  -------      -------    -------    -------
+2018a 19158019    4/2         4/2         4/2         4/2
+2018b 19163040    4/2         4/2         3/2         4/2
+2019  20099032    3/2         3/2         3/1         4/2
+2020  21044038    3/2         3/2         3/1         4/2
+2021  22076042    3/2         3/2         3/1         4/2
+2022  23012082    3/2         3/2         4/1         4/2
+
+
+-Jeff

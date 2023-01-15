@@ -36,6 +36,8 @@ Run8, TPX;        mysql -h dbbak.starp.bnl.gov -P 3407 -e 'select asic_thr_lo as
   for (Int_t i  = 0; i < 24; i++) {
     memset(&row,0,tableSet->GetRowSize());
     row.N = -1; // TPC only
+    row.Altro_thr =       1;
+    row.Altro_seq =       2;
     if (i == 15) {
       row.N         =       0;
       row.Altro_thr =       2;

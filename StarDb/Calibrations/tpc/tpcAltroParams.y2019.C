@@ -56,8 +56,8 @@ Run19, iTPC;      mysql -h dbbak.starp.bnl.gov -P 3418 -e 'select asic_thr_lo as
   for (Int_t i  = 0; i < 24; i++)		{
     tableSet->AddAt(&row);
   }
-  row.Altro_thr =       3; // 4; // iTPC, Tonko 12/12/2019
-  row.Altro_seq =       1;
+  row.Altro_thr =       4; // instead 3, iTPC, Tonko 12/12/2019, 
+  row.Altro_seq =       2; // instead 1, confirmed by Jef 01/14/2023
   cout << "[SAMPA] : Usin local configuration with Inner row.Altro_thr = " << row.Altro_thr << " row.Altro_seq = " << row.Altro_seq << endl; 
 
   for (Int_t i  = 0; i < 24; i++)		{
