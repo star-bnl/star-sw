@@ -37,7 +37,8 @@
 #include "TQtCanvas2Html.h"
 #include "TPolynomial.h"
 #endif
-void DrawList(const Char_t *pattern = "^pad_X_RC*", const Char_t *ctitle = "", 
+void DrawList() {} 
+void DrawList(const Char_t *pattern, const Char_t *ctitle = "", 
 	      Int_t nx = 7, Int_t ny = 2, Int_t color = 0, Int_t iSlices=2, Double_t ymin=-0.4, Double_t ymax = 0.6, Int_t NparMax = 9, Bool_t zoom=kFALSE) {
 #ifdef __CINT__
   cout << "Please run this script in compiled mode by running \".x DrawList.C+\"" << endl;
