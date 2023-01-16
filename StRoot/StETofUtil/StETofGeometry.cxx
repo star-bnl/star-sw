@@ -233,6 +233,12 @@ StETofNode::buildMembers()
 void
 StETofNode::setSafetyMargins( const double* margins )
 {
+    if (!margins) {
+        mSafetyMarginX = 0;
+        mSafetyMarginY = 0;
+        return;
+    }
+
     if( margins[ 0 ] < 0 || margins[ 1 ] < 0 ) {
         LOG_DEBUG << "StETofNode::setSafetyMargins()  --  WARNING: input values are negative" << endm;
     }
@@ -565,7 +571,7 @@ StETofGeometry::~StETofGeometry()
 
 
 void
-StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = initializer_list<double>({0, 0}).begin(), const bool& useHelixSwimmer = false )
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, const bool useHelixSwimmer )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;
