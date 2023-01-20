@@ -24,8 +24,8 @@ Run9, TPX;        mysql -h dbbak.starp.bnl.gov -P 3408 -e 'select asic_thr_lo as
 +-----------+-----------+------+------+------+------+------+------+---------------------+---------------+---------------+--------------------------------+
    */
   row.N         =       0;
-  row.Altro_thr =       3;
-  row.Altro_seq =       1;
+  row.Altro_thr =       3; // checked by StTpcHitMaker::CheckThrSeq
+  row.Altro_seq =       1; // -"-
   row.Altro_K1  =       0; //K1 coefficient of the TCF
   row.Altro_K2  =       0; //K2 coefficient of the TCF
   row.Altro_K3  =       0; //K3 coefficient of the TCF
