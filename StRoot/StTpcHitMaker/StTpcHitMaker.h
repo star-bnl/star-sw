@@ -87,6 +87,7 @@
 #include "StThreeVectorF.hh"
 //#define __USE__THnSparse__
 #include "TH1.h"
+#include "TH2.h"
 #ifdef __USE__THnSparse__
 #include "THnSparse.h"
 #else /* ! __USE__THnSparse__ */
@@ -123,11 +124,15 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t   RawTpcData(Int_t sector);
   Int_t   RawTpxData(Int_t sector);
   void    InitializeHistograms(Int_t token);
+  void    CheckThrSeq();
+  TH2C   *Thr() {return fThr;}
+  TH2C   *Seq() {return fSeq;}
 #ifdef __USE__THnSparse__
   THnSparseF *CompressTHn(THnSparseF *hist, Double_t compress = 1e4);
 #endif /* __USE__THnSparse__ */
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
   virtual Int_t        Finish();
+  Int_t getADC(Int_t i) {if (i < 0 || i > 511) {return 0;} else {return ADCs[i];}} 
  private:
 
   EMode   kMode;
@@ -170,6 +175,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
   static Float_t fgDt;
   static Float_t fgDperp;
   static Bool_t  fgCosmics;
+  TH2C   *fThr;
+  TH2C   *fSeq;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;

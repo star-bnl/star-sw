@@ -309,7 +309,7 @@ static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
 						    "TpcAvLaser","TpxAvLaser"};
 //_____________________________________________________________
 StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMode(kUndefined),
-						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0) {
+						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0), fThr(0), fSeq(0) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
@@ -538,7 +538,62 @@ Int_t StTpcHitMaker::Make() {
     StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
     if (hitCollection && ! IAttr("NoTpxAfterBurner")) AfterBurner(hitCollection);
   }
+  if (IAttr("CheckThrSeq") && (kMode == kTpcRaw || kMode == kTpxRaw || kMode == kiTPCRaw)) {
+    CheckThrSeq();
+  }
   return kStOK;
+}
+//_____________________________________________________________
+void  StTpcHitMaker::CheckThrSeq() {
+  if (! fThr || !fSeq) {
+    fThr = new TH2C("Thr","ADC Thresold value versus sector and row",24,0.5,24.5,72,0.5,72.5); fThr->SetDirectory(0);
+    fSeq = new TH2C("Seq","ADC sequnce value versus sector and row",24,0.5,24.5,72,0.5,72.5);  fSeq->SetDirectory(0);
+    for (Int_t s = 1; s <= 24; s++) 
+      for (Int_t r = 1; r <= 72; r++) {
+	fThr->SetBinContent(s,r,127);
+	fSeq->SetBinContent(s,r,127);
+      }
+  }
+  for (Int_t s = 1; s <= 24; s++){
+    StTpcDigitalSector *digitalSector = GetDigitalSector(s);
+    if (! digitalSector) continue;
+    Int_t Nrows = digitalSector->numberOfRows();
+    for (Int_t r = 1; r <= Nrows; r++) {
+      Int_t Npads = digitalSector->numberOfPadsInRow(r);
+      for (Int_t p = 1; p <= Npads; p++) {
+	Int_t ntb = digitalSector->numberOfTimeBins(r,p);
+	if (! ntb) continue;
+	digitalSector->getTimeAdc(r,p,ADCs,IDTs);
+	Int_t adcMin = 127;
+	Int_t seq    = 127;
+	Int_t tbF = -1, tbL = -1;
+	for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+	  if (! ADCs[tb]) {
+	    if (tbF > -1 && tbL >= tbF) {
+	      if (seq > tbL - tbF + 1) seq = tbL - tbF + 1;
+	    }
+	    tbF = tbL = -1;
+	    continue;
+	  }
+	  if (ADCs[tb] < adcMin) {
+	    adcMin = TMath::Max(ADCs[tb-2],TMath::Max(ADCs[tb-1],TMath::Max(ADCs[tb],TMath::Max(ADCs[tb+1],ADCs[tb+1]))));
+	  }
+	  if (tbF < 0) tbF = tb;
+	  tbL = tb;
+	}
+	if (adcMin < 127 && seq < 127) {
+	  if (seq == 1 && adcMin == 1) {
+	    static Int_t ibreak = 0;
+	    ibreak++;
+	  }
+	  Char_t th = fThr->GetBinContent(s,r);
+	  if (th > adcMin) fThr->SetBinContent(s,r, adcMin);
+	  Char_t sq = fSeq->GetBinContent(s,r);
+	  if (sq > seq) fSeq->SetBinContent(s,r, seq);
+	}
+      } 
+    }  
+  }
 }
 //_____________________________________________________________
 Int_t  StTpcHitMaker::Finish() {
@@ -555,6 +610,38 @@ Int_t  StTpcHitMaker::Finish() {
     }
   }
 #endif /* __USE__THnSparse__ */
+  if (fThr && fSeq) {
+    Int_t adcMinFL = 127;
+    Int_t seqFL    = 127;
+    Int_t s1 = -1, s2 = -1, r1 = -1, r2 = -1;
+    for (Int_t s = 1; s <= 24; s++){
+      for (Int_t r = 1; r <= 72; r++) {
+	Int_t adcMin = fThr->GetBinContent(s,r);
+	Int_t seq    = fSeq->GetBinContent(s,r);
+	if (adcMin == 127 || seq == 127) continue;
+	if (adcMinFL == 127 && seqFL == 127) {
+	  adcMinFL = adcMin;
+	  seqFL    = seq;
+	  s1 = s2 = s;
+	  r1 = r2 = r;
+	} else {
+	  if (adcMinFL == adcMin && seqFL == seq) {
+	    r2 = r;
+            s2 = s;
+	  } else {
+	    LOG_INFO << "StTpcHitMaker::Finish CheckThrSeq in sectors [" << s1 << "," << s2 << "] and rows[" << r1 << "," << r2 << "] Threshold = " << adcMinFL << " and sequence = " << seqFL << endm; 
+	    adcMinFL = adcMin;
+	    seqFL    = seq;
+	    s1 = s2 = s;
+	    r1 = r2 = r;
+	  }
+	}
+      }
+    }
+    LOG_INFO << "StTpcHitMaker::Finish CheckThrSeq in sectors [" << s1 << "," << s2 << "] and rows[" << r1 << "," << r2 << "] Threshold = " << adcMinFL << " and sequence = " << seqFL << endm; 
+  }
+  SafeDelete(fThr);
+  SafeDelete(fSeq);
   return StMaker::Finish();
 }
 //_____________________________________________________________

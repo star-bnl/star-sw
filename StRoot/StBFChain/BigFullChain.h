@@ -1621,6 +1621,7 @@ Bfc_st BFC[] = { // standard chains
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    ,              "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
   {"TpxDumpPxls2Nt","","tpcChain","TpxRaw","","",                   "TPC+TPX pixel dump to NTuple", kFALSE},
+  {"CheckThrSeq","","tpcChain","TpxRaw","","",     "Check Altro/Sampa Zero Suppression Parameters", kFALSE},
   {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf,MakeEvent","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
