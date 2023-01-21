@@ -44,7 +44,7 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mTables   = NULL;
   mHList    = NULL;
   mConfig   = 0;
-
+  mTestMode = false;
 }
 //==================================================
 //==================================================
@@ -3187,6 +3187,8 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 int StBemcTriggerSimu::barrelJetPatchTh(int i) const { return mB101->getRegister(i); }
 int StBemcTriggerSimu::barrelHighTowerTh(int i) const { return mB001->getRegister(i); }
 int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp/6+2)%3]; }
+int StBemcTriggerSimu::barrelPartialJetPatchAdc(int jp) const { //jp from 0 to 5, 6 high eta partical jet patch sum
+return (*mB101)[jp%6].info[3]; }
 
 void StBemcTriggerSimu::fillStEmcTriggerDetector()
 {

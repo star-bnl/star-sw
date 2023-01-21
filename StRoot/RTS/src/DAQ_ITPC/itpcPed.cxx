@@ -420,8 +420,14 @@ int itpcPed::to_cache(const char *fname, int sec1, int rdo1)
 	else if(sec1 < 0) {
 		outf = stdout ;
 	}
-	else {
+	else {	// canonical!
+
 		char fn[256] ;
+
+		if(evts[sec1-1][rdo1-1]<100) {
+			LOG(ERR,"S%02:%d -- not enough ped events %d",sec1,rdo1,evts[sec1-1][rdo1-1]) ;
+			return -1 ;
+		}
 
 		s_start = sec1 ;
 		s_stop = sec1 ;

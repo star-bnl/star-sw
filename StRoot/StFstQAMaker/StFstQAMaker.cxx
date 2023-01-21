@@ -17,7 +17,7 @@
 #include "StFstHit.h"
 #include "StRoot/StFstUtil/StFstCollection.h"
 #include "StRoot/StFstUtil/StFstRawHitCollection.h"
-#include "StRoot/StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StEvent.h"
 #include "StTrack.h"

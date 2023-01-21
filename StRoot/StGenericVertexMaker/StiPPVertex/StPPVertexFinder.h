@@ -7,6 +7,8 @@
  *
  */
 
+#include <array>
+#include <ostream>
 #include <vector>
 
 #include "StGenericVertexMaker/StGenericVertexFinder.h"

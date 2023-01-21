@@ -1,14 +1,5 @@
-//////////////////////////////////////////////////////////
-//   This class has been automatically generated 
-//     (Thu Nov 29 16:25:03 2001 by ROOT version3.02/01)
-//   from TTree StdEdxModel/H.Bichel Calculation Summary
-//   found on file: dEdx2T.root
-//////////////////////////////////////////////////////////
-
-
 #ifndef StdEdxModel_h
 #define StdEdxModel_h
-// Converted from dEdxModel.C 
 #include <assert.h>
 #include "Riostream.h"
 #include "TROOT.h"
@@ -18,41 +9,82 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "TString.h"
-
+#include "TF1.h"
+class StdEdxParamerization {
+};
 class StdEdxModel {
+  // Np = no. of primary clusters
+  // ne == n = no. of conductining electorns
  public: 
   enum ETpcType  {kTpcOuter = 0, kTpcInner = 1, kTpcAll};
   enum EValType  {kProb, kdProbdX, kdProbdY};
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
-  static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx log10(versus beta*gamma)
-  static TH1D         *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
-  static TH2F         *GetdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mdEdNModel[tpcType][val];}
-  static TH1F         *GetdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mdEdNMPV[tpcType];}
-  static TH2F         *GetLogdEdN(EValType val = kProb, ETpcType tpcType = kTpcAll) {return instance()->mLogdEdxModel[tpcType][val];}
-  static TH1F         *GetLogdEdNMPV( ETpcType tpcType = kTpcAll) {return instance()->mLogdEdNMPV[tpcType];}
-  static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0); 
-  static Double_t      zMPVFunc(Double_t *x, Double_t *p=0); // most probable dE versus x[0] = log(N_p) and sector p[0]
-  static TF1          *zMPV();                               // -"-
-  static Double_t      zdEFunc(Double_t *x, Double_t *p);    // Distributon Log(dE) - log(most probable dE) versus sector p[0]  and  p[1] = log(N_p)
-  static TF1          *zdE();                                // -"-
+  TH1D                *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
+  static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
+  static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
+  static Double_t      ggausD(Double_t *x, Double_t *p, Double_t *der = 0);  // versus mu, sigm, alpha wth derivatives
+  static Double_t      gausexp(Double_t *x, Double_t *p); // versus mu, sigma, k 
+  static Double_t      gausexpD(Double_t *x, Double_t *p, Double_t *der = 0); // versus mu, sigma, k 
+  Double_t             dNdx(Double_t poverm, Double_t charge = 1.0);								      
+  Double_t     	       dNdxEff(Double_t poverm, Double_t charge = 1.0);							      
+  static Double_t      saturationFunc(Double_t *x, Double_t *p); // nP saturation versus beta*gamma from TpcRS (nP/dX - dN/dx_model) 
+  TF1          	      *GGaus() {return fGGaus;}										      
+  TF1          	      *GausExp() {return fGausExp;}										      
+  TF1          	      *Saturation(Int_t particle=0);										      
+  static Double_t      saturationTanH(Double_t *x, Double_t *p); // nP saturation versus beta*gamma from TpcRS (nP/dX - dN/dx_model) 
+  TF1                 *SaturTanH();                                                                                                       
+  static Double_t      extremevalueG(Double_t *x, Double_t *p);  // Sum of extreme value distribution and Gauss
+  TF1                 *ExValG();
+  Double_t             keVperElectron() {return TMath::Exp(fLogkeVperElectron);}
+  Double_t             GeVperElectron() {return 1e-6*keVperElectron();}
+  Double_t             E(Double_t ne) {return ne*GeVperElectron();} // deposited energy GeV from ne					       
+  Double_t 	       n(Double_t e) {return e/GeVperElectron();}   // ne  from energy (GeV)					       
+  Double_t 	       LogE(Double_t Logne) {return fLogkeVperElectron  + Logne + TMath::Log(1e-6);} // deposited energy GeV from ne			       
+  Double_t 	       Logne(Double_t LogE) {return LogE - fLogkeVperElectron - TMath::Log(1e-6);}   // ne  from energy (GeV)				       
+  void     	       Parameters(Double_t Np, Double_t *pars, Double_t *dPardNp = 0); 						       
+  Double_t 	       Parameter(Double_t Np, Int_t k = 0, Double_t *dPardNp = 0);										       
+  static Double_t      funParam(Double_t *x, Double_t *p);
+  TF1                 *FParam(Int_t l = 0); // l = 0 -> mu, l = 1 -> sigma, l = 2 -> alpha
+  Double_t 	       MukeV(Double_t Np);                             // log(dE) (keV)
+  Double_t 	       Sigma(Double_t Np) {return Parameter(Np, 1);}								       
+  Double_t 	       Alpha(Double_t Np) {return Parameter(Np, 2);}								       
+  Double_t 	       LogdEMPV(Double_t Np)      {return LogdEMPVGeV(Np);}
+  Double_t 	       LogdEMPVeV (Double_t Np)   {return LogdEMPVkeV(Np) + TMath::Log(1e3);}
+  Double_t 	       LogdEMPVkeV(Double_t Np)   {return MukeV(Np);} // log(dE) (keV)  
+  Double_t 	       LogdEMPVGeV(Double_t Np)   {return MukeV(Np) + TMath::Log(1e-6);} // log(dE) (keV)  
+  Double_t             Prob(Double_t ee, Double_t Np, Double_t *der = 0); // probability for give log(dE/Np) versus Np					       
+  static Double_t      funcProb(Double_t *x, Double_t *p);
+  TF1                 *FProb();
+  static Double_t      funcProbP(Double_t *p, Double_t *x);
+  TF1                 *FProbP();
+  static Double_t      funcProbDer(Double_t *x, Double_t *p);
+  TF1                 *FProbDer();
+  Double_t 	       ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der = 0); // probability for give log(dE(GeV)) versus Np			       
+  void     	       SetScale(Double_t scale = 1.0) {fScale = scale;}								       
+  Double_t 	       dNdxScale() {return fScale;}											       
+  static Double_t      zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge 
+  TF1     	      *ZMP(Double_t log2dx = 1);                                                                                           
+  // from 100 keV Tcut (GEXNor.C)
+  void InitPar();
+  Double_t tmaxL10eV(Double_t betagamma); // eV
+  Double_t bgCorrected(Double_t bg); // Correction for reconstructed bega*gamma
+  Double_t NpCorrection(Double_t betagamma); // Correction for effective no. of primary clusters which produce conducting electrons 
+  TH1D    *protonEff();
  private:
-  static StdEdxModel *fgStdEdxModel; //! last instance          
   StdEdxModel();
-  static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
-  static TH1D         *mdNdx;       // dN/dx versus beta*gamma
-  static TH2F         *mdEdNModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus dE/Np,log(Np)
-  static TH1F         *mdEdNMPV[3];
-  static TH2F         *mLogdEdxModel[3][3]; // Tpc [I,O,All] [Prob, dProb/dX, dProb/dY] versus Log(dE/Np),log(Np)
-  static TH1F         *mLogdEdNMPV[3];
-  static Double_t      fScale;
-  static Int_t        _debug;
+  static StdEdxModel  *fgStdEdxModel; //! last instance          
+  static Int_t  _debug;
+  TH1D         *mdNdx;       // dN/dx versus beta*gamma
+  Double_t      fScale;
+  Double_t      fTmaxL10eV;
+  TF1          *fGGaus;        
+  TF1          *fGausExp;        
+  TF1          *fpol2F;
+  TF1          *fpol5F;
+  TF1          *fpol6F;
+  TF1          *fpol7F;
+  Double_t      fLogkeVperElectron;
   ClassDef(StdEdxModel,0)
 };
-// $Id: StdEdxModel.h,v 1.6 2019/11/19 14:44:41 fisyak Exp $
-// $Log: StdEdxModel.h,v $
-// Revision 1.6  2019/11/19 14:44:41  fisyak
-// new dEdxModel for dN/dx, calibration for Run XVIII fixed Target
-//
 #endif
-

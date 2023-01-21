@@ -176,3 +176,11 @@ void StEmcTriggerSimu::getOverlapJetPatchAdc(int i, int& jp, int& adc) const
   jp  = (1-i)*3+jp_partial-1;
   adc = (*mEM201)[0].info[i];
 }
+int StEmcTriggerSimu::overlapJetPatchAdc(int jp) const
+{
+  int adc = 0;
+  if(mBemc && mEemc){
+    adc = mBemc->barrelPartialJetPatchAdc(jp) + mEemc->endcapPartialJetPatchAdc(jp);
+  }
+  return adc;
+}

@@ -13,6 +13,7 @@ Int_t StDetectorDbMaker::_debug = 0;
 ClassImp(StDetectorDbMaker)
 //_____________________________________________________________________________
 Int_t StDetectorDbMaker::Make(){
+#if 0 /* Move to St_trigDetSumsC to unify reading daq and StEvent files */
     // Also need to update instances for classes done in InitRun.
     // This is needed because of a feature in TTable
     // Please ingore unused variables..the call to instane() is needed!
@@ -30,5 +31,6 @@ Int_t StDetectorDbMaker::Make(){
       }
     }
   }
+#endif
   return kStOK;
 }

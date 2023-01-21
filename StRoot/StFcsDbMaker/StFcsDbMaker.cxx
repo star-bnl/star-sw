@@ -118,6 +118,7 @@
 
 #include "StFcsDbMaker.h"
 #include "StFcsDb.h"
+#include "StFcsDbPulse.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StMessMgr.h"
 
@@ -136,14 +137,18 @@ StFcsDbMaker::StFcsDbMaker(const char *name) : StMaker(name){
   LOG_INFO << "******** StFcsDbMaker::StFcsDbMaker = "<<name<<endm;
   mFcsDb = new StFcsDb("fcsDb");
   AddData(mFcsDb,".const");
+  mFcsDbPulse = new StFcsDbPulse("fcsPulse");
+  AddData(mFcsDbPulse,".const");
 }; 
 
 StFcsDbMaker::~StFcsDbMaker() {
-    //delete mFcsDb;   //already deleted by chain because AddData in constructor
+  //delete mFcsDb; //already deleted by chain because AddData in constructor
+  //delete mFcsDbPulse; //already deleted by chain because AddData in constructor
 }
 
 int StFcsDbMaker::Init(){
   mFcsDb->Init();
+  mFcsDbPulse->Init();
   return kStOK;
   return StMaker::Init();
 }

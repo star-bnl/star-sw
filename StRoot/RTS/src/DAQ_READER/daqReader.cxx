@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.72 2021/01/25 03:47:52 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.73 2022/09/23 19:55:47 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -82,7 +82,7 @@ daqReader::daqReader(char *mem, int size)
 
 }
 
-daqReader::daqReader(char *name) 
+daqReader::daqReader(const char *name) 
 {
   struct stat64 stat_buf ;
 
@@ -1141,7 +1141,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
   }
 
 
-  char *daqReader::getInputType()
+  const char *daqReader::getInputType()
     {
       switch(input_type) {
       case none: 
@@ -1665,7 +1665,7 @@ int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
 
   /////// Tonko
 
-  char *daqReader::get_sfs_name(char *right)
+  char *daqReader::get_sfs_name(const char *right)
     {
       if(sfs == 0) return 0 ;
 
@@ -2029,7 +2029,7 @@ int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
       struct passwd *passwd = getpwuid(getuid()) ;
       if(passwd == NULL) {
 	LOG(WARN,"User doesn't exist?",0,0,0,0,0) ;
-	user = "????" ;
+	user = (char *)"????" ;
       }
       else {
 	user = passwd->pw_name ;

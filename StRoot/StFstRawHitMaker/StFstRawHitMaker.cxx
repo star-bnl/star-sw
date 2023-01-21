@@ -8,7 +8,8 @@
 
 #include "StFstUtil/StFstCollection.h"
 #include "StFstUtil/StFstRawHitCollection.h"
-#include "StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
+#include "StEvent/StFstEvtCollection.h"
 #include "StFstDbMaker/StFstDb.h"
 #include "StEvent/StFstConsts.h"
 
@@ -389,6 +390,48 @@ Int_t StFstRawHitMaker::Make()
     if(!mDoEmbedding && !nRawAdcFromData) nIdTruth_Fst += FillRawHitCollectionFromSimData();
 
     LOG_INFO << " Total number of FST Raw Hits - Step II = " << mFstCollectionPtr->getNumRawHits() << " w/ idTruth = " << nIdTruth_Fst << endm;
+
+    // Fill Fst raw hits we got so far into StEvent if the chain option is called
+    if(IAttr("fstEvtRawHit")) {//True for storing FST Raw hits
+        LOG_INFO << " Filling FST Raw Hits into StEvent" << endm;
+
+        //prepare for StEvent
+        mEvent = (StEvent *) GetInputDS("StEvent");
+
+        if(mEvent) {
+            LOG_DEBUG<<"Found StEvent"<<endm;
+        } else {
+            mEvent = new StEvent();
+            AddData(mEvent);
+            LOG_DEBUG <<"Added StEvent"<<endm;
+        }
+
+        // Get pointer to an existing StFstEvtCollection if any
+        mFstEvtCollection = mEvent->fstEvtCollection();
+
+        // If no fst raw hit collection, create one
+        if (!mFstEvtCollection) {
+            mFstEvtCollection = new StFstEvtCollection();
+            mEvent->setFstEvtCollection(mFstEvtCollection);
+            LOG_DEBUG << "Make() - Added new StFstEvtCollection to this StEvent" << endm;
+        }
+
+        if(mFstCollectionPtr->getNumRawHits() > 0) {
+            for(int wedgeIdx=0; wedgeIdx<kFstNumWedges; ++wedgeIdx ){
+                StFstRawHitCollection *rawHitCollectionPtr = mFstCollectionPtr->getRawHitCollection( wedgeIdx );
+                if( rawHitCollectionPtr ){
+                    std::vector<StFstRawHit*>& rawHitVec = rawHitCollectionPtr->getRawHitVec();
+                    std::vector< StFstRawHit* >::iterator rawHitIter;
+
+                    for( rawHitIter = rawHitVec.begin(); rawHitIter != rawHitVec.end(); ++rawHitIter ){
+                        StFstRawHit* rawHit = *rawHitIter;
+                        StFstRawHit* newRawHit = new StFstRawHit( *rawHit );
+                        mFstEvtCollection->addRawHit(newRawHit);
+                    }
+                }
+            }
+        }
+    }
 
     return ierr;
 }

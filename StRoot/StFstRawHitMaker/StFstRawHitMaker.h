@@ -13,7 +13,9 @@
 #include "StEvent/StFstConsts.h"
 
 
+class StEvent;
 class StFstCollection;
+class StFstEvtCollection;
 
 
 /**
@@ -83,6 +85,9 @@ private:
       std::array<int, kFstNumApvChannels> &idTruth);
 
    int FillRawHitCollectionFromSimData();
+
+   StEvent* mEvent;
+   StFstEvtCollection* mFstEvtCollection;
 
    Int_t mDataType; ///<  0=all, 1=adc only, 2=zs only
    

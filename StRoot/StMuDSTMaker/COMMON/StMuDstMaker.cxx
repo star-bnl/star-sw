@@ -71,6 +71,7 @@
 #include "StMuFttRawHit.h"
 #include "StMuFstCollection.h"
 #include "StMuFstUtil.h"
+#include "StMuFstRawHit.h"
 #include "StMuFstHit.h"
 #include "StMuEpdHit.h"  // MALisa
 #include "StMuEpdHitCollection.h"  // MALisa
@@ -479,6 +480,7 @@ void  StMuDstMaker::streamerOff() {
   StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
 #ifndef __NO_STRANGE_MUDST__
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
+  StStrangeAssoc::Class()->IgnoreTObjectStreamer(); 
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
   StKinkMuDst::Class()->IgnoreTObjectStreamer();
@@ -1199,7 +1201,7 @@ void StMuDstMaker::fillFtt(StEvent* ev) {
 void StMuDstMaker::fillFst(StEvent* ev) {
   DEBUGMESSAGE2("");
   StFstHitCollection* fstcol=(StFstHitCollection*)ev->fstHitCollection();
-  if (!fstcol)  return; //throw StMuExceptionNullPointer("no StFstCollection",__PRETTYF__);
+  if (!fstcol)  return; //throw StMuExceptionNullPointer("no StFstHitCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
 
@@ -1208,7 +1210,14 @@ void StMuDstMaker::fillFst(StEvent* ev) {
     connectFstCollection();
     mStMuDst->set(this);
   }
-  mFstUtil->fillMuFst(mFstCollection,fstcol);
+
+  //raw hit data input
+  StFstEvtCollection *fstevtcol = 0;
+  if (IAttr("fstMuRawHit")){//True for storing FST Raw hits
+    fstevtcol=(StFstEvtCollection*)ev->fstEvtCollection();
+  }
+
+  mFstUtil->fillMuFst(mFstCollection,fstcol,fstevtcol);
 
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -2042,6 +2051,7 @@ void StMuDstMaker::connectFttCollection() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectFstCollection() {
   LOG_INFO << "Setting Fst arrays" << endm;
+  mFstCollection->setFstRawHitArray(mFstArrays[muFstRawHit]);
   mFstCollection->setFstHitArray(mFstArrays[muFstHit]);
 }
 //-----------------------------------------------------------------------

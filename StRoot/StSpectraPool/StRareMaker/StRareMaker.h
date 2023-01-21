@@ -52,10 +52,10 @@ protected:
 
 public:
 
-  StRareMaker(const Char_t *name="RareParticles", Char_t* fileName="RareEvent.root");
-  StRareMaker(const Char_t *name, Char_t* fileName, StRareEventCut* cut, StRareTrackCut* track);
+  StRareMaker(const Char_t *name="RareParticles", const Char_t* fileName="RareEvent.root");
+  StRareMaker(const Char_t *name, const Char_t* fileName, StRareEventCut* cut, StRareTrackCut* track);
   StRareMaker(const Char_t *name,
-	      Char_t* fileName,
+	      const Char_t* fileName,
 	      StRareEventCut* cut,
 	      StRareTrackCut* trackCut,
 	      StL3RareTrackCut* l3trackCut);

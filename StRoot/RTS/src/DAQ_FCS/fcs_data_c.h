@@ -36,6 +36,7 @@ public:
 		run_number = 0 ;
 
 		n_sigma = 4.0 ;
+		n_sigma_epd = 4.0 ;
 		n_pre = 8 ;
 		n_post = 8 ;
 		n_cou = 4 ;
@@ -233,6 +234,7 @@ public:
 
 	// for ZS
 	static float n_sigma ;
+	static float n_sigma_epd ;
 	static short n_pre ;
 	static short n_post ;
 	static short n_cou ;

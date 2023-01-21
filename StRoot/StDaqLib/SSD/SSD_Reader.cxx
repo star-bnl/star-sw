@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <ctime>
 
 static unsigned short log8to10_table[256] = {
     0,    1,    2,    3,    4,    5,    6,    7,
@@ -118,8 +119,8 @@ SSD_Reader::SSD_Reader(EventReader *er) {
   datap=er->getDATAP(); 
   if (datap) {
 
-  unsigned int UTime = er->getEventInfo().UnixTime;
-  struct tm *time=gmtime((time_t*) &UTime);
+  std::time_t utime = er->getEventInfo().UnixTime;
+  std::tm *time = gmtime(&utime);
 
   //LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
   //LDate = yyyymmdd

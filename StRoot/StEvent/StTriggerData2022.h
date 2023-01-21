@@ -269,11 +269,11 @@ protected:
     QTBlock2022*      mQT4[11];	//!
     QTBlock2022*      mEQ1[11];	//!
     QTBlock2022*      mEQ2[11];	//!
-    unsigned short mxq[11][16][32],eq3[11][16][32],bbq[11][16][32],qt1[11][16][32],qt2[11][16][32],qt3[11][16][32],qt4[11][16][32],
-    eq1[11][16][32],eq2[11][16][32]; //!
-    unsigned char tmxq[11][16][32],teq3[11][16][32],tbbq[11][16][32],tqt1[11][16][32],tqt2[11][16][32],tqt3[11][16][32],tqt4[11][16][32],
-    teq1[11][16][32],teq2[11][16][32]; //!
-    
+    QTBlock2022*      mEQ4[11];	//!
+    unsigned short mxq[11][16][32],eq3[11][16][32],bbq[11][16][32],
+      eq1[11][16][32],eq2[11][16][32],eq4[11][16][32]; //!
+    unsigned char tmxq[11][16][32],teq3[11][16][32],tbbq[11][16][32],
+      teq1[11][16][32],teq2[11][16][32],teq4[11][16][32]; //!    
     
     void swapOfflen(TrgOfflen2022* offlen);
     void swapDataBlk(TriggerDataBlk2022* TrgData);

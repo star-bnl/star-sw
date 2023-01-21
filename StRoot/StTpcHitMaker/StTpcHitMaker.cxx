@@ -444,17 +444,6 @@ Int_t StTpcHitMaker::Make() {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
   }
-#ifdef __GENE__ /* I have no idea what the codes after */
-  if ( kMode == kTpx || kMode == kTpc || kMode == kiTPC ) {
-    pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-    if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
-    if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
-    pHitCollection = pEvent->tpcHitCollection();
-  } else {
-    pEvent = 0;
-    pHitCollection = 0;
-  }
-#endif
 
   static Int_t minSector = IAttr("minSector");
   static Int_t maxSector = IAttr("maxSector");

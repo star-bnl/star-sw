@@ -523,6 +523,15 @@ int StFcsDb::getDetFromName(const std::string& detname){
     }
 }
 
+unsigned short StFcsDb::getKey(unsigned short detid, unsigned short id){ return ( (detid & 0x7)<<12 | (id & 0xffff) ); }
+void StFcsDb::getDetIdFromKey(unsigned short key, unsigned short& detid, unsigned short& id)
+{
+  detid = (key >> 12) & 0x0007;
+  id = (key & 0x0fff);
+}
+unsigned short StFcsDb::getDetFromKey(unsigned short key){ return (key >> 12) & 0x0007; }
+unsigned short StFcsDb::getIdFromKey(unsigned short key) { return (key & 0x0fff); }
+
 StThreeVectorD StFcsDb::getDetectorOffset(int det) const{ 
   if(mRun19>0){
     const float bOffY=-(17.0*5.81);   //40in=101.6cm and 17*5.81=98.76 so I will leave this unchanged

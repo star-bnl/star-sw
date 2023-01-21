@@ -168,6 +168,7 @@ class StHltTrackNode;
 class StHltTriggerReason;
 class StHltVpdHit;
 class StIstHit;
+class StFstRawHit;
 class StFstHit;
 class StKinkVertex;
 class StL3AlgorithmInfo;
@@ -244,6 +245,7 @@ StCollectionDef(HltTrackNode)
 StCollectionDef(HltTriggerReason)
 StCollectionDef(HltVpdHit)
 StCollectionDef(IstHit)
+StCollectionDef(FstRawHit)
 StCollectionDef(FstHit)
 StCollectionDef(KinkVertex)
 StCollectionDef(L3AlgorithmInfo)

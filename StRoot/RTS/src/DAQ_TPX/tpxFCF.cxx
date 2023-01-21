@@ -1617,7 +1617,7 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 
 		}
 
-		if(do_cuts==1) {	// ADDED in FY22, pp500
+		if(do_cuts==1 && run_compatibility >= 22) {	// ADDED in FY22, pp500
 			// kill ONEDPAD unless they fall before the trigger
 			if((cl->t_max > 20) && (fla & FCF_ONEPAD)) return ;
 		}

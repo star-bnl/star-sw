@@ -1214,6 +1214,67 @@ int fstPed::to_cache(char *fname, u_int run, int dont_cache)
 
 	fclose(f) ;	
 
+	if(fname) {
+		strcpy(f_fname,fname) ;
+	}
+	else {
+		sprintf(f_fname,"/RTScache/fst_s%d_pedestals_cmn_%08u_%s.txt",sector,run,bad?"BAD":"GOOD") ;
+	}
+
+
+	f = fopen(f_fname,"w") ;
+	if(f==0) {
+		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",f_fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+
+	if(tb_cou_ped != tb_cou_xpect) {
+		LOG(ERR,"Writing pedestals to cache \"%s\" [valid %d] but data has %d timebins != expect %d!",f_fname,valid,
+		    tb_cou_ped,tb_cou_xpect) ;
+	}
+	else {
+		LOG(INFO,"Writing pedestals to cache \"%s\" [valid %d], ntimebins %d",f_fname,valid,tb_cou_ped) ;
+	}
+
+	tim = time(0) ;
+	fprintf(f,"# Detector FST%d\n",sector) ;
+	fprintf(f,"# Run %08u\n",run) ;
+	fprintf(f,"# Date %s",ctime(&tim)) ;
+	fprintf(f,"# Timebins %d\n",tb_cou_ped) ;
+	fprintf(f,"\n") ;
+
+
+	for(int r=0;r<FGT_RDO_COU;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+
+		struct peds_t *ped = peds + r ;
+
+		for(int arm=0;arm<3;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+		for(int c=0;c<FGT_CH_COU;c++) {
+
+			// dump only the ones which need to exist!
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_SHOULD) ;
+			else continue ;
+
+			if(cmnGroup[apv][c]<0) continue ;
+
+			for(int t=0;t<tb_cou_ped;t++) {
+
+				fprintf(f,"%d %d %2d %3d %2d %7.3f %.3f\n",r+1,arm,apv,c,t,
+					ped->cmn_ped[arm][apv][c][t],
+					ped->cmn_rms[arm][apv][c][t]) ;
+			}
+		}
+		}
+		}
+	}
+
+	fclose(f) ;	
+
 	
 	
 

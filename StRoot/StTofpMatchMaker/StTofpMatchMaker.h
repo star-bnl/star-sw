@@ -89,7 +89,7 @@ public:
   void setMinHitsPerTrack(Int_t);
   void setMinFitPointsPerTrack(Int_t);
   void setMaxDCA(Float_t);
-  void setHistoFileName(Char_t*);
+  void setHistoFileName(const Char_t*);
 
   Bool_t doPrintMemoryInfo; //! 
   Bool_t doPrintCpuInfo; //!
@@ -204,7 +204,7 @@ inline void StTofpMatchMaker::setStandardTrackGeometry(){mOuterTrackGeometry=fal
 inline void StTofpMatchMaker::setMinHitsPerTrack(Int_t nhits){mMinHitsPerTrack=nhits;}
 inline void StTofpMatchMaker::setMinFitPointsPerTrack(Int_t nfitpnts){mMinFitPointsPerTrack=nfitpnts;}
 inline void StTofpMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
-inline void StTofpMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
+inline void StTofpMatchMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 inline void StTofpMatchMaker::createHistograms(Bool_t histos){mHisto = histos;}
 inline bool StTofpMatchMaker::validAdc(float adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
 inline bool StTofpMatchMaker::validTdc(float tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}

@@ -258,6 +258,9 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		memset(track_array,0,sizeof(track_array)) ;
 
 		for(u_int i=0;i<sim->ncontent;i++) {
+			// new in Jun 2022
+			if(sim_dta[i].adc==0) sim_dta[i].adc = 0xFFFF ;	// transliterate 0's to 0xFFFF ;
+
 			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
 			track_array[sim_dta[i].tb] = sim_dta[i].track_id ;
 

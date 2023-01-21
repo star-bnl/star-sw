@@ -67,7 +67,7 @@ public:
 	int emu_fifo_length[128] ;
 	volatile rbFifo_t *sfifo, *rfifo ;	// same for fifos
 
-protected:
+//protected:
 
 	int board ;
 	int ch ;	// also port!

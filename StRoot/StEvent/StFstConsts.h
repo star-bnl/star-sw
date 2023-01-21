@@ -52,7 +52,8 @@ const float kFstrStart[kFstNumRStripsPerWedge]= {5.000, 7.875, 10.750, 13.625, 1
 const float kFstrStop[kFstNumRStripsPerWedge] = {7.875, 10.750, 136.25, 16.500, 19.375, 22.250, 25.125, 28.000}; // in cm
 
 //general APV chip constants
-const unsigned char kFstNumTimeBins = 3;    // 9 time bins for ADC sampling (maximum time bin number)
+const unsigned char kFstNumTimeBins = 3;    // 3 time bins for ADC sampling (maximum time bin number)
+const unsigned char kFstDefaultTimeBin = 2; // the default time bin number (2nd time bin) for FST raw hits
 const int kFstMaxAdc                = 4096; // ADC value should be less than 4096 (12 bits ADC)
 
 #endif

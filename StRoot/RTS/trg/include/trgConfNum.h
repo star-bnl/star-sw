@@ -12,6 +12,10 @@
 *     JMN 29Aug17  In order to keep RTS/trg/include in step with $DEV
 *                  re-place ConfNum from trgConfig.h to this file and
 *                  #include trgConfnum.h in trgConfig.h
+*     JMN 15Jul22  Added CLK_CONF_NUM 17 at request from CWP
+*     JMN 02Aug22  Changed sequence to include EQ4 and leave a gap at 18
+*                  for the next crate.  EXT_CONF_NUM will be an offset/
+*                  length pair for a new set of headers.
 ***********************************************************************/
 
 
@@ -34,6 +38,8 @@
 #define  QT4_CONF_NUM      14
 #define  EQ1_CONF_NUM      15
 #define  EQ2_CONF_NUM      16
-#define  INF_CONF_NUM      20
+#define  EQ4_CONF_NUM      17
+#define  CLK_CONF_NUM      19
+#define  EXT_CONF_NUM      20
 
 #endif

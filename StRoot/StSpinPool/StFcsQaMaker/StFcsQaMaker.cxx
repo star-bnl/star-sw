@@ -46,8 +46,8 @@ Int_t StFcsQaMaker::Init(){
   }
   mFile=new TFile(mFilename,"RECREATE");
 
-  char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
-  char* nameNS[kFcsNorthSouth] = {"N","S"};
+  const char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
+  const char* nameNS[kFcsNorthSouth] = {"N","S"};
   char t[100],t2[100],t3[100];
 
   mDataSize = new TH1F("DataSize","DataSize",100,-1.0,7.0);

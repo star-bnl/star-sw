@@ -35,7 +35,7 @@ StReadRare::StReadRare()
 }
 
 
-StReadRare::StReadRare(Int_t nEvents, Char_t* histoFileName)
+StReadRare::StReadRare(Int_t nEvents, const Char_t* histoFileName)
 {
   mNEvents = nEvents;
 

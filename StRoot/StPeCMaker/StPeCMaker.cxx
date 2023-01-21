@@ -264,7 +264,7 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
       if (pIOMaker)
       {
          treeFileName = pIOMaker->GetFile();
-         char* ccc = "/";
+         const char* ccc = "/";
          Ssiz_t slashPosition = treeFileName.Last(*ccc);
 
          if (slashPosition != -1 && slashPosition < treeFileName.Length()) 

@@ -99,7 +99,7 @@ int emc_t::check()
  return 0;
 }
 //________________________________________________________________________________
-static char *id2char(int id)
+static const char *id2char(int id)
 {
 	switch(id) {
 	case BTOW_ID :
@@ -111,7 +111,7 @@ static char *id2char(int id)
 	}
 }
 
-static char *inst2char(int inst)
+static const char *inst2char(int inst)
 {
 	switch(inst) {
 	case 1 :
@@ -144,7 +144,7 @@ int OLDEVP::DAQemcReader(char *m)
 	struct EMCSECP *emcsecp ;
 	struct EMCRBP *emcrbp ; 
 	struct DUMMYDATA *emcadcr, *emcadcd ;
-	char *p, *secp, *rbp, *adcr, *adcd ;
+	const char *p, *secp, *rbp, *adcr, *adcd ;
 	u_int local_token, token ;
 
 	int len, off ;

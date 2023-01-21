@@ -151,6 +151,10 @@ public:
   void getName(int ehp, int ns, int dep, int ch, char name[]); //! Get Name of a channel 
   static void getFromName(const char name[], int& det, int& id); //! Get det/id from name
   static int getDetFromName(const std::string& detname);  //! Get det from name
+  static unsigned short getKey(unsigned short detid, unsigned short id);//This key matches the 'mDetId' in StFcsHit but without "zs" value (@[June 21, 2022](David Kapukchyan)>Move static method to StFcsHit?)
+  static void getDetIdFromKey(unsigned short key, unsigned short& detid, unsigned short& id);
+  static unsigned short getDetFromKey(unsigned short key);
+  static unsigned short getIdFromKey(unsigned short key);
 
   //! Utility functions related to DetectorPosition
   StThreeVectorD getDetectorOffset(int det) const;  //! get the offset of the detector
