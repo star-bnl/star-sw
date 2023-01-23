@@ -93,7 +93,7 @@ class StRHICfDbMaker : public StMaker
 		TH2D* h2_TLphoLeakIn[15];
 
 	virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
-	ClassDef(StRHICfDbMaker,3)   //StAF chain virtual base class for Makers
+	ClassDef(StRHICfDbMaker, 0)
 };
 
 #endif
