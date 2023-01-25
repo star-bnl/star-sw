@@ -48,6 +48,10 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
   elsif ($pwd =~ /2020\/19p5GeV_fixedTarget/) {$glob = "/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/31p2GeV_fixedTarget/) {$glob = "/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/7p3GeV_fixedTarget/)  {$glob = "/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+#       /star/data40/reco/production_9p2GeV_2020b/ReversedFullField/P23ia/2020/062/21062033/st_physics_21062033_raw_7000004.picoDst.root
+# /gpfs01/star/data*/reco/production_9p2GeV_2020b/ReversedFullField/P21ib_calib/2020/???/*
+  elsif ($pwd =~ /9p2GeV_2020b_P23ia/)        {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/P23ia/2020";}# print "$pwd => $glob\n";}
+  elsif ($pwd =~ /9p2GeV_2020c_P23ia/)        {$glob = "/reco/production_9p2GeV_2020c/ReversedFullField/P23ia/2020";}# print "$pwd => $glob\n";}
   elsif ($pwd =~ /2020\/9p2GeV_2020c/)        {$glob = "/reco/production_9p2GeV_2020c/ReversedFullField/P21ib_calib/2020";}
   elsif ($pwd =~ /2020\/9p2GeV_2020b/)        {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/P21ib_calib/2020";}
   elsif ($pwd =~ /2020\/9p2GeV_2020/)         {$glob = "/reco/productioxfn_9p2GeV_2020/ReversedFullField/P21ib_calib/2020";}
