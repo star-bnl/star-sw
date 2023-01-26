@@ -431,19 +431,19 @@
 
         <!-- Sub-shhapes of the pentagon for the PCB -->
         <Block name="STPP" comment="pgon triangle for pentagon shape PCB"  >
-            <Material name="Iron"  />
+            <Material name="G10"  />
             <Attribute for="STPP" lwid="2" seen="1" colo="3"  />
             <Shape type="Pgon" phi1="0.0" rmx="{29.450262431173993, 29.450262431173993}" nz="2" npdiv="1" dphi="90.0" rmn="{0.0, 0.0}" zi="{0.0, PENT_dz}"  />
         </Block>
         
         <Block name="STPL" comment="long box for pentagon shape PCB"  >
-            <Material name="Iron"  />
+            <Material name="G10"  />
             <Attribute for="STPL" lwid="2" seen="1" colo="3"  />
             <Shape type="BBox" dx="PENT_ls/2.0" dy="PENT_ss/2.0" dz="PENT_dz/2.0"  />
         </Block>
         
         <Block name="STPS" comment="short box for pentagon shape PCB"  >
-            <Material name="Iron"  />
+            <Material name="G10"  />
             <Attribute for="STPS" lwid="2" seen="1" colo="3"  />
             <Shape type="BBox" dx="PENT_ss/2.0" dy="PENT_ms/2.0" dz="PENT_dz/2.0"  />
         </Block>
