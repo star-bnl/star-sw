@@ -51,11 +51,13 @@ struct SurveyData_t {
   Double_t dXSurvey, dYSurvey, dZSurvey;
   const Char_t *comment;
 };
-#include "SurveyData_2003_2004_2013.h"
+Bool_t fInitMatrices = kFALSE;
+//#include "SurveyData_2003_2004_2013.h"
+#include "SurveyData_2003_2004_2013_2022_2023.h"
 //                 MagCS       : MagCS => SurCS, survey coordinate system => magnet, index l : 0 => 2003, 1 => 2004, 2 => 2013 data
 //                 TpcCS       : Tpc as Whole SurCS; TpcCS => SurCS = (MagCS => SurCS) * (survTpc == TpcCS => MagCS) =  MagCS * survTpc
 //                 WheelCS[2]  : Wheel in Tpc  (0 => West, 1 => East) : (MagCS => SurCS) * (TpcCS => MagCS) * (survWheelW == WheelCS => TpcCS) = TpcCS * survWheelW
-static TGeoHMatrix MagCS[3], TpcCS[3], WheelCS[2][3];
+static TGeoHMatrix MagCS[5], TpcCS[5], WheelCS[2][5];
 using namespace std;
 TLinearFitter *lf = 0;
 /*                     y  s  d */
@@ -71,13 +73,17 @@ TNtuple    *FitP  = 0;
 TFile      *fOut  = 0;
 std::ostream&  operator<<(std::ostream& os,  const SurveyData_t& v) {
   os << Form("%10s",v.system);
-  os << Form("%10s %10.3f +/- %6.3f %10.3f +/- %6.3f %10.3f +/- %6.3f %s",
+  os << Form("%10s X = %10.3f +/- %6.3f Y = %10.3f +/- %6.3f Z = %10.3f +/- %6.3f %s",
 	     v.target,
 	     v.XSurvey,v.dXSurvey,
-	     v.ZSurvey,v.dZSurvey,
 	     v.YSurvey,v.dYSurvey,
+	     v.ZSurvey,v.dZSurvey,
 	     v.comment);
-  if (TMath::Abs(TMath::Abs(v.YSurvey) - 120) < 20) os << " ++++++++++++++";
+  Double_t x = v.XSurvey;
+  Double_t y =v.YSurvey;
+  os << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
+
+  //  if (TMath::Abs(TMath::Abs(v.YSurvey) - 120) < 20) os << " ++++++++++++++";
   return os;
 }
 
@@ -96,6 +102,7 @@ SurveyData_t *GetSurvey(Int_t y, TString &year, Int_t &N) {
   if (survey) {delete [] survey; survey = 0;}
   yold = y;
   SurveyData_t *surv;
+  Double_t scale = 100;
   if (y == 2003) {
     year = "2003";
     cout << "This is the survey data taken September 15 & 16,  2003." << endl;
@@ -106,28 +113,47 @@ SurveyData_t *GetSurvey(Int_t y, TString &year, Int_t &N) {
     cout << "This file contains the combined values for the magnet, TPC AND CONE (SSD & SVT), August 2004" << endl;
     N = sizeof(Survey_8_04)/sizeof(SurveyData_t);
     surv = &Survey_8_04[0];
-  } else {
+  } else if (y == 2013) {
     year = "2013";
     cout << "This file contains the last survey for TPC (02/01/2013)" << endl;
     N = sizeof(Survey_2_01_13)/sizeof(SurveyData_t);
     surv = &Survey_2_01_13[0];
+  } else if (y == 2022) {
+    scale = 0.1;
+    year = "2022";
+    cout << "This file contains the last survey for TPC (06/02/2022)" << endl;
+    N = sizeof(Survey_6_02_22)/sizeof(SurveyData_t);
+    surv = &Survey_6_02_22[0];
+  } else {
+    scale = 2.54; // inches
+    year = "2023";
+    cout << "This file contains the last survey for TPC (01/13/2023)" << endl;
+    N = sizeof(Survey_01_13_2023)/sizeof(SurveyData_t);
+    surv = &Survey_01_13_2023[0];
   }
   Y = year;
   Nold = N;
   survey = new SurveyData_t[N];
   for (Int_t i = 0; i < N; i++) {
     survey[i] = surv[i];
-    survey[i].XSurvey *=  100; survey[i].dXSurvey *= 100; 
-    survey[i].YSurvey *=  100; survey[i].dYSurvey *= 100; 
-    survey[i].ZSurvey *=  100; survey[i].dZSurvey *= 100; 
+    if (y < 2022) {
+      survey[i].XSurvey *=  scale; survey[i].dXSurvey *= scale; 
+      survey[i].YSurvey *=  scale; survey[i].dYSurvey *= scale; 
+      survey[i].ZSurvey *=  scale; survey[i].dZSurvey *= scale; 
+    } else {
+      survey[i].XSurvey =  scale*surv[i].XSurvey;  
+      survey[i].YSurvey =  scale*surv[i].ZSurvey;  
+      survey[i].ZSurvey = -scale*surv[i].YSurvey;    
+    }
     if (survey[i].dXSurvey < 1e-10) survey[i].dXSurvey = 0.01;
     if (survey[i].dYSurvey < 1e-10) survey[i].dYSurvey = 0.01;
     if (survey[i].dZSurvey < 1e-10) survey[i].dZSurvey = 0.01;
+    cout << survey[i] << endl;
   }
   return survey;
 }
 //________________________________________________________________________________
-void PrintSurvey(Int_t year = 2013) {
+void PrintSurvey(Int_t year = 2022) {
   TString Year;
   Int_t N;
   SurveyData_t *survey = GetSurvey(year,Year,N);
@@ -137,8 +163,9 @@ void PrintSurvey(Int_t year = 2013) {
 }
 //________________________________________________________________________________
 void InitMatrices() {
-  Int_t years[3] = {2003,2004,2013};
-  for (Int_t l = 0; l < 3; l++) {
+  if (fInitMatrices) return;
+  Int_t years[5] = {2003,2004,2013,2022,2023};
+  for (Int_t l = 0; l < 5; l++) {
     // Surver => Magnet
     MagCS[l] = TGeoHMatrix();
 #define __Mag2Surv__
@@ -151,7 +178,7 @@ void InitMatrices() {
        {0., 0.,-362.5550, 0, 0, 0}},// 2004,EF 1-8
       {{0., 0., 362.5011, 0, 0, 0},  // y2013w Coordinates are in STAR magent system
        {0., 0.,-362.5550, 0, 0, 0}}}; // y2013e
-
+    
     Double_t anglesMagnet[3] = {(survMagnetZabg[l][0][3]+survMagnetZabg[l][1][3])/2,
 				(survMagnetZabg[l][0][4]+survMagnetZabg[l][1][4])/2,
 				(survMagnetZabg[l][0][5]+survMagnetZabg[l][1][5])/2};
@@ -190,7 +217,7 @@ void InitMatrices() {
     }
     for (Int_t m = 0; m < 3; m++) {
       cout << Form("%9.4f,",trTpc[m]);
-      }
+    }
     cout << Form("0,0,0,0,0,0,\"%4i Tpc\"},",years[l]) << endl;
     survTpc.Print();
     TpcCS[l] = MagCS[l] * survTpc;
@@ -282,7 +309,8 @@ void InitMatrices() {
       WheelCS[side][l].SetName(Form("WheelCS%i_%i",side,l));
       WheelCS[side][l].Print();
     }
-  } // year
+    } // year
+  fInitMatrices = kTRUE;
 }
 //________________________________________________________________________________
 void FitGraph(TGraph2DErrors *graph = 0) {
@@ -475,12 +503,14 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
   TString System(system);
   Int_t N = 0;
   TString year;
+  if (iY == 2014) iY = 2013;
   SurveyData_t *survey = GetSurvey(iY,year,N);
   Int_t l = -1;
-  if (iY == 2014) iY = 2013;
   if (iY == 2003) l = 0;
   if (iY == 2004) l = 1;
   if (iY == 2013) l = 2;
+  if (iY == 2022) l = 3;
+  if (iY == 2023) l = 4;
   if (l < 0) {
     cout << "Illegal year" << endl;
     return 0;
@@ -540,15 +570,17 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
     }
     TString Target(survey->target);
     TString Comment(survey->comment);
+#if 0
     if (survey->YSurvey < zmin || survey->YSurvey > zmax) {
       //      cout << "Z " << *survey << " skipped" << endl;
       continue;
     }
+#endif
     if (! Target.Contains(reg)) {
       //      cout << "Target " << *survey << " skipped" << endl;
       continue;
     }
-#if 0
+#if 1
     cout << *survey << endl;
 #endif
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
@@ -583,7 +615,11 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
 #endif
     n++;
   }
+#if 0
   if (n > 0) FitGraph(graph);
+#endif
+  fOut->Write();
+  SafeDelete(fOut);
   return graph;
 }
 //____________________________________________________________________
@@ -820,7 +856,9 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     Int_t sec;
     Int_t nread = sscanf(Target.Data(),"%*3c%2i",&sec);
     if (nread != 1) continue;
+#if 0
     if (survey->YSurvey < zmin || survey->YSurvey > zmax) continue;
+#endif
     if (! Target.Contains(reg)) continue;
     cout << *survey;
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
@@ -867,7 +905,9 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     Int_t sec;
     Int_t nread = sscanf(Target.Data(),"%*3c%2d",&sec);
     if (nread != 1) continue;
+#if 0
     if (survey->YSurvey < zmin || survey->YSurvey > zmax) continue;
+#endif
     if (! Target.Contains(reg)) continue;
     cout << *survey;
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
@@ -916,28 +956,37 @@ void TpcSurvey() {
   InitMatrices();
 }
 //________________________________________________________________________________
-void TpcSurveyAll(Int_t d1 = 0) {
+void TpcSurveyAll(Int_t d0 = -1, Int_t l0 = -1) {
   //  PrintSurvey();
   //                     l  d  wea; l = 0 -> 2003, d = Magnet, Tpc, Svt, wea = West, East, Any  
   //                                    1 -> 2004
   //                                    2 -> 2013
+  //                                    3 -> 2022
+  //                                    4 -> 2023
   memset(graphs, 0, sizeof(graphs));
   const Char_t *systems[5] = {"Magnet","Tpc" ,"AO", "BO","DO"};
   const Char_t *site[5][2] = 
-    {{"^WF"    ,"^EF"    }, // magnet
+  //    {{"^WF"    ,"^EF"    }, // magnet
+    {{"^W"     ,"^E"     }, // magnet
      {"^W....$","^E....$"}, // wheels
      {"^WAO"    ,"^EAO"     },
      {"^WBO"    ,"^EBO"     },
      {"^WDO"    ,"^EDO"     }};
-  const Int_t ys[3] = {2003, 2004, 2013};
+  const Int_t ys[5] = {2003, 2004, 2013, 2022, 2023};
   InitMatrices();
-  for (Int_t d = d1; d < 5; d++) {// detectors: Magnet, Tpc, TpcR
-    for (Int_t l = 2; l < 3; l++) {// year
+  Int_t d1 = 0, d2 = 5;
+  Int_t l1 = 0, l2 = 4;
+  if (d0 > -1) {d1 = d2 = d0;}
+  if (l0 > -1) {l1 = l2 = l0;}
+  for (Int_t d = d1; d <= d2; d++) {// detectors: Magnet, Tpc, TpcR
+    for (Int_t l = l1; l <= l2; l++) {// year
       for (Int_t s = 0; s < 2; s++) { // side
 	if (d < 2) {// magnet and wheel
-	  MakeGraph(ys[l],systems[d],site[d][s]);
+	  //	  MakeGraph(ys[l],systems[d],site[d][s]);
+	  MakeGraph(ys[l],systems[d],site[0][s]);
 	} else  {// TpcR
-	  MakeRGraph(ys[l],site[d][s]);
+	  //	  MakeRGraph(ys[l],site[d][s]);
+	  MakeRGraph(ys[l],site[0][s]);
 	}
 	if (! gROOT->IsBatch() && Ask()) return;
       }
@@ -945,7 +994,7 @@ void TpcSurveyAll(Int_t d1 = 0) {
   }
 }
 //________________________________________________________________________________
-void DrawFitP(const Char_t *var = "alpha", Double_t ymax = 5, Int_t set = -1, Int_t io = -1) {
+ void DrawFitP(const Char_t *var = "alpha", Double_t ymax = 5, Int_t set = -1, Int_t io = -1) {
   if (! FitP) FitP = (TNtuple *) gDirectory->Get("FitP");
   if (! FitP) return;
   Int_t s1 = 0;
@@ -1025,4 +1074,12 @@ void y2014M() {
   MakeGraph(2014,"Tpc","^EI.*RQ",-10, 10);
   MakeGraph(2014,"Tpc","^EO.*RQ",-10, 10);
   MakeGraph(2014,"Tpc","^E.*RQ", -10, 10);
+}
+//________________________________________________________________________________
+void Print(Int_t y=2023) {
+  MakeGraph(y,"Magnet","^E.*",-10, 10);
+  MakeGraph(y,"Magnet","^W.*",-10, 10);
+
+  MakeGraph(y,"Tpc","^E.*",-10, 10);
+  MakeGraph(y,"Tpc","^W.*",-10, 10);
 }

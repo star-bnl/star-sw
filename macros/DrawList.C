@@ -364,6 +364,9 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
       if (nameH.BeginsWith("InnerTime") || 
 	  nameH.BeginsWith("OuterTime")) {
 	if (h->GetMaximum() > 2) h->SetMaximum(2);
+	if (! nameH.Contains("_p")) {
+	   c->cd(i+1)->SetLogy(1);
+	}
       }
       h->Draw();
       c->Update();
