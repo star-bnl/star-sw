@@ -44,12 +44,13 @@ double StEbyET0::getTime(StEvent* event, int mode) {
   
   mRunId = event->runId();
   mEventId = event->id();
+  mTime = 0.; // default event time should always be zero, not correcting for some other global T0
 
   // check for calibration mode
+  // fill tree without mTime subtracted
   if (mode == 1) fillTree(event);
 
   // determine event time
-  mTime = 0.; // default should always be zero, not correcting for some other global T0
   double info[12];
   St_EbyET0C* ebyeTable = St_EbyET0C::instance();
   for (int row = 0; row < ebyeTable->GetNRows(); row++) {
@@ -94,6 +95,10 @@ double StEbyET0::getTime(StEvent* event, int mode) {
     mTime = ebyeTable->time(row,coordinate);
     break;
   }
+
+  // check for QA mode
+  // fill tree with mTime added
+  if (mode == 2) fillTree(event);
 
   return mTime;
 }
@@ -216,6 +221,9 @@ void StEbyET0::getTpcInfo(StEvent* event, double* info) {
           // ignoring adding a zoffset = StTpcDb::instance->Dimenstions()->zInner/OuterOffset()
           // because constant shifts aren't relavant for the EbyET0 calibration
           double time = coorS.position().z() / (StTpcDb::instance()->DriftVelocity()*1e-6);
+
+          // apply the EbyE T0 time correction (if it is already determined)
+          time += mTime;
 
           if (innerRow) {
             if (tb < innerMaxTB && tb > innerMinTB) { // use only prompt hit candidates
