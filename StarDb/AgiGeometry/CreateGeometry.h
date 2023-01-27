@@ -3,7 +3,7 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
   if (gGeoManager) {
     cout << "VMC geometry " << gGeoManager->GetName() << " has beed created. Ignore request for " 
 	 << name << " ! " << endl;
-    return geom;
+    return (TDataSet*)geom;
   }
   TString path  = ".:./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry";
   TString geomF(name); geomF += ".h";
