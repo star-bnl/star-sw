@@ -140,10 +140,19 @@ SurveyData_t *GetSurvey(Int_t y, TString &year, Int_t &N) {
       survey[i].XSurvey *=  scale; survey[i].dXSurvey *= scale; 
       survey[i].YSurvey *=  scale; survey[i].dYSurvey *= scale; 
       survey[i].ZSurvey *=  scale; survey[i].dZSurvey *= scale; 
+      // rename to STAR Eest TPC sector notation
     } else {
       survey[i].XSurvey =  scale*surv[i].XSurvey;  
       survey[i].YSurvey =  scale*surv[i].ZSurvey;  
       survey[i].ZSurvey = -scale*surv[i].YSurvey;    
+      if (TString(survey[i].system).Contains("Tpc") && TString(survey[i].target).BeginsWith("E")) {
+	Int_t sector, row;
+	sscanf(survey[i].target,"E%i_%i",&sector,&row);
+	if (sector > 0 && sector <= 12) {
+	  sector = sector + 12;
+	  survey[i].target = Form("E%i_%i",sector,row);
+	}
+      }
     }
     if (survey[i].dXSurvey < 1e-10) survey[i].dXSurvey = 0.01;
     if (survey[i].dYSurvey < 1e-10) survey[i].dYSurvey = 0.01;
@@ -165,19 +174,25 @@ void PrintSurvey(Int_t year = 2022) {
 void InitMatrices() {
   if (fInitMatrices) return;
   Int_t years[5] = {2003,2004,2013,2022,2023};
-  for (Int_t l = 0; l < 5; l++) {
+  for (Int_t ly = 0; ly < 5; ly++) {
     // Surver => Magnet
-    MagCS[l] = TGeoHMatrix();
+    MagCS[ly] = TGeoHMatrix();
+    Int_t l = ly;
+    if (ly > 2) l = 2;
 #define __Mag2Surv__
 #ifdef  __Mag2Surv__
-    Double_t survMagnetZabg[3][2][6] = { // Survey => Magnet
+    Double_t survMagnetZabg[5][2][6] = { // Survey => Magnet
       /*x  y      z(cm)  alpha,    beta, gamma [mrad] */
-      {{0., 0., 362.5027, 0, 0, 0}, // 2003,WF 1-8
-       {0., 0.,-362.5545, 0, 0, 0}},// 2003,EF 1-8
-      {{0., 0., 362.4907, 0, 0, 0}, // 2004,WF 1-8
-       {0., 0.,-362.5550, 0, 0, 0}},// 2004,EF 1-8
+      {{0., 0., 362.5027, 0, 0, 0},  // 2003,WF 1-8
+       {0., 0.,-362.5545, 0, 0, 0}}, // 2003,EF 1-8
+      {{0., 0., 362.4907, 0, 0, 0},  // 2004,WF 1-8
+       {0., 0.,-362.5550, 0, 0, 0}}, // 2004,EF 1-8
       {{0., 0., 362.5011, 0, 0, 0},  // y2013w Coordinates are in STAR magent system
-       {0., 0.,-362.5550, 0, 0, 0}}}; // y2013e
+       {0., 0.,-362.5550, 0, 0, 0}}, // y2013e
+      {{0., 0., 362.5011, 0, 0, 0},  // y2022w Coordinates are in STAR magent system << 2013
+       {0., 0.,-362.5550, 0, 0, 0}}, // y2022e
+      {{0., 0., 362.5011, 0, 0, 0},  // y2023w Coordinates are in STAR magent system << 2013
+       {0., 0.,-362.5550, 0, 0, 0}}};// y2023e
     
     Double_t anglesMagnet[3] = {(survMagnetZabg[l][0][3]+survMagnetZabg[l][1][3])/2,
 				(survMagnetZabg[l][0][4]+survMagnetZabg[l][1][4])/2,
@@ -188,27 +203,29 @@ void InitMatrices() {
 #endif /*  __Mag2Surv__ */
     cout << Form("%4i,Magnet xyz (cm) = %9.4f %9.4f %9.4f abg[mrad] = %5.2f %5.2f %5.2f",
 		 years[l],transMagnet[0],transMagnet[1],transMagnet[2],anglesMagnet[0],anglesMagnet[1],anglesMagnet[2]) << endl;
-    MagCS[l].RotateX(1e-3*TMath::RadToDeg()*anglesMagnet[0]);
-    MagCS[l].RotateY(1e-3*TMath::RadToDeg()*anglesMagnet[1]);
-    MagCS[l].RotateZ(1e-3*TMath::RadToDeg()*anglesMagnet[2]);
-    MagCS[l].SetTranslation(transMagnet);
-    MagCS[l].SetName(Form("MagCS_%i",l));
-    MagCS[l].Print();
+    MagCS[ly].RotateX(1e-3*TMath::RadToDeg()*anglesMagnet[0]);
+    MagCS[ly].RotateY(1e-3*TMath::RadToDeg()*anglesMagnet[1]);
+    MagCS[ly].RotateZ(1e-3*TMath::RadToDeg()*anglesMagnet[2]);
+    MagCS[ly].SetTranslation(transMagnet);
+    MagCS[ly].SetName(Form("MagCS_%i",l));
+    MagCS[ly].Print();
     // Survey => Magenet => Tpc
     TGeoHMatrix survTpc;
-#define __Tpc2Mag__
+    //#define __Tpc2Mag__
 #ifdef  __Tpc2Mag__  /* East Wheel for TPC  */
-    Double_t Tpcxyzabg[3][6] = {
+    Double_t Tpcxyzabg[5][6] = {
       {-0.2287 -0.0445+0.0046,  -0.1745 +0.0169-0.0014, -231.6913+0.0258,-0.04, -0.46, 0.36}, //  2003,"Tpc","^E..."
       {-0.2287 +0.0094-0.0162,  -0.1745 +0.0370+     0, -231.6945+0.0269, 0.10, -0.55, 0.52}, //  2004,"Tpc","^E..."
-      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}};//  2013,"Tpc","^E..."
+      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}, //  2013,"Tpc","^E..."
+      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}, //  2022,"Tpc","^E..." << 2013
+      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}};//  2023,"Tpc","^E..." << 2013
     Double_t transTpc[3]  = {Tpcxyzabg[l][0], Tpcxyzabg[l][1], Tpcxyzabg[l][2]+229.71+1.7780}; // 3-rd iteration
     survTpc.RotateX(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][3]);
     survTpc.RotateY(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][4]);
     survTpc.RotateZ(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][5]);
     survTpc.SetTranslation(transTpc);
     cout << Form("%4i,Tpc xyz (cm) = %9.4f %9.4f %9.4f abg[mrad] = %5.2f %5.2f %5.2f",
-		 years[l],transTpc[0],transTpc[1],transTpc[2],Tpcxyzabg[l][3],Tpcxyzabg[l][4],Tpcxyzabg[l][5]) << endl;
+		 years[ly],transTpc[0],transTpc[1],transTpc[2],Tpcxyzabg[l][3],Tpcxyzabg[l][4],Tpcxyzabg[l][5]) << endl;
     Double_t *rotTpc = survTpc.GetRotationMatrix();
     Double_t *trTpc  = survTpc.GetTranslation();
     cout << "{0,";
@@ -218,15 +235,15 @@ void InitMatrices() {
     for (Int_t m = 0; m < 3; m++) {
       cout << Form("%9.4f,",trTpc[m]);
     }
-    cout << Form("0,0,0,0,0,0,\"%4i Tpc\"},",years[l]) << endl;
+    cout << Form("0,0,0,0,0,0,\"%4i Tpc\"},",years[ly]) << endl;
     survTpc.Print();
-    TpcCS[l] = MagCS[l] * survTpc;
-    TpcCS[l].SetName(Form("TpcCS_%i",l));
-    TpcCS[l].Print();
+    TpcCS[ly] = MagCS[ly] * survTpc;
+    TpcCS[ly].SetName(Form("TpcCS_%i",ly));
+    TpcCS[ly].Print();
 #endif
     for (Int_t side = 0; side < 2; side++) { // West and East
       TGeoHMatrix survWheelW;
-#define __Wheel2Tpc__ 
+      //#define __Wheel2Tpc__ 
 #ifdef  __Wheel2Tpc__
       const Char_t *sideName[2] = {"west","east"};
       Double_t survWheelZabg[3][2][6] = { // Survey => Tpc == average Wheel => Wheel
@@ -236,14 +253,14 @@ void InitMatrices() {
 	{{0., 0., 231.5074,  0.09,  0.10, 0},  //  MakeGraph(2004,"Tpc","^W...")            	  
          {0., 0.,-231.4560,  0.00,  0.00, 0}}, //  MakeGraph(2004,"Tpc","^E...")
 	{{0., 0., 231.4993,  0.16,  0.11, 0},  //  MakeGraph(2013,"Tpc","^W...")       
-	 {0., 0.,-231.4611, -0.00, -0.00, 0}} //  MakeGraph(2013,"Tpc","^E...")
+	 {0., 0.,-231.4611, -0.00, -0.00, 0}}  //  MakeGraph(2013,"Tpc","^E...")
 #elif defined(__2ND_ITER__)
 	{{0., 0., 231.4759,  0.13,  0.12, 0},  //  MakeGraph(2003,"Tpc","^W...")
 	 {0., 0.,-231.4880, -0.00, -0.00, 0}}, //  MakeGraph(2003,"Tpc","^E...")
 	{{0., 0., 231.4805,  0.08,  0.10, 0},  //  MakeGraph(2004,"Tpc","^W...")            	  
          {0., 0.,-231.4829,  0.00,  0.00, 0}}, //  MakeGraph(2004,"Tpc","^E...")
 	{{0., 0., 231.4724,  0.16,  0.11, 0},  //  MakeGraph(2013,"Tpc","^W...")       
-	 {0., 0.,-231.4880, -0.00, -0.00, 0}} //  MakeGraph(2013,"Tpc","^E...")
+	 {0., 0.,-231.4880, -0.00, -0.00, 0}}  //  MakeGraph(2013,"Tpc","^E...")
 #elif defined(__3RD_ITER__)
 	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35},  //  MakeGraph(2003,"Tpc","^W...")
 	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04}}, //  MakeGraph(2003,"Tpc","^E...")
@@ -282,13 +299,13 @@ void InitMatrices() {
 #endif
       };
       cout << Form("%4i,Wheel xyz (cm) = %8.4f %8.4f %8.4f abg[mrad] = %6.2f  %6.2f  %6.2f",
-		   years[l],survWheelZabg[l][side][0],survWheelZabg[l][side][1],survWheelZabg[l][side][2],
+		   years[ly],survWheelZabg[l][side][0],survWheelZabg[l][side][1],survWheelZabg[l][side][2],
 		   survWheelZabg[l][side][3],survWheelZabg[l][side][4],survWheelZabg[l][side][5]) << endl;
       Double_t z = survWheelZabg[l][side][2];
       if (z > 0) z -= (229.71+1.7780);
       else       z += (229.71+1.7780);
       cout << Form("%4i,TpcHalf xyz (cm) = %8.4f %8.4f %8.4f abg[mrad] = %6.2f  %6.2f  %6.2f",
-		   years[l],survWheelZabg[l][side][0],survWheelZabg[l][side][1],z,
+		   years[ly],survWheelZabg[l][side][0],survWheelZabg[l][side][1],z,
 		   survWheelZabg[l][side][3],survWheelZabg[l][side][4],survWheelZabg[l][side][5]) << endl;
       survWheelW.RotateX(1e-3*TMath::RadToDeg()*survWheelZabg[l][side][3]);
       survWheelW.RotateY(1e-3*TMath::RadToDeg()*survWheelZabg[l][side][4]);
@@ -305,9 +322,9 @@ void InitMatrices() {
       }
       cout << Form("0,0,0,0,0,0,\"%4i %s\"},",years[l],sideName[side]) << endl;
 #endif /* __Wheel2Tpc__ */
-      WheelCS[side][l] = TpcCS[l] * survWheelW;;
-      WheelCS[side][l].SetName(Form("WheelCS%i_%i",side,l));
-      WheelCS[side][l].Print();
+      WheelCS[side][ly] = TpcCS[ly] * survWheelW;;
+      WheelCS[side][ly].SetName(Form("WheelCS%i_%i",side,ly));
+      WheelCS[side][ly].Print();
     }
     } // year
   fInitMatrices = kTRUE;
