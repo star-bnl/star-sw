@@ -244,9 +244,15 @@
   if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {
     gInterpreter->AddIncludePath("./.$STAR_HOST_SYS_OPT/include");
     gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS_OPT/include");
+    //#ifndef __CLING__
+    gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS_OPT/include/tables");
+    //#endif
   } else {
     gInterpreter->AddIncludePath("./.$STAR_HOST_SYS/include");
     gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
+    //#ifndef __CLING__
+    gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include/tables");
+    //#endif
   }
   gInterpreter->AddIncludePath("/usr/include/mysql");
 }
