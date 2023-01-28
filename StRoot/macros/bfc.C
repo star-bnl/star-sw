@@ -38,6 +38,7 @@ StBFChain    *chain=0;
 //_________________ Prototypes _______________________________________________
 void Usage();
 void Load(const Char_t *options="");
+//TString defChain("MC.y2009a,StiCA,20Muons,vmc,Rung.1,dEdxCalib,McTpcAna");
 //TString defChain("y2010,gstar,20Muons,Test.default.Fast.ITTF,NosvtIT,NossdIT,-sfs,-ssdFast");
 //TString defChain("y2011,gstar,20Muons,TpcRS,TpxClu,bbcSim,btofsim,emcY2,EEfs,pmdSim,IdTruth,MakeEvent,VFMinuit,ITTF,NosvtIT,NossdIT,analysis,BTofIT,KFVertex");//,corr4,KFVertex,sdt20100107.110000");
 //TString defChain("MC.y2012a,sdt20120319,gstar,20Muons,StiCA,KFVertex,BEmcChkStat,btof,fmsSim,emcSim,EEss,eemcA2E,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");//,corr4,KFVertex,sdt20100107.110000");
@@ -80,8 +81,8 @@ void Load(const Char_t *options="");
 //TString defChain("gstar,K_S01,y2020a,tpcDb,TpcRS,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna");
 //TString defChain("MC2016,StiCA,20Muons,vmc,Rung.1");
 //TString defChain("MC.2017,sdt20170621.104909,StiCA,20Muons,vmc,Rung.1,UseCAVxFinder");
-//TString defChain("MC2019,StiCA,20Muons,vmc,Rung.1"); //,AgML");
-//TString defChain("MC2019,StiCA,20Muons,vmc,Rung.1,dEdxCalib"); //,AgML");
+//TString defChain("MC.2019,StiCA,20Muons,vmc,Rung.1"); //,AgML");
+//TString defChain("MC.2019,StiCA,20Muons,vmc,Rung.1,dEdxCalib,McTpcAna"); //,AgML");
 TString defChain("MC.7p7GeV_2021,20Muons,vmc,Rung.1,dEdxCalib"); //,AgML");
 StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
 		const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
