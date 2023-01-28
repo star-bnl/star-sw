@@ -42,8 +42,8 @@ Run19, iTPC;      mysql -h dbbak.starp.bnl.gov -P 3418 -e 'select asic_thr_lo as
 */
   memset(&row,0,tableSet->GetRowSize());
   row.N         =       6;
-  row.Altro_thr =       3;
-  row.Altro_seq =       2;
+  row.Altro_thr =       3; // checked by StTpcHitMaker::CheckThrSeq
+  row.Altro_seq =       2; // -"-
   row.Altro_K1  =   57158; //K1 coefficient of the TCF
   row.Altro_K2  =   21787; //K2 coefficient of the TCF
   row.Altro_K3  =   26699; //K3 coefficient of the TCF
@@ -56,8 +56,8 @@ Run19, iTPC;      mysql -h dbbak.starp.bnl.gov -P 3418 -e 'select asic_thr_lo as
   for (Int_t i  = 0; i < 24; i++)		{
     tableSet->AddAt(&row);
   }
-  row.Altro_thr =       4; // instead 3, iTPC, Tonko 12/12/2019, 
-  row.Altro_seq =       2; // instead 1, confirmed by Jef 01/14/2023
+  row.Altro_thr =       4; // instead 3, iTPC, Tonko 12/12/2019,       checked by StTpcHitMaker::CheckThrSeq
+  row.Altro_seq =       2; // instead 1, confirmed by Jef 01/14/2023    -"-
   cout << "[SAMPA] : Usin local configuration with Inner row.Altro_thr = " << row.Altro_thr << " row.Altro_seq = " << row.Altro_seq << endl; 
 
   for (Int_t i  = 0; i < 24; i++)		{
