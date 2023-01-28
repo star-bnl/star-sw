@@ -70,6 +70,8 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
+  static Double_t feiFunc(Double_t *x, Double_t *par) {return fei(x[0],par[0],par[1]);}
+  TF1            *Fei();
   static Double_t polya(Double_t *x, Double_t *par);
   SignalSum_t  *GetSignalSum(Int_t sector);
   SignalSum_t  *ResetSignalSum(Int_t sector);
