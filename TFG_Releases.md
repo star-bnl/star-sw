@@ -90,5 +90,6 @@
 <li> TFG22h Freeze befoore updating dE/dx model, fix   KPidParticles     2022-09-28 15:35:34 -0400  (HEAD -> TFG, tag: TFG22h_3, origin/TFG)
 <li> TFG22i Replace loading gain from dta_Tpx->request to tpxGain        2022-10-14 12:21:16 -0400  (HEAD -> TFG, tag: TFG22i)
 <li> TFG22j Finish dE/dx calibration RunXIX_XXII_79                      2022-12-15 19:13:11 -0500  (HEAD -> TFG, tag: TFG22j_5)
+<li> TFG23a Tune TpcRS for y2009                                         2023-01-28 19:13:11 -0500  (HEAD -> TFG, tag: TFG23a)
 <li>.DEV2   head of TFG git repository
 </ul>
