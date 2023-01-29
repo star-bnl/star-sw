@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_slp_bemc Allocated rows: 4800  Used rows: 4800  Row size: 4 bytes
 //  Table: emc_adcslope_st[0]--> emc_adcslope_st[4799]
@@ -12,5 +12,5 @@ St_DataSet *CreateTable() {
   row.p0	 =          1; // adc slope for ADC channel ;
   for (Int_t i=0;i<4800;i++) tableSet->AddAt(&row,i);
   // ----------------- end of code ---------------
-  return (St_DataSet *)tableSet;
+  return (TDataSet *)tableSet;
 }
