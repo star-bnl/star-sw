@@ -70,8 +70,8 @@ private:
 #endif
     StEpdGeom* mEpdgeo=0;
 
-    float mMinE=2.0;
-    float mMaxE=-1.0;
+    float mMinE=-1.0;
+    float mMaxE=2.0;
 
     TApplication* mApplication=0;
     TCanvas* mCanvas=0;    

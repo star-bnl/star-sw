@@ -1211,13 +1211,13 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 		if(rdo->fee[b][c].fee_status) {
 			if(altro_expect != altro) {
-				LOG(WARN,"RDO %d: expect %d, got %d",rdo->rdo,altro_expect,altro) ;
+				LOG(WARN,"RDO %d: at %d:%d: expect %d, got %d",rdo->rdo,b,c,altro_expect,altro) ;
 			}
 			
 		}	
 		else {
 			if(altro_expect != -1) {
-				LOG(WARN,"RDO %d: expect %d, got %d",rdo->rdo,altro_expect,altro) ;
+				LOG(WARN,"RDO %d: at %d:%d: expect %d, got %d",rdo->rdo,b,c,altro_expect,altro) ;
 			}
 		}
 

@@ -78,6 +78,7 @@
 #include "TError.h"
 #include <Stiostream.h>
 #include "StMagFMaker.h"
+#include "StDetectorDbMaker/St_MagFactorC.h"
 #include "StDetectorDbMaker/St_starMagOnlC.h"
 #include "StDetectorDbMaker/St_starMagAvgC.h"
 #include "StMessMgr.h" 
@@ -109,7 +110,7 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
   } else {
     gMessMgr->Info() << "StMagFMaker::InitRun active mode " << endm;
-    Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
+    Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
     if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
       fScale = St_starMagAvgC::instance()->ScaleFactor();
       gMessMgr->Info() << "StMagFMaker::InitRun use Scale Factor = " << fScale 

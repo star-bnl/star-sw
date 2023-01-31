@@ -70,7 +70,7 @@ public:
     ~StETofNode() {}
 
     StETofNode( const TGeoPhysicalNode& gpNode );
-    StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy );
+    StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment );
 
     void    convertPos( StETofNode* from, const double* pos_from, StETofNode* to, double* pos_to );
 
@@ -166,7 +166,7 @@ public:
     
     void  addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );  
     void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
-    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins );
+    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment );
 
     StETofGeomCounter* counter( const unsigned int i ) const;  
 
@@ -226,8 +226,7 @@ public:
     ~StETofGeomCounter() {}
 
     StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );
-    StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
-    
+    StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment );
     void createGeomStrips();
     
     int  findStrip( const double* local );
@@ -286,9 +285,7 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
-    void init( TGeoManager* geoManager );
-    void init( TGeoManager* geoManager, const double* safetyMargins );
-    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
+    void init( TGeoManager* geoManager, const double* safetyMargins = 0, const bool useHelixSwimmer = false );
 
     void reset();
 
@@ -305,6 +302,7 @@ public:
 
     StETofNode* findETofNode( const int moduleId, const int counter );
 
+    void           pointMaster2local( const int moduleId, const int counterId, const double* master,  double* local );
     void           hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
     StThreeVectorD hitLocal2Master( StETofHit* hit );
     StThreeVectorD hitLocal2Master( StMuETofHit* hit );
@@ -359,6 +357,10 @@ public:
     StETofGeomModule* module( const unsigned int i );
     unsigned int      nValidModules() const;
 
+    void readAlignmentParameters();
+    void readAlignmentDatabase(); 
+    void setFileNameAlignParam(std::string FileNameAlignParam);
+
     void debugOn();
     void debugOff();
     bool isDebugOn() const;
@@ -372,6 +374,9 @@ private:
     bool              mDebug;          // control message printing of this class
 
     StarMagField*     mStarBField;
+
+    std::string                 mFileNameAlignParam;
+    std::vector<StThreeVectorD> mAlignmentParameters;
 
     ClassDef( StETofGeometry, 1 )
 };
@@ -387,7 +392,7 @@ inline void  StETofGeometry::debugOn()  { mDebug = true;  }
 inline void  StETofGeometry::debugOff() { mDebug = false; }
 
 inline bool  StETofGeometry::isDebugOn() const { return mDebug; }
-
+inline void  StETofGeometry::setFileNameAlignParam(std::string fileNameAlignParam) {mFileNameAlignParam = fileNameAlignParam;}
 
 
 #endif /// STETOFGEOMETRY_H

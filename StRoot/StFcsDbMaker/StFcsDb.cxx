@@ -515,14 +515,22 @@ int StFcsDb::getDetFromName(const std::string& detname){
     else if( detname=="ES") {return 1;}
     else if( detname=="HN") {return 2;}
     else if( detname=="HS") {return 3;}
-    else if( detname=="HN") {return 4;}
-    else if( detname=="PN") {return 5;}
-    else if( detname=="PS") {return 6;}
+    else if( detname=="PN") {return 4;}
+    else if( detname=="PS") {return 5;}
     else {
 	LOG_ERROR << "ERROR:Invalid name for detector;Input:"<<detname<<endm;
 	return -1;
     }
 }
+
+unsigned short StFcsDb::getKey(unsigned short detid, unsigned short id){ return ( (detid & 0x7)<<12 | (id & 0xffff) ); }
+void StFcsDb::getDetIdFromKey(unsigned short key, unsigned short& detid, unsigned short& id)
+{
+  detid = (key >> 12) & 0x0007;
+  id = (key & 0x0fff);
+}
+unsigned short StFcsDb::getDetFromKey(unsigned short key){ return (key >> 12) & 0x0007; }
+unsigned short StFcsDb::getIdFromKey(unsigned short key) { return (key & 0x0fff); }
 
 StThreeVectorD StFcsDb::getDetectorOffset(int det) const{ 
   if(mRun19>0){
@@ -540,19 +548,10 @@ StThreeVectorD StFcsDb::getDetectorOffset(int det) const{
     return  StThreeVectorD(0.0, 0.0, 0.0);
   }else{
     if(mDbAccess==0){ //no DB
-      double a = getDetectorAngle(det) / 180.0 * M_PI;
-      if(det==0){
-	double x = -16.69 - 13.9*sin(a);
-	double z = 710.16 + 13.9*cos(a);
-	return StThreeVectorD(x, 0.0, z);
-      }
-      if(det==1){
-	double x =  16.69 + 13.9*sin(a);
-	double z = 710.16 + 13.9*cos(a);
-	return StThreeVectorD(x, 0.0, z);
-      }
-      if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
-      if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
+      if(det==0) return StThreeVectorD(-17.399, -5.26, 710.16);
+      if(det==1) return StThreeVectorD( 17.399, -5.26, 710.16);
+      if(det==2) return StThreeVectorD(-21.285, +1.80, 782.63);
+      if(det==3) return StThreeVectorD( 21.285, +1.80, 782.63);
       return StThreeVectorD(0.0, 0.0, 0.0);	  
     }else{ //from DB
       if(det>=0 && det<4) 	  
@@ -575,18 +574,14 @@ float StFcsDb::getDetectorAngle(int det) const{
 }
 
 float StFcsDb::getXWidth(int det) const{ 
-    if(det==0) return  5.542+0.05;
-    if(det==1) return  5.542+0.05;
-    if(det==2) return  10.00+0.02;
-    if(det==3) return  10.00+0.02;
-    if(det==4) return  85.0;
-    if(det==5) return  85.0;
+    if(det==0) return  5.542+0.03;
+    if(det==1) return  5.542+0.03;
+    if(det==2) return  9.99+0.00;
+    if(det==3) return  9.99+0.00;
     return 0.0;
 }
 
 float StFcsDb::getYWidth(int det) const{ 
-    if(det==4) return  5.00+0.02;
-    if(det==5) return  5.00+0.02;
     return getXWidth(det);
 }
 
@@ -669,8 +664,10 @@ double StFcsDb::getHcalProjectedToEcalY(int ns, double hcalLocalY, double zvtx){
     StThreeVectorD hcalfront = getDetectorOffset(ns+2);
     double ecalSMD = ecalfront.z() + getShowerMaxZ(ns) - zvtx;
     double hcalSMD = hcalfront.z() + getShowerMaxZ(ns+2) - zvtx;
-    double hcalLocalcm = hcalLocalY * getYWidth(ns+2); //convert to [cm]  
-    return (hcalLocalcm + hcalfront.y())*ecalSMD/hcalSMD - ecalfront.y(); 
+    double hcalLocalcm = hcalLocalY * getYWidth(ns+2); //convert to [cm] 
+    double hcalStar    = double(nRow(ns+2))/2.0*getYWidth(ns+2)+hcalfront.y()-hcalLocalcm; //STAR Y
+    double hcalatEcal  = hcalStar*ecalSMD/hcalSMD; //project assuming vtx_y=0
+    return double(nRow(ns))/2.0*getYWidth(ns) + ecalfront.y() - hcalatEcal; //put in Ecal local
 };
 
 //! Project Hcal cluster to Ecal plane and get distance from Ecal cluster [cm]
@@ -702,8 +699,13 @@ double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, doub
 };
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
-StThreeVectorD StFcsDb::getStarXYZ(StFcsHit* hit, float FcsZ) const{ 
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsHit* hit, float FcsZ) const{ 
     return getStarXYZ(hit->detectorId(),hit->id(),FcsZ);
+}
+
+//! get coordinates of the cluster STAR frame from StFcsCluster
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsCluster* clu, float FcsZ) const{ 
+    return getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y(),FcsZ);
 }
 
 //! get coordinates of center of the cell in STAR frame from det/id
@@ -760,6 +762,8 @@ StLorentzVectorD StFcsDb::getLorentzVector(const StThreeVectorD& xyz, float ener
     double e=energy;
     StThreeVectorD mom3 = xyznew.unit() * e;
     if(mDebug>1){
+      LOG_DEBUG << Form("mVx=%8.4f  mVdxdz=%8.4f mThetaX=%8.4f",mVx,mVdxdz,mThetaX) << endm;
+      LOG_DEBUG << Form("mVy=%8.4f  mVdydz=%8.4f mThetaY=%8.4f",mVy,mVdydz,mThetaY) << endm;
       LOG_DEBUG << Form("xyz     = %lf %lf %lf",xyz.x(), xyz.y(), xyz.z()) << endm;
       LOG_DEBUG << Form("xyz rot = %lf %lf %lf",xyznew.x(), xyznew.y(), xyznew.z()) << endm;
       LOG_DEBUG << Form("p       = %lf %lf %lf %lf",mom3.x(), mom3.y(), mom3.z(),e) << endm;
@@ -839,7 +843,7 @@ float StFcsDb::getGain8(StFcsHit* hit) const  {
 }
 
 float StFcsDb::getGain8(int det, int id) const {
-  return getGain(det,id)*0.0070/0.0053;
+  return getGain(det,id)/1.21;
 }
 
 void StFcsDb::getDepfromId(int detectorId, int id, int &ehp, int &ns, int &crt, int &slt, int &dep, int &ch) const{
@@ -1294,7 +1298,7 @@ void  StFcsDb::makeMap2019(){
 void StFcsDb::getIdfromEPD(int pp, int tt, int& det, int &id){
     det=-1; 
     id=-1;
-    int row,col;
+    int row=0,col=0;
     if(tt<0 || tt>=32) return;
     if(pp>=1 && pp<=6){ //north side
 	det=4;
@@ -1399,7 +1403,7 @@ void StFcsDb::printHeader4(FILE* f, int flag=0){
 }
 
 void StFcsDb::printMap(){
-    int ehp,ns,crt,slt,dep,ch,det,id,row,col;
+    int ehp,ns,crt,slt,dep,ch,det,id,row,col=0;
     
     FILE *f1  = fopen("fcsMap.txt","w");           printHeader(f1);
     FILE *f1c = fopen("fcsMap.csv","w");           printHeader(f1c,0,1);
@@ -1841,6 +1845,25 @@ float StFcsDb::getEtGain(int det, int id, float factor) const{
 }
 
 void  StFcsDb::printEtGain(){
+    // double norm[2]={0.24711, 0.21781}; // [MeV/coint]
+    double norm[2]={0.24711, 0.24711};
+    for(int det=0; det<kFcsNDet; det++){
+      int eh=det/2;
+      double gain=getGain(det,0);
+      for(int i=0; i<maxId(det); i++){
+	double ratio=1.0;
+	if(eh<2){ //PRES stays 1.0
+	  StThreeVectorD xyz=getStarXYZ(det,i);
+	  double r=xyz.perp();
+	  double l=xyz.mag();
+	  double ptch=gain/l*r;
+	  ratio=ptch/norm[eh]*1000; 
+	}
+	mEtGain[det][i]=ratio;
+      }
+    }
+    if(mDebug==0) return;
+
     FILE *f1 = fopen("fcsPtGain.txt","w");
     FILE *f2 = fopen("fcsPtGain2.txt","w");
     FILE *f3 = fopen("fcsPtGain3.txt","w");
@@ -1848,7 +1871,6 @@ void  StFcsDb::printEtGain(){
     FILE *f5 = fopen("fcs_hcal_phys_gains.txt","w");
     FILE *f6 = fopen("fcs_ecal_calib_gains.txt","w");
     FILE *f7 = fopen("fcs_hcal_calib_gains.txt","w");
-    double norm[2]={0.24711, 0.21781}; // [MeV/coint]
     fprintf(f4,"#ehp ns  dep  ch   EtGain\n");
     fprintf(f5,"#ehp ns  dep  ch   EtGain\n");
     fprintf(f6,"#ehp ns  dep  ch   CalibGain\n");
@@ -1856,7 +1878,7 @@ void  StFcsDb::printEtGain(){
     for(int det=0; det<kFcsNDet; det++){
 	int id=0;
 	int eh=det/2;
-	double gain=getGain8(det,0);
+	double gain=getGain(det,0);
 	fprintf(f2,"DET=%1d ET/ch [unit = MeV/count]\n", det);
 	fprintf(f3,"DET=%1d normalized ET/ch [unit=%f MeV/count]\n", det,norm[eh]);
         for(int row=1; row<=nRow(det); row++){
@@ -1870,7 +1892,6 @@ void  StFcsDb::printEtGain(){
 		double ptch=gain/l*r;	    
 		double ratio=1.0;
 		if(eh<2) ratio=ptch/norm[eh]*1000; //PRES stays 1.0
-		mEtGain[det][id]=ratio;
 		fprintf(f1,"D=%1d Id=%3d Row=%2d Column=%2d xyz=%7.2f %7.2f %7.2f Gain=%7.5f ET/ch=%6.4f [MeV/count] norm=%6.4f\n",
 			det,id,row,col,x,y,z,gain,ptch*1000,ratio);
 		fprintf(f2,"%7.5f ", ptch*1000);
@@ -1966,4 +1987,74 @@ void StFcsDb::readGainCorrFromText(){
     LOG_INFO<<Form("GAIN CORR  %1d %1d %2d %2d %f",ehp,ns,dep,ch,mGainCorr[ehp][ns][dep][ch])<<endm;
   }
   fclose(F);
+}
+
+//g2t track info                                                                                                   
+unsigned int StFcsDb::backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk){
+  int i = id - 1;
+  while(g2ttrk[i].next_parent_p !=0){
+    if(mDebug>3)
+      LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f",
+                     id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+                     g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+    i = g2ttrk[i].next_parent_p - 1;
+  }
+  if(mDebug>3) LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f Primary!!",
+                              id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+                              g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+  return i + 1;
+}
+    
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  StFcsCluster c;
+  c.hits().push_back(h); //dummy cluster with 1 hit
+  return getG2tTrack(&c,g2ttrk,fraction,ntrk,order,0);
+}
+
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk,unsigned int order){
+  StFcsCluster c;
+  c.hits().push_back(h); //dummy cluster with 1 hit
+  return getG2tTrack(&c,g2ttrk,fraction,ntrk,order,1);
+}
+
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  return getG2tTrack(c,g2ttrk,fraction,ntrk,order,0);
+}
+
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  return getG2tTrack(c,g2ttrk,fraction,ntrk,order,1);
+}
+
+const g2t_track_st* StFcsDb::getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order, int mode){
+  float detot=0;
+  vector<pair<unsigned int, float>> parents;
+  for(const StFcsHit* hit : c->hits()) {
+    for(const pair<unsigned int, float> & gt : hit->getGeantTracks()){
+      unsigned int id=0;
+      switch(mode){
+      case 0: id=gt.first; break;
+      case 1: id=backTraceG2tTrack(gt.first,g2ttrk); break;
+      }
+      float de=gt.second;
+      int found=0;
+      for(pair<unsigned int, float>& p : parents){
+        if(p.first == id) {p.second += de; found=1; break;}
+      }
+      if(found==0) parents.push_back(make_pair(id,de));
+      detot+=de;
+    }
+  }
+  ntrk=parents.size();
+  if(order >= ntrk) {fraction=0; return 0;}
+  std::nth_element(parents.begin(), parents.begin()+order, parents.end(),
+            [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+              return b.second < a.second;
+            });
+  fraction = parents[order].second / detot;
+  if(mDebug>3){
+    for(unsigned int jtrk=0; jtrk<ntrk; jtrk++){
+      LOG_INFO << Form("Cluster's G2T Track %3d mode=%1d id=%3d dE=%f",jtrk,mode,parents[jtrk].first,parents[jtrk].second)<<endm;
+    }
+  }
+  return &g2ttrk[parents[order].first-1];
 }

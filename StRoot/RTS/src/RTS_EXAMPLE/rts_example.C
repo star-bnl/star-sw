@@ -265,7 +265,8 @@ int main(int argc, char *argv[])
 		
 		if(print_det[0]) {
 		    if(strcmp(print_det, "tinfo") == 0) {		    
-			tinfo_doer(evp, "tinfo");
+			int ret = tinfo_doer(evp, "tinfo");
+			if(ret) LOG(INFO,"Trigger Info FOUND") ;
 		    }
 		}
 
@@ -604,7 +605,7 @@ static int l4_doer(daqReader *rdr, const char  *do_print)
 			l4_gl3_t *h = (l4_gl3_t *) dd->Void ;
 			UINT32 *x = (UINT32 *)h->data;
 			printf("L4 GL3 sec %02d: bytes %d: %d %s [0x%08x 0x%08x 0x%08x 0x%08x]\n",dd->sec,dd->ncontent,h->bytes,h->name,x[0],x[1],x[2],x[3]) ;
-			printf("sizeof %d  offset %d\n", sizeof(l4_gl3_t), (char *)h->data - (char *)h); 
+			printf("sizeof %ld  offset %ld\n", sizeof(l4_gl3_t), (char *)h->data - (char *)h); 
 		}
 	}
 
@@ -1555,7 +1556,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 		if(do_print) {
-			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("EVT %d: %s ADC: RDO %d, ARM %d, APV %d: %d values\n",good,d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
@@ -1632,7 +1633,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
+				printf(" %5d: ch %3d, tb %d = %3d (flags %d)\n",i,f[i].ch,f[i].tb,f[i].adc,f[i].flags) ;
 			}
 		}
 	}
@@ -1863,16 +1864,20 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    
 	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
 	    int trgDetMask = swap16(evtDesc->trgDetMask);
-	    int pre = swap16(evtDesc->npre);
-	    int post = swap16(evtDesc->npost);
+	    int pre = swap16(evtDesc->npre) & 0xF ;
+	    int post = swap16(evtDesc->npost) & 0xF;
 	    int res1 = swap16(evtDesc->res1);
-      	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (post & 0xfff0) << 8 | (pre & 0xfff0) >> 4;
+      	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (swap16(evtDesc->npost) & 0xfff0) << 8 | (swap16(evtDesc->npre) & 0xfff0) >> 4;
       	    UINT32 bx_high = swap32(evtDesc->bunchXing_hi);
 	    UINT32 bx_low = swap32(evtDesc->bunchXing_lo);
 	    UINT64 bx64 = bx_high;
 	    bx64 = (bx64 << 32) + bx_low;
 	    float bx_sec = bx64/9.3e6;
 	    int bx7 = bx64 % 120;
+		
+            int trg_tkn = swap16(evtDesc->TrgToken) ;
+
+	    printf("tinfo: token %d, pre %d, post %d\n",trg_tkn,pre,post) ;
 
 	    int crate_sz[MAX_CONF_NUM];
 	    int crate_internal_usec[MAX_CONF_NUM];
@@ -1958,23 +1963,26 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    
 	    printf("   l1=0x%llx   trgDetMask=0%x   trgCrateMask=0x%x\n",rdr->daqbits64_l1,trgDetMask,trgCrateMask);
 
-	    /*
+	    
 	    for(int i=2;i<MAX_OFFLEN-1;i++) {
 		if(swap32(trg->MainX[i].length)) {
-
+		    
 		    char *nm = (char *)trg + swap32(trg->MainX[i].offset);
 		    nm[4] =0 ;
-
+		    int *datasz = (int *)nm;
+		    datasz++;
+		    
+		    
 		    //		if(confnum2str[i]) {
-		    printf("ids %2d: crate %s[%s](0x%x):\toffset=%d\tsize=%d\n",i,
+		    printf("ids %2d: crate %s[%s](0x%x):\toffset=%d\tsize=%d\tdsize=%d\n",i,
 			   confnum2str[i],nm,
 			   1<<i,
 			   swap32(trg->MainX[i].offset),
-			   swap32(trg->MainX[i].length));
+			   swap32(trg->MainX[i].length),
+			   swap32(*datasz));
 		}
-
+		
 	    }
-	    */
 	}
     }
   
@@ -2412,21 +2420,19 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 				rdos[dd->row-1] = 1 ;
 
-				det_raw_bytes[dd->rdo-1] += dd->ncontent ;
+//				det_raw_bytes[dd->rdo-1] += dd->ncontent ;
 				
-#if 1
 				if(do_print) {
 					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
 
-					//u_int *d32 = (u_int *)dd->Void ;
+					u_int *d32 = (u_int *)dd->Void ;
 
-					//for(u_int i=0;i<dd->ncontent/4;i++) {
-					//	printf("%4d = 0x%08X\n",i,d32[i]) ;
-					//}
+					for(u_int i=0;i<dd->ncontent/4;i++) {
+						printf("%4d = 0x%08X\n",i,d32[i]) ;
+					}
 				}
-#endif
 			}
-			if(adc_found) det_events++ ;
+//			if(adc_found) det_events++ ;
 		}
 #endif
 
@@ -2663,6 +2669,9 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		want_ped = 1 ;
 	}
 
+	if(do_print) {
+		printf("FCS evt %d, token %d\n",good,evp->token) ;
+	}
 
 	dd = rdr->det("fcs")->get("ped") ;
 	while(dd && dd->iterate()) {
@@ -2676,10 +2685,20 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			printf("FCS PED: %d: S%02d:%d: %d:%d:%d (V%d)\n",good,dd->sec,dd->rdo,
 			       p->det,p->ns,p->dep,p->fmt_version) ;
 
-			for(int c=0;c<32;c++) {
-				printf(" ch %02d: ped %6.3f, gain %6.3f\n",c,
-				       (double)p->ped[c].ped/8.0,(double)p->ped[c].gain/256.0) ;
+			printf(" s1_delay %d\n",p->s1_delay) ;
+
+			if(p->det<=2) {	// pedestals
+				for(int c=0;c<32;c++) {
+					printf(" ch %02d: ped %6.3f, gain %6.3f\n",c,
+					       (double)p->ped[c].ped/8.0,(double)p->ped[c].gain/256.0) ;
+				}
 			}
+			else {
+				printf(" ch_mask 0x%llX, dsm_delay %d, dsm_mode %d, dsm_pattern 0x%04X\n",
+				       p->ch_mask,p->dsm_delay,p->dsm_mode,p->dsm_pattern) ;
+			}
+
+
 
 		}
 
@@ -2727,7 +2746,12 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 					u_int flags = d16[i] >> 12 ;
 					u_int data = d16[i] & 0xFFF ;
 
-					printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					if(det!=3) {	// main
+						printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					}
+					else {
+						printf(" %5d = 0x%X = 0x%04X\n",i,flags,data) ;
+					}
 				}
 			}
 
@@ -2737,22 +2761,32 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
        	dd = rdr->det("fcs")->get("zs") ;
 	if(dd) {
+//		fcs_meta_t *meta = (fcs_meta_t *)dd->meta ;
+
 		while(dd->iterate()) {
 			zs_found = 1  ;
 
-			if(do_print && want_zs) {
-				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
-				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
-				int det = (dd->sec >> 6) & 0x3;
-				int ns = (dd-> sec >> 5) & 1 ;
-				int dep = dd->row ;
-				int ch = dd->pad ;
+			int sector = ((dd->sec >> 11) & 0x1F)+1 ;
+			int rdo = ((dd->sec >> 8) & 0x7)+1 ;
+			int det = (dd->sec >> 6) & 0x3;
+			int ns = (dd-> sec >> 5) & 1 ;
+			int dep = dd->row ;
+			int ch = dd->pad ;
 
+			
+			//LOG(TERR,"META: version 0x%X: sector %d:%d, rdo %d:%d",meta->version,meta->sector1,sector,meta->rdo1,rdo) ;
+
+			if(do_print && want_zs) {
 
 				printf("FCS ZS %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
-					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					if(det==3) {
+						printf(" TB %5d, flags %d, ADC 0x%02X\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					}
+					else {
+						printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					}
 				}
 			}
 		}
@@ -2778,7 +2812,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 
 	if(raw_found || zs_found || ped_found) {
-		LOG(INFO,"FCS found [%s]",fstr) ;
+		LOG(INFO,"FCS found: %s",fstr) ;
 	}
 
 	return raw_found ;
@@ -2857,8 +2891,8 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
 				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
-				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
-				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;
+				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d, BCID_delta %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
+				       vmm[i].adc,vmm[i].bcid,vmm[i].tb,vmm[i].bcid_delta) ;
 			}
 		}
 	}

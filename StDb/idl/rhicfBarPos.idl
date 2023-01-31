@@ -1,0 +1,9 @@
+/*    rhicfBarPos.idl
+*
+*  Table: rhicfBarPos
+*
+*/
+struct rhicfBarPos {
+	float smallbar[160];          /* Positions of small tower GSO bars */
+	float largebar[320];          /* Positions of large tower GSO bars */
+};

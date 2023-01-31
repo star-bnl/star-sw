@@ -90,8 +90,8 @@ class StSvtPedMaker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  CalcPed();
   virtual Int_t  CalcPed2ndOrd();
-  virtual Int_t  WriteToFile(const char* fileName = "svtPedestal.root", char* option = "NEW");
-  virtual Int_t  WriteRMSToFile(const char* fileName = "svtPedestal.root", char* option = "NEW");
+  virtual Int_t  WriteToFile(const char* fileName = "svtPedestal.root");
+  virtual Int_t  WriteRMSToFile(const char* fileName = "svtPedestal.root");
   virtual Int_t  ReadFromFile(const char* fileName = "svtPedestal.root");
   virtual Int_t  ReadRMSFromFile(const char* fileName = "svtPedestal.root");
   virtual Int_t  ResetStat();

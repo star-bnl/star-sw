@@ -106,9 +106,9 @@
     <var name="Depth" value="90" comment=" Box Depth "  />
     <var name="NX" value="13" comment=" Number of tower in x "  />
     <var name="NY" value="20" comment=" number of tower in y "  />
-    <var name="DX" value="10.0" comment=" tower size in x "  />
-    <var name="DY" value="10.0" comment=" tower size in y "  />
-    <var name="Clearance" value="0.02"  comment=" space between towers "  /> 
+    <var name="DX" value="9.99" comment=" tower size in x "  />
+    <var name="DY" value="9.99" comment=" tower size in y "  />
+    <var name="Clearance" value="0.0"  comment=" space between towers "  /> 
     <var name="NLayer" value="36" comment=" number of steel + scinti layers "  />
     <var name="DZLAY"  value="2.34" comment=" thickness of steel + scinti layers "  />
     <var name="DXABS"  value="9.6" comment=" width of steel absorber"  />
@@ -127,7 +127,7 @@
   <Fill name="HOFF" comment="FCS HCal position Offsets " >
     <var name="NS" value="1" comment=" North or South " />    
     <var name="XOffset" value="21.285" comment=" tower x offset from beam to nearlest tower @ front face"  />
-    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="YOffset" value="1.8" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="782.63" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
   </Fill>
@@ -135,7 +135,7 @@
   <Fill name="HOFF" comment="FCS HCal position Offsets " >
     <var name="NS" value="2" comment=" North or South " />    
     <var name="XOffset" value="21.285" comment=" tower x offset from beam to nearlest tower @ front face"  />
-    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="YOffset" value="1.8" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="782.63" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
   </Fill>

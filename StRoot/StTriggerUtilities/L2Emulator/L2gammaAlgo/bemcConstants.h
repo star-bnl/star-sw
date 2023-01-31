@@ -1,12 +1,12 @@
 /* BEMC geometry constants */
-const ushort kBEmcNumEtas      = 40;     /* number of eta bins */
-const ushort kBEmcNumPhis      = 120;    /* number of phi bins */
-const ushort kBEmcNumSubs      = 10;     /* number of subsectors per sector */
-const ushort kBEmcNumSecs      = kBEmcNumPhis / kBEmcNumSubs;
+const unsigned short kBEmcNumEtas      = 40;     /* number of eta bins */
+const unsigned short kBEmcNumPhis      = 120;    /* number of phi bins */
+const unsigned short kBEmcNumSubs      = 10;     /* number of subsectors per sector */
+const unsigned short kBEmcNumSecs      = kBEmcNumPhis / kBEmcNumSubs;
 
-const ushort kBEmcNumTower     = 4800;
-const ushort kBEmcNumPatch     = kBEmcNumTower;
-const ushort kBEmcNumRdo       = kBEmcNumTower;
+const unsigned short kBEmcNumTower     = 4800;
+const unsigned short kBEmcNumPatch     = kBEmcNumTower;
+const unsigned short kBEmcNumRdo       = kBEmcNumTower;
 
 const float kBEmcEtaBins[]=
   {
@@ -23,7 +23,7 @@ const float kBEmcEtaBins[]=
   };
 
 /* BEMC calibration constants */
-const ushort kBEmcMaxADC       = 4095;
+const unsigned short kBEmcMaxADC       = 4095;
 //const float  kBEmcMaxET        = 27.5; /* for 2005 data/testing */
 const float  kBEmcMaxET        = 56.0; /* for 2006 online */
 const float  kBEmcIdealGainT   = kBEmcMaxADC / kBEmcMaxET;
@@ -31,4 +31,4 @@ const float  kBEmcIdealGainT   = kBEmcMaxADC / kBEmcMaxET;
 
 /* other control flags/settings for the algorithm */
 const int    kBEmcHistoBase    = 1000;
-const ushort kBEmcQAPrescale   = 10;  // reduce frequency of qa histograming
+const unsigned short kBEmcQAPrescale   = 10;  // reduce frequency of qa histograming

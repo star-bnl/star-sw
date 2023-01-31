@@ -36,6 +36,7 @@ public:
 		run_number = 0 ;
 
 		n_sigma = 4.0 ;
+		n_sigma_epd = 4.0 ;
 		n_pre = 8 ;
 		n_post = 8 ;
 		n_cou = 4 ;
@@ -150,12 +151,12 @@ public:
 //	int trigger_tick ;
 
 	struct fcs_ped_inline_t {
-		u_char fmt_version ;
+		u_char fmt_version ;	//1= 16 params,pre 24-Nov-2021; 2=32 params
 		u_char det ;
 		u_char ns ;
 		u_char dep ;
 
-		u_short params[16] ;	// stage params
+		u_short params[32] ;	// stage params
 
 		union {
 			struct {	// DEP/ADC
@@ -233,6 +234,7 @@ public:
 
 	// for ZS
 	static float n_sigma ;
+	static float n_sigma_epd ;
 	static short n_pre ;
 	static short n_post ;
 	static short n_cou ;
@@ -259,6 +261,10 @@ public:
 	static u_char fcs_bad_ch[8][34] ;
 
 	static int load_bad_ch(const char *fname=0, int sector=0) ;
+
+	static const char *stage_labels[32] ;
+	static int stage_params_txt[32] ;	// from the params_xx file below
+	static int load_stage_params(int sec1, const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {

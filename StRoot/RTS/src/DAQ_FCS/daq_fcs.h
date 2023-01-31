@@ -5,6 +5,16 @@
 
 
 
+struct fcs_meta_t {
+	u_int version ;
+
+	struct {
+		u_char sector1 ;
+		u_char rdo1 ;
+
+		unsigned long trg_tick ;
+	} ;
+} ;
 
 
 class daq_fcs : public daq_det {
@@ -30,6 +40,8 @@ public:
 
 	daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
+
+	struct fcs_meta_t fcs_meta ;
 
 	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
 	int get_token(char *buff, int buff_bytes) ;

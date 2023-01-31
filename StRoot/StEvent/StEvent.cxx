@@ -224,6 +224,7 @@
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
 #include "StFcsCollection.h"
+#include "StFttCollection.h"
 #include "StFmsCollection.h"
 #include "StRHICfCollection.h"
 #include "StRichCollection.h"
@@ -250,6 +251,8 @@
 #include "StFgtCollection.h"
 #include "StPxlHitCollection.h"
 #include "StIstHitCollection.h"
+#include "StFstEvtCollection.h"
+#include "StFstHitCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
 
@@ -584,6 +587,22 @@ StEvent::fcsCollection() const
     return fcs;
 }
 
+StFttCollection*
+StEvent::fttCollection()
+{
+    StFttCollection *ftt = 0;
+    _lookup(ftt, mContent);
+    return ftt;
+}
+
+const StFttCollection*
+StEvent::fttCollection() const
+{
+    StFttCollection *ftt = 0;
+    _lookup(ftt, mContent);
+    return ftt;
+}
+
 StFmsCollection*
 StEvent::fmsCollection()
 {
@@ -902,6 +921,38 @@ StEvent::istHitCollection() const
     StIstHitCollection *istHitCollection = 0;
     _lookup(istHitCollection, mContent);
     return istHitCollection;
+}
+
+StFstEvtCollection*
+StEvent::fstEvtCollection()
+{
+    StFstEvtCollection *fstEvtCollection = 0;
+    _lookup(fstEvtCollection, mContent);
+    return fstEvtCollection;
+}
+
+const StFstEvtCollection*
+StEvent::fstEvtCollection() const
+{
+    StFstEvtCollection *fstEvtCollection = 0;
+    _lookup(fstEvtCollection, mContent);
+    return fstEvtCollection;
+}
+
+StFstHitCollection*
+StEvent::fstHitCollection()
+{
+    StFstHitCollection *fstHitCollection = 0;
+    _lookup(fstHitCollection, mContent);
+    return fstHitCollection;
+}
+
+const StFstHitCollection*
+StEvent::fstHitCollection() const
+{
+    StFstHitCollection *fstHitCollection = 0;
+    _lookup(fstHitCollection, mContent);
+    return fstHitCollection;
 }
 
 StPxlHitCollection*
@@ -1268,6 +1319,12 @@ StEvent::setFcsCollection(StFcsCollection* val)
 }
 
 void
+StEvent::setFttCollection(StFttCollection* val)
+{
+  _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setRHICfCollection(StRHICfCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1389,6 +1446,18 @@ StEvent::setIstHitCollection(StIstHitCollection* val)
 }
 
 void
+StEvent::setFstEvtCollection(StFstEvtCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setFstHitCollection(StFstHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setPxlHitCollection(StPxlHitCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1497,6 +1566,8 @@ void StEvent::statistics()
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection()) << endl;
     cout << "\tStSstHitCollection:          " << static_cast<void*>(sstHitCollection()) << endl;
     cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection()) << endl;
+    cout << "\tStFstEvtCollection:          " << static_cast<void*>(fstEvtCollection()) << endl;
+    cout << "\tStFstHitCollection:          " << static_cast<void*>(fstHitCollection()) << endl;
     cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection()) << endl;
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection()) << endl;
     cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection()) << endl;

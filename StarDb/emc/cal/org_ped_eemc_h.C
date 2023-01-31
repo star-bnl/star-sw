@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_ped_eemc_h Allocated rows: 1  Used rows: 1  Row size: 24 bytes
 //  Table: emc_calib_header_st[0]--> emc_calib_header_st[0]
@@ -19,5 +19,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.nsub	 =          5; // see emc_def.h ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

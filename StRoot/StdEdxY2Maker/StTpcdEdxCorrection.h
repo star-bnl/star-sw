@@ -2,14 +2,12 @@
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
-#include "TObject.h"
-#include "TF1.h"
-#include "Stiostream.h"
-#include "StDetectorDbMaker/St_tpcCorrectionC.h"
-#include "StDetectorDbMaker/St_tpcGasC.h"
 //#include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StTrackPidTraits.h"
 #include "TString.h"
+#include "TChair.h"
+#include "StDetectorDbMaker/St_tpcGasC.h"
+#include "StDetectorDbMaker/St_tpcCorrectionC.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
 //________________________________________________________________________________
@@ -28,12 +26,10 @@ struct dE_t {
 //________________________________________________________________________________
 struct dEdxCorrection_t {
   dEdxCorrection_t(const Char_t *name = "",const  Char_t *title = "", TChair *chair=0, Int_t n=0) : 
-    Name(name), Title(title), Chair(chair), nrows(n), dE(0) {}
+    Name(name), Title(title), Chair(chair) {}
   const Char_t *Name;
   const Char_t *Title;
   TChair       *Chair;
-  Int_t   nrows;
-  Float_t dE;
 };
 //________________________________________________________________________________
 class dEdxY2_t;
@@ -43,56 +39,64 @@ class StTpcdEdxCorrection : public TObject {
   enum EOptions : int {
       kUncorrected           =  0,//U   				           
       kAdcCorrection         =  1,//R  					     
-      kEdge                  =  2,//E   correction near edge of chamber	     
-      kAdcCorrectionMDF      =  3,//RMDF  					     
-      kAdcCorrection3MDF     =  4,//RMDF 3D  					     
-      kTpcdCharge            =  5,//D  					     
-      kTpcrCharge            =  6,//D  					     
-      kTpcCurrentCorrection  =  7,//      					     
-      kTpcSecRowB            =  8,//S  					     
-      kTpcSecRowC            =  9,//S  					     
-      kTpcRowQ               = 10,//   	 					       	   
-      kTpcAccumulatedQ       = 11,//   	 					       	   
-      ktpcPressure           = 12,//P  					     
-      ktpcTime               = 13,//t  					     
-      kDrift                 = 14,//O  					     
-      kMultiplicity          = 15,//M  					     
-      kGatingGrid            = 16,//G  					     
-      kzCorrectionC          = 17,//Z  					     
-      kzCorrection           = 18,//Z  					     
-      ktpcMethaneIn          = 19,//m  					     
-      ktpcGasTemperature     = 20,//T  					     
-      ktpcWaterOut           = 21,//W   				7       	   
-      kSpaceCharge           = 22,//C   space charge near the wire	       	   
-      kPhiDirection          = 23,//p   correction wrt local interception angle  
-      kTanL                  = 24,//p   correction wrt local tan(lambda)  
-      kdXCorrection          = 25,//X  					     
-      kTpcEffectivedX        = 26,//X   Effective pad row height
-      kTpcPadTBins           = 27,//d  					     
-      kTpcZDC                = 28,//   					     
-      kTpcPadMDF             = 29, 
-      kAdcI                  = 30,
-      knPad                  = 31, 
-      knTbk                  = 32,
-      kdZdY                  = 33, 
-      kdXdY                  = 34,
-      kTpcLast               = 35,//                                             
-      kTpcNoAnodeVGainC      = 36,//   					     
-      kTpcLengthCorrection   = 37,//                                             
-      kTpcLengthCorrectionMDF= 38,//   					   
-      kTpcLengthCorrectionMD2= 39,//   					   
-      kTpcdEdxCor            = 40,//   					   
-      kTpcAllCorrections     = 41 //                                             
+      kAdcCorrectionC        =  2,//R  					     
+      kEdge                  =  3,//E   correction near edge of chamber	     
+      kAdcCorrectionMDF      =  4,//RMDF  					     
+      kAdcCorrection3MDF     =  5,//RMDF  3D  					     
+      kAdcCorrection4MDF     =  6,//RMDF  4D  					     
+      kAdcCorrection5MDF     =  7,//RMDF +4D  					     
+      kAdcCorrection6MDF     =  8,//AdcCorrectionC +4D  					     
+      kTpcdCharge            =  9,//D  					     
+      kTpcrCharge            = 10,//D  					     
+      kTpcCurrentCorrection  = 11,//      					     
+      kTpcSecRowB            = 12,//S  					     
+      kTpcSecRowC            = 13,//S  					     
+      kTpcRowQ               = 14,//   	 					       	   
+      kTpcAccumulatedQ       = 15,//   	 					       	   
+      ktpcPressure           = 16,//P  					     
+      ktpcTime               = 17,//t  					     
+      kDrift                 = 18,//O  					     
+      kMultiplicity          = 19,//M  					     
+      kGatingGrid            = 20,//G  					     
+      kzCorrectionC          = 21,//Z  					     
+      kzCorrection           = 22,//Z  					     
+      ktpcMethaneIn          = 23,//m  					     
+      ktpcGasTemperature     = 24,//T  					     
+      ktpcWaterOut           = 25,//W   				7       	   
+      kSpaceCharge           = 26,//C   space charge near the wire	       	   
+      kPhiDirection          = 27,//p   correction wrt local interception angle  
+      kTanL                  = 28,//p   correction wrt local tan(lambda)  
+      kdXCorrection          = 29,//X  					     
+      kEtaCorrection         = 30,//Eta  					     
+      kEtaCorrectionB        = 31,//EtaB  					     
+      kTpcEffectivedX        = 32,//X   Effective pad row height
+      kTpcPadTBins           = 33,//d  					     
+      kTpcZDC                = 34,//   					     
+      kTpcPadMDF             = 35, 
+      kAdcI                  = 36,
+      knPad                  = 37, 
+      knTbk                  = 38,
+      kdZdY                  = 39, 
+      kdXdY                  = 40,
+      kTpcLast               = 41,//                                             
+      kTpcNoAnodeVGainC      = 42,//   					     
+      kTpcLengthCorrection   = 43,//                                             
+      kTpcLengthCorrectionMDF= 44,//   					   
+      kTpcLengthCorrectionMD2= 45,//   					   
+      kTpcLengthCorrectionMDN= 46,//   					   
+      kTpcdEdxCor            = 47,//   					   
+      kTpcAllCorrections     = 48 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
   Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
-  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx);
-  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
+  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx, Double_t etaG = 0);
+  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx, Double_t etaG = 0);
   void SettpcGas               (St_tpcGas          *m = 0) {m_tpcGas = m;}
   
   void SetDebug(Int_t m=0) {m_Debug = m;}
   void SetMask (Long_t m=0) {m_Mask = m;}
+  void SetSimulation(Bool_t k = kTRUE)     {m_IsSimulation = k;}
   void ReSetCorrections();
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
@@ -103,6 +107,7 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *AdcCorrection()       {return Correction(kAdcCorrection);}
   St_tpcCorrectionC *zCorrection()         {return Correction(kzCorrection);}
   St_tpcCorrectionC *dXCorrection()        {return Correction(kdXCorrection);}
+  St_tpcCorrectionC *EtaCorrection()       {return Correction(kEtaCorrection);}
   St_tpcCorrectionC *TpcdEdxCor()          {return Correction(kTpcdEdxCor);}
   St_tpcCorrectionC *TpcLengthCorrection() {return Correction(kTpcLengthCorrection);}
   St_tpcCorrectionC *tpcPressure()         {return Correction(ktpcPressure);}
@@ -115,6 +120,8 @@ class StTpcdEdxCorrection : public TObject {
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
   Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
+  Bool_t            IsSimulation()         {return m_IsSimulation;}
+  
  private:
   Long_t               m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
@@ -123,6 +130,11 @@ class StTpcdEdxCorrection : public TObject {
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                 //!
   Bool_t               m_isFixedTarget;
+  Bool_t               m_IsSimulation;
+  Double_t             m_TrigT0; //us
+  Double_t             mTimeBinWidth; 
+  Double_t             mInnerSectorzOffset;
+  Double_t             mOuterSectorzOffset;
 };
 //________________________________________________________________________________
 class dEdxY2_t {
@@ -176,6 +188,10 @@ class dEdxY2_t {
   Float_t  AdcI;  // Log10(integrated ADC over time for a given socket0 or 0
   Float_t  dZdY;  // cluster projection on on Z
   Float_t  dXdY;  // cluster projection on Wire
+  Float_t  driftTime; // in microsecconds 
+  Float_t  dX_TrackFit; // dX from local curvature obtained during track fit
+  Float_t  dX_Helix;    // dX from helices from the first and last hit
+  Float_t  etaG;  // eta at the first hit point
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
 }; 

@@ -33,7 +33,7 @@ StBTofPidTraits StPidStatus::SetBTofPidTraits(const StMuBTofPidTraits &pid) {
   btofPidTraits.setProbProton   (pid.probProton());  
   return btofPidTraits;
 }
-#ifdef __TFG__VERSION_
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 StBTofPidTraits StPidStatus::SetBTofPidTraits(const StPicoBTofPidTraits &pid) {
   StBTofPidTraits btofPidTraits;
@@ -239,9 +239,11 @@ StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1),
   static StETofPidTraits pidETof; //!
   static StMtdPidTraits  pidMtd; //!
   if (picoTrack->dEdx() > 0) {
+#if 0 /* no I70 on picoDst */
     pidI70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, picoTrack->nHitsDedx(), 
 			     1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
     fI70 = new StdEdxStatus(&pidI70);
+#endif
     pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, picoTrack->nHitsDedx(), 
 			     1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
     fFit = new StdEdxStatus(&pidFit);
@@ -289,7 +291,6 @@ void StPidStatus::Set() {
   fStatus[kWeightedTruncatedMeanId] = fFitU  ;
   fStatus[kOtherMethodId]           = fdNdx  ;
   fStatus[kOtherMethodId2]          = fdNdxU ;
-
   for (l = kPidElectron; l < KPidParticles; l++) {
     Int_t charge = StProbPidTraits::mPidParticleDefinitions[l]->charge();
     Double_t mass   = StProbPidTraits::mPidParticleDefinitions[l]->mass();
@@ -368,4 +369,34 @@ void StPidStatus::Set() {
     }
   }
 #endif
+}
+//________________________________________________________________________________
+void StPidStatus::Print(Option_t *opt) const {
+  for (Int_t k = 1; k <= kOtherMethodId2; k++) {
+    if (! fStatus[k]) continue;
+    if      (k == kUndefinedMethodId)         cout << "UndefinedMethod       ";
+    else if (k == kTruncatedMeanId)           cout << "TruncatedMean         ";
+    else if (k == kEnsembleTruncatedMeanId)   cout << "EnsembleTruncatedMean ";
+    else if (k == kLikelihoodFitId)           cout << "LikelihoodFit         ";
+    else if (k == kWeightedTruncatedMeanId)   cout << "WeightedTruncatedMean ";
+    else if (k == kOtherMethodId)             cout << "OtherMethod           "; 
+    else if (k == kOtherMethodId2)            cout << "OtherMethodIdentifier2";
+    fStatus[k]->Print();
+  }
+}
+//________________________________________________________________________________
+void StdEdxStatus::Print(Option_t *option) const {
+  if (! fPiD) {cout << "\tEmpty" << endl;}
+  else {
+    Double_t scale = 1;
+    if (I() < 10) cout << "\tI = " << scale*I() << "keV";
+    else          cout << "\tI = " << I();
+    cout << " +/- " << 100*D() << "%\tPred: ";
+    for (Int_t l = kPidElectron; l <= kPidPion; l++) {cout << "\t" << scale*Pred[l];}
+    cout << "\tdev:";
+    for (Int_t l = kPidElectron; l <= kPidPion; l++) {cout << "\t" << dev[l];}
+    cout << "\tdevS:";
+    for (Int_t l = kPidElectron; l <= kPidPion; l++) {cout << "\t" << devS[l];}
+    cout << endl;
+  }
 }

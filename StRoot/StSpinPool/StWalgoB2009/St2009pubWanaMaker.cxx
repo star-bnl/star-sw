@@ -60,9 +60,9 @@ St2009pubWanaMaker::evalWeleTrackSign(){
  
 
   // search for  Ws ............
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -171,9 +171,9 @@ St2009pubWanaMaker::scanCrateRate(){
   // printf("crateScan: eveID=%d\n",wMK->wEve.id);
 
   // search for  Ws ............
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       // T.pointTower.print();
       int softID=T.pointTower.id;
@@ -198,9 +198,9 @@ St2009pubWanaMaker::scanCrateRate(){
 void 
 St2009pubWanaMaker::varyCuts4backgStudy(){
 
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error

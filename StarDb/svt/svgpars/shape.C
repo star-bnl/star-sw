@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/svgpars/shape Allocated rows: 2  Used rows: 2  Row size: 88 bytes
 //  Table: svg_shape_st[0]--> svg_shape_st[1]
@@ -57,5 +57,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.shape[9]	 =          0;
 tableSet->AddAt(&row,1);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

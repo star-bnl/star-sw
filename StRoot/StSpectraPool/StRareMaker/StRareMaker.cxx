@@ -59,7 +59,7 @@ double dEdx_formula(double momentum, double mass);
 
 ClassImp(StRareMaker)
 
-StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName) : StMaker(name) {
+StRareMaker::StRareMaker(const Char_t *name, const Char_t* fileName) : StMaker(name) {
   mRareEvent = new StRareEvent();
   out = new TFile(fileName, "RECREATE");
   out->SetCompressionLevel(2);
@@ -73,7 +73,7 @@ StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName) : StMaker(name) {
   mL3TrackCut = new StAcceptAllL3Tracks();
 }
 
-StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
+StRareMaker::StRareMaker(const Char_t *name, const Char_t* fileName,
 			 StRareEventCut* cut, StRareTrackCut* track) : StMaker(name) {
   out = new TFile(fileName, "RECREATE");
   out->SetCompressionLevel(2);
@@ -87,7 +87,7 @@ StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
   mL3TrackCut = 0;
 }
 
-StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
+StRareMaker::StRareMaker(const Char_t *name, const Char_t* fileName,
 			 StRareEventCut* cut,
 			 StRareTrackCut* trackCut,
 			 StL3RareTrackCut* l3trackCut) : StMaker(name) {

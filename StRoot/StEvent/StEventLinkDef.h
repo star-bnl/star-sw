@@ -238,5 +238,8 @@
 #pragma link C++ function operator<<(ostream&, const StFmsHit&);        
 
 #pragma link C++ class vector<StFmsPointPair*>+;
+#pragma link C++ class pair<unsigned int,float>+;
+#pragma link C++ class vector<pair<unsigned int,float>>+;
+
 #endif
 

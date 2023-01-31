@@ -2,7 +2,7 @@
 #include "TROOT.h"
 #endif
 #include "Bfc.h"
-#if !defined(__CINT__)
+#if !defined(__CINT__) && !defined(__CLING__)
 TableImpl(Bfc);
 #endif
 #include "BigFullChain.h"

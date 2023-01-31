@@ -15,8 +15,10 @@
  *
  **************************************************************************/
 #include "StFcsHit.h"
+#include <algorithm>
 
 ClassImp(StFcsHit)
+using namespace std;
 
 StFcsHit::StFcsHit() { /* no operation */}
 
@@ -73,7 +75,7 @@ int   StFcsHit::nPeak()    const {return mNPeak;}
 float StFcsHit::energy()   const {return mEnergy;}
 
 void StFcsHit::setDepCh(unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch) { 
-    mDepCh = (ns << 15) | (ehp<<13) | (dep<<8) | ch; 
+    mDepCh = ((ns&0x1) << 15) | ((ehp&0x3)<<13) | ((dep&0x1f)<<8) | (ch & 0xff);
 }
 void StFcsHit::setNS(unsigned short val)       { setDepCh(val,ehp(),dep(),channel());}
 void StFcsHit::setEHP(unsigned short val)      { setDepCh(ns(),val,dep(),channel());}
@@ -93,7 +95,7 @@ void StFcsHit::setData(int ntimebin, const unsigned short* data) {
     }
     else {
         mData->Set(ntimebin,(const short*)data);
-  }
+    }
 }
 void StFcsHit::setDataAt(int i, unsigned short val)                       { mData->AddAt(val,i); }
 void StFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mData->AddAt(((flag&0xf)<<12) + adc, i); }
@@ -138,4 +140,19 @@ void StFcsHit::print(Option_t *option) const {
 	cout << Form("%4d (%3d) ",adc(i),timebin(i));
     }
     cout << endl;
+}
+
+void StFcsHit::addGeantTrack(unsigned int id, float e){    
+    // auto cmp = [](auto t){ return t.first == id; }; //c++20
+    auto cmp = [id](decltype(mGeantTracks)::value_type t){ return t.first == id; };
+    auto trk = find_if(mGeantTracks.rbegin(), mGeantTracks.rend(), cmp);
+    if(trk == mGeantTracks.rend()){
+      mGeantTracks.push_back(make_pair(id, e));
+    }else{
+      trk->second += e;
+    }
+    // Old way
+    //for(unsigned int i=0; i<mGeantTracks.size(); i++)
+    //  if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
+    //mGeantTracks.push_back(make_pair(id,e));
 }

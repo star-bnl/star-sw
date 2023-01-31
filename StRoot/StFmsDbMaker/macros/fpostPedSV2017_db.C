@@ -33,7 +33,7 @@ void fpostPedSV2017_db(char* opt="", char* year="", char* filename="fpost_good_p
 
   cout << f1.str() << " idx="<<idx  << " f2="<<f2.str() << " run="<<run << endl;
   
-  char *onlserver="onldb", *bakserver="dbbak", *server=0;
+  char *onlserver="onldb2", *bakserver="dbbak", *server=0;
   int  port = 0;
   int y=run/1000000 -1;
   if(y >= 18){

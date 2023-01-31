@@ -262,8 +262,8 @@ class StMiniMcMaker : public StMaker{
   void  setOutDir(const char* dir= "./") 	{ mOutDir = dir; }  
   void  setPtCut(Float_t minPt=0, Float_t maxPt=9999) 
     						{ mMinPt=minPt; mMaxPt=maxPt; }
-  void  setFileName(TString& val)      		{ mInFileName = val; }
-  void  setFilePrefix(TString& val)      	{ mInFilePrefix = val; }
+  void  setFileName(const TString& val)      		{ mInFileName = val; }
+  void  setFilePrefix(const TString& val)      	{ mInFilePrefix = val; }
 
  private:
   //static const Float_t mSharedHitsCut = .5;

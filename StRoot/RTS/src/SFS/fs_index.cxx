@@ -356,7 +356,7 @@ int fs_index::initmount()
   return 0;
 }
 
-void fs_index::getFullPath(char *fullpath, char *name)
+void fs_index::getFullPath(char *fullpath, const char *name)
 {
   if(name[0] == '/') {
     strcpy(fullpath,name);
@@ -436,7 +436,7 @@ void fs_index::umount()
   index_created = 0;
 }
 
-fs_dirent *fs_index::readdirent(char *dir, fs_dirent *ent)
+fs_dirent *fs_index::readdirent(const char *dir, fs_dirent *ent)
 {
   if(ent == NULL) {
       ent = &_readdirent_static_;
@@ -473,7 +473,7 @@ fs_dirent *fs_index::readdirent(char *dir, fs_dirent *ent)
 }
 
 
-fs_dir *fs_index::opendir(char *dir)
+fs_dir *fs_index::opendir(const char *dir)
 {
   if(!index_created) return NULL;
  
@@ -582,7 +582,7 @@ fs_inode *fs_index::alloc_inode(const char *name, long long int off, int sz, int
   return n;
 }
 
-int fs_index::fileSize(char *fn)
+int fs_index::fileSize(const char *fn)
 {
   if(!index_created) return -1;
 
@@ -595,7 +595,7 @@ int fs_index::fileSize(char *fn)
   return entry->sz;
 }
 
-int fs_index::read(char *fn, char *buff, int maxsize)
+int fs_index::read(const char *fn, char *buff, int maxsize)
 {
   if(!index_created) return -1;
 

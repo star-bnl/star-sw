@@ -84,7 +84,7 @@ private:
     StHe5Lambda(const string  &aName="He5Lambda",  
 		  double mass =4.83978 *GeV,
 		  double width=0.0*MeV, /* TODO */
-		  double charge=+3 *eplus,
+		  double charge=+2 *eplus,
 		  int              iSpin=0,
 		  int              iParity=0,
 		  int              iConjugation=0,
@@ -166,7 +166,7 @@ private:
     StHe5LambdaBar(const string  &aName="He5LambdaBar",  
 		  double mass =4.83978 *GeV,
 		  double width=0.0*MeV, /* TODO */
-		  double charge=-3 *eplus,
+		  double charge=-2 *eplus,
 		  int              iSpin=0,
 		  int              iParity=0,
 		  int              iConjugation=0,

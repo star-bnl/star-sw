@@ -1845,6 +1845,31 @@ int daq_tpx::get_token(char *addr, int words)
 
 }
 
+
+// HACK for Dec 2019 Trigger Cable problem of TPC Sector 12
+// 3rd and 4th bit were reversed on the TCD cable.
+static u_int swap_s12(u_int dta)
+{
+	u_int n_dta = (dta & 0xFFF00000) ;
+	for(int n=0;n<5;n++) {
+		int dd = (dta>>(n*4)) & 0xF ;
+				
+		int b4 = (dd & 0x8)?1:0 ;
+		int b3 = (dd & 0x4)?1:0 ;
+		int b2 = (dd & 0x2)?1:0 ;
+		int b1 = (dd & 0x1)?1:0 ;
+
+		int sdd = (b3<<3)|(b4<<2)|(b2<<1)|(b1<<0) ;
+		//LOG(TERR,"   %d: 0x%X %d %d %d %d 0x%X",n,dd,b4,b3,b2,b1,sdd) ;
+
+		n_dta |= (sdd<<(n*4)) ;
+	}
+
+	return n_dta ;
+
+}
+
+
 // dumps the known accept/abort trigger decisions from
 // the FIFO part of the event.
 // returns the count
@@ -1869,6 +1894,22 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int marker = rdo.trg[i].csr >> 24 ;
 		u_int rhic = rdo.trg[i].rhic_counter ;
 
+#if 0
+		if(rdo.sector==12) {
+			dta = swap_s12(dta) ;
+
+#if 0
+			LOG(WARN,"RDO %d: %d/%d: T %d, trg %d, daq %d: 0x%08X: marker 0x%X",rdo.rdo,i,rdo.trg_cou,
+			    dta&0xFFF,
+			    (dta>>16)&0xF,
+			    (dta>>12)&0xF,
+			    dta,marker) ;
+#endif
+
+
+		}
+#endif
+
 
 //#define WANT_LOGGING
 #ifdef WANT_LOGGING
@@ -1891,11 +1932,15 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].rhic = rhic ;
 			trgs[cou].reserved[0] = 0xF0000000 | (0x0FFFFFFF & dta) ;	// 0xF for "fired"
 
+			
+
 			switch(trgs[cou].trg) {
 			case 4 :	// physics
 			case 8 :	// interleaved laser
 			case 9 :	// usual laser
 			case 10 :	// pulser
+			case 6 :	// sector 12 interleaved laser
+			case 7 :	// sector 12 normal laser
 				break ;
 			default :
 				LOG(ERR,"RDO %d: T %d: prompt: bad trg: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
@@ -1967,6 +2012,11 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int dta = rdo.trg[i].data ;
 		u_int marker = rdo.trg[i].csr >> 24 ;
 		u_int rhic = rdo.trg[i].rhic_counter ;
+#if 0
+		if(rdo.sector==12) {
+			dta = swap_s12(dta) ;
+		}
+#endif
 
 		if(marker==0xFF) {	// FIFO
 			int daq10k = 0 ;
@@ -2020,6 +2070,8 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 				case 8 :	// interspersed laser
 				case 9 :	// laser
 				case 10 :	// pulser
+				case 6 :
+				case 7 :
 					break ;
 				default:
 					if(trgs[0].trg == 9) { //laser!	

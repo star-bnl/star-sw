@@ -30,6 +30,7 @@ class St_MDFCorrectionC : public TChair {
   Double_t      Eval(Int_t k = 0, Double_t *x = 0) const;
   Double_t      Eval(Int_t k, Double_t x0, Double_t x1) const;
   Double_t      EvalError(Int_t k = 0, Double_t *x = 0) const;
+  Int_t         IsActiveChair() const;
   static Double_t MDFunc(Double_t *x = 0, Double_t *p = 0);
   static St_MDFCorrectionC *fgMDFCorrectionC;
  protected:

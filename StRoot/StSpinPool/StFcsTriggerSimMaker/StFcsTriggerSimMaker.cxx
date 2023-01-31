@@ -52,10 +52,10 @@
 
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
-  u_int   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+  uint32_t   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
   float   fcs_trg_pt_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
   float   fcs_trg_gain_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
-  u_short fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+  uint16_t fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
 
   static const int mNTRG=21;
   static const char* ctrg[mNTRG]={"JP2", "JPA1", "JPA0", "JPBC1", "JPBC0", "JPDE1", "JPDE0",
@@ -212,7 +212,7 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
 	    //float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
 	    float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
-	    int g = (u_int)(gg*256.0+0.5) ;
+	    int g = (uint32_t)(gg*256.0+0.5) ;
 	    mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
 
 	    /*
@@ -269,7 +269,7 @@ int StFcsTriggerSimMaker::Make(){
     mTrgSim->start_event();
 
     //Feed ADC
-    static u_short data[8]; 
+    static uint16_t data[8]; 
     memset(data,0,sizeof(data)) ;
     memset(fcs_trg_sim_adc,0,sizeof(fcs_trg_sim_adc));
     int n=0;
@@ -307,8 +307,8 @@ int StFcsTriggerSimMaker::Make(){
     LOG_INFO << Form("StFcsTriggerSimMaker feeded %d hits",n) << endm;;
 
     //Run Trigger Simulation
-    //   u_short dsm_out = fcs_trg_run(mTrgSelect, mDebug);
-    u_int dsm_out = mTrgSim->end_event();
+    //   uint16_t dsm_out = fcs_trg_run(mTrgSelect, mDebug);
+    uint32_t dsm_out = mTrgSim->end_event();
 
     //QA Tree
     mFlt=0;
@@ -373,7 +373,7 @@ int StFcsTriggerSimMaker::Make(){
 }    
 
 void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
-  u_short s2_to_dsm;
+  uint16_t s2_to_dsm;
   mTrgSim->stage_2(ecal,hcal,pres,geo,output,&s2_to_dsm);
 }
 

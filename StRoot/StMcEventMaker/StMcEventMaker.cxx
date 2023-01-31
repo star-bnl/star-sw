@@ -334,6 +334,8 @@ struct vertexFlag {
 	      int primaryFlag; };
 
 static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.79 2016/08/04 01:54:33 perev Exp $";
+static long NTracks = 0;
+
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -524,7 +526,9 @@ Int_t StMcEventMaker::Make()
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
     if (g2t_vertexTablePointer && g2t_trackTablePointer){
-	
+      long NVertices = g2t_vertexTablePointer->GetNRows();
+      NTracks = g2t_trackTablePointer->GetNRows();
+      if (NVertices > 0 && NTracks > 0) {
 	//
 	// g2t_event Table
 	//
@@ -789,7 +793,6 @@ Int_t StMcEventMaker::Make()
 	//______________________________________________________________________
 	// Step 2 - Fill Vertices - we do not fill parent/daughters until Step 3
 	
-	long NVertices = g2t_vertexTablePointer->GetNRows();
 	  
 	vector<vertexFlag> vtemp(NVertices); // Temporary array for Step 3
        
@@ -838,7 +841,6 @@ Int_t StMcEventMaker::Make()
 	//______________________________________________________________________
 	// Step 3 - Fill Tracks - we do not fill associated hits until Step 4
 	
-	long NTracks = g2t_trackTablePointer->GetNRows();
 	size_t usedTracksG2t = 0;
 	long NGeneratorTracks = (particleTablePointer) ? particleTablePointer->GetNRows() : 0;
 	size_t usedTracksEvGen = 0;
@@ -1067,12 +1069,14 @@ Int_t StMcEventMaker::Make()
 		long nPseudoPadrow = 0;
 		long ihit;
 		for(ihit=0; ihit<NHits; ihit++) {
-		    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2445) {
-			if (tpcHitTable[ihit].volume_id <= 202445 &&
-			    tpcHitTable[ihit].volume_id > 2445) nPseudoPadrow++; 
+#if 0 /* keep all tpc hits => Inner TPC sector upgrade */
+		    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2472) {
+			if (tpcHitTable[ihit].volume_id <= 202472 &&
+			    tpcHitTable[ihit].volume_id > 2472) nPseudoPadrow++; 
 			else nBadVolId++;
 			continue;
 		    }
+#endif
 		    //		    g2t_tpc_hitTablePointer->Print(ihit,1);		  
 		    th = new StMcTpcHit(&tpcHitTable[ihit]);
 		    //		    cout << "McTpcHit\t" << ihit << *th << endl;
@@ -1295,6 +1299,7 @@ Int_t StMcEventMaker::Make()
 	//_______________________________________________________________
 	// At this point StMcEvent should be loaded.
 		
+      }
     }
     
     
@@ -1350,6 +1355,7 @@ void StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
 // 	cout << "eta       " << eta      << endl;
 // 	cout << "sub       " << sub      << endl;
 // 	cout << "detector  " << detector << endl;
+	if (emcHitTable->track_p <= 0 || emcHitTable->track_p > NTracks) continue;
 	tr   = ttemp[emcHitTable->track_p - 1];
 	de   = emcHitTable->de;
 		    
@@ -1423,6 +1429,7 @@ void StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
     long NHits = g2t_smd_hitTablePointer->GetNRows();
     for(long ihit=0; ihit<NHits; ihit++,smdHitTable++) { 
 	geomBsmd->getVolIdBsmd(smdHitTable->volume_id, module,eta,sub,detector); // Must check ??
+	if (smdHitTable->track_p <= 0 || smdHitTable->track_p > NTracks) continue;
 	tr   = ttemp[smdHitTable->track_p - 1];
 	de   = smdHitTable->de;
 
@@ -1485,7 +1492,7 @@ void StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd)
     const EEmcMCHit *h  = mEemcGeant.getGeantHits(nHit);
     for(Int_t i=0; i<nHit; i++,h++) {
 	int detId=h->detector;
-	assert(h->track_p>0); // tmp, to catch bugs,JB
+	if (h->track_p <= 0 || h->track_p > NTracks) continue;
 	StMcTrack *tr = ttemp[h->track_p - 1];
 	int Beta=0,Bsub=0,Bmodule=0; // barrel indexes
 	/* barrel indexes are used to lable eemc hits 
@@ -1579,6 +1586,7 @@ void StMcEventMaker::fillFpd(St_g2t_emc_hit* g2t_fpd_hitTablePointer)
     volume_id /= 1000;
     int nstb = volume_id % 10;
     int ew = volume_id / 10;
+    if (hit.track_p <= 0 || hit.track_p > NTracks) continue;
     StMcTrack* track = ttemp[hit.track_p - 1];
     // Store ew in module, nstb in sub, and ch in eta
     StMcCalorimeterHit* fpdHit = new StMcCalorimeterHit(ew,ch,nstb,hit.de,track);
@@ -1612,6 +1620,7 @@ void StMcEventMaker::fillFsc(St_g2t_emc_hit* g2t_fsc_hitTablePointer)
     int module = 1; 		// only one FSC exists at the moment :)
     int eta = floor(float(volume_id) / float(80)); // X coordinate
     int sub = volume_id % 80; 	// Y coordinate
+    if (hit.track_p <= 0 || hit.track_p > NTracks) continue;
     StMcTrack* track = ttemp[hit.track_p - 1];
     // Store ew in module, nstb in sub, and ch in eta
     StMcCalorimeterHit* fscHit = new StMcCalorimeterHit(module,eta,sub,hit.de,track);

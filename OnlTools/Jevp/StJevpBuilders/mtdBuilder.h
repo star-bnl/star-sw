@@ -33,11 +33,12 @@ class mtdBuilder : public JevpBuilder {
  private:
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       // MTDhits histogram group
       TH2* hMTD_hitmap2D;
       TH2* hMTD_hitmap2D_good;
+      TH1** hMTD_ToT_good;
       TH2* hMTD_timeDiff;
       TH1*** hMTD_hitmap;
 
@@ -85,8 +86,8 @@ class mtdBuilder : public JevpBuilder {
   TString QTtpcsector[128];
  
   double numberforsort;
-  vector<double> leadinghits;
-  vector<double> trailinghits;
+  double leadinghits[30][120];
+  double trailinghits[30][120];
   TLatex *MTD_Error1_label;
   TLatex *MTD_Error2_label;
   TLatex *MTD_Error3_label;

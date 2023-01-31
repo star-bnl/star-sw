@@ -148,8 +148,8 @@ L2pedAlgo12::initRunUser(int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 bool
 L2pedAlgo12::doPedestals(int inpEveId, int* L2Result, 
-		   int bemcIn, ushort *bemcData,
-		   int eemcIn, ushort *eemcData){
+		   int bemcIn, unsigned short *bemcData,
+		   int eemcIn, unsigned short *eemcData){
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo */
   unsigned long mEveTimeStart;
   rdtscl_macro(mEveTimeStart);
@@ -211,7 +211,7 @@ L2pedAlgo12::doPedestals(int inpEveId, int* L2Result,
   int  kTick=mEveTimeDiff/1000;
   hA[11]->fill(kTick/20);
   
-  const ushort maxKT=30000;
+  const unsigned short maxKT=30000;
   out.int0.kTick=  kTick>maxKT ? maxKT : (int)kTick;
   
   int *outPlace=L2Result+ mResultOffset;

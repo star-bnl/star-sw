@@ -24,7 +24,7 @@ void fpsGainSV_db(char* opt="", char* year="", char* filename="fpsgain/pAu200_16
     int run=f2.Atoi();
     printf("%s idx=%d f2=%s run=%d\n",f1.Data(),idx,f2.Data(),run);
     
-    char *onlserver="onldb",*bakserver="dbbak",*server=0;
+    char *onlserver="onldb2",*bakserver="dbbak",*server=0;
     int  port;
     int y=run/1000000 -1;
     if(y == 17){

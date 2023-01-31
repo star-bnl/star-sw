@@ -1,0 +1,43 @@
+/*
+    Double_t delta =alpha/TMath::Sqrt(1 + alpha*alpha);
+    Double_t muz = delta/TMath::Sqrt(TMath::PiOver2());
+    Double_t sigmaz = TMath::Sqrt(1 - muz*muz);
+    Double_t gamma1 = (4 - TMath::Pi())/2 * TMath::Power(delta*TMath::Sqrt(2./TMath::Pi()), 3) 
+      /                                     TMath::Power(1 - 2*delta*delta/TMath::Pi(), 1.5);
+    Double_t m_0 = muz - gamma1*sigmaz/2 - TMath::Sign(1.,alpha)/2*TMath::Exp(-2*TMath::Pi()/TMath::Abs(alpha));
+    w   = sigma/TMath::Sqrt(1 - 2* delta*delta/TMath::Pi()); 
+    ksi = mu - w*m_0;
+*/
+load (f90) $
+:lisp (setq *f90-output-line-length-max* 1000000000)
+stardisp: true$
+delta(alpha) := alpha/sqrt(1 + alpha*alpha);
+muz(alpha) := delta(alpha)/sqrt(%pi/2);
+sigmaz(alpha) := sqrt(1 - muz(alpha)*muz(alpha));
+gamma1(alpha) := (4 - %pi)/2 * (delta(alpha)/sqrt(%pi/2))**3 / (1 - 2*delta(alpha)**2 /%pi)**1.5;
+signn(x) := x/abs(x);
+m_0(alpha) := muz(alpha) - gamma1(alpha)/sigmaz(alpha)/2 - signn(alpha)/2*exp(-2*%pi/abs(alpha));
+w(sigma,alpha):= sigma/sqrt(1 - 2*delta(alpha)**2/%pi);
+ksi(mu,sigma,alpha):= mu - w(sigma,alpha)*m_0(alpha);
+
+F : jacobian([  ksi(mu,sigma,alpha), w(sigma,alpha), alpha], [mu, sigma, alpha]);
+trigsimp(F);
+f90(F);
+with_stdout ("F.txt",  f90(F));
+/*================================================================================*/
+t(ksi,w) := (x - ksi)/w;
+v(ksi,w) := t(ksi,w)/sqrt(2);
+G(ksi,w) := 1./sqrt(2*%pi)*exp(-t(ksi,w)**2/2);
+E(ksi,w,alpha) := 1 + erf(alpha*v(ksi,w));
+Val(ksi,w,alpha):= G(ksi,w)/w *E(ksi,w,alpha);
+
+J : jacobian([Val(ksi,w,alpha)], [ksi,w,alpha]);
+trigsimp(J);
+f90(J);
+with_stdout ("J.txt",  f90(J));
+T: J . F; 
+trigsimp(%);
+A : %;
+ratsimp(%),ratsimpexpons:true;
+f90(A);
+with_stdout ("A.txt",  f90(A));

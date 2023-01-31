@@ -156,7 +156,7 @@
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
 	
 	$FFLAGS    = $G77FLAGS;     # will be overwritten below, ignore
-	$FLIBS     = "-lgfortran";
+	$FLIBS     = "-lgfortran -lquadmath";
 
     } else {
 	$G77       = "g77";
@@ -210,7 +210,7 @@
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1";
+    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
@@ -837,110 +837,31 @@
     #
     # *** Standard package first, then MYSTAR ***
     #	
-    my ($MYSQLINCDIR,$mysqlheader);
-    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
-			      $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ",
-			      "mysql.h");
-    } else { 
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ".
-			      $MYSTAR . "/include " .  $MYSTAR . "/include/mysql " ,
-			      "mysql.h");
-    }
 
-    if (! $MYSQLINCDIR) {
-	die "Can't find mysql.h in standard path and $MYSTAR/include  $MYSTAR/include/mysql\n";
-    }
 
     # search for the config    
-    my ($MYSQLCONFIG,$mysqlconf);
-    # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
-			     $MYSQL . " ".
-			     $MYSQL . "/bin ".
-			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
-			     "mysql_config");
-    # } else {
-    #	($MYSQLCONFIG,$mysqlconf) =
-    #	    script::find_lib($MYSQL . " ".
-    #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
-    #			     $MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ",
-    #			     "mysql_config");
-    # } 
+    chomp(my $mysqlconf = `which mysql_config`);
 
-
-    # Associate the proper lib with where the inc was found
-    my ($mysqllibdir)=$MYSQLINCDIR;
-    $mysqllibdir =~ s/include/$LLIB/;
-
-    # print "DEBUG :: $mysqllibdir\n";
-    # Note - there is a trick here - the first element uses mysqllibdir
-    #        which is dreived from where the INC is found hence subject to 
-    #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-    # my ($MYSQLLIBDIR,$MYSQLLIB) =
-    #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-    #			 $MYSTAR . "/lib " .  $MYSTAR . "/lib/mysql ",
-    #			 "libmysqlclient");
-    #			 # "libmysqlclient_r libmysqlclient");
-    # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
-
-    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-    if ( $mysqlconf ){
-	$mysqlconf = "$MYSQLCONFIG/$mysqlconf";
-	# if ( 1==1 ){
-	# Do not guess, just take it - this leads to a cons error though TBC
-	chomp($MYSQLLIB = `$mysqlconf  --libs`);
-	# but remove -L which are treated separately by cons
-	my(@libs) = split(" ", $MYSQLLIB);
-	my($test) = shift(@libs);
-	if ( $test =~ /-L/){
-	    $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
-	    $MYSQLLIB = "";
-	    foreach my $el (@libs){
-		$MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
-	    }
-	}
-	
-	# here is a check for libmysqlclient
-	
-	
-	# die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
-	
-	# mysqlconf returns (on SL5, 64 bits)
-	#  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-	# } else {
-	#    $MYSQLLIB .= " -L/usr/$LLIB";
-	#    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	#    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	#    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	#    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-	#    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-	#    $MYSQLLIB .= " -lz";
-	#    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
-	# }
-    } else {
-	die "No mysql_config found\n";
+    if ($?) {
+        die "No mysql_config found\n";
     }
-    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-          if ! $param::quiet;
 
-    # die "\n";
+    chomp(my $MYSQLINCDIR = `mysql_config --variable=pkgincludedir`);
+    chomp(my $MYSQLLIBDIR = `mysql_config --variable=pkglibdir`);
 
+    chomp(my $MYSQLLIB = `$mysqlconf --libs`);
+    # Remove -L which are treated separately by cons
+    my(@libs) = split(" ", $MYSQLLIB);
+    my($test) = shift(@libs);
+    if ( $test =~ /-L/) {
+        $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+        $MYSQLLIB = "";
+        foreach my $el (@libs) {
+            $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+        }
+    }
+
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR\n\tMYSQLLIBDIR = $MYSQLLIBDIR\n\tMYSQLLIB = $MYSQLLIB\n" if !$param::quiet;
 
 
     # QT
@@ -1038,65 +959,62 @@
     }
 
     # Logger
-    $LoggerDir = $MYSTAR . "/include/log4cxx";
+    chomp($LoggerDir = `pkg-config --variable=prefix liblog4cxx`);
+    $LoggerDir = $MYSTAR unless $LoggerDir;
 
-    if (-d $LoggerDir) {
-	$LoggerINCDIR = $MYSTAR . "/include";
-	$LoggerLIBDIR = $MYSTAR . "/lib";
-	$LoggerLIBS   = "-llog4cxx";
-	print
-	    "Use Logger  ",
-	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
-	    if $LoggerLIBDIR && ! $param::quiet;
+    if (not -d $LoggerDir."/include/log4cxx") {
+        die "No log4cxx found\n";
     }
+
+    $LoggerINCDIR = $LoggerDir . "/include";
+    $LoggerLIBDIR = $LoggerDir . "/lib";
+    $LoggerLIBS   = "-llog4cxx";
+
+    print "Using $LoggerDir\n\tLoggerLIBDIR = $LoggerLIBDIR\n\tLoggerINCDIR = $LoggerINCDIR\n\tLoggerLIBS = $LoggerLIBS\n" unless $param::quiet;
+
     # xml2
-    my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin",
-				  "xml2-config");
-    if ($xml) {
-	$xml .= "/xml2-config";
-	$XMLINCDIR = `$xml --cflags`;
-	chomp($XMLINCDIR);
-	$XMLINCDIR =~ s/-I//;
-	my $XML  = `$xml --libs`; # die "$XML\n";
-	my(@libs)= split(" ", $XML);
+    chomp(my $xml = `which xml2-config`);
 
-	$XMLLIBDIR = shift(@libs);
-	if ($XMLLIBDIR =~ /-L/){
-	    $XMLLIBDIR =~ s/-L//;
-	    $XMLLIBS   = join(" ",@libs);
-	} else {
-	    # no -L, assume all were LIBS
-	    $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
-	    # and fix -L / should work for both 32 and 64
-	    $XMLLIBDIR = "/usr/$LLIB";
-	}
-
-
-	# ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-	# if ($XMLLIBDIR =~ /-L/){
-	#    $XMLLIBDIR =~ s/-L//;
-	# } else {
-	#    # may not have any -L
-	#    if ($XMLLIBS
-	# }
-
-	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
-	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
-	$XMLCPPFlag = "";#-DXmlTreeReader";
-	if ($major < 2 or $major == 2 and $minor < 5) {
-	    $XMLCPPFlag = "-DNoXmlTreeReader";
-	}
-	if ( ! $param::quiet ){
-	    if ( $XMLLIBDIR ){
-		print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
-	    } else {
-		print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
-	    }
-	}
-    } else {
-	print "Could not find xml libs\n" if (! $param::quiet);
+    if ($?) {
+        die "No xml2-config found\n";
     }
+
+    my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
+
+    $XMLINCDIR = `$xml --cflags`;
+    chomp($XMLINCDIR);
+    $XMLINCDIR =~ s/-I//;
+    my $XML  = `$xml --libs`; # die "$XML\n";
+    my(@libs)= split(" ", $XML);
+
+    $XMLLIBDIR = shift(@libs);
+    if ($XMLLIBDIR =~ /-L/){
+        $XMLLIBDIR =~ s/-L//;
+        $XMLLIBS   = join(" ",@libs);
+    } else {
+        # no -L, assume all were LIBS
+        $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
+        # and fix -L / should work for both 32 and 64
+        $XMLLIBDIR = "/usr/$LLIB";
+    }
+
+    my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
+    my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
+    $XMLCPPFlag = "";#-DXmlTreeReader";
+    if ($major < 2 or $major == 2 and $minor < 5) {
+        $XMLCPPFlag = "-DNoXmlTreeReader";
+    }
+    if ( ! $param::quiet ){
+        if ( $XMLLIBDIR ){
+            print "Using $xml\n\tXMLLIBDIR = $XMLLIBDIR\n\tXMLINCDIR = $XMLINCDIR\n\tXMLLIBS = $XMLLIBS\n\tXMLCPPFlag = $XMLCPPFlag\n" if !$param::quiet;
+        } else {
+            print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
+        }
+    }
+
+    chomp($FASTJET_PREFIX = `fastjet-config --prefix`);
+    chomp($GSL_PREFIX = `gsl-config --prefix`);
+
  #Vc check SSE support
  my $cmd = "touch temp_gccflags.c; $CXX -E -dM -o - temp_gccflags.c | grep -q SSE";
  my $VcCPPFLAGS = " -DVC_IMPL=SSE";
@@ -1212,6 +1130,7 @@
 		  'ENV'    => {
 		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
+		      'PYTHONPATH'      => $PYTHONPATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
 		      'ROOT'            => $ROOT,
@@ -1256,6 +1175,12 @@
 			    'CPPFLAGS' => $CERNLIB_CPPFLAGS,
 			    'CERNLIBS' => $CERNLIBS
 			    },
+                       'FASTJET' => {
+                           'INCDIR'=> "$FASTJET_PREFIX/include"
+                           },
+                       'GSL' => {
+                           'INCDIR'=> "$GSL_PREFIX/include"
+                           },
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,

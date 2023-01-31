@@ -26,9 +26,9 @@ St2009WMaker::find_W_boson(){
   if(wEve.zTag) return;
 
   // search for  Ws ............
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -195,9 +195,9 @@ St2009WMaker::tag_Z_boson(){
   mJets = getJets("ConeJets12_100"); //select specific jet-type
 
   //form invariant mass from lepton candidate and jet
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {//vertex loop
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {//vertex loop
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {// select track
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {// select track
       WeveEleTrack &T1=V.eleTrack[it];
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
@@ -250,9 +250,9 @@ St2009WMaker::tag_Z_boson(){
 void
 St2009WMaker::findPtBalance(){
 
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
 
@@ -311,9 +311,9 @@ void
 St2009WMaker::findAwayJet(){
   // printf("\n******* find AwayJet() nVert=%d\n",wEve.vertex.size());
   //wEve.print();
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       
@@ -338,9 +338,9 @@ void
 St2009WMaker::findNearJet(){
   //printf("\n******* findNearJet() nVert=%d\n",wEve.vertex.size());
 
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
 
@@ -386,10 +386,10 @@ St2009WMaker::matchTrack2Cluster(){
   //wEve.print();
   int nTr=0;
   float Rcylinder= mBtowGeom->Radius();
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
     float zVert=V.z;
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       T.isMatch2Cl=false; // just in case (was already set in constructor)
       if(T.pointTower.id==0) continue;
@@ -524,9 +524,9 @@ St2009WMaker::extendTrack2Barrel(){// return # of extended tracks
   //wEve.print();
   //printf("******* extendTracks() nVert=%d\n",wEve.vertex.size());
   int nTrB=0; 
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       //.... extrapolate track to the barrel @ R=entrance....
       const StPhysicalHelixD TrkHlx=T.prMuTrack->outerHelix(); 

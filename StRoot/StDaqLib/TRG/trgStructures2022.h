@@ -49,8 +49,9 @@
 #define y22QT4_CONF_NUM      14
 #define y22EQ1_CONF_NUM      15
 #define y22EQ2_CONF_NUM      16
+#define y22EQ4_CONF_NUM      17
+#define y22CLK_CONF_NUM      19
 #define y22INF_CONF_NUM      20
-
 
 #define y22ADD_BIT_PREPILEUP      0              /* pileup present */
 #define y22ADD_BIT_POSTPILEUP     1
@@ -127,11 +128,7 @@ typedef struct {
   unsigned short ZDClayer1[8];                /* layer1 ZDC DSM that feeds the VT201 DSM */
   unsigned short VPD[8];                      /* layer1 VPD DSM feeding ADC & TAC values to VT201*/
   unsigned short EPDlayer0t[16];	      /* layer0 EPD DSM feeding east & west TAC to EP101 */
-  unsigned short EPDlayer1b[8];		      /* 2nd layer1 EPD DSM taking EPD QT ADC data to VT201 */
-  unsigned short EPDlayer0a[16];              /* layer0 EPD DSM feeding east & west QT32C adcs to EP102 */
-  unsigned char EPDlayer0h[32]; 	      /* layer0 EPD DSM feeding east & west QT32B to EP102 */
 } BBCBlock2022;
-
 
 typedef struct {
   char name[4];                               /* Contains MIX */

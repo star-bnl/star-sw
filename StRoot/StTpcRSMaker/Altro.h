@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include "TObject.h"
 /*
 g++ -c -o Altro.o Altro.C
 g++  Altro.o -o Altromain.app Altromain.C
@@ -19,7 +19,7 @@ g++ -o Altromain.app Altro.C Altromain.C
 */
 using namespace std;
 
-class Altro{
+class Altro : public TObject {
 	public:
 	Altro(int timebins, short* Channel);
 	~Altro();

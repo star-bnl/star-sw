@@ -16,6 +16,7 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
+#include "TGraph.h"
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
@@ -71,6 +72,7 @@ class StdEdxY2Maker : public StMaker {
   static  void fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   static  Double_t gaus2(Double_t *x, Double_t *p);
   static  TF1 *Gaus2();
+  static  TGraph *dNdxGraph(Int_t k = 0) {return fdNdxGraph[k];}
   void     IntegrateAdc(const StTpcHitCollection* TpcHitCollection);
   Double_t IntegratedAdc(const StTpcHit* tpcHit);
  private:
@@ -84,7 +86,6 @@ class StdEdxY2Maker : public StMaker {
   static dEdxY2_t *dEdxS; // dEdx sorted
   static void      UsedNdx() {fUsedNdx = kTRUE;}
   Long_t               m_Mask; //!
-  Bool_t               fUsedx2; //! flag for StPiDStatus to absord log2(dx) dependence into TpcLengthCorrectionMD2
   Char_t               beg[1];
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
@@ -95,10 +96,12 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mPromptPosition[2][2][3]; 
 #endif /* __OLD_dX_Calculation__ */
   TH2F                *mHitsUsage;//!
+  Bool_t               fUsedx2; //! flag for StPiDStatus to absord log2(dx) dependence into TpcLengthCorrectionMD2
   Char_t               end[1];
   static Double_t      bField;
   static Bool_t        fUsedNdx;
   static TH2F         *fIntegratedAdc;
+  static TGraph       *fdNdxGraph[3];
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=

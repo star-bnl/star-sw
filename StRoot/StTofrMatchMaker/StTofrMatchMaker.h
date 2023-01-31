@@ -133,7 +133,7 @@ public:
     void setMinFitPointsPerTrack(Int_t);
     void setMinFitPointsOverMax(Float_t);
     void setMaxDCA(Float_t);
-    void setHistoFileName(Char_t*);
+    void setHistoFileName(const Char_t*);
     void setNtupleFileName(Char_t*);
     void setSaveGeometry(Bool_t geomSave=kFALSE);
 
@@ -150,8 +150,8 @@ private:
     void bookHistograms();
     void writeHistogramsToFile();
     
-    Bool_t validAdc(Float_t const);
-    Bool_t validTdc(Float_t const);
+    Bool_t validAdc(Float_t);
+    Bool_t validTdc(Float_t);
     Bool_t validEvent(StEvent *);
     Bool_t validTrack(StTrack*);
     Bool_t validTrackRun8(StGlobalTrack*);
@@ -382,7 +382,7 @@ inline void StTofrMatchMaker::setMinFitPointsOverMax(Float_t ratio) {mMinFitPoin
 
 inline void StTofrMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
-inline void StTofrMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
+inline void StTofrMatchMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 
 inline void StTofrMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
 
@@ -390,8 +390,8 @@ inline void StTofrMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 
 inline void StTofrMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
-inline Bool_t StTofrMatchMaker::validAdc(const Float_t adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
+inline Bool_t StTofrMatchMaker::validAdc(Float_t adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
 
-inline Bool_t StTofrMatchMaker::validTdc(const Float_t tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
+inline Bool_t StTofrMatchMaker::validTdc(Float_t tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
 
 #endif

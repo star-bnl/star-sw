@@ -638,12 +638,12 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
-      cmd += "pSMMk->DoXi();";
-      cmd += "pSMMk->DoKink();";
-      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
-      ProcessLine(cmd);
+
+      mk -> SetAttr( "DoV0", 1 );
+      mk -> SetAttr( "DoXi", 1 );
+      mk -> SetAttr( "DoKink", 1 );
+      mk -> SetAttr( "SetNoKeep", 1 );
+
     }
 
     // Alex requested an option (not turned by default) to disable all
@@ -654,6 +654,16 @@ Int_t StBFChain::Instantiate()
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
+      
+    // trigger simu maker
+    if ( maker == "StEmcRawMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production - save all BTOW hits for triggerSimuMaker
+    }
+
+    // trigger simu maker
+    if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production
+    }
 
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
@@ -664,6 +674,16 @@ Int_t StBFChain::Instantiate()
       if ( ! GetOption("CMuDST")) cmd += "pMuMk->SetStatus(\"*\",0);";
       cmd += "pMuMk->SetStatus(\"EztAll\",1);";
       ProcessLine(cmd);
+    }
+
+    // FST Raw hits in StEvent
+    if (maker == "StFstRawHitMaker" && GetOption("fstEvtRawHit") ){
+      mk->SetAttr("fstEvtRawHit", kTRUE);
+    }
+
+    // FST Raw hits in MuDST
+    if (maker == "StMuDstMaker" && GetOption("fstMuRawHit") ){
+      mk->SetAttr("fstMuRawHit", kTRUE);
     }
 
     if ( maker == "StPicoDstMaker"){
@@ -771,7 +791,10 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);
 	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);
 	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);
-	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);
+	if( GetOption("OSpaceZ2")   ) {
+          if( GetOption("FXT")      ) mk->SetAttr("OSpaceFXT"  , kTRUE);
+          else                        mk->SetAttr("OSpaceZ2"   , kTRUE);
+        }
 	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
@@ -888,6 +911,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 

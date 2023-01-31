@@ -230,7 +230,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 #if 0
   vector<unsigned int> trgL=L1->triggerIds();
   printf("trigL len=%d totEve=%d\n",trgL.size(),mTotInpEve);
-  uint ii;
+  unsigned int ii;
   for(ii=0;ii<trgL.size();ii++){
     printf("ii=%d trigID=%d\n",ii,trgL[ii]);
   }

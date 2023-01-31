@@ -29,7 +29,7 @@ extern "C" {
 volatile int tonkoLogLevel = 2 ;	
 
 
-static char *getCmd(void) ;
+static const char *getCmd(void) ;
 static int  odesc = -1 ;
 static int handchange ;
 static FILE *fdesc = 0 ;
@@ -119,7 +119,7 @@ int rtsLogUnix_v(const char *str, ...)
 	/* common to all threads */
 	static int sockAddrSize ;
 	static struct sockaddr_in serverAddr ;
-	static char *cmd_l ;
+	static const char *cmd_l ;
 	/* thread dependant */
 	int ret ;
 	char buffer[10240] ;
@@ -330,11 +330,11 @@ int rtsLogUnix_v(const char *str, ...)
 
 
 
-static char *getCmd(void)
+static const char *getCmd(void)
 {
 
 
-	static char *str = "(no-name)" ;
+        static const char *str = "(no-name)" ;
 #if defined(__linux__) || defined(__APPLE__)	
 	FILE *file ;
 	static char name[128] ;

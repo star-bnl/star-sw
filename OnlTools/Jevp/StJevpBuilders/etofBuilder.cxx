@@ -1261,7 +1261,7 @@ void etofBuilder::processMessages( uint64_t* messageBuffer, size_t nFullMessages
             }
             if( pulser.at( i ).size() > 1 ) LOG( DBG, "-->selected index: %d", index );
 
-	    if(index > 0) {    // JML 1/30/21  FIX SIGABORT!
+	    if(index >= 0) {    // JML 1/30/21  FIX SIGABORT! PW 11/11/21 Fixed pulser histogram filling.
 		pulserTimestamp[ i ] = pulser.at( i ).at( index ).GetFullTimeNs();
 		contents.nPulsersPerSide[ i / 18 ]->Fill( ( i % 18 ) );
 	    }

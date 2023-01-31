@@ -32,7 +32,7 @@ class StBTofSimResParams : public StMaker {
 		 * Calculates the average resolution across all 38 tubes (discounts inactive tubes)
 		 * then returns a single vertex resolution (in ps) for use in embedding w/ vpdStart
 		 */
-		double timeres_tof(uint itray, uint imodule, uint icell) 
+		double timeres_tof(unsigned int itray, unsigned int imodule, unsigned int icell) 
 		{
 			double result = 8.5e-11;
 			if ( itray > 120 || imodule > 32 || icell > 6 )

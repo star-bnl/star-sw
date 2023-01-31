@@ -256,8 +256,11 @@ C                    Entry to initialize from one or three integers
 #endif
       ENDIF
       IN24 = 0
-      IF (INS .LT. 0)  WRITE (6,'(A)')
+      IF (INS .LT. 0)  THEN
+        WRITE (6,'(A)')
      +   ' Illegal initialization by RLUXGO, negative input seed'
+        CALL ABORT
+      ENDIF
       IF (INS .GT. 0)  THEN
         JSEED = INS
 #ifndef SILENT_RANLUX

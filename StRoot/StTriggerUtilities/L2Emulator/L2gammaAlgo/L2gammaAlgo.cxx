@@ -371,8 +371,8 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
       
 
       // check fail bit and artificially raise HT threshold 
-      ushort stat = x->stat;   
-      ushort fail = x->fail;   
+      unsigned short stat = x->stat;   
+      unsigned short fail = x->fail;   
       if ( gain < 0.0 ) {
 	if(mLogFile) 	fprintf(mLogFile,"L2gammaEmCal::WARN %s gain=%5.2f will be masked\n",x->name,x->gain);
 	fail = 0xffff;
@@ -392,7 +392,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
       // calculate high tower threshold for this
       // rdo channel in ADC
       if ( !fail ) {
-	mTowerAdcThreshold[rdo] = (ushort)(ped + (mIdealGainT * mTowerThreshold)/mTowerAdcCorrection[rdo] + 0.5 );
+	mTowerAdcThreshold[rdo] = (unsigned short)(ped + (mIdealGainT * mTowerThreshold)/mTowerAdcCorrection[rdo] + 0.5 );
 	mTowerPed[rdo]=ped;
       }
       else {
@@ -649,8 +649,8 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   bool trig = false;
 
   float  sum=0.;                                   /* tower patch sum, 3x3 cluster around high tower */
-  ushort htrdo=8192;                               /* rdo of high tower */
-  ushort tprdo=8192;                               /* rdo of high cluster */
+  unsigned short htrdo=8192;                               /* rdo of high tower */
+  unsigned short tprdo=8192;                               /* rdo of high cluster */
 
   nRdosHT=0;
   nRdosTP=0;
@@ -663,9 +663,9 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   // section.
 
   if ( mL2input ) {
-    for ( ushort i=0;i<mL2input->getNumberOfHighTowers();i++ )
+    for ( unsigned short i=0;i<mL2input->getNumberOfHighTowers();i++ )
       {
-	ushort rdo=mL2input->mListOfRdosHT[i];
+	unsigned short rdo=mL2input->mListOfRdosHT[i];
 #ifdef DEBUG
 	mHistos[3].fill( emcData[rdo] );
 #endif
@@ -682,7 +682,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
 	  if ( mTowerFail[prdo] ) continue; /* skip masked towers */
 	  sum += emcData[prdo] / mIdealGainT * mTowerAdcCorrection[rdo];
 	}
-	ushort sumx2=(ushort)(2.0*sum); 
+	unsigned short sumx2=(unsigned short)(2.0*sum); 
 #ifdef DEBUG
 	mHistos[7].fill( sumx2 );
 #endif
@@ -706,7 +706,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   // been met.  We store results for higher thresholds/other algorithms to
   // process at a later point.
 
-  for ( ushort rdo=0; rdo<mNumRdo; rdo++ ) 
+  for ( unsigned short rdo=0; rdo<mNumRdo; rdo++ ) 
     {
 
       // check if tower is above ADC=ET*gain+ped threshold
@@ -736,7 +736,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
 	if ( mTowerFail[prdo] ) continue; /* skip masked towers */
 	sum += emcData[prdo] / mIdealGainT * mTowerAdcCorrection[rdo];
       }
-      ushort sumx2=(ushort)(2.0*sum);
+      unsigned short sumx2=(unsigned short)(2.0*sum);
 #ifdef DEBUG
       mHistos[7].fill( sumx2 );
 #endif
@@ -802,7 +802,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   mResult.trigger = 0x00;
 
   float max=0.;
-  ushort maxrdo=8192;
+  unsigned short maxrdo=8192;
 
   // set high tower bit
   if ( eht ) 
@@ -810,7 +810,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
 
 
   // set cluster bit and 
-  for ( ushort i=0;i<nRdosTP;i++ )
+  for ( unsigned short i=0;i<nRdosTP;i++ )
     {
       if ( mETofTP[i] > max ) {
 	max=mETofTP[i];
@@ -820,19 +820,19 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   if ( maxrdo < mNumRdo ) 
     {
       mResult.trigger |= 0x2;
-      ushort tow=mRdo2tower[maxrdo];
+      unsigned short tow=mRdo2tower[maxrdo];
       mResult.phibin=tow/mNumEtas;
       mResult.etabin=tow%mNumEtas;
       max-=mPatchAdcThreshold[maxrdo];
       max+=mPatchThreshold;
       if ( max < 127.5 )
-	mResult.ptclusterx2 = ((ushort)(2.0*max));
+	mResult.ptclusterx2 = ((unsigned short)(2.0*max));
       else
 	mResult.ptclusterx2 = 255;
       float pttow=emcData[maxrdo]-mTowerPed[maxrdo];
       pttow*=mTowerAdcCorrection[maxrdo]/mIdealGainT;
       if ( pttow < 127.5 )
-	mResult.pttowerx2 = (ushort)(2.0*pttow);
+	mResult.pttowerx2 = (unsigned short)(2.0*pttow);
       else
 	mResult.pttowerx2 = 255;
       if ( mEEmc ) mResult.phibin |= 0x8;
@@ -877,13 +877,13 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   if ( trig || prescaleAccept )
     {
       mHistos[0].fill(3);
-      for ( ushort i=0;i<nRdosHT;i++ ) {
+      for ( unsigned short i=0;i<nRdosHT;i++ ) {
 	int tower=(int)mRdo2tower[mListOfRdosHT[i]];
-	mHistos[6].fill( (mADCofHT[i] - (ushort)mTowerPed[ mListOfRdosHT[i] ])/5,tower );
+	mHistos[6].fill( (mADCofHT[i] - (unsigned short)mTowerPed[ mListOfRdosHT[i] ])/5,tower );
 	mHistos[13].fill(tower);
       }
 
-      for ( ushort i=0;i<nRdosTP;i++ ) {
+      for ( unsigned short i=0;i<nRdosTP;i++ ) {
 	int tower=(int)mRdo2tower[mListOfRdosTP[i]];
 	mHistos[9].fill( (int)(mETofTP[i]*2),tower );
 	mHistos[14].fill( tower );
@@ -1166,8 +1166,8 @@ void L2gammaAlgo::printPatchConfig( int rdo )
     //int phis[]={phi_l,phi,phi_r};
     float peds[]={0,0,0};
     float gains[]={0,0,0};
-    ushort stats[]={0xff,0xff,0xff};
-    ushort fails[]={0xff,0xff,0xff};
+    unsigned short stats[]={0xff,0xff,0xff};
+    unsigned short fails[]={0xff,0xff,0xff};
     int freqs[]={0,0,0};
 
     // get numbers from db
@@ -1272,8 +1272,8 @@ void L2gammaAlgo::printPatchConfig( int rdo )
     int phis[]={phi_l,phi,phi_r};
     float peds[]={0,0,0};
     float gains[]={0,0,0};
-    ushort stats[]={0xff,0xff,0xff};
-    ushort fails[]={0xff,0xff,0xff};
+    unsigned short stats[]={0xff,0xff,0xff};
+    unsigned short fails[]={0xff,0xff,0xff};
     int freqs[]={0,0,0};
 
     float corr[]={0.,0.,0.};

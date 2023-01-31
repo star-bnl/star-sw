@@ -1,0 +1,9 @@
+/*    rhicfPhotonLeakageOut.idl
+*
+*  Table: rhicfPhotonLeakageOut
+*
+*/
+struct rhicfPhotonLeakageOut {
+	float smallplate[6000];          /* 400x15, Leakage-out for small tower */
+	float largeplate[24000];        /* 1600x15, Leakage-out for large tower */
+};

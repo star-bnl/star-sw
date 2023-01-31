@@ -18,9 +18,6 @@
 /* CHANGE THIS WITH EVERY COMPILATION ON L2 MACHINE DURING RUN */
 #define LEVEL2_GAMMA_ALGORITHM_VERSION 0x1 
 
-//#define ushort unsigned short
-typedef unsigned short ushort;
-
 #define MAX_TOWERS 4800
 
 
@@ -70,23 +67,23 @@ class L2gammaAlgo : public L2VirtualAlgo
   /// The following block of variables are initialized
   /// in the constructor and select between the two 
   /// calorimeter geometries
-  ushort  mEEmc;
-  ushort  mBEmc;
-  ushort  mThresholdLevel;
-  ushort  mNumEtas;
-  ushort  mNumPhis;
-  ushort  mNumSubs;
-  ushort  mNumSecs;
-  ushort  mNumTower;
-  ushort  mNumClust;
-  ushort  mNumRdo;
+  unsigned short  mEEmc;
+  unsigned short  mBEmc;
+  unsigned short  mThresholdLevel;
+  unsigned short  mNumEtas;
+  unsigned short  mNumPhis;
+  unsigned short  mNumSubs;
+  unsigned short  mNumSecs;
+  unsigned short  mNumTower;
+  unsigned short  mNumClust;
+  unsigned short  mNumRdo;
   const float *mEtaBins; /* points to preexisting array, no "new" allocation */
-  ushort  mMaxADC;
+  unsigned short  mMaxADC;
   float   mMaxET;
   float   mIdealGainT;
   int     mHistogramBase;
-  ushort  mHistogramPres;
-  ushort  mIdThreshold; // 0=low threshold, 1=high threshold
+  unsigned short  mHistogramPres;
+  unsigned short  mIdThreshold; // 0=low threshold, 1=high threshold
 
  public:
 
@@ -96,17 +93,17 @@ class L2gammaAlgo : public L2VirtualAlgo
    * use of other algorithms.
    */
 
-  ushort getNumberOfHighTowers(){ return nRdosHT; }
-  ushort getRdoOfHighTower(ushort i){ return mListOfRdosHT[i]; }
-  ushort rdo2tower(ushort rdo){ return mRdo2tower[rdo]; }
-  ushort tower2rdo(ushort tow){ return mTower2rdo[tow]; }
+  unsigned short getNumberOfHighTowers(){ return nRdosHT; }
+  unsigned short getRdoOfHighTower(unsigned short i){ return mListOfRdosHT[i]; }
+  unsigned short rdo2tower(unsigned short rdo){ return mRdo2tower[rdo]; }
+  unsigned short tower2rdo(unsigned short tow){ return mTower2rdo[tow]; }
   
-  ushort mListOfRdosHT[ MAX_TOWERS ]; /* list of rdos where HT exceeded specified threshold */
-  ushort mListOfRdosTP[ MAX_TOWERS ]; /* list of rdos where 3x3 "cluster" exceeded specified threshold */
-  ushort nRdosHT;                /* number of high towers */
-  ushort nRdosTP;                /* number of clusters (patches) */
+  unsigned short mListOfRdosHT[ MAX_TOWERS ]; /* list of rdos where HT exceeded specified threshold */
+  unsigned short mListOfRdosTP[ MAX_TOWERS ]; /* list of rdos where 3x3 "cluster" exceeded specified threshold */
+  unsigned short nRdosHT;                /* number of high towers */
+  unsigned short nRdosTP;                /* number of clusters (patches) */
   float  mETofTP[ MAX_TOWERS ];       /* ET of clusters (patches) */
-  ushort mADCofHT[ MAX_TOWERS ];      /* raw ADC of high tower */
+  unsigned short mADCofHT[ MAX_TOWERS ];      /* raw ADC of high tower */
 
   /*
    * Algorithm parameters, may be set in constructor 
@@ -152,7 +149,7 @@ class L2gammaAlgo : public L2VirtualAlgo
 
 
   /// implementation of the "virtual" method in L2VirtualAlgo.  this is a wrapper for
-  /// doEvent( int, TrgDataType*, int, ushort ) above.
+  /// doEvent( int, TrgDataType*, int, unsigned short ) above.
   bool  doEvent( int L0trigger, int inuptEventID, TrgDataType* trgData,
 		 int bemcIn, unsigned short *bemcData,
 		 int eemcIn, unsigned short *eemcData );
@@ -231,7 +228,7 @@ class L2gammaAlgo : public L2VirtualAlgo
 
   /// High tower threshold expressed in terms of ADC
   /// for each of the 720 rdo channels
-  ushort mTowerAdcThreshold[MAX_TOWERS];
+  unsigned short mTowerAdcThreshold[MAX_TOWERS];
 
   /// Thresholds on the 3x3 patch of towers centered
   /// on the rdo channel.  The threshold is calculated
@@ -253,19 +250,19 @@ class L2gammaAlgo : public L2VirtualAlgo
 
   /// bitwise "or" of _all_ stat and fail bits of towers
   /// w/in the 3x3 tower patch
-  ushort mPatchStat[MAX_TOWERS];
-  ushort mPatchFail[MAX_TOWERS];
+  unsigned short mPatchStat[MAX_TOWERS];
+  unsigned short mPatchFail[MAX_TOWERS];
 
-  ushort mTowerStat[MAX_TOWERS];
-  ushort mTowerFail[MAX_TOWERS];
+  unsigned short mTowerStat[MAX_TOWERS];
+  unsigned short mTowerFail[MAX_TOWERS];
 
   /// Map to go from Rdo to Tower and Tower to Rdo
-  ushort mRdo2tower[ MAX_TOWERS ];
-  ushort mTower2rdo[ MAX_TOWERS ];
+  unsigned short mRdo2tower[ MAX_TOWERS ];
+  unsigned short mTower2rdo[ MAX_TOWERS ];
 
   /// Number and list of up to 9 neighboring towers
-  ushort mNumPatch[ MAX_TOWERS ];
-  ushort mRdoPatch[ MAX_TOWERS ][ 9 ];
+  unsigned short mNumPatch[ MAX_TOWERS ];
+  unsigned short mRdoPatch[ MAX_TOWERS ][ 9 ];
 
   float mTowerPed[ MAX_TOWERS ];
   float mPatchPed[ MAX_TOWERS ];
@@ -295,8 +292,8 @@ class L2gammaAlgo : public L2VirtualAlgo
   // FILE *mLogFile;
   // FILE *mHistFile;
 
-  ushort phibin( ushort sec, ushort sub ) { return mNumSubs * sec + sub; }
-  ushort tower( ushort phi, ushort eta ) { return mNumEtas * phi + eta; }
+  unsigned short phibin( unsigned short sec, unsigned short sub ) { return mNumSubs * sec + sub; }
+  unsigned short tower( unsigned short phi, unsigned short eta ) { return mNumEtas * phi + eta; }
 
 
 

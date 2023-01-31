@@ -42,6 +42,7 @@ class RtsTimer
   timespec ts_new;
 #endif
   double t;
+  int ref_cnt;
 
   RtsTimer() {
     reset();
@@ -54,6 +55,7 @@ class RtsTimer
     clock_gettime(CLOCK_REALTIME, &ts_old);
 #endif
     ts_last = ts_old;
+    ref_cnt = 0;
   }
 
   double currtime() {
@@ -126,6 +128,20 @@ class RtsTimer
       stopwatchcounting = 1;
       return stopwatch;
   }
+
+  double rt_start() {
+      ref_cnt++;
+      if(ref_cnt == 1) return record_time();
+      return 0.0;
+  }
+  
+  double rt_stop() {
+      ref_cnt--;
+      if(ref_cnt < 0) ref_cnt = 0;
+      if(ref_cnt == 0) return record_time();
+      return 0.0;
+  }
+      
 };
 
 // Returns medium resolution time  (~1ms)

@@ -80,8 +80,8 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.0; // Old Tpc electronics or iTPC  1.4 => 1.0; Tonko 12/12/2019
-  row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
+  row.AveragePedestalRMS    = -1.0; // Tpx, Use St_TpcPadPedRMSC chair
+  row.AveragePedestalRMSX   = -1.0; // iTPC, -"- 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
   row.tauP                  = 775.0e-9;// secs Tpc 
@@ -89,21 +89,23 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
+  row.SigmaJitterTI         = 0.0; //1.5*0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0.52; //1.5*0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterXI         = 0.1027785/2./1.5;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
-  row.longitudinalDiffusionI= row.longitudinalDiffusion;
-  row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.transverseDiffusionI  = 0.83* row.transverseDiffusion;
+  row.longitudinalDiffusionI= row.longitudinalDiffusion*0.51;
+  row.transverseDiffusion   = 0.02263*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
+  row.transverseDiffusionI  = 0.63  *row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 +1.14433e-01 -3.57593e-01 -3.95075e-02 -2.12902e-02 -2.43764e-03 +1.92592e-01; // hijingAuAu200.DEV2X5.StiCA.Minuit
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 -6.15827e-02 +1.99821e-01              +6.06971e-03 -6.98644e-04 -1.37937e-01;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] =  6.21777e-01 -4.23291e-02;
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = -1.54623e-03 +1.26327e-03;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] =  9.59474e-01 +2.50905e-02;
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] =  1.72672e-03 -1.97991e-03;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
@@ -125,14 +127,9 @@ TDataSet *CreateTable() {
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   // row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   row.T0offset   = 0.50 -1.43663e-01 -0.00932877 + 0.0416;//g // 12/18/19 from Run 19 AuAu19.6 GeV simulation
-  /* 
-     0.05  => -0.154  
-    -0.05  => -0.054
-    -0.104 => -0.006  but very big sigma 0.298 => 0.303 
-    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires, check with X7
-    No. cut on 3 first wires => -9.21881e-02 ; X9
-    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
-   */
+  row.T0offsetI  = -1.58786167960479896e-01;
+  row.T0offsetO  = -1.94071983062808762e-01-1.76429075511644329e-02;
+
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

@@ -58,6 +58,16 @@ public:
 
     ~StMuETofHeader();
 
+    virtual void Clear( Option_t *opt = "" ){
+        // ensure allocations are destroyed
+        mRocGdpbTs.clear();
+        mRocStarTs.clear();
+        mMissMatchFlagVec.clear();
+        mGoodEventFlagVec.clear();
+        mMissMatchFlagVec.shrink_to_fit();
+        mGoodEventFlagVec.shrink_to_fit();
+    }
+
     double    trgGdpbFullTime()   const;
     double    trgStarFullTime()   const;
 

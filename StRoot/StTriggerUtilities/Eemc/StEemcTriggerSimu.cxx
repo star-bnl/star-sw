@@ -190,8 +190,10 @@ StEemcTriggerSimu::InitRun(int runnumber){
   fill(highTowerMask,highTowerMask+90,1); // all channels good
   fill(patchSumMask,patchSumMask+90,1); // all channels good
 
+#if 0  // loading local mask files - no actual effect for jobs running on clusters - working on DB solution
   EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
   EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
+#endif
 
   switch (mPedMode) {
   case kOnline:
@@ -328,7 +330,7 @@ StEemcTriggerSimu::Make(){
   StMuTriggerIdCollection *tic=&StMuDst::event()->triggerIdCollection();
   std::vector<unsigned int> trgL=(tic->nominal()).triggerIds();
   //  printf("   trigL len=%d \n",trgL.size());
-  uint ii;
+  unsigned int ii;
   for(ii=0;ii<trgL.size();ii++){ // collect all trigger ID's
     TString cID=Form("%d",trgL[ii]);
     hA[1]->Fill(cID.Data(),1.);
@@ -392,7 +394,7 @@ StEemcTriggerSimu::Make(){
     // Barrel DSM2 (3 boards), only 5bit Esum for 6 remaining inputs
     static const  int kA[6]={3,4,5,0,1,2}; // mapping between Renee & Hank  
     for(j=0;j<6;j++) {
-      ushort fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
+      unsigned short fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
       // higher bits ar not provided for the Barrel
       int ibr=j/2;
       int ich=j%2;
@@ -665,7 +667,7 @@ StEemcTriggerSimu::getDsm0123inputs(){
   StL0Trigger &L0trg=StMuDst::event()->l0Trigger();
   //int L0Num;
   //L0Num=L0trg.lastDsmArraySize();
-  ushort L0word=L0trg.lastDsmArray(0);
+  unsigned short L0word=L0trg.lastDsmArray(0);
   dsm3TRG->setWord(0, L0word);
   //printf("L0word=%d\n", L0word);
 
@@ -790,6 +792,7 @@ int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister
 int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegister(i); }
 
 int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[jp%3]; }
+int StEemcTriggerSimu::endcapPartialJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[3+jp%3]; }
 
 int StEemcTriggerSimu::getOutHT(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
 int StEemcTriggerSimu::getOutTPsum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }

@@ -229,7 +229,8 @@ int trgReader32(char *arg, int bytes, int swap, struct trg_t *trg)
 	  trg->FPD_l1[0][0][i] = swap ? swap16(raw[0].FPDEastNSLayer1[i]) : raw[0].FPDEastNSLayer1[i] ;
 	}
 	// East, TB
-	for(i=0;i<64;i++) {
+	//for(i=0;i<64;i++) {
+	for(i=0;i<16;i++) {   // 9/23/22 FPDEastTBLayer0 only has 16
 		trg->FPD[0][1][i] = raw[0].FPDEastTBLayer0[i] ;
 	}
 	// Not existing in 2007

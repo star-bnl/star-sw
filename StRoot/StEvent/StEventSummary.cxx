@@ -90,6 +90,18 @@ StEventSummary::StEventSummary()
 
 StEventSummary::~StEventSummary() { /* noop */ }
 
+void StEventSummary::Clear( Option_t * opt ){
+    mNumberOfVertexTypes.Set(0);
+    mEtaBins.Set(0);
+    mPtBins.Set(0);
+    mPhiBins.Set(0);
+    mEtaOfTracksHisto.Set(0);
+    mPtOfTracksHisto.Set(0);
+    mPhiOfTracksHisto.Set(0);
+    mEneryVsEtaHisto.Set(0);
+    mEnergyVsPhiHisto.Set(0);
+}
+
 void
 StEventSummary::initBinRanges()
 {

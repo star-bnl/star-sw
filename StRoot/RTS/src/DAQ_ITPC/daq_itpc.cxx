@@ -258,6 +258,9 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		memset(track_array,0,sizeof(track_array)) ;
 
 		for(u_int i=0;i<sim->ncontent;i++) {
+			// new in Jun 2022
+			if(sim_dta[i].adc==0) sim_dta[i].adc = 0xFFFF ;	// transliterate 0's to 0xFFFF ;
+
 			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
 			track_array[sim_dta[i].tb] = sim_dta[i].track_id ;
 
@@ -578,7 +581,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
 
-			//LOG(TERR,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
+			LOG(DBG,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
 
 			int clusters = int_cou/ints_per_cluster ;	
 
@@ -795,14 +798,14 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	char buff[128] ;
 	int buff_cou ;
 	u_int want_dump = 0 ;
-	int sector ;
+//	int sector ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
 
 
 	//from Dec 2019
-	sector = rdo>>4 ;
+//	sector = rdo>>4 ;
 	rdo &= 0xF ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
@@ -982,9 +985,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		LOG(ERR,"%d: evt_status 0x%08X:0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,fee_status,trg_fired,trg_cou,b_cou) ;
 
 		// We'll let it pass for now with just the error message
-		trg[0].t = -ETIMEDOUT ;
-		trg[0].daq = trg[0].trg = 0 ;
-		return 1 ;
+		//trg[0].t = -ETIMEDOUT ;
+		//trg[0].daq = trg[0].trg = 0 ;
+		//return 1 ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;

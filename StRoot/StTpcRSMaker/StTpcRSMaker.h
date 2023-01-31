@@ -62,7 +62,7 @@ class StTpcRSMaker : public StMaker {
   virtual void Print(Option_t *option="") const;
   StTpcDigitalSector *DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
-  static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
+  static Int_t    AsicThresholds();
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
   static Double_t shapeEI(Double_t *x, Double_t *par=0);
@@ -102,16 +102,14 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mShaperResponse;             //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
-  TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
-  Altro *mAltro;                      //!
+  Altro *mAltro[2][24];               //!
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!
@@ -152,9 +150,10 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower;  //!
   const Int_t NoOfSectors;            //!
-  const Int_t NoOfPads;               //!
+  Int_t NoOfPads;                     //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
+  static Short_t mADCs[__MaxNumberOfTimeBins__];//!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 

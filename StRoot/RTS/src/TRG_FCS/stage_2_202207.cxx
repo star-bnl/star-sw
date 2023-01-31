@@ -187,7 +187,7 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
     u_int HAD2=0, HAD1=0, HAD0=0;
     u_int ETOT=0, HTOT=0;
     for(int r=0; r<15; r++){
-        if(fcs_trgDebug>=2) printf("E4x4 ");
+        if(fcs_trgDebug>=2) printf("EM4x4 ");
         for(int c=0; c<9; c++){
             esum[ns][r][c]
                 = ecal[ETbTdep[r  ][c  ]].d[ETbTadr[r  ][c  ]]
@@ -213,6 +213,7 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
  
 	    // E+H sum
             sum[ns][r][c] = esum[ns][r][c] + h;
+	    summax[ns][r][c] = esum[ns][r][c] + hmax;
 
             //in VHDL we will do esum>hsum*threshold. Ratio is for human only
             if(sum[ns][r][c]==0) {
@@ -220,6 +221,11 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
             }else{
                 ratio[ns][r][c] = float(esum[ns][r][c]) / float(sum[ns][r][c]);
             }
+	    if(esum[ns][r][c]+hmax==0){
+                ratiomax[ns][r][c]=0.0;
+	    }else{
+	        ratiomax[ns][r][c]=float(esum[ns][r][c]) / float(summax[ns][r][c]);
+	    }
 
 	    //check EPD hits using the mask
 	    epdcoin[ns][r][c]=0;
@@ -244,7 +250,7 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
 	    u_int h128 = h*128 ;
             u_int hmax128 = hmax*128 ;
 
-	    if(hmax128 < esum[ns][r][c] * EM_HERATIO_THR){
+	    if(hmax128 <= esum[ns][r][c] * EM_HERATIO_THR){
 		if(esum[ns][r][c] > EMTHR2)  EM2 = 1;
 		if(esum[ns][r][c] > EMTHR1)  EM1 = 1;
 		if(esum[ns][r][c] > EMTHR0)  EM0 = 1;
@@ -261,11 +267,20 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
 		if(sum[ns][r][c] > HADTHR1) HAD1 = 1;
 		if(sum[ns][r][c] > HADTHR2) HAD2 = 1;
 	    }
-	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",esum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
+	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",esum[ns][r][c],epdcoin[ns][r][c],ratiomax[ns][r][c]);
 	}
 	if(fcs_trgDebug>=2) printf("\n");
     }
-    
+    if(fcs_trgDebug>=2){
+      for(int r=0; r<15; r++){
+	printf("HAD4x4 ");
+	for(int c=0; c<9; c++){
+	  printf("%5d %3.2f ",sum[ns][r][c],ratio[ns][r][c]);
+	}
+	printf("\n");
+      }
+    }
+
     //5 square JP
     int e_col_start[5] = { 0, 0, 0, 3, 3};  //these are 2x2 row/col
     int e_col_stop[5]  = { 3, 6, 6, 9, 9};
@@ -280,20 +295,23 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
     int JP0[5] = {0,0,0,0,0};    
     int JPd[5] = {0,0,0,0,0};    
     for(int i=0; i<5; i++){
-      jet[ns][i]=0;
+      int ejet=0, hjet=0;
       for(int c=e_col_start[i]; c<=e_col_stop[i]; c++){ 
 	for(int r=e_row_start[i]; r<=e_row_stop[i]; r++){ 
 	  if((i==1 || i==2) && (c==0 || c==1) && (r>=5 && r<=10)) continue; //cutout
-	  jet[ns][i] += ecal[ETbTdep[r][c]].d[ETbTadr[r][c]]; 
-	}
+	  ejet += ecal[ETbTdep[r][c]].d[ETbTadr[r][c]]; 
+	} 
       }
       for(int c=h_col_start[i]; c<=h_col_stop[i]; c++){ 
 	for(int r=h_row_start[i]; r<=h_row_stop[i]; r++){ 
 	  if((i==1 || i==2) && (c==0) && (r>=3 && r<=6)) continue; //cutout
-	  jet[ns][i] += hcal[HTbTdep[r][c]].d[HTbTadr[r][c]]; 
+	  hjet += hcal[HTbTdep[r][c]].d[HTbTadr[r][c]]; 
 	}
       }
-      if(jet[ns][i]>0xff) jet[ns][i]=0xff;
+      jet[ns][i] = ejet + hjet;
+      //if(jet[ns][i]>=0xff) jet[ns][i]=0xff;
+      //int jet2 = ((ejet & 0x3ff) + (hjet & 0x3ff)) & 0x3ff;
+      //if(jet2>=0xff) jet2=0xff;
       if(i==0){ //JPA	  
 	  if(jet[ns][i]>JPATHR2) JP2[i] = 1;
 	  if(jet[ns][i]>JPATHR1) JP1[i] = 1;
@@ -310,7 +328,8 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
 	  if(jet[ns][i]>JPDETHRD) JPd[i] = 1;
       }
     }
-    if(fcs_trgDebug>=2) printf("JP5 = %3d %3d %3d %3d %3d\n",jet[ns][0],jet[ns][1],jet[ns][2],jet[ns][3],jet[ns][4]);
+    if(fcs_trgDebug>=2) printf("JP5 (ns=%1d) = %3d %3d %3d %3d %3d\n",ns,jet[ns][0],jet[ns][1],jet[ns][2],jet[ns][3],jet[ns][4]);
+    if(fcs_trgDebug>=2) printf("JP5x(ns=%1d) = %3x %3x %3x %3x %3x\n",ns,jet[ns][0],jet[ns][1],jet[ns][2],jet[ns][3],jet[ns][4]);
     
     //Ecal sub-crate sum
     u_int esub[4];
@@ -365,6 +384,16 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
 	       ns,
 	       output[0].d[0],output[1].d[0],output[0].d[1],output[1].d[1],
 	       output[0].d[2],output[1].d[2],*s2_to_dsm);
+        printf("emuout   = %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x TCU=%04x\n",
+               output[1].d[0],output[0].d[0],
+               output[1].d[1],output[0].d[1],
+               output[1].d[2],output[0].d[2],
+               output[1].d[3],output[0].d[3],
+	       output[1].d[4],output[0].d[4],
+               output[1].d[5],output[0].d[5],
+               output[1].d[6],output[0].d[6],
+               output[1].d[7],output[0].d[7],
+               *s2_to_dsm);
     }
     
     return ;

@@ -8,6 +8,7 @@
 #include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
+#include "TString.h"
 
 static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
 static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;

@@ -161,7 +161,7 @@ L2etowCalAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 /* ========================================
   ======================================== */
 void 
-L2etowCalAlgo12::calibrateEtow(int token, int eemcIn, ushort *rawAdc){
+L2etowCalAlgo12::calibrateEtow(int token, int eemcIn, unsigned short *rawAdc){
   // Etow calibration is a special case, must have one exit  at the end
 
   computeStart();
@@ -182,9 +182,9 @@ L2etowCalAlgo12::calibrateEtow(int token, int eemcIn, ushort *rawAdc){
     int low_noise_adc;
     float et;
     float low_noise_et; // bit-chopped
-    ushort *thr=mGeom->etow.thr_rdo;
-    ushort *ped=mGeom->etow.ped_rdo;
-    ushort *ped_shifted=mGeom->etow.ped_shifted_rdo;
+    unsigned short *thr=mGeom->etow.thr_rdo;
+    unsigned short *ped=mGeom->etow.ped_rdo;
+    unsigned short *ped_shifted=mGeom->etow.ped_shifted_rdo;
     float *gain2ET=mGeom->etow.gain2ET_rdo;
     float *gain2Ene=mGeom->etow.gain2Ene_rdo;
     HitTower1 *hit=etowCalibData.hit;

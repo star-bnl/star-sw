@@ -10,10 +10,9 @@
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 
-
 u_int fcs_trg_base::stage_version[4] ;
 
-u_short fcs_trg_base::stage_params[4][16] ;
+u_short fcs_trg_base::stage_params[4][32] ;
 
 ped_gain_t fcs_trg_base::p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;
 u_short fcs_trg_base::ht_threshold[ADC_DET_COU] ;
@@ -64,7 +63,7 @@ u_short        fcs_trg_base::PHTTHR ;
 
 u_int fcs_trg_base::data_format ;
 
-
+int fcs_trg_base::run_type ;
 
 
 fcs_trg_base::fcs_trg_base()
@@ -77,8 +76,13 @@ fcs_trg_base::fcs_trg_base()
 	sim_mode = 0 ;
 	data_format = 1 ;
 
+	run_type = 3 ;	// assume normal
+
+	trg_xing = 5 ;
+
 	want_stage_2_io = 0 ;
 	want_stage_3_io = 0 ;
+	want_stage_1_sim = 1 ;
 }
 
 
@@ -186,22 +190,21 @@ void fcs_trg_base::init(const char* fname)
 	// BELOW depends on the length of processing so don't change!
 	// Set by Tonko
 
-	marker.last_xing = 14 ;	// this depends on the post setting and should be calculable
+	// concrete values at e.g. 09-Dec-2021
+	marker.last_xing = 7 ;	// this depends on the post setting and should be calculable
 
-
-	
-	marker.adc_start = 1 ;				// fixed during board configuration
+	marker.adc_start = 7 ;				// fixed during board configuration
 	marker.s1_out_start = marker.adc_start + 11 ;	// depends on stage_0/1 algo but pretty much fixed
 
-	marker.s2_in_start = marker.s1_out_start + 4 ;		// depends on the cable length from 1-to-2 put pretty much fixed
-	marker.s2_to_s3_start = marker.s2_in_start + 13 ;	// depends on stage_2 algo?
+	marker.s2_in_start = marker.s1_out_start + 2 ;		// depends on the cable length from 1-to-2 put pretty much fixed
+	marker.s2_to_s3_start = marker.s2_in_start + 15 ;	// depends on stage_2 algo?
 
 
-	marker.s3_in_start = marker.s2_to_s3_start + 4 ;	// depends on cable length from 2-to-3; 0 in FY19
-	marker.dsm_out_start = marker.s3_in_start + 10 ;	// depends on stage_3 algo
+	marker.s3_in_start = marker.s2_to_s3_start + 8 ;	// depends on cable length from 2-to-3; 0 in FY19
+	marker.dsm_out_start = marker.s3_in_start + 14 ;	// depends on stage_3 algo
 
 
-	if(log_level>0) LOG(INFO,"Markers: last xing %d, ADC %d, s1_out %d, s2_in %d, s2_to_s3 %d, s3_in %d, dsm_out %d",
+	if(log_level>0) LOG(INFO,"init markers: last xing %d, ADC %d, s1_out %d, s2_in %d, s2_to_s3 %d, s3_in %d, dsm_out %d",
 	       marker.last_xing,
 	       marker.adc_start,
 	       marker.s1_out_start,
@@ -476,6 +479,17 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 				}
 				break ;
 			case 36 :	// new in FY22
+				//tix = t - (marker.s2_to_s3_start - 1) ;	// adjusted by hand!
+				tix = t - marker.dsm_out_start ;		// same as S3 to DSM!
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s2[ns].s2_to_dsm.d[xou] = dta & 0xFF ;
+				}
+				break ;
+				
 				break ;	// for now
 			default :
 				tix = t - marker.s2_in_start ;	
@@ -508,26 +522,38 @@ int fcs_trg_base::end_event()
 {
 	event_bad = 0 ;
 
+	s2_io_ns_bad = 0 ;
+	s2_io_ch_bad = 0 ;
+
+	s3_io_ch_bad = 0 ;
+
+	s1_dep_bad = 0 ;
+	s1_det_bad = 0 ;
+	s1_ns_bad = 0 ;
+
+	s2_ns_bad = 0 ;
+	s2_ch_bad = 0 ;
+
+	s3_to_dsm = s2_to_dsm[0] = s2_to_dsm[1] = 0 ;
+
 	if(!got_one) return 0 ;	// nothing to do; let's not waste time
 
 	verify_event_io() ;	// verify interconnectivity 
 
 	int dsmout = 0;
 
-	dsm_any = 0 ;
-	dsm_xing = 0 ;
+	self_trigger = 0 ;
 
+	s3_to_dsm = d_in[trg_xing].s3.dsm_out.d[0] ;
+	s2_to_dsm[0] = d_in[trg_xing].s2[0].s2_to_dsm.d[0] ;
+	s2_to_dsm[1] = d_in[trg_xing].s2[1].s2_to_dsm.d[0] ;
+			  
 	for(int xing=0;xing<marker.last_xing;xing++) {
     		if(log_level>1) {
 			LOG(NOTE,"run_event_sim: xing %d",xing) ;
 		}
 
 		dsmout = run_event_sim(xing,sim_mode) ;		
-
-		if(dsmout) {
-			dsm_any = dsmout ;
-			dsm_xing = xing ;
-		}
 
 		if(sim_mode) {	// when running offline
 			dump_event_sim(xing) ;
@@ -545,25 +571,39 @@ int fcs_trg_base::run_stop()
 	int err = 0 ;
 
 	for(int i=0;i<4;i++) {
-		if(errs.io_s1_to_s2[i]) err = 1 ;
+		if(errs.io_s1_to_s2[i]) err |= 1 ;
 	}
 
-	if(errs.sim_s1 || errs.sim_s2 || errs.sim_s3 || errs.io_s2_to_s3) {
-		err = 1 ;
+	if(errs.io_s2_to_s3) err |= 1 ;
+
+	if(errs.sim_s1 || errs.sim_s2 || errs.sim_s3) {
+		err |= 2 ;
 	}
 
 	LOG(INFO,"thread %d: self_trg_marker %d, tcd_marker %d",id,statistics.self_trg_marker,statistics.tcd_marker) ;
 
 	if(err) {
-	LOG(ERR,"thread %d: %d/%d events in run %d: errs sim %u %u %u; io [%u %u %u %u] %u",id,
-	    statistics.self_trgs,
-	    evts,run_number,
-	    errs.sim_s1,
-	    errs.sim_s2,
-	    errs.sim_s3,
-	    errs.io_s1_to_s2[0],errs.io_s1_to_s2[1],errs.io_s1_to_s2[2],errs.io_s1_to_s2[3],
-	    errs.io_s2_to_s3) ;
+		if(run_type==3 || (err&1)) {	// normal run or IO
+			LOG(ERR,"thread %d: %d/%d events in run %d: errs sim %u %u %u; io [%u %u %u %u] %u",id,
+			    statistics.self_trgs,
+			    evts,run_number,
+			    errs.sim_s1,
+			    errs.sim_s2,
+			    errs.sim_s3,
+			    errs.io_s1_to_s2[0],errs.io_s1_to_s2[1],errs.io_s1_to_s2[2],errs.io_s1_to_s2[3],
+			    errs.io_s2_to_s3) ;
+		}
+		else {
+			LOG(WARN,"thread %d: %d/%d events in run %d: errs sim %u %u %u; io [%u %u %u %u] %u",id,
+			    statistics.self_trgs,
+			    evts,run_number,
+			    errs.sim_s1,
+			    errs.sim_s2,
+			    errs.sim_s3,
+			    errs.io_s1_to_s2[0],errs.io_s1_to_s2[1],errs.io_s1_to_s2[2],errs.io_s1_to_s2[3],
+			    errs.io_s2_to_s3) ;
 
+		}
 
 	}
 
@@ -604,12 +644,22 @@ int fcs_trg_base::verify_event_io()
 				if(ns==0) cns='N' ;
 				else cns = 'S' ;
 
-				if(tb_cou[ns][3][1]==0) continue ;	// no stage_2
+				//LOG(TERR,"xing %d, t %d, ns %d = %d",x,t,ns,tb_cou[ns][3][1]) ;
+
+				//watch it!
+				//if(tb_cou[ns][3][1]==0) continue ;	// no stage_2
 
 				for(int i=0;i<34;i++) {
 					s2_from_s1[i] = d_in[x].s2[ns].s2_from_s1[i].d[t] ;
 				}
 
+
+				// ECAL
+				//LOG(TERR," %d %d %d %d",
+				//    tb_cou[ns][0][0],
+				//    tb_cou[ns][0][0],
+				//    tb_cou[ns][0][0],
+				//    tb_cou[ns][0][0]) ;
 
 				for(int d=0;d<20;d++) {
 					if(tb_cou[ns][0][d]) mask |= (1ll<<ix) ;
@@ -617,11 +667,14 @@ int fcs_trg_base::verify_event_io()
 					ix++ ;
 				}
 
+				// HCAL
 				for(int d=0;d<8;d++) {
 					if(tb_cou[ns][1][d]) mask |= (1ll<<ix) ;
 					s1_to_s2[ix] = d_in[x].s1[ns][1][d].s1_to_s2.d[t] ;
 					ix++ ;
 				}
+
+				// FPRE
 				for(int d=0;d<6;d++) {
 					if(tb_cou[ns][2][d]) mask |= (1ll<<ix) ;
 					s1_to_s2[ix] = d_in[x].s1[ns][2][d].s1_to_s2.d[t] ;
@@ -631,11 +684,12 @@ int fcs_trg_base::verify_event_io()
 			
 				
 
-				//LOG(WARN,"xing %d:%d, ns %d: mask 0x%llX, ix %d",x,t,ns,mask,ix) ;
+				if(mask != 0 && log_level>1) LOG(WARN,"xing %d:%d, ns %d: mask 0x%llX, ix %d",x,t,ns,mask,ix) ;
 
 				for(int i=0;i<34;i++) {
-					if(mask & (1ll<<i)) ;
-					else continue ;
+					// watch it!
+					//if(mask & (1ll<<i)) ;
+					//else continue ;
 
 					// separate mask
 					if(s2_ch_mask[ns] & (1ll<<i)) continue ;
@@ -646,6 +700,9 @@ int fcs_trg_base::verify_event_io()
 
 					if(s2_from_s1[i] != s1_to_s2[i]) {
 						event_bad |= 0x10 ;
+
+						s2_io_ns_bad = ns ;
+						s2_io_ch_bad = i ;
 
 						if(log_level>0) LOG(ERR,"evt %d: S1_to_S2 IO: NS %c: ch %d: xing %d:%d: out 0x%02X, in 0x%02X",
 						    evts,cns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
@@ -702,6 +759,8 @@ int fcs_trg_base::verify_event_io()
 
 				if(s2_to_s3 != s3_from_s2) {
 					event_bad |= 0x20 ;
+
+					s3_io_ch_bad = c ;
 
 					errs.io_s2_to_s3++ ;
 					err = 1 ;
@@ -795,6 +854,8 @@ int fcs_trg_base::verify_event_sim(int xing)
 	int s2_failed = 0 ;
 	int s3_failed = 0 ;
 
+	if(!want_stage_1_sim) goto skip_stage1 ;
+	
 	for(int i=0;i<NS_COU;i++) {
 	int cns ;
 
@@ -830,6 +891,10 @@ int fcs_trg_base::verify_event_sim(int xing)
 			if(d_sim != d_i) {
 				s1_failed = 1 ;
 				errs.sim_s1++ ;
+
+				s1_dep_bad = k ;
+				s1_det_bad = j ;
+				s1_ns_bad = i ;
 
 				want_log = 1 ;
 				bad++ ;
@@ -882,6 +947,8 @@ int fcs_trg_base::verify_event_sim(int xing)
 
 	}}}
 	
+	skip_stage1: ;
+
 	if(s1_failed) {
 		event_bad |= 1 ;
 	}
@@ -893,6 +960,65 @@ int fcs_trg_base::verify_event_sim(int xing)
 
 	if(i==0) cns = 'N' ;
 	else cns = 'S' ;
+
+#if 1
+	// check S2-to-DSM
+	for(int j=0;j<1;j++) {
+		int want_print = 0 ;
+		int want_log = 0 ;
+
+		if(tb_cou[i][3][1]==0) continue ;	// no stage_2 in data
+
+		for(int t=0;t<4;t++) {		// just the first 4
+			int d_sim = d_out.s2[i].s2_to_dsm ;
+			int d_i = d_in[xing].s2[i].s2_to_dsm.d[t] ;
+
+			if(d_sim != d_i) {
+				errs.sim_s2++ ;
+				s2_failed = 1 ;
+				event_bad |= 8 ;
+
+				s2_ns_bad = i ;
+				s2_ch_bad = j ;
+
+				want_log = 1 ;
+				bad++ ;
+			}
+			else {
+				good.sim_s2++ ;
+			}
+
+			if(d_i || d_sim) {
+				want_print = 1 ;
+			}
+		}
+
+		for(int t=0;t<4;t++) {
+			char ctmp = ' ' ;
+
+			int d_sim = d_out.s2[i].s2_to_dsm ;
+			int d_i = d_in[xing].s2[i].s2_to_dsm.d[t] ;
+
+			if(d_sim != d_i) ctmp = '*' ;
+
+			if(want_log && log_level>0) {
+				LOG(ERR,"evt %d: S2_to_DSM sim: %c - xing %d:%d: sim 0x%02X, dta 0x%02X%c",evts,cns,
+				    xing,t,
+				    d_sim,
+				    d_i,ctmp) ;
+			}
+
+			if(want_print && log_level>3) {
+				printf("evt %d: S2_to_DSM sim: %c: - xing %d:%d: sim %d, dta %d %s\n",evts,cns,
+				       xing,t,
+				       d_sim,
+				       d_i,want_log?"ERROR":"") ;
+			}
+		}
+
+
+	}
+#endif		
 
 	for(int j=0;j<2;j++) {
 		int want_print = 0 ;
@@ -907,6 +1033,11 @@ int fcs_trg_base::verify_event_sim(int xing)
 			if(d_sim != d_i) {
 				errs.sim_s2++ ;
 				s2_failed = 1 ;
+				event_bad |= 2 ;
+
+				s2_ns_bad = i ;
+				s2_ch_bad = j ;
+
 				want_log = 1 ;
 				bad++ ;
 			}
@@ -946,9 +1077,9 @@ int fcs_trg_base::verify_event_sim(int xing)
 	}}
 
 
-	if(s2_failed) {
-		event_bad |= 2 ;
-	}
+//	if(s2_failed) {
+//		event_bad |= 2 ;
+//	}
 
 	// verify stage_3 locally to stage_2 DEP
 	if(tb_cou[0][3][0]==0) return bad ;	// no stage_3 in data
@@ -1016,6 +1147,8 @@ u_int fcs_trg_base::run_event_sim(int xing, int type)
 		memset(&d_out,0,sizeof(d_out)) ;
 	}
 
+	dbg_xing = xing ;
+
 	for(int i=0;i<NS_COU;i++) {			// NS
 		geo.ns = i ;
 
@@ -1045,8 +1178,20 @@ u_int fcs_trg_base::run_event_sim(int xing, int type)
 
 					s0_to_s1[c] = res ;
 
-					if(log_level>100) printf("... S0: xing %d: %d:%d:%d: ch %d = %d (ped %d, gain %d)\n",xing,i,j,k,c,res,
-								p_g[i][j][k][c].ped,p_g[i][j][k][c].gain) ;
+					if(log_level>100) printf("... S0: xing %d: %d:%d:%d: ch %d = %d (ADC %d) (ped %d, gain %d) %s\n",xing,i,j,k,c,res,
+								 d_in[xing].s1[i][j][k].adc[c].d[0],
+								p_g[i][j][k][c].ped,p_g[i][j][k][c].gain,
+								 res?"S1_HIT":"") ;
+
+					if(log_level>101) {
+						int sum = 0 ;
+						for(int t=0;t<8;t++) {
+							sum += d_in[xing].s1[i][j][k].adc[c].d[t] ;
+							printf("       ADC %d = %d [sum %d, delta %d]\n",t,d_in[xing].s1[i][j][k].adc[c].d[t],sum,sum-p_g[i][j][k][c].ped) ;
+						}
+
+						printf("SSS0: %d %d %d %d %d\n",j,i,k,c,sum-p_g[i][j][k][c].ped) ;
+					}
 				}
 
 				// so that we compare d_out.s1_to_s2 and d_in.s1_to_s2
@@ -1147,7 +1292,7 @@ void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dt
 	case 2 :
 		stage_0_202103(adc, geo, pg, dta_out) ;
 		break ;
-	case 3 :
+	case 3 :	// current at start of FY22
 		stage_0_202109(adc, geo, pg, dta_out) ;
 		break ;
 	default :
@@ -1166,7 +1311,7 @@ void fcs_trg_base::stage_1(u_int s0[], geom_t geo, link_t *output)
 	case 0 :
 		stage_1_201900(s0,geo,output) ;
 		break ;
-	case 1 :
+	case 1 :	// at start of FY22
 		stage_1_202201(s0,geo,output) ;
 		break ;
 	default :
@@ -1189,7 +1334,7 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 2 :
 		stage_2_TAMU_202202(ecal,hcal,pres,geo,output) ;
 		break ;
-	case 3 :
+	case 3 :	// at start of FY22
 		stage_2_202203(ecal,hcal,pres,geo,output) ;
 		break ;
 	case 4 :
@@ -1201,9 +1346,10 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 6 :
 		stage_2_JP5_202206(ecal,hcal,pres,geo,output) ;
 		break ;
-	case 7 :
+	case 7 :	// for FY22
 	        stage_2_202207(ecal,hcal,pres,geo,output,s2_to_dsm) ;
 		break ;
+
 	// debugging versions below
 	case 0xFF210201 :
 		stage_2_tonko_202101(ecal,hcal,pres,geo,output) ;
@@ -1230,10 +1376,10 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 	case 1 :
 		stage_3_202201(link,dsm_out) ;
 		break ;
-	case 3 :
+	case 3 :	// at start of FY22
 		stage_3_202203(link,dsm_out) ;
 		break ;
-	case 7 :
+	case 7 :	// for FY22
 		stage_3_202207(link,dsm_out) ;
 		break ;
 	// debugging versions below

@@ -32,15 +32,15 @@ MinvCorrFctnM_vs_Phi::MinvCorrFctnM_vs_Phi(char* title,
 					 const int& nbins2, const float& MinvLo2, const float& MinvHi2){
   // set up numerator
   char theTitle[100];
-  char* TitNum = "MinvCorrFctnM_vs_Phi_Num";
+  const char* TitNum = "MinvCorrFctnM_vs_Phi_Num";
   sprintf(theTitle,"Num %s",title);
   mNumerator = new StHbt2DHisto(TitNum,theTitle,nbins1,MinvLo1,MinvHi1,nbins2,MinvLo2,MinvHi2);
   // set up denominator
-  char* TitDen = "MinvCorrFctnM_vs_Phi_Den";
+  const char* TitDen = "MinvCorrFctnM_vs_Phi_Den";
   sprintf(theTitle,"Den %s",title);
   mDenominator = new StHbt2DHisto(TitDen,theTitle,nbins1,MinvLo1,MinvHi1,nbins2,MinvLo2,MinvHi2);
   // set up difference
-  char* TitDif = "MinvCorrFctnM_vs_Phi_Dif";
+  const char* TitDif = "MinvCorrFctnM_vs_Phi_Dif";
   sprintf(theTitle,"Dif %s",title);
   mDifference = new StHbt2DHisto(TitDif,theTitle,nbins1,MinvLo1,MinvHi1,nbins2,MinvLo2,MinvHi2);
   // this next bit is unfortunately needed so that we can have many histos of same "title"

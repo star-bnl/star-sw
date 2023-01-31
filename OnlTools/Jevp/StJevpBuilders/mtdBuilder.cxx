@@ -89,6 +89,12 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   	contents.hMTD_hitmap2D_good->GetXaxis()->SetBinLabel(i+1,tmpchr);
   }
 
+  contents.hMTD_ToT_good = new TH1*[30];
+  for (int i=0;i<ntray;i++){
+    sprintf(tmpchr,"MTD TOT BL %d", i+1);
+    contents.hMTD_ToT_good[i] = new TH1F(Form("MTD_TOT_BL%d", i+1),tmpchr,120,0,60);		// 30 active backlegs
+  }
+
   sprintf(tmpchr,"MTD trigger time vs BL");
   contents.hMTD_timeDiff = new TH2F(tmpchr,tmpchr,30,0.5,30.5,500,2500,3000);		// 30 active backlegs
   for (int i=0;i<ntray;i++){
@@ -219,7 +225,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 
   // Add root histograms to Plots
   LOG("====MTD====", "Adding Plots...........................");
-  JevpPlot *plots[300];				// was 200
+  JevpPlot *plots[400];				// was 200
   int nhhit=0;
   int nhtrig=0;
   int n=0;
@@ -282,6 +288,10 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
       plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap[val5tray-1][islot-1]);
     }
   }
+  for (int i=0;i<ntray;i++){
+    plots[nhhit++] = new JevpPlot(contents.hMTD_ToT_good[i]);
+  }
+
   LOG("====MTD====", "n=%d nhhit=%d nhtrig=%d", nhhit+nhtrig, nhhit, nhtrig);
   //
   plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig2D);
@@ -290,6 +300,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   for (int i=0; i<nMTDtrig; i++) {
     plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig[i]);
   }
+
   LOG("====MTD====", "n=%d nhhit=%d nhtrig=%d", nhhit+nhtrig, nhhit, nhtrig);
 
   // Add Plots to plot set...
@@ -306,9 +317,16 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 		plots[i]->getHisto(0)->histo->SetMinimum(0);
 		plots[i]->getHisto(0)->histo->SetFillStyle(1001);
 		plots[i]->optstat=10;
-		plots[i]->addElement(latexW);
-		plots[i]->addElement(latexE);
-		plots[i]->addElement(ln);
+		if(i<nhhit-30)
+		  {
+		    plots[i]->addElement(latexW);
+		    plots[i]->addElement(latexE);
+		    plots[i]->addElement(ln);
+		  }
+		else
+		  {
+		    plots[i]->getHisto(0)->histo->SetFillColor(5);
+		  }
     }
   }
   LOG("====MTD====", "%d hitmap plots added",nhhit);
@@ -475,23 +493,29 @@ void mtdBuilder::event(daqReader *rdr) {
   int halftrayid=-1;
   int trayid=-1;
   int bunchid=0;
-  leadinghits.clear();
-  trailinghits.clear();
+  for(int ibl=0; ibl<30; ibl++)
+    {
+      for(int j=0; j<120; j++)
+	{
+	  leadinghits[ibl][j] = 0;
+	  trailinghits[ibl][j] = 0;
+	}
+    }
   int allbunchid[2][30];
   for(int i=0;i<2;i++){ for(int j=0;j<30;j++){ allbunchid[i][j] = -9999; }}
   int triggerTimeStamp[2];
   for(int i=0; i<2; i++) { triggerTimeStamp[i] = 0; }
 
   daq_dta *dd = rdr->det("mtd")->get("legacy");
+  if(!dd) return; // do not process if mtd is not in the readout
+
   mtd_t *mtd;
   if (dd) {
     while(dd->iterate()) {
       mtd = (mtd_t *)dd->Void;
       for (int ifib=0;ifib<2;ifib++){				// THUB-S is fiber 0, THUB-N is fiber 1
 	int ndataword = mtd->ddl_words[ifib];    
-	if(ndataword<=0) continue;
 	contents.MTD_EventCount->Fill(ifib+1);
-	//cout << "ndataword = " << ndataword << endl;
 	for(int iword=0;iword<ndataword;iword++){
 	  int dataword=mtd->ddl[ifib][iword];
 						
@@ -526,14 +550,12 @@ void mtdBuilder::event(daqReader *rdr) {
 
 	  int edgeid =int( (dataword & 0xf0000000)>>28 );
 	  //if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
-	  if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
 						
 	  int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
 	  int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
 	  int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
 	  timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
 	  time = timeinbin * 25./1024;   // time in ns 
-			
 						
 	  int globalstripid=-1;
 	  int stripid=-1;
@@ -549,17 +571,33 @@ void mtdBuilder::event(daqReader *rdr) {
 	  if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
 	  if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
 	  if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
-			
-	  contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
-	  contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
 
-	  // apply rough trigger time window cut to select good MTD hits
+	  int bl = HitmapXbyTray[trayid-1];
+	  int strip = 24*(slot-1)+globalstripid;
+
 	  float timeDiff = time - 25.*(triggerTimeStamp[ifib] & 0xfff);
 	  while(timeDiff<0) timeDiff += 51200;
+	  if(timeDiff>trigTimeCut_min[ifib] && timeDiff<trigTimeCut_max[ifib])
+	    {		
+	      if(edgeid==4)
+		{
+		  leadinghits[bl-1][strip-1] = time;
+		}
+	      if(edgeid==5)
+		{
+		  trailinghits[bl-1][strip-1] = time;
+		}
+	    }
+	  
+	  if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
+	  contents.hMTD_hitmap2D->Fill(bl, strip);
+	  contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);   
+
+	  // apply rough trigger time window cut to select good MTD hits
 	  contents.hMTD_timeDiff->Fill(HitmapXbyTray[trayid-1], timeDiff);
 	  if(timeDiff>trigTimeCut_min[ifib] && timeDiff<trigTimeCut_max[ifib])
 	    {
-	      contents.hMTD_hitmap2D_good->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
+	      contents.hMTD_hitmap2D_good->Fill(bl, strip);
 	    }
 
 	  int ntrayonbl	= 5;
@@ -573,7 +611,20 @@ void mtdBuilder::event(daqReader *rdr) {
       } // end loop over fibers
     } //end dd iterate
   } //end if dd
-	  
+
+  for(int ibl=0; ibl<30; ibl++)
+    {
+      for(int j=0; j<120; j++)
+	{
+	  double letime = leadinghits[ibl][j];
+	  double trtime = trailinghits[ibl][j];
+	  if(letime*trtime<1) continue;
+	  double timediff = trtime - letime;
+	  if(timediff<0) timediff += 51200;
+	  contents.hMTD_ToT_good[ibl]->Fill(timediff);
+	}
+    }
+
   //check bunchid
   int bunchidref1 	= allbunchid[0][mReferenceTray-1];
   int bunchidref2 	= allbunchid[1][mReferenceTray-1];
@@ -583,7 +634,8 @@ void mtdBuilder::event(daqReader *rdr) {
   
   contents.MTD_bunchid->Fill(mReferenceTray, diff);
   if(bunchidref2!=-9999 && diff) contents.MTD_Error2->Fill(mReferenceTray);
-  if(bunchidref1==-9999 || bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
+  if(bunchidref1==-9999) contents.MTD_Error3->Fill(mReferenceTray);
+  if(bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
 
   int BunchIdError	= 1;
   for(int ihalf=0; ihalf<2; ihalf++){
@@ -616,10 +668,10 @@ void mtdBuilder::event(daqReader *rdr) {
       }
     }
   }
-  
+
   //painting label.. //can move to end of run
   char t[256];
-  int nev = (int)(contents.MTD_EventCount->GetEntries());
+  int nev = (int)(contents.MTD_EventCount->GetEntries())/2;
   int err1 = (int)(contents.MTD_Error1->GetEntries());
   int err2 = (int)(contents.MTD_Error2->GetEntries());
   int err3 = (int)(contents.MTD_Error3->GetEntries());
@@ -645,7 +697,7 @@ void mtdBuilder::event(daqReader *rdr) {
     MTD_Error2_label->SetTextColor(2);
   }
   MTD_Error2_label->SetText(.2,.8,t);
-  
+
   //error3 label
   if( err3== 0) {
     sprintf(t, "No read out errors in %d events",nev);

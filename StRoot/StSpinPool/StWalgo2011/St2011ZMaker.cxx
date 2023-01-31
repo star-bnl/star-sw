@@ -80,12 +80,12 @@ St2011ZMaker::findEndcap_Z_boson(){
   hA[50]->Fill("inp",1.); 
 
   // search for  Zs ............
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     hA[50]->Fill("vert",1.);
     WeveVertex &V=wEve->vertex[iv];
 
     //first loop over good barrel tracks
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &TB=V.eleTrack[it];
       if(TB.pointTower.id<=0) continue; //skip endcap towers
       if(TB.isMatch2Cl==false) continue;
@@ -106,7 +106,7 @@ St2011ZMaker::findEndcap_Z_boson(){
       hA[50]->Fill("conB",1.); 
 
       // 1) try to find candidate track in the endcap
-      for(uint it=0;it<V.eleTrack.size();it++) {
+      for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	WeveEleTrack &TE=V.eleTrack[it];
 	if(TE.pointTower.id>=0) continue; //skip barrel towers
 	if(TE.isMatch2Cl==false) continue;
@@ -230,7 +230,7 @@ St2011ZMaker::find_Z_boson(){
   hA[0]->Fill("inp",1.);
 
   // search for  Zs ............
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     hA[0]->Fill("vert",1.);
     WeveVertex &V=wEve->vertex[iv];
     hA[32]->Fill(V.eleTrack.size());
@@ -240,7 +240,7 @@ St2011ZMaker::find_Z_boson(){
     //only one Z can come from a vertex, and it should be the highest-energy object
     //hence, the two highest-et clusters should correspond to the z.  Pick those 
     //eventually, but for now, just try all of them.
-    for(uint it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
+    for(unsigned int it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
       WeveEleTrack &T1=V.eleTrack[it];
       if(T1.pointTower.id<=0) continue; //skip endcap towers
       if(T1.isMatch2Cl==false) continue;
@@ -260,7 +260,7 @@ St2011ZMaker::find_Z_boson(){
       if(fracET1< par_nearTotEtFracZ) continue; 
       hA[0]->Fill("con1",1.);
 
-      for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
+      for (unsigned int it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
 	if(T2.pointTower.id<=0) continue; //skip endcap towers
 	if(T2.isMatch2Cl==false) continue;

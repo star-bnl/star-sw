@@ -153,8 +153,8 @@ L2pedAlgo09::initRunUser(int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 bool
 L2pedAlgo09::doPedestals(int inpEveId, int* L2Result, 
-		   int bemcIn, ushort *bemcData,
-		   int eemcIn, ushort *eemcData){
+		   int bemcIn, unsigned short *bemcData,
+		   int eemcIn, unsigned short *eemcData){
   // printf("L2pedAlgo09::doEvent  bemcIn=%d eemcIn=%d\n",bemcIn,eemcIn);
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo */
   unsigned long mEveTimeStart;
@@ -222,7 +222,7 @@ L2pedAlgo09::doPedestals(int inpEveId, int* L2Result,
   hA[11]->fill(kTick/20);
   
   //  printf("jkTick=%d\n",kTick);
-  const ushort maxKT=30000;
+  const unsigned short maxKT=30000;
   out.int0.kTick=  kTick>maxKT ? maxKT : (int)kTick;
   
   int *outPlace=L2Result+ mResultOffset;

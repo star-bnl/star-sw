@@ -138,7 +138,7 @@ void StPicoTrack::setChi2(Float_t chi2) {
 
 //_________________
 void StPicoTrack::setDedx(Float_t dEdx) {
-  // In KeV/cm
+  // In keV/cm
   mDedx = dEdx * 1.e6;
 }
 

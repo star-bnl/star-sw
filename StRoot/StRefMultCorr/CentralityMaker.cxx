@@ -37,11 +37,10 @@ using std::endl ;
 
 ClassImp(CentralityMaker)
 
-  CentralityMaker* CentralityMaker::fInstance = 0 ;
+CentralityMaker* CentralityMaker::fInstance = 0 ;
 
-//____________________________________________________________________________________________________
-CentralityMaker::CentralityMaker()
-{
+//_________________
+CentralityMaker::CentralityMaker() {
   // Create instance for centrality classes
   fRefMultCorr  = new StRefMultCorr("refmult") ;
   fRefMult2Corr = new StRefMultCorr("refmult2") ;
@@ -57,13 +56,13 @@ CentralityMaker::CentralityMaker()
   fgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij = new StRefMultCorr("grefmult","Run16_AuAu200_VpdMBnoVtx","P16ij") ;
 }
 
-//____________________________________________________________________________________________________
-CentralityMaker::~CentralityMaker()
-{ }
+//_________________
+CentralityMaker::~CentralityMaker(){
+  /* empty */
+}
 
-//____________________________________________________________________________________________________
-CentralityMaker* CentralityMaker::instance()
-{
+//_________________
+CentralityMaker* CentralityMaker::instance() {
   if ( !fInstance ) {
     // Initialize StRefMultCorr only once
     fInstance = new CentralityMaker() ;
@@ -72,83 +71,70 @@ CentralityMaker* CentralityMaker::instance()
   return fInstance ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getRefMultCorr()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getRefMultCorr() {
   return fRefMultCorr ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getRefMult2Corr()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getRefMult2Corr() {
   return fRefMult2Corr ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getRefMult3Corr()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getRefMult3Corr() {
   return fRefMult3Corr ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getRefMultCorr_Isobar()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getRefMultCorr_Isobar() {
   return fRefMultCorr_Isobar ;
 }
 
 /*
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getTofTrayMultCorr()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getTofTrayMultCorr() {
   return fTofTrayMultCorr ;
 }
 */
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr() {
   return fgRefMultCorr ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id() {
   return fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMB30_P16id()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMB30_P16id() {
   return fgRefMultCorr_Run14_AuAu200_VpdMB30_P16id ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_LowMid_P16id()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_LowMid_P16id() {
   return fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_LowMid_P16id ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_High_P15ic()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_High_P15ic() {
   return fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_High_P15ic ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run16_AuAu200_VpdMB5_P16ij()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run16_AuAu200_VpdMB5_P16ij() {
   return fgRefMultCorr_Run16_AuAu200_VpdMB5_P16ij ;
 }
 
-//____________________________________________________________________________________________________
-StRefMultCorr* CentralityMaker::getgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij()
-{
+//_________________
+StRefMultCorr* CentralityMaker::getgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij() {
   return fgRefMultCorr_Run16_AuAu200_VpdMBnoVtx_P16ij ;
 }
 
-//____________________________________________________________________________________________________
-void CentralityMaker::help() const
-{
+//_________________
+void CentralityMaker::help() const {
   cout << endl;
   cout << "//------------------------------------------------------------------------------" << endl;
   cout << "How to get centrality bins by CentralityMaker ?" << endl;

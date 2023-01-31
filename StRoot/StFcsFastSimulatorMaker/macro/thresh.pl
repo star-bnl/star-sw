@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 #
 #  Server and Port depend on run year:
-#   Year : ongoing  onldb:3501
-#          20xx     onlsun1:3400+x-1
+#   Year : ongoing  heston:3501
+#          20xx     db04:3400+year-1
 
 if (@ARGV != 1) {
     printf("thresh.pl run\n");
@@ -10,13 +10,13 @@ if (@ARGV != 1) {
 }
 
 $run = @ARGV[0];
-$year = $run/1000000;
+$year = int(($run - 273000)/1000000); # October 1 rollover date
 
-if($run > 22274000){
-    $server = "onldb.starp.bnl.gov";
+if($run > 22274000){ # This condition will change each year!
+    $server = "heston.star.bnl.gov";
     $port = 3501;
 }else{
-    $server = "onlsun1.starp.bnl.gov";
+    $server = "db04.star.bnl.gov";
     $port = 3400+$year-1;
 }
 

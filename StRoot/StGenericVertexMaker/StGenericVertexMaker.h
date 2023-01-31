@@ -18,7 +18,6 @@
 
 class StEvent;
 class StPrimaryVertex;
-class StMinuitVertexFinder;
 class StGenericVertexFinder;
 class TNtuple;
 

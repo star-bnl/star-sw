@@ -45,7 +45,7 @@ class EMCdsm2Tree  {  // DSM0 tree emulators
   ~EMCdsm2Tree(); 
   void  print(int k=0) const;
   void  clear();
-  void setInput16bit(int ibrd, int ch,  ushort val); // words
+  void setInput16bit(int ibrd, int ch,  unsigned short val); // words
   void compute();
   //  int getNboards() { return Nee1;}
   //int getInpTPsum(int ch /*0...11*/) const;// halfPatches, for both DSM1 boards

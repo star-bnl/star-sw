@@ -302,10 +302,12 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kFtsId       = kFtsIdentifier,
                    kiTpcId      = kiTpcIdentifier,
                    kETofId      = kETofIdentifier,
-		   kFcsWcalId   = kFcsWcalIdentifier,
-		   kFcsHcalId   = kFcsHcalIdentifier,
-		   kFcsPresId   = kFcsPresIdentifier,		   
-                   kMaxDetectorId = 44};
+		           kFcsWcalId   = kFcsWcalIdentifier,
+		           kFcsHcalId   = kFcsHcalIdentifier,
+		           kFcsPresId   = kFcsPresIdentifier,
+                   kFttId       = kFttIdentifier,
+                   kFstId       = kFstIdentifier,
+                   kMaxDetectorId = 46};
 
 /*!
  * \enum StTrackType
@@ -341,7 +343,7 @@ enum StDedxMethod {kUndefinedMethodId        = kUndefinedMethodIdentifier,
                   kEnsembleTruncatedMeanId   = kEnsembleTruncatedMeanIdentifier,
                   kLikelihoodFitId           = kLikelihoodFitIdentifier,
                   kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
-		  kOtherMethodId             = kOtherMethodIdentifier,
+                  kOtherMethodId             = kOtherMethodIdentifier,
                   kOtherMethodId2            = kOtherMethodIdentifier2};
 
 /*!
@@ -671,6 +673,21 @@ enum StFcsConstants {
     kFcsHcal4x4NCol=5,
     kFcsHcal4x4NRow=9
 };
+
+/** StFtt Enums **/
+enum StFttConstants {
+    kFttHorizontal = 0,
+    kFttVertical = 1,
+    kFttDiagonalH = 2, // diagonal strips on the horizontal chamber
+    kFttDiagonalV = 3, // diagonal strips on the vertical chamber
+    kFttUnknownOrientation = 4,
+    kFttQuadrantA = 0,
+    kFttQuadrantB = 1,
+    kFttQuadrantC = 2,
+    kFttQuadrantD = 3,
+    kFttUnknownQuadrant = 4,
+};
+
 
 enum StRHICfConstants{
     kRHICfNtower=2,     // 0=small, 1=large                                                        

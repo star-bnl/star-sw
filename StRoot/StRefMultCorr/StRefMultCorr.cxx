@@ -1,77 +1,16 @@
-//------------------------------------------------------------------------------
-// $Id: StRefMultCorr.cxx,v 1.6 2021/05/17 09:07:05 tnonaka Exp $
-// $Log: StRefMultCorr.cxx,v $
-// Revision 1.6  2021/05/17 09:07:05  tnonaka
-// Refmult centrality definition for isobaric data
-//
-// Revision 1.5  2020/01/16 23:53:28  tnonaka
-// gRefmult for Run14 and Run16 added
-//
-// Revision 1.4  2019/10/03 15:42:26  tnonaka
-// Some functions for pile-up rejection and trigger inefficiency corrections are added
-//
-// Revision 1.3  2019/07/11 03:31:45  tnonaka
-// Some functions are added/replaced to read header files and to implement Vz dependent centrality definitions for 54.4 GeV RefMult.
-//
-//
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// StRefMultCor package has been moved to StRoot/StRefMultCorr 2019/02
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-//
-// Revision 1.14  2015/05/22 06:52:05  hmasui
-// Add grefmult for Run14 Au+Au 200 GeV
-//
-// Revision 1.13  2013/05/10 18:33:33  hmasui
-// Add TOF tray mult, preliminary update for Run12 U+U
-//
-// Revision 1.12  2012/05/19 00:48:20  hmasui
-// Update refmult3
-//
-// Revision 1.11  2012/05/14 00:40:25  hmasui
-// Exit code if no valid run number found. Fix the initialization of mParameterIndex
-//
-// Revision 1.10  2012/05/09 22:26:46  hmasui
-// Commented out option use in the print() function
-//
-// Revision 1.9  2012/05/08 03:19:49  hmasui
-// Move parameters to Centrality_def_refmult.txt
-//
-// Revision 1.8  2012/04/23 21:29:37  hmasui
-// Added isBadRun() function for outlier rejection, getBeginRun() and getEndRun() to obtain the run range for a given (energy,year)
-//
-// Revision 1.7  2011/11/30 00:25:07  hmasui
-// Additional check for ifstream to avoid reading one extra line from input file
-//
-// Revision 1.6  2011/11/08 19:11:05  hmasui
-// Add luminosity corrections for 200 GeV
-//
-// Revision 1.5  2011/10/11 19:35:20  hmasui
-// Fix typo. Add z-vertex check in getWeight() function
-//
-// Revision 1.4  2011/10/10 21:30:37  hmasui
-// Replaced hard coded parameters for z-vertex and weight corrections by input parameters from text file
-//
-//
-// Revision 1.3  2011/08/12 20:28:07  hmasui
-// Avoid varying corrected refmult in the same event by random number
-//
-// Revision 1.2  2011/08/11 23:51:10  hmasui
-// Suppress cout in the setParameterIndex function. Use TError for error messages.
-//
-// Revision 1.1  2011/08/11 18:38:28  hmasui
-// First version of Refmult correction class
-//
-//------------------------------------------------------------------------------
-
+// C++ headers
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <limits>
 
+// StRefMultCorr headers
 #include "StRefMultCorr.h"
 #include "StBadRunChecker.h"
+
 #include "TError.h"
 #include "TRandom.h"
 #include "TMath.h"
@@ -80,21 +19,22 @@
 
 ClassImp(StRefMultCorr)
 
-using namespace std ;
-
 namespace {
-  typedef pair<Double_t, Int_t> keys;
+  typedef std::pair<Double_t, Int_t> keys;
 }
 
-//______________________________________________________________________________
+//_________________
 // Default constructor
-StRefMultCorr::StRefMultCorr(const TString name, const TString subname, const TString libname)
-: mName(name), mSubName(subname), mLibName(libname) {
+StRefMultCorr::StRefMultCorr(const TString name, const TString subname,
+                             const TString libname) : 
+                             mName(name), mSubName(subname), mLibName(libname) {
   mRefMult = 0 ;
   mVz = -9999. ;
-  mRefMult_corr = -1.0 ;
+  mRefMult_corr = -1.0;
+  mIsRu = false;
+  mIsZr = false;
 
-  cout << mSubName.Data() <<"  "<< mLibName.Data() << endl;
+  std::cout << mSubName.Data() <<"  "<< mLibName.Data() << std::endl;
 
   // Clear all data members
   clear() ;
@@ -103,11 +43,12 @@ StRefMultCorr::StRefMultCorr(const TString name, const TString subname, const TS
   readBadRunsFromHeaderFile() ;
 }
 
-//______________________________________________________________________________
+//_________________
 // Default destructor
 StRefMultCorr::~StRefMultCorr() {
   /* empty */
 }
+
 
 //check bad runs based on sub-systems 
 void StRefMultCorr::initBadRunChecker(TString Run,TString CollisionMode,TString RunEnergy,TString Species){
@@ -155,40 +96,41 @@ Bool_t StRefMultCorr::isBadRunAnalysis(const Int_t RunId){
 }
 
 //______________________________________________________________________________
+
 Int_t StRefMultCorr::getBeginRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 
   // Make sure key exists
-  multimap<keys, Int_t>::iterator iterCheck = mBeginRun.find(key);
+  std::multimap<keys, Int_t>::iterator iterCheck = mBeginRun.find(key);
   if ( iterCheck == mBeginRun.end() ) {
     Error("StRefMultCorr::getBeginRun", "can't find energy = %1.1f, year = %d", energy, year);
     return -1;
   }
 
-  pair<multimap<keys, Int_t>::iterator, multimap<keys, Int_t>::iterator> iterRange = mBeginRun.equal_range(key);
+  std::pair<std::multimap<keys, Int_t>::iterator, std::multimap<keys, Int_t>::iterator> iterRange = mBeginRun.equal_range(key);
 
   return (*(iterRange.first)).second ;
 }
 
-//______________________________________________________________________________
+//________________
 Int_t StRefMultCorr::getEndRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 
   // Make sure key exists
-  multimap<keys, Int_t>::iterator iterCheck = mEndRun.find(key);
-  if ( iterCheck == mEndRun.end() ) {
+  std::multimap<keys, Int_t>::iterator iterCheck = mEndRun.find(key);
+  if (iterCheck == mEndRun.end()) {
     Error("StRefMultCorr::getEndRun", "can't find energy = %1.1f, year = %d", energy, year);
     return -1;
   }
 
-  pair<multimap<keys, Int_t>::iterator, multimap<keys, Int_t>::iterator> iterRange = mEndRun.equal_range(key);
-  multimap<keys, Int_t>::iterator iter = iterRange.second ;
+  std::pair<std::multimap<keys, Int_t>::iterator, std::multimap<keys, Int_t>::iterator> iterRange = mEndRun.equal_range(key);
+  std::multimap<keys, Int_t>::iterator iter = iterRange.second;
   iter--;
 
-  return (*iter).second ;
+  return (*iter).second;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::clear() {
   // Clear all arrays, and set parameter index = -1
 
@@ -226,22 +168,23 @@ void StRefMultCorr::clear() {
   mgRefMultTriggerCorrDiffVzScaleRatio.clear() ;
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isBadRun(const Int_t RunId) {
   // Return true if a given run id is bad run
-  vector<Int_t>::iterator iter = std::find(mBadRun.begin(), mBadRun.end(), RunId);
+  std::vector<Int_t>::iterator iter = std::find(mBadRun.begin(), mBadRun.end(), RunId);
 #if 0
   if ( iter != mBadRun.end() ) {
     // QA
-    cout << "StRefMultCorr::isBadRun  Find bad run = " << (*iter) << endl;
+    std::cout << "StRefMultCorr::isBadRun  Find bad run = " << (*iter) << std::endl;
   }
 #endif
 
   return ( iter != mBadRun.end() ) ;
 }
 
-//______________________________________________________________________________
-void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate) {
+//_________________
+void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z, 
+                              const Double_t zdcCoincidenceRate) {
   // Set refmult, vz and corrected refmult if current (refmult,vz) are different from inputs
   // User must call this function event-by-event before 
   // calling any other public functions
@@ -253,45 +196,51 @@ void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z, const Do
   }
 }
 
-//______________________________________________________________________________
-Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch) {
-  if( mParameterIndex>=30 && mParameterIndex<=35 ) { //Run18 27 GeV MB, cut curve parameters are from fit
+//_________________
+Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, 
+                                              Double_t vz /* default = 0*/) const {
+
+  Double_t a0{}, a1{}, a2{}, a3{}, a4{};
+  Double_t b0{}, b1{}, b2{}, b3{}, b4{};
+  Double_t c0{}, c1{}, c2{}, c3{}, c4{};
+  Double_t refmultcutmax{};
+  Double_t refmultcutmin{};
+
+  Bool_t notPileUp = kFALSE;
+
+
+  if( mParameterIndex>=30 && mParameterIndex<=35 ) { // Au+Au 27 GeV 2018
     const Double_t min = 4.0;
     const Double_t max = 5.0;
 
     if(ntofmatch<=2)  return false;
 
-    const double a0 = -0.704787625248525;
-    const double a1 = 0.99026234637141;
-    const double a2 = -0.000680713101607504;
-    const double a3 = 2.77035215460421e-06;
-    const double a4 = -4.04096185674966e-09;
-    const double b0 = 2.52126730672253;
-    const double b1 = 0.128066911940844;
-    const double b2 = -0.000538959206681944;
-    const double b3 = 1.21531743671716e-06;
-    const double b4 = -1.01886685404478e-09;
-    const double c0 = 4.79427731664144;
-    const double c1 = 0.187601372159186;
-    const double c2 = -0.000849856673886957;
-    const double c3 = 1.9359155975421e-06;
-    const double c4 = -1.61214724626684e-09;
+    a0 = -0.704787625248525;
+    a1 = 0.99026234637141;
+    a2 = -0.000680713101607504;
+    a3 = 2.77035215460421e-06;
+    a4 = -4.04096185674966e-09;
+    b0 = 2.52126730672253;
+    b1 = 0.128066911940844;
+    b2 = -0.000538959206681944;
+    b3 = 1.21531743671716e-06;
+    b4 = -1.01886685404478e-09;
+    c0 = 4.79427731664144;
+    c1 = 0.187601372159186;
+    c2 = -0.000849856673886957;
+    c3 = 1.9359155975421e-06;
+    c4 = -1.61214724626684e-09;
 
     double refmultCenter = a0+a1*(ntofmatch)+a2*pow(ntofmatch,2)+a3*pow(ntofmatch,3)+a4*pow(ntofmatch,4);
-    double refmultLower  = b0+b1*(ntofmatch)+b2*pow(ntofmatch,2)+b3*pow(ntofmatch,3)+b4*pow(ntofmatch,4);
-    double refmultUpper  = c0+c1*(ntofmatch)+c2*pow(ntofmatch,2)+c3*pow(ntofmatch,3)+c4*pow(ntofmatch,4);
+    double refmultLower  = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    double refmultUpper  = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
 
-    double refmultCutMin = refmultCenter - min*refmultLower;
-    double refmultCutMax = refmultCenter + max*refmultUpper;
-
-    if( refmult>refmultCutMax || refmult<refmultCutMin ) return false;
-
-    return true;
+    refmultcutmin = refmultCenter - min*refmultLower;
+    refmultcutmax = refmultCenter + max*refmultUpper;
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
-  else if( mParameterIndex>=36 && mParameterIndex<=37 ) { //Run18 200 GeV isobar 
+  else if( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobars 200 GeV 2018
 
-    double b0, b1, b2, b3, b4;
-    double c0, c1, c2, c3, c4;
     // Zr+Zr
     if(mParameterIndex==36) {
       b0=13.5244327901538;
@@ -318,26 +267,110 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       c3=-4.68933832723005e-06;
       c4=4.4151761900593e-09;
     }
-    double refmultcutmax = ( b0 + b1*(ntofmatch) + b2*pow(ntofmatch,2) + b3*pow(ntofmatch,3) + b4*pow(ntofmatch,4) );
-    double refmultcutmin = ( c0 + c1*(ntofmatch) + c2*pow(ntofmatch,2) + c3*pow(ntofmatch,3) + c4*pow(ntofmatch,4) );
-    return ( refmult<refmultcutmax && refmult>refmultcutmin );
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+  }
+  else if ( mParameterIndex==38 ) { // Au+Au 19.6 GeV 2019
+
+    if ( -145. <= vz && vz < -87. ) {
+      b0=33.7732676854599;
+      b1=1.75937881368933;
+      b2=-0.00285868075552296;
+      b3=8.50344260510873e-06;
+      b4=-1.19215380537174e-08;
+      c0=-22.7060232139884;
+      c1=0.863809402986806;
+      c2=-0.000368119767293671;
+      c3=5.97122714011036e-06;
+      c4=-1.27438638584224e-08;
+    }
+    else if ( -87. <= vz && vz < -29. ) {
+      b0=20.5875336291458;
+      b1=1.67371122493626;
+      b2=-0.00307534477962496;
+      b3=7.93755518827246e-06;
+      b4=-8.46257293600085e-09;
+      c0=-15.5923736275086;
+      c1=0.604206551537668;
+      c2=0.00131805594121643;
+      c3=-2.04753779335401e-06;
+      c4=5.73181898751325e-10;
+    }
+    else if ( -29. <= vz && vz < 29. ) {
+      b0=15.1015102672534;
+      b1=1.53929151189229;
+      b2=-0.00269203062814483;
+      b3=6.488759952638e-06;
+      b4=-6.06073586314757e-09;
+      c0=-13.1157864223955;
+      c1=0.504707692972168;
+      c2=0.00187997948645203;
+      c3=-4.7317012773039e-06;
+      c4=4.8234194091071e-09;
+    }
+    else if ( 29. <= vz && vz < 87. ) {
+      b0=20.7718852504153;
+      b1=1.67316129891511;
+      b2=-0.00315093393202473;
+      b3=8.35823870487966e-06;
+      b4=-9.14822467807924e-09;
+      c0=-15.9411138444366;
+      c1=0.61506063963685;
+      c2=0.0011824174541949;
+      c3=-1.48902496972716e-06;
+      c4=-2.29371463231934e-10;
+    }
+    else if ( 87. <= vz && vz <= 145. ) {
+      b0=33.4926150575549;
+      b1=1.79372677959986;
+      b2=-0.00319461487211403;
+      b3=9.56612691680003e-06;
+      b4=-1.31049413530369e-08;;
+      c0=-22.4679773305418;
+      c1=0.83906220918966;
+      c2=-0.000106213494253586;
+      c3=4.93946486222714e-06;
+      c4=-1.1450298089717e-08;
+    }
+
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+  }
+  else if ( mParameterIndex==39 ) { // Au+Au 14.6 GeV 2019
+      b0 =  36.4811873257854;
+      b1 =  1.96363692967013;
+      b2 = -0.00491528146300182;
+      b3 =  1.45179464078414e-05;;
+      b4 = -1.82634741809226e-08;
+      c0 = -16.176117733536;;
+      c1 =  0.780745107634961;
+      c2 = -2.03347057620351e-05;
+      c3 =  3.80646723724747e-06;
+      c4 = -9.43403282145648e-09;
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
   else {
-    return true;
+    notPileUp = kTRUE;
   }
+
+  return notPileUp;
 }
 
-
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isIndexOk() const {
   // mParameterIndex not initialized (-1)
   if ( mParameterIndex == -1 ) {
     Error("StRefMultCorr::isIndexOk", "mParameterIndex = -1. Call init(const Int_t RunId) function to initialize centrality bins, corrections");
     Error("StRefMultCorr::isIndexOk", "mParameterIndex = -1. or use valid run numbers defined in Centrality_def_%s.txt", mName.Data());
     Error("StRefMultCorr::isIndexOk", "mParameterIndex = -1. exit");
-    cout << endl;
+    std::cout << std::endl;
     // Stop the process if invalid run number found
-    exit(0);
+    // exit(0);
+    return kFALSE;
   }
 
   // Out of bounds
@@ -351,23 +384,24 @@ Bool_t StRefMultCorr::isIndexOk() const {
   return kTRUE ;
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isZvertexOk() const {
   // Primary z-vertex check
-  return ( mVz > mStart_zvertex[mParameterIndex] && mVz < mStop_zvertex[mParameterIndex] ) ;
+  return (mVz > mStart_zvertex[mParameterIndex] &&
+          mVz < mStop_zvertex[mParameterIndex]);
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isRefMultOk() const {
   // Invalid index
   if ( !isIndexOk() ) return kFALSE ;
 
   // select 0-80%
-  return ( mRefMult_corr > mCentrality_bins[0][mParameterIndex] && 
-	   mRefMult_corr < mCentrality_bins[mNCentrality][mParameterIndex] );
+  return (mRefMult_corr > mCentrality_bins[0][mParameterIndex] &&
+          mRefMult_corr < mCentrality_bins[mNCentrality][mParameterIndex]);
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isCentralityOk(const Int_t icent) const {
   // Invalid centrality id
   if ( icent < -1 || icent >= mNCentrality+1 ) return kFALSE ;
@@ -386,15 +420,15 @@ Bool_t StRefMultCorr::isCentralityOk(const Int_t icent) const {
 			mRefMult_corr <= mCentrality_bins[icent+1][mParameterIndex] );
   //  if(isOK)
   //  {
-  //    cout << "StRefMultCorr::isCentralityOk  refmultcorr = " << mRefMult_corr
+  //    std::cout << "StRefMultCorr::isCentralityOk  refmultcorr = " << mRefMult_corr
   //      << "  min. bin = " << mCentrality_bins[icent][mParameterIndex]
   //      << "  max. bin = " << mCentrality_bins[icent+1][mParameterIndex]
-  //      << endl;
+  //      << std::endl;
   //  }
   return isOK ;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::init(const Int_t RunId) {
   // Reset mParameterIndex
   mParameterIndex = -1 ;
@@ -403,13 +437,13 @@ void StRefMultCorr::init(const Int_t RunId) {
   setParameterIndex(RunId) ;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::setParameterIndex(const Int_t RunId) {
   // Determine the corresponding parameter set for the input RunId
   for(UInt_t npar = 0; npar < mStart_runId.size(); npar++) {
     if(RunId >= mStart_runId[npar] && RunId <= mStop_runId[npar]) {
       mParameterIndex = npar ;
-      //      cout << "StRefMultCorr::setParameterIndex  Parameter set = " << mParameterIndex << " for RUN " << RunId << endl;
+      //      std::cout << "StRefMultCorr::setParameterIndex  Parameter set = " << mParameterIndex << " for RUN " << RunId << std::endl;
       break ;
     }
   }
@@ -421,66 +455,66 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId) {
   if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) { 
     if ( mSubName.CompareTo("Run14_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 ) {
       if(RunId/1000000==15 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 ) {
-	mParameterIndex = 0;
-	if(mVzEdgeForWeight.empty()) { 
-	  setVzForWeight( nWeightVzBin_Run14_P16id, 
-			  WeightVzEdgeMin_Run14_P16id,
-			  WeightVzEdgeMax_Run14_P16id );
-	}
-	if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()){ 
-	  readScaleForWeight( nWeightgRefmultBin_Run14_P16id, 
-			      weight_VpdMB5ToVpdMB30_Run14_P16id );
-	}
-      }
-    }
+        mParameterIndex = 0;
+        if (mVzEdgeForWeight.empty()) {
+          setVzForWeight(nWeightVzBin_Run14_P16id,
+                         WeightVzEdgeMin_Run14_P16id,
+                         WeightVzEdgeMax_Run14_P16id);
+        }
+        if (mgRefMultTriggerCorrDiffVzScaleRatio.empty()) {
+          readScaleForWeight(nWeightgRefmultBin_Run14_P16id,
+                             weight_VpdMB5ToVpdMB30_Run14_P16id);
+        }
+      } // if(RunId/1000000==15 && mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0 )
+    } // if ( mSubName.CompareTo("Run14_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 )
     else if ( mSubName.CompareTo("Run16_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 ) {
       if(mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0) {
-	// prod.1
-	if(RunId/1000>=17039&&RunId/1000<=17130) {
-	  mParameterIndex = 4;
-	  if( mVzEdgeForWeight.empty() ) {
-	    setVzForWeight( nWeightVzBin_Run16_P16ij_prod1, 
-			    WeightVzEdgeMin_Run16_P16ij_prod1,
-			    WeightVzEdgeMax_Run16_P16ij_prod1 );
-	  }
-	  if( mgRefMultTriggerCorrDiffVzScaleRatio.empty() ) {
-	    readScaleForWeight( nWeightgRefmultBin_Run16_P16ij_prod1, 
-				weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod1 );
-	  }
-	}
-	// prod.2
-	else if( RunId/1000 >= 17169 && RunId/1000 <= 17179 ) {
-	  mParameterIndex = 5;
-	  if(mVzEdgeForWeight.empty()) {
-	    setVzForWeight( nWeightVzBin_Run16_P16ij_prod2, 
-			    WeightVzEdgeMin_Run16_P16ij_prod2,
-			    WeightVzEdgeMax_Run16_P16ij_prod2 );
-	  }
-	  if(mgRefMultTriggerCorrDiffVzScaleRatio.empty()) {
-	    readScaleForWeight( nWeightgRefmultBin_Run16_P16ij_prod2, 
-				weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod2 );
-	  }
-	}
-      }
-    }
+        // prod.1
+        if (RunId / 1000 >= 17039 && RunId / 1000 <= 17130) {
+          mParameterIndex = 4;
+          if (mVzEdgeForWeight.empty()) {
+            setVzForWeight(nWeightVzBin_Run16_P16ij_prod1,
+                           WeightVzEdgeMin_Run16_P16ij_prod1,
+                           WeightVzEdgeMax_Run16_P16ij_prod1);
+          }
+          if (mgRefMultTriggerCorrDiffVzScaleRatio.empty()) {
+            readScaleForWeight(nWeightgRefmultBin_Run16_P16ij_prod1,
+                               weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod1);
+          }
+        } // if (RunId / 1000 >= 17039 && RunId / 1000 <= 17130)
+        // prod.2
+        else if (RunId / 1000 >= 17169 && RunId / 1000 <= 17179) {
+          mParameterIndex = 5;
+          if (mVzEdgeForWeight.empty()) {
+            setVzForWeight(nWeightVzBin_Run16_P16ij_prod2,
+                           WeightVzEdgeMin_Run16_P16ij_prod2,
+                           WeightVzEdgeMax_Run16_P16ij_prod2);
+          }
+          if (mgRefMultTriggerCorrDiffVzScaleRatio.empty()) {
+            readScaleForWeight(nWeightgRefmultBin_Run16_P16ij_prod2,
+                               weight_VpdMB5ToVpdMBnoVtx_Run16_P16ij_prod2);
+          }
+        } // else if (RunId / 1000 >= 17169 && RunId / 1000 <= 17179)
+      } // if(mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0)
+    } // else if ( mSubName.CompareTo("Run16_AuAu200_VpdMB5", TString::kIgnoreCase) == 0 )
     else if ( mSubName.CompareTo("Run14_AuAu200_VpdMB30", TString::kIgnoreCase) == 0 ) {
-      if(mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0) {
-	mParameterIndex = 1;
+      if (mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0) {
+        mParameterIndex = 1;
       }
     }
     else if ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_LowMid", TString::kIgnoreCase) == 0 ) {
       if(mLibName.CompareTo("P16id", TString::kIgnoreCase) == 0) {
-	mParameterIndex = 2;
+        mParameterIndex = 2;
       }
     }
     else if ( mSubName.CompareTo("Run14_AuAu200_VpdMBnoVtx_High", TString::kIgnoreCase) == 0 ) {
       if(mLibName.CompareTo("P15ic", TString::kIgnoreCase) == 0) {
-	mParameterIndex = 3;
+        mParameterIndex = 3;
       }
     }
     else if ( mSubName.CompareTo("Run16_AuAu200_VpdMBnoVtx", TString::kIgnoreCase) == 0 ) {
       if(mLibName.CompareTo("P16ij", TString::kIgnoreCase) == 0) {
-	mParameterIndex = 6;
+        mParameterIndex = 6;
       }
     }
     else{
@@ -491,73 +525,67 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId) {
   // Run numbers for isobar data are not successive
   if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 &&
        mSubName.CompareTo("Isobar", TString::kIgnoreCase) == 0 ) {
-    //	cout <<"This is isobaric runs"<< endl;
-    IsZr = IsRu = kFALSE;
-    for(Int_t i=0; i<nRunId_Zr; i++) {
-      if(RunId==IsobarRunId_Zr[i]) {
-	IsZr = kTRUE; 
-	mParameterIndex = 36;
-	//	cout <<"--> Zr+Zr"<< endl;
-	break;
+
+    //	std::cout <<"This is isobaric runs"<< std::endl;
+    mIsZr = mIsRu = kFALSE;
+    for (Int_t i = 0; i < nRunId_Zr; i++) {
+      if (RunId == IsobarRunId_Zr[i]) {
+        mIsZr = kTRUE;
+        mParameterIndex = 36;
+        //	std::cout <<"--> Zr+Zr"<< std::endl;
+        break;
       }
     }
-    for(Int_t i=0; i<nRunId_Ru; i++) {
-      if(RunId==IsobarRunId_Ru[i]) {
-	IsRu = kTRUE; 
-	mParameterIndex = 37;
-	//	cout <<"--> Ru+Ru"<< endl;
-	break;
+    for (Int_t i = 0; i < nRunId_Ru; i++) {
+      if (RunId == IsobarRunId_Ru[i]) {
+        mIsRu = kTRUE;
+        mParameterIndex = 37;
+        //	std::cout <<"--> Ru+Ru"<< std::endl;
+        break;
       }
     }
-    if(!IsZr && !IsRu) {
+    if(!mIsZr && !mIsRu) {
       Error("StRefMultCorr::setParameterIndex", "RUN %d is not isobaric data", RunId);
     }
   }
 
-  //	cout <<"mParameterIndex = "<< mParameterIndex << endl;
+  //	std::cout <<"mParameterIndex = "<< mParameterIndex << std::endl;
 
   if(mParameterIndex == -1) {
     Error("StRefMultCorr::setParameterIndex", "Parameter set does not exist for RUN %d", RunId);
   }
-  //else cout << "Parameter set = " << npar_set << endl;
+  //else std::cout << "Parameter set = " << npar_set << std::endl;
 
   return mParameterIndex ;
 }
 
-//______________________________________________________________________________
+//_________________
 Double_t StRefMultCorr::getRefMultCorr() const {
   // Call initEvent() first
   return mRefMult_corr ;
 }
 
-//______________________________________________________________________________
-Double_t StRefMultCorr::getRefMultCorr(const UShort_t RefMult, 
-				       const Double_t z,
-				       const Double_t zdcCoincidenceRate, 
-				       const UInt_t flag
-				       ) const {
-  // Apply correction if parameter index & z-vertex are ok
-  if (!isIndexOk() || !isZvertexOk()) return RefMult ;
+//________________
+Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) const {
 
-  // Correction function for RefMult, takes into account z_vertex dependence
-
-  // Luminosity corrections
+  Double_t lumiCorr = 1.;
+  
   // 200 GeV only. correction = 1 for all the other energies for BES-I
   // the above statement may not true for BES-II, since the luminosity is much higher than BES-I, add by Zaochen
   // better to check the <Refmult> vs ZDCX to see whether they are flat or not, add by Zaochen
   const Double_t par0_lum = mPar_luminosity[0][mParameterIndex] ;
   const Double_t par1_lum = mPar_luminosity[1][mParameterIndex] ;
-  Double_t correction_luminosity;
+  
   if( mParameterIndex>=36 && mParameterIndex<=37 ) {
-    // if(mYear[mParameterIndex] == 2018 && IsZr) zdcmean = 96.9914;
-    // if(mYear[mParameterIndex] == 2018 && IsRu) zdcmean = 97.9927;
+    // if(mYear[mParameterIndex] == 2018 && mIsZr) zdcmean = 96.9914;
+    // if(mYear[mParameterIndex] == 2018 && mIsRu) zdcmean = 97.9927;
     Double_t b_prime = 1.;
     if(mParameterIndex==36) b_prime = 96.9914; // Zr
     if(mParameterIndex==37) b_prime = 97.9927; // Ru
-    correction_luminosity = (par0_lum==0.000) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
+    lumiCorr = (par0_lum<std::numeric_limits<double>::epsilon() ) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
   }
   else {
-    correction_luminosity = (par0_lum==0.000) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+    lumiCorr = (par0_lum < std::numeric_limits<double>::epsilon() ) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
   }
 
   // from Run14, P16id, for VpdMB5/VPDMB30/VPDMB-noVtx, use refMult at ZdcX=30, other is at ZdcX=0;  
@@ -573,56 +601,95 @@ Double_t StRefMultCorr::getRefMultCorr(const UShort_t RefMult,
     float zdcmean = 0;
     if(mYear[mParameterIndex] == 2014) zdcmean = 30.;
     if(mYear[mParameterIndex] == 2016) zdcmean = 50.;
-    correction_luminosity = (par0_lum==0.0) ? correction_luminosity : correction_luminosity*(par0_lum+par1_lum*zdcmean)/par0_lum; 
+    lumiCorr = (par0_lum==0.0) ? lumiCorr : lumiCorr*(par0_lum+par1_lum*zdcmean)/par0_lum; 
   }
 
-  // par0 to par5 define the parameters of a polynomial to parametrize z_vertex dependence of RefMult
-  const Double_t par0 = mPar_z_vertex[0][mParameterIndex];
-  const Double_t par1 = mPar_z_vertex[1][mParameterIndex];
-  const Double_t par2 = mPar_z_vertex[2][mParameterIndex];
-  const Double_t par3 = mPar_z_vertex[3][mParameterIndex];
-  const Double_t par4 = mPar_z_vertex[4][mParameterIndex];
-  const Double_t par5 = mPar_z_vertex[5][mParameterIndex];
-  const Double_t par6 = mPar_z_vertex[6][mParameterIndex];
-  const Double_t par7 = mPar_z_vertex[7][mParameterIndex]; // this parameter is usually 0, it takes care for an additional efficiency, usually difference between phase A and phase B parameter 0
-
-  const Double_t  RefMult_ref = par0; // Reference mean RefMult at z=0
-  const Double_t  RefMult_z   = par0 + par1*z + par2*z*z + par3*z*z*z + par4*z*z*z*z + par5*z*z*z*z*z + par6*z*z*z*z*z*z; // Parametrization of mean RefMult vs. z_vertex position
-  Double_t  Corr_z = 1.0; // Correction factor for RefMult, takes into account z_vertex dependence
-
-  if(RefMult_z > 0.0) {
-    Corr_z = (RefMult_ref + par7)/RefMult_z;
-  }
-
-  // random sampling over bin width -> avoid peak structures in corrected distribution
-  Double_t RefMult_d     = -9999.;
-  if( mParameterIndex>=30 && mParameterIndex<=35 ) {
-    RefMult_d = (Double_t)(RefMult)+gRandom->Rndm()-0.5;
-  }
-  else if( mParameterIndex>=36 && mParameterIndex<=37 ) {
-    RefMult_d = (Double_t)(RefMult)-0.5+gRandom->Rndm();
-  }
-  else {
-    RefMult_d = (Double_t)(RefMult)+gRandom->Rndm();
-  }
-
-	
-  Double_t RefMult_corr  = -9999. ;
-  switch ( flag ) {
-  case 0: return RefMult_d * correction_luminosity;
-  case 1: return RefMult_d * Corr_z;
-  case 2: return RefMult_d * Corr_z * correction_luminosity;
-  default: {
-    Error("StRefMultCorr::getRefMultCorr", "invalid flag, flag=%d, should be 0,1 or 2", flag);
-    return -9999.;
-  }
-  } // switch ( flag )
-  return RefMult_corr ;
+  return lumiCorr;
 }
 
-//______________________________________________________________________________
+//________________
+Double_t StRefMultCorr::vzCorrection(Double_t z) const {
+
+  Double_t vzCorr = 1.;
+  if ( mParameterIndex < 38 ) { 
+    // Old correction based on the 6th-order polynomial fit of the high-end point 
+    // fit of refMult for the given Vz range
+
+    // par0 to par5 define the parameters of a polynomial to parametrize z_vertex dependence of RefMult
+    const Double_t par0 = mPar_z_vertex[0][mParameterIndex];
+    const Double_t par1 = mPar_z_vertex[1][mParameterIndex];
+    const Double_t par2 = mPar_z_vertex[2][mParameterIndex];
+    const Double_t par3 = mPar_z_vertex[3][mParameterIndex];
+    const Double_t par4 = mPar_z_vertex[4][mParameterIndex];
+    const Double_t par5 = mPar_z_vertex[5][mParameterIndex];
+    const Double_t par6 = mPar_z_vertex[6][mParameterIndex];
+    // This parameter is usually 0, it takes care for an additional efficiency, 
+    // usually difference between phase A and phase B parameter 0
+    const Double_t par7 = mPar_z_vertex[7][mParameterIndex]; 
+
+    const Double_t  RefMult_ref = par0; // Reference mean RefMult at z=0
+    const Double_t  RefMult_z   = par0 + par1*z + par2*z*z + par3*z*z*z + par4*z*z*z*z + par5*z*z*z*z*z + par6*z*z*z*z*z*z; // Parametrization of mean RefMult vs. z_vertex position
+    if(RefMult_z > 0.0) {
+      vzCorr = (RefMult_ref + par7)/RefMult_z;
+    }
+  }
+  else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV Run 19
+    // New Vz correction. All vz bins bins are normalize to the one at the center
+    vzCorr = auau19_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+  } // else if ( mParameterIndex == 38 )
+  else if ( mParameterIndex == 39 ) {
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau14_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
+
+  return vzCorr;
+}
+
+//________________
+Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
+
+  Double_t refMult_d = -9999.;
+  if( mParameterIndex>=30 && mParameterIndex<=38 ) {
+    refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
+  }
+  else {
+    refMult_d = (Double_t)refMult + gRandom->Rndm();
+  }
+
+  return refMult_d;
+}
+
+//________________
+Double_t StRefMultCorr::getRefMultCorr(const UShort_t refMult,
+                                       const Double_t z,
+                                       const Double_t zdcCoincidenceRate,
+                                       const UInt_t flag) const {
+  
+  // Apply correction if parameter index & z-vertex are ok
+  if (!isIndexOk() || !isZvertexOk()) return refMult ;
+
+  // Correction function for RefMult, takes into account z_vertex dependence
+
+  Double_t lumiCorr = luminosityCorrection(zdcCoincidenceRate);
+  Double_t vzCorr = vzCorrection(z);
+  Double_t refMult_d = sampleRefMult( refMult );
+  Double_t refMultCorr  = -9999. ;
+  switch (flag) {
+  case 0: refMultCorr = refMult_d * lumiCorr; break;
+  case 1: refMultCorr =  refMult_d * vzCorr; break;
+  case 2: refMultCorr = refMult_d * vzCorr * lumiCorr; break;
+  default: {
+    Error("StRefMultCorr::getRefMultCorr", "invalid flag, flag=%d, should be 0, 1 or 2", flag);
+    refMultCorr = -9999.;
+  }
+  } // switch ( flag )
+
+  return refMultCorr;
+}
+
+//_________________
 void StRefMultCorr::readScaleForWeight(const Char_t* input) {
-  ifstream fin(input) ;
+  std::ifstream fin(input) ;
   if(!fin) {
     Error("StRefMultCorr::readScaleForWeight", "can't open %s", input);
     return;
@@ -642,8 +709,7 @@ void StRefMultCorr::readScaleForWeight(const Char_t* input) {
     return;
   }
 
-  cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..."
-       << flush;
+  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..." << std::flush;
 	
   while(fin) {
     Double_t scale[mnVzBinForWeight] ;
@@ -657,12 +723,12 @@ void StRefMultCorr::readScaleForWeight(const Char_t* input) {
       mgRefMultTriggerCorrDiffVzScaleRatio.push_back(scale[i]);
     }
   }
-  cout << " [OK]" << endl;
+  std::cout << " [OK]" << std::endl;
 }
 
 // NEW version to read Vz dependent weights from header
 // Implemented inside StRefMultCorr::setParameterIndex(RunId)
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *weight) {
 
   // Users must set the vz bin size by setVzForWeight() (see below)
@@ -679,8 +745,7 @@ void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *
     return;
   }
 
-  cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..."
-       << flush;
+  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..." << std::flush;
 	
 
   for(Int_t i=0; i<nRefmultbin*mnVzBinForWeight; i++) {
@@ -688,13 +753,13 @@ void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *
   }
 
 
-  cout << " [OK]" << endl;
+  std::cout << " [OK]" << std::endl;
 }
 
 
 // In NEW version, setVzForWeight() is implemented inside StRefMultCorr::setParameterIndex(RunId)
 // It does not need to be called by users.
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max) {
   // Do not allow multiple calls
   if ( !mVzEdgeForWeight.empty() ) {
@@ -713,12 +778,12 @@ void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const D
 	
   // Debug
   for(Int_t i=0; i<mnVzBinForWeight; i++) {
-    cout << i << " " << step << " " << mVzEdgeForWeight[i]
-	 << ", " << mVzEdgeForWeight[i+1] << endl;
+    std::cout << i << " " << step << " " << mVzEdgeForWeight[i]
+	 << ", " << mVzEdgeForWeight[i+1] << std::endl;
   }
 }
 
-//______________________________________________________________________________
+//_________________
 Double_t StRefMultCorr::getScaleForWeight() const {
   // Special scale factor for global refmult in Run14 (Run16)
   // to account for the relative difference of VPDMB5 w.r.t VPDMB30 (VPDMBnoVtx) 
@@ -757,14 +822,18 @@ Double_t StRefMultCorr::getScaleForWeight() const {
   return 1.0/VPD5weight;
 }
 
-//______________________________________________________________________________
+//_________________
 // For Run18 27 GeV
-Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
-  if( mParameterIndex>=30 && mParameterIndex<=35 ) { //Run18 27 GeV MB
+Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
+
+  Double_t weight = 1.;
+  Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
+
+  if ( mParameterIndex>=30 && mParameterIndex<=35 ) { // Run18 27 GeV MB
+
     if(mRefMult_corr>=500.) return 1.0; // almost no Refmult>500 for this collision energy
 		
     Int_t iRunPdIndex = mParameterIndex-30;
-    Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
     Int_t iRefmultBin = (Int_t)(mRefMult_corr/2.); //find the refmult bin matching to the Parameter bin, if binWidth=2
     //Int_t iRefmultBin = (Int_t)(mRefMult_corr);  //find the refmult bin matching to the Parameter bin, if binWidth=1
 		
@@ -774,18 +843,18 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
     //----------------------------------------------------------
     //load the ShapeReweight factors in given RunPd and VzBin
     //----------------------------------------------------------
-    vector<string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(iRunPdIndex,iVzBinIndex),',');
+    std::vector<std::string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(iRunPdIndex,iVzBinIndex),',');
     if( iRefmultBin>=(Int_t)sParam_ShapeWeight.size() ) {
-      cout<<"ERROR: sParam_ShapeWeight is out of ranges!!!!!"<<endl;
+      std::cout<<"ERROR: sParam_ShapeWeight is out of ranges!!!!!"<<std::endl;
       return 1.0;
     }
 	
-    //cout<<"sParam_ShapeWeight.size(): "<<sParam_ShapeWeight.size()<<endl;
-    //for(UInt_t is=0; is<sParam_ShapeWeight.size(); is++) cout<<"sParam_ShapeWeight[is]: "<<sParam_ShapeWeight[is]<<endl;
+    //std::cout<<"sParam_ShapeWeight.size(): "<<sParam_ShapeWeight.size()<<std::endl;
+    //for(UInt_t is=0; is<sParam_ShapeWeight.size(); is++) std::cout<<"sParam_ShapeWeight[is]: "<<sParam_ShapeWeight[is]<<std::endl;
 
     Double_t ShapeReweight = 1.0;
 
-    Double_t tem_ShapeReweight = stod( sParam_ShapeWeight[iRefmultBin] );
+    Double_t tem_ShapeReweight = std::stod( sParam_ShapeWeight[iRefmultBin] );
     //prevent the crazy numbers for the large fluctuations
     if( tem_ShapeReweight<0.1 ) {
       ShapeReweight = 0.1;
@@ -793,104 +862,129 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
     else if(tem_ShapeReweight>10) {
       ShapeReweight = 10.;
     }
-    else if(tem_ShapeReweight>=0.1&&tem_ShapeReweight<=10.) {
+    else if(tem_ShapeReweight>=0.1 && tem_ShapeReweight<=10.) {
       ShapeReweight = tem_ShapeReweight;
     }
 		
-    return (1./ShapeReweight);
-  }
-  else if( mParameterIndex>=36 && mParameterIndex<=37 ) { //Run18 200GeV isobar 
+    weight = 1./ShapeReweight;
 
-    if (mVz>=-9 && mVz<=9) return 1.;
-    Int_t mShapeIndex;
-    if (IsRu)      mShapeIndex=0;
-    else if (IsZr) mShapeIndex=1;
-    Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
-    //retrive shape weight 
-    Double_t weight = 1.;
-    if (iVzBinIndex>=22) {
-      weight = ShapeWeightArray[mShapeIndex][iVzBinIndex-9][TMath::Nint(mRefMult_corr)];
+  } // if ( mParameterIndex>=30 && mParameterIndex<=35 ) { // Run18 27 GeV MB
+  else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
+
+    if (mVz >= -9 && mVz <= 9) {
+      return 1.;
+    }
+
+    Int_t mShapeIndex = 0;
+    if (mIsZr) {
+      mShapeIndex = 1;
+    }
+
+    //retrive shape weight
+    if (iVzBinIndex >= 22) {
+      weight = ShapeWeightArray[mShapeIndex][iVzBinIndex - 9][TMath::Nint(mRefMult_corr)];
     }
     else {
       weight = ShapeWeightArray[mShapeIndex][iVzBinIndex][TMath::Nint(mRefMult_corr)];
     }
     //handle bad weight
-    if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
-    return weight;
-  }
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }                                 // else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
+  else if (mParameterIndex == 38) { // Au+Au 19.6 GeV 2019
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau19_run19_nVzBins) return 1.0;
+
+    weight = auau19_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  } // else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
+  else if (mParameterIndex == 39) { // Au+Au 14.6 GeV 2019
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau14_run19_nVzBins) return 1.0;
+
+    weight = auau14_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  } // else if ( mParameterIndex == 39 ) {  // Au+Au 14.6 GeV 2019
   else {
-    return 1.0;
+    weight = 1.0;
   }
+  return weight;
 }
 
-//______________________________________________________________________________
-Double_t StRefMultCorr::getWeight() { //const
-
-  Double_t Weight = 1.0;
-
-  // Invalid index
-  if( !isIndexOk() )   return Weight ;
-
-  // Invalid z-vertex
-  if( !isZvertexOk() ) return Weight ;
-
-  // 200 GeV Isobar
-  if(mParameterIndex==36||mParameterIndex==37) {
-    return getShapeWeight_SubVz2Center();
-  }
+//________________
+Double_t StRefMultCorr::triggerWeight() const {
+  
+  Double_t weight = 1.;
 
   const Double_t par0 =   mPar_weight[0][mParameterIndex];
   const Double_t par1 =   mPar_weight[1][mParameterIndex];
   const Double_t par2 =   mPar_weight[2][mParameterIndex];
   const Double_t par3 =   mPar_weight[3][mParameterIndex];
   const Double_t par4 =   mPar_weight[4][mParameterIndex];
-  const Double_t A    =   mPar_weight[5][mParameterIndex];
-  const Double_t par6 =   mPar_weight[6][mParameterIndex];//Add by guannan for run14
-  const Double_t par7 =   mPar_weight[7][mParameterIndex];//Add by guannan for run14
+  const Double_t A    =   mPar_weight[5][mParameterIndex]; // Set to 0 if no z-dependent trigger weight is set
+  const Double_t par6 =   mPar_weight[6][mParameterIndex];
+  const Double_t par7 =   mPar_weight[7][mParameterIndex];
 
   // Additional z-vetex dependent correction
   //const Double_t A = ((1.27/1.21))/(30.0*30.0); // Don't ask...
   //const Double_t A = (0.05/0.21)/(30.0*30.0); // Don't ask...
-  //cout<<"--------------------"<<endl;
-  //cout<<"par0: "<<par0<<endl;
-  //cout<<"par1: "<<par1<<endl;
-  //cout<<"par2: "<<par2<<endl;
-  //cout<<"par3: "<<par3<<endl;
-  //cout<<"par4: "<<par4<<endl;
-  //cout<<"--------------------"<<endl;
+
 
   if ( isRefMultOk() // 0-80%
-       && mRefMult_corr < mNormalize_stop[mParameterIndex] // re-weighting only apply up to normalization point
+       && mRefMult_corr < mNormalize_stop[mParameterIndex] // reweighting only apply up to normalization point
        && mRefMult_corr != -(par3/par2)  ) { // avoid denominator = 0 
-    Weight = ( par0 +
-	       par1/(par2*mRefMult_corr + par3) +
-	       par4*(par2*mRefMult_corr + par3) +
-	       par6/TMath::Power(par2*mRefMult_corr+par3 ,2) +
-	       par7*TMath::Power(par2*mRefMult_corr+par3 ,2) ); // Parametrization of MC/data RefMult ratio
-		
-    Weight = Weight + (Weight-1.0)*(A*mVz*mVz); // z-dependent weight correction
+
+    // Parametrization of MC/data RefMult ratio
+    weight = (par0 +
+              par1 / (par2 * mRefMult_corr + par3) +
+              par4 * (par2 * mRefMult_corr + par3) +
+              par6 / TMath::Power(par2 * mRefMult_corr + par3, 2) +
+              par7 * TMath::Power(par2 * mRefMult_corr + par3, 2));
+    /*
+    std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
+              << " par3: " << par3 << " par4: " << par4 << " A: " << A
+              << " par6: " << par6 << " par7: " << par7 << "\n"
+              << "refMultCorr: " << mRefMult_corr << " weight: " << weight << std::endl;
+              */
+
+    weight = weight + (weight-1.0)*(A*mVz*mVz); // z-dependent weight correction
   }
 
+  return weight;
+}
+
+//_________________
+Double_t StRefMultCorr::getWeight() const {
+
+  Double_t Weight = 1.0;
+
+  // Invalid index
+  if( !isIndexOk() )   return Weight ;
+  // Invalid z-vertex
+  if( !isZvertexOk() ) return Weight ;
+
+  // Trigger efficiency
+  Weight = triggerWeight();
 
   //------------for Run14 and Run16----------------
   // Special scale factor for global refmult depending on Vz window
   // for others, scale factor = 1
-  const Double_t scale = getScaleForWeight() ; 
-  Weight *= scale ;
-  //------------for Run14 and Run16----------------
+  Weight *= getScaleForWeight();
 
-  //------------for Run18 27 GeV AuAu---------------
-  const Double_t RefMult_ShapeWeight_SubVz2Center = getShapeWeight_SubVz2Center();
-  //------------for Run18 27 GeV AuAu---------------
-	
-  //cout<<"RefMult_ShapeWeight_SubVz2Center: "<<setprecision(5)<<RefMult_ShapeWeight_SubVz2Center<<endl;
+  // Shape correction
+  Weight *= getShapeWeight_SubVz2Center();
 
-  Weight *= RefMult_ShapeWeight_SubVz2Center;
-
-  return Weight ;
+  return Weight;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin16() const {
   Int_t CentBin16 = -1;
 
@@ -905,16 +999,16 @@ Int_t StRefMultCorr::getCentralityBin16() const {
   // Run17 54.4 GeV, trigid = 580001
   if( mParameterIndex==28&&(mVz<-27||mVz>25) ) {
     CentBin16 = getCentralityBin16VzDep();
-    // if(CentBin16==-1) cout <<"Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr << endl;
-    // if(CentBin16==9999) cout << "Invalide number"<< endl; 
-    // cout <<"Vz dependent centrality definition for Vz<-27 and Vz>25 ... Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr <<" iCent="<< CentBin16 << endl;
+    // if(CentBin16==-1) std::cout <<"Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr << std::endl;
+    // if(CentBin16==9999) std::cout << "Invalide number"<< std::endl; 
+    // std::cout <<"Vz dependent centrality definition for Vz<-27 and Vz>25 ... Vz="<< mVz <<" RefMult="<< mRefMult <<" RefMultCorr="<< mRefMult_corr <<" iCent="<< CentBin16 << std::endl;
   }
 
   // return -1 if CentBin16 = 16 (very large refmult, refmult>5000)
   return ( CentBin16==16 ) ? -1 : CentBin16;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin9() const {
   Int_t CentBin9 = -1;
 
@@ -942,7 +1036,7 @@ Int_t StRefMultCorr::getCentralityBin9() const {
 
   // Vz dependent centrality definition for Vz<-27 and Vz>25
   // Run17 54.4 GeV, trigid = 580001
-  // cout << mParameterIndex << endl;
+  // std::cout << mParameterIndex << std::endl;
   if ( mParameterIndex == 28 && ( mVz<-27 || mVz>25 ) ) {
     CentBin9 = getCentralityBin9VzDep();
   }
@@ -950,7 +1044,7 @@ Int_t StRefMultCorr::getCentralityBin9() const {
   return CentBin9;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
   Int_t iBinVz = -1;
 
@@ -982,51 +1076,33 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
   else if( mParameterIndex>=36 && mParameterIndex<=37 ) { //Run18 200 GeV isobar 
     Double_t VtxZBinDouble = mVz/2. + 17.;
     iBinVz = 0;
-    if(mVz == 25.) iBinVz = 29;
-    else if(mVz == -35.) iBinVz = 0;
-    else iBinVz = TMath::Nint(VtxZBinDouble);
-  }
-  /*
-    else if(mParameterIndex>=36 &&mParameterIndex<=37)//Run18 200 GeV isobar 
-    {
-    if(     mVz>=-35.&&mVz<-33.) iBinVz = 0;
-    else if(mVz>=-33.&&mVz<-31.) iBinVz = 1;
-    else if(mVz>=-31.&&mVz<-29.) iBinVz = 2;
-    else if(mVz>=-29.&&mVz<-27.) iBinVz = 3;
-    else if(mVz>=-27.&&mVz<-25.) iBinVz = 4;
-    else if(mVz>=-25.&&mVz<-23.) iBinVz = 5;
-    else if(mVz>=-23.&&mVz<-21.) iBinVz = 6;
-    else if(mVz>=-21.&&mVz<-19.) iBinVz = 7;
-    else if(mVz>=-19.&&mVz<-17.) iBinVz = 8;
-    else if(mVz>=-17.&&mVz<-15.) iBinVz = 9;
-    else if(mVz>=-15.&&mVz<-13.) iBinVz = 10;
-    else if(mVz>=-13.&&mVz<-11.) iBinVz = 11;
-    else if(mVz>=-11.&&mVz<-9.) iBinVz = 12;
-    else if(mVz>=-9.&&mVz<-7.) iBinVz = 13;
-    else if(mVz>=-7.&&mVz<-5.) iBinVz = 14;
-    else if(mVz>=-5.&&mVz<-3.) iBinVz = 15;
-    else if(mVz>=-3.&&mVz<-1.) iBinVz = 16;
-    else if(mVz>=-1.&&mVz<1.) iBinVz = 17;
-    else if(mVz>=1.&&mVz<3.) iBinVz = 18;
-    else if(mVz>=3.&&mVz<5.) iBinVz = 19;
-    else if(mVz>=5.&&mVz<7.) iBinVz = 20;
-    else if(mVz>=7.&&mVz<9.) iBinVz = 21;
-    else if(mVz>=9.&&mVz<11.) iBinVz = 22;
-    else if(mVz>=11.&&mVz<13.) iBinVz = 23;
-    else if(mVz>=13.&&mVz<15.) iBinVz = 24;
-    else if(mVz>=15.&&mVz<17.) iBinVz = 25;
-    else if(mVz>=17.&&mVz<19.) iBinVz = 26;
-    else if(mVz>=19.&&mVz<21.) iBinVz = 27;
-    else if(mVz>=21.&&mVz<23.) iBinVz = 28;
-    else if(mVz>=23.&&mVz<=25.) iBinVz = 29;
+    if (mVz == 25.) {
+      iBinVz = 29;
     }
-  */
-  else iBinVz = -1;
+    else if (mVz == -35.) {
+      iBinVz = 0;
+    }
+    else {
+      iBinVz = TMath::Nint(VtxZBinDouble);
+    }
+  }
+  else if ( (mParameterIndex == 38) || (mParameterIndex == 39) ) {  // Au+Au 19.6 GeV 2019 || Au+Au 14.6 GeV 2019
+
+    for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ ) { // Utilize same Vz binning: (29 bins, -145., 145.)
+      if ( auau19_run19_vzRangeLimits[iVz][0] <= mVz && mVz < auau19_run19_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 38 )
+  else {
+    iBinVz = -1;
+  }
 	
   return iBinVz;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin9VzDep() const {
   const Int_t vzid = getVzWindowForVzDepCentDef();
   Int_t iCent = 9999;
@@ -1042,19 +1118,19 @@ Int_t StRefMultCorr::getCentralityBin9VzDep() const {
   return ( iCent==9999 ) ? -1 : iCent;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin16VzDep() const {
   const Int_t vzid = getVzWindowForVzDepCentDef();
   Int_t iCent = 9999;
   for(Int_t i=0; i<16; i++) {
-    if(i==15) {
-      if( mRefMult_corr>CentBin16_vzdep[vzid][i] && mRefMult_corr<50000 ) {
-	iCent = i; 
+    if (i == 15) {
+      if (mRefMult_corr > CentBin16_vzdep[vzid][i] && mRefMult_corr < 50000) {
+        iCent = i;
       }
     }
-    else if( mRefMult_corr>CentBin16_vzdep[vzid][i] && 
-	     mRefMult_corr<CentBin16_vzdep[vzid][i+1] ) {
-      iCent = i; 
+    else if (mRefMult_corr > CentBin16_vzdep[vzid][i] &&
+             mRefMult_corr < CentBin16_vzdep[vzid][i + 1]) {
+      iCent = i;
     }
   }
   // 80-100% for icent=-1
@@ -1064,8 +1140,7 @@ Int_t StRefMultCorr::getCentralityBin16VzDep() const {
   return (iCent==9999) ? -1 : iCent;
 }
 
-
-//______________________________________________________________________________
+//_________________
 const Int_t StRefMultCorr::getRefX() const {
   if (      mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) return 0; 
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return 1; 
@@ -1075,7 +1150,7 @@ const Int_t StRefMultCorr::getRefX() const {
   else return 9999;
 }
 
-//______________________________________________________________________________
+//_________________
 const Int_t StRefMultCorr::getNumberOfDatasets() const {
   if (      mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) return nID_gref; 
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return nID_ref1; 
@@ -1085,29 +1160,32 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else return 9999;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readHeaderFile() {
 
-  //vector<string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(1,1),',');
-  //for(int ib=0;ib<sParam_ShapeWeight.size(); ib++) cout<<"sParam_ShapeWeight[i]: "<<sParam_ShapeWeight[ib]<<endl;
+  //std::vector<std::string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(1,1),',');
+  //for(int ib=0;ib<sParam_ShapeWeight.size(); ib++) std::cout<<"sParam_ShapeWeight[i]: "<<sParam_ShapeWeight[ib]<<std::endl;
   
   const Int_t refX = getRefX();
   const Int_t nID =  getNumberOfDatasets();
   
   for(int iID=0; iID<nID; iID++) {
-    //// Year, energy, run numbers, Vz cut
+
+    //
+    // Year, energy, run numbers, Vz cut
+    //
     Int_t year; Double_t energy;
-    vector<string> sParam = StringSplit(getParamX(refX,iID,0),':'); 
+    std::vector<std::string> sParam = StringSplit(getParamX(refX,iID,0),':'); 
     year = stoi(sParam[0]); 
     energy = stoi(sParam[1]); 
-    vector<string> sRuns = StringSplit(sParam[2],',');
+    std::vector<std::string> sRuns = StringSplit(sParam[2],',');
 		
     Int_t startRunId=0, stopRunId=0;
     startRunId = stoi(sRuns[0]); 
     stopRunId = stoi(sRuns[1]); 
 		
     Double_t startZvertex=-9999., stopZvertex=-9999. ;
-    vector<string> sVz = StringSplit(sParam[3],',');
+    std::vector<std::string> sVz = StringSplit(sParam[3],',');
     startZvertex = stod(sVz[0]);
     stopZvertex = stod(sVz[1]);
 
@@ -1119,20 +1197,26 @@ void StRefMultCorr::readHeaderFile() {
     mStart_zvertex.push_back( startZvertex ) ;
     mStop_zvertex.push_back(  stopZvertex ) ;
 
-    //// Centrality definition
-    vector<string> sParamCent = StringSplit(getParamX(refX,iID,1),','); 
+    //
+    // Centrality definition
+    //
+    std::vector<std::string> sParamCent = StringSplit(getParamX(refX,iID,1),','); 
     for(UInt_t i=0; i<sParamCent.size(); i++) {
       mCentrality_bins[i].push_back( stoi(sParamCent[i]) );
     }
     mCentrality_bins[mNCentrality].push_back( 5000 );
 
-    //// Normalization range
+    //
+    // Normalization range
+    //
     Double_t normalize_stop=-1.0 ;
     normalize_stop = stod(getParamX(refX,iID,2)) ;
     mNormalize_stop.push_back( normalize_stop );
 
-    //// Acceptance correction
-    vector<string> sParamVz = StringSplit(getParamX(refX,iID,3),','); 
+    //
+    // Acceptance (vz) correction
+    //
+    std::vector<std::string> sParamVz = StringSplit(getParamX(refX,iID,3),','); 
     for(UInt_t i=0; i<mNPar_z_vertex; i++) {
       Double_t val = -9999.; 
       if(i<sParamVz.size()) val = stod(sParamVz[i]);
@@ -1140,8 +1224,10 @@ void StRefMultCorr::readHeaderFile() {
       mPar_z_vertex[i].push_back( val );
     }
 
-    //// Trigger inefficiency correction
-    vector<string> sParamTrig = StringSplit(getParamX(refX,iID,4),','); 
+    //
+    // Trigger inefficiency correction
+    //
+    std::vector<std::string> sParamTrig = StringSplit(getParamX(refX,iID,4),','); 
     for(UInt_t i=0; i<mNPar_weight; i++) {
       Double_t val = -9999.;
       if(i<sParamTrig.size()) val = stod(sParamTrig[i]);
@@ -1149,8 +1235,10 @@ void StRefMultCorr::readHeaderFile() {
       mPar_weight[i].push_back( val );
     }
 
-    //// Luminosity correction
-    vector<string> sParamLumi = StringSplit(getParamX(refX,iID,5),','); 
+    //
+    // Luminosity correction
+    //
+    std::vector<std::string> sParamLumi = StringSplit(getParamX(refX,iID,5),','); 
     for(UInt_t i=0; i<mNPar_luminosity; i++) {
       Double_t val = -9999.;
       if(i<sParamLumi.size()) val = stod(sParamLumi[i]);
@@ -1158,124 +1246,132 @@ void StRefMultCorr::readHeaderFile() {
       mPar_luminosity[i].push_back( val );
     }
 
-    //	cout << refX <<"  "<< iID <<"/"<< nID << endl;
+    //	std::cout << refX <<"  "<< iID <<"/"<< nID << std::endl;
   }
 
-  cout << "StRefMultCorr::readHeaderFile  [" << mName 
+  std::cout << "StRefMultCorr::readHeaderFile  [" << mName 
        << "] Correction parameters and centrality definitions have been successfully read."
-       << endl;
+       << std::endl;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readBadRunsFromHeaderFile() {
+
+  //
+  // TODO: Modify to read only bad runs associated with the current at least year
+  //
+
   for(Int_t i=0; i<nBadRun_refmult_2010; i++) {
     mBadRun.push_back(badrun_refmult_2010[i]);
   }
-	
-  cout<<"read in nBadRun_refmult_2010: "<<nBadRun_refmult_2010<<endl;
+  std::cout << "read in nBadRun_refmult_2010: " << nBadRun_refmult_2010 << std::endl;
 
   for(Int_t i=0; i<nBadRun_refmult_2011; i++) {
     mBadRun.push_back(badrun_refmult_2011[i]);
   }
-	
-  cout<<"read in nBadRun_refmult_2011: "<<nBadRun_refmult_2011<<endl;
+  std::cout << "read in nBadRun_refmult_2011: " << nBadRun_refmult_2011 << std::endl;
 
   for(Int_t i=0; i<nBadRun_grefmult_2014; i++) {
     mBadRun.push_back(badrun_grefmult_2014[i]);
   }
-	
-  cout<<"read in nBadRun_grefmult_2014: "<<nBadRun_grefmult_2014<<endl;
+  std::cout << "read in nBadRun_grefmult_2014: " << nBadRun_grefmult_2014 << std::endl;
 
   for(Int_t i=0; i<nBadRun_grefmult_2016; i++) {
     mBadRun.push_back(badrun_grefmult_2016[i]);
   }
-	
-  cout<<"read in nBadRun_grefmult_2016: "<<nBadRun_grefmult_2016<<endl;
-	
+  std::cout << "read in nBadRun_grefmult_2016: " << nBadRun_grefmult_2016 << std::endl;
+
   for(Int_t i=0; i<nBadRun_refmult_2017; i++) {
     mBadRun.push_back(badrun_refmult_2017[i]);
   }
-	
-  cout<<"read in nBadRun_refmult_2017: "<<nBadRun_refmult_2017<<endl;
-	
-  for(Int_t i=0; i<nBadRun_refmult_2018; i++) {
+  std::cout << "read in nBadRun_refmult_2017: " << nBadRun_refmult_2017 << std::endl;
+
+  for (Int_t i = 0; i < nBadRun_refmult_2018; i++) {
     mBadRun.push_back(badrun_refmult_2018[i]);
   }
-	
-  cout<<"read in nBadRun_refmult_2018: "<<nBadRun_refmult_2018<<endl;
-	
+  std::cout << "read in nBadRun_refmult_2018: " << nBadRun_refmult_2018 << std::endl;
+
+  for (Int_t i = 0; i < nBadRun_refmult_2019; i++) {
+    mBadRun.push_back(badrun_refmult_2019[i]);
+  }
+  std::cout << "read in nBadRun_refmult_2019: " << nBadRun_refmult_2019 << std::endl;
+
   //// notification only one
   if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) {
-    //cout << "StRefMultCorr::readBadRunsFromHeaderFile  Bad runs for year 2010, 2011 and 2017 have been read." << endl;
-    cout << "StRefMultCorr::readBadRunsFromHeaderFile  Bad runs for year 2010, 2011, 2017 and 2018 have been read." << endl;
+    std::cout << "StRefMultCorr::readBadRunsFromHeaderFile  Bad runs for year 2010, 2011, 2017, 2018 and 2019 have been read." << std::endl;
   }
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::print(const Option_t* option) const {
-  cout << "StRefMultCorr::print  Print input parameters for " 
-       << mName << " ========================================" << endl << endl;
+  std::cout << "StRefMultCorr::print  Print input parameters for " 
+       << mName << " ========================================" << std::endl << std::endl;
   // Option switched off, can be used to specify parameters
   //  const TString opt(option);
   
   //  Int_t input_counter = 0;
   for(UInt_t id=0; id<mStart_runId.size(); id++) {
-    //cout << "Data line = " << input_counter << ", Start_runId = " << Start_runId[input_counter] << ", Stop_runId = " << Stop_runId[input_counter] << endl;
+    //std::cout << "Data line = " << input_counter << ", Start_runId = " << Start_runId[input_counter] << ", Stop_runId = " << Stop_runId[input_counter] << std::endl;
     //    const UInt_t id = mStart_runId.size()-1;
     
     // Removed line break
-    cout << "  Index=" << id;
-    cout << Form(" Run=[%8d, %8d]", mStart_runId[id], mStop_runId[id]);
-    cout << Form(" z-vertex=[%1.1f, %1.1f]", mStart_zvertex[id], mStop_zvertex[id]);
-    cout << ", Normalize_stop=" << mNormalize_stop[id];
-    cout << endl;
+    std::cout << "  Index=" << id;
+    std::cout << Form(" Run=[%8d, %8d]", mStart_runId[id], mStop_runId[id]);
+    std::cout << Form(" z-vertex=[%1.1f, %1.1f]", mStart_zvertex[id], mStop_zvertex[id]);
+    std::cout << ", Normalize_stop=" << mNormalize_stop[id];
+    std::cout << std::endl;
     
     //    if(opt.IsWhitespace()){
     //      continue ;
     //    }
     
-    cout << "Centrality:  ";
+    std::cout << "Centrality:  ";
 		
     for(Int_t i=0;i<mNCentrality;i++) {
-      cout << Form("  >%2d%%", 80-5*i);
+      std::cout << Form("  >%2d%%", 80-5*i);
     }
-    cout << endl;
-    cout << "RefMult:     ";
+    std::cout << std::endl;
+    std::cout << "RefMult:     ";
 		
     for(Int_t i=0;i<mNCentrality;i++) {
-      //      cout << Form("StRefMultCorr::read  Centrality %3d-%3d %%, refmult > %4d", 75-5*i, 80-5*i, mCentrality_bins[i][id]) << endl;
+      //      std::cout << Form("StRefMultCorr::read  Centrality %3d-%3d %%, refmult > %4d", 75-5*i, 80-5*i, mCentrality_bins[i][id]) << std::endl;
       const TString tmp(">");
       const TString centrality = tmp + Form("%d", mCentrality_bins[i][id]);
-      cout << Form("%6s", centrality.Data());
+      std::cout << Form("%6s", centrality.Data());
     }
-    cout << endl;
+    std::cout << std::endl;
 
     for(Int_t i=0;i<mNPar_z_vertex;i++) {
-      cout << "  mPar_z_vertex[" << i << "] = " << mPar_z_vertex[i][id];
+      std::cout << "  mPar_z_vertex[" << i << "] = " << mPar_z_vertex[i][id];
     }
-    cout << endl;
+    std::cout << std::endl;
 		
     for(Int_t i=0;i<mNPar_weight;i++) {
-      cout << "  mPar_weight[" << i << "] = " << mPar_weight[i][id];
+      std::cout << "  mPar_weight[" << i << "] = " << mPar_weight[i][id];
     }
-    cout << endl;
+    std::cout << std::endl;
     
     for(Int_t i=0;i<mNPar_luminosity;i++) {
-      cout << "  mPar_luminosity[" << i << "] = " << mPar_luminosity[i][id];
+      std::cout << "  mPar_luminosity[" << i << "] = " << mPar_luminosity[i][id];
     }
-    cout << endl << endl;
+    std::cout << std::endl << std::endl;
   }
-  cout << "=====================================================================================" << endl;
+  std::cout << "=====================================================================================" << std::endl;
 }
 
-//______________________________________________________________________________
-vector<string> StRefMultCorr::StringSplit( const string str, const char sep ) {
-  vector<string> vstr;
-  stringstream ss(str);
-  string buffer;
+//_________________
+std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, const char sep ) const {
+  std::vector<std::string> vstr;
+  std::stringstream ss(str);
+  std::string buffer;
   while( getline(ss,buffer,sep) ) {
     vstr.push_back(buffer);
   }
   return vstr;
 }
 
+//________________
+Double_t StRefMultCorr::calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Double_t x1, 
+                                          Double_t x2, Double_t x3, Double_t x4) const {
+  return ( x0 + x1*(ntofmatch) + x2*pow(ntofmatch,2) + x3*pow(ntofmatch,3) + x4*pow(ntofmatch,4) );
+}

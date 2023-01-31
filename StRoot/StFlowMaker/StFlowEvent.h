@@ -56,8 +56,8 @@ public:
   TVector2       Q(StFlowSelection*);
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   TVector2       QPart(StFlowSelection*);
-  TVector2       ReCentEPPar(StFlowSelection*, char*); // for ana
-  TVector2       ReCentPar(StFlowSelection*, char*); // for LYZ
+  TVector2       ReCentEPPar(StFlowSelection*, const char*); // for ana
+  TVector2       ReCentPar(StFlowSelection*, const char*); // for LYZ
   TVector2       ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   TVector2       ReCentEP(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Float_t        q(StFlowSelection*);

@@ -1,5 +1,5 @@
 #include "dEdxHist.h"
-Int_t Hists3D::NtotHist = 9;
+Int_t Hists3D::NtotHist = 2;
 Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 		 const Char_t *TitleX, const Char_t *TitleY,
 		 Int_t nXBins, 
@@ -56,6 +56,15 @@ void Hists3D::Fill(Double_t x, Double_t y, Double_t *z) {
   }
 }
 //________________________________________________________________________________
+void Hists3D::FillY(Double_t x, Double_t *y, Double_t *z) {
+  for (Int_t i = 0; i < TMath::Min(2,fNHist); i++) {
+    if (hists[i]) {
+      if (i < 8) ((TH3F *) hists[i])->Fill(x,y[i],z[i]);
+      else       ((TProfile2D *) hists[i])->Fill(x,y[i],z[i]);
+    }
+  }
+}
+//________________________________________________________________________________
 Hists2D::Hists2D(const Char_t *Name) {
   memset(dev, 0, 3*KPidParticles*sizeof(TH2F*));
   TString nameP;
@@ -73,12 +82,12 @@ Hists2D::Hists2D(const Char_t *Name) {
       title.ReplaceAll("-","");
       title += " "; title += ChargeT[sCharge];
       title += " versus log10(p/m)";
-      dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,2000,-5,5);
+      dev[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),320,-2,6,2000,-5,5);
       dev[hyp][sCharge]->SetMarkerColor(hyp+2);
       dev[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
       title += " Unique";
       nameP += "T";
-      devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),280,-1,6,2000,-5,5);
+      devT[hyp][sCharge]  = new TH2F(nameP.Data(),title.Data(),320,-2,6,2000,-5,5);
       devT[hyp][sCharge]->SetMarkerColor(hyp+2);
       devT[hyp][sCharge]->SetXTitle("log_{10}(p/m)");
     }

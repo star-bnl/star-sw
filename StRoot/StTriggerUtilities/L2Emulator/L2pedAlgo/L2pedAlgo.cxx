@@ -141,8 +141,8 @@ L2pedAlgo::initRun(int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 bool
 L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
-		   int bemcIn, ushort *bemcData,
-		   int eemcIn, ushort *eemcData){
+		   int bemcIn, unsigned short *bemcData,
+		   int eemcIn, unsigned short *eemcData){
   // not used: L0trg, inpEveId
   mAccept=true; // it never aborts
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo*/
@@ -210,7 +210,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   hA[11]->fill(kTick/20);
   
   //  printf("jkTick=%d\n",kTick);
-  const ushort maxKT=30000;
+  const unsigned short maxKT=30000;
   out.int0.kTick=  kTick>maxKT ? maxKT : (int)kTick;
   
   unsigned int *outPlace=myTrigData->TrgSum.L2Result+ mResultOffset;

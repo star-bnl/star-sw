@@ -56,8 +56,8 @@ class L2pedAlgo : public  L2VirtualAlgo {
   int  initRun(int runNo,  int *rc_ints, float *rc_floats);
   
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
-	      int bemcIn, ushort *bemcData,
-	      int eemcIn, ushort *eemcData);
+	      int bemcIn, unsigned short *bemcData,
+	      int eemcIn, unsigned short *eemcData);
 
   void finishRun();// at the end of each run
 };

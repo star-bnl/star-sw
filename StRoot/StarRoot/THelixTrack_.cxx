@@ -2660,7 +2660,7 @@ static const int lPads=sizeof(lNams)/sizeof(char*);
 //================================================================================
 
   int nFit = 0,isgn;
-  static uint seed=0;
+  static unsigned int seed=0;
 
 
   for (int ir = 50; ir <= 50; ir +=5) 		{//loop over radius
