@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.145 2018/04/11 19:03:11 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.148 2020/06/11 19:20:37 genevb Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -74,8 +74,14 @@
     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
     $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
     $AFSLIBS .= " -lcmd -lcom_err -laudit " . $AFSDIR . "/lib/afs/util.a";
+
+    $ROOT_VERSION = `root-config --version`;
+    $ROOT_VERSION =~ s/^\s+|\s+$//; # trim
+    $ROOT_VERSION =~ s/\//./;       # dot notation
+    ($ROOT_VERSION_MAJOR, $ROOT_VERSION_MINOR, $ROOT_VERSION_PATCH) = split('\.', $ROOT_VERSION);
+
     if ( !$ROOT )       { $ROOT       = $AFS_RHIC."/star/ROOT"; }
-    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = "2.25.01"; }
+    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = $ROOT_VERSION; }
     if ( !$ROOTSYS )    { $ROOTSYS    = $ROOT . "/" . $ROOT_LEVEL; }
     my $rootlibs = `root-config --nonew --libs`; chomp($rootlibs);
     my @List = ();
@@ -135,7 +141,7 @@
 	$LLIB = "lib";
     }
 
-    if ( ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
+    if ( ( -x "/usr/bin/gfortran" || -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
 	# JL 200908 - give preference to gfortran for now 
 	# JL 201004 - added possibility to revertto g77 by defining USE_G77 but 
 	#             this is at your own risk
@@ -148,12 +154,10 @@
 	}
 
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
-	$FFLAGS    = $G77FLAGS;
-	$FLIBS     = "-lgfortran";
-#	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
-#	if ($FLIBS eq "libgfortran.$SOEXT") {
-#	  $FLIBS    = `$FC $FFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-#	}
+	
+	$FFLAGS    = $G77FLAGS;     # will be overwritten below, ignore
+	$FLIBS     = "-lgfortran -lquadmath";
+
     } else {
 	$G77       = "g77";
 	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -179,8 +183,10 @@
 
     $FCPATH        = "";
     $EXTRA_FCPATH  = "";
+
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
+
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
@@ -191,22 +197,20 @@
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-#    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
- if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
-    $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
-    $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
-    $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
-  } 
+
+    if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
+	$LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
+	$LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
+	$LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
+    } 
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
     $F77LDFLAGS    = $LDFLAGS;
-#    $F77LDFLAGS    = "$XMACHOPT ";#$LDFLAGS;
     $SO            = $CXX;
-#    $SOFLAGS       = "$XMACHOPT";
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1";
+    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
@@ -316,63 +320,61 @@
     # Above was a generic gcc support
     # ============================================================
 
-    # cernlib if not intel WNT
-    if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-	my($packl,$cernl,$kernl,$strip);
+    my($packl,$cernl,$kernl,$strip);
 
-	$strip = "";
+    $strip = "";
 
-	# A small sanity check in case user redefines improperly CERN_ROOT
-	if ( $CERN_ROOT eq "") {
-	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
-		unless ($param::quiet);
-	} elsif ( ! -d "$CERN_ROOT/lib"){
-	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
-		unless ($param::quiet);
-	}
-
-	# now check
-	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
-	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
-	    $packl = "packlib_noshift";
-	    $kernl = "kernlib_noshift";
-	    if (-e "$CERN_ROOT/bin/cernlib_noshift"){
-		$cernl = "$CERN_ROOT/bin/cernlib_noshift";
-	    } else {
-		$cernl = "cernlib";
-	    }
-	} elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
-		  -e "$CERN_ROOT/lib/libkernlib-noshift.a") {
-	    $packl = "packlib-noshift";
-	    $kernl = "kernlib-noshift";
-	    if (-e "$CERN_ROOT/bin/cernlib-noshift"){
-		$cernl = "$CERN_ROOT/bin/cernlib-noshift";
-	    } else {
-		$cernl = "cernlib";
-	    }
-
-	} else {
-	    print "WARNING: using cernlib from the default path\n"
-		unless ($param::quiet);
-#	    $cernl = "cernlib -s";
-	    $cernl = "cernlib";
-	    $packl = "packlib";
-	    $kernl = "kernlib";
-	}
-
-	$CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
-	$CERNLIBS =~ s/packlib\./$packl\./g;
-	$CERNLIBS =~ s/kernlib\./$kernl\./g;
-	$CERNLIBS =~ s/$strip//g     if ($strip ne "");
-	$CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
-
-	chop($CERNLIBS);
-	
-	if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
-	  $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
-	}
-	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
+    # A small sanity check in case user redefines improperly CERN_ROOT
+    if ( $CERN_ROOT eq "") {
+        print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
+        unless ($param::quiet);
+    } elsif ( ! -d "$CERN_ROOT/lib"){
+        print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
+        unless ($param::quiet);
     }
+
+    # now check
+    if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
+         -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
+        $packl = "packlib_noshift";
+        $kernl = "kernlib_noshift";
+        if (-e "$CERN_ROOT/bin/cernlib_noshift"){
+        $cernl = "$CERN_ROOT/bin/cernlib_noshift";
+        } else {
+        $cernl = "cernlib";
+        }
+    } elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
+          -e "$CERN_ROOT/lib/libkernlib-noshift.a") {
+        $packl = "packlib-noshift";
+        $kernl = "kernlib-noshift";
+        if (-e "$CERN_ROOT/bin/cernlib-noshift"){
+        $cernl = "$CERN_ROOT/bin/cernlib-noshift";
+        } else {
+        $cernl = "cernlib";
+        }
+
+    } else {
+        print "WARNING: using cernlib from the default path\n"
+        unless ($param::quiet);
+#        $cernl = "cernlib -s";
+        $cernl = "cernlib";
+        $packl = "packlib";
+        $kernl = "kernlib";
+    }
+
+    $CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
+    $CERNLIBS =~ s/packlib\./$packl\./g;
+    $CERNLIBS =~ s/kernlib\./$kernl\./g;
+    $CERNLIBS =~ s/$strip//g     if ($strip ne "");
+    $CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
+
+    chop($CERNLIBS);
+
+    if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
+      $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
+    }
+    print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
+
     $PLATFORM      = `root-config --platform`; chomp($PLATFORM);
     $ARCH          = `root-config --arch`; chomp($ARCH);
     #  ============================================================
@@ -420,9 +422,6 @@
 	}
 	$FLIBS      .= " -lg2c";
 	$FFLAGS        = "-save";
-#	$F77LIBS      .= " -lg2c";
-#	$FLIBS         = $F77LIBS;
-#	$FFLAGS        = "$XMACHOPT -save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
@@ -442,95 +441,6 @@
 	$EXTRA_LDFLAGS = "";
 	$EXTRA_SOFLAGS = "";
 
-    } elsif (/^alpha_dux/) {
-	#
-	# Trying True64
-	#
-        $ARCOM  = "%AR %ARFLAGS %>  -input %< ; %RANLIB %>";
-#	$PLATFORM      = "alpha";
-#	$ARCH          = "alphaxxx6";
-	$CC            = "cc";
-	$CXX           = "cxx";
-	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "tlocal";
-	$CFLAGS        = "";
-	$FC            = "f77";
-	$FLIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
-	$FFLAGS        = "-old_f77";
-	$FEXTEND       = "-extend_source -shared -warn argument_checking -warn nouninitialize";
-	$NOOPT         = "-O0";
-	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
-	$SYSLIBS       = "-lm";
-	$CLIBS         = "-lm -ltermcap";
-	$LD            = $CXX;
-	$LDFLAGS       = "";
-	$LDEXPORT      = " -Wl,-call_shared -Wl,-expect_unresolved -Wl,\"*\""; #-B symbolic
-        $LDALL         = " -Wl,-all";
-        $LDNONE        = " -Wl,-none";
-	$F77LD         = $LD;
-	$SO            = $CXX;
-	$SOFLAGS       = "-shared -nocxxstd -Wl,-expect_unresolved,*,-msym,-soname,";
-	$OSFID        .= " ST_NO_NAMESPACES";
-
-	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
-	$EXTRA_CFLAGS  = "";
-	$EXTRA_CPPFLAGS= "";
-	$EXTRA_LDFLAGS = "";
-	$EXTRA_SOFLAGS = "";
-
-    } elsif (/^sun4x_/) {
-	#
-	# Solaris
-	#
-#        $PLATFORM = "solaris";
-#        $ARCH     = "solarisCC5";
-        if (/^sun4x_56/) {$OSFCFID    = "__SunOS_5_6";}
-	if (/^sun4x_58/) {$OSFCFID    = "__SunOS_5_8";}
-        $OSFCFID .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED SOLARIS";
-        if ($STAR) {
-            $OSFID .= " ST_NO_MEMBER_TEMPLATES";
-        }
-        $OSFCFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
-        $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
-	$SUNWS = $ENV{'SUNWS'};
-	$SUNOPT= $ENV{'SUNOPT'};
-	if( ! defined($SUNWS) ){ $SUNWS = "WS5.0";}
-	if( ! defined($SUNOPT)){ $SUNOPT= "/opt";}
-        $CC     = "$SUNOPT/$SUNWS/bin/cc";
-        $CXX    = "$SUNOPT/$SUNWS/bin/CC";
-	$CPP           = $CC . " -EP";
-        $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
-        $FC             = "$SUNOPT/$SUNWS/bin/f77";
-        $CXXFLAGS       = "-KPIC";
-        $CLIBS        =
-          "-lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so -L. -lCstd -lmalloc";
-          # Brute force required for CC WS6.0 (?). Links all others but that one
-	  # (libCrun however isa softlink unlike the others).
-          # -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
-        $FLIBS = "-L$SUNOPT/$SUNWS/lib -lM77 -lF77 -lsunmath";
-        $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
-
-        #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
-        $SYSLIBS    = "-lmalloc -lm -ldl -lnsl -lsocket";
-        $FFLAGS     = "-KPIC -w";
-        $FEXTEND    = "-e";
-        $CFLAGS     = "-KPIC";
-        $LD         = $CXX;
-        $LDFLAGS    = " -Bdynamic";
-	$F77LD         = $LD;
-        $SO         = $CXX;
-        $SOFLAGS    = "-G -ptr%ObjDir";
-
-        $EXTRA_CXXFLAGS = " -D__CC5__";
-        $EXTRA_CFLAGS   = " -D__CC5__";
-	$EXTRA_CPPFLAGS = "";
-	$EXTRA_LDFLAGS  = "";
-	$EXTRA_SOFLAGS  = "";
-
-	# ATTENTION
-	# - Below is a generic gcc support tweaks
-	# - Any platform specific support needs to appear prior to this
     } elsif ($STAR_HOST_SYS =~ /^i386_/ ||
 	     $STAR_HOST_SYS =~ /^rh/    ||
 	     $STAR_HOST_SYS =~ /^sl/    ||
@@ -553,13 +463,29 @@
         #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
-	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
+	($CXX_MAJOR,$CXX_MINOR,$CXX_LOWER) = split '\.', $CXX_VERSION;
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
         print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
 
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 
+	# some fortran initial options
+        if ($PGI) {
+	  # under SL5 where PGI is installed, this test make PGI used
+	    # but eventually fail at link-time - TBC [TODO: JL 200908]
+	    $FC      = "pgf77";
+	    $FFLAGS  = "";
+	    $FEXTEND = "-Mextend";
+	} else {
+	    $FC      = $G77;
+	    $FFLAGS  = $G77FLAGS;
+	    $FEXTEND = $G77EXTEND;
+	}
+
+
+	# ---- compiler version fixes and command line option adjustements
+	# general and using standards
         if ($CXX_VERSION < 3) {
 	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	} else {
@@ -581,10 +507,12 @@
 	    }
 	}
 
-        # -fpermissive ?
-	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
+        # use of pendantic / permissive 
+	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4 ) {
 	    $CXXFLAGS    .= " -pedantic"; 
 	}
+
+
 	$CXXFLAGS    .= " -Wno-long-long";
 
 	#
@@ -607,6 +535,7 @@
 		#   2015 NB: does it make sense to align on 2 bytes nowadays?
 		$optflags = "-falign-loops -falign-jumps -falign-functions";
 	    }
+
 
 	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
 	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
@@ -670,22 +599,9 @@
 	$CLIBS     .= " -lrt -rdynamic";
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 	
-        if ($PGI) {
-	  # under SL5 where PGI is installed, this test make PGI used
-	    # but eventually fail at link-time - TBC [TODO: JL 200908]
-	  $FC    = "pgf77";
-	  $FFLAGS = "";
-	  $FEXTEND = "-Mextend";
-	} else {
-	    $FC      = $G77;
-	    $FFLAGS  = $G77FLAGS;
-	    $FEXTEND = $G77EXTEND;
-	}
 
 	if ( $G77 =~ m/gfortran/ ){
-#	  $LIBIFCPATH  = `$FC -print-file-name=libgfortranbegin.a`; chomp($LIBIFCPATH);
-#	  $FLIBS     =  $LIBFRTBEGIN;
-#	  $FLIBS    .= " -lgfortran";
+	    # nothing to set - used to be -lgfortran
 	} else {
 	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/^x86_darwin/ ){
 		# Same comment, not sure if V4 or a Mac issue
@@ -695,6 +611,7 @@
 		$FLIBS = " -lg2c -lnsl";
 	    }
 	}
+
     } elsif ( $STAR_HOST_SYS =~ /x86_darwin/) {
       $CXX_VERSION  = `$CXX -dumpversion`;
       chomp($CXX_VERSION);
@@ -803,9 +720,6 @@
 #	$CXX          = "g++-4";
 	$FFLAGS       = "-funroll-loops -fomit-frame-pointer -ftree-vectorize -fno-second-underscore";
 	$FFLAGS      .= " -w -fno-automatic -fd-lines-as-comments -Wall -W -Wsurprising -fPIC";
-#	$FFLAGS      .= "-std=legacy";
-#	$FFLAGS      .= " -fd-lines-as-comments"; # -fd-lines-as-code
-#	$FFLAGS      .= " -ff2c";
 	$FEXTEND      = $G77EXTEND;
         $FPPFLAGS    .= " -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_MACOSX -DCERNLIB_GFORTRAN";
 #	$FLIBS      = `$F77 -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
@@ -923,110 +837,31 @@
     #
     # *** Standard package first, then MYSTAR ***
     #	
-    my ($MYSQLINCDIR,$mysqlheader);
-    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
-			      $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ",
-			      "mysql.h");
-    } else { 
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ".
-			      $MYSTAR . "/include " .  $MYSTAR . "/include/mysql " ,
-			      "mysql.h");
-    }
 
-    if (! $MYSQLINCDIR) {
-	die "Can't find mysql.h in standard path and $MYSTAR/include  $MYSTAR/include/mysql\n";
-    }
 
     # search for the config    
-    my ($MYSQLCONFIG,$mysqlconf);
-    # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
-			     $MYSQL . " ".
-			     $MYSQL . "/bin ".
-			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
-			     "mysql_config");
-    # } else {
-    #	($MYSQLCONFIG,$mysqlconf) =
-    #	    script::find_lib($MYSQL . " ".
-    #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
-    #			     $MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ",
-    #			     "mysql_config");
-    # } 
+    chomp(my $mysqlconf = `which mysql_config`);
 
-
-    # Associate the proper lib with where the inc was found
-    my ($mysqllibdir)=$MYSQLINCDIR;
-    $mysqllibdir =~ s/include/$LLIB/;
-
-    # print "DEBUG :: $mysqllibdir\n";
-    # Note - there is a trick here - the first element uses mysqllibdir
-    #        which is dreived from where the INC is found hence subject to 
-    #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-    # my ($MYSQLLIBDIR,$MYSQLLIB) =
-    #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-    #			 $MYSTAR . "/lib " .  $MYSTAR . "/lib/mysql ",
-    #			 "libmysqlclient");
-    #			 # "libmysqlclient_r libmysqlclient");
-    # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
-
-    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-    if ( $mysqlconf ){
-	$mysqlconf = "$MYSQLCONFIG/$mysqlconf";
-	# if ( 1==1 ){
-	# Do not guess, just take it - this leads to a cons error though TBC
-	chomp($MYSQLLIB = `$mysqlconf  --libs`);
-	# but remove -L which are treated separately by cons
-	my(@libs) = split(" ", $MYSQLLIB);
-	my($test) = shift(@libs);
-	if ( $test =~ /-L/){
-	    $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
-	    $MYSQLLIB = "";
-	    foreach my $el (@libs){
-		$MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
-	    }
-	}
-	
-	# here is a check for libmysqlclient
-	
-	
-	# die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
-	
-	# mysqlconf returns (on SL5, 64 bits)
-	#  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-	# } else {
-	#    $MYSQLLIB .= " -L/usr/$LLIB";
-	#    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	#    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	#    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	#    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-	#    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-	#    $MYSQLLIB .= " -lz";
-	#    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
-	# }
-    } else {
-	die "No mysql_config found\n";
+    if ($?) {
+        die "No mysql_config found\n";
     }
-    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-          if ! $param::quiet;
 
-    # die "\n";
+    chomp(my $MYSQLINCDIR = `mysql_config --variable=pkgincludedir`);
+    chomp(my $MYSQLLIBDIR = `mysql_config --variable=pkglibdir`);
 
+    chomp(my $MYSQLLIB = `$mysqlconf --libs`);
+    # Remove -L which are treated separately by cons
+    my(@libs) = split(" ", $MYSQLLIB);
+    my($test) = shift(@libs);
+    if ( $test =~ /-L/) {
+        $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+        $MYSQLLIB = "";
+        foreach my $el (@libs) {
+            $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+        }
+    }
+
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR\n\tMYSQLLIBDIR = $MYSQLLIBDIR\n\tMYSQLLIB = $MYSQLLIB\n" if !$param::quiet;
 
 
     # QT
@@ -1124,65 +959,62 @@
     }
 
     # Logger
-    $LoggerDir = $MYSTAR . "/include/log4cxx";
+    chomp($LoggerDir = `pkg-config --variable=prefix liblog4cxx`);
+    $LoggerDir = $MYSTAR unless $LoggerDir;
 
-    if (-d $LoggerDir) {
-	$LoggerINCDIR = $MYSTAR . "/include";
-	$LoggerLIBDIR = $MYSTAR . "/lib";
-	$LoggerLIBS   = "-llog4cxx";
-	print
-	    "Use Logger  ",
-	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
-	    if $LoggerLIBDIR && ! $param::quiet;
+    if (not -d $LoggerDir."/include/log4cxx") {
+        die "No log4cxx found\n";
     }
+
+    $LoggerINCDIR = $LoggerDir . "/include";
+    $LoggerLIBDIR = $LoggerDir . "/lib";
+    $LoggerLIBS   = "-llog4cxx";
+
+    print "Using $LoggerDir\n\tLoggerLIBDIR = $LoggerLIBDIR\n\tLoggerINCDIR = $LoggerINCDIR\n\tLoggerLIBS = $LoggerLIBS\n" unless $param::quiet;
+
     # xml2
-    my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin",
-				  "xml2-config");
-    if ($xml) {
-	$xml .= "/xml2-config";
-	$XMLINCDIR = `$xml --cflags`;
-	chomp($XMLINCDIR);
-	$XMLINCDIR =~ s/-I//;
-	my $XML  = `$xml --libs`; # die "$XML\n";
-	my(@libs)= split(" ", $XML);
+    chomp(my $xml = `which xml2-config`);
 
-	$XMLLIBDIR = shift(@libs);
-	if ($XMLLIBDIR =~ /-L/){
-	    $XMLLIBDIR =~ s/-L//;
-	    $XMLLIBS   = join(" ",@libs);
-	} else {
-	    # no -L, assume all were LIBS
-	    $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
-	    # and fix -L / should work for both 32 and 64
-	    $XMLLIBDIR = "/usr/$LLIB";
-	}
-
-
-	# ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-	# if ($XMLLIBDIR =~ /-L/){
-	#    $XMLLIBDIR =~ s/-L//;
-	# } else {
-	#    # may not have any -L
-	#    if ($XMLLIBS
-	# }
-
-	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
-	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
-	$XMLCPPFlag = "";#-DXmlTreeReader";
-	if ($major < 2 or $major == 2 and $minor < 5) {
-	    $XMLCPPFlag = "-DNoXmlTreeReader";
-	}
-	if ( ! $param::quiet ){
-	    if ( $XMLLIBDIR ){
-		print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
-	    } else {
-		print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
-	    }
-	}
-    } else {
-	print "Could not find xml libs\n" if (! $param::quiet);
+    if ($?) {
+        die "No xml2-config found\n";
     }
+
+    my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
+
+    $XMLINCDIR = `$xml --cflags`;
+    chomp($XMLINCDIR);
+    $XMLINCDIR =~ s/-I//;
+    my $XML  = `$xml --libs`; # die "$XML\n";
+    my(@libs)= split(" ", $XML);
+
+    $XMLLIBDIR = shift(@libs);
+    if ($XMLLIBDIR =~ /-L/){
+        $XMLLIBDIR =~ s/-L//;
+        $XMLLIBS   = join(" ",@libs);
+    } else {
+        # no -L, assume all were LIBS
+        $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
+        # and fix -L / should work for both 32 and 64
+        $XMLLIBDIR = "/usr/$LLIB";
+    }
+
+    my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
+    my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
+    $XMLCPPFlag = "";#-DXmlTreeReader";
+    if ($major < 2 or $major == 2 and $minor < 5) {
+        $XMLCPPFlag = "-DNoXmlTreeReader";
+    }
+    if ( ! $param::quiet ){
+        if ( $XMLLIBDIR ){
+            print "Using $xml\n\tXMLLIBDIR = $XMLLIBDIR\n\tXMLINCDIR = $XMLINCDIR\n\tXMLLIBS = $XMLLIBS\n\tXMLCPPFlag = $XMLCPPFlag\n" if !$param::quiet;
+        } else {
+            print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
+        }
+    }
+
+    chomp($FASTJET_PREFIX = `fastjet-config --prefix`);
+    chomp($GSL_PREFIX = `gsl-config --prefix`);
+
  #Vc check SSE support
  my $cmd = "touch temp_gccflags.c; $CXX -E -dM -o - temp_gccflags.c | grep -q SSE";
  my $VcCPPFLAGS = " -DVC_IMPL=SSE";
@@ -1298,10 +1130,12 @@
 		  'ENV'    => {
 		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
+		      'PYTHONPATH'      => $PYTHONPATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
 		      'ROOT'            => $ROOT,
 		      'ROOT_LEVEL'      => $ROOT_LEVEL,
+		      'ROOT_VERSION_MAJOR' => $ROOT_VERSION_MAJOR,
 		      'ROOTSRC'         => $ROOTSRC,
 		      'ROOTSYS'         => $ROOTSYS,
 		      'CINTSYSDIR'      => $CINTSYSDIR,
@@ -1341,6 +1175,12 @@
 			    'CPPFLAGS' => $CERNLIB_CPPFLAGS,
 			    'CERNLIBS' => $CERNLIBS
 			    },
+                       'FASTJET' => {
+                           'INCDIR'=> "$FASTJET_PREFIX/include"
+                           },
+                       'GSL' => {
+                           'INCDIR'=> "$GSL_PREFIX/include"
+                           },
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
