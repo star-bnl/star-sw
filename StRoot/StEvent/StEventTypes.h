@@ -331,4 +331,5 @@
 #include "StIstSensorHitCollection.h" 
 #include "StIstLadderHitCollection.h"
 #include "StIstHitCollection.h"
+#include "StFwdTrackCollection.h"
 #endif

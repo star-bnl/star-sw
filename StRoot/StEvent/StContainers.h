@@ -170,6 +170,7 @@ class StHltVpdHit;
 class StIstHit;
 class StFstRawHit;
 class StFstHit;
+class StFwdTrack;
 class StKinkVertex;
 class StL3AlgorithmInfo;
 class StMtdHit;
@@ -234,6 +235,7 @@ StCollectionDef(FmsHit)
 StCollectionDef(FmsPoint)
 StCollectionDef(FpsSlat)
 StCollectionDef(FtpcHit)
+StCollectionDef(FwdTrack)
 StCollectionDef(Hit)
 StCollectionDef(HltBEmcTowerHit)
 StCollectionDef(HltBTofHit)
@@ -285,5 +287,6 @@ StCollectionDef(TrackNode)
 StCollectionDef(TrackPidTraits)
 StCollectionDef(V0Vertex)
 StCollectionDef(XiVertex)
+
 
 #endif
