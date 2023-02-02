@@ -98,8 +98,7 @@ public:
                 rProj = proj;
                 if ( count == index )
                     return true;
-                else 
-                    count++;
+                count++;
         }
         return false;
     }
@@ -128,6 +127,7 @@ public:
     short   numberOfSeedPoints() const;
 
 
+    void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
     void setDidFitConvergeFully( bool lDidFitConvergeFully ) { mDidFitConvergeFully = lDidFitConvergeFully;}
     void setNumberOfFailedPoints( short lNumberOfFailedPoints ) { mNumberOfFailedPoints = lNumberOfFailedPoints;}
