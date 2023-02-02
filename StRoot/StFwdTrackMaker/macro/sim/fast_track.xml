@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <Output url="fast_track.root" />
+	<Geometry>fGeom.root</Geometry>
+    <Source ftt="GEANT" fttFilter="true" />
+    <!-- Missing <TrackFinder> means use MC Track finding -->
+    
+	<TrackFitter refitSi="true" mcSeed="true" refitGBL="true" >
+        <Vertex sigmaXY="0.002" sigmaZ="1.0" includeInFit="true" smearMcVertex="true" />
+    </TrackFitter>
+</config>
