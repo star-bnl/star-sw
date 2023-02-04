@@ -126,17 +126,15 @@ int StFcsTrackMatchMaker::Make()
 
     // get the projections
     StFwdTrackProjection projECAL, projHCAL, projEPD;
-    LOG_INFO << "nProjections: "<< trk->mProjections.size() << endm;
     bool gotECAL = trk->getProjectionFor( StFwdTrackProjection::ECAL, projECAL );
     bool gotHCAL = trk->getProjectionFor( StFwdTrackProjection::HCAL, projHCAL );
     bool gotEPD  = trk->getProjectionFor( StFwdTrackProjection::EPD,  projEPD  );
 
     if (Debug())
     {
-      
-      LOG_INFO << Form("Proj0 [%d]: %6.2f %6.2f %6.2f", gotECAL, projECAL.mXYZ.x(), projECAL.mXYZ.y(), projECAL.mXYZ.z()) << endm;
-      LOG_INFO << Form("Proj1 [%d]: %6.2f %6.2f %6.2f", gotHCAL, projHCAL.mXYZ.x(), projHCAL.mXYZ.y(), projHCAL.mXYZ.z()) << endm;
-      LOG_INFO << Form("Proj2 [%d]: %6.2f %6.2f %6.2f", gotEPD, projEPD. mXYZ.x(), projEPD. mXYZ.y(), projEPD. mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj0 [detId=%d, found=%d]: %6.2f %6.2f %6.2f", StFwdTrackProjection::ECAL, gotECAL, projECAL.mXYZ.x(), projECAL.mXYZ.y(), projECAL.mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj1 [detId=%d, found=%d]: %6.2f %6.2f %6.2f", StFwdTrackProjection::HCAL, gotHCAL, projHCAL.mXYZ.x(), projHCAL.mXYZ.y(), projHCAL.mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj2 [detId=%d, found=%d]: %6.2f %6.2f %6.2f", StFwdTrackProjection::EPD,  gotEPD, projEPD. mXYZ.x(), projEPD. mXYZ.y(), projEPD. mXYZ.z()) << endm;
     }
 
     // North or south from track
