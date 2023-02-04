@@ -1262,11 +1262,11 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
         TVector3 tv3(0, 0, 0);
         if ( detIndex != StFwdTrackProjection::HCAL ){
             tv3 = ObjExporter::trackPosition( track, z, cov, mom );
-            fwdTrack->mProjections.push_back( StFwdTrackProjection( detIndex, StThreeVectorF( tv3.X(), tv3.Y(), tv3.Z() ), StThreeVectorF( mom.X(), mom.Y(), mom.Z() ), cov) );
         } else {
             // use a straight line projection to HCAL since GenFit cannot handle long projections
             tv3 = ObjExporter::projectAsStraightLine( track, 575.0, 625.0, z, cov, mom );
         }
+        fwdTrack->mProjections.push_back( StFwdTrackProjection( detIndex, StThreeVectorF( tv3.X(), tv3.Y(), tv3.Z() ), StThreeVectorF( mom.X(), mom.Y(), mom.Z() ), cov) );
 
         // // Add Proj info to TTree
         mTreeData.tprojX.push_back( tv3.X() ); 
@@ -1585,5 +1585,8 @@ void StFwdTrackMaker::ProcessFwdTracks(  ){
     StFwdTrackCollection * ftc = stEvent->fwdTrackCollection();
     for ( auto fwdTrack : ftc->tracks() ){
         LOG_DEBUG << TString::Format("StFwdTrack[ nProjections=%lu, nFTTSeeds=%lu, nFSTSeeds=%lu ]", fwdTrack->mProjections.size(), fwdTrack->mFTTPoints.size(), fwdTrack->mFSTPoints.size()) << endm;
+        for ( auto proj : fwdTrack->mProjections ) {
+            LOG_DEBUG << TString::Format("Proj[ %d, %f, %f, %f ]", proj.mDetId, proj.mXYZ.x(), proj.mXYZ.y(), proj.mXYZ.z() ) << endm;
+        }
     }
 }
