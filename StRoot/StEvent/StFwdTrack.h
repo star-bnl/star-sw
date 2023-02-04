@@ -28,14 +28,33 @@ class StFcsCluster;
 
 struct StFwdTrackProjection {
     StFwdTrackProjection() {}
+    StFwdTrackProjection ( const StFwdTrackProjection & other) {
+        mXYZ = other.mXYZ;
+        mMom = other.mMom;
+        mDetId = other.mDetId;
+        memcpy( mCov, other.mCov, sizeof( mCov ) );
+    }
     StFwdTrackProjection(   unsigned short detId, 
                             StThreeVectorD xyz, 
                             StThreeVectorD mom, 
                             float c[9] ) {
+        set( detId, xyz, mom, c );
+    }
+
+    void set(   unsigned short detId, 
+                StThreeVectorD xyz, 
+                StThreeVectorD mom, 
+                float c[9]) {
         mDetId = detId;
         mXYZ = xyz;
 		mMom = mom;
-        memcpy( mCov, c, sizeof(mCov) );
+        memcpy( mCov, c, sizeof(mCov) ); 
+    }
+    void set(   StFwdTrackProjection &other ){
+        mDetId = other.mDetId;
+        mXYZ   = other.mXYZ;
+        mMom   = other.mMom;
+        memcpy( mCov, other.mCov, sizeof(mCov) ); 
     }
     StThreeVectorD mXYZ;
 	StThreeVectorD mMom;
@@ -91,17 +110,7 @@ public:
 
     bool getProjectionFor(  int detectorId, 
                             StFwdTrackProjection &rProj, 
-                            size_t index = 0 ){
-        size_t count = 0;
-        for ( auto proj : mProjections ){
-            if (proj.mDetId == detectorId)
-                rProj = proj;
-                if ( count == index )
-                    return true;
-                count++;
-        }
-        return false;
-    }
+                            size_t index = 0 );
 
     StThreeVectorD momentum() const;
     StThreeVectorD momentumAt(size_t _id = 0) const;

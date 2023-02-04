@@ -1,5 +1,6 @@
 #include "StFwdTrack.h"
 #include "StEvent/StFcsCluster.h"
+#include "St_base/StMessMgr.h"
 
 StFwdTrack::StFwdTrack() {
 
@@ -76,4 +77,19 @@ void StFwdTrack::sortHcalClusterByET() {
     std::sort(mHcalClusters.begin(), mHcalClusters.end(), [](StFcsCluster* a, StFcsCluster* b) {
             return b->fourMomentum().perp() < a->fourMomentum().perp();
         });
+}
+
+bool StFwdTrack::getProjectionFor(  int detectorId, 
+                                    StFwdTrackProjection &rProj, 
+                                    size_t index ){
+    size_t count = 0;
+    for ( auto proj : mProjections ){
+        if (proj.mDetId == detectorId){
+            rProj.set( proj );
+            if ( count == index )
+                return true;
+            count++;
+        }
+    }
+    return false;
 }
