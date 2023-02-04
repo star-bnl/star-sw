@@ -114,6 +114,7 @@ TDataSet *CreateTable() {
   row.T0offset   = 0.25 - 0.56;// + 0.70; // 01/25/23 Zc10B
   row.T0offsetI  = 0.242653;   // ZZ 01/27/23
   row.T0offsetO  = 0.0925036;  // -"-
+  row.tMaxI = row.tMaxO = 1.5e-6; // sec
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
