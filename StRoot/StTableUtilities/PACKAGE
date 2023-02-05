@@ -2,4 +2,3 @@
 # package StTableUtilities
 # author: 
 Library:libStTableUtilities.so:LIBS +=   -lglobal_Tables
-#Library:libStTableUtilities.so:LIBS +=   -lglobal_Tables  -ltpc_Tables

@@ -2,4 +2,3 @@
 # package St_tcl_Maker
 # author: 
 Library:libSt_tcl_Maker.so:LIBS +=   -lStChain -lStTpcDb  
-#Library:libSt_tcl_Maker.so:LIBS +=   -lStChain  -lStDbUtilities  -lStTpcDb  -lSt_tpc  -ltpc_Tables

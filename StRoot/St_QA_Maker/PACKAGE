@@ -2,4 +2,3 @@
 # package St_QA_Maker
 # author: 
 Library:libSt_QA_Maker.so:LIBS += -lglobal_Tables  -lsim_Tables  -lStChain  -lStEvent -lStMcEventMaker  -lStMcEvent  -lStPmdUtil  -lStTpcDb  
-#Library:libSt_QA_Maker.so:LIBS +=   -lglobal  -lglobal_Tables  -lsim_Tables  -lStChain  -lStDbUtilities  -lStEmcUtil  -lStEvent  -lSt_global  -lStMcEventMaker  -lStMcEvent  -lStPmdUtil  -lStTpcDb  
