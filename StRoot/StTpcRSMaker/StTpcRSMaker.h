@@ -55,8 +55,8 @@ class StTpcRSMaker : public StMaker {
   TF1F *GetChargeFraction(Int_t io = 0, Int_t sector = 20)     {return (TF1F *) mChargeFraction[io][sector-1];}     
   TF1F *GetPadResponseFunction(Int_t io = 0, Int_t sector = 20){return (TF1F *) mPadResponseFunction[io][sector-1];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
-  TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
-  TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
+  TF1  *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
+  TF1  *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
   TF1  *GetHeed()                    {return mHeed;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
@@ -95,8 +95,8 @@ class StTpcRSMaker : public StMaker {
   void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
   Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
 #endif
-  static TF1F     *fgTimeShape3[2];  //!
-  static TF1F     *fgTimeShape0[2];   //!
+  static TF1      *fgTimeShape3[2];   //!
+  static TF1      *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!

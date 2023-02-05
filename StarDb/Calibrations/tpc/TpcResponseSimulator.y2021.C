@@ -29,20 +29,22 @@ TDataSet *CreateTable() {
   row.tauCO                 =   0;  
   row.SigmaJitterTI         = 0.00000;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
   row.SigmaJitterTO         = 0.00000;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0.03426;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
-  row.SigmaJitterXO         = 0.03426;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
-  row.longitudinalDiffusion = 0.03624*1.3; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
+  row.SigmaJitterXI         = 0.15; // J 0.06; // F 0.21; //0.03426;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
+  row.SigmaJitterXO         = 0.15; // J 0.03; // I 0.04; //0.10; // F 0.21; // 0.03426*1.20;// 1.05;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
+  row.longitudinalDiffusion = 0.03624*1.3*0.92; //*1.3  Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
   row.longitudinalDiffusionI= row.longitudinalDiffusion;
-  row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz 87% Ar + 10% CH4 + 3%CF4
-  row.transverseDiffusionI  = 0.97*row.transverseDiffusion;
+  row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau)/1.08 ; // Magboltz 87% Ar + 10% CH4 + 3%CF4
+  row.transverseDiffusionI  = row.transverseDiffusion;// J *0.983; // 0.97*
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
-  row.OmegaTauScaleI        =   0;//2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        =   0;//1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+#if 0
+  row.OmegaTauScaleI        =  2.145*1.515;// restore in D HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
+  row.OmegaTauScaleO        =  1.8  *1.201;// -"- HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+#endif
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538 + 5.13440e-02 - 0.23; 
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538 + 5.13440e-02 - 0.23 + 2.02654e-01 -1.41451e-01; 
   row.SecRowCorIW[1] = row.SecRowCorIE[1] = -5.40702e-04;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01 + 2.52297e-02 - 0.135;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01 + 2.52297e-02 - 0.135 + 1.72299e-01  -1.55654e-01;
   row.SecRowCorOW[1] = row.SecRowCorOE[1] = -3.73511e-04;
   // SecRow3CGF7p7GeV_2021.root: FitP->Draw("sigma:y","i&&j","prof")
   //                                     Inner            3.10477e-01, Outer   2.70452e-01
@@ -57,9 +59,10 @@ TDataSet *CreateTable() {
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  row.T0offset   = 0.50 -1.43663e-01 -0.00932877 + 0.0416;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
-  // row.T0offsetI  = -1.58786167960479896e-01;
-  // row.T0offsetO  = -1.94071983062808762e-01-1.76429075511644329e-02;
+  row.T0offset   = 0.50 -1.43663e-01 -0.00932877 + 0.0416 + 0.0241 ;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offsetI  =  0.0709683 -0.00865149; // TFG23a = 0
+  row.T0offsetO  = -0.0710492 -0.0159205; // TFG23a = 0
+  row.tMaxI = row.tMaxO = 2e-5; // sec
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

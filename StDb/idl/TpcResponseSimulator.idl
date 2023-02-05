@@ -59,4 +59,6 @@ struct TpcResponseSimulator {
   float  T0offsetO;       /* = 0.0   extra off set for outer sector */
   float  FirstRowC;       /* = 0.0   extra correction for the first pad row */
   float  betaStar;        /* = 0.6  beam beta* (meters) */
+  float  tMaxI;           /* = 0.0  maximum ion time collection for Inner Sectors */
+  float  tMaxO;           /* = 0.0  maximum ion time collection for Outer Sectors */
  };  

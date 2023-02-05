@@ -392,12 +392,17 @@ if ($h_files) {
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule -s $Lib -rmf $RootMap";
   $ENV{ROOTIGNOREPREFIX} = 1;
   $ENV{ROOT_MODULES} = 1;
-  my $cmd  = "rootcling -rootbuild -f $Cint_cxx";
+  my $cmd  = "rootcling -rootbuild -v2 -f $Cint_cxx";
 #  $cmd .= " -cxxmodule";
+  $cmd .= " -s $Lib";
+  $cmd .= " -excludePath " . $ROOTSYS ."/ginclude";
+  $cmd .= " -excludePath " . $ROOTSYS ."/externals";
+  $cmd .= " -excludePath " . $ROOTSYS. "/builtins";
+  $cmd .= " -compilerI/usr/local/include";
 #  $cmd .= " -inlineInputHeader -s $Lib -rmf $RootMap";
   my $bLib = File::Basename::basename($Lib);
 #  my $RootMapF =   cwd() . "/" . $RootMap;
-  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMap";
+#  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMap";
 #  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMapF";
 #  my $LibF = cwd() . $Lib;
 #  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMap";
@@ -406,8 +411,8 @@ if ($h_files) {
     foreach my $l (@libs) {
       #	print "l = $l\n";
       my $m = $l;
-      $m =~ s/-l/lib/;
-      $m .= "_rdict.pcm";
+#      $m =~ s/-l/lib/;
+#      $m .= "_rdict.pcm";
       $cmd .= " -m " . $m;
     }
   }

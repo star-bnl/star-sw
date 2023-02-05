@@ -109,9 +109,11 @@ TMultiDimFit* MDfit = 0;
 TFile *fOut = 0;
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
 TF1  *mShaperResponse = 0;             //!
+TF1  *mShaperResponseInner = 0;        //!
+TF1  *mShaperResponseOuter = 0;        //!
 TF1  *mChargeFractionInner = 0;        //!
-TF1  *mPadResponseFunctionInner = 0;   //!
 TF1  *mChargeFractionOuter = 0;        //!
+TF1  *mPadResponseFunctionInner = 0;   //!
 TF1  *mPadResponseFunctionOuter = 0;   //!
 TF1  *mConvolution = 0;                //!
 //static Double_t K3I = 1.5236; // fit data - res. 1.709;// data Full Field; 0.68;  // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
@@ -174,6 +176,7 @@ const  Double_t lO  = 1.95;
 #include "tables/St_tpcPadGainT0B_Table.h"
 #endif
 //#include "DrawList.C"
+void MakeFunctions();
 //________________________________________________________________________________
 struct Var_t {
   Double_t    sec;
@@ -217,6 +220,12 @@ Bool_t AcceptFile(const TString &File) {
 }
 //________________________________________________________________________________
 void SetInnerPadrows() {
+  if (! mChargeFractionInner )      mChargeFractionInner      = (TF1 *) gDirectory->Get("ChargeFractionInner_01");
+  if (! mChargeFractionOuter )      mChargeFractionOuter      = (TF1 *) gDirectory->Get("ChargeFractionOuter_01");
+  if (! mPadResponseFunctionInner)  mPadResponseFunctionInner = (TF1 *) gDirectory->Get("PadResponseFunctionInner_01");
+  if (! mPadResponseFunctionOuter)  mPadResponseFunctionOuter = (TF1 *) gDirectory->Get("PadResponseFunctionOuter_01");
+  if (! mShaperResponseInner)       mShaperResponseInner      = (TF1 *) gDirectory->Get("ShaperFunc_I_S01");
+  if (! mShaperResponseOuter)       mShaperResponseOuter      = (TF1 *) gDirectory->Get("ShaperFunc_O_S01");
   if (NoInnerRows > 0) return;
   TH3 *h3 = (TH3 *) gDirectory->Get("SecRow3");
   if (! h3) {
@@ -295,7 +304,7 @@ public:
 ClassImp(TH1FSet);
 #endif
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *files="*.root", const Char_t *opt = "R", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
+void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 #ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
@@ -453,6 +462,13 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "R", const Char_t *O
 #endif
   if (! fOut) fOut = new TFile(output,"recreate");
   fOut->cd();
+  if (mChargeFractionInner )      mChargeFractionInner      ->Write();
+  if (mChargeFractionOuter )      mChargeFractionOuter      ->Write();
+  if (mPadResponseFunctionInner)  mPadResponseFunctionInner ->Write();
+  if (mPadResponseFunctionOuter)  mPadResponseFunctionOuter ->Write();
+  if (mShaperResponseInner)       mShaperResponseInner      ->Write();
+  if (mShaperResponseOuter)       mShaperResponseOuter      ->Write();
+  
   struct Name_t {
     const Char_t *Name;
     const Char_t *Title;
@@ -1015,7 +1031,9 @@ Double_t ConvGausShaperF(Double_t *x, Double_t *par) {
     proj->Draw();
     proj->Fit("tf","er","",-2.5,2.5);
    */
-  static TF1* shape = 0;
+  TF1* shape = mShaperResponse;
+  assert(shape);
+#if 0
   if (! shape) {
     TDirectory *dir = gDirectory;
     Char_t *file = gSystem->Which(TROOT::GetMacroPath(),"ShaperResponse.root");
@@ -1029,6 +1047,7 @@ Double_t ConvGausShaperF(Double_t *x, Double_t *par) {
     shape = new TF1(*f);
     delete _fil;
   }
+#endif
   Double_t xshift = par[0];
   Double_t Area   = par[1];
   Double_t sigma2 = TMath::Abs(par[2]);
@@ -1066,6 +1085,7 @@ TGraphErrors *OmegaTau() {
 }
 //________________________________________________________________________________
 void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root") {
+  gSystem->Load("StBichsel");
   TDirIter Dir(files);
   Char_t *file = 0;
   Char_t *file1 = 0;
@@ -2561,6 +2581,7 @@ Fit outer_1M    Fitted value of par[1]=Mean
 }
 //________________________________________________________________________________
 void MakeFunctions() {
+#if 0
   Double_t timeBinMin = -0.5;
   Double_t timeBinMax = 10.5;
   if (! mShaperResponse) 
@@ -2628,6 +2649,14 @@ void MakeFunctions() {
   mChargeFractionOuter->SetParNames("outerSectorPadLength","outerSectorAnodeWirePadPlaneSeparation",
 				    "anodeWirePitch","K3OR",
 				    "CrossTalk","outerSectorPadPitch");
+#else
+  if (! mChargeFractionInner )      mChargeFractionInner      = (TF1 *) gDirectory->Get("ChargeFractionInner_01");
+  if (! mChargeFractionOuter )      mChargeFractionOuter      = (TF1 *) gDirectory->Get("ChargeFractionOuter_01");
+  if (! mPadResponseFunctionInner)  mPadResponseFunctionInner = (TF1 *) gDirectory->Get("PadResponseFunctionInner_01");
+  if (! mPadResponseFunctionOuter)  mPadResponseFunctionOuter = (TF1 *) gDirectory->Get("PadResponseFunctionOuter_01");
+  if (! mShaperResponseInner)       mShaperResponseInner      = (TF1 *) gDirectory->Get("ShaperFunc_I_S01");
+  if (! mShaperResponseOuter)       mShaperResponseOuter      = (TF1 *) gDirectory->Get("ShaperFunc_O_S01");
+#endif
   //  mChargeFractionOuter->Save(xmin,xmax,0,0,0,0);
   if (! mConvolution) 
     mConvolution = new TF1("Convolution",ConvolutionF,-8,8,19);
@@ -2901,16 +2930,22 @@ void FitSlicesT(const Char_t *name="OuterTimeRc", const Char_t *opt="SigmaSqSpre
   }
   Double_t lH = lI;
   TProfile *prof = (TProfile *) gDirectory->Get("dLInner");
+  mShaperResponse = mShaperResponseInner;
   if (Name.Contains("Outer")) {
     lH = lO;
     prof = (TProfile *) gDirectory->Get("dLOuter");
+    mShaperResponse = mShaperResponseOuter;
   }
   if (! prof) return;
+  
   TF1 *ga = new TF1("ga",ConvGausShaperF,-2,5,5);
   ga->SetParameters(0,1,1,0,1);
   ga->SetParNames("shift","Area","sigmaSQ","noise","spread");
   ga->SetParLimits(2,0.,10.);
   ga->SetParLimits(3,0.,10.);
+  if (! mShaperResponseInner) MakeFunctions();
+  mShaperResponse = mShaperResponseInner;
+  if (Name.Contains("Outer",TString::kIgnoreCase))   mShaperResponse = mShaperResponseOuter;
   TString OutFile(fIn->GetName());
   OutFile.ReplaceAll(".root",".Fit.root");
   if (! fOut) fOut = new TFile(OutFile,"recreate");
