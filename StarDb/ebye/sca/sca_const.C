@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sca/sca_const Allocated rows: 1  Used rows: 1  Row size: 112 bytes
 //  Table: sca_const_st[0]--> sca_const_st[0]
@@ -39,5 +39,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.perfectdither	 =          0; // ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

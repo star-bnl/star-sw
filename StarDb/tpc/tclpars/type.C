@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tclpars/type Allocated rows: 1  Used rows: 1  Row size: 28 bytes
 //  Table: tcl_tpc_index_type_st[0]--> tcl_tpc_index_type_st[0]
@@ -18,5 +18,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.tptrack_tpsegment	 =          7; // correlate tptrack and tpsegment tables ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }
