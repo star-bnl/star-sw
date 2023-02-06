@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include "StBFChain/StBFChain.h"
+
 #include "StEvent/StEvent.h"
 #include "StEvent/StGlobalTrack.h"
 #include "StEvent/StHelixModel.h"
@@ -188,7 +190,7 @@ class ForwardTracker : public ForwardTrackMaker {
   public:
     // Replaces original initialization.  Config file and hitloader
     // will be provided by the maker.
-    void initialize( bool genHistograms ) {
+    void initialize( TString geoCache, bool genHistograms ) {
         nEvents = 1; // only process single event
 
         // Create the forward system...
@@ -199,11 +201,11 @@ class ForwardTracker : public ForwardTrackMaker {
         mQualityPlotter->makeHistograms(mConfig.get<size_t>("TrackFinder:nIterations", 1));
 
         // initialize the track fitter
-        mTrackFitter = new TrackFitter(mConfig);
+        mTrackFitter = new TrackFitter(mConfig, geoCache);
         mTrackFitter->setGenerateHistograms(genHistograms);
         mTrackFitter->setup();
 
-        ForwardTrackMaker::initialize( genHistograms );
+        ForwardTrackMaker::initialize( geoCache, genHistograms );
     }
 
     void finish() {
@@ -417,10 +419,23 @@ int StFwdTrackMaker::Init() {
 
     /// Instantiate and cache the geometry 
     GetDataBase("VmcGeometry");
+
+
+
+    TString geoCache = dynamic_cast<StBFChain*>(GetChain())->GetFileOut();  
+    if ( geoCache=="" ) 
+        geoCache = dynamic_cast<StBFChain*>(GetChain())->GetFileIn();
+
+    // Strip out @ symbol
+    geoCache = geoCache.ReplaceAll("@",""); 
+    // Strip off the last extention in the geoCache
+    geoCache = geoCache( 0, geoCache.Last('.') );
+    // Append geom.root to the extentionless geoCache
+    geoCache+=".geom.root";
     
     // create an SiRasterizer in case we need it 
     mSiRasterizer = std::shared_ptr<SiRasterizer>( new SiRasterizer(mFwdConfig));
-    mForwardTracker = std::shared_ptr<ForwardTracker>(new ForwardTracker());
+    mForwardTracker = std::shared_ptr<ForwardTracker>(new ForwardTracker( ));
     mForwardTracker->setConfig(mFwdConfig);
 
     // only save criteria values if we are generating a tree.
@@ -428,7 +443,7 @@ int StFwdTrackMaker::Init() {
 
     mForwardData = std::shared_ptr<FwdDataSource>(new FwdDataSource());
     mForwardTracker->setData(mForwardData);
-    mForwardTracker->initialize( mGenHistograms );
+    mForwardTracker->initialize( geoCache, mGenHistograms );
 
     if ( mGenHistograms ){
         mHistograms["fwdVertexZ"] = new TH1D("fwdVertexZ", "FWD Vertex (RAVE);z", 1000, -50, 50);
@@ -1288,6 +1303,7 @@ void StFwdTrackMaker::FillEvent() {
     // FillEvent();
     StFwdTrackCollection * ftc = stEvent->fwdTrackCollection();
     if ( !ftc ){
+        LOG_INFO << "Creating the StFwdTrackCollection" << endm;
         ftc = new StFwdTrackCollection();
         stEvent->setFwdTrackCollection( ftc );
     }

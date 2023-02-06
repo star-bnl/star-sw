@@ -13,18 +13,19 @@ class StarFieldAdaptor : public genfit::AbsBField {
     bool mDebugField = false;
     static size_t sNCalls;
     StarFieldAdaptor() {
-
-        mUseMappedField = false;
         mDebugField = false;
 
-        hdBx = new TH1F( "hdBx", ";dBx", 100, -5e-1, 5e-1 );
-        hdBy = new TH1F( "hdBy", ";dBy", 100, -5e-1, 5e-1 );
-        hdBz = new TH1F( "hdBz", ";dBz", 100, -5e-2, 5e-2 );
 
-        TFile *fileMap = new TFile("/star/u/jdb/work/ssw/MagField/FieldOn.root", "READ");
-        hBx = (TH2D *)fileMap->Get("fieldX");
-        hBy = (TH2D *)fileMap->Get("fieldY");
-        hBz = (TH2D *)fileMap->Get("fieldZ");
+        if ( mUseMappedField){
+            hdBx = new TH1F( "hdBx", ";dBx", 100, -5e-1, 5e-1 );
+            hdBy = new TH1F( "hdBy", ";dBy", 100, -5e-1, 5e-1 );
+            hdBz = new TH1F( "hdBz", ";dBz", 100, -5e-2, 5e-2 );
+
+            TFile *fileMap = new TFile("/star/u/jdb/work/ssw/MagField/FieldOn.root", "READ");
+            hBx = (TH2D *)fileMap->Get("fieldX");
+            hBy = (TH2D *)fileMap->Get("fieldY");
+            hBz = (TH2D *)fileMap->Get("fieldZ");
+        }
     };
 
     void WriteHistograms(){

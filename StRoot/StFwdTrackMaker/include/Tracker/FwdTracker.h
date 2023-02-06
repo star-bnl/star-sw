@@ -199,10 +199,11 @@ class ForwardTrackMaker {
     // Adopt external hit loader
     void setData(std::shared_ptr<FwdDataSource>data) { mDataSource = data; }
 
-    virtual void initialize( bool genHistograms) {
+    virtual void initialize( TString geoCache, bool genHistograms) {
         mGenHistograms = genHistograms;
         if (mGenHistograms) setupHistograms();
 
+        mGeoCache = geoCache;
         mDoTrackFitting = !(mConfig.get<bool>("TrackFitter:off", false));
 
         if (!mConfig.exists("TrackFitter"))
@@ -1259,6 +1260,7 @@ class ForwardTrackMaker {
 
     // histograms of the raw input data
     bool mGenHistograms = false; // controls these histograms and use of QualityPlotter
+    TString mGeoCache;
     std::map<std::string, TH1 *> mHist;
     
 

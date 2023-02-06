@@ -57,7 +57,7 @@ class TrackFitter {
   public:
     // ctor 
     // provide the main configuration object
-    TrackFitter(FwdTrackerConfig _mConfig) : mConfig(_mConfig) {
+    TrackFitter(FwdTrackerConfig _mConfig, TString geoCache) : mConfig(_mConfig), mGeoCache(geoCache) {
         mTrackRep = 0;
         mFitTrack = 0;
     }
@@ -69,7 +69,8 @@ class TrackFitter {
         TGeoManager * gMan = nullptr;
 
         // Setup the Geometry used by GENFIT
-        TGeoManager::Import(mConfig.get<string>("Geometry", "fGeom.root").c_str());
+        LOG_INFO << "StFwdTrackMaker is loading the geometry cache: " << mConfig.get<string>("Geometry", mGeoCache.Data()).c_str() << endm;
+        TGeoManager::Import(mConfig.get<string>("Geometry", mGeoCache.Data()).c_str());
         gMan = gGeoManager;
         // Set up the material interface and set material effects on/off from the config
         genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
@@ -932,6 +933,7 @@ class TrackFitter {
     std::unique_ptr<genfit::AbsBField> mBField;
 
     FwdTrackerConfig mConfig; // main config object
+    TString mGeoCache;
 
     // optional histograms, off by default
     std::map<std::string, TH1 *> mHist;
