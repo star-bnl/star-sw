@@ -487,7 +487,7 @@ int StFcsWaveformFitMaker::Make() {
 	    if(GetDebug()>1){
 	      char name[100];
 	      mDb->getName(hits[i]->ehp(), hits[i]->ns(), hits[i]->dep(), hits[i]->channel(),name);
-	      printf("%s Pedestal (%d-%d+1)=%8.2f\n",name,mPedMax,mPedMin,res[6] );
+	      LOG_DEBUG << name << " Pedestal ("<<mPedMax<<"-"<<mPedMin<<"+1)="<< res[6] <<std::endl;
 	    }
 	  }
 	  
@@ -649,8 +649,8 @@ float StFcsWaveformFitMaker::AnaPed( StFcsHit* hit, float& ped, float& pedstd )
     }
     if(tb>=mPedMax) break;
   }
-  ped = float(p)/(mPedMax-mPedMin+1.0);
-  pedstd = sqrt( ( sumsq-((double(p)*double(p))/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+  ped = p/(mPedMax-mPedMin+1.0);
+  pedstd = sqrt( ( sumsq-((p*p)/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
   return ped;
 }
 
@@ -1730,8 +1730,6 @@ std::vector<int> StFcsWaveformFitMaker::NPeaksPrePost(int& trigidx,Double_t& xmi
       if( xmax < mPulseFit->GetPeak(i).mEndX ){ xmax = mPulseFit->GetPeak(i).mEndX; }
     }
   }
-  //std::cout << "|fountrigidx:"<<foundtrigidx << "|trigidx:"<<trigidx << std::endl;
-  //for( unsigned int i=0; i<valididx.size(); ++i ){ std::cout << " - |valididx|i:" << i << "|at:"<< valididx.at(i) << std::endl; }
   if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeaksPrePost: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
   return valididx;
 }

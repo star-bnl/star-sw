@@ -647,7 +647,7 @@ void StFcsPulseAna::SetFitPars(TF1*& func, int start, int end)
   func->SetParName(1,"Ped");
   for( int i=0; i<npeaks; ++i ){
     int j = 1+i*3+1;
-    char name[10];
+    char name[40];
     sprintf(name,"P%d_A",start+i);
     func->SetParName(j,name);
     para[j++] = GetPeak(start+i).mPeakY;
