@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/tof_slat_eta Allocated rows: 18  Used rows: 18  Row size: 36 bytes
 //  Table: ctg_slat_eta_st[0]--> ctg_slat_eta_st[17]
@@ -207,5 +207,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.z_min	 =     205.56; // ;
 tableSet->AddAt(&row,17);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

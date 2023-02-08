@@ -92,7 +92,12 @@ void StMuFcsUtil::fillMuFcsHits(StMuFcsCollection* muFcs,
             );
 
             // set the corrected energy too
-            muFcsHit->setEnergy( vecHit[i]->energy() );
+	    muFcsHit->setAdcSum  ( vecHit[i]->adcSum()  );
+	    muFcsHit->setFitPeak ( vecHit[i]->fitPeak() );
+	    muFcsHit->setFitSigma( vecHit[i]->fitSigma());
+	    muFcsHit->setFitChi2 ( vecHit[i]->fitChi2() );
+	    muFcsHit->setNPeak   ( vecHit[i]->nPeak()   );
+            muFcsHit->setEnergy  ( vecHit[i]->energy()  );
 
             // store in memory map between StEvent and StMuDst version
             mMapHits[ fcscol->hits(idet)[i] ] = muFcsHit;
@@ -284,6 +289,11 @@ void StMuFcsUtil::fillFcsHits(StFcsCollection* fcscol,
             l, muHit->data()
         );
 
-    hit->setEnergy( muHit->energy() );
+    hit->setAdcSum  ( muHit->adcSum()  );
+    hit->setFitPeak ( muHit->fitPeak() );
+    hit->setFitSigma( muHit->fitSigma());
+    hit->setFitChi2 ( muHit->fitChi2() );
+    hit->setNPeak   ( muHit->nPeak()   );
+    hit->setEnergy  ( muHit->energy() );
   }  // while
 } // fillFcsHits
