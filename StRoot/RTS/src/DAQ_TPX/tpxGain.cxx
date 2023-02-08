@@ -828,7 +828,7 @@ void tpxGain::do_default(int sec)
 	return ;
 }
 
-int tpxGain::from_file(char *fname, int sec)
+int tpxGain::from_file(const char *fname, int sec)
 {
 	FILE *f ;
 	int s, r, p ;
@@ -999,7 +999,7 @@ int tpxGain::from_file(char *fname, int sec)
 }
 
 
-int tpxGain::to_file(char *fname) 
+int tpxGain::to_file(const char *fname) 
 {
 
 	FILE *f ;
