@@ -274,10 +274,12 @@ void StFttFastSimMaker::FillThinGapChambers(StEvent *event) {
         float yhit = hit->x[1];
         float zhit = hit->x[2];
         int volume_id = hit->volume_id;
-        int disk = (volume_id - 1) / 4 + 9 ; // add 7 to differentiat from FST - dedicated collection will not need 
-
+        // volume_id = (1 front | 2 back) + 10 * (quadrant 0-3) + 100 * (station 0-4)
+        int disk = ((volume_id - 1) / 100) + 9 ; 
         LOG_DEBUG << "sTGC hit: volume_id = " << volume_id << " disk = " << disk << endm;
-        if (disk < 9)
+        
+        // Now that geometry has a front and back, we skip points on the back module for fast sim
+        if (disk < 9 || volume_id % 2 == 0)
             continue;
 
         float theta = DiskRotation(disk);

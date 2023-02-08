@@ -33,7 +33,14 @@ class StMessMgr;
 #include "TAttr.h"
 #include "Rtypes.h"
 #endif
-StBFChain    *chain=0; 
+
+#if !defined(__CINT__) || defined(__CLING__)
+// 'chain' is defined in StBFChain library (see StRoot/StBFChain.cxx)
+extern StBFChain* chain;
+#else
+StBFChain* chain = 0;
+#endif
+
 //_____________________________________________________________________
 //_________________ Prototypes _______________________________________________
 void Usage();
