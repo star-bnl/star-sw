@@ -64,7 +64,8 @@ source ${GROUP_DIR}/group_env.csh
 #else
 source ${GROUP_DIR}/setup    gcc
 #endif
-source ${GROUP_DIR}/setup    32b
+#source ${GROUP_DIR}/setup    32b
+source ${GROUP_DIR}/setup    64b
 #setup gcc492
 #setup 32b
 #source ${GROUP_DIR}/.starver ${STAR_LEVEL}

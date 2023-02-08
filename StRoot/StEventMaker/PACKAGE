@@ -1,6 +1,4 @@
 # $Id $
 # package StEventMaker
 # author: 
-#Library:libStEventMaker.so:LIBS +=   -lgen_Tables  -lglobal_Tables  -lStChain  -lStDAQMaker  -lStDetectorDbMaker  -lStEvent  -lStTpcDb
 Library:libStEventMaker.so:LIBS +=   -lgen_Tables  -lStChain  -lStDAQMaker  -lStDetectorDbMaker  -lStEvent  -lStTpcDb
-#Library:libStEventMaker.so:LIBS +=   -lgen_Tables  -lglobal_Tables  -lStChain  -lStDAQMaker  -lStDetectorDbMaker  -lStEvent  -lStTpcDb

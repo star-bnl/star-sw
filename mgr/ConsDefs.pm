@@ -86,8 +86,8 @@
  my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
  my $RCINTPL    = "";
- my $ROOTCLING  = ""; # switch off cling
-#  my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
+# my $ROOTCLING  = ""; # switch off cling
+  my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
  if (! -e $ROOTCLING) {
    $ROOTCLING = "";
    $RCINTPL = cwd() . "/mgr/RootCint.pl";

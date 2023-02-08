@@ -2,4 +2,3 @@
 # package StPCollTagMaker
 # author: 
 Library:libStPCollTagMaker.so:LIBS +=   -lglobal_Tables  -lStChain    -lStEvent
-#Library:libStPCollTagMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStEvent

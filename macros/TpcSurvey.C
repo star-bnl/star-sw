@@ -28,7 +28,7 @@
 #include "TLegend.h"
 #include "TLinearFitter.h"
 #include "TString.h"
-#include "TRegexp.h"
+#include "TPRegexp.h"
 #include "Ask.h"
 #include "TArrayD.h"
 #include "TArc.h"
@@ -45,15 +45,17 @@ struct FitP_t {
 FitP_t BP;
 const Char_t *vFitP = "set/I:side/I:sector/I:io/I:row/I:ndf/I:z:dz:alpha:dalpha:beta:dbeta:gamma:dgamma:chisq:res:dres";
 struct SurveyData_t {
-  const Char_t *system;
-  const Char_t *target;
+  TString system;
+  TString target;
   Double_t XSurvey, YSurvey, ZSurvey; // (X, Z, Y)
   Double_t dXSurvey, dYSurvey, dZSurvey;
   const Char_t *comment;
 };
-Bool_t fInitMatrices = kFALSE;
-//#include "SurveyData_2003_2004_2013.h"
-#include "SurveyData_2003_2004_2013_2022_2023.h"
+#include "Survey_01_13_2023.h"
+#include "Survey_02_01_2013.h"
+#include "Survey_06_02_2022.h"
+#include "Survey_08_01_2004.h"
+#include "Survey_09_17_2003.h"
 //                 MagCS       : MagCS => SurCS, survey coordinate system => magnet, index l : 0 => 2003, 1 => 2004, 2 => 2013 data
 //                 TpcCS       : Tpc as Whole SurCS; TpcCS => SurCS = (MagCS => SurCS) * (survTpc == TpcCS => MagCS) =  MagCS * survTpc
 //                 WheelCS[2]  : Wheel in Tpc  (0 => West, 1 => East) : (MagCS => SurCS) * (TpcCS => MagCS) * (survWheelW == WheelCS => TpcCS) = TpcCS * survWheelW
@@ -64,7 +66,7 @@ TLinearFitter *lf = 0;
 TGraph2DErrors *graphs[2][3][3];
 TGraphErrors *graphfit = 0;
 TH2          *h2fit = 0;
-
+TGraph2DErrors *graph = 0;
 //TMultiGraph    *mg = 0;
 TProfile2D *prof2D = 0;
 TProfile2D *prof2DRphi = 0;
@@ -72,15 +74,15 @@ TH1D       *zPlot = 0;
 TNtuple    *FitP  = 0;
 TFile      *fOut  = 0;
 std::ostream&  operator<<(std::ostream& os,  const SurveyData_t& v) {
-  os << Form("%10s",v.system);
+  os << Form("%10s",v.system.Data());
   os << Form("%10s X = %10.3f +/- %6.3f Y = %10.3f +/- %6.3f Z = %10.3f +/- %6.3f %s",
-	     v.target,
+	     v.target.Data(),
 	     v.XSurvey,v.dXSurvey,
 	     v.YSurvey,v.dYSurvey,
 	     v.ZSurvey,v.dZSurvey,
 	     v.comment);
   Double_t x = v.XSurvey;
-  Double_t y =v.YSurvey;
+  Double_t y = v.ZSurvey;
   os << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
 
   //  if (TMath::Abs(TMath::Abs(v.YSurvey) - 120) < 20) os << " ++++++++++++++";
@@ -124,40 +126,59 @@ SurveyData_t *GetSurvey(Int_t y, TString &year, Int_t &N) {
     cout << "This file contains the last survey for TPC (06/02/2022)" << endl;
     N = sizeof(Survey_6_02_22)/sizeof(SurveyData_t);
     surv = &Survey_6_02_22[0];
-  } else {
+  } else if (y == 2023) {
     scale = 2.54; // inches
     year = "2023";
     cout << "This file contains the last survey for TPC (01/13/2023)" << endl;
     N = sizeof(Survey_01_13_2023)/sizeof(SurveyData_t);
     surv = &Survey_01_13_2023[0];
+  } else {
+    cout << "There is no survey for year " << y << endl;
+    return 0;
   }
   Y = year;
   Nold = N;
+  if (survey) delete [] survey;
   survey = new SurveyData_t[N];
   for (Int_t i = 0; i < N; i++) {
     survey[i] = surv[i];
+    if (survey[i].dXSurvey < 1e-10) survey[i].dXSurvey = 0.01;
+    if (survey[i].dYSurvey < 1e-10) survey[i].dYSurvey = 0.01;
+    if (survey[i].dZSurvey < 1e-10) survey[i].dZSurvey = 0.01;
     if (y < 2022) {
       survey[i].XSurvey *=  scale; survey[i].dXSurvey *= scale; 
       survey[i].YSurvey *=  scale; survey[i].dYSurvey *= scale; 
       survey[i].ZSurvey *=  scale; survey[i].dZSurvey *= scale; 
-      // rename to STAR Eest TPC sector notation
+      continue;
     } else {
-      survey[i].XSurvey =  scale*surv[i].XSurvey;  
-      survey[i].YSurvey =  scale*surv[i].ZSurvey;  
-      survey[i].ZSurvey = -scale*surv[i].YSurvey;    
-      if (TString(survey[i].system).Contains("Tpc") && TString(survey[i].target).BeginsWith("E")) {
-	Int_t sector, row;
-	sscanf(survey[i].target,"E%i_%i",&sector,&row);
-	if (sector > 0 && sector <= 12) {
-	  sector = sector + 12;
-	  survey[i].target = Form("E%i_%i",sector,row);
+      survey[i].XSurvey *=  scale; survey[i].dXSurvey *= scale; 
+      survey[i].YSurvey *= -scale; survey[i].dYSurvey *= scale; // old survey was done in left handed coordinate system
+      survey[i].ZSurvey *=  scale; survey[i].dZSurvey *= scale; 
+      // rename to STAR Eest TPC sector notation
+      Int_t sector, row;
+      if (y == 2023 && survey[i].system.Contains("Tpc") ) {
+	if (TString(survey[i].target).BeginsWith("ETPC")) {
+	  sscanf(survey[i].target,"ETPC%i_%i",&sector,&row);
+	  if (sector > 0 && sector <= 12) {
+	    sector = sector + 12;
+	    survey[i].target = Form("E%i_%i",sector,row);
+	  }
+	} 
+	if (TString(survey[i].target).BeginsWith("WTPC")) {
+	  sscanf(survey[i].target,"WTPC%i_%i",&sector,&row);
+	  survey[i].target = Form("W%i_%i",sector,row);
 	}
       }
     }
-    if (survey[i].dXSurvey < 1e-10) survey[i].dXSurvey = 0.01;
-    if (survey[i].dYSurvey < 1e-10) survey[i].dYSurvey = 0.01;
-    if (survey[i].dZSurvey < 1e-10) survey[i].dZSurvey = 0.01;
-    cout << survey[i] << endl;
+    // to Old notations
+    const Char_t *ABCD[5] = {"?","A", "B", "C", "D"}; 
+    Char_t WE[2];
+    Int_t sector, row;
+    Int_t nread = sscanf(survey[i].target,"%1s%i_%i",&WE,&sector,&row);
+    if (nread == 3 && sector > 0 && sector <= 24 && row > 0 && row <= 4) {
+      survey[i].target = Form("%s%sO%02i",WE,ABCD[row],sector);
+    }
+    //    cout << survey[i] << endl;
   }
   return survey;
 }
@@ -171,14 +192,29 @@ void PrintSurvey(Int_t year = 2022) {
   }
 }
 //________________________________________________________________________________
-void InitMatrices() {
-  if (fInitMatrices) return;
+Bool_t InitMatrices(Int_t y = 0) {
+  static Bool_t fInitMatrices[5] = {0};
+  /*
+    MagCS[ly]                                   : Survey to Magnet
+    TpcCS[ly] = MagCS[ly] * survTpc;            : Survey to Tpc
+    WheelCS[side][ly] = TpcCS[ly] * survWheelW  : Survey to Wheel
+
+    xyzG => xyzL: WheelCS[side][l].MasterToLocal(xyzG,xyzL);
+   */
   Int_t years[5] = {2003,2004,2013,2022,2023};
-  for (Int_t ly = 0; ly < 5; ly++) {
+  Int_t ly = -1;
+  for (Int_t lY = 0; lY < 5; lY++) {
+    if (y == years[lY]) {
+      ly = lY;
+      break;
+    }
+  } 
+  if (fInitMatrices[ly]) return fInitMatrices[ly];
+  //  for (Int_t ly = 0; ly < 5; ly++) {
     // Surver => Magnet
     MagCS[ly] = TGeoHMatrix();
     Int_t l = ly;
-    if (ly > 2) l = 2;
+    //    if (ly > 2) l = 2;
 #define __Mag2Surv__
 #ifdef  __Mag2Surv__
     Double_t survMagnetZabg[5][2][6] = { // Survey => Magnet
@@ -189,20 +225,20 @@ void InitMatrices() {
        {0., 0.,-362.5550, 0, 0, 0}}, // 2004,EF 1-8
       {{0., 0., 362.5011, 0, 0, 0},  // y2013w Coordinates are in STAR magent system
        {0., 0.,-362.5550, 0, 0, 0}}, // y2013e
-      {{0., 0., 362.5011, 0, 0, 0},  // y2022w Coordinates are in STAR magent system << 2013
-       {0., 0.,-362.5550, 0, 0, 0}}, // y2022e
-      {{0., 0., 362.5011, 0, 0, 0},  // y2023w Coordinates are in STAR magent system << 2013
-       {0., 0.,-362.5550, 0, 0, 0}}};// y2023e
+      {{0, 0, 0, 0, 0, 0},  // y2022w Coordinates are in STAR magent system << 2013
+       {0, 0, 0, 0, 0, 0}}, // y2022e
+      {{0, 0, 0, 0, 0, 0},  // y2023w Coordinates are in STAR magent system << 2013
+       {0, 0, 0, 0, 0, 0}}};// y2023e
     
-    Double_t anglesMagnet[3] = {(survMagnetZabg[l][0][3]+survMagnetZabg[l][1][3])/2,
-				(survMagnetZabg[l][0][4]+survMagnetZabg[l][1][4])/2,
-				(survMagnetZabg[l][0][5]+survMagnetZabg[l][1][5])/2};
-    Double_t transMagnet[3] = {(survMagnetZabg[l][0][0]+survMagnetZabg[l][1][0])/2,
-			       (survMagnetZabg[l][0][1]+survMagnetZabg[l][1][1])/2,
-			       (survMagnetZabg[l][0][2]+survMagnetZabg[l][1][2])/2};
+    Double_t anglesMagnet[3] = {(survMagnetZabg[ly][0][3]+survMagnetZabg[ly][1][3])/2,
+				(survMagnetZabg[ly][0][4]+survMagnetZabg[ly][1][4])/2,
+				(survMagnetZabg[ly][0][5]+survMagnetZabg[ly][1][5])/2};
+    Double_t transMagnet[3] = {(survMagnetZabg[ly][0][0]+survMagnetZabg[ly][1][0])/2,
+			       (survMagnetZabg[ly][0][1]+survMagnetZabg[ly][1][1])/2,
+			       (survMagnetZabg[ly][0][2]+survMagnetZabg[ly][1][2])/2};
 #endif /*  __Mag2Surv__ */
     cout << Form("%4i,Magnet xyz (cm) = %9.4f %9.4f %9.4f abg[mrad] = %5.2f %5.2f %5.2f",
-		 years[l],transMagnet[0],transMagnet[1],transMagnet[2],anglesMagnet[0],anglesMagnet[1],anglesMagnet[2]) << endl;
+		 years[ly],transMagnet[0],transMagnet[1],transMagnet[2],anglesMagnet[0],anglesMagnet[1],anglesMagnet[2]) << endl;
     MagCS[ly].RotateX(1e-3*TMath::RadToDeg()*anglesMagnet[0]);
     MagCS[ly].RotateY(1e-3*TMath::RadToDeg()*anglesMagnet[1]);
     MagCS[ly].RotateZ(1e-3*TMath::RadToDeg()*anglesMagnet[2]);
@@ -211,21 +247,28 @@ void InitMatrices() {
     MagCS[ly].Print();
     // Survey => Magenet => Tpc
     TGeoHMatrix survTpc;
-    //#define __Tpc2Mag__
+#define __Tpc2Mag__
 #ifdef  __Tpc2Mag__  /* East Wheel for TPC  */
     Double_t Tpcxyzabg[5][6] = {
       {-0.2287 -0.0445+0.0046,  -0.1745 +0.0169-0.0014, -231.6913+0.0258,-0.04, -0.46, 0.36}, //  2003,"Tpc","^E..."
       {-0.2287 +0.0094-0.0162,  -0.1745 +0.0370+     0, -231.6945+0.0269, 0.10, -0.55, 0.52}, //  2004,"Tpc","^E..."
       {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}, //  2013,"Tpc","^E..."
-      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}, //  2022,"Tpc","^E..." << 2013
-      {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}};//  2023,"Tpc","^E..." << 2013
-    Double_t transTpc[3]  = {Tpcxyzabg[l][0], Tpcxyzabg[l][1], Tpcxyzabg[l][2]+229.71+1.7780}; // 3-rd iteration
-    survTpc.RotateX(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][3]);
-    survTpc.RotateY(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][4]);
-    survTpc.RotateZ(1e-3*TMath::RadToDeg()*Tpcxyzabg[l][5]);
+#if 0
+      {0,   0, 0, 0, 0, 0}, //  2022,"Tpc","^E..." << 2013
+      {0,   0, 0, 0, 0, 0}  //  2023,"Tpc","^E..." << 2013
+#else
+      {0,   0, 0.785340, 0, 0.61, 0}, //  2022,"Tpc","^E..." << 2013
+      {0,   0, 0.771450, 0, 0.61, 0}  //  2023,"Tpc","^E..." << 2013
+#endif
+    };
+    Double_t transTpc[3]  = {Tpcxyzabg[ly][0], Tpcxyzabg[ly][1], Tpcxyzabg[ly][2]}; // 3-rd iteration
+    if (ly < 3) transTpc[2] += 229.71+1.7780;
+    survTpc.RotateX(1e-3*TMath::RadToDeg()*Tpcxyzabg[ly][3]);
+    survTpc.RotateY(1e-3*TMath::RadToDeg()*Tpcxyzabg[ly][4]);
+    survTpc.RotateZ(1e-3*TMath::RadToDeg()*Tpcxyzabg[ly][5]);
     survTpc.SetTranslation(transTpc);
     cout << Form("%4i,Tpc xyz (cm) = %9.4f %9.4f %9.4f abg[mrad] = %5.2f %5.2f %5.2f",
-		 years[ly],transTpc[0],transTpc[1],transTpc[2],Tpcxyzabg[l][3],Tpcxyzabg[l][4],Tpcxyzabg[l][5]) << endl;
+		 years[ly],transTpc[0],transTpc[1],transTpc[2],Tpcxyzabg[ly][3],Tpcxyzabg[ly][4],Tpcxyzabg[ly][5]) << endl;
     Double_t *rotTpc = survTpc.GetRotationMatrix();
     Double_t *trTpc  = survTpc.GetTranslation();
     cout << "{0,";
@@ -243,67 +286,35 @@ void InitMatrices() {
 #endif
     for (Int_t side = 0; side < 2; side++) { // West and East
       TGeoHMatrix survWheelW;
-      //#define __Wheel2Tpc__ 
+
+#define __Wheel2Tpc__ 
 #ifdef  __Wheel2Tpc__
       const Char_t *sideName[2] = {"west","east"};
-      Double_t survWheelZabg[3][2][6] = { // Survey => Tpc == average Wheel => Wheel
-#if defined(__1ST_ITER__)
-	{{0., 0., 231.5017,  0.13,  0.12, 0},  //  MakeGraph(2003,"Tpc","^W...")
-	 {0., 0.,-231.4622, -0.00, -0.00, 0}}, //  MakeGraph(2003,"Tpc","^E...")
-	{{0., 0., 231.5074,  0.09,  0.10, 0},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         {0., 0.,-231.4560,  0.00,  0.00, 0}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{0., 0., 231.4993,  0.16,  0.11, 0},  //  MakeGraph(2013,"Tpc","^W...")       
-	 {0., 0.,-231.4611, -0.00, -0.00, 0}}  //  MakeGraph(2013,"Tpc","^E...")
-#elif defined(__2ND_ITER__)
-	{{0., 0., 231.4759,  0.13,  0.12, 0},  //  MakeGraph(2003,"Tpc","^W...")
-	 {0., 0.,-231.4880, -0.00, -0.00, 0}}, //  MakeGraph(2003,"Tpc","^E...")
-	{{0., 0., 231.4805,  0.08,  0.10, 0},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         {0., 0.,-231.4829,  0.00,  0.00, 0}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{0., 0., 231.4724,  0.16,  0.11, 0},  //  MakeGraph(2013,"Tpc","^W...")       
-	 {0., 0.,-231.4880, -0.00, -0.00, 0}}  //  MakeGraph(2013,"Tpc","^E...")
-#elif defined(__3RD_ITER__)
-	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35},  //  MakeGraph(2003,"Tpc","^W...")
-	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04}}, //  MakeGraph(2003,"Tpc","^E...")
-	{{ 0.0330, -0.0092, 231.4805,  0.08,  0.10, -0.34},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         { 0.    , -0.0001,-231.4829,  0.00,  0.00,  0.05}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36},  //  MakeGraph(2013,"Tpc","^W...")       
-	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03}} //  MakeGraph(2013,"Tpc","^E...")
-#elif defined(__4TH_ITER__)
-	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35-0.04},  //  MakeGraph(2003,"Tpc","^W...")
-	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04     }}, //  MakeGraph(2003,"Tpc","^E...")
-	{{ 0.0330, -0.0092, 231.4805,  0.08,  0.10, -0.34-0.03},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         { 0.    , -0.0001,-231.4829,  0.00,  0.00,  0.05-0.02}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36-0.03},  //  MakeGraph(2013,"Tpc","^W...")       
-	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02}} //  MakeGraph(2013,"Tpc","^E...")
-#elif defined(__5TH_ITER__)
+      Double_t survWheelZabg[5][2][6] = { // Survey => Tpc == average Wheel => Wheel
 	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35-0.04},  //  MakeGraph(2003,"Tpc","^W...")
 	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04     }}, //  MakeGraph(2003,"Tpc","^E...")
 	{{ 0.0330, -0.0092, 231.4805,  0.08,  0.10, -0.34-0.03},  //  MakeGraph(2004,"Tpc","^W...")            	  
          { 0.    , -0.0001,-231.4829,  0.00,  0.00,  0.05-0.02+0.02}}, //  MakeGraph(2004,"Tpc","^E...")
+
 	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36-0.03},  //  MakeGraph(2013,"Tpc","^W...")       
-	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02+0.06}} //  MakeGraph(2013,"Tpc","^E...")
-#elif defined(__6TH_ITER__)
-	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35-0.04},  //  MakeGraph(2003,"Tpc","^W...")
-	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04     }}, //  MakeGraph(2003,"Tpc","^E...")
-	{{ 0.0330, -0.0092, 231.4805,  0.08,  0.10, -0.34-0.03},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         { 0.    , -0.0001,-231.4829,  0.00,  0.00,  0.05-0.02+0.02}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36-0.03},  //  MakeGraph(2013,"Tpc","^W...")       
-	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02+0.06-0.03}} //  MakeGraph(2013,"Tpc","^E...")
-#else
-	{{ 0.0393, -0.0305, 231.4759,  0.13,  0.12, -0.35-0.04},  //  MakeGraph(2003,"Tpc","^W...")
-	 { 0.    ,  0.    ,-231.4880, -0.00, -0.00,  0.04     }}, //  MakeGraph(2003,"Tpc","^E...")
-	{{ 0.0330, -0.0092, 231.4805,  0.08,  0.10, -0.34-0.03},  //  MakeGraph(2004,"Tpc","^W...")            	  
-         { 0.    , -0.0001,-231.4829,  0.00,  0.00,  0.05-0.02+0.02}}, //  MakeGraph(2004,"Tpc","^E...")
-	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36-0.03},  //  MakeGraph(2013,"Tpc","^W...")       
-	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02+0.06-0.03-0.01}} //  MakeGraph(2013,"Tpc","^E...")
+	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02+0.06-0.03-0.01}}, //  MakeGraph(2013,"Tpc","^E...")
+	{{ 0, 0,   (229.71+1.7780+30.033+ 0.7784-0.0184), 0.47, 0, 0},  //0  Alexei: 30.033 cm + 0.7784 => 30.7930 cm
+	 { 0, 0,  -(229.71+1.7780+30.033+ 0.7784-0.0184), 0.15, 0, 0}}, //0 
+	{{ 0, 0,   (229.71+1.7780+27.007+ 0.7784-2.4063), 0.39, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+	 { 0, 0,  -(229.71+1.7780+27.007+ 0.7784-2.4063), 0.01, 0, 0}}  //0 
 #endif
       };
       cout << Form("%4i,Wheel xyz (cm) = %8.4f %8.4f %8.4f abg[mrad] = %6.2f  %6.2f  %6.2f",
 		   years[ly],survWheelZabg[l][side][0],survWheelZabg[l][side][1],survWheelZabg[l][side][2],
 		   survWheelZabg[l][side][3],survWheelZabg[l][side][4],survWheelZabg[l][side][5]) << endl;
       Double_t z = survWheelZabg[l][side][2];
-      if (z > 0) z -= (229.71+1.7780);
-      else       z += (229.71+1.7780);
+#if 0
+      if (ly < 3) {
+	if (z > 0) z += (229.71+1.7780);
+	else       z -= (229.71+1.7780);
+      }
+      survWheelZabg[l][side][2] = z;
+#endif
       cout << Form("%4i,TpcHalf xyz (cm) = %8.4f %8.4f %8.4f abg[mrad] = %6.2f  %6.2f  %6.2f",
 		   years[ly],survWheelZabg[l][side][0],survWheelZabg[l][side][1],z,
 		   survWheelZabg[l][side][3],survWheelZabg[l][side][4],survWheelZabg[l][side][5]) << endl;
@@ -326,13 +337,14 @@ void InitMatrices() {
       WheelCS[side][ly].SetName(Form("WheelCS%i_%i",side,ly));
       WheelCS[side][ly].Print();
     }
-    } // year
-  fInitMatrices = kTRUE;
+    //    } // year
+  fInitMatrices[ly] = kTRUE;
+  return fInitMatrices[ly];
 }
 //________________________________________________________________________________
 void FitGraph(TGraph2DErrors *graph = 0) {
   if (! graph) return;
-  graph->Print("");
+  //  graph->Print("");
   if (lf ) {delete lf; lf = 0;}
   Int_t n = graph->GetN();
   cout << "graph " << graph->GetName() << " with " << n << " points" << endl;
@@ -363,9 +375,7 @@ void FitGraph(TGraph2DErrors *graph = 0) {
     if (ymax < x[2*i+1]) ymax = x[2*i+1];
     y[i]     = graph->GetZ()[i];
     e[i]     = graph->GetEZ()[i];
-    if (n < 4) {
-      cout << Form("%2i xy %8.3f %8.3f z %8.3f +/- %8.2f",i,x[2*i  ],x[2*i+1],y[i],e[i]) << endl;
-    }
+    cout << Form("%2i xy %8.3f %8.3f z %8.3f +/- %8.2f",i,x[2*i  ],x[2*i+1],y[i],e[i]) << endl;
   }
   if (n < 3) return;
   lf->AssignData(n, 2, x, y, e);
@@ -397,7 +407,7 @@ void FitGraph(TGraph2DErrors *graph = 0) {
     xav     += x[2*l  ];
     yav     += x[2*l+1];
     zav     += y[l];
-#if 0
+#if 1
     cout << Form("%2i xy %8.3f %8.3f z %8.3f +/- %8.2f res = %8.0f dev = %7.2f Bit: %1i",
 		 l,x[2*l  ],x[2*l+1],y[l],e[l],1e4*res,dev,bits.TestBitNumber(l)) << endl;
 #endif
@@ -424,7 +434,7 @@ void FitGraph(TGraph2DErrors *graph = 0) {
   TString line(Form("%-12s",graph->GetTitle()));
   //    line += Form("\txyz = %8.3f %8.3f %8.3f z =%9.4f +/- %6.4f (cm) alpha =%6.2f +/- %4.2f [mrad] beta =%6.2f +/- %4.2f [mrad] chi2/ndf%7.2f/%2i",
   //		 xav,yav,zav,params(0),errors(0),1e3*params(2),1e3*errors(2),-1e3*params(1),1e3*errors(1),chisquare,j-3);
-  line += Form("z =%9.4f +/- %6.4f (cm) alpha =%6.2f +/- %4.2f [mrad] beta =%6.2f +/- %4.2f [mrad] chi2/ndf%12.2f/%4i",
+  line += Form("\tz =%9.4f +/- %6.4f (cm) alpha =%6.2f +/- %4.2f [mrad] beta =%6.2f +/- %4.2f [mrad] chi2/ndf%12.2f/%4i",
 	       params(0),errors(0),1e3*params(2),1e3*errors(2),-1e3*params(1),1e3*errors(1),chisquare,j-3);
   if (FitP) {
     BP.z = params(0); BP.dz = errors(0);
@@ -467,7 +477,7 @@ void FitGraph(TGraph2DErrors *graph = 0) {
     Double_t res2  = 0;
     for (Int_t l = 0; l < n; l++) {
       Double_t res = Yold[l] - func->Eval(Xold[2*l],Xold[2*l+1]);
-#if 0
+#if 1
       cout << Form("Res %7.1f (mkm) at %4i x = %8.4f and y = %8.4f",1e4*res,l,Xold[2*l],Xold[2*l+1]) << endl;
 #endif
       resAv += res;
@@ -504,8 +514,9 @@ void FitGraph(TGraph2DErrors *graph = 0) {
 }
 //________________________________________________________________________________
 TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const Char_t *pattern = "^WF", Double_t zmin = 0, Double_t zmax = 0/*, Int_t section = 0 */) {
+  if (! InitMatrices(iY)) return 0;
   TString patt(pattern);
-  TRegexp reg(pattern);
+  TPRegexp reg(pattern);
   Int_t side = -1;
   if (patt.BeginsWith("^W")) {side = 0;}
   if (patt.BeginsWith("^E")) {side = 1;}
@@ -556,11 +567,12 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
   BP.side = side;
   name ="G";
   name += Name;
-  TGraph2DErrors *graph = (TGraph2DErrors *) gDirectory->Get(name);
+  graph = (TGraph2DErrors *) gDirectory->Get(name);
   if (graph) {delete graph; graph = 0;}
   graph = new TGraph2DErrors();
   graph->SetName(name);
-  graph->SetTitle(name);
+  TString Title(Form("MakeGraph(%i,\"%s\",\"%s\",%5.0f,%5.0f)", iY, system, pattern, zmin,zmax));
+  graph->SetTitle(Title);
   name ="P";
   name += Name;
   TProfile2D *prof2D = (TProfile2D *) gDirectory->Get(name);
@@ -587,7 +599,7 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
     }
     TString Target(survey->target);
     TString Comment(survey->comment);
-#if 0
+#if 1
     if (survey->YSurvey < zmin || survey->YSurvey > zmax) {
       //      cout << "Z " << *survey << " skipped" << endl;
       continue;
@@ -608,16 +620,24 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
       xyzL[2] = xyzG[2];
     } else {
       if (System == "Magnet")     MagCS[l].MasterToLocal(xyzG,xyzL);
-      else                        WheelCS[side][l].MasterToLocal(xyzG,xyzL);
-    }
+      else                       {
+	WheelCS[side][l].MasterToLocal(xyzG,xyzL);
 #if 0
-    //    Double_t x = survey->XSurvey;
-    //    Double_t y = survey->ZSurvey;
-    Double_t x = xyzL[0];
-    Double_t y = xyzL[1];
-    cout << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
-    cout << endl;
+	if (n < 1) {
+	WheelCS[side][l].Print();
+	cout << Form("xyzG: %8.3f  %8.3f  %8.3f => xyzL:  %8.3f  %8.3f  %8.3f",xyzG[0],xyzG[1],xyzG[2],xyzL[0],xyzL[1],xyzL[2]) << endl;
+#if 0
+	//    Double_t x = survey->XSurvey;
+	//    Double_t y = survey->ZSurvey;
+	Double_t x = xyzL[0];
+	Double_t y = xyzL[1];
+	cout << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
+	cout << endl;
 #endif
+	}
+#endif
+      }
+    }
     graph->SetPoint(n,xyzL[0],xyzL[1],xyzL[2]);
     graph->SetPointError(n,survey->dXSurvey,survey->dZSurvey,survey->dYSurvey);
     prof2D->Fill(xyzL[0],xyzL[1],xyzL[2]);
@@ -632,11 +652,12 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
 #endif
     n++;
   }
-#if 0
+#if 1
   if (n > 0) FitGraph(graph);
 #endif
   fOut->Write();
-  SafeDelete(fOut);
+  //  SafeDelete(fOut);
+  fOut = 0;
   return graph;
 }
 //____________________________________________________________________
@@ -839,13 +860,15 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
   if (iY == 2003) l = 0;
   if (iY == 2004) l = 1;
   if (iY == 2013) l = 2;
+  if (iY == 2022) l = 3;
+  if (iY == 2023) l = 4;
   if (l < 0) {
     cout << "Illegal year" << endl;
     return 0;
   }
   const Char_t *system = "Tpc";
   TString patt(pattern);
-  TRegexp reg(pattern);
+  TPRegexp reg(pattern);
   TString System(system);
   Int_t N = 0;
   TString year;
@@ -868,16 +891,18 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
   Int_t n = 0;
   survey = survey0;
   for (Int_t i = 0; i < N; i++, survey++) {
-    if (! System.Contains(survey->system,TString::kIgnoreCase)) continue;
-    TString Target(survey->target);
-    Int_t sec;
-    Int_t nread = sscanf(Target.Data(),"%*3c%2i",&sec);
-    if (nread != 1) continue;
-#if 0
-    if (survey->YSurvey < zmin || survey->YSurvey > zmax) continue;
-#endif
-    if (! Target.Contains(reg)) continue;
     cout << *survey;
+    if (! survey->system.Contains("Tpc",TString::kIgnoreCase)) { cout << "  " << endl; continue;}
+    if (! survey->target.Contains(reg)) { cout << "  " << endl; continue;}
+    Int_t sec;
+    Int_t nread = sscanf(survey->target.Data(),"%*3c%2i",&sec);
+    if (nread != 1) { cout << "  " << endl; continue;}
+#if 0
+    TString Target(survey->target);
+#if 0
+    if (survey->YSurvey < zmin || survey->YSurvey > zmax) { cout << "  " << endl; continue;}
+#endif
+#endif
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
     Double_t xyzL[3];
     WheelCS[side][l].MasterToLocal(xyzG,xyzL);
@@ -886,13 +911,14 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     Double_t x = xyzL[0];
     Double_t y = xyzL[1];
     Double_t r = TMath::Sqrt(x*x + y*y);
-    if (r < rmin || r > rmax) continue;
-    cout << endl;
+    if (r < rmin || r > rmax) { cout << "  " << endl; continue;}
+    cout << " Accepted" <<  endl;
     if (! graph) {
       graph = new TGraphErrors();
       TString Name = survey->system; Name += survey->target; Name += year;
       graph->SetName(Name);
-      graph->SetTitle(Name);
+      TString Title(Form("MakeRGraph(%i,\"%s\",%5.0f,%5.0f,%5.0f,%5.0f,%i)", iY, pattern, zmin,zmax,rmin,rmax,(Int_t)ellipse));
+      graph->SetTitle(Title);
     }
     //    graph->SetPoint(n,survey->XSurvey,survey->ZSurvey);
     graph->SetPoint(n,xyzL[0],xyzL[1]);
@@ -920,12 +946,12 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     if (! System.Contains(survey->system,TString::kIgnoreCase)) continue;
     TString Target(survey->target);
     Int_t sec;
-    Int_t nread = sscanf(Target.Data(),"%*3c%2d",&sec);
+    Int_t nread = sscanf(survey->target.Data(),"%*3c%2d",&sec);
     if (nread != 1) continue;
 #if 0
     if (survey->YSurvey < zmin || survey->YSurvey > zmax) continue;
 #endif
-    if (! Target.Contains(reg)) continue;
+    if (! survey->target.Contains(reg)) continue;
     cout << *survey;
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
     Double_t xyzL[3];
@@ -960,17 +986,24 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
   gamma /= n;
   gamma2 /= n;
   Double_t dgam = TMath::Sqrt(gamma2 - gamma*gamma)/TMath::Sqrt(n-1);
-  cout << Form("%10s",graph->GetName());
-  cout << Form(" x0 =%8.4f +/- %7.4f y0 =%8.4f +/- %7.4f R =%8.4f +/- %7.4f gamma =%6.2f +/- %5.2f", 
+  TString Line(Form("%40s",graph->GetTitle())); 
+  Line += Form(" x0 =%8.4f +/- %7.4f y0 =%8.4f +/- %7.4f R =%8.4f +/- %7.4f gamma =%6.2f +/- %5.2f", 
 	       fitter->GetParameter(0),fitter->GetParError(0),
 	       fitter->GetParameter(1),fitter->GetParError(1),
 	       fitter->GetParameter(2),fitter->GetParError(2),
-	       1e3*gamma,1e3*dgam) << endl;
+	       1e3*gamma,1e3*dgam);
+  TString Out("Results.data");
+  ofstream out;
+  if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+  else                              out.open(Out, ios::app);
+  cout << Line->Data() << endl;
+  out << Line->Data() << endl;
+  out.close();
   return graph;
 }
 //________________________________________________________________________________
 void TpcSurvey() {
-  InitMatrices();
+  //  InitMatrices();
 }
 //________________________________________________________________________________
 void TpcSurveyAll(Int_t d0 = -1, Int_t l0 = -1) {
