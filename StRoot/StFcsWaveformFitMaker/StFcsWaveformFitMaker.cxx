@@ -1191,7 +1191,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 
 float StFcsWaveformFitMaker::gausFitWithPed(TGraphAsymmErrors* g, float* res, TF1*& func){
   AnaPed( g, res[6], res[7] );
-  printf("Pedestal (%6.2f-%6.2f+1)=%6.2f +- %6.2f\n",float(mPedMax),float(mPedMin),res[6],res[7]);
+  LOG_DEBUG << "Pedestal ("<<mPedMax<<"-"<<mPedMin<<"+1)=" << res[6]<<" +- "<<res[7] << endm;
   return gausFit(g, res, func, res[6]);
 }
 
