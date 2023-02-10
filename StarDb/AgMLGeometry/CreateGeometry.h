@@ -1,5 +1,10 @@
-#ifndef __CINT__
+#include <TGeoManager.h>
+
+#if !defined(__CINT__) || defined(__CLING__)
 #include "StBFChain/StBFChain.h"
+#include "StarVMC/StarAgmlLib/AgModule.h"
+#include "StarVMC/StarAgmlLib/StarTGeoStacker.h"
+#include "StarVMC/StarGeometry/StarGeo.h"
 #endif
 
 extern StBFChain* chain;
