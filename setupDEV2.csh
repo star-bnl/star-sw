@@ -8,40 +8,24 @@ if (-e $GROUP_DIR/dropit) then
 endif
 endif
 unsetenv AFS_RHIC
-unsetenv STAR_ROOT
-unsetenv ROOT
-unsetenv PROD_LOG
-unsetenv GROUP_DIR
-unsetenv optstar
-unsetenv xoptstar
-unsetenv STAF
-unsetenv STAF_LIB
-unsetenv STAF_BIN
-unsetenv STAR
-unsetenv STAR_LIB
-unsetenv STAR_OBJ
-unsetenv STAR_BIN
-unsetenv STARL
+unsetenv STAR*
+unsetenv ROOT*
+unsetenv GROUP*
+unsetenv STAF*
 unsetenv GARFIELD_HOME
 unsetenv HEED_DATABASE
 unsetenv DB_SERVER_LOCAL_CONFIG
-unsetenv STAR_SCRIPTS
-unsetenv STAR_CGI
-unsetenv STAR_MGR
-unsetenv STAR_PAMS
 unsetenv TMVASYS
 unsetenv CINTSYSDIR
 unsetenv IVROOT
 unsetenv CLHEP_BASE_DIR
-unsetenv XOPTSTAR
-unsetenv OPTSTAR
+unsetenv *optstar
+unsetenv *OPTSTAR
 unsetenv QTDIR
-unsetenv STAR_PATH
-unsetenv GROUP_PATH
-unsetenv ROOTROOT
-unsetenv ROOTSYS
 unsetenv SITE
-if ($?NODEBUG) unsetenv NODEBUG
+unsetenv *DEBUG
+	unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
+
 if (-d /net/l402/data/fisyak/STAR) then
   setenv AFS_RHIC  /net/l402/data/fisyak/STAR
     setenv SITE "HLT"

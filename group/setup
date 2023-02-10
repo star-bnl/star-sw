@@ -47,7 +47,7 @@ set location = 0;
 if ( $#argv > 0 ) set version  = $1
 if ( $#argv > 1 ) set location = $2
 #echo "==================== setup $pkg $version $location ===================="
-setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
+#if ($?STAR_HOST_SYS != 0) setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
 
 source $GROUP_DIR/unix_programs.csh
 
@@ -88,41 +88,58 @@ switch ($pkg)
       source $GROUP_DIR/group_env.csh
       source ${GROUP_DIR}/.starver $STAR_LEVEL
       breaksw
+    case "NOTFG":
+    case "NoTFG":
+    case "notfg":
+      unsetenv TFG_STAR
+      breaksw
+    case "TFG":
+    case "tfg":
+      setenv TFG_STAR
+      breaksw
     case "cvmfs":
     case "afs":
-      if ( -r $HOME/.login ) then
-	#set saved_home=$HOME
-	#set saved_display=$DISPLAY
-	#unsetenv *
-	#setenv HOME     $saved_home
-	#setenv DISPLAY  $saved_display
-	unsetenv star_login_csh star_cshrc_csh 
-	unsetenv STAR OPTSTAR XOPTSTAR optstar xoptstar
-	unsetenv PATH LD_LIBRARY_PATH GROUP_DIR GROUP_PATH GROUPPATH
-	unsetenv ROOT ROOTSYS
-	unsetenv STAF* STAR_* 
-	unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
-	unsetenv CERN QTDIR CLHEP_BASE_DIR
-	if ( $?WNOSG ) then
-	    set test1=`echo $WNOSG | $GREP afs`
-	    set test2=`echo $WNOSG | $GREP cvmfs`
-	    # if defined as AFS and we we asked for cvmfs, undefine
-	    if ( "$test1" != "" && $pkg == "cvmfs") then
-		unsetenv WNOSG
-	    endif	
-	    # if defined as CVMFS and we we asked for afs, undefine
-	    if ( "$test2" != "" && $pkg == "afs") then
-		unsetenv WNOSG
-	    endif
-        endif
-
-	if ( $pkg == "cvmfs") then
-	    setenv    USE_CVMFS 1
-	else
-	    unsetenv  USE_CVMFS
-        endif
-	source $HOME/.cshrc
+      if ($?STAR_LEVEL) setenv LEVEL_STAR ${STAR_LEVEL}
+      unsetenv AFS_RHIC      unsetenv STAR*
+      if ($?STAR)       unsetenv ROOT*
+      if ($?GROUP_DIR)   unsetenv GROUP*
+      unsetenv STAF*
+      unsetenv CINTSYSDIR
+      unsetenv IVROOT
+      unsetenv *optstar
+      unsetenv *OPTSTAR
+      if ($?QTDIR) unsetenv QTDIR
+     unsetenv SITE
+      unsetenv *DEBUG
+      unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
+      unsetenv star*
+      unsetnev CERN* CLHEP*
+      if ($?LEVEL_STAR) setenv STAR_LEVEL ${LEVEL_STAR}
+      if ( $pkg == "cvmfs") then
+	 setenv    USE_CVMFS 1
+         if ($?TFG_STAR) then
+	   setenv AFS_RHIC  /cvmfs/star.sdcc.bnl.gov/TFG
+         else 
+	   setenv AFS_RHIC  /cvmfs/star.sdcc.bnl.gov
+         endif
+      else
+	 unsetenv  USE_CVMFS
+	 setenv AFS_RHIC  /afs/rhic.bnl.gov/star
+         if ($?TFG_STAR) then	 
+	   if (-d  /net/l402/data/fisyak/STAR)              setenv AFS_RHIC /net/l402/data/fisyak/STAR 
+	   else if (-d /gpfs01/star/subsys-tpc/fisyak/STAR) setenv setenv AFS_RHIC  /gpfs01/star/subsys-tpc/fisyak/STAR
+         endif
       endif
+      if (-d ${AFS_RHIC}/packages/.DEV2/group) then 
+         setenv GROUP_DIR  ${AFS_RHIC}/packages/.DEV2/group
+      else                                     
+         setenv GROUP_DIR  ${AFS_RHIC}/group
+      endif
+      setenv STAR_ROOT ${AFS_RHIC}
+#      echo "GROUP_DIR = ${GROUP_DIR}"
+
+      source $GROUP_DIR/group_env.csh
+#      source $HOME/.cshrc
       breaksw
 
     case "64bits":
