@@ -1,5 +1,8 @@
 /*
 Author: David Kapukchyan
+@[October 20, 2022]
+> Added doxygen style comments
+
 @[September 29, 2022]
 > Got rid of the virtual painter
 
