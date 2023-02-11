@@ -210,7 +210,7 @@ bool PeakAna::ValidPeakIdx() const
 bool PeakAna::GoodWindow()
 {
   if( mComputedIndex<0 ){this->AnalyzeForPeak();}
-  //First check if start and end times are within our max timebin window of 0-1023
+  //First check if peak values are within the specified range
   if( mFoundPeak.mStartX<mXRangeMin || mFoundPeak.mStartX>mXRangeMax ){return false;}
   else if( mFoundPeak.mEndX<mXRangeMin || mFoundPeak.mEndX > mXRangeMax ){return false;}
   //Next check if values make physical sense
@@ -230,8 +230,8 @@ void PeakAna::GetXYMax(Double_t xmin, Double_t xmax)
   }
   if( mMaxY<0 && mMaxX<0 ){
     LOG_WARN << "Unable to find a maximum adc\nSetting to impossible values" << endm;
-    mMaxY = 5000;
-    mMaxX = 5000;
+    mMaxY = mYRangeMax;
+    mMaxX = mXRangeMax;
   }
 }
 
@@ -730,61 +730,53 @@ void PeakAna::GetPossiblePeaks()
 //Returns index that corresponds to the serach criteria
 Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
 {
-  if( PossiblePeaks.size()==0 )
-    {
-      if( GetDebug()>0 ){LOG_DEBUG << "PeakAna::SearchForPeak - Error:Unable to find a valid peak\nReturning impossible index" << endm; }
-      return PossiblePeaks.size();
+  if( PossiblePeaks.size()==0 ){
+    if( GetDebug()>0 ){LOG_DEBUG << "PeakAna::SearchForPeak - Error:Unable to find a valid peak\nReturning impossible index" << endm; }
+    return PossiblePeaks.size();
+  }
+  else{
+    if( GetDebug()>0 ){
+      LOG_DEBUG << "|Size of Possible peaks:"<<PossiblePeaks.size();
+      LOG_DEBUG << "|Search Peak:"<<mSearch.mStartX;
+      LOG_DEBUG << "|Search Width:"<<mSearch.mEndX;
+      LOG_DEBUG << endm;
     }
-  else
-    {
-      if( GetDebug()>0 )
-	{
-	  LOG_DEBUG << "|Size of Possible peaks:"<<PossiblePeaks.size();
-	  LOG_DEBUG << "|Search Peak:"<<mSearch.mStartX;
-	  LOG_DEBUG << "|Search Width:"<<mSearch.mEndX;
+    Short_t peakindex=-1;
+    for( UShort_t ipeak=0; ipeak<PossiblePeaks.size(); ++ipeak ){
+      if( GetDebug()>1 ){
+	LOG_DEBUG << " - ";
+	LOG_DEBUG << "|Index:"<<ipeak;
+	PossiblePeaks.at(ipeak).Print("debug");
+	LOG_DEBUG << endm;
+      }
+      Double_t PeakLoc = PossiblePeaks.at(ipeak).mPeakX;
+      if( mSearch.mStartX-mSearch.mEndX<=PeakLoc && PeakLoc <= mSearch.mStartX+mSearch.mEndX ){
+	peakindex=ipeak;
+	if( GetDebug()>1 ){
+	  LOG_DEBUG << "   + ";
+	  LOG_DEBUG << "|TrueIndex:"<<peakindex;
 	  LOG_DEBUG << endm;
 	}
-      Short_t peakindex=-1;
-      for( UShort_t ipeak=0; ipeak<PossiblePeaks.size(); ++ipeak )
-	{
-	  if( GetDebug()>1 )
-	    {
-	      LOG_DEBUG << " - ";
-	      LOG_DEBUG << "|Index:"<<ipeak;
-	      PossiblePeaks.at(ipeak).Print("debug");
-	      LOG_DEBUG << endm;
-	    }
-	  Double_t PeakLoc = PossiblePeaks.at(ipeak).mPeakX;
-	  if( mSearch.mStartX-mSearch.mEndX<=PeakLoc && PeakLoc <= mSearch.mStartX+mSearch.mEndX )
-	    {
-	      peakindex=ipeak;
-	      if( GetDebug()>1 )
-		{
-		  LOG_DEBUG << "   + ";
-		  LOG_DEBUG << "|TrueIndex:"<<peakindex;
-		  LOG_DEBUG << endm;
-		}
-	    }
-	}
-      if( peakindex>=0 && mSearch.mStartX>0 && PossiblePeaks.at(peakindex).mP_Peak>0 )
-	{
-	  if(GetDebug()>1){PossiblePeaks.at(peakindex).Print("debug");LOG_DEBUG<<endm;}
-	  return peakindex;
-	}
-      else{ return PossiblePeaks.size();}
+      }
     }
+    if( peakindex>=0 && mSearch.mStartX>0 && PossiblePeaks.at(peakindex).mP_Peak>0 ){
+      if(GetDebug()>1){PossiblePeaks.at(peakindex).Print("debug");LOG_DEBUG<<endm;}
+      return peakindex;
+    }
+    else{ return PossiblePeaks.size();}
+  }
 }
 
 Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks, const PeakWindow& search)
 {
-	mSearch = search;
-	return this->SearchForPeak(PossiblePeaks);
+  mSearch = search;
+  return this->SearchForPeak(PossiblePeaks);
 }
 
 Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks, Double_t peak, Double_t width)
 {
-	SetSearchWindow(peak, width);
-	return this->SearchForPeak(PossiblePeaks);
+  SetSearchWindow(peak, width);
+  return this->SearchForPeak(PossiblePeaks);
 }
 
 void PeakAna::MergeByProbability(std::vector<PeakWindow>& newpeaks) const
@@ -839,7 +831,6 @@ void PeakAna::MergeByChirality(std::vector<PeakWindow>& newpeaks) const
   }
   //std::cout << "PeakAna::MergeByChirality - newpeaksize:" << newpeaks.size()  << std::endl;
 }
-
 
 short PeakAna::MergeLeftOrRight(UInt_t index) const
 {
@@ -980,44 +971,10 @@ std::vector< std::pair<int,int> > PeakAna::MergeIndices(std::vector<short>& vec)
   return mergeindexs;
 }
 
-double* PeakAna::GaussianMatrix2D(int rx,  double sx, int ry, double sy, bool kNorm)
-{
-  if( rx<0 ){rx = -rx;}
-  if( ry<0 ){ry = -ry;}
-  if( sx==0 ){ sx = static_cast<double>(rx)*0.5; }
-  if( sy==0 ){ sy = static_cast<double>(ry)*0.5; }
-  const int nsizex = (2*rx+1);
-  const int nsizey = (2*ry+1);
-  
-  double GM_sum = 0;
-  //@[June 7, 2022]>[How to create 2D dynamic arrays](https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new)
-  double* GM_2D = new double[nsizex*nsizey];
-  for( int ix=0; ix<nsizex; ++ix ){
-    for( int jy=0; jy<nsizey; ++jy ){
-      int xi = ix-rx;
-      int yi = jy-ry;
-      double product = 1.0;
-      if( sx!=0 ){ product *= exp( (-1.0*xi*xi)/(2.0*sx*sx) )/(sqrt(2.0*3.14159265358979323846)*sx); }
-      if( sy!=0 ){ product *= exp( (-1.0*yi*yi)/(2.0*sy*sy) )/(sqrt(2.0*3.14159265358979323846)*sy); }
-      GM_2D[ix*nsizey+jy] = product;
-      GM_sum += product;
-    }
-  }
-  
-  if( kNorm ){
-    double invsum = 1.0/GM_sum;
-    for( int i=0; i<nsizex; ++i ){
-      for( int j=0; j<nsizey; ++j ){
-	GM_2D[i*nsizey+j] *= invsum;
-      }
-    }
-  }
-  return GM_2D;
-}
-
 void PeakAna::Draw(Option_t* opt)
 {
   AppendPad(opt);
+  //gPad->IncrementPaletteColor(1, mOption); (Doesn't work with ROOT v5) 
 }
 
 void PeakAna::Paint(Option_t* opt)
@@ -1276,5 +1233,40 @@ void PeakAna::SetAllPeakLineWidth(Width_t s_width, Width_t e_width)
     mPeaks.at(ipeak).SetStartLineWidth(s_width);
     mPeaks.at(ipeak).SetEndLineWidth(e_width);
   }
+}
+
+double* PeakAna::GaussianMatrix2D(int rx,  double sx, int ry, double sy, bool kNorm)
+{
+  if( rx<0 ){rx = -rx;}
+  if( ry<0 ){ry = -ry;}
+  if( sx==0 ){ sx = static_cast<double>(rx)*0.5; }
+  if( sy==0 ){ sy = static_cast<double>(ry)*0.5; }
+  const int nsizex = (2*rx+1);
+  const int nsizey = (2*ry+1);
+  
+  double GM_sum = 0;
+  //@[June 7, 2022]>[How to create 2D dynamic arrays](https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new)
+  double* GM_2D = new double[nsizex*nsizey];
+  for( int ix=0; ix<nsizex; ++ix ){
+    for( int jy=0; jy<nsizey; ++jy ){
+      int xi = ix-rx;
+      int yi = jy-ry;
+      double product = 1.0;
+      if( sx!=0 ){ product *= exp( (-1.0*xi*xi)/(2.0*sx*sx) )/(sqrt(2.0*3.14159265358979323846)*sx); }
+      if( sy!=0 ){ product *= exp( (-1.0*yi*yi)/(2.0*sy*sy) )/(sqrt(2.0*3.14159265358979323846)*sy); }
+      GM_2D[ix*nsizey+jy] = product;
+      GM_sum += product;
+    }
+  }
+  
+  if( kNorm ){
+    double invsum = 1.0/GM_sum;
+    for( int i=0; i<nsizex; ++i ){
+      for( int j=0; j<nsizey; ++j ){
+	GM_2D[i*nsizey+j] *= invsum;
+      }
+    }
+  }
+  return GM_2D;
 }
 

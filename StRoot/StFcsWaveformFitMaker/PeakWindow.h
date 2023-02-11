@@ -1,5 +1,8 @@
 /*
 Author: David Kapukchyan
+@[October 20, 2022]
+> Added doxygen style comments
+
 @[June 27, 2022]
 > Added a TMarker for the peak position in drawing PeakWindow objects. Also added options to the Draw() and Paint() methods for this object.
 
