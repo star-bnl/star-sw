@@ -1,5 +1,8 @@
 //Author:David Kapukchyan
 /*
+@[December 17, 2022]
+> SetFitPars can now set a function parameters for a range of in npeaks as opposed to all peaks
+
 @[June 25, 2022]
  > Added Refinements to drawing and copying. Also made some changes to how the tunnel probability is used to merge the peaks.
 
@@ -8,7 +11,7 @@
 */
 
 /*!
-  This class is an extension of #PeakAna to analyze specifically STAR data from the DEP boards. The DEP boards are used in the Forward Calorimeter System (FCS) and comprises of an electromagnetic, and hadronic calorimeters as well as a presower.
+  This class is an extension of #PeakAna to analyze specifically STAR data from the DEP boards. The DEP boards are used in the Forward Calorimeter System (FCS) and comprises of an electromagnetic, and hadronic calorimeters as well as a preshower.
 */
 
 #ifndef STFCSPULSEANA_H
@@ -71,7 +74,7 @@ class StFcsPulseAna : public PeakAna
   Double_t MBFit(Int_t Start=0,Int_t End=0);        //!< Fit a Maxwell-Boltzmann distribution to #mFoundPeak and return the integral minus the baseline
   Double_t PulseFit(Int_t Start=0, Int_t End=0);    //!< Fit the pulse shape defined in #StFcsDbPulse::multiPulseShape() to all peaks and return the integral of the found peak minus the baseline
 
-  void SetFitPars(TF1* func);                       //!< Set the parameters of an external TF1 function that has the form of #StFcsDbPulse::multiPulseShape()
+  void SetFitPars(TF1*& func, int start=-1, int end=-1);   //!< Set the parameters of an external TF1 function that has the form of #StFcsDbPulse::multiPulseShape(), optionally only set fit paramaters for peaks from index start up to and including end
 
   static void FillAdc(TGraphAsymmErrors* g, unsigned short& counter, int Start, unsigned short* adcdata);//!< Needed for SumDep0, et al. It basically fills in tb vs. adc sequentially so all timebins from a given start value have an adc.
   static int SumDep0(TGraphAsymmErrors* gdata, int Start, int ped=0);     //!< Test of sum method in DEP board
@@ -80,7 +83,7 @@ class StFcsPulseAna : public PeakAna
   void SetFitSignal(TF1* func){mF1_SignalFit=func;}      //!< @param func sets #mF1_SignalFit
   void SetBaselineFit(TF1* func){mF1_BaselineFit=func;}  //!< @param func sets #mF1_BaselineFit
 
-  void SetZS(){SetBaseline(0,0.6);}//Call this for ZS data which uses thresholds that are relevant for that. (like 0 baseline and 0.5 sigma so thereshold is at 2 since ZS is pedestal subtracted. Maybe even 0.3 so it is above one.
+  void SetZS(){SetBaseline(0,0.39);} //!< Call this for ZS data which uses thresholds that are relevant for that. (like 0 baseline and 0.5 sigma so thereshold is at 2 since ZS is pedestal subtracted. Maybe even 0.3 so it is above one.
 
   void AnalyzeForPedestal(); //!< Analyze graph data to determine baseline internally
   
