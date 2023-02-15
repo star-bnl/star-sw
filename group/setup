@@ -109,11 +109,12 @@ switch ($pkg)
       unsetenv *optstar
       unsetenv *OPTSTAR
       if ($?QTDIR) unsetenv QTDIR
-     unsetenv SITE
+      unsetenv SITE
       unsetenv *DEBUG
       unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
       unsetenv star*
       unsetnev CERN* CLHEP*
+      unsetenv ROOT*
       if ($?LEVEL_STAR) setenv STAR_LEVEL ${LEVEL_STAR}
       if ( $pkg == "cvmfs") then
 	 setenv    USE_CVMFS 1
