@@ -62,6 +62,7 @@ struct SurveyData_t {
 static TGeoHMatrix MagCS[5], TpcCS[5], WheelCS[2][5];
 using namespace std;
 TLinearFitter *lf = 0;
+static Int_t _debug = 0; 
 /*                     y  s  d */
 TGraph2DErrors *graphs[2][3][3];
 TGraphErrors *graphfit = 0;
@@ -216,6 +217,7 @@ Bool_t InitMatrices(Int_t y = 0) {
     Int_t l = ly;
     //    if (ly > 2) l = 2;
 #define __Mag2Surv__
+#define __IDEAL__
 #ifdef  __Mag2Surv__
     Double_t survMagnetZabg[5][2][6] = { // Survey => Magnet
       /*x  y      z(cm)  alpha,    beta, gamma [mrad] */
@@ -227,7 +229,7 @@ Bool_t InitMatrices(Int_t y = 0) {
        {0., 0.,-362.5550, 0, 0, 0}}, // y2013e
       {{0, 0, 0, 0, 0, 0},  // y2022w Coordinates are in STAR magent system << 2013
        {0, 0, 0, 0, 0, 0}}, // y2022e
-#if 0
+#ifdef __IDEAL__1
       {{0, 0, 0, 0, 0, 0},  // y2023w 
        {0, 0, 0, 0, 0, 0}}, // y2023e
 #else
@@ -237,10 +239,24 @@ Bool_t InitMatrices(Int_t y = 0) {
 //        {0, 0, -0.7791, 0, 0, 0}}  // y2023e
 //       {{0, 0, -0.7795, 0, 0, 0},  // y2023w Coordinates are in STAR magent system << 2013
 //        {0, 0,  0.7791, 0, 0, 0}}  // y2023e
-      {{0, 0, -0.8483, 0, 0, 0},  // y2023w 
-       {0, 0,  2.4072, 0, 0, 0}}, // y2023e
+//       {{0, 0, -0.8483, 0, 0, 0},  // y2023w 
+//        {0, 0,  2.4072, 0, 0, 0}}, // y2023e
 //       {{0, 0, -0.8483-1.6279, 0, 0, 0},  // y2023w 
 //        {0, 0,  2.4072+1.6275, 0, 0, 0}}, // y2023e
+//       {{0, 0, 0, 0, 0, 0},  // y2023w 
+//        {0, 0, 0, 0, 0, 0}}, // y2023e
+/*
+MakeGraph(2023,"Magnet","^W",   10,  500)       z = 365.9615 +/- 0.0402 (cm) alpha = -0.03 +/- 0.18 [mrad] beta =  0.85 +/- 0.07 [mrad] chi2/ndf        0.59/   2 res. =  -0.0 +/-  86.9 (mkm)
+MakeGraph(2023,"Magnet","^E", -500,  -10)       z =-364.1466 +/- 0.0349 (cm) alpha =  0.19 +/- 0.16 [mrad] beta =  0.88 +/- 0.07 [mrad] chi2/ndf        0.03/   2 res. =   0.0 +/-  19.4 (mkm)
+dz = (zW+zE)/2 =                                      0.9074                                                       0.86
+*/
+      {{0, 0, 0.9074, 0, 0.86, 0},  // y2023w 
+       {0, 0, 0.9074, 0, 0.86, 0}}, // y2023e
+      /*
+MakeGraph(2023,"Magnet","^W",   10,  500)       z = 365.0539 +/- 0.0402 (cm) alpha = -0.03 +/- 0.18 [mrad] beta = -0.01 +/- 0.07 [mrad] chi2/ndf        0.59/   2 res. =  -0.0 +/-  86.9 (mkm)
+MakeGraph(2023,"Magnet","^E", -500,  -10)       z =-365.0538 +/- 0.0349 (cm) alpha =  0.19 +/- 0.16 [mrad] beta =  0.02 +/- 0.07 [mrad] chi2/ndf        0.03/   2 res. =   0.0 +/-  19.4 (mkm)
+
+       */
 #endif
     };
     
@@ -268,13 +284,17 @@ Bool_t InitMatrices(Int_t y = 0) {
       {-0.2287 +0.0094-0.0162,  -0.1745 +0.0370+     0, -231.6945+0.0269, 0.10, -0.55, 0.52}, //  2004,"Tpc","^E..."
       {-0.2287 -0.0095-0.0001,  -0.1745 +0.0013+     0, -231.7106+0.0269, 0.10, -0.48, 0.36}, //  2013,"Tpc","^E..."
       {0,   0, 0.785340, 0, 0.61, 0}, //  2022,"Tpc","^E..." 
-#if 0
-      {0,   0, 0.771450, 0, 0.61, 0}  //  2023,"Tpc","^E..." 
+#ifdef __IDEAL__1
+//       {0,   0, 0.771450, 0, 0.61, 0}  //  2023,"Tpc","^E..." 
+      {0,   0, 0, 0, 0, 0}  //  2023,"Tpc","^E..." 
 #else
 //       {0,   0, 0, 0, 0.00, 0}  //  2023,"Tpc","^E..."  2023
 //       {0,   0, 0, 1.6277, 0.00, 0}  //  2023,"Tpc","^E..."  2023
 //       {0,   0, 0, 0, 0.55, 0}  //  2023,"Tpc","^E..."  2023
-      {-0.1734,   0, 0, 0, 0.55, 0}  //  2023,"Tpc","^E..."  2023
+//      {-0.1734,   0, 0, 0, 0.55, 0}  //  2023,"Tpc","^E..."  2023
+//      {0,   0, 0, 0, 0, 0}  //  2023,"Tpc","^E..." 
+      {0,   0, -0.2784, 0, -0.31, 0}  //  MakeGraph(2023,"Tpc","^E", -500,  -10)  z =  -0.2784 +/- 0.0046 (cm) alpha = -0.03 +/- 0.06 [mrad] beta = -0.31 +/- 0.05 [mrad] chi2/ndf       27.24/  31 res. =  71.9 +/- 485.4 (mkm)
+
 #endif
     };
     Double_t transTpc[3]  = {Tpcxyzabg[ly][0], Tpcxyzabg[ly][1], Tpcxyzabg[ly][2]}; // 3-rd iteration
@@ -300,9 +320,9 @@ Bool_t InitMatrices(Int_t y = 0) {
     TpcCS[ly].SetName(Form("TpcCS_%i",ly));
     TpcCS[ly].Print();
 #endif
+    Double_t zWeel = 229.71; // zWheel = 229.71 cm (90.4375 inch)
     for (Int_t side = 0; side < 2; side++) { // West and East
       TGeoHMatrix survWheelW;
-
 #define __Wheel2Tpc__ 
 #ifdef  __Wheel2Tpc__
       const Char_t *sideName[2] = {"west","east"};
@@ -314,20 +334,28 @@ Bool_t InitMatrices(Int_t y = 0) {
 
 	{{ 0.0193, -0.0133, 231.4724,  0.16,  0.11, -0.36-0.03},  //  MakeGraph(2013,"Tpc","^W...")       
 	 { 0.    , 0.     ,-231.4880, -0.00, -0.00,  0.03-0.02+0.06-0.03-0.01}}, //  MakeGraph(2013,"Tpc","^E...")
-	{{ 0, 0,   (229.71+1.7780+30.033+ 0.7784-0.0184), 0.47, 0, 0},  //2022  Alexei: 30.033 cm + 0.7784 => 30.7930 cm
-	 { 0, 0,  -(229.71+1.7780+30.033+ 0.7784-0.0184), 0.15, 0, 0}}, //2022
-#if 0
-	{{ 0, 0,   (229.71+1.7780+27.007+ 0.7784-2.4063), 0.39, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
-	 { 0, 0,  -(229.71+1.7780+27.007+ 0.7784-2.4063), 0.01, 0, 0}}  //0 
+	{{ 0, 0,   (zWeel+1.7780+30.033+ 0.7784-0.0184), 0.47, 0, 0},  //2022  Alexei: 30.033 cm + 0.7784 => 30.7930 cm
+	 { 0, 0,  -(zWeel+1.7780+30.033+ 0.7784-0.0184), 0.15, 0, 0}}, //2022
+#ifdef __IDEAL__1
+	{{ 0, 0,   (zWeel+27.007), 0, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+	 { 0, 0,  -(zWeel+27.007), 0, 0, 0}}  //0 
 #else
-// 	{{ 0, 0,   (229.71+1.7780+27.007), 0.00, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
-// 	 { 0, 0,  -(229.71+1.7780+27.007), 0.00, 0, 0}}  //0 
-// 	{{ 0, 0,   (229.71+1.7780+27.007-1.6276), 0.00, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
-// 	 { 0, 0,  -(229.71+1.7780+27.007-1.6276), 0.00, 0, 0}}  //0 
-// 	{{ 0, 0,   (229.71+1.7780+27.007-1.6276), 0.24, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
-// 	 { 0, 0,  -(229.71+1.7780+27.007-1.6276), 0.00, 0, 0}}  //0 
-	{{ -0.0244, -0.0594,   (229.71+1.7780+27.007-1.6276), 0.24, 0, 0.17},  //0  Alexei: 27.007 cm          => 25.3791 cm
-	 {  0.0242,  0.0565,  -(229.71+1.7780+27.007-1.6276), 0.00, 0, 0.52}}  //0 
+// 	{{ 0, 0,   (zWeel+1.7780+27.007), 0.00, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+// 	 { 0, 0,  -(zWeel+1.7780+27.007), 0.00, 0, 0}}  //0 
+// 	{{ 0, 0,   (zWeel+1.7780+27.007-1.6276), 0.00, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+// 	 { 0, 0,  -(zWeel+1.7780+27.007-1.6276), 0.00, 0, 0}}  //0 
+// 	{{ 0, 0,   (zWeel+1.7780+27.007-1.6276), 0.24, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+// 	 { 0, 0,  -(zWeel+1.7780+27.007-1.6276), 0.00, 0, 0}}  //0 
+// 	{{ -0.0244, -0.0594,   (zWeel+1.7780+27.007-1.6276), 0.24, 0, 0.17},  //0  Alexei: 27.007 cm          => 25.3791 cm
+// 	 {  0.0242,  0.0565,  -(zWeel+1.7780+27.007-1.6276), 0.00, 0, 0.52}}  //0 
+// 	{{ 0, 0,   (zWeel+27.007), 0, 0, 0},  //0  Alexei: 27.007 cm          => 25.3791 cm
+// 	 { 0, 0,  -(zWeel+27.007), 0, 0, 0}}  //0 
+// 	{{ 0, 0,   (zWeel+27.007)+0.3005, 0.24, 0, 0},  //0  Alexei: 27.007 cm MakeGraph(2023,"Tpc","^W",   10,  500)  z =   0.3005 +/- 0.0043 (cm) alpha =  0.24 +/- 0.05 [mrad] beta = -0.04 +/- 0.04 [mrad] chi2/ndf       71.84/  33 res. =   0.0 +/- 358.8 (mkm)
+// 	 { 0, 0,  -(zWeel+27.007)       , 0   , 0, 0}}  //0 		       MakeGraph(2023,"Tpc","^E", -500,  -10)  z =   0.0000 +/- 0.0046 (cm) alpha = -0.03 +/- 0.06 [mrad] beta = -0.00 +/- 0.05 [mrad] chi2/ndf       27.24/  31 res. =  71.9 +/- 485.4 (mkm)
+// 	{{ -0.1976, -0.0594,   (zWeel+27.007)+0.3005, 0.24, 0, 0.17},  //0  Alexei: 27.007 cm MakeRGraph
+// 	 { -0.1490,  0.0564,  -(zWeel+27.007)       , 0   , 0, 0.52}}  //0 		      MakeRGraph
+	{{ -0.1976, -0.0594,   (zWeel+27.007)+0.3005, 0.24, 0, 0.17+0.022},  //0  Alexei: 27.007 cm MakeRGraph
+	 { -0.1490,  0.0564,  -(zWeel+27.007)       , 0   , 0, 0.52+0.074}}  //0 		      MakeRGraph
 #endif
       };
       cout << Form("%4i,Wheel xyz (cm) = %8.4f %8.4f %8.4f abg[mrad] = %6.2f  %6.2f  %6.2f",
@@ -336,8 +364,8 @@ Bool_t InitMatrices(Int_t y = 0) {
       Double_t z = survWheelZabg[l][side][2];
 #if 0
       if (ly < 3) {
-	if (z > 0) z += (229.71+1.7780);
-	else       z -= (229.71+1.7780);
+	if (z > 0) z += (zWeel+1.7780);
+	else       z -= (zWeel+1.7780);
       }
       survWheelZabg[l][side][2] = z;
 #endif
@@ -540,7 +568,7 @@ void FitGraph(TGraph2DErrors *graph = 0) {
   //  if (! gROOT->IsBatch() && Ask()) return;
 }
 //________________________________________________________________________________
-TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const Char_t *pattern = "^WF", Double_t zmin = 0, Double_t zmax = 0/*, Int_t section = 0 */) {
+TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const Char_t *pattern = "^WF"/*, Int_t section = 0 */) {
   if (! InitMatrices(iY)) return 0;
   TString patt(pattern);
   TPRegexp reg(pattern);
@@ -551,10 +579,9 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
     cout << "Illegal side for pattern " << pattern << endl;
     return 0;
   }
-  if (zmin == 0 && zmax == 0) {
-    if (side == 0) {zmin =   10; zmax = 500;}
-    if (side == 1) {zmin = -500; zmax = -10;}
-  }
+  Double_t zmin = 0, zmax = 0;
+  if (side == 0) {zmin =   10; zmax = 500;}
+  if (side == 1) {zmin = -500; zmax = -10;}
   TString System(system);
   Int_t N = 0;
   TString year;
@@ -598,7 +625,7 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
   if (graph) {delete graph; graph = 0;}
   graph = new TGraph2DErrors();
   graph->SetName(name);
-  TString Title(Form("MakeGraph(%i,\"%s\",\"%s\",%5.0f,%5.0f)", iY, system, pattern, zmin,zmax));
+  TString Title(Form("MakeGraph(%i,\"%s\",\"%s\")", iY, system, pattern));
   graph->SetTitle(Title);
   name ="P";
   name += Name;
@@ -649,20 +676,16 @@ TGraph2DErrors *MakeGraph(Int_t iY=2013, const Char_t *system = "Magnet", const 
       if (System == "Magnet")     MagCS[l].MasterToLocal(xyzG,xyzL);
       else                       {
 	WheelCS[side][l].MasterToLocal(xyzG,xyzL);
-#if 0
-	if (n < 1) {
-	WheelCS[side][l].Print();
-	cout << Form("xyzG: %8.3f  %8.3f  %8.3f => xyzL:  %8.3f  %8.3f  %8.3f",xyzG[0],xyzG[1],xyzG[2],xyzL[0],xyzL[1],xyzL[2]) << endl;
-#if 0
-	//    Double_t x = survey->XSurvey;
-	//    Double_t y = survey->ZSurvey;
-	Double_t x = xyzL[0];
-	Double_t y = xyzL[1];
-	cout << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
-	cout << endl;
-#endif
+	if (_debug) {
+	  WheelCS[side][l].Print();
+	  cout << Form("xyzG: %8.3f  %8.3f  %8.3f => xyzL:  %8.3f  %8.3f  %8.3f",xyzG[0],xyzG[1],xyzG[2],xyzL[0],xyzL[1],xyzL[2]) << endl;
+	  //    Double_t x = survey->XSurvey;
+	  //    Double_t y = survey->ZSurvey;
+	  Double_t x = xyzL[0];
+	  Double_t y = xyzL[1];
+	  cout << Form(" R =%6.2f phi = %8.3f",TMath::Sqrt(x*x + y*y),TMath::RadToDeg()*TMath::ATan2(y,x));
+	  cout << endl;
 	}
-#endif
       }
     }
     graph->SetPoint(n,xyzL[0],xyzL[1],xyzL[2]);
@@ -701,7 +724,7 @@ void MakeSectors(const Char_t *pattern = "ZF", Int_t iY=2013, const Char_t *syst
       else           select += "O";
       select += Form("%02i.*",sec);
       select += pattern;
-      MakeGraph(iY,system,select,-10,10);
+      MakeGraph(iY,system,select);
     }
   }
 }
@@ -880,9 +903,10 @@ void fitEllipse(TGraphErrors *graph) {
   ellipse->Draw();
 }
 //________________________________________________________________________________
-TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO", 
-			 Double_t zmin = -500, Double_t zmax = 500, 
-			 Double_t rmin = 0, Double_t rmax = 200, Bool_t ellipse = kFALSE) {
+TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO", Bool_t ellipse = kFALSE) {
+  InitMatrices(iY);
+  Double_t rmin = 0;
+  Double_t rmax = 200;
   Int_t l = -1;
   if (iY == 2003) l = 0;
   if (iY == 2004) l = 1;
@@ -926,13 +950,15 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     if (nread != 1) { cout << "  " << endl; continue;}
 #if 0
     TString Target(survey->target);
-#if 0
-    if (survey->YSurvey < zmin || survey->YSurvey > zmax) { cout << "  " << endl; continue;}
-#endif
 #endif
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
     Double_t xyzL[3];
     WheelCS[side][l].MasterToLocal(xyzG,xyzL);
+    if (_debug) {
+      cout << "WheelCS[" << side << "][" << l << "]\t"; WheelCS[side][l].Print();
+      cout << Form("xyzG: %8.3f  %8.3f  %8.3f => xyzL:  %8.3f  %8.3f  %8.3f",xyzG[0],xyzG[1],xyzG[2],xyzL[0],xyzL[1],xyzL[2]) << endl;
+      
+    }
     //    Double_t x = survey->XSurvey;
     //    Double_t y = survey->ZSurvey;
     Double_t x = xyzL[0];
@@ -944,7 +970,7 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
       graph = new TGraphErrors();
       TString Name = survey->system; Name += survey->target; Name += year;
       graph->SetName(Name);
-      TString Title(Form("MakeRGraph(%i,\"%s\",%5.0f,%5.0f,%5.0f,%5.0f,%i)", iY, pattern, zmin,zmax,rmin,rmax,(Int_t)ellipse));
+      TString Title(Form("MakeRGraph(%i,\"%s\",%i)", iY, pattern, (Int_t)ellipse));
       graph->SetTitle(Title);
     }
     //    graph->SetPoint(n,survey->XSurvey,survey->ZSurvey);
@@ -975,9 +1001,6 @@ TGraphErrors *MakeRGraph(Int_t iY=2004, const Char_t *pattern = "^EAO",
     Int_t sec;
     Int_t nread = sscanf(survey->target.Data(),"%*3c%2d",&sec);
     if (nread != 1) continue;
-#if 0
-    if (survey->YSurvey < zmin || survey->YSurvey > zmax) continue;
-#endif
     if (! survey->target.Contains(reg)) continue;
     cout << *survey;
     Double_t xyzG[3] = {survey->XSurvey,survey->ZSurvey,survey->YSurvey};
@@ -1114,49 +1137,49 @@ void TpcSurveyAll(Int_t d0 = -1, Int_t l0 = -1) {
 //________________________________________________________________________________
 void y2014M() {
 #if 1
-  MakeGraph(2014,"Tpc","^WI.*FF",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*FF",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*FF", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*FF",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*FF",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*FF", -10, 10);
-  MakeGraph(2014,"Tpc","^WI.*ZF",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*ZF",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*ZF", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*ZF",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*ZF",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*ZF", -10, 10);
-  MakeGraph(2014,"Tpc","^WI.*ZR",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*ZR",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*ZR", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*ZR",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*ZR",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*ZR", -10, 10);
-  MakeGraph(2014,"Tpc","^WI.*RF",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*RF",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*RF", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*RF",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*RF",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*RF", -10, 10);
+  MakeGraph(2014,"Tpc","^WI.*FF");
+  MakeGraph(2014,"Tpc","^WO.*FF");
+  MakeGraph(2014,"Tpc","^W.*FF");
+  MakeGraph(2014,"Tpc","^EI.*FF");
+  MakeGraph(2014,"Tpc","^EO.*FF");
+  MakeGraph(2014,"Tpc","^E.*FF");
+  MakeGraph(2014,"Tpc","^WI.*ZF");
+  MakeGraph(2014,"Tpc","^WO.*ZF");
+  MakeGraph(2014,"Tpc","^W.*ZF");
+  MakeGraph(2014,"Tpc","^EI.*ZF");
+  MakeGraph(2014,"Tpc","^EO.*ZF");
+  MakeGraph(2014,"Tpc","^E.*ZF");
+  MakeGraph(2014,"Tpc","^WI.*ZR");
+  MakeGraph(2014,"Tpc","^WO.*ZR");
+  MakeGraph(2014,"Tpc","^W.*ZR");
+  MakeGraph(2014,"Tpc","^EI.*ZR");
+  MakeGraph(2014,"Tpc","^EO.*ZR");
+  MakeGraph(2014,"Tpc","^E.*ZR");
+  MakeGraph(2014,"Tpc","^WI.*RF");
+  MakeGraph(2014,"Tpc","^WO.*RF");
+  MakeGraph(2014,"Tpc","^W.*RF");
+  MakeGraph(2014,"Tpc","^EI.*RF");
+  MakeGraph(2014,"Tpc","^EO.*RF");
+  MakeGraph(2014,"Tpc","^E.*RF");
 #endif
-  MakeGraph(2014,"Tpc","^WI.*ZQ",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*ZQ",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*ZQ", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*ZQ",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*ZQ",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*ZQ", -10, 10);
-  MakeGraph(2014,"Tpc","^WI.*RQ",-10, 10);
-  MakeGraph(2014,"Tpc","^WO.*RQ",-10, 10);
-  MakeGraph(2014,"Tpc","^W.*RQ", -10, 10);
-  MakeGraph(2014,"Tpc","^EI.*RQ",-10, 10);
-  MakeGraph(2014,"Tpc","^EO.*RQ",-10, 10);
-  MakeGraph(2014,"Tpc","^E.*RQ", -10, 10);
+  MakeGraph(2014,"Tpc","^WI.*ZQ");
+  MakeGraph(2014,"Tpc","^WO.*ZQ");
+  MakeGraph(2014,"Tpc","^W.*ZQ");
+  MakeGraph(2014,"Tpc","^EI.*ZQ");
+  MakeGraph(2014,"Tpc","^EO.*ZQ");
+  MakeGraph(2014,"Tpc","^E.*ZQ");
+  MakeGraph(2014,"Tpc","^WI.*RQ");
+  MakeGraph(2014,"Tpc","^WO.*RQ");
+  MakeGraph(2014,"Tpc","^W.*RQ");
+  MakeGraph(2014,"Tpc","^EI.*RQ");
+  MakeGraph(2014,"Tpc","^EO.*RQ");
+  MakeGraph(2014,"Tpc","^E.*RQ");
 }
 //________________________________________________________________________________
 void Print(Int_t y=2023) {
-  MakeGraph(y,"Magnet","^E.*",-10, 10);
-  MakeGraph(y,"Magnet","^W.*",-10, 10);
+  MakeGraph(y,"Magnet","^E.*");
+  MakeGraph(y,"Magnet","^W.*");
 
-  MakeGraph(y,"Tpc","^E.*",-10, 10);
-  MakeGraph(y,"Tpc","^W.*",-10, 10);
+  MakeGraph(y,"Tpc","^E.*");
+  MakeGraph(y,"Tpc","^W.*");
 }
