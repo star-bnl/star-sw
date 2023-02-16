@@ -22,8 +22,8 @@
 
 #include "StObject.h"
 
-#include "StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
-#include "StEnumerations.h"
+#include "StEvent/StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
+#include "StEvent/StEnumerations.h"
 
 class StFcsPoint;
 class StFwdTrack;
