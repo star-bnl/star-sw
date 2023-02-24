@@ -62,9 +62,13 @@ print "DistortionSet = @DistortionSet\n";
 # 	     '17p3GeV_2021'	       => '20210525.113000',
 # 	     'pp500_2022'	       => '20211207.000002'
 # 	    );
+# my %dates = (
+#      '7p7GeV_2021'      => '20210209',
+#      '7p7GeV_2021DbV'   => '20210209,DbV20210909',
+# );
 my %dates = (
-     '7p7GeV_2021'      => '20210209',
-     '7p7GeV_2021DbV'   => '20210209,DbV20210909',
+     'OO_200GeV_2021'      => '20210511.033917',
+     'FF_OO_200GeV_2021'   => '20210522.023642'
 );
 foreach $trig  (sort keys %dates) {
   my $datetime = $dates{$trig};  print "$trig => $datetime\n";
