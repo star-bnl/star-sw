@@ -71,6 +71,8 @@ private:
 
 	static const char *help_string ;
 
+	int cld23 ;
+
 protected:
 
 public:

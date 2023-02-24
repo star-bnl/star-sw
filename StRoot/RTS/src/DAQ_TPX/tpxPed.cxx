@@ -312,7 +312,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	tpx36_to_real(sector,rb+1,s_real,r_real) ;
 
-//	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
+	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
@@ -464,6 +464,8 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		}
 
 		*addr = (aid << 24) | (ch << 16) | tcou ;
+
+//		LOG(TERR,"to_altro: sector %d, rb %d: ALTRO %3d:%02d tcou %d",sector,rb,aid,ch,tcou) ;
 
 		rbuff += 2 * tcou ;	// skip stored...
 	}

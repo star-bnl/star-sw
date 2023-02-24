@@ -3,8 +3,7 @@
 
 #include "tpc23_base.h"
 
-//class itpcPed ;
-
+struct daq_dta ;
 
 class itpc23 : public tpc23_base {
 public:
@@ -20,8 +19,6 @@ public:
 
 	int words ;		// original FIFO words
 	u_int err ;		// cleared at rdo_start
-
-//	static itpcPed *ped_c ;
 
 
 	//current values
@@ -39,6 +36,11 @@ public:
 	int from22to23(char *dta, int words) ;
 	u_int get_token_s(char *c_addr, int words) ;
 	inline void set_rdo(int s, int r) ;
+
+	int init(daq_dta *gain) ;
+
+	static struct row_pad_t (*rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;     // max for both dets; all sectors
+
 
 private:
 	u_int *fee_non_trgd(u_int *d) ;

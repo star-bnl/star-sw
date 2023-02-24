@@ -23,6 +23,7 @@
 
 
 tpxPed *tpx23::peds ;
+tpc23_base::row_pad_t (*tpx23::rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
 
 
 int tpx23::from22to23(char *c_addr, int words)
@@ -100,7 +101,7 @@ u_int *tpx23::fee_scan()
 
 					if(id & 1) should |= 1 ;
 
-					LOG(WARN,"S%2:%d overriding ALTRO id %d with %d",id,should) ;
+					//LOG(WARN,"S%02d:%d overriding ALTRO id %d with %d",sector1,rdo1,id,should) ;
 					id = should ;
 					break ;
 				}
@@ -538,8 +539,13 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 		// check for error string but just print a warning, we'll be more selective later
 		if(strstr(tmpbuff+st,"ERR")) {
-			err = -1 ;
-			LOG(ERR,"---> [%d LOG]: contains ERR \"%s\"",rdo,tmpbuff+st) ;
+			if(strstr(tmpbuff+st,"FLASH Id")) {
+				LOG(WARN,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
+			}
+			else {
+				err = -1 ;
+				LOG(ERR,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
+			}
 		}
 
 		// check for question mark in CPLD status
@@ -743,17 +749,22 @@ tpx23::tpx23()
 
 	rts_id = TPX_ID ;
 
-#if 0
+
 	if(rp_gain_tpx==0) {
 		rp_gain_tpx = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
+
+		// initialize here!
+		for(int s=0;s<24;s++) {
+		for(int r=0;r<=ROW_MAX;r++) {
+		for(int p=0;p<=PAD_MAX;p++) {
+			rp_gain_tpx[s][r][p].gain = 1.0 ;
+			rp_gain_tpx[s][r][p].t0 = 0.0 ;
+			rp_gain_tpx[s][r][p].flags = 0 ;
+		}}}
+
 	}
+
 	rp_gain = rp_gain_tpx ;
-#else
-	if(rp_gain==0) {
-		LOG(TERR,"id %d: allocating rp_gain",id) ;
-		rp_gain = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
-	}	
-#endif
 
 	if(peds==0) {
 		peds = new class tpxPed ;

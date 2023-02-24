@@ -43,6 +43,8 @@ libtpc23.a : $(OBJS)
 itpc23.o: ../../../../StRoot/RTS/include/rtsLog.h
 itpc23.o: ../../../../StRoot/RTS/include/rts.h
 itpc23.o: ../../../../StRoot/RTS/include/rtsSystems.h
+itpc23.o: ../DAQ_READER/daq_dta.h
+itpc23.o: ../DAQ_READER/daq_dta_structs.h
 itpc23.o: ../DAQ_ITPC/itpcCore.h
 itpc23.o: ../DAQ_READER/daq_dta_structs.h
 itpc23.o: ../DAQ_ITPC/itpc_rowlen.h

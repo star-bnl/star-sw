@@ -26,7 +26,7 @@
 #include "tpc23_base.h"
 
 
-tpc23_base::row_pad_t (*tpc23_base::rp_gain)[ROW_MAX+1][PAD_MAX+1] ;
+//tpc23_base::row_pad_t (*tpc23_base::rp_gain)[ROW_MAX+1][PAD_MAX+1] ;
 
 //tpc23_base::row_pad_t (*tpc23_base::rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
 //tpc23_base::row_pad_t (*tpc23_base::rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;
@@ -34,9 +34,9 @@ tpc23_base::row_pad_t (*tpc23_base::rp_gain)[ROW_MAX+1][PAD_MAX+1] ;
 short tpc23_base::bad_fee_cou[24][6] ;
 short tpc23_base::bad_fee[24][6][36] ;
 
-int tpc23_base::rowlen[ROW_MAX+1] ;
-int tpc23_base::row_min ;
-int tpc23_base::row_max ;
+//int tpc23_base::rowlen[ROW_MAX+1] ;
+//int tpc23_base::row_min ;
+//int tpc23_base::row_max ;
 
 itpcData *tpc23_base::data_c ;
 
@@ -95,6 +95,110 @@ void tpc23_base::sim_evt_start(int sec1)
 	evt_trgd++ ;
 }
 
+
+int tpc23_base::do_ch_sim(int row, int pad, u_short *adc, int *track_id)
+{
+	int t_start = -1 ;
+
+	struct seq_t *seq = s1[row][pad].seq ;
+	
+	int s_cou = 0 ;
+	int dta_p_ix = 0 ;
+
+	s1[row][pad].ix = last_ix ;
+
+	u_short *dta = s1_dta + last_ix ;	// where I store the data
+	int *track = s1_track_id + last_ix ;	// and corresponding track_id
+
+#if 1
+	// SAMPA allows up to 2 zeros in a row so let's emulate it
+	for(int t=1;t<510;t++) {
+		if(adc[t-1]!=0 && adc[t]==0 && adc[t+1]!=0) {
+			adc[t] = 0xFFFF ;
+		}
+		else if(adc[t-1]!=0 && adc[t]==0 && adc[t+1]==0 && adc[t+2]!=0) {
+			adc[t] = 0xFFFF ;
+			adc[t+1] = 0xFFFF ;
+			t += 1 ;
+		}
+
+	}
+#endif
+
+	int t_err = 0 ;
+
+	for(int t=0;t<512;t++) {
+		if(adc[t]) {
+			if(t_start<0) {
+				// starting
+				seq[s_cou].t_lo = t ;
+				seq[s_cou].dta_p = dta_p_ix ;
+				seq[s_cou].blob_id = 0 ;	// clear it here
+
+				t_start = t ;
+			}
+			
+			if(adc[t]==0xFFFF) {
+				//adc[t] = 0 ;
+				dta[dta_p_ix] = 0 ;
+			}
+			else {
+				dta[dta_p_ix] = adc[t] ;
+			}
+			track[dta_p_ix] = track_id[t] ;
+
+			dta_p_ix++ ;
+		}
+		else {	// data is now 0
+			if(t_start>=0) {	// started!
+				// so stop it
+				seq[s_cou].t_hi = t-1 ;
+
+				if(t<=0) {
+					LOG(ERR,"rp %d:%d t is %d, t_start is %d",row,pad,t,t_start) ;
+					t_err = 1 ;
+				}
+
+				s_cou++ ;
+
+				t_start = -1 ;
+
+				if(s_cou>=SEQ_MAX) {
+					LOG(WARN,"too many sequences %d: sec %d, row %d, pad %d, tb %d",s_cou,sector1,row,pad,t-1) ;
+					goto done ;
+				}
+			}
+		}
+	}
+
+	if(t_err) {
+		for(int t=0;t<511;t++) {
+			LOG(TERR,"  tb %3d %d",t,adc[t]) ;
+		}
+	}
+
+	if(t_start>=0) {	// a sequence started but was never finished before the timebins ran out
+		// stop it
+		seq[s_cou].t_hi = 511 ;
+		s_cou++ ;
+	}
+
+	if(s_cou>=SEQ_MAX) {
+		LOG(ERR,"still too many sequences %d: sec %d, row %d, pad %d",s_cou,sector1,row,pad) ;
+	}
+
+	done:;
+
+	sequence_cou += s_cou ;
+
+	seq[s_cou].t_hi = -1 ;	// sentinel
+
+	last_ix += dta_p_ix ;
+
+	return 0 ;
+}
+
+#if 0
 void tpc23_base::sim_do_pad(int row, int pad, short *adc, int *track_id)
 {
 	int t_start = -1 ;
@@ -163,7 +267,7 @@ void tpc23_base::sim_do_pad(int row, int pad, short *adc, int *track_id)
 	last_ix += dta_p_ix ;
 
 }
-
+#endif
 
 
 int tpc23_base::row_stage2(int row)
@@ -1005,8 +1109,8 @@ int tpc23_base::row_stage1(int row)
 
 							blob_merges++ ;
 							
-							blob[bl].flags |= 1 ;
-							blob[br].flags |= 1 ;
+							//blob[bl].flags |= 1 ;
+							//blob[br].flags |= 1 ;
 
 							// merge into smaller index
 
@@ -1268,7 +1372,8 @@ tpc23_base::tpc23_base()
 
 //	rp_gain_tpx = 0 ;
 //	rp_gain_itpc = 0 ;
-//	rp_gain = 0 ;
+
+	rp_gain = 0 ;
 
 
 	
@@ -1343,7 +1448,7 @@ int tpc23_base::gains_from_cache(const char *fname)
 {
 	int ret = 0 ;
 
-	LOG(TERR,"%s [%s;%p]",__PRETTY_FUNCTION__,fname,rp_gain) ;
+//	LOG(TERR,"%s [%s;%p]",__PRETTY_FUNCTION__,fname,rp_gain) ;
 
 	// set defaults, again
 	for(int s=0;s<24;s++) {

@@ -4,6 +4,7 @@
 struct daq_sim_cld_x ;
 
 class itpcData ;
+struct daq_dta ;
 
 class tpc23_base {
 public:
@@ -72,14 +73,17 @@ public:
 	static short bad_fee_cou[24][6] ;
 	static short bad_fee[24][6][36] ; 
 
-	static struct row_pad_t (*rp_gain)[ROW_MAX+1][PAD_MAX+1] ;	// max for both dets; all sectors
+	struct row_pad_t (*rp_gain)[ROW_MAX+1][PAD_MAX+1] ;	// max for both dets; all sectors
 
 //	static struct row_pad_t (*rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
 //	static struct row_pad_t (*rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;
 
-	static int rowlen[ROW_MAX+1] ;
-	static int row_min ;
-	static int row_max ;
+//	static int rowlen[ROW_MAX+1] ;
+//	static int row_min ;
+//	static int row_max ;
+	int rowlen[ROW_MAX+1] ;
+	int row_min ;
+	int row_max ;
 
 	static struct sim_dta_t {
 		struct {
@@ -94,8 +98,13 @@ public:
 
 	// simulation
 	void sim_evt_start(int sector) ;
-	void sim_do_pad(int row, int pad, short *adc, int *track_id) ;
+	//void sim_do_pad(int row, int pad, short *adc, int *track_id) ;
+	int do_ch_sim(int row, int pad, u_short *adc, int *track_id) ;
 	static int fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version) ;
+
+
+	// called from daq_itpc
+	int init(daq_dta *gain) ;
 
 //private:
 

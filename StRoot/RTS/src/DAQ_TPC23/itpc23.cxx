@@ -8,6 +8,8 @@
 #include <rts.h>
 #include <rtsSystems.h>
 
+#include <DAQ_READER/daq_dta.h>
+
 #include <DAQ_ITPC/itpcCore.h>
 #include <DAQ_ITPC/itpc_rowlen.h>
 #include <DAQ_ITPC/itpcPed.h>
@@ -18,7 +20,7 @@
 //============= iTPC Data Support Routines for the NEW (FY23) version!!! =========
 //================================================================================
 
-//itpcPed *itpc23::ped_c  ;
+tpc23_base::row_pad_t (*itpc23::rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;
 
 
 static const char *hwicap_version(u_int v) ;
@@ -34,6 +36,8 @@ static inline u_int sw16(u_int d)
 
 inline void itpc23::set_rdo(int sec, int rdo)
 {
+//	LOG(TERR,"set_rdo %d: S%02d:%d",id,sec,rdo) ;
+
 	sector1 = sec ;
 	rdo1 = rdo ;
 
@@ -52,7 +56,7 @@ int itpc23::from22to23(char *c_dta, int words)
 	u_int *data_end = data + words ;
 	u_int *data_start = data ;
 
-	
+	// this is wrong! I need to get it from the data!!
 	fee_mask = get_ifee_mask(sector1,rdo1) ;
 
 //	LOG(TERR,"iS%02d:%d fee_mask 0x%04X",sector1,rdo1,fee_mask) ;
@@ -70,7 +74,7 @@ int itpc23::from22to23(char *c_dta, int words)
 
 	int need_swapping = 0 ;
 	if(data[0]==0xCCCC001C) {
-		LOG(WARN,"Need swapping!") ;
+//		LOG(WARN,"Need swapping!") ;
 		need_swapping = 1 ;
 		for(int i=0;i<w_cou;i++) {
 			data[i] = sw16(data[i]) ;
@@ -88,21 +92,25 @@ int itpc23::from22to23(char *c_dta, int words)
 		LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
 	}
 
-	LOG(TERR,"wds 0x%08X 0x%08X; data end 0x%08X",data[0],data[1],data_end[0]) ;
-	for(int i=0;i>-15;i--) {
-		LOG(TERR,"  end %d = 0x%08X",i,data_end[i]) ;
-	}
+//	LOG(TERR,"wds 0x%08X 0x%08X; data end 0x%08X",data[0],data[1],data_end[0]) ;
+//	for(int i=0;i>-15;i--) {
+//		LOG(TERR,"  end %d = 0x%08X",i,data_end[i]) ;
+//	}
 
 	// data[3] is 0x80310010...???
 
 
 	// go to the end...
 
+
+	int found ;
+
+#if 0
 	data_end = data_end - 1 - 2 - 1 - 6 - 1 ;
 
 	// hm, live data seems to need -10 and not -11???
 	if(need_swapping) {
-		LOG(WARN,"adjusting data end") ;
+//		LOG(WARN,"adjusting data end") ;
 		data_end++ ;
 	}
 
@@ -110,10 +118,29 @@ int itpc23::from22to23(char *c_dta, int words)
 	if((data_end[0]&0xFF000000) != 0x58000000) {
 		LOG(ERR,"data_end 0 0x58 = 0x%08X",data_end[0]) ;
 	}
+#else	
+	// find it going backwwards
 
-	//LOG(TERR,"data_end 0x%08X",data_end[0]) ;
+	found = 0 ;
+	for(int i=0;i<16;i++) {
+//		LOG(TERR,"%d: 0x%08X",-i,data_end[-1]) ;
 
-	int found = 0 ;
+		if((data_end[-i]&0xFF000000)==0x58000000) {
+			data_end = data_end - i ;
+			found=1 ;
+			break ;
+		}
+	}
+
+	if(!found) {
+		LOG(ERR,"%d: can't find data_end!",rdo1) ;
+	}
+
+#endif
+
+//	LOG(TERR,"data_end 0x%08X",data_end[0]) ;
+
+	found = 0 ;
 	while(data_end>data) {
 		if((*data_end & 0xFF000000)==0x98000000) {
 			found = 1 ;
@@ -125,7 +152,7 @@ int itpc23::from22to23(char *c_dta, int words)
 	// data_end[0] is 0x9800.... : trigger header
 
 	if(!found) {
-		LOG(ERR,"data_end 0x98 not found = 0x%08X",data_end[0]) ;
+		LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
 	}
 
 	n_words = data_end - data ;
@@ -136,6 +163,7 @@ int itpc23::from22to23(char *c_dta, int words)
 
 	int fee_cou = 0 ;
 	u_int *fee_p[16] ;
+	int l_fee_mask = 0 ;
 
 	memset(fee_p,0,sizeof(fee_p)) ;
 
@@ -146,6 +174,7 @@ int itpc23::from22to23(char *c_dta, int words)
 			int port = d[4]&0xF ;
 			fee_cou++ ;
 
+			l_fee_mask |= (1<<port) ;
 			fee_p[port] = d ;
 
 //			LOG(TERR,"FEE cou %d: port %d: fee_mask 0x%04X at %d",fee_cou,port,l_fee_mask,d-data) ;
@@ -155,10 +184,12 @@ int itpc23::from22to23(char *c_dta, int words)
 		d++ ;
 	}
 
+	fee_mask = l_fee_mask ;
 
 //	fee_mask = get_ifee_mask(sector1,rdo1) ;
 
 	for(int i=0;i<5;i++) d_use[i] = data_start[i] ;
+
 	d_use[5] = 0x20000000 ;			// 1:
 	d_use[6] = data[1] ;		// 2:trigger
 	d_use[7] = 0 ;			// 3: MHZ start
@@ -232,6 +263,27 @@ int itpc23::from22to23(char *c_dta, int words)
 
 
 
+int itpc23::init(daq_dta *gain)
+{
+	if(gain==0) return -1 ;
+
+	while(gain->iterate()) {
+		int s = gain->sec ;
+		int r = gain->row ;
+
+		daq_det_gain *gp = (daq_det_gain *) gain->Void ;
+
+		for(u_int p=0;p<gain->ncontent;p++) {
+			if(p==0) continue ;
+
+			//gain row,pad is gp[p].gain, gp[p].t0 ;
+			LOG(TERR,"gains: S%02d, rp %d:%d = %.1f",s,r,p,gp[p].gain) ;
+		}
+			
+	}
+
+	return 9 ;
+}
 
 
 u_int *itpc23::ch_scan(u_int *start)
@@ -380,6 +432,8 @@ u_int *itpc23::ch_scan(u_int *start)
 				//printf("seq_ix %d: %d %d = %d %d\n",seq_ix,row,pad,tb_start,tb_cou) ;
 
 
+				//LOG(TERR,"DDD %d %d %d",tb_start,tb_cou,tb_start+tb_cou-1) ;
+
 				seq[seq_ix].t_lo = tb_start ;
 				seq[seq_ix].t_hi = tb_start + tb_cou - 1 ;
 				seq[seq_ix].dta_p = (dd-d_start) ;	// where is this sequence...
@@ -479,6 +533,28 @@ u_int *itpc23::ch_scan(u_int *start)
 
 			data_c->ch_done(0) ;
 		}
+#if 0
+		{
+		u_short *dd = dd_save ;
+		for(int i=0;i<seq_ix;i++) {
+			dd += 2 ;
+			int t_len = seq[i].t_hi - seq[i].t_lo + 1 ;
+
+			printf("RP %d:%d, seq %d: t_lo %d, t_hi %d\n",row,pad,i,seq[i].t_lo,seq[i].t_hi) ;
+
+			int ii = 0 ;
+			for(int j=0;j<t_len;j++) {
+				int adc = *dd++ ;
+				int tb = seq[i].t_lo + ii ;
+				
+				printf("    tb %3d = %3d ADC\n",tb,adc);
+
+				ii++ ;
+			}
+		}
+		}
+#endif
+
 	}
 
 	last_ix += dd-d_start ;
@@ -533,7 +609,7 @@ u_int *itpc23::fee_non_trgd(u_int *start)
 	int fee_words = 0 ;
 
 	if(fee_evt_type != 0x02) {	// no clue
-		LOG(ERR,"fee_scan %d: evt_type 0x%02X",fee_ix,fee_evt_type) ;
+		LOG(ERR,"%d: fee_non_trgd %d: evt_type 0x%02X",rdo1,fee_ix,fee_evt_type) ;
 
 
 		while(d<trl) {
@@ -675,7 +751,7 @@ u_int *itpc23::fee_scan(u_int *start)
 		
 	if((d[0]&0xF0000000)!=0x40000000) {
 		err |= 0x40000 ;	// oopsy -- what now!?
-		LOG(ERR,"fee_scan %d: not end-of-FEE 0x%08X",fee_ix,d[0]) ;
+		LOG(ERR,"%d: fee_scan %d: not end-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
 	}
 	else {
 		if(d[0]&0x00800000) {
@@ -766,6 +842,10 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	u_int fee_xoff = d[5]>>16 ;			// actually prog_full
 	u_int rdo_stuff = d[5]&0xFFFF ;
 	u_int fee_empty = d[6]&0xFFFF ;
+//	u_int sig = d[7] ;
+
+//	LOG(TERR,"fee_mask 0x%X, fee_synced 0x%X, fee_overrun 0x%X, fee_xoff 0x%X, rdo_stuff 0x%X, fee_empty 0x%X, sig 0x%X",
+//	    fee_mask,fee_synced,fee_overrun,fee_xoff,rdo_stuff,fee_empty,sig) ;
 
 	if((fee_synced&fee_mask)!=fee_mask) {
 		LOG(ERR,"%d: evt %d: fee sync error 0x%04X, expect 0x%04X",rdo1,evt,fee_synced,fee_mask) ;
@@ -901,6 +981,8 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 	if(log_level>=2) LOG(TERR,"here") ;
 
+//	LOG(TERR,"%d: fee_mask 0x%08X",rdo1,fee_mask) ;
+
 	for(int i=0;i<16;i++) {
 		if(fee_mask & (1<<i)) ;
 		else continue ;
@@ -977,7 +1059,8 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 	
 	u_int sig, trg_w,sub ;
 	u_int fmt23 ;
-	if(d[4]==0xCCCC001C) {
+//	if(d[4]==0xCCCC001C) {
+	if(d[4]==0xCCCC001C && fmt<23) {
 		sig = sw16(d[5]) ;
 		trg_w = sw16(d[6]) ;
 		sub = sw16(d[7]) ;
@@ -987,6 +1070,8 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 		trg_w = d[6] ;
 		sub = d[7] ;
 	}
+
+//	LOG(TERR,"0x%08X: 0x%08X 0x%08X 0x%08X",d[4],sig,trg_w,sub) ;
 
 	if((sig&0xFF000000)==0x98000000) {
 		fmt23 = 0 ;
@@ -1098,14 +1183,27 @@ itpc23::itpc23()
 
 	rts_id = ITPC_ID ;
 
-//	if(rp_gain_itpc==0) {
-//		rp_gain_itpc = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
-//	}
-//	rp_gain = rp_gain_itpc ;
+	if(rp_gain_itpc==0) {
+		rp_gain_itpc = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
 
-	if(rp_gain==0) {
-		rp_gain = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
+		// inititalize here!
+		// initialize here!
+		for(int s=0;s<24;s++) {
+		for(int r=0;r<=ROW_MAX;r++) {
+		for(int p=0;p<=PAD_MAX;p++) {
+			rp_gain_itpc[s][r][p].gain = 1.0 ;
+			rp_gain_itpc[s][r][p].t0 = 0.0 ;
+			rp_gain_itpc[s][r][p].flags = 0 ;
+		}}}
+
+
 	}
+
+	rp_gain = rp_gain_itpc ;
+
+//	if(rp_gain==0) {
+//		rp_gain = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
+//	}
 	
 	row_min = 1 ;
 	row_max = 40 ;
@@ -1122,7 +1220,7 @@ itpc23::itpc23()
 
 itpc23::~itpc23()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	return ;
 }

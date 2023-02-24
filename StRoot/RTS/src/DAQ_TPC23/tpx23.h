@@ -4,7 +4,7 @@
 #include "tpc23_base.h"
 
 class tpxPed ;
-
+struct daq_dta ;
 
 class tpx23 : public tpc23_base {
 public:
@@ -22,6 +22,11 @@ public:
 
 
 	u_int get_token(char *c_addr, int words) ;
+
+	int init(daq_dta *gain) ;
+
+	static struct row_pad_t (*rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;     // max for both dets; all sectors
+
 private:
 
 	u_int *fee_scan() ;
