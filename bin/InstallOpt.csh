@@ -1,3 +1,5 @@
+#  sh ../../cmake-3.25.0-linux-x86_64.sh --prefix=$XOPTSTAR  --skip-license
+
 #if ("${OPTSTAR}" == "${XOPTSTAR}") then
   setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
   if (! -d ${XOPTSTAR}) mkdir -p ${XOPTSTAR}
@@ -93,7 +95,8 @@ endsw
 #set list = "gsl"
 #set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3  boost_1_66_0"
 #set list = " gsl xrootd coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3   qt-everywhere-opensource-src-4.8.7 pythia6 pythia8  eigen3  boost_1_66_0"
-set list = "qt-everywhere-opensource-src-4.8.7 coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl xrootd  pythia6 pythia8  eigen3  boost_1_66_0"
+#set list = "qt-everywhere-opensource-src-4.8.7 coin quarter  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl xrootd  pythia6 pythia8  eigen3  boost_1_66_0"
+set list = "apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl xrootd  pythia6 pythia8  eigen3  boost_1_66_0"
 #set list = pythia8
 #if ($#argv != 0) set list = $argv[1];
 setenv DIR ~/sources/.${STAR_HOST_SYS}
@@ -150,7 +153,7 @@ setenv CFLAGSd   "$cflags"
 	rehash
         perldoc perl
         breaksw
-      case "libtools*":
+      case "libtool*":
       case "cfitsio*":
        ./bootstrap
        ./configure --prefix=${XOPTSTAR}
@@ -184,7 +187,8 @@ setenv CFLAGSd   "$cflags"
 	breaksw
       case "xrootd*":
 # has problem with gcc 4.8.2
-          cmake ../../${pkg} -DCMAKE_FORCE_32BITS=${FORCE_32BITS} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS
+#          cmake ../../${pkg} -DCMAKE_FORCE_32BITS=${FORCE_32BITS} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS
+          cmake ../../${pkg} -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} -DENABLE_PERL=FALSE -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_SHARED_LINKER_FLAGS=$LDFLAGS
 	  make 
           if ( $?) break;
 	  make install
@@ -298,7 +302,8 @@ EOF
           touch ../${pkg}.Done
 	  breaksw
       case "pythia6":
-          csh -x makePythia6.${ARCH}
+#          csh -x makePythia6.${ARCH}
+          csh -x makePythia6.linuxx8664gcc
           if ( $?) break;
 	  cp libPythia6* ${XOPTSTAR}/lib
           if ( $?) break;
@@ -306,7 +311,8 @@ EOF
           breaksw
 #      case "pythia8*":
       case "pythia8":
-          ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
+#          ./configure --prefix=$XOPTSTAR --enable-64bit  --enable-shared #--cxx-common=\'$CFLAGS\' 
+          ./configure --prefix=$XOPTSTAR
 	  make install
           if ( $?) break;
           touch ../${pkg}.Done
@@ -320,7 +326,7 @@ EOF
       case "mercurial*":
           make PREFIX=$XOPTSTAR install
           if ( $?) break;
-          touch ../${pkg}.Done
+          touch ../${pkg}.Doneq
 	  breaksw
       case "boost*":
 	  bootstrap.sh --prefix=${XOPTSTAR}
@@ -328,7 +334,7 @@ EOF
 	  ./b2 install
           if ( $?) break;
           touch ../${pkg}.Done
-	  breaks
+	  breaksw
       case "simage":
 	  cmake -DCMAKE_INSTALL_PREFIX=$XOPTSTAR -DSIMAGE_BUILD_DOCUMENTATION=0 -DSIMAGE_BUILD_EXAMPLES=0 -DSIMAGE_LIBSNDFILE_SUPPORT=0 -DSIMAGE_MPEG2ENC_SUPPORT=0 -DSIMAGE_OGGVORBIS_SUPPORT=0 ../../simage
 	  breaksw
