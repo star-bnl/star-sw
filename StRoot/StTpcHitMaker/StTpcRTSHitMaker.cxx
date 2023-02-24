@@ -6,7 +6,6 @@
  ***************************************************************************
  *
  * Description:  Make clusters from StTpcRawData and fill the StEvent      */
-//#define __USE_GAIN_FROM_FILE__
 #include <assert.h>
 #include <stdio.h>
 #include "StTpcHitMaker.h"
@@ -29,10 +28,8 @@
 #include "StDetectorDbMaker/St_itpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcStatusC.h"
-#ifdef __USE_GAIN_FROM_FILE__
 #include "StDetectorDbMaker/StPath2tpxGain.h"
 #include "StDetectorDbMaker/StPath2itpcGain.h"
-#endif /* __USE_GAIN_FROM_FILE__ */
 #include "StMessMgr.h" 
 #include "StDAQMaker/StDAQReader.h"
 #include "StRtsTable.h"
@@ -50,8 +47,8 @@
 #include "RTS/src/DAQ_TPX/tpxStat.h"
 #include "RTS/src/DAQ_ITPC/itpcFCF.h"
 #ifdef __TFG__VERSION__
-#include "TPC23/tpx23.h"
-#include "TPC23/itpc23.h"
+#include "RTS/src/DAQ_TPC23/tpx23.h"
+#include "RTS/src/DAQ_TPC23/itpc23.h"
 #endif /*  __TFG__VERSION__ */
 #include "TBenchmark.h"
 ClassImp(StTpcRTSHitMaker); 
@@ -77,7 +74,6 @@ Int_t StTpcRTSHitMaker::Init() {
   bin0Hits = 0;
   return StMaker::Init();
 }
-#ifdef __USE_GAIN_FROM_FILE__
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::from_file(daq_dta *gain_dta, const Char_t *fname) {
   // example of gains; will use file for that
@@ -127,7 +123,6 @@ Int_t StTpcRTSHitMaker::from_file(daq_dta *gain_dta, const Char_t *fname) {
   }
   return 1;
 }
-#endif /* __USE_GAIN_FROM_FILE__ */
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
@@ -141,19 +136,26 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(fTpx23);
   SafeDelete(fiTpc23);
 #endif /*  __TFG__VERSION__ */
-#ifdef __USE_GAIN_FROM_FILE__
-    const Char_t *fname  = StPath2tpxGain::instance()->GetPath();
-    const Char_t *fnameITPC  = StPath2itpcGain::instance()->GetPath();
-#else
-    const Char_t *fname  = "none";
-    const Char_t *fnameITPC  = "none";
-#endif /* __USE_GAIN_FROM_FILE__ */
+  TString fnameTPX("none");
+  TString fnameITPC("none");
+  if (IAttr("USE_GAIN_FROM_FILE")) {
+    fnameTPX  = StPath2tpxGain::instance()->GetPath();  
+    LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameTPX.Data() << " for TPX" << endm;
+    fnameITPC = StPath2itpcGain::instance()->GetPath(); 
+    LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameITPC.Data() << " for iTPC" << endm;
+  }
 #ifdef __TFG__VERSION__
   if ( IAttr("TPC23")) { // TPC23
+    LOG_INFO << "StTpcRTSHitMaker::InitRun:: use TPC23 mode" << endm;
     Int_t log_level = 0 ;
+    //    Int_t fmt_version = 0 ; 
+    Int_t run_type = 3; 
+    Int_t online    = 0 ; //   NOTE setting for Offline mode!
     fTpx23  = new tpx23;
-    fTpx23->log_level = log_level;
-    if (fTpx23->gains_from_cache(fname) < 0) {	// REQUIRED even if no gain correction
+    fTpx23->online = online ;
+    fTpx23->run_type = run_type ;
+    fTpx23->log_level = log_level ;
+    if (fTpx23->gains_from_cache(fnameTPX) < 0 || fnameTPX == "none") {	// REQUIRED even if no gain correction
       // Tpx Load gains from Db
       for(Int_t sector=1;sector<=24;sector++) {
 	Int_t rowMin = 1;
@@ -177,8 +179,11 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     fTpx23->run_start() ;
     // iTPC23
     fiTpc23 = new itpc23 ;
-    fiTpc23->log_level = log_level;
-    if (fiTpc23->gains_from_cache(fnameITPC) < 0) {	// REQUIRED even if no gain correction
+    fiTpc23->online = online ;
+    fiTpc23->run_type = run_type ;
+    fiTpc23->log_level = log_level ;
+    Int_t ok = fiTpc23->gains_from_cache(fnameITPC);
+    if (ok < 0 || fnameITPC == "none") {	// REQUIRED even if no gain correction
       for(Int_t sector=1;sector<=24;sector++) {
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
 	for(Int_t row = 1; row <= 40; row++) {
@@ -212,7 +217,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     //    daq_dta *dta_Tpx  = fTpx->put("gain"); 
     tpxGain *gain = fTpx->gain_algo;
     // gain->do_default(sector) ;	// zap to all 1...
-    if (gain->from_file(fname, 0) < 0) {
+    Int_t ok = gain->from_file(fnameTPX, 0);
+    if (ok < 0 &&fnameTPX == "none") {
       for(Int_t sector=1;sector<=24;sector++) {
 	// Tpx
 	Int_t rowMin = 1;
@@ -252,9 +258,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     // iTpc
     if (fiTpc) {
       daq_dta * dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
-#ifdef __USE_GAIN_FROM_FILE__
-      if (from_file(dta_iTpc, fname) < 0) {
-#endif /* __USE_GAIN_FROM_FILE__ */
+      Int_t ok = from_file(dta_iTpc, fnameITPC);
+      if (ok < 0 || fnameITPC == "none") {
 	for(Int_t sector=1;sector<=24;sector++) {
 	  if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
 	  for(Int_t row = 1; row <= 40; row++) {
@@ -277,9 +282,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  }
 	  //      ((daq_itpc *) dta_iTpc)->InitRun(runnumber);
 	}
-#ifdef __USE_GAIN_FROM_FILE__
       }
-#endif /* __USE_GAIN_FROM_FILE__ */
     } // 
 #ifdef __TFG__VERSION__
   }
@@ -695,14 +698,18 @@ Int_t StTpcRTSHitMaker::Make23() {
 	  // add adc data for this specific sector:row:pad
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  UInt_t l = 0;
+	  static UShort_t adcs[__MaxNumberOfTimeBins__];
+	  memset(adcs, 0, sizeof(adcs));
 	  for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
 	    if (ADCs[k]) {
+	      adcs[k] = ADCs[k];
 	      l++;
 	    }
 	  }
 	  if (l > 0) {
 	    Int_t padrow = rowO;
-	    tpc23->sim_do_pad(padrow,pad,ADCs,IDTs) ;
+	    //	    tpc23->sim_do_pad(padrow,pad,ADCs,IDTs) ;
+	    tpc23->do_ch_sim(padrow,pad,adcs,IDTs) ;
 	    NoAdcs += l;
 	  }
 	} // pad loop
