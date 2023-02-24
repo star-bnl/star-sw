@@ -195,7 +195,7 @@
     TString OPTSTAR("$OPTSTAR");               gSystem->ExpandPathName(OPTSTAR);
     TString XOPTSTAR("$XOPTSTAR");             gSystem->ExpandPathName(XOPTSTAR);
     TString QTDIR("$QTDIR");                   gSystem->ExpandPathName(QTDIR);
-    cout <<  Form("QAInfo:You are using STAR_LEVEL : %s%s, ROOT_LEVEL : %s and node : %s ",  
+    printf("QAInfo:You are using STAR_LEVEL : %s%s, ROOT_LEVEL : %s and node : %s ",  
 		  STAR_LEVEL.Data(),STAR_GIT_VERSION.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
 #ifndef __CLING__1
     // ROOT and XROOTD
@@ -205,9 +205,9 @@
 #endif
     SysInfo_t info;
     if (gSystem->GetSysInfo(&info) >= 0) {
-      cout << Form("with %i %s",info.fCpus,info.fModel.Data());
+      printf("with %i %s",info.fCpus,info.fModel.Data());
     }
-    cout << endl;
+    printf("\n");
     // note that the above bacward support the old mode for include whenever
     // it was not in .$STAR_HOST_SYS_OPT but one level up. The backward compatibility
     // can be removed only at the net root release ... 
@@ -232,7 +232,7 @@
   }
   Char_t *file = gSystem->Which(rootlogon_path,"rootlogon.C",kReadPermission);
   if (file) {
-    cout << "Found local " << file  << endl;
+    prinf("Found local %s\n",file);
     gROOT->Macro(file);
   }
   delete [] file;

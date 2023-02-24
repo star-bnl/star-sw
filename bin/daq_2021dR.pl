@@ -76,11 +76,13 @@ foreach my $run (@runs) {
       my $file = $files[$i];
       my $b = File::Basename::basename($file,".daq");
       #    print "$b\n" if ($debug);
-      my $mufile = $b . ".MuDst.root";
+      my $logfile = $b . "B.log.gz"; print "$logfile\n" if ($debug);
+      if (-r $logfile) {next;}
+      my $mufile = $b . ".MuDst.root"; print "$mufile\n" if ($debug);
       if (-r $mufile) {next;}
-      my $pifile = $b . ".picoDst.root";
+      my $pifile = $b . ".picoDst.root"; print "$pifile\n" if ($debug);
       if (-r $pifile) {next;}
-      my $blafile = $b . ".bla.root";
+      my $blafile = $b . ".bla.root"; print "$blafile\n" if ($debug);
       if (-r $blafile) {next;}
       print "string:$file\n";
       $fNo++;

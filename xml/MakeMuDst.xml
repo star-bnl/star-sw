@@ -11,5 +11,6 @@
 	</command>
 	<stdout URL="file:./$JOBID.log" />
 	<stderr URL="file:./$JOBID.err" />
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2014_AuAu200Z3C/*.event.root" /> 
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2014_AuAu200Z3C/*.event.root" />  -->
+<input URL="file:/hlt/cephfs/reco/2021/RF/TFG22g/7p7GeV_2021/*/*/*event.root" />
 </job>

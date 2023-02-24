@@ -13,6 +13,7 @@
 #   setup gcc
 #   setup 32b
 #    starver TFG20i
+#    starver TFG23a
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 500; # 2000
@@ -43,6 +44,8 @@
    if (! $? ) set chain = ${chain},TpxRaw,TpxClu;
    echo ${SUBMITTINGDIRECTORY} | grep TPC23
    if ($? == 0) set chain = ${chain},TpxRaw,TPC23;
+   echo ${SUBMITTINGDIRECTORY} | grep TPC23F
+   if ($? == 0) set chain = ${chain},TpxRaw,TPC23,USE_GAIN_FROM_FILE;
 #  set chain = ${chain},TpxRaw,TpxClu,McTpcAna;
    root.exe -b -q 'bfc.C('${f}','${l}',"'${chain}'","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
@@ -71,8 +74,9 @@
 <input URL="file:/hlt/cephfs/daq/2019B/production_19GeV_2019/*/*/*adc*.daq" />
 <input URL="file:/hlt/cephfs/daq/2019B/production_14p5GeV_2019/*/*/*adc*.daq" />
 -->
-<input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/production_19GeV_2019/09*/*/*adc*.daq'" /> 
+<!-- <input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/production_19GeV_2019/09*/*/*adc*.daq'" />  -->
 <!-- <input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/192/20192001/st*.daq'" /> --> <!-- 2019AuAu200 -->
+<input URL="file:/RTS/TONKO/data/st_physics_adc_20192001_raw_5500002.daq" />
    <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>

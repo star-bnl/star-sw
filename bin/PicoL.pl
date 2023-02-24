@@ -1,8 +1,117 @@
 #! /usr/bin/env perl
+# /star/data14/GRID/NFS_FileList
+# dir -ltrd /star/data*/reco/productio*/*/*
+# dir -ltrd /star/data*/reco/productio*/*/* | awk -F\/ '{print $5"/"$7}' | sort -u
+# production_11p5GeV_2020/P22ic_calib
+# production_11p5GeV_2020/P23ia
+# production_13p5GeV_fixedTarget_2020/P21id
+# production_13p5GeV_fixedTarget_2020/P21id.SL22b
+# production_13p5GeV_fixedTarget_2020/P21id.SL22c
+# production_14p5GeV_2019/P21ic
+# production_19GeV_2019b/P21ic
+# production_19GeV_2019/P21ic
+# production_19p5GeV_fixedTarget_2020/P21id
+# production_26p5GeV_fixedTarget_2020/DEV
+# production_26p5GeV_fixedTarget_2020/P21ic_calib
+# production_27GeV_fixedTarget_2018/P19ie.SL20d
+# production_31GeV_fixedTarget_2019/P21id
+# production_31p2GeV_fixedTarget_2020/P21id
+# production_3p85GeV_fixedTarget_2019/P21id
+# production_4p59GeV_fixedTarget_2019/P21id
+# production_5p75GeV_fixedTarget_2020/P21id
+# production_7.3GeV_fixedTarget_2019/P21id
+# production_7p3GeV_fixedTarget_2020/P21id
+# production_7p7GeV_2021/DEV
+# production_7p7GeV_2021/P22ia
+# production_7p7GeV_2021/P22ia_calib
+# production_7p7GeV_2021/P22ib
+# production_7p7GeV_2021/p7p7_21_DEV_calib
+# production_9p2GeV_2020b/P22ic_calib
+# production_9p2GeV_2020b/P23ia
+# production_9p2GeV_2020c/P22ic_calib
+# production_9p2GeV_2020c/P23ia
+# production_9p2GeV_2020/P22ic_calib
+# production_9p2GeV_2020/P23ia
+# production_9p8GeV_fixedTarget_2020/P21id
+# production_AuAu200_2019/P21id
+# production_AuAu200_2019/P22ia
+# production_dAu200_2021/DEV
+# production_FF_OO_200GeV_2021/dev
+# production_FF_OO_200GeV_2021/P23ia_calib
+# production_isobar_2018/P21id
+# production_isobar_2018/P21id.SL21d
+# production_isobar_2018/P22ia
+# production_OO_200GeV_2021/dev
+# production_OO_200GeV_2021/DEV
+# production_OO_200GeV_2021/P23ia_calib
+# production_OO_fcsTiming/dev
+# production_pp500_2022/dev
+# production_pp500_2022/DEV
+# production_pp500_2022/pp500_22_DEV_fcs
+# production_ps_OO_200GeV_2021/dev
+# production_ps_OO_200GeV_2021/P23ia_calib
+#--------------------------------------------------------------------------------
+# production_27GeV_fixedTarget_2018/P19ie.SL20d
+# production_isobar_2018/P21id
+# production_isobar_2018/P21id.SL21d
+# production_isobar_2018/P22ia
+
+# production_14p5GeV_2019/P21ic
+# production_19GeV_2019b/P21ic
+# production_19GeV_2019/P21ic
+# production_31GeV_fixedTarget_2019/P21id
+# production_3p85GeV_fixedTarget_2019/P21id
+# production_4p59GeV_fixedTarget_2019/P21id
+# production_7.3GeV_fixedTarget_2019/P21id
+# production_AuAu200_2019/P21id
+# production_AuAu200_2019/P22ia
+
+# production_11p5GeV_2020/P22ic_calib
+# production_11p5GeV_2020/P23ia
+# production_13p5GeV_fixedTarget_2020/P21id
+# production_13p5GeV_fixedTarget_2020/P21id.SL22b
+# production_13p5GeV_fixedTarget_2020/P21id.SL22c
+# production_19p5GeV_fixedTarget_2020/P21id
+# production_26p5GeV_fixedTarget_2020/DEV
+# production_26p5GeV_fixedTarget_2020/P21ic_calib
+# production_31p2GeV_fixedTarget_2020/P21id
+# production_5p75GeV_fixedTarget_2020/P21id
+# production_7p3GeV_fixedTarget_2020/P21id
+# production_9p2GeV_2020b/P22ic_calib
+# production_9p2GeV_2020b/P23ia
+# production_9p2GeV_2020c/P22ic_calib
+# production_9p2GeV_2020c/P23ia
+# production_9p2GeV_2020/P22ic_calib
+# production_9p2GeV_2020/P23ia
+# production_9p8GeV_fixedTarget_2020/P21id
+
+# production_7p7GeV_2021/DEV
+# production_7p7GeV_2021/P22ia
+# production_7p7GeV_2021/P22ia_calib
+# production_7p7GeV_2021/P22ib
+# production_7p7GeV_2021/p7p7_21_DEV_calib
+# production_dAu200_2021/DEV
+# production_FF_OO_200GeV_2021/dev
+# production_FF_OO_200GeV_2021/P23ia_calib
+# production_OO_200GeV_2021/dev
+# production_OO_200GeV_2021/DEV
+# production_OO_200GeV_2021/P23ia_calib
+# production_OO_fcsTiming/dev
+
+# production_pp500_2022/dev
+# production_pp500_2022/DEV
+# production_pp500_2022/pp500_22_DEV_fcs
+# production_ps_OO_200GeV_2021/dev
+# production_ps_OO_200GeV_2021/P23ia_calib
+
+# dir -ltrd dir -ltrd /hlt/cephfs/reco/Pico/20*/*GeV* /hlt/cephfs/reco/Pico/20*/*/*GeV* /hlt/cephfs/reco/Pico/20*/*/*/*GeV*
 use File::Basename;
 use Cwd;
 use File::stat;
 use Time::localtime;
+use Env;
+use lib $STAR . "/bin";
+use PicoDef;
 # dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
 #my $timestamp = ctime(stat($fh)->mtime);
 #my $glob =  "/net/l404/data/fisyak/Pico/BES-I/AuAu19_production/2011/???/*";
@@ -10,6 +119,17 @@ use Time::localtime;
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/TFG19d/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/14GeV_2019_StiCA/0??/*";
 #my $glob =  "./Pico*/???/*/*.picoDst.root";
+#____________________________________________________________
+sub PrintHash($$) {
+  my $env = shift; # print "Call PrintHash\n";
+  my $prefix = shift;
+  foreach my $key (sort keys %$env ) {
+    print "{ $key }\t=> $env->{$key}\n";
+  }
+}
+my $def = {@PicoDefs};# print "Runs = @Runs\n"
+PrintHash($def,"Runs");# if ($debug);
+die;
 my $PICOPATH = "";
 my $debug = 0;
 if ($#ARGV >= 0) {
@@ -36,7 +156,8 @@ elsif ($pwd =~ /2012/) { $year = "y2012";}
 elsif ($pwd =~ /2011/) { $year = "y2011";} 
 elsif ($pwd =~ /2010/) { $year = "y2010";} 
 if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
-  $PICOPATH = "/gpfs01/star/data*"; print "PICOPATH = $PICOPATH \n" if ($debug);
+#  $PICOPATH = "/gpfs01/star/data*"; print "PICOPATH = $PICOPATH \n" if ($debug);
+  $PICOPATH = "/star/data*"; print "PICOPATH = $PICOPATH \n" if ($debug);
   if    ($pwd =~ /2021\/p7p7_21_DEV_calib/)  {$PICOPATH = "/star/data*"; $glob = "/reco/production_7p7GeV_2021/ReversedFullField/p7p7_21_DEV_calib/2021/";}
   elsif ($pwd =~ /2021\/7p7GeV.P22ia_calib/)  {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/P22ia_calib/2021/";}
   elsif ($pwd =~ /2020\/5p75GeV_fixedTarget_P21id/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/P21id/20*";}
@@ -177,6 +298,7 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
   elsif ($pwd =~ /2021\/ps_OO_200GeV_2021/)        {$glob = "/2021/RF/TFG21e/ps_OO_200GeV_2021";}
   elsif ($pwd =~ /2021\/OO_200GeV_2021/)           {$glob = "/2021/RF/TFG21e/OO_200GeV_2021";}
   elsif ($pwd =~ /2021\/FF_OO_200GeV_2021f/)       {$glob = "/2021/FF/TFG21f/FF_OO_200GeV_2021";}
+  elsif ($pwd =~ /2021\/FF_OO_200GeV_2022g/)       {$glob = "/2021/FF/TFG22g/FF_OO_200GeV_2021";}
   elsif ($pwd =~ /2021\/FF_OO_200GeV_2021/)        {$glob = "/2021/FF/TFG21e/FF_OO_200GeV_2021";}
   elsif ($pwd =~ /2021\/17p3GeV_2021/)             {$glob = "/2021/RF/TFG21e/17p3GeV_2021";}
   elsif ($pwd =~ /2021\/26p5GeV/)                  {$glob = "/2021/RF/TFG21g.B/26p5GeV_fixedTarget_2021/";}

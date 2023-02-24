@@ -66,13 +66,14 @@
 #include "TDirIter.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #endif
+#define __FLAG0_ONLY__
 static TString Old("Old");
 static TString New("New");
 // Clusters
 struct Name_t {
   const Char_t *histName;
   const Char_t *varName;
-  const Char_t *cutName;
+  const Char_t * cutName;
 };
 Name_t Names[3] = {
   {"Pad",              "newP.pad:newP.row found both by old and new","oldP.sector&&newP.sector"}, 
@@ -96,6 +97,18 @@ Name_t Names[3] = {
 
 // Header file for the classes stored in the TTree if any.
 #include <TObject.h>
+//________________________________________________________________________________
+void SetNewOld() {
+  TString pwd(gSystem->BaseName( gSystem->WorkingDirectory()));
+  TObjArray *obj = pwd.Tokenize("_");
+  Int_t nParsed = obj->GetEntries();
+  if (nParsed >= 2) {// _Old_New
+    Old = ((TObjString *) obj->At(nParsed-2))->GetName();
+    New = ((TObjString *) obj->At(nParsed-1))->GetName();
+  }
+  delete obj;
+  cout << "New = " << New.Data() << " versus Old = " << Old.Data() << endl;
+}
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -268,17 +281,22 @@ void hitMateComp::Loop()
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
    if (fChain == 0) return;
-   TH1D *RN = new TH1D("RN","new clusters versus row",72,0.5,72.5);
-   TH1D *RO = new TH1D("RO","old clusters versus row",72,0.5,72.5);
-   TH1D *RON = new TH1D("RON","old&new clusters versus new row",72,0.5,72.5);
-   TH1D *RNO = new TH1D("RNO","old&new clusters versus old row",72,0.5,72.5);
-   TH2F *padD = new TH2F("padD","pad diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
-   TH2F *timD = new TH2F("timD","time diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
-   TH2F *adcR = new TH2F("adcR","log(adc_{new}/adc_{old} versus row",72,0.5,72.5,256,-2.0,2.0);
+   SetNewOld();
+   TH1D *RN = new TH1D("RN",Form("%s clusters versus row",New.Data()),72,0.5,72.5);
+   TH1D *RO = new TH1D("RO",Form("%s clusters versus row",Old.Data()),72,0.5,72.5);
+   TH1D *RON = new TH1D("RON",Form("%s&%s clusters versus %s row",Old.Data(),New.Data(),New.Data()),72,0.5,72.5);
+   TH1D *RNO = new TH1D("RNO",Form("%s&%s clusters versus %s row",Old.Data(),New.Data(),Old.Data()),72,0.5,72.5);
+   TH2F *padD = new TH2F("padD",Form("pad diff. %s - %s versus row",New.Data(),Old.Data()),72,0.5,72.5,256,-2.0,2.0);
+   TH2F *timD = new TH2F("timD",Form("time diff. %s - %s versus row",New.Data(),Old.Data()),72,0.5,72.5,256,-2.0,2.0);
+   TH2F *adcR = new TH2F("adcR",Form("log(adc_{%s}/adc_{%s} versus row",New.Data(),Old.Data()),72,0.5,72.5,256,-2.0,2.0);
    TH2F *PadRow[3][24] = {0}; 
+   TString Title;
    for (Int_t k = 0; k < 3; k++) {
+     TString Title(Form("found by both %s && %s",Old.Data(), New.Data()));
+     if (k == 1) Title = Form("found only by %s", New.Data());
+     if (k == 2) Title = Form("found only by %s", Old.Data());
      for (Int_t sec = 1; sec <= 24; sec++) {
-       PadRow[k][sec-1] = new TH2F(Form("%s%i",Names[k].histName,sec),Form("%s for %i",Names[k].varName,sec), 72,0.5,72.5,182,0.5,182.5);
+       PadRow[k][sec-1] = new TH2F(Form("%s%i",Names[k].histName,sec),Title, 72,0.5,72.5,144,0.5,144.5);
        PadRow[k][sec-1]->SetXTitle("row");
        PadRow[k][sec-1]->SetYTitle("pad");
      }
@@ -291,8 +309,13 @@ void hitMateComp::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
+#ifndef __FLAG0_ONLY__
       if (oldP_sector > 0 && oldP_fl > 0 && oldP_fl & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)) oldP_sector = 0;
       if (newP_sector > 0 && newP_fl > 0 && newP_fl & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)) newP_sector = 0;
+#else
+      if (oldP_sector > 0 && oldP_fl) oldP_sector = 0;
+      if (newP_sector > 0 && newP_fl) newP_sector = 0;
+#endif
       if (oldP_sector <= 0 && newP_sector <= 0) continue;
       if (oldP_sector > 0 && newP_sector > 0) {
 	if (oldP_sector != newP_sector) continue;
@@ -548,22 +571,14 @@ void TbyTHits() {
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
 	<< "chain returned pointer: " << tChain << endl;
+#ifndef __FLAG0_ONLY__
   TFile *fOut =  new TFile("Hits.root","recreate");
+#else
+  TFile *fOut =  new TFile("Hits0.root","recreate");
+#endif
   hitMateComp t(tChain);
   t.Loop();
   fOut->Write();
-}
-//________________________________________________________________________________
-void SetNewOld() {
-  TString pwd(gSystem->BaseName( gSystem->WorkingDirectory()));
-  TObjArray *obj = pwd.Tokenize("_");
-  Int_t nParsed = obj->GetEntries();
-  if (nParsed >= 2) {// _Old_New
-    Old = ((TObjString *) obj->At(nParsed-2))->GetName();
-    New = ((TObjString *) obj->At(nParsed-1))->GetName();
-  }
-  delete obj;
-  cout << "New = " << New.Data() << " versus Old = " << Old.Data() << endl;
 }
 //________________________________________________________________________________
 void PlotEff() {
@@ -574,7 +589,7 @@ void PlotEff() {
   TH1D *RNO = (TH1D *) gDirectory->Get("RNO");
   TEfficiency *newE = new TEfficiency(*RON,*RO);
   TEfficiency *oldE = new TEfficiency(*RON,*RN);
-  TCanvas *ceff = new TCanvas("ceff"<"ClusterEfficiencies");
+  TCanvas *ceff = new TCanvas("ceff","ClusterEfficiencies");
   TH1F *frame = ceff->DrawFrame(0.5,0.9,72.5,1.02);
   frame->SetTitle(Form("%s and %s cluster efficiencies",Old.Data(),New.Data()));
   frame->SetXTitle("row");

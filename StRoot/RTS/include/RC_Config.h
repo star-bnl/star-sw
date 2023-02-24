@@ -53,7 +53,7 @@
 #define MAX_TCD 20
 
 #define MAX_NODES 400
-#define MAX_EVBS 15
+#define MAX_EVBS 25
 
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
@@ -251,7 +251,7 @@ struct EthServerName
 
 // Reads from all.conf
 // returns -1 if no server, 0 if server exists.
-int getEthServer(int node, int task, EthServer *eth);   
+int getEthServer(int node, int task, EthServer *eth, int force_vlan=0);   
 char *ReadAllDotConf(int node, int task, char *param, char *result=(char *)NULL, char *paramfilename=(char *)"/RTS/conf/handler/all.conf");
 int getAllEthServers(EthServerName *list, int max);
 
@@ -264,7 +264,7 @@ int getAllEthServers(EthServerName *list, int max);
 class EvbChooser
 {
  public:
-    EvbChooser() {weights_set = 0; };
+    EvbChooser(int _force_vlan=0) { weights_set = 0; force_vlan=_force_vlan; };
   void configure(SimpleXmlDoc *xml);
 
   //void configure(STAR_CFG *cfg, int legacy);
@@ -297,7 +297,9 @@ class EvbChooser
   int nextWeightedServer(int seq, int token);
   
   int nevbs;
-  int evb4token[4096];         
+  int evb4token[4096];   
+
+  int force_vlan;
 };
 
 #define RHIC_TRG "RHICTRG\0"

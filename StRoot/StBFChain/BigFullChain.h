@@ -1627,6 +1627,7 @@ Bfc_st BFC[] = { // standard chains
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
   {"TpxClu2D"    ,"","","TpxClu","","",                              "RTS(online) 2D-cluster maker",kFALSE},
   {"TPC23"       ,"","","TpxClu","","",                           "RTS(online) tpc23-cluster maker",kFALSE},
+  {"USE_GAIN_FROM_FILE","","","TpxClu","","","RTS(online) force use gain from Tonko's online files",kFALSE},
   {"NoiTPCLu"    ,"","","TpxClu","","",                "RTS(online) use 1+1D cluster find for iTPC",kFALSE},
   {"NoTpxAfterBurner","","","","","",       "Switch off AfterBurner for RTS(online) cluster makers",kFALSE},
   {"TpcAvCluster","TpcAvCluster","tpcChain","rts,detDb","StTpcAvClusterMaker","StTpcHitMaker"

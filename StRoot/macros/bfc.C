@@ -247,7 +247,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
   chain = (StBFChain *) StMaker::New("StBFChain", chainName);
   cout << "Create chain " << chain->GetName() << endl;
   chain->cd();
-   chain->SetDebug(1);
+  chain->SetDebug(1);
   if (Last < -3) return chain;
   chain->SetFlags(tChain);
 #ifndef __CLING__

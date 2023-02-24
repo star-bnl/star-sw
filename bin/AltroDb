@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+# http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map/
+# Run/Year	       NODE	Port
+my @Runs = (
+    'Run1'        => {node => 'dbbak.starp.bnl.gov', port => '3400'},
+    'Run2' 	  => {node => 'dbbak.starp.bnl.gov', port => '3401'},
+    'Run3' 	  => {node => 'dbbak.starp.bnl.gov', port => '3402'},
+    'Run4' 	  => {node => 'dbbak.starp.bnl.gov', port => '3403'},
+    'Run5' 	  => {node => 'dbbak.starp.bnl.gov', port => '3404'},
+    'Run6' 	  => {node => 'dbbak.starp.bnl.gov', port => '3405'},
+    'Run7' 	  => {node => 'dbbak.starp.bnl.gov', port => '3406'},
+    'Run8' 	  => {node => 'dbbak.starp.bnl.gov', port => '3407'},
+    'Run9' 	  => {node => 'dbbak.starp.bnl.gov', port => '3408'},
+    'Run10' 	  => {node => 'dbbak.starp.bnl.gov', port => '3409'},
+    'Run11' 	  => {node => 'dbbak.starp.bnl.gov', port => '3410'},
+    'Run12' 	  => {node => 'dbbak.starp.bnl.gov', port => '3411'},
+    'Run13' 	  => {node => 'dbbak.starp.bnl.gov', port => '3412'},
+    'Run14' 	  => {node => 'dbbak.starp.bnl.gov', port => '3413'},
+    'Run15' 	  => {node => 'dbbak.starp.bnl.gov', port => '3414'},
+    'Run16' 	  => {node => 'dbbak.starp.bnl.gov', port => '3415'},
+    'Run17' 	  => {node => 'dbbak.starp.bnl.gov', port => '3416'},
+    'Run18' 	  => {node => 'dbbak.starp.bnl.gov', port => '3417'},
+    'Run19' 	  => {node => 'dbbak.starp.bnl.gov', port => '3418'},
+    'Run20' 	  => {node => 'dbbak.starp.bnl.gov', port => '3419'},
+    'Run21' 	  => {node => 'dbbak.starp.bnl.gov', port => '3420'},
+    'Run22' 	  => {node => 'dbbak.starp.bnl.gov', port => '3421'},
+    'CURRENT'     => {node => 'onldb.starp.bnl.gov', port => '3501'}
+	   );	
+my $Run = "CURRENT";
+my $tpcSYS = "TPC";
+my $select = "";
+if ($#ARGV < 0) {
+   print "Usage: $0 Run1/22/Current TPC/TPX/iTPC\n";
+   exit 0;
+} else {
+  $Run = $ARGV[0];
+  if ($#ARGV >= 1) {
+    $tpcSYS = $ARGV[1];
+}
+my $det = 0;
+if ($tpcSYS eq "TPX") {$det = 20;}
+if ($tpcSYS eq "iTPC") {$det = 31;}
+
+  $select  = " -e \'select asic_thr_lo as ALTRO_thr,asic_seq_lo as ALTRO_seq,analysis as K1, time_bin_lo as K2, ";
+  $select .= "clust_charge_lo as K3, default_format as L1, time_bin_hi as L2, cl_write as L3, ";
+  $select .= "min(a.beginTIme),min(a.idx_rn),max(a.idx_rn),b.glb_setup_name from Conditions_rts.dets a, Conditions_rts.run b where a.idx_det=" . $det;
+  $select .=  " and a.idx_rn=b.idx_rn and b.glb_setup_name like \"%production%\" group by asic_seq_hi,asic_seq_lo,asic_thr_hi,asic_thr_lo,glb_setup_name order by min(a.idx_rn)\;'";
+}
+my $def = {@Runs};
+#print "$Run => node: $def->{$Run}->{node} port: $def->{$Run}->{port}\n";
+#my $cmd = "mysql Conditions_rich -h $def->{$Run}->{node} -P $def->{$Run}->{port}";
+my $cmd = "mysql -h $def->{$Run}->{node} -P $def->{$Run}->{port}";
+$cmd .= $select;
+print "$Run, $tpcSYS;\t  $cmd\n";
+system($cmd);

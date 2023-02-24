@@ -5,7 +5,7 @@
 void WeightedAverage( const Char_t *pattern = "x0", const Char_t *FileName = "MakeRGraph.txt") {
   FILE *fp = fopen(FileName,"r");
   if (! fp) {
-    cout << "Can't open" << FileName << endl;
+    cout << "Can't open " << FileName << endl;
     return;
   }
   TString Pattern(pattern);

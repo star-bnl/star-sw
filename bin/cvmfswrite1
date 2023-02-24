@@ -1,0 +1,13 @@
+stargw.starp.bnl.gov
+rsync -avz -r --stats --progress \
+    -e "ssh gateway.dot.com ssh" \
+    server.dot.com:/home/myname/documents/ \
+    /home/myname/documents  
+cvmfswrite02.sdcc.bnl.gov
+rsync -nCavz -e "ssh -J @hop.example.com,user@gateway user@destination" user@destination:/DirSource/ /DirDest/
+
+rsync -avz -r --stats --progress -e "ssh stargw.starp.bnl.gov ssh" l409.l4.bnl.local:/net/l402/data/fisyak/STAR/ROOT
+
+rsync -nCavz -e "ssh -J @hop.example.com,fisyak@ssh.sdcc.bnl.gov fisyak@cvmfswrite02.sdcc.bnl.gov" 6.99.99 fisyak@cvmfswrite02.sdcc.bnl.gov:/cvmfs/star.sdcc.bnl.gov/TFG/ROOT
+
+rsync -nCavz -e "ssh -J fisyak@ssh.sdcc.bnl.gov fisyak@cvmfswrite02.sdcc.bnl.gov" 6.99.99 fisyak@cvmfswrite02.sdcc.bnl.gov:/cvmfs/star.sdcc.bnl.gov/TFG/ROOT

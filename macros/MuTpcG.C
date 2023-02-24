@@ -1,7 +1,7 @@
 #if 0
    FPE_OFF
    setup debug
-   root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+   root.exe -q -b 'lMuDst.C(-1,"*/*/*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
    foreach d (`ls -1d ???/2*`)
      cd ${d}
      ln -s ../../.sl* .
@@ -11,7 +11,7 @@
    foreach d (`ls -1d ???`)
      cd ${d}
      ln -s ../.sl* .
-     root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+     root.exe -q -b 'lMuDst.C(-1,"*/*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
      cd -
    end
    foreach d (`ls -1d *`)
@@ -185,7 +185,8 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   if (! Vtx) return kFALSE;
   if (TMath::Abs(Vtx->position().z()) > 250) return kFALSE;
   if (Vtx->position().perp() > 10.0)         return kFALSE;
-  if (Vtx->noTracks() < 10)                 return kFALSE;
+  //  if (Vtx->noTracks() < 10)                  return kFALSE;
+  if (Vtx->nTracksUsed() < 10)               return kFALSE;
   //  if (! Vtx->idTruth())  return kFALSE;
   //  if (  Vtx->qaTruth() < 90) return kFALSE;
   return kTRUE;

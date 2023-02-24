@@ -259,3 +259,11 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
 #unsetenv plugindir
 #    --enable-builtin_afterimage \
 #    --enable-builtin_lz4        \
+#__END__
+#mkdir $ROOTSYS
+#cd $ROOTSYS
+#mkdir Build
+#cd Build
+#lndir $ROOTROOT/root .
+##setenv ROOTSYS ..
+#setupROOT.csh
