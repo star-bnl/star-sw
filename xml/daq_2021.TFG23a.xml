@@ -12,7 +12,7 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-#    starver TFG22b
+    starver TFG23a
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 1000
@@ -77,6 +77,6 @@ set evout = "evout";
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2020.pl" /> -->
 <!-- <input URL="command:daq_2021dR2.pl" /> -->
-<!-- <input URL="command:daq_2021dR.pl" /> -->
-<input URL="file:/hlt/cephfs/daq/2021/FF_OO_200GeV_2021/*.daq" />
+<input URL="command:daq_2021dR.pl" />
+<!-- <input URL="file:/hlt/cephfs/daq/2021/FF_OO_200GeV_2021/*.daq" />  -->
 </job>
