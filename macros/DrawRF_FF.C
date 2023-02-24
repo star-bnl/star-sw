@@ -47,11 +47,11 @@ void DrawRF_FF(const Char_t *histN = "dYS2P") {
     NF++;
   }
   if (! NF) return;
-  TCanvas *c1 = new TCanvas(histN,histN);
+  TCanvas *c1 = new TCanvas(Form("c%s",histN),histN);
   TH1F *frame = c1->DrawFrame(0.5,-0.4,24.5,0.4);
   frame->SetXTitle("sector");
   frame->SetYTitle(histN);
-  gStyle->SetOptStat(0);
+  //  gStyle->SetOptStat(0);
   Int_t color = 0;
   TLegend *l = new TLegend(0.6,0.7,0.9,0.9);
   for (Int_t i = 0; i < NF; i++) {
@@ -82,8 +82,10 @@ void DrawRF_FF(const Char_t *histN = "dYS2P") {
     h1->SetMarkerColor(color);
     h1->SetLineColor(color);
     h1->Draw("same"); 
+    c1->Update();
     TString Title(gSystem->DirName(gDirectory->GetName()));
     Title.ReplaceAll("/FF_OO_200GeV_2021","");
+    Title.ReplaceAll("/OO_200GeV_2021","");
     l->AddEntry(h1,Title);
   }
   l->Draw();
