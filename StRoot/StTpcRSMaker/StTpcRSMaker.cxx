@@ -1932,7 +1932,10 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
   SignalSum_t *SignalSum = GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
+	Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+	Bool_t row_on = false;
+	for(int ipad=1;ipad<=numPadsAtRow;ipad++) row_on = row_on || StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,ipad);
+	if ( ! row_on ) continue;
       if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
     }
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
@@ -1977,6 +1980,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
     mPadResponseFunction[io][sector-1]->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
+	if(!StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,pad))continue;
       Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
