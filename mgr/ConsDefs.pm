@@ -983,8 +983,8 @@
 
     $XMLINCDIR = `$xml --cflags`;
     chomp($XMLINCDIR);
+    $XMLINCDIR =~ s/ -I/:/g;
     $XMLINCDIR =~ s/-I//g;
-    $XMLINCDIR =~ s/ /:/g;
     my $XML  = `$xml --libs`; # die "$XML\n";
     my(@libs)= split(" ", $XML);
 
