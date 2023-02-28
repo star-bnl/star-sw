@@ -4,7 +4,7 @@ ClassImp(StMuRHICfHit)
 
 StMuRHICfHit::StMuRHICfHit()
 {
-	clear();
+  clear();
 }
 
 StMuRHICfHit::~StMuRHICfHit()
@@ -13,35 +13,35 @@ StMuRHICfHit::~StMuRHICfHit()
 
 void StMuRHICfHit::clear()
 {
-    memset(mPlateE, 0., sizeof(mPlateE));
-    memset(mGSOBarSmallE, 0., sizeof(mGSOBarSmallE));
-    memset(mGSOBarLargeE, 0., sizeof(mGSOBarLargeE));
+  memset(mPlateE, 0., sizeof(mPlateE));
+  memset(mGSOBarSmallE, 0., sizeof(mGSOBarSmallE));
+  memset(mGSOBarLargeE, 0., sizeof(mGSOBarLargeE));
 
-    memset(mL20, 0.,sizeof(mL20));
-    memset(mL90, 0.,sizeof(mL90));
+  memset(mL20, 0.,sizeof(mL20));
+  memset(mL90, 0.,sizeof(mL90));
 
-    memset(mPointNum, 0, sizeof(mPointNum));
-    memset(mGSOMaxLayer, 0, sizeof(mGSOMaxLayer));
-    memset(mMaxPeakBin, 0, sizeof(mMaxPeakBin));
+  memset(mPointNum, 0, sizeof(mPointNum));
+  memset(mGSOMaxLayer, 0, sizeof(mGSOMaxLayer));
+  memset(mMaxPeakBin, 0, sizeof(mMaxPeakBin));
 
-    memset(mSingleHitNum, 0, sizeof(mSingleHitNum));
-    memset(mSingleHitPos, 0.,sizeof(mSingleHitPos));
-    memset(mSinglePeakHeight, 0.,sizeof(mSinglePeakHeight));
-    memset(mSingleChiSquare, 0.,sizeof(mSingleChiSquare));
+  memset(mSingleHitNum, 0, sizeof(mSingleHitNum));
+  memset(mSingleHitPos, 0.,sizeof(mSingleHitPos));
+  memset(mSinglePeakHeight, 0.,sizeof(mSinglePeakHeight));
+  memset(mSingleChiSquare, 0.,sizeof(mSingleChiSquare));
 
-    memset(mMultiHitNum, 0, sizeof(mMultiHitNum));
-    memset(mMultiHitPos, 0.,sizeof(mMultiHitPos));
-    memset(mMultiPeakHeight, 0.,sizeof(mMultiPeakHeight));
-    memset(mMultiPeakRaw, 0.,sizeof(mMultiPeakRaw));
-    memset(mMultiEnergySum, 0.,sizeof(mMultiEnergySum));
-    memset(mMultiChiSquare, 0.,sizeof(mMultiChiSquare));
+  memset(mMultiHitNum, 0, sizeof(mMultiHitNum));
+  memset(mMultiHitPos, 0.,sizeof(mMultiHitPos));
+  memset(mMultiPeakHeight, 0.,sizeof(mMultiPeakHeight));
+  memset(mMultiPeakRaw, 0.,sizeof(mMultiPeakRaw));
+  memset(mMultiEnergySum, 0.,sizeof(mMultiEnergySum));
+  memset(mMultiChiSquare, 0.,sizeof(mMultiChiSquare));
 }
 
 void StMuRHICfHit::setPlateEnergy(Int_t tower, Int_t plate, Float_t val) {mPlateE[tower][plate] = val;}
 void StMuRHICfHit::setGSOBarEnergy(Int_t tower, Int_t layer, Int_t xy, Int_t bar, Float_t val) 
 {
-    if(tower==0){mGSOBarSmallE[layer][xy][bar] = val;}
-    if(tower==1){mGSOBarLargeE[layer][xy][bar] = val;}
+  if(tower==0){mGSOBarSmallE[layer][xy][bar] = val;}
+  if(tower==1){mGSOBarLargeE[layer][xy][bar] = val;}
 }
 
 void StMuRHICfHit::setL20(Int_t tower, Float_t val){mL20[tower] = val;}
@@ -66,9 +66,9 @@ void StMuRHICfHit::setMultiFitChi2(Int_t tower, Int_t layer, Int_t xy, Float_t v
 Float_t StMuRHICfHit::getPlateEnergy(Int_t tower, Int_t plate){return mPlateE[tower][plate];}
 Float_t StMuRHICfHit::getGSOBarEnergy(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
 {
-    if(tower==0){return mGSOBarSmallE[layer][xy][bar];}
-    if(tower==1){return mGSOBarLargeE[layer][xy][bar];}
-    return 0;
+  if(tower==0){return mGSOBarSmallE[layer][xy][bar];}
+  if(tower==1){return mGSOBarLargeE[layer][xy][bar];}
+  return 0;
 }
 
 Float_t StMuRHICfHit::getL20(Int_t tower){return mL20[tower];}

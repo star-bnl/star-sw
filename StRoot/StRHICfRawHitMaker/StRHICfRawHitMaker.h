@@ -21,20 +21,20 @@ class StRHICfRawHit;
 
 class StRHICfRawHitMaker : public StRTSBaseMaker, StRHICfFunction
 {
-	public: 
-		StRHICfRawHitMaker(const Char_t* name="RHICfRawHit");
-		~StRHICfRawHitMaker();
+  public: 
+    StRHICfRawHitMaker(const Char_t* name="RHICfRawHit");
+    ~StRHICfRawHitMaker();
 
-		Int_t InitRun(Int_t runNumber);
-		Int_t Make();
-		Int_t Finish();
+    Int_t InitRun(Int_t runNumber);
+    Int_t Make();
+    Int_t Finish();
 
-	private:
-		StRHICfDbMaker* mRHICfDbMaker = 0; 
-		StRHICfCollection* mRHICfCollection = 0; 
-		StRHICfRawHit* mRHICfRawHitColl = 0;
+  private:
+    StRHICfDbMaker* mRHICfDbMaker = 0; 
+    StRHICfCollection* mRHICfCollection = 0; 
+    StRHICfRawHit* mRHICfRawHitColl = 0;
 
-	ClassDef(StRHICfRawHitMaker,0);
+  ClassDef(StRHICfRawHitMaker,0);
 };
 
 #endif

@@ -4,7 +4,7 @@ ClassImp(StRHICfCollection)
 
 StRHICfCollection::StRHICfCollection()
 {
-	clear();
+  clear();
 }
 
 StRHICfCollection::~StRHICfCollection()
@@ -13,15 +13,15 @@ StRHICfCollection::~StRHICfCollection()
 
 void StRHICfCollection::clear()
 {
-	mRHICfRawHitColl = new StRHICfRawHit();
-	mRHICfHitColl = 0;
+  mRHICfRawHitColl = new StRHICfRawHit();
+  mRHICfHitColl = 0;
 
-	mBunchNumber = 0;
-	mRHICfTrigger = 0;
-	mRunTime[0] = 0;
-	mRunTime[1] = 0;
-	mRunTRGM = 0;
-	mRunType = 999;
+  mBunchNumber = 0;
+  mRHICfTrigger = 0;
+  mRunTime[0] = 0;
+  mRunTime[1] = 0;
+  mRunTRGM = 0;
+  mRunType = 999;
 }
 
 StRHICfRawHit* StRHICfCollection::rawHitCollection(){return mRHICfRawHitColl;}

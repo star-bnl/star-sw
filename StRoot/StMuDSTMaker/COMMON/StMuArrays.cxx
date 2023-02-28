@@ -11,15 +11,15 @@
 //		ARRAY NAMES
 //============================================================================================
 const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVertices",
-					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
-					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
-							   "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
+                                       "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
+                                       "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
+                               "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
-							   "V0","McV0","V0Assoc",
-							   "Xi","McXi","XiAssoc",
-							   "Kink","McKink","KinkAssoc",
-							   "StrangeCuts",
+                               "V0","McV0","V0Assoc",
+                               "Xi","McXi","XiAssoc",
+                               "Kink","McKink","KinkAssoc",
+                               "StrangeCuts",
 #endif
 /*mcArrayNames[__NMCARRAYS__]*/                            "StMuMcVertex","StMuMcTrack",
 /*emcArrayNames    [__NEMCARRAYS__    ]*/                  "EmcTow",
@@ -65,19 +65,19 @@ const char** StMuArrays::eztArrayNames = StMuArrays::fgtArrayNames    +__NFGTARR
 //		ARRAY TYPES
 //============================================================================================
 const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrimaryVertex",
-					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
-					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
-							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
+                                       "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
+                                       "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
+                               "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
-							   "StV0MuDst","StV0Mc","StStrangeAssoc",
-							   "StXiMuDst","StXiMc","StStrangeAssoc",
-							   "StKinkMuDst","StKinkMc","StStrangeAssoc",
-							   "TCut",
+                               "StV0MuDst","StV0Mc","StStrangeAssoc",
+                               "StXiMuDst","StXiMc","StStrangeAssoc",
+                               "StKinkMuDst","StKinkMc","StStrangeAssoc",
+                               "TCut",
 #endif
 /*mcArrayTypes[__NMCARRAYS__]*/                            "StMuMcVertex","StMuMcTrack",
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
-							                               "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
+                                                           "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
 /*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit","StMuFmsCluster","StMuFmsPoint","StMuFmsInfo",
 /*rhicfArrayTypes [__NRHICfARRAYS__   ]*/                  "StMuRHICfRawHit","StMuRHICfHit","StMuRHICfPoint",

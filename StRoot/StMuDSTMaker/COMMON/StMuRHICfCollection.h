@@ -10,34 +10,34 @@ class StMuRHICfPoint;
 
 class StMuRHICfCollection : public TObject 
 {
-    public:
-        StMuRHICfCollection();
-        ~StMuRHICfCollection();    
+  public:
+    StMuRHICfCollection();
+    ~StMuRHICfCollection();    
 
-        void init();
+    void init();
 
-        unsigned int  numberOfPoints() const;
+    unsigned int  numberOfPoints() const;
 
-        StMuRHICfRawHit* addRawHit();
-        StMuRHICfHit* addHit();
-        StMuRHICfPoint* addPoint();
-        
-        StMuRHICfRawHit* getRawHit();
-        StMuRHICfHit* getHit();
-        StMuRHICfPoint* getPoint(Int_t index);
+    StMuRHICfRawHit* addRawHit();
+    StMuRHICfHit* addHit();
+    StMuRHICfPoint* addPoint();
+    
+    StMuRHICfRawHit* getRawHit();
+    StMuRHICfHit* getHit();
+    StMuRHICfPoint* getPoint(Int_t index);
 
-        TClonesArray* getPointArray();
+    TClonesArray* getPointArray();
 
-        void setRHICfRawHitArray(TClonesArray *array);
-        void setRHICfHitArray(TClonesArray *array);
-        void setRHICfPointArray(TClonesArray* array);
+    void setRHICfRawHitArray(TClonesArray *array);
+    void setRHICfHitArray(TClonesArray *array);
+    void setRHICfPointArray(TClonesArray* array);
 
-    private:
-        TClonesArray* mRawHit;
-        TClonesArray* mHit;
-        TClonesArray* mPoint;
+  private:
+    TClonesArray* mRawHit;
+    TClonesArray* mHit;
+    TClonesArray* mPoint;
 
-	ClassDef(StMuRHICfCollection,1)
+  ClassDef(StMuRHICfCollection,1)
 };
 
 #endif

@@ -4,7 +4,7 @@ ClassImp(StMuRHICfRawHit)
 
 StMuRHICfRawHit::StMuRHICfRawHit()
 {
-	clear();
+  clear();
 }
 
 StMuRHICfRawHit::~StMuRHICfRawHit()
@@ -13,21 +13,21 @@ StMuRHICfRawHit::~StMuRHICfRawHit()
 
 void StMuRHICfRawHit::clear()
 {	
-	mBunchNumber = 0;
-	mRHICfTrigger = 0;
-	mRunTime[0] = 0;
-	mRunTime[1] = 0;
-	mRunTRGM = 0;
-	mRunType = 999;
+  mBunchNumber = 0;
+  mRHICfTrigger = 0;
+  mRunTime[0] = 0;
+  mRunTime[1] = 0;
+  mRunTRGM = 0;
+  mRunType = 999;
 
-    memset(mPlateADC, 0, sizeof(mPlateADC));
-    memset(mPlateADCDelay, 0, sizeof(mPlateADCDelay));
-	memset(mGSOSmallADC, 0, sizeof(mGSOSmallADC));
-	memset(mGSOLargeADC, 0, sizeof(mGSOLargeADC));
-	memset(mTDC, 0, sizeof(mTDC));
-	memset(mCAD0, 0, sizeof(mCAD0));
-	memset(mGPI0, 0, sizeof(mGPI0));
-	memset(mGPI1, 0, sizeof(mGPI1));
+  memset(mPlateADC, 0, sizeof(mPlateADC));
+  memset(mPlateADCDelay, 0, sizeof(mPlateADCDelay));
+  memset(mGSOSmallADC, 0, sizeof(mGSOSmallADC));
+  memset(mGSOLargeADC, 0, sizeof(mGSOLargeADC));
+  memset(mTDC, 0, sizeof(mTDC));
+  memset(mCAD0, 0, sizeof(mCAD0));
+  memset(mGPI0, 0, sizeof(mGPI0));
+  memset(mGPI1, 0, sizeof(mGPI1));
 }
 
 void StMuRHICfRawHit::setBunchNumber(UInt_t bunch){mBunchNumber = bunch;}
@@ -40,8 +40,8 @@ void StMuRHICfRawHit::setPlateADC(Int_t tower, Int_t plate, Int_t range, Int_t a
 void StMuRHICfRawHit::setPlateADCDelay(Int_t tower, Int_t plate, Int_t range, Int_t adc) {mPlateADCDelay[tower][plate][range] = adc;}
 void StMuRHICfRawHit::setGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar, Int_t adc) 
 {
-    if(tower==0){mGSOSmallADC[layer][xy][bar] = adc;}
-    if(tower==1){mGSOLargeADC[layer][xy][bar] = adc;}
+  if(tower==0){mGSOSmallADC[layer][xy][bar] = adc;}
+  if(tower==1){mGSOLargeADC[layer][xy][bar] = adc;}
 }
 
 void StMuRHICfRawHit::setTDC(Int_t idx, UInt_t val){mTDC[idx] = val;}
@@ -59,9 +59,9 @@ UShort_t StMuRHICfRawHit::getPlateADC(Int_t tower, Int_t plate, Int_t range) {re
 UShort_t StMuRHICfRawHit::getPlateADCDelay(Int_t tower, Int_t plate, Int_t range) {return mPlateADCDelay[tower][plate][range];}
 UShort_t StMuRHICfRawHit::getGSOBarADC(Int_t tower, Int_t layer, Int_t xy, Int_t bar) 
 {
-    if(tower==0){return mGSOSmallADC[layer][xy][bar];}
-    if(tower==1){return mGSOLargeADC[layer][xy][bar];}
-    return 0;
+  if(tower==0){return mGSOSmallADC[layer][xy][bar];}
+  if(tower==1){return mGSOLargeADC[layer][xy][bar];}
+  return 0;
 }
 
 UInt_t StMuRHICfRawHit::getTDC(Int_t idx){return mTDC[idx];}
