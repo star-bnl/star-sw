@@ -74,8 +74,9 @@ class TrackParameters : public TObject {
 };
 class TrackMatch : public TObject {
  public:
- TrackMatch() {}
- virtual ~TrackMatch() {}
+  TrackMatch() {}
+  virtual ~TrackMatch() {}
+  Int_t event;
   TrackParameters newP;
   TrackParameters oldP;
   ClassDef(TrackMatch,3)
@@ -110,8 +111,9 @@ class HitParameters : public TObject {
 };
 class HitMatch : public TObject {
  public:
- HitMatch() {}
- virtual ~HitMatch() {}
+  HitMatch() {}
+  virtual ~HitMatch() {}
+  Int_t    event;
   HitParameters newP;
   HitParameters oldP;
   ClassDef(HitMatch,3)
