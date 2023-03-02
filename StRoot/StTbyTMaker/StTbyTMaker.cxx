@@ -261,12 +261,14 @@ Int_t StTbyTMaker::Make(){
 }
 //________________________________________________________________________________
 void StTbyTMaker::FillMatch(const StGlobalTrack* trk1, const StGlobalTrack* trk2) {
+  fTrackMatch->event = GetEventNumber();
   fTrackMatch->oldP = TrackParametersFill(trk1);
   fTrackMatch->newP = TrackParametersFill(trk2);
   trackTree->Fill();
 }
 //________________________________________________________________________________
 void StTbyTMaker::FillMatch(const StTpcHit* hit1,const  StTpcHit* hit2) {
+  fHitMatch->event = GetEventNumber();
   fHitMatch->oldP = HitParametersFill(hit1);
   fHitMatch->newP = HitParametersFill(hit2);
   if (Debug()) {
