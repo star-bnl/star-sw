@@ -47,7 +47,7 @@ set location = 0;
 if ( $#argv > 0 ) set version  = $1
 if ( $#argv > 1 ) set location = $2
 #echo "==================== setup $pkg $version $location ===================="
-#if ($?STAR_HOST_SYS != 0) setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
+if ($?STAR_HOST_SYS != 0) setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
 
 source $GROUP_DIR/unix_programs.csh
 
