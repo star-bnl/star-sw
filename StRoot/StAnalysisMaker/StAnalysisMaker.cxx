@@ -323,11 +323,12 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   static const Char_t *vname = "sector/I:row/I:rdo/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb:vpdE:vpdW";
   BPoint_t BPoint;
   BPoint.vpdE = BPoint.vpdW = 0;
-  StEvent  *event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
-  if (event->triggerData()) {
-    BPoint.vpdE = event->triggerData()->vpdEarliestTDC(east);
-    BPoint.vpdW = event->triggerData()->vpdEarliestTDC(west);
-    LOG_QA  << ": ZdcZ:" << Form("%7.2f",event->triggerData()->zdcVertexZ());
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
+  if (pEvent->triggerData()) {
+    BPoint.vpdE = pEvent->triggerData()->vpdEarliestTDC(east);
+    BPoint.vpdW = pEvent->triggerData()->vpdEarliestTDC(west);
+    LOG_QA  << ": ZdcZ:" << Form("%7.2f",pEvent->triggerData()->zdcVertexZ());
   }
 
   static TNtuple *Nt = 0;
@@ -335,8 +336,6 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
     TFile *tf =  StMaker::GetTopChain()->GetTFile();
     if (tf) {tf->cd(); Nt = new TNtuple("TpcHit","TpcHit",vname);}
   }
-  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
-  if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
 #ifdef __TRIGGER_ID__
   const StTriggerIdCollection* triggerCol = pEvent->triggerIdCollection();
   const StTriggerId* nominal = 0;
@@ -393,7 +392,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		if (! tpcHit) continue;
 		if (mOnlyIdT && tpcHit->idTruth() <= 0) continue;
 		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
-		if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
+		//		if (tpcHit->flag() & FCF_CHOPPED || tpcHit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 		if (! plot) 		tpcHit->Print();
 		else {
 		  if (Nt) {
