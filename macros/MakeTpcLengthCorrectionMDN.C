@@ -9,6 +9,10 @@
      set b = `basename ${d} .root`;
      root.exe -q -b NPoints2*U*${d}  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
   end 
+  foreach d (FF_OO_200GeV_2021  OO_200GeV_2021  ps_OO_200GeV_2021)
+     set b = `basename ${d} .root`;
+     root.exe -q -b NPoints*UGP${d}.root  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
+  end 
  dir TpcZCorrectionB.20*.C | grep GeV | grep fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.FXT.C "$9}'
  dir TpcZCorrectionB.20*.C | grep GeV | grep -v fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.COL.C "$9}'
 
