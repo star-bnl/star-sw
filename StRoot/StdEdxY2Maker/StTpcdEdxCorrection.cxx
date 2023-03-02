@@ -603,12 +603,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } 
       if (k == kzCorrection || k == kzCorrectionC) {
 	// Take care about prompt hits and Gating Grid region in Simulation
-	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) {
 	    return k;
 	  }
-	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
+	}
+	if (VarXs[k] < 0) {// prompt hits
+	  dE *= TMath::Exp(1.2);
 	}
 	if (k == kzCorrectionC && corl->type == 20) {
 	  Int_t np = TMath::Abs(corl->npar)%100;
