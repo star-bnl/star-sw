@@ -69,7 +69,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
         StTpcHit*hit=*iter;
 	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
-	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
+	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY || hit->flag() & 256)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
 	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
 	if (TMath::Abs( hit->position().z() ) > _maxZ) continue;
 #if 0 /*VP*/
