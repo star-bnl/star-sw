@@ -48,7 +48,7 @@
    if ($? == 0) set chain = ${chain},TpxRaw,TPC23,USE_GAIN_FROM_FILE;
 #  set chain = ${chain},TpxRaw,TpxClu,McTpcAna;
    root.exe -b -q 'bfc.C('${f}','${l}',"'${chain}'","'${evtsFile}'")' &gt;&amp; ${logFile}
-#   root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault,NoTpxAfterBurner","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
 #  gzip ${logFile}
