@@ -51,6 +51,10 @@
 #include "RTS/src/DAQ_TPC23/itpc23.h"
 #endif /*  __TFG__VERSION__ */
 #include "TBenchmark.h"
+#include "TH2.h"
+#include "TFile.h"
+#include "TPolyMarker.h"
+#include "TBox.h"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -58,6 +62,7 @@ ClassImp(StTpcRTSHitMaker);
 #else
 #define PrPP(A,B)
 #endif
+StTpcRTSHitMaker *StTpcRTSHitMaker::fgStTpcRTSHitMaker = 0;
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
@@ -886,3 +891,85 @@ Int_t StTpcRTSHitMaker::Make23() {
   return kStOK;
 }
 #endif /*  __TFG__VERSION__ */
+//________________________________________________________________________________
+TH2F *StTpcRTSHitMaker::PlotSecRow(Int_t sec, Int_t row, Int_t flags) {
+  /* 
+     Usage: 
+     root.exe ' bfc.C(1"P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault,TpxRaw,TPC23,TpxRaw,TPC23,USE_GAIN_FROM_FILE,tpxO,NoTpxAfterBurner","/RTS/TONKO/data/st_physics_adc_20192001_raw_5500002.daq","","Plot.root")'
+     TH2F *plot = StTpcRTSHitMaker::instance()->PlotSecRow(2,43,-1);
+   */
+  TH2F *plot = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return plot;}
+  StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+  if (! TpcHitCollection) { cout << "No TPC Hit Collection" << endl; return plot;}
+  StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(sec-1);
+  if (! sectorCollection) { cout << "No TPC Hit Collection for sector " << sec << endl; return plot;}
+  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(row-1);
+  if (! rowCollection) { cout << "No TPC Hit Collection for sector " << sec << " and row " << row << endl; return plot;}
+  TFile *f = StMaker::GetChain()->GetTFile();
+  if (! f) {cout << "No TFile is opened" << endl; return plot;}
+  f->cd();
+  TString PlotName(Form("s%02ir%03i",sec,row));
+  plot = (TH2F *) f->Get(PlotName);
+  if (plot) {
+    plot->Reset(); 
+    plot->SetTitle(Form("ADC versus  pad and time buckets for sec = %i and row = %i in event %i",sec,row, pEvent->id()));
+  } else {
+    plot = new TH2F(PlotName,Form("ADC versus  pad and time buckets for sec = %i and row = %i in event %i",sec,row, pEvent->id()), 512,-0.5,511.5,144,0.5,144.5);
+  }
+  TDataSet*  tpcRawEvent = StMaker::GetChain()->GetInputDS("Event");
+  if (! tpcRawEvent) {
+    LOG_WARN << "There is not Tpc Raw Event" << endm;
+  } else {
+    StTpcRawData *tpcRawData = (StTpcRawData *) tpcRawEvent->GetObject();
+    if (! tpcRawData) {
+      LOG_WARN << "There is not Tpc Raw Data" << endm;
+    } else {
+      StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
+      if (! digitalSector) {
+	LOG_WARN << "There is not digital sector" << sec << endm;
+      } else {
+	Int_t Npads = digitalSector->numberOfPadsInRow(row);
+	for(Int_t pad = 1; pad <= Npads; pad++) {
+	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
+	  static Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
+	  static Int_t IDTs[__MaxNumberOfTimeBins__];
+#else
+	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+#endif
+	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	  for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
+	    if (ADCs[k]) plot->Fill(k,pad,ADCs[k]);
+	  }
+	}
+      }
+    }
+  }
+  StSPtrVecTpcHit &hits = rowCollection->hits();
+  Long_t NoHits = hits.size();
+  for (Long64_t k = 0; k < NoHits; k++) {
+    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
+    Int_t color = 1;
+    Int_t style = 20;
+    Double_t offset = 0.0;
+    Int_t flag = tpcHit->flag();
+    if (flag & 256) {color = 2; style = 21; offset = 0.1; flag &= ~0x100;}
+    if (flags > -1 && flag < flags) continue;
+    Double_t tb = tpcHit->timeBucket();
+    Double_t pad = tpcHit->pad();
+    TPolyMarker *pm = new TPolyMarker(1,&tb, &pad);
+    pm->SetMarkerStyle(style);
+    pm->SetMarkerColor(color);
+    plot->GetListOfFunctions()->Add(pm);
+    TBox *box = new TBox(tpcHit->minTmbk()-0.5 + offset,tpcHit->minPad()-0.5 + offset, tpcHit->maxTmbk()+0.5 + offset,tpcHit->maxPad()+0.5 + offset); 
+    box->SetLineWidth(4);
+    box->SetLineColor(color);
+    box->SetFillStyle(0);
+    box->SetFillColor(0);
+    plot->GetListOfFunctions()->Add(box);
+  }
+  plot->Draw("colz");
+  return plot;
+}

@@ -306,7 +306,7 @@ static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
 						    "tpc_hits","tpx_hits","itpc_hits",
 						    "TpcPulser","TpxPulser","iTPCPulser",
 						    "TpcRaw","TpxRaw","iTPCRaw",
-						    "TpcAvLaser","TpxAvLaser"};
+						    "TpcAvLaser","TpxAvLaser","tpc_hitsO"};
 //_____________________________________________________________
 StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMode(kUndefined),
 						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0), fThr(0), fSeq(0) {
@@ -317,8 +317,8 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
- LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
-   TString MkName(GetName());
+  LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
+  TString MkName(GetName());
   for (Int_t k = 1; k < kAll; k++) {
     if (MkName.CompareTo(Names[k],TString::kIgnoreCase) == 0) {kMode = (EMode) k; break;}
   }
@@ -496,6 +496,7 @@ Int_t StTpcHitMaker::Make() {
 	      switch (kMode) {
 	      case kTpc: 
 	      case kiTPC: 
+	      case kTpxO:
 	      case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
 	      case kTpcPulser:       
 	      case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
@@ -531,7 +532,7 @@ Int_t StTpcHitMaker::Make() {
                 << ") starting at time bin 0. Skipping event." << endm;
       return kStSkip;
   }
-  if (kMode == kTpc || kMode == kTpx) { // || kMode == kiTPC) { --> no after burner for iTpc
+  if (kMode == kTpc || kMode == kTpx || kMode == kTpxO) { // || kMode == kiTPC) { --> no after burner for iTpc
     StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
     if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
     if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
@@ -672,6 +673,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  if (! c || ! c->charge) continue;
 	  if (c->flags &&
 	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
+	  if (kMode == kTpxO) c->flags |= 256; // mark cluster if it is coming from extra online maker
 	  Int_t row = padrow + 1;
 	  Float_t pad  = c->p;
 	  Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
@@ -708,6 +710,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       if (cld->t2 <  0 || cld->t2 >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
+      if (kMode == kTpxO) cld->flags |= 256; // mark cluster if it is coming from extra online maker
       Float_t pad  = cld->pad;
       Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
       if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
@@ -745,7 +748,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
 #endif
   Double_t q = 0; //cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
 			       , (Int_t)    0  // idTruth=0
@@ -758,7 +760,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 			       , pad
 			       , time 
 			       , cluster.charge
-			       , cluster.flags);
+			       ,cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
   if (Debug()) {
     LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt tpc_cl\t" <<*hit << endm;
@@ -793,6 +795,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
+  UShort_t flag = cluster.flags;
+  if (kMode == kTpxO) flag |= 256; // mark cluster if it is coming from extra online maker
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
@@ -806,7 +810,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 			       , pad
 			       , time 
 			       , cluster.charge
-			       , cluster.flags);
+			       , flag);
   if (hit->minTmbk() == 0) bin0Hits++;
   if (Debug()) {
     LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt daq_cld\t" <<*hit << endm;

@@ -107,6 +107,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
 	      kTpcPulser, kTpxPulser, kiTPCPulser, 
 	      kTpcRaw, kTpxRaw, kiTPCRaw,
 	      kTpcAvLaser, kTpxAvLaser,      // averaging on pixel level
+	      kTpxO,
 	      kAll};
   StTpcHitMaker(const char *name="tpc_hits");
   virtual ~StTpcHitMaker() {}
