@@ -34,7 +34,7 @@
     end
   else 
       if (${SITE} == "HLT") then
-        ln -s  ${inputDIR}/*.root .
+        ln -s  ${inputDIR}.root .
       else 
         rsync  ${inputDIR}  .
       endif

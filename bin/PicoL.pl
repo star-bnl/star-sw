@@ -216,8 +216,9 @@ print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($de
 #if (! $glob) {die "glob = $glob";}
 if (! $PICOPATH) {die "PICOPATH = $PICOPATH";}
 #if ($glob == "" or $PICOPATH == "") {die "glob = $glob, PICOPATH = $PICOPATH";}
-#per run my $GLOB = $PICOPATH . $glob . "/*/???/*";
-my $GLOB = $PICOPATH . $glob . "/*/???"; # per day
+#per run 
+my $GLOB = $PICOPATH . $glob . "/*/???/*";
+# my $GLOB = $PICOPATH . $glob . "/*/???"; # per day
 my @Files = glob $GLOB; print "$GLOB => found $#Files\n" if ($debug);
 my %Runs= ();
 foreach my $run (@Files) { 
@@ -228,8 +229,9 @@ foreach my $run (@Files) {
   $day -=  1000*$Y;            print "day = $day\n" if ($debug);
   if ($dayMin > 0 && $day < $dayMin) {next;}
   if ($dayMax > 0 && $day > $dayMax) {next;}
-#per run  my $glb = $run . "/*" . $DST . ".root"; 
-  my $glb = $run . "/*/*" . $DST . ".root"; # per day
+#per run  
+  my $glb = $run . "/*" . $DST . ".root"; 
+#  my $glb = $run . "/*/*" . $DST . ".root"; # per day
   my @files =  glob $glb; print "glb = $glb, no. files = $#files\n" if ($debug);
   my $NF = $#files + 1;
   my $step = 20;
@@ -241,7 +243,9 @@ foreach my $run (@Files) {
       if ($k < $NF && $files[$j]) {
 	push @list, $files[$j];
 	my $fileB =  File::Basename::basename( $files[$j] );
+#per run
 	push @listB,$fileB;
+#	push @listB, "*/" . $fileB; # per day
       } 
     }
     $Runs{$f}++;
