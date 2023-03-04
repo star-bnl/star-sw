@@ -28,6 +28,8 @@ StRHICfRawHit* StRHICfCollection::rawHitCollection(){return mRHICfRawHitColl;}
 StRHICfHit* StRHICfCollection::hitCollection(){return mRHICfHitColl;}
 
 void StRHICfCollection::addPoint(StRHICfPoint* pointColl){mRHICfPointColl.push_back(pointColl);}
+void StRHICfCollection::addPointCollection(std::vector<StRHICfPoint*> coll){mRHICfPointColl = coll;}
+
 std::vector<StRHICfPoint*>& StRHICfCollection::pointCollection(){return mRHICfPointColl;}
 const std::vector<StRHICfPoint*>& StRHICfCollection::pointCollection() const {return mRHICfPointColl;}
 

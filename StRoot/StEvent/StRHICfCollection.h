@@ -25,6 +25,7 @@ class StRHICfCollection : public StObject
     StRHICfHit* hitCollection();
 
     void addPoint(StRHICfPoint* pointColl); 
+    void addPointCollection(std::vector<StRHICfPoint*> coll);
     std::vector<StRHICfPoint*>& pointCollection();    // Return the point list
     const std::vector<StRHICfPoint*>& pointCollection() const;
 
