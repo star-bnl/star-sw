@@ -1,5 +1,5 @@
-#if 0
 void Run1Ev(Int_t NEvents=1, Int_t iD = 46, 
+#if 0
 	    Double_t pTlow=1.0,Double_t pThigh=1.0, // Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
 #if 0
@@ -10,11 +10,10 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 46,
 	    Double_t Zlow=10, Double_t Zhigh=10, Int_t Npart = 1, const Char_t *opt = "G") 
 #endif
 #else
-	    void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
 	    Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=0.0, Double_t Yhigh=0.0,
 	    Double_t Philow=0, Double_t Phihigh=0,
-	    Double_t Zlow=10, Double_t Zhigh=10, Int_t Npart = 1, const Char_t *opt = "G") 
+	    Double_t Zlow=209, Double_t Zhigh=209, Int_t Npart = 1, const Char_t *opt = "G") 
 #endif
 {
   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star

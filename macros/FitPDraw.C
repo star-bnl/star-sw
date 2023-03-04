@@ -433,6 +433,15 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     } else {
       MuDraw(muPlot.Data(),"EtaO", ny, yMin, yMax, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "Eta", "#mu versus #eta");
     }
+  } else if (Name.BeginsWith("xyPad3qB"))      {
+    muPlot += ":0.5*y+TMath::Nint(x)";
+    if (Opt == "") {
+      MuDraw(muPlot.Data(),"xy", 48*32,   0.5, 48.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.45,  0.15, "All", "xy", "#mu versus sector phi");
+    } else if (Opt == "I") {
+      MuDraw(muPlot.Data(),"xyI", 48*32,   0.5, 48.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", -0.45,  0.15, "Inner", "xy", "#mu versus sector phi");
+    } else if (Opt == "O") {
+      MuDraw(muPlot.Data(),"xyO", 48*32,   0.5, 48.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", -0.45,  0.15, "Outer", "xy", "#mu versus sector phi");
+    }
   } else if (Name.BeginsWith("xyPad3"))      {
     muPlot += ":0.5*y+TMath::Nint(x)";
     if (Opt == "") {
