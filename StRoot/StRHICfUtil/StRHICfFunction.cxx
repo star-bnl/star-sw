@@ -22,8 +22,11 @@ void StRHICfFunction::initChecker()
   mGSOBarNum = 0;
   mGSOBarTableNum = 0;
   mPlateNum = 0;
-  memset(mValueForRecoNum, 0, sizeof(mValueForRecoNum));
-  memset(mLeakageNum, 0, sizeof(mLeakageNum));
+  
+  for(int i=0; i<5; i++){
+    if(i<3){mLeakageNum[i] = 0;}
+    mValueForRecoNum[i] = 0;
+  }
 }
 
 StRHICfFunction::~StRHICfFunction()
