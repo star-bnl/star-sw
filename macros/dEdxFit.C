@@ -5172,6 +5172,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	  } else if (ny == 72 || ny == 145) {
 	    IO = 0;
 	    if (TMath::Abs(Fit.y) > 40.5) IO = 1;
+	  } else if (ny == 2*24*20) {// xyPad3qB
+	    Sign = 2; // "+" & "-"
+	    Double_t y = Fit.y - TMath::Nint(Fit.y);
+	    IO = 0;
+	    if (y > 0) IO = 1;
 	  }
 	}
 	if (TString(FitName) == "G4E")  	g = FitG4E(proj,opt,IO, Sign);
