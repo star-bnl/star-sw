@@ -15,6 +15,7 @@
 #include "StMuRHICfHit.h"
 #include "StMuRHICfPoint.h"
 
+
 ClassImp(StMuRHICfUtil)
 
 StMuRHICfUtil::StMuRHICfUtil()
@@ -48,9 +49,32 @@ void StMuRHICfUtil::fillMuRHICf(StMuRHICfCollection* muColl, StRHICfCollection* 
   if(!coll) return;
   if(!muColl) return;
 
-  fillMuRHICfRawHit(muColl, coll);
-  fillMuRHICfHit(muColl, coll);
-  fillMuRHICfPoint(muColl, coll);
+  StMuRHICfRawHit* muRHICfRawHit = muColl -> addRawHit();
+  StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
+
+  muRHICfRawHit -> setBunchNumber(coll->getBunchNumber());
+  muRHICfRawHit -> setRunType(coll->getRunType());
+  muRHICfRawHit -> setTriggerNumber(coll->getTriggerNumber());
+  muRHICfRawHit -> setRunTime(0, coll->getRunTime(0));
+  muRHICfRawHit -> setRunTime(1, coll->getRunTime(1));
+  muRHICfRawHit -> setRunTRGM(coll->getRunTRGM());
+
+  fillMuRHICfRawHit(muRHICfRawHit, rhicfRawHit);
+
+  StRHICfHit* rhicfHit = coll -> hitCollection();
+  if(rhicfHit){
+    StMuRHICfHit* muRHICfHit = muColl -> addHit();
+    fillMuRHICfHit(muRHICfHit, rhicfHit);
+  }
+
+  for (unsigned i(0); i < coll->numberOfPoints(); ++i){
+    StRHICfPoint* rhicfPoint = coll->pointCollection()[i];
+    StMuRHICfPoint* muRHICfPoint = muColl->addPoint();
+
+    if(rhicfPoint && muRHICfPoint){
+      fillMuRHICfPoint(muRHICfPoint, rhicfPoint);
+    }
+  }
 }
 
 void StMuRHICfUtil::fillRHICf(StRHICfCollection* coll, StMuRHICfCollection* muColl)
@@ -58,9 +82,32 @@ void StMuRHICfUtil::fillRHICf(StRHICfCollection* coll, StMuRHICfCollection* muCo
   if(!muColl) return;
   if(!coll) return;
 
-  fillRHICfRawHit(coll, muColl);
-  fillRHICfHit(coll, muColl);
-  fillRHICfPoint(coll, muColl);
+  StMuRHICfRawHit* muRHICfRawHit = muColl -> getRawHit();
+  StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
+  coll -> setBunchNumber(muRHICfRawHit->getBunchNumber());
+  coll -> setRunType(muRHICfRawHit->getRunType());
+  coll -> setTriggerNumber(muRHICfRawHit->getTriggerNumber());
+  coll -> setRunTime(0, muRHICfRawHit->getRunTime(0));
+  coll -> setRunTime(1, muRHICfRawHit->getRunTime(1));
+  coll -> setRunTRGM(muRHICfRawHit->getRunTRGM());
+
+  fillRHICfRawHit(rhicfRawHit, muRHICfRawHit);
+
+  StMuRHICfHit* muRHICfHit = muColl -> getHit();
+  if(muRHICfHit){
+    StRHICfHit* rhicfHit = coll -> hitCollection();
+    fillRHICfHit(rhicfHit, muRHICfHit);
+  }
+
+  for(unsigned i(0); i < muColl->numberOfPoints(); ++i){
+    StMuRHICfPoint* muRHICfPoint = muColl->getPoint(i);
+    StRHICfPoint* rhicfPoint = new StRHICfPoint();
+    
+    if(muRHICfPoint && rhicfPoint){
+      fillRHICfPoint(rhicfPoint, muRHICfPoint);
+      coll -> addPoint(rhicfPoint);
+    }
+  }
 }
 
 Int_t StMuRHICfUtil::checkGSOBarSize(Int_t tower)
@@ -70,18 +117,8 @@ Int_t StMuRHICfUtil::checkGSOBarSize(Int_t tower)
   else{return 0;}
 }
 
-void StMuRHICfUtil::fillMuRHICfRawHit(StMuRHICfCollection* muColl, StRHICfCollection* coll)
+void StMuRHICfUtil::fillMuRHICfRawHit(StMuRHICfRawHit* muRHICfRawHit, StRHICfRawHit* rhicfRawHit)
 {
-  StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
-  StMuRHICfRawHit* muRHICfRawHit = muColl -> addRawHit();
-
-  muRHICfRawHit -> setBunchNumber(coll->getBunchNumber());
-  muRHICfRawHit -> setRunType(coll->getRunType());
-  muRHICfRawHit -> setTriggerNumber(coll->getTriggerNumber());
-  muRHICfRawHit -> setRunTime(0, coll->getRunTime(0));
-  muRHICfRawHit -> setRunTime(1, coll->getRunTime(1));
-  muRHICfRawHit -> setRunTRGM(coll->getRunTRGM());
-
   for(int it=0; it<kRHICfNtower; it++){
     for(int il=0; il<kRHICfNlayer; il++){
       for(int ixy=0; ixy<kRHICfNxy; ixy++){
@@ -108,75 +145,72 @@ void StMuRHICfUtil::fillMuRHICfRawHit(StMuRHICfCollection* muColl, StRHICfCollec
   }   
 }
 
-void StMuRHICfUtil::fillMuRHICfHit(StMuRHICfCollection* muColl, StRHICfCollection* coll)
+void StMuRHICfUtil::fillMuRHICfHit(StMuRHICfHit* muRHICfHit, StRHICfHit* rhicfHit)
 {
-  StRHICfHit* rhicfHit = coll -> hitCollection();
-  if(!rhicfHit){return;}
-  StMuRHICfHit* muRHICfHit = muColl -> addHit();
-
-  for(int it=0; it<kRHICfNtower; it++){
-    muRHICfHit -> setL20(it, rhicfHit->getL20(it)); 
-    muRHICfHit -> setL90(it, rhicfHit->getL90(it)); 
-    muRHICfHit -> setPointNum(it, rhicfHit->getPointNum(it)); 
-    muRHICfHit -> setMultiHitNum(it, rhicfHit->getMultiHitNum(it)); 
-    muRHICfHit -> setGSOMaxLayer(it, 0, rhicfHit->getGSOMaxLayer(it, 0)); 
-    muRHICfHit -> setGSOMaxLayer(it, 1, rhicfHit->getGSOMaxLayer(it, 1)); 
-
-    for(int il=0; il<kRHICfNlayer; il++){
-      for(int ixy=0; ixy<kRHICfNxy; ixy++){
-        muRHICfHit -> setMaxPeakBin(it, il, ixy, rhicfHit->getMaxPeakBin(it, il, ixy));
-        muRHICfHit -> setSingleHitNum(it, il, ixy, rhicfHit->getSingleHitNum(it, il, ixy));
-        muRHICfHit -> setSingleHitPos(it, il, ixy, rhicfHit->getSingleHitPos(it, il, ixy));
-        muRHICfHit -> setSinglePeakHeight(it, il, ixy, rhicfHit->getSinglePeakHeight(it, il, ixy));
-        muRHICfHit -> setSingleFitChi2(it, il, ixy, rhicfHit->getSingleFitChi2(it, il, ixy));
-        muRHICfHit -> setMultiFitChi2(it, il, ixy, rhicfHit->getMultiFitChi2(it, il, ixy));
-
-        for(int ich=0; ich<checkGSOBarSize(it); ich++){
-          muRHICfHit -> setGSOBarEnergy(it, il, ixy, ich, rhicfHit->getGSOBarEnergy(it, il, ixy, ich));
-        }
-
-        for(int io=0; io<2; io++){
-          muRHICfHit -> setMultiHitPos(it, il, ixy, io, rhicfHit->getMultiHitPos(it, il, ixy, io));
-          muRHICfHit -> setMultiPeakHeight(it, il, ixy, io, rhicfHit->getMultiPeakHeight(it, il, ixy, io));
-          muRHICfHit -> setMultiPeakRaw(it, il, ixy, io, rhicfHit->getMultiPeakRaw(it, il, ixy, io));
-          muRHICfHit -> setMultiEnergySum(it, il, ixy, io, rhicfHit->getMultiEnergySum(it, il, ixy, io));
+  if(!muRHICfHit->isSaveDataArray()){
+    for(int it=0; it<kRHICfNtower; it++){
+      for(int il=0; il<kRHICfNlayer; il++){
+        for(int ixy=0; ixy<kRHICfNxy; ixy++){
+          for(int ich=0; ich<checkGSOBarSize(it); ich++){
+            muRHICfHit -> setGSOBarEnergy(it, il, ixy, ich, rhicfHit->getGSOBarEnergy(it, il, ixy, ich));
+          }
         }
       }
+      for(int ip=0; ip<kRHICfNplate; ip++){
+        muRHICfHit -> setPlateEnergy(it, ip, rhicfHit->getPlateEnergy(it, ip));
+      }
     }
-    for(int ip=0; ip<kRHICfNplate; ip++){
-      muRHICfHit -> setPlateEnergy(it, ip, rhicfHit->getPlateEnergy(it, ip));
+  }
+  // save the detailed hit data
+  else if(muRHICfHit->isSaveDataArray()){
+    muRHICfHit -> initDataArray();
+
+    for(int it=0; it<kRHICfNtower; it++){
+      muRHICfHit -> setL20(it, rhicfHit->getL20(it)); 
+      muRHICfHit -> setL90(it, rhicfHit->getL90(it)); 
+      muRHICfHit -> setMultiHitNum(it, rhicfHit->getMultiHitNum(it)); 
+      muRHICfHit -> setGSOMaxLayer(it, 0, rhicfHit->getGSOMaxLayer(it, 0)); 
+      muRHICfHit -> setGSOMaxLayer(it, 1, rhicfHit->getGSOMaxLayer(it, 1)); 
+
+      for(int il=0; il<kRHICfNlayer; il++){
+        for(int ixy=0; ixy<kRHICfNxy; ixy++){
+          muRHICfHit -> setMaxPeakBin(it, il, ixy, rhicfHit->getMaxPeakBin(it, il, ixy));
+          muRHICfHit -> setSingleHitNum(it, il, ixy, rhicfHit->getSingleHitNum(it, il, ixy));
+          muRHICfHit -> setSingleHitPos(it, il, ixy, rhicfHit->getSingleHitPos(it, il, ixy));
+          muRHICfHit -> setSinglePeakHeight(it, il, ixy, rhicfHit->getSinglePeakHeight(it, il, ixy));
+          muRHICfHit -> setSingleFitChi2(it, il, ixy, rhicfHit->getSingleFitChi2(it, il, ixy));
+          muRHICfHit -> setMultiFitChi2(it, il, ixy, rhicfHit->getMultiFitChi2(it, il, ixy));
+
+          for(int ich=0; ich<checkGSOBarSize(it); ich++){
+            muRHICfHit -> setGSOBarEnergy(it, il, ixy, ich, rhicfHit->getGSOBarEnergy(it, il, ixy, ich));
+          }
+
+          for(int io=0; io<2; io++){
+            muRHICfHit -> setMultiHitPos(it, il, ixy, io, rhicfHit->getMultiHitPos(it, il, ixy, io));
+            muRHICfHit -> setMultiPeakHeight(it, il, ixy, io, rhicfHit->getMultiPeakHeight(it, il, ixy, io));
+            muRHICfHit -> setMultiPeakRaw(it, il, ixy, io, rhicfHit->getMultiPeakRaw(it, il, ixy, io));
+            muRHICfHit -> setMultiEnergySum(it, il, ixy, io, rhicfHit->getMultiEnergySum(it, il, ixy, io));
+          }
+        }
+      }
+      for(int ip=0; ip<kRHICfNplate; ip++){
+        muRHICfHit -> setPlateEnergy(it, ip, rhicfHit->getPlateEnergy(it, ip));
+      }
     }
   }
 }
 
-void StMuRHICfUtil::fillMuRHICfPoint(StMuRHICfCollection* muColl, StRHICfCollection* coll)
+void StMuRHICfUtil::fillMuRHICfPoint(StMuRHICfPoint* muRHICfPoint, StRHICfPoint* rhicfPoint)
 {
-  for (unsigned i(0); i < coll->numberOfPoints(); ++i){
-    StRHICfPoint* rhicfPoint = coll->pointCollection()[i];
-    StMuRHICfPoint* muRHICfPoint = muColl->addPoint();
-
-    if(rhicfPoint && muRHICfPoint){
-      muRHICfPoint -> setTowerIdx(rhicfPoint->getTowerIdx());
-      muRHICfPoint -> setPID(rhicfPoint->getPID());
-      muRHICfPoint -> setTowerSumEnergy(rhicfPoint->getTowerSumEnergy(0), rhicfPoint->getTowerSumEnergy(1));
-      muRHICfPoint -> setPointPos(rhicfPoint->getPointPos(0), rhicfPoint->getPointPos(1));
-      muRHICfPoint -> setPointEnergy(rhicfPoint->getPointEnergy(0), rhicfPoint->getPointEnergy(1));
-    } 
-  }
+  muRHICfPoint -> setTowerIdx(rhicfPoint->getTowerIdx());
+  muRHICfPoint -> setPID(rhicfPoint->getPID());
+  muRHICfPoint -> setTowerSumEnergy(rhicfPoint->getTowerSumEnergy(0), rhicfPoint->getTowerSumEnergy(1));
+  muRHICfPoint -> setPointPos(rhicfPoint->getPointPos(0), rhicfPoint->getPointPos(1));
+  muRHICfPoint -> setPointEnergy(rhicfPoint->getPointEnergy(0), rhicfPoint->getPointEnergy(1));
 }
 
-void StMuRHICfUtil::fillRHICfRawHit(StRHICfCollection* coll, StMuRHICfCollection* muColl)
+void StMuRHICfUtil::fillRHICfRawHit(StRHICfRawHit* rhicfRawHit, StMuRHICfRawHit* muRHICfRawHit)
 {
-  StMuRHICfRawHit* muRHICfRawHit = muColl -> getRawHit();
-  StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
-
-  coll -> setBunchNumber(muRHICfRawHit->getBunchNumber());
-  coll -> setRunType(muRHICfRawHit->getRunType());
-  coll -> setTriggerNumber(muRHICfRawHit->getTriggerNumber());
-  coll -> setRunTime(0, muRHICfRawHit->getRunTime(0));
-  coll -> setRunTime(1, muRHICfRawHit->getRunTime(1));
-  coll -> setRunTRGM(muRHICfRawHit->getRunTRGM());
-
   for(int it=0; it<kRHICfNtower; it++){
     for(int il=0; il<kRHICfNlayer; il++){
       for(int ixy=0; ixy<kRHICfNxy; ixy++){
@@ -203,60 +237,66 @@ void StMuRHICfUtil::fillRHICfRawHit(StRHICfCollection* coll, StMuRHICfCollection
   }   
 }
 
-void StMuRHICfUtil::fillRHICfHit(StRHICfCollection* coll, StMuRHICfCollection* muColl)
+void StMuRHICfUtil::fillRHICfHit(StRHICfHit* rhicfHit, StMuRHICfHit* muRHICfHit)
 {
-  StMuRHICfHit* muRHICfHit = muColl -> getHit();
-  if(!muRHICfHit){return;}
-  StRHICfHit* rhicfHit = coll -> hitCollection();
-
-  for(int it=0; it<kRHICfNtower; it++){
-    rhicfHit -> setL20(it, muRHICfHit->getL20(it)); 
-    rhicfHit -> setL90(it, muRHICfHit->getL90(it)); 
-    rhicfHit -> setPointNum(it, muRHICfHit->getPointNum(it)); 
-    rhicfHit -> setMultiHitNum(it, muRHICfHit->getMultiHitNum(it)); 
-    rhicfHit -> setGSOMaxLayer(it, 0, muRHICfHit->getGSOMaxLayer(it, 0)); 
-    rhicfHit -> setGSOMaxLayer(it, 1, muRHICfHit->getGSOMaxLayer(it, 1)); 
-
-    for(int il=0; il<kRHICfNlayer; il++){
-      for(int ixy=0; ixy<kRHICfNxy; ixy++){
-        rhicfHit -> setMaxPeakBin(it, il, ixy, muRHICfHit->getMaxPeakBin(it, il, ixy));
-        rhicfHit -> setSingleHitNum(it, il, ixy, muRHICfHit->getSingleHitNum(it, il, ixy));
-        rhicfHit -> setSingleHitPos(it, il, ixy, muRHICfHit->getSingleHitPos(it, il, ixy));
-        rhicfHit -> setSinglePeakHeight(it, il, ixy, muRHICfHit->getSinglePeakHeight(it, il, ixy));
-        rhicfHit -> setSingleFitChi2(it, il, ixy, muRHICfHit->getSingleFitChi2(it, il, ixy));
-        rhicfHit -> setMultiFitChi2(it, il, ixy, muRHICfHit->getMultiFitChi2(it, il, ixy));
-
-        for(int ich=0; ich<checkGSOBarSize(it); ich++){
-          rhicfHit -> setGSOBarEnergy(it, il, ixy, ich, muRHICfHit->getGSOBarEnergy(it, il, ixy, ich));
-        }
-
-        for(int io=0; io<2; io++){
-          rhicfHit -> setMultiHitPos(it, il, ixy, io, muRHICfHit->getMultiHitPos(it, il, ixy, io));
-          rhicfHit -> setMultiPeakHeight(it, il, ixy, io, muRHICfHit->getMultiPeakHeight(it, il, ixy, io));
-          rhicfHit -> setMultiPeakRaw(it, il, ixy, io, muRHICfHit->getMultiPeakRaw(it, il, ixy, io));
-          rhicfHit -> setMultiEnergySum(it, il, ixy, io, muRHICfHit->getMultiEnergySum(it, il, ixy, io));
+  if(!rhicfHit->isSaveDataArray()){
+    for(int it=0; it<kRHICfNtower; it++){
+      for(int il=0; il<kRHICfNlayer; il++){
+        for(int ixy=0; ixy<kRHICfNxy; ixy++){
+          for(int ich=0; ich<checkGSOBarSize(it); ich++){
+            rhicfHit -> setGSOBarEnergy(it, il, ixy, ich, muRHICfHit->getGSOBarEnergy(it, il, ixy, ich));
+          }
         }
       }
+      for(int ip=0; ip<kRHICfNplate; ip++){
+        rhicfHit -> setPlateEnergy(it, ip, muRHICfHit->getPlateEnergy(it, ip));
+      }
     }
-    for(int ip=0; ip<kRHICfNplate; ip++){
-      rhicfHit -> setPlateEnergy(it, ip, muRHICfHit->getPlateEnergy(it, ip));
+  }
+  // save the detailed hit data
+  else if(rhicfHit->isSaveDataArray()){
+    rhicfHit -> initDataArray();
+
+    for(int it=0; it<kRHICfNtower; it++){
+      rhicfHit -> setL20(it, muRHICfHit->getL20(it)); 
+      rhicfHit -> setL90(it, muRHICfHit->getL90(it)); 
+      rhicfHit -> setMultiHitNum(it, muRHICfHit->getMultiHitNum(it)); 
+      rhicfHit -> setGSOMaxLayer(it, 0, muRHICfHit->getGSOMaxLayer(it, 0)); 
+      rhicfHit -> setGSOMaxLayer(it, 1, muRHICfHit->getGSOMaxLayer(it, 1)); 
+
+      for(int il=0; il<kRHICfNlayer; il++){
+        for(int ixy=0; ixy<kRHICfNxy; ixy++){
+          rhicfHit -> setMaxPeakBin(it, il, ixy, muRHICfHit->getMaxPeakBin(it, il, ixy));
+          rhicfHit -> setSingleHitNum(it, il, ixy, muRHICfHit->getSingleHitNum(it, il, ixy));
+          rhicfHit -> setSingleHitPos(it, il, ixy, muRHICfHit->getSingleHitPos(it, il, ixy));
+          rhicfHit -> setSinglePeakHeight(it, il, ixy, muRHICfHit->getSinglePeakHeight(it, il, ixy));
+          rhicfHit -> setSingleFitChi2(it, il, ixy, muRHICfHit->getSingleFitChi2(it, il, ixy));
+          rhicfHit -> setMultiFitChi2(it, il, ixy, muRHICfHit->getMultiFitChi2(it, il, ixy));
+
+          for(int ich=0; ich<checkGSOBarSize(it); ich++){
+            rhicfHit -> setGSOBarEnergy(it, il, ixy, ich, muRHICfHit->getGSOBarEnergy(it, il, ixy, ich));
+          }
+
+          for(int io=0; io<2; io++){
+            rhicfHit -> setMultiHitPos(it, il, ixy, io, muRHICfHit->getMultiHitPos(it, il, ixy, io));
+            rhicfHit -> setMultiPeakHeight(it, il, ixy, io, muRHICfHit->getMultiPeakHeight(it, il, ixy, io));
+            rhicfHit -> setMultiPeakRaw(it, il, ixy, io, muRHICfHit->getMultiPeakRaw(it, il, ixy, io));
+            rhicfHit -> setMultiEnergySum(it, il, ixy, io, muRHICfHit->getMultiEnergySum(it, il, ixy, io));
+          }
+        }
+      }
+      for(int ip=0; ip<kRHICfNplate; ip++){
+        rhicfHit -> setPlateEnergy(it, ip, muRHICfHit->getPlateEnergy(it, ip));
+      }
     }
   }
 }
 
-void StMuRHICfUtil::fillRHICfPoint(StRHICfCollection* coll, StMuRHICfCollection* muColl)
+void StMuRHICfUtil::fillRHICfPoint(StRHICfPoint* rhicfPoint, StMuRHICfPoint* muRHICfPoint)
 {
-  for(unsigned i(0); i < muColl->numberOfPoints(); ++i){
-    StMuRHICfPoint* muRHICfPoint = muColl->getPoint(i);
-    StRHICfPoint* rhicfPoint = new StRHICfPoint();
-    
-    if(muRHICfPoint && rhicfPoint){
-      rhicfPoint -> setTowerIdx(muRHICfPoint->getTowerIdx());
-      rhicfPoint -> setPID(muRHICfPoint->getPID());
-      rhicfPoint -> setTowerSumEnergy(muRHICfPoint->getTowerSumEnergy(0), muRHICfPoint->getTowerSumEnergy(1));
-      rhicfPoint -> setPointPos(muRHICfPoint->getPointPos(0), muRHICfPoint->getPointPos(1));
-      rhicfPoint -> setPointEnergy(muRHICfPoint->getPointEnergy(0), muRHICfPoint->getPointEnergy(1));
-      coll -> addPoint(rhicfPoint);
-    }
-  }
+  rhicfPoint -> setTowerIdx(muRHICfPoint->getTowerIdx());
+  rhicfPoint -> setPID(muRHICfPoint->getPID());
+  rhicfPoint -> setTowerSumEnergy(muRHICfPoint->getTowerSumEnergy(0), muRHICfPoint->getTowerSumEnergy(1));
+  rhicfPoint -> setPointPos(muRHICfPoint->getPointPos(0), muRHICfPoint->getPointPos(1));
+  rhicfPoint -> setPointEnergy(muRHICfPoint->getPointEnergy(0), muRHICfPoint->getPointEnergy(1));
 }

@@ -5,7 +5,13 @@
 #include "StRoot/StEvent/StEnumerations.h"
 
 class StRHICfCollection;
+class StRHICfRawHit;
+class StRHICfHit;
+class StRHICfPoint;
 class StMuRHICfCollection;
+class StMuRHICfRawHit;
+class StMuRHICfHit;
+class StMuRHICfPoint;
 class StMuDst;
 
 class StMuRHICfUtil : public StObject
@@ -20,16 +26,16 @@ class StMuRHICfUtil : public StObject
     void fillMuRHICf(StMuRHICfCollection*,StRHICfCollection*);
     void fillRHICf(StRHICfCollection*,StMuRHICfCollection*);
 
+    void fillMuRHICfRawHit(StMuRHICfRawHit*,StRHICfRawHit*);
+    void fillMuRHICfHit(StMuRHICfHit*,StRHICfHit*);
+    void fillMuRHICfPoint(StMuRHICfPoint*,StRHICfPoint*);
+
+    void fillRHICfRawHit(StRHICfRawHit*,StMuRHICfRawHit*);
+    void fillRHICfHit(StRHICfHit*,StMuRHICfHit*);
+    void fillRHICfPoint(StRHICfPoint*,StMuRHICfPoint*);
+
   private:
     Int_t checkGSOBarSize(Int_t tower);
-
-    void fillMuRHICfRawHit(StMuRHICfCollection*, StRHICfCollection*);
-    void fillMuRHICfHit(StMuRHICfCollection*, StRHICfCollection*);
-    void fillMuRHICfPoint(StMuRHICfCollection*, StRHICfCollection*);
-
-    void fillRHICfRawHit(StRHICfCollection*, StMuRHICfCollection*);
-    void fillRHICfHit(StRHICfCollection*, StMuRHICfCollection*);
-    void fillRHICfPoint(StRHICfCollection*, StMuRHICfCollection*);
 
   ClassDef(StMuRHICfUtil,0)
 };
