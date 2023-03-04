@@ -76,6 +76,7 @@ if ($all) {
 			      SecRow3 SecRow3P SecRow3+SecRow3P SecRow3C SecRow3PC SecRow3C+SecRow3PC
 			      Z3 Z3P  Z3+Z3P  Z3C+Z3P 
 			      Z3C Z3PC Z3C+Z3PC 
+			      xyPad3qB xyPad3qBC
 			      xyPad3+xyPad3P xyPad3C+xyPad3PC
 			      xyPad3 xyPad3P xyPad3C xyPad3PC 
 			      Pressure PressureP Pressure+PressureP PressureC PressurePC PressureC+PressurePC
