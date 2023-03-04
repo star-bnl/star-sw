@@ -16,6 +16,7 @@ elsif ($mount eq 'gpfs01') { $DISK = "/direct/gpfs01"; $disk = "/direct/gpfs01";
 elsif ($mount eq 'gpfs02') { $DISK = "/direct/gpfs02"; $disk = "/direct/gpfs02";}
 elsif ($mount eq 'gpfs03') { $DISK = "/direct/gpfs03"; $disk = "/direct/gpfs03";}
 elsif ($mount eq 'gpfs04') { $DISK = "/direct/gpfs04"; $disk = "/direct/gpfs04";}
+elsif ($mount eq 'lustre02') { $DISK = "/sdcc/lustre02"; $disk = "/direct/lustre02";}
 else {
   die "Non valid option";
 }

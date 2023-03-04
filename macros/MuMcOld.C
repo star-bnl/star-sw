@@ -942,7 +942,7 @@ void PrintMcVx(Int_t idVx = 1, TClonesArray *MuMcVertices = 0, TClonesArray *MuM
   cout << endl;
 }
 //________________________________________________________________________________
-void MuMc(Long64_t nevent = 999999,
+void MuMcOld(Long64_t nevent = 999999,
 	  //	  const char* file="/star/rcf/test/dev/trs_sl302.ittf/Wed/year_2011/pp500_pileup/rcf10100_90_200evts_Wplus_enu.MuDst.root",
 	  const char* file="./*.MuDst.root",
 	  const char* filter="st:MuDst.root",

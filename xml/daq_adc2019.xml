@@ -16,7 +16,7 @@
 #    starver TFG23a
      set evtsFile = $INPUTFILE0;
      set f        = 1
-     set l        = 500; # 2000
+     set l        = 20000
   echo "${evtsFile}"
  if (! -r ${evtsFile}) exit 1;
   set evtsFileB = `basename ${evtsFile}`
@@ -75,8 +75,9 @@
 <input URL="file:/hlt/cephfs/daq/2019B/production_14p5GeV_2019/*/*/*adc*.daq" />
 -->
 <!-- <input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/production_19GeV_2019/09*/*/*adc*.daq'" />  -->
-<!-- <input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/192/20192001/st*.daq'" /> --> <!-- 2019AuAu200 -->
-<input URL="file:/RTS/TONKO/data/st_physics_adc_20192001_raw_5500002.daq" />
+<!-- 2019AuAu200 -->
+<input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/192/20192001/st*.daq'" /> 
+<!-- <input URL="file:/RTS/TONKO/data/st_physics_adc_20192001_raw_5500002.daq" /> -->
    <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
