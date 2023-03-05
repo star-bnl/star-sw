@@ -1384,7 +1384,7 @@ double StiStEventFiller::impactParameter(StiKalmanTrack* track
   originD->setZ(node->z_g());
 
 
-  physicalHelix->setParameters(node->getCurvature(),
+  physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase(),
 			       *originD,
@@ -1484,7 +1484,7 @@ void StiStEventFiller::FillTpcdX(const StiKalmanTrack* track, const StiKalmanTra
   originD->setY(node->y_g());
   originD->setZ(node->z_g());
 
-  physicalHelix->setParameters(node->getCurvature(),
+  physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase(),
 			       *originD,
