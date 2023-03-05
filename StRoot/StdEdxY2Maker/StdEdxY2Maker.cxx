@@ -359,6 +359,8 @@ Int_t StdEdxY2Maker::Make(){
     StTrack *tracks[2] = {gTrack, pTrack};
     Int_t sCharge = 0;
     if (gTrack->geometry()->charge() < 0) sCharge = 1;
+    Int_t qB = (sCharge+1)%2;
+    if (bField > 0) qB = (qB + 1)%2; // swap for Full Field
 #ifdef __BEST_VERTEX__
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       for (Int_t l = 0; l < 2; l++) {
@@ -615,6 +617,8 @@ Int_t StdEdxY2Maker::Make(){
 	Float_t NoPadsInRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
 	if (CdEdx[NdEdx].edge > 0.5*NoPadsInRow) 	  CdEdx[NdEdx].edge -= 1 + NoPadsInRow;
 	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5)/NoPadsInRow - 1.0;
+	CdEdx[NdEdx].xpadR = 2*(tpcHit->pad() - 0.5)/NoPadsInRow - 1.0;
+	CdEdx[NdEdx].qB = qB;
 	CdEdx[NdEdx].yrow = sector + 0.5*((row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/St_tpcPadConfigC::instance()->innerPadRows(sector) : 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/(St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
@@ -1015,6 +1019,7 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
   static Hists3D nPad3 ## SIGN ("nPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","npad",-NoRows,18,0.5,18.5); \
   static Hists3D nTbk3 ## SIGN ("nTbk3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","ntimebuckets",-NoRows,35,2.5,37.5);
 #endif
+  static Hists3D xyPad3qB("xyPad3qB","log(dEdx/Pion) for all","24*qB+sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",2*numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 48.5);
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   __BOOK__VARS__(,);
 #else
@@ -1288,6 +1293,10 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
 	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].ddEdxL +
 	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowC].ddEdxL +
 	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ].ddEdxL);   
+	} else if (l == StTpcdEdxCorrection::kTpcPadMDF ||
+	   	   l == StTpcdEdxCorrection::kTpcPadMDC ) {
+	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDF].ddEdxL +
+	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDC].ddEdxL);
 	} else {
 	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
 	}
@@ -1396,6 +1405,8 @@ __FILL__VARS__PadTmbk(SIGN)
      #endif /* __NEGATIVE_AND_POSITIVE__ */
   #endif /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
 #endif /* __NEGATIVE_AND_POSITIVE__ */
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDC].dEdxN;	
+	xyPad3qB.Fill(24*FdEdx[k].qB+FdEdx[k].yrow,FdEdx[k].xpadR, Vars); 
       } // MIP momentum cut
     } // loop over dEdx points 
   }
