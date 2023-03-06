@@ -91,6 +91,6 @@
 <li> TFG22i Replace loading gain from dta_Tpx->request to tpxGain        2022-10-14 12:21:16 -0400  (HEAD -> TFG, tag: TFG22i)
 <li> TFG22j Finish dE/dx calibration RunXIX_XXII_79                      2022-12-15 19:13:11 -0500  (HEAD -> TFG, tag: TFG22j_5)
 <li> TFG23a Tune TpcRS for y2009 & y2021                                 2023-02-05 12:38:48 -0500  (HEAD -> TFG, tag: TFG23a_4, origin/TFG)
-<li> TFG23b RunXIX_XXII dE/dx calibration                                2023-03-05 17:31:36 -0500  (HEAD -> TFG, tag: TFG23b_1)
+<li> TFG23b RunXIX_XXII dE/dx calibration                                2023-03-06 08:53:28 -0500  (HEAD -> TFG, tag: TFG23b_2)
 <li>.DEV2   head of TFG git repository
 </ul>
