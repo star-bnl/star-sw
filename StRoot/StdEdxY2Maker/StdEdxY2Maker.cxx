@@ -1447,7 +1447,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
 		 Names[iop],i,pdEdx->sector,pdEdx->row,dEdx, pdEdx->F.dx ,pdEdx->dxC, pdEdx->xyz[0], pdEdx->xyz[1], 
 		 pdEdx->xyz[2],pdEdx->Qcm,pdEdx->Crow);
     cout << Form(" d[%8.2f,%8.2f,%8.2f] Sum %8.2f Prob %8.5f", pdEdx->xyzD[0], pdEdx->xyzD[1], pdEdx->xyzD[2],
-		 1.e6*I,pdEdx->Prob) << endl;
+		 I,pdEdx->Prob) << endl;
     if (iop == 2) {
       if (i < N60) I60 += dEdx;
       if (i < N70) I70 += dEdx;
@@ -1849,16 +1849,18 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   static vector<Double_t> F;
   static vector<Double_t> E;
   static vector<Double_t> P;
-  static vector<Double_t> I;
+  //  static vector<Double_t> I;
   if (_debug > 0 && iflag == 1) {
     X.clear();
     F.clear();
     E.clear();
     P.clear();
-    I.clear();
-    if (!c1) c1 =new TCanvas("fcn","fcn",500,1500);
+    //    I.clear();
+    //    if (!c1) c1 = new TCanvas("fcn","fcn",500,1500);
+    if (!c1) c1 = new TCanvas("fcn","fcn",500,1000);
     else     c1->Clear();
-    c1->Divide(1,3);
+    //    c1->Divide(1,3);
+    c1->Divide(1,2);
   }
 #endif /* __DEBUG_dNdx__ */
   f = 0;
@@ -1873,11 +1875,12 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t Prob = StdEdxModel::instance()->ProbdEGeVlog(TMath::Log(dE),Np, &derivative);
 #ifdef __DEBUG_dNdx__
     if (_debug && iflag == 3) {
-      Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
+      //      Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
+      Double_t ee = StdEdxModel::instance()->Logne(TMath::Log(dE))  -TMath::Log(Np); // to eV/Np
       E.push_back(ee);
       P.push_back(Prob);
-      Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
-      I.push_back(In);
+      //      Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
+      //      I.push_back(In);
     }
 #endif /* __DEBUG_dNdx__ */
     if (Prob <= 0.0) {
@@ -1914,22 +1917,22 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       fdNdxGraph[0]->Draw("axp");
       TArrayD EA(NdEdx);
       TArrayD PA(NdEdx);
-      TArrayD IA(NdEdx);
+      //      TArrayD IA(NdEdx);
       for (Int_t i = 0; i < NdEdx; i++) {
 	EA[i] = E[i];
 	PA[i] = P[i];
-	IA[i] = I[i];
+	//	IA[i] = I[i];
       }
       if (fdNdxGraph[1]) delete fdNdxGraph[1];
-      fdNdxGraph[1] = new TGraph(N, EA.GetArray(), PA.GetArray());
+      fdNdxGraph[1] = new TGraph(NdEdx, EA.GetArray(), PA.GetArray());
       fdNdxGraph[1]->SetTitle("Prob");
       c1->cd(2);
       fdNdxGraph[1]->Draw("axp");
       if (fdNdxGraph[2]) delete fdNdxGraph[2];
-      fdNdxGraph[2] = new TGraph(N, EA.GetArray(), IA.GetArray());
-      fdNdxGraph[2]->SetTitle("Integral");
-      c1->cd(3);
-      fdNdxGraph[2]->Draw("axp");
+//       fdNdxGraph[2] = new TGraph(N, EA.GetArray(), IA.GetArray());
+//       fdNdxGraph[2]->SetTitle("Integral");
+//       c1->cd(3);
+//       fdNdxGraph[2]->Draw("axp");
       c1->Update();
     }
 #endif /* __DEBUG_dNdx__ */
