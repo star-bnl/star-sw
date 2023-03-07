@@ -359,6 +359,8 @@ Int_t StdEdxY2Maker::Make(){
     StTrack *tracks[2] = {gTrack, pTrack};
     Int_t sCharge = 0;
     if (gTrack->geometry()->charge() < 0) sCharge = 1;
+    Int_t qB = (sCharge+1)%2;
+    if (bField > 0) qB = (qB + 1)%2; // swap for Full Field
 #ifdef __BEST_VERTEX__
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       for (Int_t l = 0; l < 2; l++) {
@@ -615,6 +617,8 @@ Int_t StdEdxY2Maker::Make(){
 	Float_t NoPadsInRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
 	if (CdEdx[NdEdx].edge > 0.5*NoPadsInRow) 	  CdEdx[NdEdx].edge -= 1 + NoPadsInRow;
 	CdEdx[NdEdx].xpad = 2*(CdEdx[NdEdx].pad - 0.5)/NoPadsInRow - 1.0;
+	CdEdx[NdEdx].xpadR = 2*(tpcHit->pad() - 0.5)/NoPadsInRow - 1.0;
+	CdEdx[NdEdx].qB = qB;
 	CdEdx[NdEdx].yrow = sector + 0.5*((row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/St_tpcPadConfigC::instance()->innerPadRows(sector) : 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/(St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
@@ -1015,6 +1019,7 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
   static Hists3D nPad3 ## SIGN ("nPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","npad",-NoRows,18,0.5,18.5); \
   static Hists3D nTbk3 ## SIGN ("nTbk3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","ntimebuckets",-NoRows,35,2.5,37.5);
 #endif
+  static Hists3D xyPad3qB("xyPad3qB","log(dEdx/Pion) for all","24*qB+sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",2*numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 48.5);
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   __BOOK__VARS__(,);
 #else
@@ -1288,6 +1293,10 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
 	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].ddEdxL +
 	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowC].ddEdxL +
 	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ].ddEdxL);   
+	} else if (l == StTpcdEdxCorrection::kTpcPadMDF ||
+	   	   l == StTpcdEdxCorrection::kTpcPadMDC ) {
+	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDF].ddEdxL +
+	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDC].ddEdxL);
 	} else {
 	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
 	}
@@ -1396,6 +1405,8 @@ __FILL__VARS__PadTmbk(SIGN)
      #endif /* __NEGATIVE_AND_POSITIVE__ */
   #endif /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
 #endif /* __NEGATIVE_AND_POSITIVE__ */
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDC].dEdxN;	
+	xyPad3qB.Fill(24*FdEdx[k].qB+FdEdx[k].yrow,FdEdx[k].xpadR, Vars); 
       } // MIP momentum cut
     } // loop over dEdx points 
   }
@@ -1436,7 +1447,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
 		 Names[iop],i,pdEdx->sector,pdEdx->row,dEdx, pdEdx->F.dx ,pdEdx->dxC, pdEdx->xyz[0], pdEdx->xyz[1], 
 		 pdEdx->xyz[2],pdEdx->Qcm,pdEdx->Crow);
     cout << Form(" d[%8.2f,%8.2f,%8.2f] Sum %8.2f Prob %8.5f", pdEdx->xyzD[0], pdEdx->xyzD[1], pdEdx->xyzD[2],
-		 1.e6*I,pdEdx->Prob) << endl;
+		 I,pdEdx->Prob) << endl;
     if (iop == 2) {
       if (i < N60) I60 += dEdx;
       if (i < N70) I70 += dEdx;
@@ -1838,16 +1849,18 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   static vector<Double_t> F;
   static vector<Double_t> E;
   static vector<Double_t> P;
-  static vector<Double_t> I;
+  //  static vector<Double_t> I;
   if (_debug > 0 && iflag == 1) {
     X.clear();
     F.clear();
     E.clear();
     P.clear();
-    I.clear();
-    if (!c1) c1 =new TCanvas("fcn","fcn",500,1500);
+    //    I.clear();
+    //    if (!c1) c1 = new TCanvas("fcn","fcn",500,1500);
+    if (!c1) c1 = new TCanvas("fcn","fcn",500,1000);
     else     c1->Clear();
-    c1->Divide(1,3);
+    //    c1->Divide(1,3);
+    c1->Divide(1,2);
   }
 #endif /* __DEBUG_dNdx__ */
   f = 0;
@@ -1862,11 +1875,12 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t Prob = StdEdxModel::instance()->ProbdEGeVlog(TMath::Log(dE),Np, &derivative);
 #ifdef __DEBUG_dNdx__
     if (_debug && iflag == 3) {
-      Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
+      //      Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
+      Double_t ee = StdEdxModel::instance()->Logne(TMath::Log(dE))  -TMath::Log(Np); // to eV/Np
       E.push_back(ee);
       P.push_back(Prob);
-      Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
-      I.push_back(In);
+      //      Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
+      //      I.push_back(In);
     }
 #endif /* __DEBUG_dNdx__ */
     if (Prob <= 0.0) {
@@ -1903,22 +1917,22 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       fdNdxGraph[0]->Draw("axp");
       TArrayD EA(NdEdx);
       TArrayD PA(NdEdx);
-      TArrayD IA(NdEdx);
+      //      TArrayD IA(NdEdx);
       for (Int_t i = 0; i < NdEdx; i++) {
 	EA[i] = E[i];
 	PA[i] = P[i];
-	IA[i] = I[i];
+	//	IA[i] = I[i];
       }
       if (fdNdxGraph[1]) delete fdNdxGraph[1];
-      fdNdxGraph[1] = new TGraph(N, EA.GetArray(), PA.GetArray());
+      fdNdxGraph[1] = new TGraph(NdEdx, EA.GetArray(), PA.GetArray());
       fdNdxGraph[1]->SetTitle("Prob");
       c1->cd(2);
       fdNdxGraph[1]->Draw("axp");
       if (fdNdxGraph[2]) delete fdNdxGraph[2];
-      fdNdxGraph[2] = new TGraph(N, EA.GetArray(), IA.GetArray());
-      fdNdxGraph[2]->SetTitle("Integral");
-      c1->cd(3);
-      fdNdxGraph[2]->Draw("axp");
+//       fdNdxGraph[2] = new TGraph(N, EA.GetArray(), IA.GetArray());
+//       fdNdxGraph[2]->SetTitle("Integral");
+//       c1->cd(3);
+//       fdNdxGraph[2]->Draw("axp");
       c1->Update();
     }
 #endif /* __DEBUG_dNdx__ */

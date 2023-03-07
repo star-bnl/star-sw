@@ -22,7 +22,6 @@
 #include "TClassTable.h"
 //#include "DeDxTree.C"
 #include "TMinuit.h"
-#include "TCanvas.h"
 #include "TSpectrum.h"
 #include "StBichsel/Bichsel.h"
 #include "TROOT.h"

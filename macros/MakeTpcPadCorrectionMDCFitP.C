@@ -1,6 +1,6 @@
 // @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
-  root.exe -q -b xyPad3C*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain,7,20,20210129,5)' >& MakeTpcPadCorrectionMDF.log
+  root.exe -q -b xyPad3qBG*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain,7,20,20210129,5)' >& MakeTpcPadCorrectionMDC.log
  */
 #ifndef __CINT__
 #include <stdlib.h>
@@ -20,6 +20,7 @@
 #include "TMultiDimFit.h"
 #include "TString.h"
 #include "Ask.h"
+#include "TCanvas.h"
 #else
 class TMultiDimFit;
 #endif
@@ -163,7 +164,7 @@ public :
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
-  virtual void      Mdf(Int_t sector, Int_t io, Int_t max=7, Int_t maxTerm = 20);
+  virtual void     Mdf(Int_t sector, Int_t qB, Int_t io, Int_t max=7, Int_t maxTerm = 20);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -423,7 +424,7 @@ Int_t FitP::Cut(Long64_t entry)
 #endif // #ifdef FitP_cxx
 
 //using namespace std;
-void FitP::Mdf(Int_t sector, Int_t IO, Int_t max, Int_t maxTerm)
+void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
 {
 //   In a ROOT session, you can do:
 //      Root > .L FitP.C
@@ -456,7 +457,7 @@ void FitP::Mdf(Int_t sector, Int_t IO, Int_t max, Int_t maxTerm)
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kChebyshev,"vk");
   fit = new TMultiDimFit(nVars, TMultiDimFit::kLegendre,"vk");
-  fit->SetName(Form("MDC_%i_%i",sector,IO));
+  fit->SetName(Form("MDC_qB%i_s%02i_io%i",qB,sector,IO));
   gDirectory->Append(fit);
   TDirectory *dir = gDirectory->mkdir(fit->GetName());
   dir->cd();
@@ -467,7 +468,7 @@ void FitP::Mdf(Int_t sector, Int_t IO, Int_t max, Int_t maxTerm)
   fit->SetMaxFunctions(1000);
   fit->SetMaxStudy(1000);
   fit->SetMaxTerms(maxTerm);
-#if 0
+#if 1
   //  fit->SetPowerLimit(max);
   fit->SetPowerLimit(1);
   fit->SetMinAngle(); //10);
@@ -481,6 +482,8 @@ void FitP::Mdf(Int_t sector, Int_t IO, Int_t max, Int_t maxTerm)
   Int_t ix1, ix2;
   if (IO) {ix1 =  1+20*(sector-1); ix2 = 10+20*(sector-1);} // Inner
   else    {ix1 = 11+20*(sector-1); ix2 = 20+20*(sector-1);} // Outer
+  ix1 += 20*24*qB;
+  ix2 += 20*24*qB;
   Double_t xx[2];
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -569,10 +572,10 @@ void FitP::Mdf(Int_t sector, Int_t IO, Int_t max, Int_t maxTerm)
   }
   if (fit->GetNCoefficients()%2) {cout << endl; out << endl;}
 }//____________________________________________________________________________
-void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t max=7, Int_t maxTerm = 20, Int_t date = 20190201, Int_t time = 709){
+void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t max=7, Int_t maxTerm = 20, Int_t date = 20190225, Int_t time = 202320){
   if (! tChain) return;
   FitP t(tChain);
-  TFile *fOut = new TFile("MakeTpcPadCorrectionMDCFitP.root","recreae");
+  TFile *fOut = new TFile("MakeTpcPadCorrectionMDCFitP.root","recreate");
   TString cOut =  Form("TpcPadCorrectionMDC.%8i.%06i.C",date,time);
   cout << "Create " << cOut << endl;
   out.open(cOut.Data());
@@ -581,16 +584,32 @@ void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t max=7, Int_t maxTerm = 20
   out << "  if (!gROOT->GetClass(\"St_MDFCorrection\")) return 0;" << endl;
   out << "  MDFCorrection_st row;" << endl;
   out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcPadCorrectionMDC\"," << nrows << ");" << endl;
-  for (Int_t sector = 1; sector <= nrows/2; sector++) {
-    for (Int_t io = 0; io < 2; io++) {// io == 0 : Outer, io = 1 : Inner
-      Int_t idx = io + 2*(sector-1);
-      out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
-      out << "  row.nrows = " << nrows << " //" << gDirectory->GetName() << endl;
-      out << "  row.idx   = " << Form("%2i", idx+1) << ";" << endl;
-      fOut->cd();
-      t.Mdf(sector,io, max, maxTerm);
-      out << "  tableSet->AddAt(&row," << idx << ");" << endl;
-      if (Ask()) goto ENDL;
+  for (Int_t qB = 0; qB < 2; qB++) {
+    for (Int_t sector = 1; sector <= 24; sector++) {
+      for (Int_t io = 0; io < 2; io++) {// io == 0 : Outer, io = 1 : Inner
+	Int_t idx = io + 2*(sector-1) + 48*qB;
+	out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
+	out << "  row.nrows = " << nrows << "; //" << gDirectory->GetName() << endl;
+        out << "  row.idx   = " << Form("%2i", idx+1) << ";" << endl;
+	t.Mdf(sector, qB, io, max, maxTerm);
+	out << "  tableSet->AddAt(&row," << idx << ");" << endl;
+	if (Ask()) goto ENDL;
+	else if (! gROOT->IsBatch()) {
+	  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+	  if (! c1 ) c1 = new TCanvas("c1","c1");
+	  else c1->Clear();
+	  TH1 *res_train = (TH1*) gDirectory->Get("res_train");
+	  if (res_train) {
+	    res_train->Draw();
+	    TH1 *d_orig = (TH1*) gDirectory->Get("d_orig");
+	    if (d_orig) {
+	      d_orig->SetLineColor(2);
+	      d_orig->Draw("sames");
+	    }
+	    c1->Update();
+	  }
+	}
+      }
     }
   }
  ENDL:
