@@ -1335,6 +1335,7 @@ MakeChairInstance(itpcDeadFEE,Calibrations/tpc/itpcDeadFEE);
 ClassImp(St_itpcPadGainT0C);
 St_itpcPadGainT0C *St_itpcPadGainT0C::fgInstance = 0;
 rowpadFEEmap_t  St_itpcPadGainT0C::rowpadFEE[] = {
+  //row, padMin, padMax, fee, rdo
     { 1,  1, 26, 54, 1},
     { 1, 27, 52, 55, 1},
     { 2,  1, 27, 54, 1},
@@ -1604,15 +1605,18 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
       for (Int_t j = 0; j < nFEE; j++) {
 	if (fee > 0) {
 	  if (rowpadFEE[j].fee != fee) continue;
+	  if (rowpadFEE[j].row != r  ) continue;
 	  r = rowpadFEE[j].row;
 	  pmin = rowpadFEE[j].padMin;
 	  pmax = rowpadFEE[j].padMax;
-	}
-	for (Int_t pad = pmin; pad <= pmax; pad++) {
-	  if (_debug) {
-	    cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
+	  if (pmin > 0 && pmax >= pmin) {
+	    for (Int_t pad = pmin; pad <= pmax; pad++) {
+	      if (_debug && g->Gain[s-1][r-1][pad-1] > 0) {
+		cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
+	      }
+	      g->Gain[s-1][r-1][pad-1] = 0;
+	    }
 	  }
-	  g->Gain[s-1][r-1][pad-1] = 0;
 	}
       }
     }
@@ -1646,23 +1650,31 @@ St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {
       Int_t RDO    = extra->RDO(i);
       Int_t FEE    = extra->FEE(i);
       Int_t status = extra->status(i);
+#if 0
       LOG_WARN << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
 	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
       if (! status) continue;
       Int_t rowMin = row;
       Int_t rowMax = row;
-      if (row <= 0) {rowMin = 1; rowMax = 72;}
+      if (row <= 0) {rowMin = 1; rowMax = 45;}
       if (padMin > padMax) {
 	// Calculate padMin/Max from FEE or RDO
       }
       for (Int_t r = rowMin; r <= rowMax; r++) {
 	Float_t *gains = St_tpcPadGainT0BC::instance()->Gains(sector, r);
 	for (Int_t p = padMin; p <= padMax; p++) {
-	  LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  if (gains[p-1] > 0) {
+	    LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  }
 	  gains[p-1] = 0;
 	}
       }
+#else
+      LOG_ERROR << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i should be moved to tpcRDOMaks", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+#endif
     }
   }
   return fgInstance;
