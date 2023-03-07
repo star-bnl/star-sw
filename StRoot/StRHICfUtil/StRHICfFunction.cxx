@@ -20,13 +20,8 @@ void StRHICfFunction::initChecker()
 {
   mRunType = 999;
   mGSOBarNum = 0;
-  mGSOBarTableNum = 0;
-  mPlateNum = 0;
-  
-  for(int i=0; i<5; i++){
-    if(i<3){mLeakageNum[i] = 0;}
-    mValueForRecoNum[i] = 0;
-  }
+std::fill(mLeakageNum, mLeakageNum+3, 0);
+std::fill(mValueForRecoNum, mValueForRecoNum+5, 0);
 }
 
 StRHICfFunction::~StRHICfFunction()
