@@ -316,7 +316,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     i++;
     if (! m_Corrections[k].Chair) continue;
     Int_t j = 0;
-    for (auto x : PriorityListL) {
+    for (auto x : PriorityListP) {
       j++;
       if (j <= i) continue;
       if (! m_Corrections[x].Chair) continue;
@@ -491,9 +491,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else if (k == kTpcPadMDC) {
       Int_t nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
       l = 2*(sector-1);
-      if (nrows > 48 && qB) l += 24*qB;
+      if (nrows > 48 && qB) l += 48*qB;
       if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
-      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpadR));
+      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow+24*qB,CdEdx.xpadR));
       goto ENDL;
     } else if (k == kAdcCorrectionMDF) {
       ADC = adcCF;

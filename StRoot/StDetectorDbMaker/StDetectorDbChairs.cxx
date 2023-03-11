@@ -525,6 +525,14 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   assert(x);
   if (! fFunc[k]) {
     fgMDFCorrectionC = (St_MDFCorrectionC *) this;
+    if (_debug) {
+      MDFCorrection_st *corK = fgMDFCorrectionC->Struct(k);
+      cout << Table()->GetName() << " k = " << k << " Idx = " << (Int_t) corK->idx << " Nvar = " << corK->NVariables << " type = " << corK->PolyType;
+      for (Int_t v = 0; v < corK->NVariables; v++) {
+	cout << "\t" << v << " min = " << corK->XMin[v] << " max = " << corK->XMax[v];
+      }
+      cout << endl;
+    }
     if (NVariables(k) <= 0) {
       return 0;
     } else if (NVariables(k) == 1) {

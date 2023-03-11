@@ -357,8 +357,8 @@ Int_t StdEdxY2Maker::Make(){
     if (pTrack && pTrack->bad()) {pTrack = 0;}
     StTrack *track = 0;
     StTrack *tracks[2] = {gTrack, pTrack};
-    Int_t sCharge = 0;
-    if (gTrack->geometry()->charge() < 0) sCharge = 1;
+    Int_t sCharge = 0;                                // positive
+    if (gTrack->geometry()->charge() < 0) sCharge = 1;// negative
     Int_t qB = (sCharge+1)%2;
     if (bField > 0) qB = (qB + 1)%2; // swap for Full Field
 #ifdef __BEST_VERTEX__
@@ -586,6 +586,8 @@ Int_t StdEdxY2Maker::Make(){
 	dx = tpcHit->dX();
 	if ((ForcedX || dX_TrackFit <= 0.0)) {
 	  if (dX_Helix <= 0.0) continue;
+	  if (Debug()) {
+	  }
 	  dx = dX_Helix;
 	  if (ForcedX) tpcHit->setdX(dx);
 	} else {
@@ -1169,8 +1171,8 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
   StPidStatus &PiD = fUsedx2 ? *&PiDs[0] :  *&PiDs[1];
   if (PiD.PiDStatus < 0) return;
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
-  Int_t sCharge = 0;
-  if (gTrack->geometry()->charge() < 0) sCharge = 1;
+  Int_t sCharge = 0;                                 // positive
+  if (gTrack->geometry()->charge() < 0) sCharge = 1; // negative
 #ifdef __BEST_VERTEX__
   EtaVspTC[sCharge]->Fill(TMath::Log10(g3.perp()), g3.pseudoRapidity());
 #endif /* __BEST_VERTEX__ */
