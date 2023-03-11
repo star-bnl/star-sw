@@ -5,7 +5,7 @@
 !! \author Claus Kleinwort, DESY (maintenance and developement)
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2020 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2022 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -335,16 +335,18 @@ SUBROUTINE ndbits(npgrp,ndims,nsparr,ihst)
     !$OMP  SCHEDULE(DYNAMIC,ICHUNK)
     DO i=1,n
         ! restore row statistics
-        irgn(1)=INT(nsparr(1,i+1),mpi)
-        irgn(2)=INT(nsparr(1,i+n+2),mpi)
-        inr(1)=INT(nsparr(2,i+1),mpi)
-        inr(2)=INT(nsparr(2,i+n+2),mpi)
+        ir=i+1
+        DO jp=1,nspc
+            irgn(jp)=INT(nsparr(1,ir),mpi)    ! number of regions per row and precision
+            inr(jp)=INT(nsparr(2,ir),mpi)     ! number of columns per row and precision (groups)
+            ir=ir+n+1
+        END DO
 
         ! analyze precision type bit fields for extended storage ('2nd half' (j>i) too) ?
         IF (iextnd > 0) THEN
 
             noffj=(i-1)*nspc
-            mm=INT(MOD(noffj,bs),mpi)
+            mm=INT(MOD(noffj,INT(bs,mpl)),mpi)
 
             last=0
             lrgn=0
@@ -539,16 +541,13 @@ SUBROUTINE spbits(npgrp,nsparr,nsparc)               ! collect elements
     INTEGER(mpl) :: l
     INTEGER(mpl) :: ll
     INTEGER(mpl) :: l1
-    INTEGER(mpl) :: k8
     INTEGER(mpl) :: n1
     INTEGER(mpl) :: ndiff
     INTEGER(mpl) :: noffi
     INTEGER(mpl) :: noffj
     INTEGER(mpi) :: i
     INTEGER(mpi) :: j
-    INTEGER(mpi) :: j1
     INTEGER(mpi) :: jb
-    INTEGER(mpi) :: jn
     INTEGER(mpi) :: k
     INTEGER(mpi) :: m
     INTEGER(mpi) :: ichunk
@@ -561,7 +560,7 @@ SUBROUTINE spbits(npgrp,nsparr,nsparc)               ! collect elements
     DO jb=0,nspc-1
         ! parallelize row loop
         !$OMP  PARALLEL DO &
-        !$OMP  PRIVATE(I,N1,NOFFI,NOFFJ,L,M,KL,L1,NDIFF,K8,LAST,LL,J1,JN,J,NEXT) &
+        !$OMP  PRIVATE(I,N1,NOFFI,NOFFJ,L,M,KL,L1,NDIFF,LAST,LL,J,NEXT) &
         !$OMP  SCHEDULE(DYNAMIC,ICHUNK)
         DO i=1,n
             n1=i+jb*(n+1)
@@ -606,7 +605,7 @@ SUBROUTINE spbits(npgrp,nsparr,nsparc)               ! collect elements
             ! extended storage ('2nd half' too) ?
             IF (iextnd > 0) THEN
                 noffj=(i-1)*nspc
-                m=INT(MOD(noffj,bs),mpi)+jb
+                m=INT(MOD(noffj,INT(bs,mpl)),mpi)+jb
                 last=0
                 ! remaining columns
                 DO j=i+1, n
@@ -728,13 +727,15 @@ END SUBROUTINE inbmap
 
 !> Get pairs (statistic) from map.
 !!
+!! \param [in]     ngroup  number of parameter groups
 !! \param [in]     npgrp   parameter groups
 !! \param [out]    npair   number of paired parameters
 !!
-SUBROUTINE gpbmap(npgrp,npair)
+SUBROUTINE gpbmap(ngroup,npgrp,npair)
     USE mpbits
     IMPLICIT NONE
 
+    INTEGER(mpi), INTENT(IN) :: ngroup
     INTEGER(mpi), DIMENSION(:,:), INTENT(IN) :: npgrp
     INTEGER(mpi), DIMENSION(:), INTENT(OUT) :: npair
 
@@ -745,10 +746,10 @@ SUBROUTINE gpbmap(npgrp,npair)
     INTEGER(mpi) :: m
     LOGICAL :: btest
 
-    npair(1:n2)=0
+    npair(1:ngroup)=0
     l=0
 
-    DO i=1,n2
+    DO i=1,ngroup
         npair(i)=npair(i)+npgrp(2,i)-1 ! from own group
         noffi=INT(i-1,mpl)*INT(i-2,mpl)/2
         l=noffi/bs+i
@@ -769,3 +770,51 @@ SUBROUTINE gpbmap(npgrp,npair)
 
     RETURN
 END SUBROUTINE gpbmap
+
+!> Get paired (parameter) groups from map.
+!!
+!! \param [in]     ipgrp   parameter group
+!! \param [out]    npair   number of paired parameters
+!! \param [in]     npgrp   paired parameter groups (for ipgrp)
+!!
+SUBROUTINE ggbmap(ipgrp,npair,npgrp)
+    USE mpbits
+    IMPLICIT NONE
+
+    INTEGER(mpi), INTENT(IN) :: ipgrp
+    INTEGER(mpi), INTENT(OUT) :: npair
+    INTEGER(mpi), DIMENSION(:), INTENT(OUT) :: npgrp
+
+    INTEGER(mpl) :: l
+    INTEGER(mpl) :: noffi
+    INTEGER(mpi) :: noffj
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    LOGICAL :: btest
+
+    npair=0
+
+    i=ipgrp
+    noffi=INT(i-1,mpl)*INT(i-2,mpl)/2 ! for J=1    
+    l=noffi/bs+i! row offset
+    !     add I instead of 1 to keep bit maps of different rows in different words (openMP !)
+    DO j=1,ipgrp-1
+        noffj=j-1
+        IF (btest(bitMap(l+noffj/bs),MOD(noffj,bs))) THEN
+            npair=npair+1
+            npgrp(npair)=j
+        END IF 
+    END DO
+ 
+    noffj=ipgrp-1
+    DO i=ipgrp+1,n2
+        noffi=INT(i-1,mpl)*INT(i-2,mpl)/2 ! for J=1    
+        l=noffi/bs+i ! row offset   
+        IF (btest(bitMap(l+noffj/bs),MOD(noffj,bs))) THEN
+            npair=npair+1
+            npgrp(npair)=i
+        END IF 
+    END DO
+
+    RETURN
+END SUBROUTINE ggbmap

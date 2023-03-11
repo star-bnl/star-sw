@@ -9,7 +9,7 @@
 !! \author Claus Kleinwort, DESY (maintenance and developement)
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2015 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2022 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -71,7 +71,7 @@
 !!
 !!     Storage manager for GMP...
 !!
-!!      CALL STMARS                 !! init/reset  storage manager
+!!      CALL STMARS(NDIM)           !! init/reset  storage manager, partially dynamic
 !!
 !!      CALL STMAPR(JFLC,X,Y)       !! store pair (X,Y)
 !!
@@ -89,55 +89,57 @@
 
 !     *************************** Histograms ******************************
 
-SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
+!> Histogram constants.
+MODULE hmpcons
     USE mpdef
+    IMPLICIT NONE
+    
+    INTEGER(mpi), PARAMETER :: numhis=15  !< number of histograms
+    INTEGER(mpi), PARAMETER :: nbin=120   !< number of bins
+    INTEGER(mpi), PARAMETER :: nsampl=120 !< number of samples for auto scaling
+    
+END MODULE hmpcons
+    
+!> Histogram data.
+MODULE hmpdata
+    USE hmpcons
+    IMPLICIT NONE
+
+    INTEGER(mpi) :: lun=7 !< unit for output
+    INTEGER(mpi) :: inhist(nbin,numhis)    !< histogram (bin) data
+    INTEGER(mpi) :: jnhist(5,numhis)      !< histogram statistics
+    INTEGER(mpi) :: khist(numhis)=0       !< histgram type
+    INTEGER(mpi) :: kvers(numhis)         !< histogram version
+    REAL(mps) :: fnhist(nsampl,numhis)    !< initial data for auto scaling
+    REAL(mps) :: xl(6,numhis)             !< histogram binning
+    REAL(mpd) :: dl(2,numhis)             !< histogram moments
+    CHARACTER (LEN=60):: htext(numhis)    !< histogram text
+
+END MODULE hmpdata    
+
+!> book, reset histogram
+SUBROUTINE hmpdef(ih,xa,xb,text)
+    USE hmpdata
 
     IMPLICIT NONE
-    INTEGER(mpi) :: i
-    INTEGER(mpi) :: iha
-    INTEGER(mpi) :: ihb
-    INTEGER(mpi) :: ihc
-    INTEGER(mpi) :: ix
-    INTEGER(mpi) :: j
-    INTEGER(mpi) :: lun
-    INTEGER(mpi) :: lunw
-    INTEGER(mpi) :: nbin
-    INTEGER(mpi) :: nn
-    REAL(mps) :: x
-    REAL(mps) :: xcent
-    REAL(mps) :: xmean
-    REAL(mps) :: xsigm
-    !     book millepede histogram, 120 bins
+
+    !     book millepede histogram, 'nbin' bins
 
     INTEGER(mpi), INTENT(IN)                      :: ih
     REAL(mps), INTENT(IN)                         :: xa
     REAL(mps), INTENT(IN)                         :: xb
     CHARACTER (LEN=*), INTENT(IN)            :: text
-    INTEGER(mpi), PARAMETER :: numhis=15
-    INTEGER(mpi) :: inhist(120,numhis)
-    INTEGER(mpi) ::jnhist(5,numhis)
-    INTEGER(mpi) ::khist(numhis)
-    REAL(mps) :: fnhist(120,numhis)
-    EQUIVALENCE (inhist(1,1),fnhist(1,1))
-    INTEGER(mpi) :: kvers(numhis)
-    REAL(mps) :: xl(6,numhis)
-    REAL(mpd):: dl(2,numhis)
-    CHARACTER (LEN=60):: htext(numhis)
+
     SAVE
-    DATA khist/numhis*0/,lun/7/
     !     ...
     IF(ih <= 0.OR.ih > numhis) RETURN
     !      IF(XA.EQ.XB)                RETURN
-    DO i=1,120
-        inhist(i,ih)=0
-    END DO
-    DO j=1,5
-        jnhist(j,ih)=0
-    END DO
+    inhist(:,ih)=0
+    jnhist(:,ih)=0
     xl(1,ih)=xa
     xl(2,ih)=xb
     xl(3,ih)=0.0
-    IF(xa /= xb) xl(3,ih)=120.0/(xb-xa)
+    IF(xa /= xb) xl(3,ih)=REAL(nbin,mps)/(xb-xa)
     xl(6,ih)=0.5*(xa+xb) ! center
     IF(khist(ih) == 0) THEN
         kvers(ih)=0
@@ -147,17 +149,23 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
     khist(ih)=1    ! flt.pt. (lin)
     htext(ih)=text
     dl(1,ih)=0.0_mpd
-    dl(2,ih)=0.0_mpd
+    dl(2,ih)=0.0_mpd 
     RETURN
+END SUBROUTINE hmpdef
 
-    ENTRY hmpldf(ih,text)                   ! book, reset log histogram
+!> book, reset log histogram
+SUBROUTINE hmpldf(ih,text)
+    USE hmpdata
+
+    IMPLICIT NONE
+    
+    INTEGER(mpi), INTENT(IN)                      :: ih
+    CHARACTER (LEN=*), INTENT(IN)            :: text
+
+    SAVE
     IF(ih <= 0.OR.ih > numhis) RETURN
-    DO i=1,120
-        inhist(i,ih)=0
-    END DO
-    DO j=1,5
-        jnhist(j,ih)=0
-    END DO
+    inhist(:,ih)=0
+    jnhist(:,ih)=0
     IF(khist(ih) == 0) THEN
         kvers(ih)=0
     ELSE
@@ -166,17 +174,28 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
     khist(ih)=2    ! integer log
     htext(ih)=text
     xl(1,ih)=0.0
-    xl(2,ih)=6.0
+    xl(2,ih)=6.0    
     RETURN
+END SUBROUTINE hmpldf
 
-    ENTRY hmpent(ih,x)                      ! entry flt.pt.
+!> entry flt.pt.
+SUBROUTINE hmpent(ih,x)
+    USE hmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    
+    INTEGER(mpi), INTENT(IN)                      :: ih
+    REAL(mps), INTENT(IN)                         :: x
+        
     IF(ih <= 0.OR.ih > numhis) RETURN
     IF(khist(ih) /= 1)          RETURN
     IF(jnhist(4,ih) >= 2147483647) RETURN
     jnhist(4,ih)=jnhist(4,ih)+1      ! count
-    IF(jnhist(4,ih) <= 120) THEN
+    IF(jnhist(4,ih) <= nsampl) THEN
         fnhist(jnhist(4,ih),ih)=x     ! store value
-        IF(jnhist(4,ih) == 120) THEN
+        IF(jnhist(4,ih) == nsampl) THEN
             CALL hmpmak(inhist(1,ih),fnhist(1,ih),jnhist(1,ih), xl(1,ih),dl(1,ih))
         END IF
         RETURN
@@ -188,7 +207,7 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
     i=INT(1.0+xl(3,ih)*(x-xl(1,ih)),mpi)   ! X - Xmin
     j=2
     IF(i <  1) j=1
-    IF(i > 120) j=3
+    IF(i > nbin) j=3
     jnhist(j,ih)=jnhist(j,ih)+1
     xl(4,ih)=MIN(xl(4,ih),x)
     xl(5,ih)=MAX(xl(5,ih),x)
@@ -197,8 +216,19 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
     dl(1,ih)=dl(1,ih)+ x-xl(6,ih)
     dl(2,ih)=dl(2,ih)+(x-xl(6,ih))**2
     RETURN
+END SUBROUTINE hmpent
 
-    ENTRY hmplnt(ih,ix)                     ! entry integer
+!> entry integer
+SUBROUTINE hmplnt(ih,ix)
+    USE hmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+
+    INTEGER(mpi), INTENT(IN)                      :: ih
+    INTEGER(mpi), INTENT(IN)                      :: ix
+    
     IF(ih <= 0.OR.ih > numhis) RETURN
     IF(khist(ih) /= 2)          RETURN
     IF(jnhist(1,ih) >= 2147483647) RETURN
@@ -212,13 +242,29 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
         i=INT(1.0+20.0*LOG10(REAL(ix,mps)),mpi)
         j=2
         IF(i <  1) j=1
-        IF(i > 120) j=3
+        IF(i > nbin) j=3
         IF(j == 2)  inhist(i,ih)=inhist(i,ih)+1
         jnhist(j,ih)=jnhist(j,ih)+1
     END IF
     RETURN
+END SUBROUTINE hmplnt
 
-    ENTRY hmprnt(ih)                        ! print, content vert
+!> print, content vert
+SUBROUTINE hmprnt(ih)
+    USE hmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: iha
+    INTEGER(mpi) :: ihb
+    INTEGER(mpi) :: ihc
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: nn
+    REAL(mps) :: xcent
+    REAL(mps) :: xmean
+    REAL(mps) :: xsigm
+        
+    INTEGER(mpi), INTENT(IN)                      :: ih
+    
     IF(ih == 0) THEN
         iha=1
         ihb=numhis
@@ -249,10 +295,10 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
                         (jnhist(j,ihc),j=1,3)
                 END IF
                 IF(khist(ihc) == 3) THEN
-                    CALL pfvert(120,fnhist(1,ihc))
+                    CALL pfvert(nbin,fnhist(1,ihc))
                 END IF
                 IF(jnhist(2,ihc) /= 0) THEN        ! integer content
-                    CALL pivert(120,inhist(1,ihc))
+                    CALL pivert(nbin,inhist(1,ihc))
                     IF(khist(ihc) == 1) THEN
                         CALL psvert(xl(1,ihc),xl(2,ihc))
                     ELSE IF(khist(ihc) == 2) THEN
@@ -276,12 +322,36 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
         END IF
     END DO
     RETURN
+END SUBROUTINE hmprnt
 
-    ENTRY hmplun(lunw)                      ! unit for output
+!> unit for output
+SUBROUTINE hmplun(lunw)
+    USE hmpdata
+
+    IMPLICIT NONE
+    
+    INTEGER(mpi), INTENT(IN)                      :: lunw
+    
     lun=lunw
     RETURN
+END SUBROUTINE hmplun
 
-    ENTRY hmpwrt(ih)                        ! write histogram text file
+!> write histogram text file
+SUBROUTINE hmpwrt(ih)
+    USE hmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: iha
+    INTEGER(mpi) :: ihb
+    INTEGER(mpi) :: ihc
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    REAL(mps) :: xcent
+    REAL(mps) :: xmean
+    REAL(mps) :: xsigm
+        
+    INTEGER(mpi), INTENT(IN)                      :: ih
+
     IF(lun <= 0) RETURN
     IF(ih == 0) THEN
         iha=1
@@ -298,7 +368,6 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
                 CALL hmpmak(inhist(1,ihc),fnhist(1,ihc),jnhist(1,ihc),  &
                     xl(1,ihc),dl(1,ihc))
             END IF
-            nbin=120
             WRITE(lun,204) ' '
             WRITE(lun,201) ihc,kvers(ihc),khist(ihc)
             WRITE(lun,204) htext(ihc)
@@ -336,6 +405,7 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
             WRITE(lun,204) 'end of histogram'
         END IF
     END DO
+    RETURN
 
 201 FORMAT('Histogram ',i4,10X,'version ',i4,10X,'type',i2)
 202 FORMAT(10X,' bins, limits ',i4,2G15.5)
@@ -345,10 +415,11 @@ SUBROUTINE hmpdef(ih,xa,xb,text)           ! book, reset histogram
 206 FORMAT('meansigma',2E15.7)
 
 219 FORMAT(4E15.7)
-END SUBROUTINE hmpdef
+END SUBROUTINE hmpwrt
 
-SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl) ! hist scale from data
-    USE mpdef
+!> hist scale from data
+SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl)
+    USE hmpcons
 
     IMPLICIT NONE
     INTEGER(mpi) :: i
@@ -359,14 +430,12 @@ SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl) ! hist scale from data
     REAL(mps) :: xa
     REAL(mps) :: xb
 
-    INTEGER(mpi), INTENT(OUT)                     :: inhist(120)
-    REAL(mps), INTENT(IN)                         :: fnhist(120)
+    INTEGER(mpi), INTENT(OUT)                     :: inhist(nbin)
+    REAL(mps), INTENT(IN)                         :: fnhist(nsampl)
     INTEGER(mpi), INTENT(IN OUT)                  :: jnhist(5)
     REAL(mps), INTENT(IN OUT)                     :: xl(6)
     REAL(mpd), INTENT(OUT)            :: dl(2)
-    REAL(mps) :: cphist(120)
-
-
+    REAL(mps) :: cphist(nsampl)
 
     SAVE
     !     ...
@@ -374,17 +443,14 @@ SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl) ! hist scale from data
     !      WRITE(*,*) 'HMPMAK: NN,JNHIST(5)',NN,JNHIST(5)
     IF(nn == 0.OR.jnhist(5) /= 0) RETURN
     jnhist(5)=1
-    DO i=1,nn
-        !       WRITE(*,*) 'copy ',I,FNHIST(I)
-        cphist(i)=fnhist(i)
-    END DO
+    cphist(:)=fnhist(:)
     CALL heapf(cphist,nn)
     IF(xl(3) == 0.0) THEN
         CALL bintab(cphist,nn,xa,xb)
         xl(1)=xa
         xl(2)=xb
         xl(3)=0.0
-        IF(xa /= xb) xl(3)=120.0/(xb-xa)
+        IF(xa /= xb) xl(3)=REAL(nbin,mps)/(xb-xa)
         xl(6)=0.5*(xa+xb) ! center
     END IF
     xl(4)=cphist( 1)
@@ -399,7 +465,7 @@ SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl) ! hist scale from data
         !       WRITE(*,*) 'K,I,X ',K,I,X
         j=2
         IF(i <  1) j=1
-        IF(i > 120) j=3
+        IF(i > nbin) j=3
         jnhist(j)=jnhist(j)+1
         IF(j == 2) THEN
             inhist(i)=inhist(i)+1
@@ -409,11 +475,9 @@ SUBROUTINE hmpmak(inhist,fnhist,jnhist,xl,dl) ! hist scale from data
     END DO
 END SUBROUTINE hmpmak
 
-
-
-
-SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
-    USE mpdef
+!> hist scale from data
+SUBROUTINE bintab(tab,n,xa,xb)
+    USE hmpcons
 
     IMPLICIT NONE
     REAL(mps) :: dd
@@ -426,14 +490,15 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
     INTEGER(mpi) :: m2
     INTEGER(mpi) :: n1
     INTEGER(mpi) :: n2
+    INTEGER(mpi) :: nch
     REAL(mps) :: rat
     REAL(mps) :: x1
     REAL(mps) :: x2
     REAL(mps) :: xx
     !     Bin limits XA and XB from TAB(N)
 
-    REAL(mps), INTENT(IN)                         :: tab(n)
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mps), INTENT(IN)                         :: tab(n)
     REAL(mps), INTENT(OUT)                        :: xa
     REAL(mps), INTENT(OUT)                        :: xb
 
@@ -441,11 +506,11 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
     DATA bin/1.0,1.5,2.0,3.0,4.0,5.0,8.0,10.0,15.0,20.0/
     SAVE
     !     ...
-
+    
     CALL heapf(tab,n) ! reduced statistic
     !      WRITE(*,*) ' '
-    !      WRITE(*,*) 'Sorted ',(TAB(I),I=1,N)
-    IF(n < 100) THEN
+    !      WRITE(*,*) 'Sorted ',N,(TAB(I),I=1,N)
+    IF(n < nsampl) THEN
         x1=tab(1)
         x2=tab(n)
     !         WRITE(*,*) 'reduced statistic X1 X2 ',X1,X2
@@ -480,7 +545,7 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
         x2=x2+1.0
     END IF
     dx=x2-x1
-    !      WRITE(*,*) 'X1,X2,DX ',X1,X2,DX
+    !      WRITE(*,*) 'X1,X2,DX ',N,X1,X2,DX
     rat=0.0
     ii=1
     DO j=1,11
@@ -489,7 +554,7 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
         iexp=INT(101.0+LOG10(dx)-LOG10(6.0*bin(i)),mpi)
         iexp=iexp-100
         dd=bin(i)*10.0**iexp
-  
+        
         n1=INT(ABS(x1)/dd,mpi)
         IF(x1 < 0.0) n1=-n1
         IF(REAL(n1,mps)*dd > x1) n1=n1-1
@@ -498,11 +563,22 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
         n2=INT(ABS(x2)/dd,mpi)
         IF(x2 < 0.0) n2=-n2
         IF(REAL(n2,mps)*dd < x2) n2=n2+1
-        !       WRITE(*,*) 'Bin ',I,N2,N2*DD,X2
+        !       WRITE(*,*) 'Bin ',I,N1,N2,N2*DD,X2
 10      IF(n2-n1 < 6) THEN
-            IF(n1 /= 0) n1=n1-1
-            IF(n2-n1 < 6.AND.n2 /= 0) n2=n2+1
-            GO TO 10
+            nch=0 ! number of changes
+            IF(n1 /= 0) THEN
+                n1=n1-1
+                nch=nch+1
+            END IF    
+            IF(n2-n1 < 6.AND.n2 /= 0) THEN
+                n2=n2+1
+                nch=nch+1
+            ENDIF    
+            IF (nch > 0) GO TO 10 
+            ! avoid infinite loop
+            print *, ' BINTAB: break infinite loop ', n1, n2, n, x1, x2, dd
+            n1=-3
+            n2=3
         END IF
         !       WRITE(*,*) 'corrected N1 N2 ',N1,N2
         xa=SIGN(REAL(n1,mps)*dd,x1)
@@ -516,7 +592,8 @@ SUBROUTINE bintab(tab,n,xa,xb)             ! hist scale from data
 !      WRITE(*,*) J,' resulting limits XA XB ',XA,XB
 END SUBROUTINE bintab
 
-SUBROUTINE kprint(lun,list,n)              ! print integer array
+!> print integer array
+SUBROUTINE kprint(lun,list,n)
     USE mpdef
 
     IMPLICIT NONE
@@ -530,8 +607,8 @@ SUBROUTINE kprint(lun,list,n)              ! print integer array
     !     print integer array LIST(N)
 
     INTEGER(mpi), INTENT(IN OUT)                  :: lun
-    INTEGER(mpi), INTENT(IN)                      :: list(n)
     INTEGER(mpi), INTENT(IN)                      :: n
+    INTEGER(mpi), INTENT(IN)                      :: list(n)
     INTEGER(mpi) :: li(7)
     DATA li/2,3,4,6,8,9,12/ ! number of characters
     SAVE
@@ -578,69 +655,78 @@ END SUBROUTINE kprint
 
 !     ***************************** XY data ****************************
 
-SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
+!> XY constants.
+MODULE gmpcons
     USE mpdef
-
     IMPLICIT NONE
-    REAL(mps) :: dx
-    REAL(mps) :: dy
-    INTEGER(mpi) :: i
-    INTEGER(mpi) :: iga
-    INTEGER(mpi) :: igb
-    INTEGER(mpi) :: igc
-    INTEGER(mpi) :: j
-    INTEGER(mpi) :: lun
-    INTEGER(mpi) :: lunw
-    INTEGER(mpi) :: n
-    INTEGER(mpi) :: na
-    REAL(mps) :: wght
-    REAL(mps) :: x
-    REAL(mps) :: y
-    REAL(mps) :: y1
+    
+    INTEGER(mpi), PARAMETER :: numgxy=10  !< number of XY data plots
+    
+END MODULE gmpcons
+
+!> Histogram data.
+MODULE gmpdata
+    USE gmpcons
+    IMPLICIT NONE
+    
+    INTEGER(mpi) :: lun=7           !< unit for output
+    INTEGER(mpi) :: nlimit=500      !< max. number of XY pairs
+    INTEGER(mpi) :: nstr(numgxy)=0  !< initialization flag 
+    INTEGER(mpi) :: igtp(numgxy)    !< type of XY data
     !     ITYP = 1  X,Y     as dots
     !          = 2  X,Y     as line
     !          = 3  X,Y     as line and dots
     !          = 4  X,Y, DX,DY symbols
+    !          = 5  mean, sigma of Y vs X (GMPMS)
+    INTEGER(mpi) :: lvers(numgxy)   !< version
+    INTEGER(mpi) :: nst(3,numgxy)   !< counters for GMPMS
 
-    INTEGER(mpi), INTENT(IN)                      :: ig
-    INTEGER(mpi), INTENT(IN)                      :: ityp
-    CHARACTER (LEN=*), INTENT(IN)            :: text
-    INTEGER(mpi), PARAMETER :: narr=1000
-    REAL(mps) :: array(2,narr)
-    REAL(mps) ::array4(4,narr/2)
-    REAL(mps) ::array1(narr+narr)
-    REAL(mps) ::four(4)
-    EQUIVALENCE (array(1,1),array4(1,1),array1(1))
-    INTEGER(mpi), PARAMETER :: numgxy=10
-    INTEGER(mpi), PARAMETER :: nlimit=500
-    INTEGER(mpi) :: nstr(numgxy)
-    INTEGER(mpi) ::igtp(numgxy)
-    INTEGER(mpi) ::lvers(numgxy)
-    INTEGER(mpi) ::nst(3,numgxy)
-    REAL(mps) :: xyplws(10,numgxy)
-    INTEGER(mpi) :: jflc(5,numgxy)
-    INTEGER(mpi) ::kflc(5,numgxy)
+    INTEGER(mpi) :: jflc(5,numgxy)  !< meta data
+    INTEGER(mpi) :: kflc(5,numgxy)  !< meta data 
     !     JFLC(1,.) = first used index
     !     JFLC(2,.) = last used index
     !     JFLC(3,.) = counter of used places
     !     JFLC(4,.) = counter of ignored
     !     JFLC(5,.) = limit for JFLC(3)
-    CHARACTER (LEN=60):: gtext(numgxy)
+    REAL(mps) :: xyplws(10,numgxy)  !< additional data for GMPMS
+    REAL(mps) :: y1(numgxy)         !< first Y (as X) for GMPMS 
+    REAL(mps), DIMENSION(:,:), ALLOCATABLE :: array  !< X,Y
+    REAL(mps), DIMENSION(:,:), ALLOCATABLE :: array4 !< X,Y,DX,DY
+    REAL(mps), DIMENSION(:), ALLOCATABLE :: array1   !< Y(X)
+    CHARACTER (LEN=60):: gtext(numgxy)               !< text 
+    
+END MODULE gmpdata
+
+!> book, reset XY storage
+SUBROUTINE gmpdef(ig,ityp,text)
+    USE gmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+
+    INTEGER(mpi), INTENT(IN)                      :: ig
+    INTEGER(mpi), INTENT(IN)                      :: ityp
+    CHARACTER (LEN=*), INTENT(IN)            :: text
 
     LOGICAL:: start
     SAVE
-    DATA start/.TRUE./,lun/7/
-    DATA nstr/numgxy*0/   ! by GF
+    DATA start/.TRUE./
     !     ...
     IF(start) THEN
         start=.FALSE.
-        CALL stmars    ! initialize storage
+        ! dummy call to increase nlimit ?
+        if(ig == 0) nlimit = max(nlimit, ityp)
+        CALL stmars(nlimit*numgxy)    ! initialize storage
         DO i=1,numgxy
             DO j=1,5
                 jflc(j,i)=0
                 kflc(j,i)=0
             END DO
         END DO
+        ALLOCATE (array(2,nlimit))
+        ALLOCATE (array4(4,(nlimit+1)/2))
+        ALLOCATE (array1(nlimit*2))
     END IF
 
     IF(ig < 1.OR.ig > numgxy) RETURN
@@ -665,7 +751,7 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
             kflc(j,ig)=0
         END DO
         jflc(5,ig)=128 ! maximum of 128 values
-        kflc(5,ig)=narr
+        kflc(5,ig)=nlimit
         nst(1,ig)=0
         nst(2,ig)=0
         nst(3,ig)=1
@@ -674,14 +760,36 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
         END DO
     END IF
     RETURN
+END SUBROUTINE gmpdef
 
-    ENTRY gmpxy(ig,x,y)                     ! add (X,Y) pair
+!> add (X,Y) pair
+SUBROUTINE gmpxy(ig,x,y)
+    USE gmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi), INTENT(IN)                      :: ig
+    REAL(mps), INTENT(IN)                         :: x
+    REAL(mps), INTENT(IN)                         :: y
+    
     IF(ig  < 1.OR.ig > numgxy) RETURN        ! check argument IG
     IF(igtp(ig) < 1.OR.igtp(ig) > 3) RETURN   ! check type
     CALL stmapr(jflc(1,ig),x,y)
     RETURN
+END SUBROUTINE gmpxy
 
-    ENTRY gmpxyd(ig,x,y,dx,dy)              ! add (X,Y,DX,DY)
+!> add (X,Y,DX,DY)
+SUBROUTINE gmpxyd(ig,x,y,dx,dy)
+    USE gmpdata
+
+    IMPLICIT NONE
+    REAL(mps) :: four(4)            !< X,Y,DX,DY
+
+    INTEGER(mpi), INTENT(IN)                      :: ig
+    REAL(mps), INTENT(IN)                         :: x
+    REAL(mps), INTENT(IN)                         :: y
+    REAL(mps), INTENT(IN)                         :: dx
+    REAL(mps), INTENT(IN)                         :: dy
+    
     IF(ig  < 1.OR.ig > numgxy) RETURN        ! check argument IG
     IF(igtp(ig) /= 4) RETURN
     four(1)=x
@@ -690,8 +798,20 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
     four(4)=dy
     CALL stmadp(jflc(1,ig),four)
     RETURN
+END SUBROUTINE gmpxyd
 
-    ENTRY gmpms(ig,x,y)                     ! mean sigma(X) from Y
+!> mean sigma(X) from Y
+SUBROUTINE gmpms(ig,x,y)
+    USE gmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: n
+
+    INTEGER(mpi), INTENT(IN)                      :: ig
+    REAL(mps), INTENT(IN)                         :: x
+    REAL(mps), INTENT(IN)                         :: y
+    
     !     mean sigma from Y, as a function of X
     !      WRITE(*,*) 'GMPMS ',IG,X,Y
 
@@ -700,17 +820,16 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
 
     xyplws(10,ig)=x  ! last X  coordinate
     IF(nst(1,ig) == 0) THEN
-        y1=y
+        y1(ig)=y
         nst(1,ig)=1
         IF(kflc(3,ig) == 0) xyplws(9,ig)=x        ! start coordinate
     ELSE
         nst(1,ig)=0
-        CALL stmapr(kflc(1,ig),y1,y) ! store pair
+        CALL stmapr(kflc(1,ig),y1(ig),y) ! store pair
         IF(kflc(3,ig) >= kflc(5,ig)) THEN
-            CALL stmacp(kflc(1,ig),array,n) ! get data
-            CALL stmarm(kflc(1,ig))         ! remove data
-            n=n+n
-            CALL rmesig(array,n,xyplws(2,ig),xyplws(4,ig))
+            CALL stmacp1(kflc(1,ig),array1,n) ! get data
+            IF(kflc(1,ig) /= 0) CALL stmarm(kflc(1,ig))         ! remove data
+            CALL rmesig(array1,n,xyplws(2,ig),xyplws(4,ig))
             nst(2,ig)=nst(2,ig)+1
             IF(nst(2,ig) == 1) xyplws(7,ig)=xyplws(9,ig)
             xyplws(8,ig)=x                   ! end coordinate
@@ -726,9 +845,8 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
                 nst(2,ig)=0
                 CALL stmadp(jflc(1,ig),xyplws(1,ig))
                 IF(jflc(3,ig) >= jflc(5,ig)) THEN
-                    CALL stmacp(jflc(1,ig),array4,n)   ! get data
-                    n=n/2
-                    CALL stmarm(jflc(1,ig))            ! remove data
+                    CALL stmacp4(jflc(1,ig),array4,n)   ! get data
+                    IF(jflc(1,ig) /= 0) CALL stmarm(jflc(1,ig))            ! remove data
                     DO i=1,n,2                   ! average
                         xyplws(7,ig)=array4(1,i  )-array4(3,  i)
                         xyplws(8,ig)=array4(1,i+1)+array4(3,i+1)
@@ -744,8 +862,23 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
         END IF
     END IF
     RETURN
+END SUBROUTINE gmpms
 
-    ENTRY gmprnt(ig)                        ! print XY data
+!> print XY data
+SUBROUTINE gmprnt(ig)
+    USE gmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: iga
+    INTEGER(mpi) :: igb
+    INTEGER(mpi) :: igc
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: n
+    INTEGER(mpi) :: na
+    REAL(mps) :: wght
+    
+    INTEGER(mpi), INTENT(IN)                      :: ig
+    
     IF(ig == 0) THEN
         iga=1
         igb=numgxy
@@ -783,8 +916,7 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
                     jflc(3,igc),', ',jflc(4,igc)
             END IF
     
-            CALL stmacp(jflc(1,igc),array,na) ! get all data
-            na=na/2
+            CALL stmacp4(jflc(1,igc),array4,na) ! get all data
     
             DO n=1,na
                 WRITE(*,102) n,(array4(j,n),j=1,4)
@@ -792,12 +924,11 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
     
         ELSE IF(igtp(igc) == 5) THEN
     
-            CALL stmacp(kflc(1,igc),array,n) ! get data
-            CALL stmarm(kflc(1,igc))         ! remove data
-            n=n+n
+            CALL stmacp1(kflc(1,igc),array1,n) ! get data
+            IF(kflc(1,igc) /= 0) CALL stmarm(kflc(1,igc))         ! remove data
             IF(nst(1,igc) == 1) THEN
                 n=n+1
-                array1(n)=y1
+                array1(n)=y1(igc)
                 nst(1,igc)=0 ! reset
             END IF
             IF(n /= 0) THEN
@@ -823,20 +954,49 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
                     jflc(3,igc),', ',jflc(4,igc)
             END IF
     
-            CALL stmacp(jflc(1,igc),array,na) ! get all data
-            na=na/2
+            CALL stmacp4(jflc(1,igc),array4,na) ! get all data
             DO n=1,na
                 WRITE(*,102) n,(array4(j,n),j=1,4)
             END DO
         END IF
     END DO
     RETURN
+102 FORMAT(i12,4G15.7)
+    ! 103  FORMAT('       Index    ___X___       ___Y___     '/
+    !     +       '       ----- -------------- --------------')
+    ! 104  FORMAT('       Index    ___X___       ___Y___     ',
+    !     +                   '    ___DX__       ___DY__     '/
+    !     +       '       ----- -------------- --------------',
+    !     +                   ' -------------- --------------')
+END SUBROUTINE gmprnt
 
-    ENTRY gmplun(lunw)                      ! unit for output
+!> unit for output
+SUBROUTINE gmplun(lunw)
+    USE gmpdata
+
+    IMPLICIT NONE
+
+    INTEGER(mpi), INTENT(IN)                      :: lunw
+
     lun=lunw
     RETURN
+END SUBROUTINE gmplun
 
-    ENTRY gmpwrt(ig)                        ! write XY text file
+!> write XY text file
+SUBROUTINE gmpwrt(ig)
+    USE gmpdata
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: iga
+    INTEGER(mpi) :: igb
+    INTEGER(mpi) :: igc
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: n
+    INTEGER(mpi) :: na
+    REAL(mps) :: wght
+    
+    INTEGER(mpi), INTENT(IN)                      :: ig
+
     IF(lun <= 0) RETURN
     IF(ig == 0) THEN
         iga=1
@@ -849,12 +1009,11 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
     DO igc=iga,igb
         IF(igtp(igc) == 5) THEN
     
-            CALL stmacp(kflc(1,igc),array,n) ! get data
-            CALL stmarm(kflc(1,igc))         ! remove data
-            n=n+n
+            CALL stmacp1(kflc(1,igc),array1,n) ! get data
+            IF(kflc(1,igc) /= 0) CALL stmarm(kflc(1,igc))         ! remove data
             IF(nst(1,igc) == 1) THEN
                 n=n+1
-                array1(n)=y1
+                array1(n)=y1(igc)
                 nst(1,igc)=0 ! reset
             END IF
             IF(n /= 0) THEN
@@ -877,15 +1036,15 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
             WRITE(lun,201) igc,lvers(igc),igtp(igc)
             WRITE(lun,204) gtext(igc)
             WRITE(lun,203) jflc(3,igc)+jflc(4,igc)
-            CALL stmacp(jflc(1,igc),array,na) ! get all data
             IF(igtp(igc) >= 1.AND.igtp(igc) <= 3) THEN
+                CALL stmacp(jflc(1,igc),array,na) ! get all data
                 WRITE(lun,204) 'x-y'
                 DO n=1,na
                     WRITE(lun,205) array(1,n),array(2,n)
                 END DO
             ELSE IF(igtp(igc) == 4.OR.igtp(igc) == 5) THEN
+                CALL stmacp4(jflc(1,igc),array4,na) ! get all data
                 WRITE(lun,204) 'x-y-dx-dy'
-                na=na/2
                 DO n=1,na
                     WRITE(lun,205) (array4(j,n),j=1,4)
                 END DO
@@ -893,49 +1052,47 @@ SUBROUTINE gmpdef(ig,ityp,text)            ! book, reset XY storage
             WRITE(lun,204) 'end of xy-data'
         END IF
     END DO
-102 FORMAT(i12,4G15.7)
-    ! 103  FORMAT('       Index    ___X___       ___Y___     '/
-    !     +       '       ----- -------------- --------------')
-    ! 104  FORMAT('       Index    ___X___       ___Y___     ',
-    !     +                   '    ___DX__       ___DY__     '/
-    !     +       '       ----- -------------- --------------',
-    !     +                   ' -------------- --------------')
+    RETURN
 201 FORMAT('XY-Data ',i4,10X,'version ',i4,10X,'type',i2)
 203 FORMAT(10X,'stored  not-stored ',2I10)
 204 FORMAT(a)
 205 FORMAT(3X,4G15.7)
-END SUBROUTINE gmpdef
+END SUBROUTINE gmpwrt
 
-
-SUBROUTINE stmars                          ! init/reset  storage
+!> storage manager data.
+MODULE stmamod
     USE mpdef
+    IMPLICIT NONE
+    
+    REAL(mps), DIMENSION(:,:), ALLOCATABLE :: tk    ! pair storage for data pairs
+    INTEGER(mpi), DIMENSION(:), ALLOCATABLE :: next    ! pointer
+    INTEGER(mpi) :: iflc1     ! first and last index of free pairs
+    INTEGER(mpi) :: iflc2     ! first and last index of free pairs
+        
+END MODULE stmamod
+
+!> init/reset  storage
+SUBROUTINE stmars(ndim)
+    USE stmamod
 
     IMPLICIT NONE
     INTEGER(mpi) :: i
-    INTEGER(mpi) :: ifre
-    INTEGER(mpi) :: ifrea
-    INTEGER(mpi) :: ifreb
-    INTEGER(mpi) :: ind
-    INTEGER(mpi) :: j
-    INTEGER(mpi) :: n
-    REAL(mps) :: x
-    REAL(mps) :: y
-    INTEGER(mpi), PARAMETER :: ndim=5000   ! storage dimension, should be NUMGXY*NLIMIT
-    REAL(mps) :: tk(2,ndim)    ! pair storage for data pairs
-    INTEGER(mpi) :: next(ndim)    ! pointer
-    INTEGER(mpi) :: iflc1     ! first and last index of free pairs
-    INTEGER(mpi) ::iflc2     ! first and last index of free pairs
+
+    INTEGER(mpi), INTENT(IN)                      :: ndim
+
     SAVE
 
-    REAL(mps) :: four(4) ! double_pair, copy array
-    REAL(mps) ::array(2,*) ! double_pair, copy array
-    INTEGER(mpi) :: jflc(5)         ! user array
+    !INTEGER(mpi) :: jflc(5)         ! user array
     !     JFLC(1) = first used index
     !     JFLC(2) = last used index
     !     JFLC(3) = counter of used places
     !     JFLC(4) = counter of ignored
     !     JFLC(5) = limit for JFLC(3)
     !     ...
+    !print *, ' stmars ndim ', ndim
+    ALLOCATE (tk(2,ndim))
+    ALLOCATE (next(ndim))
+    
     DO i=1,ndim
         next(i)=i+1   ! pointer to next free location
         tk(1,i)=0.0   ! reset
@@ -945,8 +1102,19 @@ SUBROUTINE stmars                          ! init/reset  storage
     iflc1=1        ! index first free pair
     iflc2=ndim     ! index last free pair
     RETURN
+END SUBROUTINE stmars                          ! init/
 
-    ENTRY stmapr(jflc,x,y)                  ! store pair (X,Y)
+!> store pair (X,Y)
+SUBROUTINE stmapr(jflc,x,y)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: ifre
+
+    INTEGER(mpi), INTENT(INOUT)                   :: jflc(5)
+    REAL(mps), INTENT(IN)                         :: x
+    REAL(mps), INTENT(IN)                         :: y
+        
     ifre=iflc1                   ! index of free place
     IF(ifre == 0.OR.jflc(3) >= jflc(5)) THEN ! overflow
         jflc(4)=jflc(4)+1
@@ -964,8 +1132,19 @@ SUBROUTINE stmars                          ! init/reset  storage
         tk(2,ifre)=y
     END IF
     RETURN
+END SUBROUTINE stmapr
 
-    ENTRY stmadp(jflc,four)                 ! store double pair
+!> store double pair
+SUBROUTINE stmadp(jflc,four)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: ifrea
+    INTEGER(mpi) :: ifreb
+
+    INTEGER(mpi), INTENT(INOUT)                   :: jflc(5)
+    REAL(mps), INTENT(IN)                         :: four(4)
+    
     ifrea=iflc1                  ! index of 1. free place
     IF(ifrea == 0) THEN ! overflow
         jflc(4)=jflc(4)+1
@@ -990,8 +1169,19 @@ SUBROUTINE stmars                          ! init/reset  storage
         END IF
     END IF
     RETURN
+END SUBROUTINE stmadp
 
-    ENTRY stmacp(jflc,array,n)              ! copy (cp) all pairs to array
+!> copy (cp) all pairs to array
+SUBROUTINE stmacp(jflc,array,n)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: ind
+
+    INTEGER(mpi), INTENT(IN)                      :: jflc(5)
+    INTEGER(mpi), INTENT(OUT)                     :: n
+    REAL(mps), INTENT(OUT)                        :: array(2,*)
+    
     n=0
     ind=jflc(1)
 10  IF(ind == 0) RETURN
@@ -1000,16 +1190,74 @@ SUBROUTINE stmars                          ! init/reset  storage
     array(2,n)=tk(2,ind)
     ind=next(ind)
     GO TO 10
+END SUBROUTINE stmacp
 
-    ENTRY stmarm(jflc)                      ! remove (rm) stored paiirs
+!> copy (cp) all pairs to array4
+SUBROUTINE stmacp4(jflc,array,n)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: ind1
+    INTEGER(mpi) :: ind2
+
+    INTEGER(mpi), INTENT(IN)                      :: jflc(5)
+    INTEGER(mpi), INTENT(OUT)                     :: n
+    REAL(mps), INTENT(OUT)                        :: array(4,*)
+    
+    n=0
+    ind1=jflc(1)
+10  IF(ind1 == 0) RETURN
+    ind2=next(ind1) ! 2nd pair
+    IF(ind2 == 0) RETURN
+    n=n+1
+    array(1,n)=tk(1,ind1)
+    array(2,n)=tk(2,ind1)
+    array(3,n)=tk(1,ind2)
+    array(4,n)=tk(2,ind2)
+    ind1=next(ind2)
+    GO TO 10
+END SUBROUTINE stmacp4
+
+!> copy (cp) all pairs to array1
+SUBROUTINE stmacp1(jflc,array,n)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: ind
+
+    INTEGER(mpi), INTENT(IN)                      :: jflc(5)
+    INTEGER(mpi), INTENT(OUT)                     :: n
+    REAL(mps), INTENT(OUT)                        :: array(*)
+    
+    n=0
+    ind=jflc(1)
+10  IF(ind == 0) RETURN
+    n=n+1
+    array(n)=tk(1,ind)
+    n=n+1
+    array(n)=tk(2,ind)
+    ind=next(ind)
+    GO TO 10
+END SUBROUTINE stmacp1
+
+!> remove (rm) stored pairs
+SUBROUTINE stmarm(jflc)
+    USE stmamod
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: j
+
+    INTEGER(mpi), INTENT(INOUT)                   :: jflc(5)
+    
     next(iflc2)=jflc(1)          ! connect to free space
     iflc2=jflc(2)                ! new last free index
     DO j=1,4
         jflc(j)=0
     END DO
-END SUBROUTINE stmars                          ! init/
+END SUBROUTINE stmarm                          ! init/
 
-SUBROUTINE rmesig(x,n,xloc,xsca)           ! robust mean and sigma
+!> robust mean and sigma
+SUBROUTINE rmesig(x,n,xloc,xsca)
     USE mpdef
 
     IMPLICIT NONE
@@ -1019,8 +1267,8 @@ SUBROUTINE rmesig(x,n,xloc,xsca)           ! robust mean and sigma
     !     XLOC = median of X_i            (N values in array X(N))
     !     XCSA = median of | X_i - XLOC |, times 1.4826
 
-    REAL(mps), INTENT(IN OUT)                     :: x(n) ! input array, modified
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mps), INTENT(IN OUT)                     :: x(n) ! input array, modified
     REAL(mps), INTENT(OUT)                        :: xloc
     REAL(mps), INTENT(OUT)                        :: xsca
     SAVE

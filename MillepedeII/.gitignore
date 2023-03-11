@@ -1,0 +1,9 @@
+# ignore file from 'make'
+*.o
+*.mod
+
+# ignore pede executable
+/pede
+
+# ignore editor backups
+*.bck

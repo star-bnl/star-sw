@@ -9,7 +9,7 @@
 !! \author Claus Kleinwort, DESY (maintenance and developement)
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2015 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2022 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -199,8 +199,8 @@
 !!    W(.) and V(.) are symmetric n-by-n matrices with (N*N+N)/2 elements
 !!
 !!    SUBROUTINE DCHDEC(W,N, AUX)      ! decomposition, symmetric matrix
-!!         ENTRY DCHSLV(W,N,B, X)      ! solution B -> X
-!!         ENTRY DCHINV(W,N, V)        ! inversion
+!!    SUBROUTINE DCHSLV(W,N,B, X)      ! solution B -> X
+!!    SUBROUTINE DCHINV(W,N, V)        ! inversion
 !!
 !!    SUBROUTINE DCFDEC(W,N)           ! modified composition, symmetric
 !!                                     ! alternative to DCHDEC
@@ -211,9 +211,9 @@
 !!         The symmetric matrix VS has (N*N+N)/2 elements
 !!
 !!    SUBROUTINE DBCDEC(W,MP1,N, AUX)  ! decomposition, bandwidth M
-!!         ENTRY DBCSLV(W,MP1,N,B, X)  ! solution B -> X
-!!         ENTRY DBCIEL(W,MP1,N, V)    ! V = inverse band matrix elements
-!!         ENTRY DBCINV(W,MP1,N, VS)   ! V = inverse symmetric matrix
+!!    SUBROUTINE DBCSLV(W,MP1,N,B, X)  ! solution B -> X
+!!    SUBROUTINE DBCIEL(W,MP1,N, V)    ! V = inverse band matrix elements
+!!    SUBROUTINE DBCINV(W,MP1,N, VS)   ! V = inverse symmetric matrix
 !!
 !!    SUBROUTINE DBFDEC(W,MP1,N)       ! modified decomposition, bandwidth M
 !!                                     ! alternative to DBCDEC
@@ -222,12 +222,12 @@
 !!    SUBROUTINE DBCPRV(W,MP1,N,B)     ! print corr band matrix and pars
 !!
 !!    SUBROUTINE DB2DEC(W,N, AUX)      ! decomposition (M=1)
-!!         ENTRY DB2SLV(W,N,B, X)      ! solution B -> X
-!!         ENTRY DB2IEL(W,N, V)        ! V = inverse band matrix elements
+!!    SUBROUTINE DB2SLV(W,N,B, X)      ! solution B -> X
+!!    SUBROUTINE DB2IEL(W,N, V)        ! V = inverse band matrix elements
 !!
 !!    SUBROUTINE DB3DEC(W,N, AUX)      ! decomposition (M=2)
-!!         ENTRY DB3SLV(W,N,B, X)      ! solution B -> X
-!!         ENTRY DB3IEL(W,N, V)        ! V = inverse band matrix elements
+!!    SUBROUTINE DB3SLV(W,N,B, X)      ! solution B -> X
+!!    SUBROUTINE DB3IEL(W,N, V)        ! V = inverse band matrix elements
 !!\endverbatim
 
 
@@ -235,10 +235,10 @@
 
 !> Decomposition of symmetric matrix.
 !!
-!! ENTRY DCHSLV(W,N,B, X) for solution B -> X \n
-!! ENTRY DCHINV(W,N,V) for inversion
+!! SUBROUTINE DCHSLV(W,N,B, X) for solution B -> X \n
+!! SUBROUTINE DCHINV(W,N,V) for inversion
 !!
-!! \param [in,out] W    symmetirc matrix
+!! \param [in,out] W    symmetric matrix, replaced by decomposition
 !! \param [in]     N    size
 !! \param [in]     AUX  scratch array
 
@@ -252,15 +252,12 @@ SUBROUTINE dchdec(w,n, aux)
     INTEGER(mpi) :: jj
     INTEGER(mpi) :: k
     INTEGER(mpi) :: kk
-    INTEGER(mpi) :: l
-    INTEGER(mpi) :: m
+    REAL(mpd) :: ratio
 
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN OUT)           :: w((n*n+n)/2)
+    REAL(mpd), INTENT(OUT)              :: aux(n)
 
-    REAL(mpd), INTENT(IN OUT)         :: w(*)
-    INTEGER(mpi), INTENT(IN)                      :: n
-    REAL(mpd), INTENT(OUT)            :: aux(n)
-
-    REAL(mpd) :: b(*),x(*),v(*),suma,ratio
     !     ...
     DO i=1,n
         aux(i)=16.0_mpd*w((i*i+i)/2) ! save diagonal elements
@@ -285,11 +282,31 @@ SUBROUTINE dchdec(w,n, aux)
             jj=jj+j
         END DO ! J
     END DO ! I
-
-
     RETURN
+END SUBROUTINE dchdec
 
-    ENTRY dchslv(w,n,b, x)       ! solution B -> X
+!> solution B -> X
+!!
+!! \param [in,out] W    (decomposition of) symmetric matrix
+!! \param [in]     N    size
+!! \param [in]     B    r.h.s.
+!! \param [out]    X    solution
+
+SUBROUTINE dchslv(w,n,b, x)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: ii
+    INTEGER(mpi) :: k
+    INTEGER(mpi) :: kk
+    REAL(mpd) :: suma
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w((n*n+n)/2)
+    REAL(mpd), INTENT(IN)               :: b(n)
+    REAL(mpd), INTENT(OUT)              :: x(n)
+    
     WRITE(*,*) 'before copy'
     DO i=1,n
         x(i)=b(i)
@@ -317,8 +334,30 @@ SUBROUTINE dchdec(w,n, aux)
     END DO
     WRITE(*,*) 'after backward'
     RETURN
+END SUBROUTINE dchslv
 
-    ENTRY dchinv(w,n,v)         ! inversion
+!> inversion
+!!
+!! \param [in,out] W    (decomposition of) symmetric matrix
+!! \param [in]     N    size
+!! \param [out]    V    inverse symmetric matrix
+
+SUBROUTINE dchinv(w,n,v)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: ii
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: k
+    INTEGER(mpi) :: l
+    INTEGER(mpi) :: m
+    REAL(mpd) :: suma
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w((n*n+n)/2)
+    REAL(mpd), INTENT(OUT)              :: v((n*n+n)/2)
+    
     ii=(n*n-n)/2
     DO i=n,1,-1
         suma=w(ii+i)                       ! (I,I)
@@ -333,7 +372,7 @@ SUBROUTINE dchdec(w,n, aux)
         END DO
         ii=ii-i+1
     END DO
-END SUBROUTINE dchdec
+END SUBROUTINE dchinv
 
 !> Etimate condition.
 !!
@@ -356,8 +395,8 @@ REAL(mps) FUNCTION condes(w,n,aux)
     REAL(mps) :: xlan
 
 
-    REAL(mpd), INTENT(IN)             :: w(*)
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mpd), INTENT(IN)             :: w((n*n+n)/2)
     REAL(mpd), INTENT(IN OUT)         :: aux(n)
 
     REAL(mpd) :: suma,sumu,sums
@@ -406,31 +445,32 @@ END FUNCTION condes
 !                                inverse and band part of the inverse
 !> Decomposition of symmetric band matrix.
 !!
-!! ENTRY DBCSLV(W,MP1,N,B, X) for solution B -> X \n
-!! ENTRY DBCIEL(W,MP1,N, V), V = inverse band matrix elements \n
-!! ENTRY DBCINB(W,MP1,N, VS), VS = band part of inverse symmetric matrix \n
-!! ENTRY DBCINV(W,MP1,N, VS), V = inverse symmetric matrix
+!! SUBROUTINE DBCSLV(W,MP1,N,B, X) for solution B -> X \n
+!! SUBROUTINE DBCIEL(W,MP1,N, V), V = inverse band matrix elements \n
+!! SUBROUTINE DBCINB(W,MP1,N, VS), VS = band part of inverse symmetric matrix \n
+!! SUBROUTINE DBCINV(W,MP1,N, VS), VS = inverse symmetric matrix
 !!
-!! \param [in,out] W    symmetric band matrix
+!! \param [in,out] W    symmetric band matrix, replaced by decomposition
 !! \param [in]     MP1  band width (M) + 1
 !! \param [in]     N    size
 !! \param [in]     AUX  scratch array
-
-SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
+!!
+!! decomposition, bandwidth M
+SUBROUTINE dbcdec(w,mp1,n, aux)
     USE mpdef
 
     implicit none
     INTEGER(mpi) :: i
     INTEGER(mpi) :: j
     INTEGER(mpi) :: k
+    REAL(mpd) :: rxw
     !     M=MP1-1                                    N*M(M-1) dot operations
 
-    REAL(mpd), INTENT(IN OUT)         :: w(mp1,n)
-    INTEGER(mpi), INTENT(IN)                      :: mp1
-    INTEGER(mpi), INTENT(IN)                      :: n
-    REAL(mpd), INTENT(OUT)            :: aux(n)
+    INTEGER(mpi), INTENT(IN)            :: n
+    INTEGER(mpi), INTENT(IN)            :: mp1
+    REAL(mpd), INTENT(IN OUT)           :: w(mp1,n)
+    REAL(mpd), INTENT(OUT)              :: aux(n)
     ! decompos
-    REAL(mpd) :: v(mp1,n),b(n),x(n), vs(*),rxw
     !     ...
     DO i=1,n
         aux(i)=16.0_mpd*w(1,i) ! save diagonal elements
@@ -450,8 +490,29 @@ SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
         END DO
     END DO
     RETURN
+END SUBROUTINE dbcdec
 
-    ENTRY dbcslv(w,mp1,n,b, x)  ! solution B -> X
+!> solution B -> X
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+!! \param [in]     B    r.h.s.
+!! \param [out]    X    solution
+
+SUBROUTINE dbcslv(w,mp1,n,b, x)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    REAL(mpd) :: rxw
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    INTEGER(mpi), INTENT(IN)            :: mp1
+    REAL(mpd), INTENT(IN)               :: w(mp1,n)
+    REAL(mpd), INTENT(IN)               :: b(n)
+    REAL(mpd), INTENT(OUT)              :: x(n)
     !                                                N*(2M-1) dot operations
     DO i=1,n
         x(i)=b(i)
@@ -469,8 +530,28 @@ SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
         x(i)=rxw
     END DO
     RETURN
+END SUBROUTINE dbcslv
 
-    ENTRY dbciel(w,mp1,n, v)    ! V = inverse band matrix elements
+!> V = inverse band matrix elements
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+!! \param [out]    V    inverse band matrix elements
+
+SUBROUTINE dbciel(w,mp1,n,v)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: k
+    REAL(mpd) :: rxw
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    INTEGER(mpi), INTENT(IN)            :: mp1
+    REAL(mpd), INTENT(IN)               :: w(mp1,n)
+    REAL(mpd), INTENT(OUT)              :: v(mp1,n)
     !                                               N*M*(M-1) dot operations
     DO i=n,1,-1
         rxw=w(1,i)
@@ -483,8 +564,28 @@ SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
         END DO
     END DO
     RETURN
+END SUBROUTINE dbciel
 
-    ENTRY dbcinb(w,mp1,n, vs)   ! VS = band part of inverse symmetric matrix
+!> VS = band part of inverse symmetric matrix
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+!! \param [out]    VS   band part of inverse symmetric matrix
+
+SUBROUTINE dbcinb(w,mp1,n, vs)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: k
+    REAL(mpd) :: rxw
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    INTEGER(mpi), INTENT(IN)            :: mp1
+    REAL(mpd), INTENT(IN)               :: w(mp1,n)
+    REAL(mpd), INTENT(OUT)              :: vs((n*n+n)/2)
     !                                             N*M*(M-1) dot operations
     DO i=n,1,-1
         rxw=w(1,i)
@@ -500,8 +601,28 @@ SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
     !       END DO
     END DO
     RETURN
+END SUBROUTINE dbcinb
 
-    ENTRY dbcinv(w,mp1,n, vs)   ! V = inverse symmetric matrix
+!> VS = inverse symmetric matrix
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+!! \param [out]    VS   inverse symmetric matrix
+
+SUBROUTINE dbcinv(w,mp1,n, vs)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: k
+    REAL(mpd) :: rxw
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    INTEGER(mpi), INTENT(IN)            :: mp1
+    REAL(mpd), INTENT(IN)               :: w(mp1,n)
+    REAL(mpd), INTENT(OUT)              :: vs((n*n+n)/2)
     !                                             N*N/2*(M-1) dot operations
     DO i=n,1,-1
         rxw=w(1,i)
@@ -514,7 +635,7 @@ SUBROUTINE dbcdec(w,mp1,n, aux)  ! decomposition, bandwidth M
         END DO
     END DO
     RETURN
-END SUBROUTINE dbcdec
+END SUBROUTINE dbcinv
 
 !> Print corr band matrix and pars.
 !!
@@ -533,9 +654,9 @@ SUBROUTINE dbcprv(w,mp1,n,b)
     REAL(mps) :: rho
 
 
-    REAL(mpd), INTENT(IN OUT)         :: w(mp1,n)
-    INTEGER(mpi), INTENT(IN)                      :: mp1
     INTEGER(mpi), INTENT(IN)                      :: n
+    INTEGER(mpi), INTENT(IN)                      :: mp1
+    REAL(mpd), INTENT(IN OUT)         :: w(mp1,n)
     REAL(mpd), INTENT(OUT)            :: b(n)
 
     REAL(mpd) :: ERR
@@ -577,9 +698,9 @@ SUBROUTINE dbcprb(w,mp1,n)
     INTEGER(mpi) :: j
 
 
-    REAL(mpd), INTENT(IN OUT)         :: w(mp1,n)
     INTEGER(mpi), INTENT(IN)                      :: mp1
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mpd), INTENT(IN OUT)         :: w(mp1,n)
 
 
     !     ...
@@ -612,25 +733,23 @@ END SUBROUTINE dbcprb
 !!    all 1 and not stored. The other elements of L are stored in the
 !!    corresponding elements of W.
 !!
-!! ENTRY DB2SLV(W,N,B, X), solution B -> X \n
-!! ENTRY DB2IEL(W,N, V), V = inverse band matrix elements
+!! SUBROUTINE DB2SLV(W,N,B, X), solution B -> X \n
+!! SUBROUTINE DB2IEL(W,N, V), V = inverse band matrix elements
 !!
 !! \param [in,out] W    symmetric band matrix
 !! \param [in]     N    size
 !! \param [in]     AUX  scratch array
-
+!!
 SUBROUTINE db2dec(w,n, aux)
     USE mpdef
 
     implicit none
     INTEGER(mpi) :: i
+    REAL(mpd) :: rxw
 
-
-    REAL(mpd), INTENT(IN OUT)         :: w(2,n)
-    INTEGER(mpi), INTENT(IN OUT)                  :: n
-    REAL(mpd), INTENT(OUT)            :: aux(n)
-
-    REAL(mpd) :: v(2,n),b(n),x(n), rxw
+    INTEGER(mpi), INTENT(IN OUT)        :: n
+    REAL(mpd), INTENT(IN OUT)           :: w(2,n)
+    REAL(mpd), INTENT(OUT)              :: aux(n)
 
     DO i=1,n
         aux(i)=16.0_mpd*w(1,i) ! save diagonal elements
@@ -652,8 +771,27 @@ SUBROUTINE db2dec(w,n, aux)
         w(1,n)=0.0_mpd
     END IF
     RETURN
+END SUBROUTINE db2dec
 
-    ENTRY db2slv(w,n,b, x)      ! solution B -> X
+!> solution B -> X
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     N    size
+!! \param [in]     B    r.h.s.
+!! \param [out]    X    solution
+
+
+SUBROUTINE db2slv(w,n,b, x)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w(2,n)
+    REAL(mpd), INTENT(IN)               :: b(n)
+    REAL(mpd), INTENT(OUT)              :: x(n)
+    
     !     The equation W(original)*X=B is solved for X; input is B in vector X.
     DO i=1,n
         x(i)=b(i)
@@ -666,8 +804,24 @@ SUBROUTINE db2dec(w,n, aux)
         x(i)=x(i)*w(1,i)-w(2,i)*x(i+1)
     END DO
     RETURN
+END SUBROUTINE db2slv
 
-    ENTRY db2iel(w,n, v)        ! V = inverse band matrix elements
+!> V = inverse band matrix elements
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     N    size
+!! \param [out]    V    inverse band matrix elements
+
+SUBROUTINE db2iel(w,n, v)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w(2,n)
+    REAL(mpd), INTENT(OUT)              :: v(2,n)
+    
     !     The band elements of the inverse of W(original) are calculated,
     !     and stored in V in the same order as in W.
     !     Remaining elements of the inverse are not calculated.
@@ -680,7 +834,8 @@ SUBROUTINE db2dec(w,n, aux)
     v(1,2)= w(1,2)-v(2,2)*w(2,2)
     v(2,1)=-v(1,2)*w(2,1)
     v(1,1)= w(1,1)-v(2,1)*w(2,1)
-END SUBROUTINE db2dec
+    RETURN
+END SUBROUTINE db2iel
 
 
 !     (4) Symmetric band matrix of band width m=2: decomposition,
@@ -700,8 +855,8 @@ END SUBROUTINE db2dec
 !!    all 1 and not stored. The other elements of L are stored in the
 !!    corresponding elements of W.
 !!
-!! ENTRY DB3SLV(W,N,B, X), solution B -> X \n
-!! ENTRY DB3IEL(W,N, V), V = inverse band matrix elements
+!! SUBROUTINE DB3SLV(W,N,B, X), solution B -> X \n
+!! SUBROUTINE DB3IEL(W,N, V), V = inverse band matrix elements
 !!
 !! \param [in,out] W    symmetric band matrix
 !! \param [in]     N    size
@@ -712,14 +867,12 @@ SUBROUTINE db3dec(w,n, aux)      ! decomposition (M=2)
 
     implicit none
     INTEGER(mpi) :: i
+    REAL(mpd) :: rxw
 
-
-    REAL(mpd), INTENT(IN OUT)         :: w(3,n)
-    INTEGER(mpi), INTENT(IN OUT)                  :: n
-    REAL(mpd), INTENT(OUT)            :: aux(n)
+    INTEGER(mpi), INTENT(IN OUT)        :: n
+    REAL(mpd), INTENT(IN OUT)           :: w(3,n)
+    REAL(mpd), INTENT(OUT)              :: aux(n)
     ! decompos
-
-    REAL(mpd) :: v(3,n),b(n),x(n), rxw
 
     DO i=1,n
         aux(i)=16.0_mpd*w(1,i) ! save diagonal elements
@@ -755,8 +908,26 @@ SUBROUTINE db3dec(w,n, aux)      ! decomposition (M=2)
         w(1,n)=0.0_mpd
     END IF
     RETURN
+END SUBROUTINE db3dec
 
-    ENTRY db3slv(w,n,b, x)      ! solution B -> X
+!> solution B -> X
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     N    size
+!! \param [in]     B    r.h.s.
+!! \param [out]    X    solution
+
+SUBROUTINE db3slv(w,n,b, x)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w(3,n)
+    REAL(mpd), INTENT(IN)               :: b(n)
+    REAL(mpd), INTENT(OUT)              :: x(n)
+    
     DO i=1,n
         x(i)=b(i)
     END DO
@@ -771,8 +942,24 @@ SUBROUTINE db3dec(w,n, aux)      ! decomposition (M=2)
         x(i)=x(i)*w(1,i)-w(2,i)*x(i+1)-w(3,i)*x(i+2)
     END DO
     RETURN
+END SUBROUTINE db3slv
 
-    ENTRY db3iel(w,n, v)        ! V = inverse band matrix elements
+!> V = inverse band matrix elements
+!!
+!! \param [in,out] W    (decomposition of) )symmetric band matrix
+!! \param [in]     N    size
+!! \param [out]    V    inverse band matrix elements
+
+SUBROUTINE db3iel(w,n, v)
+    USE mpdef
+
+    implicit none
+    INTEGER(mpi) :: i
+
+    INTEGER(mpi), INTENT(IN)            :: n
+    REAL(mpd), INTENT(IN)               :: w(3,n)
+    REAL(mpd), INTENT(OUT)              :: v(3,n)
+    
     !     The band elements of the inverse of W(original) are calculated,
     !     and stored in V in the same order as in W.
     !     Remaining elements of the inverse are not calculated.
@@ -790,7 +977,8 @@ SUBROUTINE db3dec(w,n, aux)      ! decomposition (M=2)
     v(1,2)= w(1,2) -v(2,2)*w(2,2)-v(3,2)*w(3,2)
     v(2,1)=-v(1,2)*w(2,1)-v(2,2)*w(3,1)
     v(1,1)= w(1,1) -v(2,1)*w(2,1)-v(3,1)*w(3,1)
-END SUBROUTINE db3dec
+    RETURN
+END SUBROUTINE db3iel
 
 
 !     (5) Symmetric matrix with band structure, bordered by full row/col
@@ -846,15 +1034,15 @@ END SUBROUTINE db3dec
 !!    Philip E.Gill, Walter Murray and Margarete H.Wright:
 !!      Practical Optimization, Academic Press, 1981
 !!
-!! \param [in,out] W    symmetirc matrix
+!! \param [in,out] W    symmetric matrix
 !! \param [in]     N    size
 
 SUBROUTINE dcfdec(w,n)
     USE mpdef
 
     IMPLICIT NONE
-    REAL(mpd), INTENT(OUT)            :: w(*)
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mpd), INTENT(OUT)            :: w((n*n+n)/2)
     INTEGER(mpi) :: i,j,k
     REAL(mpd) :: epsm,gamm,xchi,beta,delta,theta
 
@@ -905,9 +1093,9 @@ SUBROUTINE dbfdec(w,mp1,n)
     USE mpdef
 
     IMPLICIT NONE
-    REAL(mpd), INTENT(OUT)            :: w(mp1,n)
     INTEGER(mpi), INTENT(IN OUT)                  :: mp1
     INTEGER(mpi), INTENT(IN)                      :: n
+    REAL(mpd), INTENT(OUT)            :: w(mp1,n)
     INTEGER(mpi) :: i,j,k
     REAL(mpd) :: epsm,gamm,xchi,beta,delta,theta
 

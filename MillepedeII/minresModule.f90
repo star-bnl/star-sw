@@ -350,7 +350,7 @@ contains
            'Msolve does not define a pos-def preconditioner    ' /) !  8
     !-------------------------------------------------------------------
 
-    intrinsic       :: abs, dot_product, epsilon, min, max, sqrt
+    !obsolete intrinsic       :: abs, dot_product, epsilon, min, max, sqrt
 
     ! Print heading and initialize.
 

@@ -9,7 +9,7 @@
 !! \author Claus Kleinwort, DESY (maintenance and developement)
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2019 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2021 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -45,8 +45,9 @@ END MODULE mptext
 !! \param[in]   text  text
 !! \param[out]  nums  number of numbers found
 !! \param[out]  dnum  array of numbers found
+!! \param[in]   mnum  size of dnum
 
-SUBROUTINE ratext(text,nums,dnum)
+SUBROUTINE ratext(text,nums,dnum,mnum)
     USE mptext
 
     IMPLICIT NONE
@@ -65,7 +66,8 @@ SUBROUTINE ratext(text,nums,dnum)
 
     CHARACTER (LEN=*), INTENT(IN)            :: text
     INTEGER(mpi), INTENT(OUT)                     :: nums
-    REAL(mpd), INTENT(OUT)            :: dnum(*)
+    INTEGER(mpi), INTENT(IN)                      :: mnum
+    REAL(mpd), INTENT(OUT)            :: dnum(mnum)
 
     INTEGER(mpi) :: last ! last non-blank character
     INTEGER(mpi), PARAMETER :: ndim=1000
@@ -212,6 +214,7 @@ SUBROUTINE ratext(text,nums,dnum)
             icd(1,nums)=icd(1,i)
             icd(2,nums)=icd(2,i)
             dnum(nums)=dic(i)
+            IF (nums >= mnum) EXIT
         END IF
     END DO
 

@@ -70,7 +70,7 @@
 /* ________ global variables used for file handling __________ */
 
 #ifdef USE_ZLIB
-gzFile **files;   ///< pointer to list of pointers to opened binary files
+gzFile *files;   ///< pointer to list of pointers to opened binary files
 #else
 FILE **files;     ///< pointer to list of pointers to opened binary files
 #endif
@@ -87,7 +87,7 @@ void initC(int *nFiles) {
 	maxNumFiles = *nFiles;
 #ifdef USE_ZLIB
 	printf(" initC: using zlib version %s\n",ZLIB_VERSION);
-	files = (gzFile **) malloc(sizeof(gzFile *)*maxNumFiles);
+	files = (gzFile *) malloc(sizeof(gzFile *)*maxNumFiles);
 #else
 	files = (FILE **) malloc(sizeof(FILE *) * maxNumFiles);
 #endif

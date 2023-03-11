@@ -9,7 +9,7 @@
 !! \author Claus Kleinwort, DESY (maintenance and developement)
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2015 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2021 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -24,13 +24,7 @@
 !! details); if not, write to the Free Software Foundation, Inc.,
 !! 675 Mass Ave, Cambridge, MA 02139, USA.
 
-!> Add data block to record. Called from user code.
-!!
-!!         CALL MILLE(...)       ! measured value, derivatives (one set)
-!!         CALL ENDLE            ! complete, write record (many sets)
-!!     (or CALL KILLE            ! stop record)
-!!
-!! The data transmitted by MILLE calls are collected in two arrays,
+!> The data transmitted by MILLE calls are collected in two arrays,
 !! a real array and an integer array, of same length. The collected
 !! data are written at the ENDLE call. The content of the arrays:
 !!
@@ -63,6 +57,27 @@
 !! change the entry names to e.g. AMILLE, AENDLE, AKILLE and change
 !! the value of LUN and evtl. the dimension parameter in the
 !! parameter statements.
+
+MODULE mpmille
+    USE mpdef
+    IMPLICIT NONE
+    SAVE
+
+    INTEGER(mpi), PARAMETER :: lun=51     !< unit
+    INTEGER(mpi), PARAMETER :: ndim=10000 !< max. record length
+    INTEGER(mpi) :: nr=0                  !< current record length
+    INTEGER(mpi) :: icount=0              !< number of records exceeding max. length
+    INTEGER(mpi) :: isp                   !< spcial data flag
+    REAL(mps) :: glder(ndim)              !< real data record array
+    INTEGER(mpi) :: inder(ndim)           !< integer data record array
+        
+END MODULE mpmille  
+
+!> Add data block to record. Called from user code.
+!!
+!!         CALL MILLE(...)       ! measured value, derivatives (one set)
+!!         CALL ENDLE            ! complete, write record (many sets)
+!!     (or CALL KILLE            ! stop record)
 !!
 !! \param [in] NLC    number of local derivatives
 !! \param [in] DERLC  local derivatives
@@ -73,14 +88,10 @@
 !! \param [in] SIGMA  error of measurement
 
 SUBROUTINE MILLE(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
-    USE mpdef
+    USE mpmille
 
     IMPLICIT NONE
     INTEGER(mpi) :: i
-    INTEGER(mpi) :: icount
-    INTEGER(mpi) :: isp
-    INTEGER(mpi) :: nr
-    INTEGER(mpi) :: nsp
     !     -----------------------------------------------------------------
 
     INTEGER(mpi), INTENT(IN)                      :: nlc
@@ -90,15 +101,9 @@ SUBROUTINE MILLE(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
     INTEGER(mpi), INTENT(IN)                      :: label(ngl)
     REAL(mps), INTENT(IN)                         :: rmeas
     REAL(mps), INTENT(IN)                         :: sigma
-    INTEGER(mpi), PARAMETER :: lun=51
-    INTEGER(mpi), PARAMETER :: ndim=10000
-    REAL(mps) :: glder(ndim)      ! real data record array
-    INTEGER(mpi) :: inder(ndim)   ! integer data record array
     !     -----------------------------------------------------------------
 
     SAVE
-    DATA nr/0/               ! initial record length
-    DATA icount/0/
     !     ...
     IF(sigma <= 0.0) RETURN   ! error zero - no measurement
     IF(nr == 0) THEN
@@ -140,13 +145,29 @@ SUBROUTINE MILLE(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
         END IF
     END DO
     RETURN
+END SUBROUTINE MILLE
 
-    ENTRY MILLSP(nsp,dergl,label)
-    !     add NSP special words (floating-point and integer)
+!> Add special data
+!!
+!!     add NSP special words (floating-point and integer)
+!!
+!!     0.0            0
+!!     -float(NSP)    0   ! indicates special data
+!!     following NSP floating and NSP integer data
+!!
+!! \param [in] NSP    size of special data
+!! \param [in] DERGL  special float values
+!! \param [in] LABEL  special integer values
+    
+SUBROUTINE MILLSP(nsp,dergl,label)
+    USE mpmille
 
-    !     0.0            0
-    !     -float(NSP)    0   ! indicates special data
-    !     following NSP floating and NSP integer data
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+
+    INTEGER(mpi), INTENT(IN)                      :: nsp
+    REAL(mps), INTENT(IN)                         :: dergl(nsp)
+    INTEGER(mpi), INTENT(IN)                      :: label(nsp)       
 
     IF(nsp <= 0.OR.isp /= 0) RETURN
     isp=nr
@@ -171,15 +192,29 @@ SUBROUTINE MILLE(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
         inder(nr)=label(i)       ! integer
     END DO
     RETURN
+END SUBROUTINE MILLSP
 
-    ENTRY KILLE                             ! stop record
+!> Stop record
+SUBROUTINE KILLE
+    USE mpmille
+
+    IMPLICIT NONE
+    
     nr=0    ! reset
     RETURN
+END SUBROUTINE KILLE
 
-    ENTRY ENDLE                             ! end-of-record
+!> End-of-record
+SUBROUTINE ENDLE
+    USE mpmille
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+        
     IF(nr > 1) THEN
         WRITE(lun) nr+nr,(glder(i),i=1,nr),(inder(i),i=1,nr)
     END IF
     nr=0    ! reset
     RETURN
-END SUBROUTINE MILLE
+END SUBROUTINE ENDLE
+ 

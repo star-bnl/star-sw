@@ -442,7 +442,7 @@ contains
        end subroutine Msolve
     end interface
 
-    intrinsic :: abs, sqrt, present, floor, log10, dot_product
+    !obsolete intrinsic :: abs, sqrt, present, floor, log10, dot_product
 
     ! Local arrays and variables
     real(dp)     :: shift_
@@ -1336,7 +1336,7 @@ end subroutine MINRESQLP
     real(dp), intent(in)  :: a, b
     real(dp), intent(out) :: c, s, r
 
-    intrinsic :: abs, sqrt
+    !obsolete intrinsic :: abs, sqrt
 
     ! Local variables
     logical, parameter :: debug = .false.

@@ -4,7 +4,7 @@
 !! \author Claus Kleinwort, DESY, 2012 (Claus.Kleinwort@desy.de)
 !!
 !! \copyright
-!! Copyright (c) 2012 - 2015 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2012 - 2021 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -25,8 +25,8 @@ MODULE mpdef
     IMPLICIT NONE
     SAVE
     ! precision constants
-    INTRINSIC :: selected_real_kind
-    INTRINSIC :: selected_int_kind
+    !obsolete INTRINSIC :: selected_real_kind
+    !obsolete INTRINSIC :: selected_int_kind
     INTEGER, PARAMETER :: mpi4  = selected_int_kind(9)         !>  4 byte integer
     INTEGER, PARAMETER :: mpi8  = selected_int_kind(18)        !>  8 byte integer
     INTEGER, PARAMETER :: mpr4  = selected_real_kind(6, 37)    !>  4 byte float

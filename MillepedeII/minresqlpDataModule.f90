@@ -37,7 +37,7 @@ module minresqlpDataModule
 
   implicit none
 
-  intrinsic                   :: selected_real_kind, selected_int_kind, tiny, huge
+  !obsolete intrinsic                   :: selected_real_kind, selected_int_kind, tiny, huge
 
   ! The following reals are provided for portability. Do not use 'DOUBLE PRECISION'.
   integer,  parameter, public :: dp      = mpd !selected_real_kind(15,307)    ! 64-bit real, default

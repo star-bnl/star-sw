@@ -3,7 +3,7 @@
 ## \file
 # Read millepede binary file and print records
 #
-# \author Claus Kleinwort, DESY, 2009 (Claus.Kleinwort@desy.de)
+# \author Claus Kleinwort, DESY, 2009-2022 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
 #  Copyright (c) 2009 - 2018 Deutsches Elektronen-Synchroton,
@@ -47,8 +47,9 @@ import array, sys
 # ############### read millepede binary file #################
 #  
 ## Binary file type (C or Fortran)
-Cfiles = 1  # Cfiles
+#Cfiles = 1  # Cfiles
 #Cfiles = 0 # Fortran files
+Cfiles = -1 # autodetect
 # 
 ## Integer format 
 intfmt = 'i'  # SL5, gcc-4
@@ -82,6 +83,18 @@ if narg > 1:
 
 #print " input ", fname, mrec, skiprec
 
+# autodetect?
+if Cfiles < 0:
+  f = open(fname, "rb")
+  len2 = array.array(intfmt)
+  len2.fromfile(f, 2)
+  f.close()
+  Cfiles = 1 # C
+  if len2[0] == 4*(len2[1]+1): 
+    Cfiles = 0 # Fortran
+    print "Detected Fortran binary file"
+
+# read file
 f = open(fname, "rb")
 
 nrec = 0
@@ -91,7 +104,7 @@ try:
         nr = 0
         if (Cfiles == 0):
             lenf = array.array(intfmt)
-            lenf.fromfile(f, 2)
+            lenf.fromfile(f, 1)
 
         length = array.array(intfmt)
         length.fromfile(f, 1)
@@ -109,7 +122,7 @@ try:
 
         if (Cfiles == 0):
             lenf = array.array(intfmt)
-            lenf.fromfile(f, 2)
+            lenf.fromfile(f, 1)
 
         if (nrec <= skiprec):  # must be after last fromfile
             continue

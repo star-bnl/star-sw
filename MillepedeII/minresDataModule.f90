@@ -21,7 +21,7 @@ module minresDataModule
 
   implicit none
 
-  intrinsic                        ::      selected_real_kind
+  !obsolete intrinsic                        ::      selected_real_kind
   integer,       parameter, public :: dp = mpd !selected_real_kind(15)
   real(kind=dp), parameter, public :: zero = 0.0_dp, one = 1.0_dp
 

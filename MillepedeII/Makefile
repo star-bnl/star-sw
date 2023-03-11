@@ -69,7 +69,7 @@ FCOMP = $(OMPP) $(GCC)
 F_FLAGS = -Wall -fautomatic -fno-backslash -O3 -cpp
 #
 CCOMP = $(OMPP) $(GCC) 
-C_FLAGS = -Wall -O3 -Df2cFortran
+C_FLAGS = -Wall -Wno-unused-function -O3 -Df2cFortran
 C_INCLUDEDIRS =  # e.g. -I
 #.
 ifeq ($(findstring 4.4., $(GCCVERS)), 4.4.)

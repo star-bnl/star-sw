@@ -8,7 +8,7 @@
 !! \author Claus Kleinwort, DESY, 2009
 !!
 !! \copyright
-!! Copyright (c) 2009 - 2015 Deutsches Elektronen-Synchroton,
+!! Copyright (c) 2009 - 2022 Deutsches Elektronen-Synchroton,
 !! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 !! This library is free software; you can redistribute it and/or modify
 !! it under the terms of the GNU Library General Public License as
@@ -42,7 +42,7 @@
 !!
 !! MC for simple silicon strip tracker:
 !! - 10 silicon detector layers
-!! - 50 modules per layer (1*2cm)
+!! - 50 modules per layer (2*4cm)
 !! - 10 cm spacing, no B-field
 !! - layers 1,4,7,10 have additional +/-5deg stereo modules
 !! - intrinsic resolution 20mu, 2% X0 per strip module
@@ -63,6 +63,7 @@ MODULE mptest2
     INTEGER(mpi), PARAMETER :: nlyr=10            !< number of detector layers
     INTEGER(mpi), PARAMETER :: nmlyr=14           !< number of measurement layers
     INTEGER(mpi), PARAMETER :: nmx=10             !< number of modules in x direction
+    INTEGER(mpi), PARAMETER :: ncx=5              !< center (vertical/x) row (used in cons.)
     INTEGER(mpi), PARAMETER :: nmy=5              !< number of modules in y direction
     INTEGER(mpi), PARAMETER :: ntot=nlyr*nmx*nmy  !< total number of modules
     !     define detector geometry
@@ -143,7 +144,6 @@ SUBROUTINE mptst2(imodel)         ! generate test files
     INTEGER(mpi) :: nalc
     INTEGER(mpi) :: nbrl
     INTEGER(mpi) :: ncount
-    INTEGER(mpi) :: ncx
     INTEGER(mpi) :: nmxy
     INTEGER(mpi) :: nrecds
     INTEGER(mpi) :: nthits
@@ -167,7 +167,7 @@ SUBROUTINE mptst2(imodel)         ! generate test files
     INQUIRE(FILE='mp2tst.bin',IOSTAT=ios,EXIST=ex3) ! remove, if existing
 
     WRITE(*,*) ' '
-    WRITE(*,*) 'Generating test data for mp II...'
+    WRITE(*,*) 'Generating test data for MP-II ...', imodel
     WRITE(*,*) ' '
     !     file management
     IF(ex3) CALL system('rm mp2tst.bin')   ! remove old file
@@ -204,6 +204,8 @@ SUBROUTINE mptst2(imodel)         ! generate test files
     sold=-1000.
     nbrl(1)=0
     nbrl(2)=0
+    sbrl=0.
+    wbrl=0.
     DO k=1,2
         DO i=1, nmlyr
             IF (ABS(sarc(i)-sold) > cmbbrl(k)) nbrl(k)=nbrl(k)+1
@@ -222,8 +224,8 @@ SUBROUTINE mptst2(imodel)         ! generate test files
 
     !     misalign detector modules -----------------------------------------
 
-    dispxm=0.01           ! module displacement in X .05 mm * N(0,1)
-    dispym=0.01           ! module displacement in Y .05 mm * N(0,1)
+    dispxm=0.01           ! module displacement in X 0.1 mm * N(0,1)
+    dispym=0.01           ! module displacement in Y 0.1 mm * N(0,1)
 
     DO i=0,nlyr-1
         DO k=0,nmy-1
@@ -237,46 +239,56 @@ SUBROUTINE mptst2(imodel)         ! generate test files
 
     IF(.NOT.ex1) THEN
         luns=7                           ! steerfile
-        WRITE(luns,101) '*            Default test steering file'
+        WRITE(luns,101) '*        *** Default test steering file ***'
+        WRITE(luns,101) ' '
+        WRITE(luns,101) '*            Additinal files'
         WRITE(luns,101) 'fortranfiles ! following bin files are fortran'
         WRITE(luns,101) 'mp2con.txt   ! constraints text file '
         WRITE(luns,101) 'mp2tst.bin   ! binary data file'
         WRITE(luns,101) 'Cfiles       ! following bin files are Cfiles'
-        !      WRITE(LUNS,101) '*outlierrejection 100.0 ! reject if Chi^2/Ndf >'
-        !      WRITE(LUNS,101) '*outliersuppression 3   ! 3 local_fit iterations'
-
-        WRITE(luns,101) '*hugecut 50.0     !cut factor in iteration 0'
-        WRITE(luns,101) '*chisqcut 1.0 1.0 ! cut factor in iterations 1 and 2'
-        WRITE(luns,101) '*entries  10 ! lower limit on number of entries/parameter'
-        WRITE(luns,101)  &
-            '*pairentries 10 ! lower limit on number of parameter pairs',  &
-            '                ! (not yet!)'
-        WRITE(luns,101) '*printrecord   1  2      ! debug printout for records'
-        WRITE(luns,101)  &
-            '*printrecord  -1 -1      ! debug printout for bad data records'
-        WRITE(luns,101)  &
-            '*outlierdownweighting  2 ! number of internal iterations (> 1)'
+        WRITE(luns,101) ' '
+        WRITE(luns,101) '*            Selection of variable global parameters'        
+        WRITE(luns,101) '*entries  10 ! lower   limit on number of entries/parameter'
+        WRITE(luns,101) '*entries  25 ! default limit on number of entries/parameter'
+        WRITE(luns,101) '*entries  50 ! higher  limit on number of entries/parameter'
+        WRITE(luns,101) ' '
+        WRITE(luns,101) '*            Initial parameter values, presigmas'
+        WRITE(luns,101) '*Parameter        ! define parameter attributes (start  of list)'
+        WRITE(luns,101) '*205  -0.01   0.  ! start value'
+        WRITE(luns,101) '*206   0.01   0.  ! start value'
+        WRITE(luns,101) '*215   0.01  -1.  ! fix parameter at value'
+        WRITE(luns,101) '*216   0.    -1.  ! fix parameter at value'
+        WRITE(luns,101) ' '                
+        WRITE(luns,101) '*            Handling of outliers, tails etc'        
+        WRITE(luns,101) '*hugecut 50.0            !cut factor in iteration 0'
+        WRITE(luns,101) '*chisqcut 30.0 6.0       ! cut factor in iterations 1 and 2'
+        WRITE(luns,101) '*outlierdownweighting  2 ! number of internal iterations (> 1)'
         WRITE(luns,101) '*dwfractioncut      0.2  ! 0 < value < 0.5'
         WRITE(luns,101) '*presigma           0.01 ! default value for presigma'
         WRITE(luns,101) '*regularisation 1.0      ! regularisation factor'
         WRITE(luns,101) '*regularisation 1.0 0.01 ! regularisation factor, pre-sigma'
-
         WRITE(luns,101) ' '
-        WRITE(luns,101) '*bandwidth 0         ! width of precond. band matrix'
-        WRITE(luns,101) 'method diagonalization 3 0.001 ! diagonalization      '
-        WRITE(luns,101) 'method fullMINRES       3 0.01 ! minimal residual     '
-        WRITE(luns,101) 'method sparseMINRES     3 0.01 ! minimal residual     '
-        WRITE(luns,101) '*mrestol      1.0D-8          ! epsilon for MINRES'
+        WRITE(luns,101) '*            Solution methods'        
+        WRITE(luns,101) 'method fullMINRES       3 0.01 ! (approximate) MINRES, full storage'
+        WRITE(luns,101) 'method sparseMINRES     3 0.01 ! (approximate) MINRES, sparse storage'
+        WRITE(luns,101) '*mrestol      1.0D-8           ! epsilon for MINRES convergence'
+        WRITE(luns,101) '*bandwidth 0                   ! width of MINRES precond. band matrix'
+        WRITE(luns,101) 'method diagonalization 3 0.001 ! diagonalization (-> millepede.eve)'
+        WRITE(luns,101) 'method decomposition   3 0.001 ! Cholesky decomposition'
         WRITE(luns,101) 'method inversion       3 0.001 ! Gauss matrix inversion'
         WRITE(luns,101) '* last method is applied'
-        WRITE(luns,101) '*matiter      3  ! recalculate matrix in iterations'
+        WRITE(luns,101) ' '
+        WRITE(luns,101) '*            Additional output. monitoring'        
+        WRITE(luns,101) 'printcounts           ! print number of entries'
+        WRITE(luns,101) '*monitorresiduals     ! poor man''s DMR (-> millepede.mon)'        
+        WRITE(luns,101) '*printrecord   1  2   ! debug printout for records'
+        WRITE(luns,101) '*printrecord  -1 -1   ! debug printout for bad data records'
         WRITE(luns,101) ' '
         WRITE(luns,101) 'end ! optional for end-of-data'
     END IF
 
     ! constraints: fix center modules in first/last layer
 
-    ncx=(nmx+1)/2
     nmxy=nmx*nmy
     lunt=9
     one=1.0
