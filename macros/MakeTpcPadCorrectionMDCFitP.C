@@ -1,6 +1,8 @@
 // @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
-  root.exe -q -b xyPad3qBG*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain,7,20,20210129,5)' >& MakeTpcPadCorrectionMDC.log
+  root.exe -q -b xyPad3qBG*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain)' >& MakeTpcPadCorrectionMDC.log
+   root.exe xyPad3qBG*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain,1,0,1)'
+   root.exe xyPad3qBG*.root Chain.C 'MakeTpcPadCorrectionMDCFitP.C+(tChain,1,1,1)'
  */
 #ifndef __CINT__
 #include <stdlib.h>
@@ -164,7 +166,7 @@ public :
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
-  virtual void     Mdf(Int_t sector, Int_t qB, Int_t io, Int_t max=7, Int_t maxTerm = 20);
+  virtual void     Mdf(Int_t sector, Int_t qB, Int_t io, Int_t max=7, Int_t maxTerm = 20, Int_t nrows = 96);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -424,7 +426,7 @@ Int_t FitP::Cut(Long64_t entry)
 #endif // #ifdef FitP_cxx
 
 //using namespace std;
-void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
+void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm, Int_t nrows)
 {
 //   In a ROOT session, you can do:
 //      Root > .L FitP.C
@@ -450,20 +452,32 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
   if (fChain == 0) return;
+  TString dirName(Form("MDC_s%02i_io%i_qB%i",sector,IO,qB));
   Int_t nVars       = 2;
-  
+  gDirectory->cd("/");
+  TDirectory *dir = gDirectory->mkdir(dirName);
+  dir->cd();
   // make fit object and set parameters on it. 
   if (fit) delete fit;
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kChebyshev,"vk");
   fit = new TMultiDimFit(nVars, TMultiDimFit::kLegendre,"vk");
-  fit->SetName(Form("MDC_qB%i_s%02i_io%i",qB,sector,IO));
+  fit->SetName(dirName);
   gDirectory->Append(fit);
-  TDirectory *dir = gDirectory->mkdir(fit->GetName());
-  dir->cd();
-  TH2F *hists[2] = {new TH2F("val_x_0","input values 0", 24*20, 0.5, 24.5, 200, -0.5, 0.5), new TH2F("val_x_1","input values 1", 32, -1, 1, 200, -0.5, 0.5)};
-  
-  Int_t mPowers[]   = {max , max};
+  Int_t nx = 10;
+  Int_t ny = 32;
+  fit->SetBinVarX(nx);
+  fit->SetBinVarY(ny);
+  Double_t xS   = 24*qB + sector;
+  Double_t xmin = xS;
+  Double_t xmax = xS + 0.5;
+  if (IO) {
+    xmin = xS - 0.5;
+    xmax = xS;
+  }
+  TH2F *hists[2] = {new TH2F("val_x_0","input values 0", nx, xmin, xmax, 200, -0.5, 0.5), new TH2F("val_x_1","input values 1", ny, -1, 1, 200, -0.5, 0.5)};
+  //  Int_t mPowers[]   = {max , max};
+  Int_t mPowers[]   = {3 , max};
   fit->SetMaxPowers(mPowers);
   fit->SetMaxFunctions(1000);
   fit->SetMaxStudy(1000);
@@ -480,10 +494,6 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
   Long64_t nbytes = 0, nb = 0;
   Long64_t nev = 0;
   Int_t ix1, ix2;
-  if (IO) {ix1 =  1+20*(sector-1); ix2 = 10+20*(sector-1);} // Inner
-  else    {ix1 = 11+20*(sector-1); ix2 = 20+20*(sector-1);} // Outer
-  ix1 += 20*24*qB;
-  ix2 += 20*24*qB;
   Double_t xx[2];
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
@@ -493,8 +503,8 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
     Int_t ix = this->i;
     Int_t jy = this->j;
     if (ix == 0 || jy == 0)   continue;
-    if (ix < ix1 || ix > ix2) continue;
-    if (dmu    > 0.10) continue;
+    if (x < xmin || x > xmax) continue;
+    if (dmu    > 0.15) continue;
     if (dsigma > 0.05) continue;
     if (chisq >  200.) continue;
     if (mu    <= -0.8) continue;
@@ -506,8 +516,12 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/St_tpcPadConfigC::instance()->innerPadRows(sector) : 
 					  (row - St_tpcPadConfigC::instance()->innerPadRows(sector) - 0.5)/(St_tpcPadConfigC::instance()->numberOfRows(sector) - St_tpcPadConfigC::instance()->innerPadRows(sector)));
     */
+#if 1 /* 2D */
     xx[0] = x;
     xx[1] = y;
+#else
+    xx[0] = y;
+#endif
     hists[0]->Fill(x,mu);
     hists[1]->Fill(y,mu);
     fit->AddRow(xx, mu, dmu*dmu);
@@ -518,12 +532,20 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
   // Print out the statistics
   fit->Print("s");
   cout << "SampleSize = " << fit->GetSampleSize() << "\tSumSqQuantity = " << fit->GetSumSqQuantity() << "\tSumSqAvgQuantity = " << fit->GetSumSqQuantity()/fit->GetSampleSize() << endl;
+  out << "// SampleSize = " << fit->GetSampleSize() << "\tSumSqQuantity = " << fit->GetSumSqQuantity() << "\tSumSqAvgQuantity = " << fit->GetSumSqQuantity()/fit->GetSampleSize() << endl;
   //  if (fit->GetSumSqQuantity()/fit->GetSampleSize() < 5e-5) return;
   // Book histograms 
   //  fit->SetBinVarX(1000);
   //  fit->SetBinVarY(1000);
   fit->MakeHistograms();
-
+  TAxis *ax = 0;
+  TH1 *d_orig = (TH1 *)fit->GetHistograms()->FindObject("d_orig");
+  ax = d_orig->GetXaxis();
+  d_orig->SetBins(100, ax->GetXmin(), ax->GetXmax()); 
+  TH1 *res_train = (TH1*) fit->GetHistograms()->FindObject("res_train");
+  ax = res_train->GetXaxis();
+  res_train->SetBins(100, ax->GetXmin(), ax->GetXmax()); 
+  //  ((TH1 *)fit->GetHistograms()->FindObject("res_train"))->SetNbinx(100);
   // Find the parameterization 
   fit->FindParameterization();
 
@@ -532,6 +554,10 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
   //
   Int_t i, j;
  // Assignment to coefficients vector.
+  Int_t idx = IO + 2*(sector-1) + 48*qB;
+  out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
+  out << "  row.nrows = " << nrows << "; //" << gDirectory->GetName() << endl;
+  out << "  row.idx   = " << Form("%2i", idx+1) << ";" << endl;
   cout << "  row.PolyType = \t"      << fit->GetPolyType() << ";" << endl;
   cout << "  row.NVariables = \t"    << fit->GetNVariables() << ";" << endl;
   cout << "  row.NCoefficients = \t" << fit->GetNCoefficients() << ";" << endl;
@@ -571,8 +597,9 @@ void FitP::Mdf(Int_t sector, Int_t qB, Int_t IO, Int_t max, Int_t maxTerm)
     if ((i+1) %2 == 0) {cout << endl; out << endl;}
   }
   if (fit->GetNCoefficients()%2) {cout << endl; out << endl;}
+	out << "  tableSet->AddAt(&row," << idx << ");" << endl;
 }//____________________________________________________________________________
-void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t max=7, Int_t maxTerm = 20, Int_t date = 20190225, Int_t time = 202320){
+void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t sec = -1, Int_t qb = -1, Int_t IO = -1, Int_t max=5, Int_t maxTerm = 20, Int_t date = 20190225, Int_t time = 202320){
   if (! tChain) return;
   FitP t(tChain);
   TFile *fOut = new TFile("MakeTpcPadCorrectionMDCFitP.root","recreate");
@@ -583,31 +610,50 @@ void MakeTpcPadCorrectionMDCFitP(TChain *tChain, Int_t max=7, Int_t maxTerm = 20
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_MDFCorrection\")) return 0;" << endl;
   out << "  MDFCorrection_st row;" << endl;
-  out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcPadCorrectionMDC\"," << nrows << ");" << endl;
-  for (Int_t qB = 0; qB < 2; qB++) {
-    for (Int_t sector = 1; sector <= 24; sector++) {
-      for (Int_t io = 0; io < 2; io++) {// io == 0 : Outer, io = 1 : Inner
-	Int_t idx = io + 2*(sector-1) + 48*qB;
-	out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
-	out << "  row.nrows = " << nrows << "; //" << gDirectory->GetName() << endl;
-        out << "  row.idx   = " << Form("%2i", idx+1) << ";" << endl;
-	t.Mdf(sector, qB, io, max, maxTerm);
-	out << "  tableSet->AddAt(&row," << idx << ");" << endl;
+  out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcPadCorrectionMDC\"," << nrows << "); //" << gDirectory->GetName() << endl;
+  Int_t sec1 = 1, sec2 = 24;
+  Int_t qB1 = 0, qB2 = 1;
+  Int_t io1 = 0, io2 = 1;
+  if (sec > 0) {sec1 = sec2 = sec;}
+  if (qb >= 0) { qB1 = qB2 = qb;}
+  if (IO >= 0) {io1 = io2 = IO;}
+  for (Int_t qB = qB1; qB <= qB2; qB++) {
+    for (Int_t sector = sec1; sector <= sec2; sector++) {
+      for (Int_t io = io1; io <= io2; io++) {// io == 0 : Outer, io = 1 : Inner
+	t.Mdf(sector, qB, io, max, maxTerm, nrows);
 	if (Ask()) goto ENDL;
 	else if (! gROOT->IsBatch()) {
 	  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-	  if (! c1 ) c1 = new TCanvas("c1","c1");
+	  if (! c1 ) c1 = new TCanvas("c1","c1",1200,1600);
 	  else c1->Clear();
+	  c1->SetTitle(gDirectory->GetName());
+	  c1->Divide(2,3);
+	  c1->cd(2);
+	  cout << gDirectory->GetName() << endl;
 	  TH1 *res_train = (TH1*) gDirectory->Get("res_train");
 	  if (res_train) {
 	    res_train->Draw();
 	    TH1 *d_orig = (TH1*) gDirectory->Get("d_orig");
 	    if (d_orig) {
+	      c1->cd(1);
 	      d_orig->SetLineColor(2);
-	      d_orig->Draw("sames");
+	      d_orig->Draw();
 	    }
 	    c1->Update();
 	  }
+	  c1->cd (3);
+          TH2 *val_x_0 = (TH2 *) gDirectory->Get("val_x_0");
+	  if (val_x_0) val_x_0->Draw("colz");
+	  c1->cd(4);
+	  TH2* res_x_0 = (TH2 *) gDirectory->Get("res_x_0");
+	  if (res_x_0) res_x_0->Draw("colz");
+	  c1->cd (5);
+          TH2 *val_x_1 = (TH2 *) gDirectory->Get("val_x_1");
+	  if (val_x_1) val_x_1->Draw("colz");
+	  c1->cd(6);
+	  TH2* res_x_1 = (TH2 *) gDirectory->Get("res_x_1");
+	  if (res_x_1) res_x_1->Draw("colz");
+	  c1->Update();
 	}
       }
     }
