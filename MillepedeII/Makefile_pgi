@@ -1,0 +1,115 @@
+# #################################################################
+# Makefile for MillePede II (Fortran90) with possible input from C
+# 
+# Author Claus Kleinwort, University Hamburg, 2020
+#
+# Tested on - 64-bit EL7 with pgi compiler version 20.1.0.
+#
+# #################################################################
+#
+# ### Define PGIC to be used ###
+#
+PGIC=pgfortran_2020
+#
+# #################################################################
+#
+# ### Options ###
+#
+# All but 'yes' disables support of reading C-binaries:
+SUPPORT_READ_C = yes
+#
+# If yes (and if SUPPORT_READ_C is yes and SUPPORT_C_RFIO is not yes),
+# use zlib to read gzipped binary files:
+SUPPORT_ZLIB = yes
+# default path (by '=') to ZLIB - overwrite if needed
+# requires z library and header to be installed at places defined here:
+ZLIB_INCLUDES_DIR = =
+ZLIB_LIBS_DIR = =
+#
+# If yes use multithreading with OpenMP (TM)
+SUPPORT_OPENMP = yes
+# ompP profiler (http://www.ompp-tool.com, needs Opari for source-to-source instrumentation)
+OMPP =
+# kinst-ompp-pgi
+#
+# make install copies the binary to $(PREFIX)/bin
+PREFIX = .
+#
+# #################################################################
+#
+FCOMP = $(OMPP) $(PGIC)
+F_FLAGS = -O3 -Mpreprocess
+#
+CCOMP = $(OMPP) $(PGIC) 
+C_FLAGS = -O3 -Df2cFortran
+C_INCLUDEDIRS =  # e.g. -I
+#
+ifeq ($(SUPPORT_OPENMP),yes)
+# Multithreading with OpenMP (TM)
+  F_FLAGS += -mp -Minfo=mp
+endif
+#
+LOADER = $(OMPP) $(PGIC)
+L_FLAGS = -O3
+#
+# objects for this project
+#
+USER_OBJ_PEDE = mpdef.o mpdalc.o mpmod.o mpmon.o mpbits.o mpqldec.o mptest1.o mptest2.o mille.o mpnum.o mptext.o mphistab.o \
+	minresDataModule.o minresModule.o minresqlpDataModule.o minresqlpBlasModule.o minresqlpModule.o \
+        randoms.o vertpr.o linesrch.o Dbandmatrix.o pede.o
+#
+# Chose flags/object files for C-binary support:
+#
+ifeq ($(SUPPORT_READ_C),yes)
+  F_FLAGS += -DREAD_C_FILES
+  USER_OBJ_PEDE += readc.o
+  ifeq ($(SUPPORT_C_RFIO),yes)
+    C_FLAGS += -DUSE_SHIFT_RFIO -I$(RFIO_INCLUDES_DIR)
+    C_LIBS += -L$(RFIO_LIBS_DIR) -lshift
+  else
+    ifeq ($(SUPPORT_ZLIB),yes)
+      C_FLAGS += -DUSE_ZLIB -I$(ZLIB_INCLUDES_DIR)
+      C_LIBS += -L$(ZLIB_LIBS_DIR) -lz
+    endif
+  endif
+endif
+#  
+#
+# Make the executables
+EXECUTABLES = pede 
+#
+
+all:	$(EXECUTABLES)
+
+pede : 	${USER_OBJ_PEDE} Makefile
+	$(LOADER) $(L_FLAGS) \
+		-o $@ ${USER_OBJ_PEDE} $(C_LIBS) 
+#
+clean:
+	rm -f *.o *~ */*.o */*~ *.mod */*.mod
+#
+clobber: clean 
+	rm -f $(EXECUTABLES)
+
+install: $(EXECUTABLES) #clean
+	mkdir -p $(PREFIX)/bin
+	mv $(EXECUTABLES) $(PREFIX)/bin
+
+# Make the object files - depend on source and include file 
+#
+%.o : %.f90 Makefile
+	${FCOMP} ${F_FLAGS} -c $< -o $@ 
+%.o: %.c Makefile
+	$(CCOMP) -c $(C_FLAGS) $(DEFINES) $(C_INCLUDEDIRS) $(DEBUG) -o $@ $<
+#
+# ##################################################################
+# Module dependencies
+mpbits.o:  mpdef.o mpdalc.o
+mpdalc.o:  mpdef.o
+mpmod.o:   mpdef.o
+mpnum.o:   mpdef.o
+mpqldec.o: mpdef.o mpdalc.o
+pede.o:    mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o
+# ##################################################################
+# END
+# ##################################################################

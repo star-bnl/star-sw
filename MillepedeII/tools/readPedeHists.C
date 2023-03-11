@@ -1,64 +1,88 @@
-//
-//    |-------------------------------------------------------------------|
-//    ||-----------------------------------------------------------------||
-//    ||   ROOT script to read the millepede.his file produced by pede   ||
-//    ||-----------------------------------------------------------------||
-//    |-------------------------------------------------------------------|
-//
-// Author     : Gero Flucke
-// Date       : July 2007
-// Last update: $Date: 2009/01/20 20:22:27 $ by $Author: flucke $
-//
-//
-// Usage:
-// ======
-//
-// Start ROOT and compile (!) the script:
-//
-// root [0] .L readPedeHists.C+
-// Info in <TUnixSystem::ACLiC>: creating shared library ./readPedeHists_C.so
-//
-// If the millepede.his file is in the directory that ROOT was started in, just call
-//
-// root [1] readPedeHists()
-//
-// ROOT will display the histograms (TH1) and XY-data objects (TGraph).
-//
-// The following options and their combinations can be given as first argument:
-// - print: produce a postscript file millepede.his.ps 
-// - write: write the histograms and graphs into the ROOT file millepede.his.root
-// - nodraw: skip displaying (write/print work still fine)
-//
-// Note that both options 'print' and 'write' will overwrite existing files.
-//
-// If the millepede.his file has been renamed or is not in the local directory,
-// its name can be given as second argument. The names of the postscript or ROOT files
-// will be adjusted to the given name, too.
-// 
-// The following example will read the file '../adir/millepede_result5.his' and directly
-// produce the postscript file '../adir/millepede_result5.his.ps' without displaying and
-// without producing a ROOT file:
-//
-// root [1] readPedeHists("print nodraw", "../adir/millepede_result5.his")
-// Info in <TCanvas::Print>: ps file ../adir/millepede_result5.hisps has been created
-// Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
-// Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
-// Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
-// Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
-//
-//
-// Possible modifications:
-// =======================
-// - The size of the canvases is defined in ReadPedeHists::Draw() via 'nPixelX' and 'nPixelY'.
-// - The number of histograms/graphs per canvas is defined in ReadPedeHists::Draw() as 
-//   'nHistX' and 'nHistY'.
-// - The position of the corners of the boxes giving the minimum or maximum value of a
-//   histogrammed distribution is defined as the first four arguments after 'new TPaveText'
-//   at the end of the method ReadPedeHists::readNextHist.
-// - gStyle->SetOptStat(...), executed before readPedeHists(), defines whether you see all
-//   relevant information in the statistics. Try e.g.:
-//   root [0] gStyle->SetOptStat("emrou"); // or "nemrou"
-//
+/** \file
+ *  ROOT script to read pede histograms.
+ *
+ * \author Gero Flucke, University Hamburg, 2007
+ *
+ *  \copyright
+ *  Copyright (c) 2009 Deutsches Elektronen-Synchroton,
+ *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+ *  This library is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as
+ *  published by the Free Software Foundation; either version 2 of the
+ *  License, or (at your option) any later version. \n\n
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details. \n\n
+ *  You should have received a copy of the GNU Library General Public
+ *  License along with this program (see the file COPYING.LIB for more
+ *  details); if not, write to the Free Software Foundation, Inc.,
+ *  675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *
+ * \verbatim
+ *
+ *    |-------------------------------------------------------------------|
+ *    ||-----------------------------------------------------------------||
+ *    ||   ROOT script to read the millepede.his file produced by pede   ||
+ *    ||-----------------------------------------------------------------||
+ *    |-------------------------------------------------------------------|
+ *
+ * Author     : Gero Flucke, University Hamburg, 2007
+ * Date       : July 2007
+ * Last update: $Date: 2009/01/20 20:22:27 $ by $Author: flucke $
+ * \endverbatim
+ *
+ * Usage:
+ * ======
+ *
+ * Start ROOT and compile (!) the script:
+ *
+ * root [0] .L readPedeHists.C+
+ * Info in <TUnixSystem::ACLiC>: creating shared library ./readPedeHists_C.so
+ *
+ * If the millepede.his file is in the directory that ROOT was started in, just call
+ *
+ * root [1] readPedeHists()
+ *
+ * ROOT will display the histograms (TH1) and XY-data objects (TGraph).
+ *
+ * The following options and their combinations can be given as first argument:
+ * - print: produce a postscript file millepede.his.ps
+ * - write: write the histograms and graphs into the ROOT file millepede.his.root
+ * - nodraw: skip displaying (write/print work still fine)
+ *
+ * Note that both options 'print' and 'write' will overwrite existing files.
+ *
+ * If the millepede.his file has been renamed or is not in the local directory,
+ * its name can be given as second argument. The names of the postscript or ROOT files
+ * will be adjusted to the given name, too.
+ *
+ * The following example will read the file '../adir/millepede_result5.his' and directly
+ * produce the postscript file '../adir/millepede_result5.his.ps' without displaying and
+ * without producing a ROOT file:
+ *
+ * root [1] readPedeHists("print nodraw", "../adir/millepede_result5.his")
+ * Info in <TCanvas::Print>: ps file ../adir/millepede_result5.hisps has been created
+ * Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
+ * Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
+ * Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
+ * Info in <TCanvas::Print>: Current canvas added to ps file ../adir/millepede_result5.his.ps
+ *
+ *
+ * Possible modifications:
+ * =======================
+ * - The size of the canvases is defined in ReadPedeHists::Draw() via 'nPixelX' and 'nPixelY'.
+ * - The number of histograms/graphs per canvas is defined in ReadPedeHists::Draw() as
+ *   'nHistX' and 'nHistY'.
+ * - The position of the corners of the boxes giving the minimum or maximum value of a
+ *   histogrammed distribution is defined as the first four arguments after 'new TPaveText'
+ *   at the end of the method ReadPedeHists::readNextHist.
+ * - gStyle->SetOptStat(...), executed before readPedeHists(), defines whether you see all
+ *   relevant information in the statistics. Try e.g.:
+ *   root [0] gStyle->SetOptStat("emrou");  // or "nemrou"
+ *
+ */
 
 #include <fstream>
 #include <vector>

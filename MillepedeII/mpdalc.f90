@@ -1,7 +1,24 @@
 !> \file
 !! Dynamic memory management.
 !!
-!! \author C. Kleinwort, DESY, 2012 (Claus.Kleinwort@desy.de)
+!! \author Claus Kleinwort, DESY, 2012 (Claus.Kleinwort@desy.de)
+!!
+!! \copyright
+!! Copyright (c) 2012 - 2015 Deutsches Elektronen-Synchroton,
+!! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+!! This library is free software; you can redistribute it and/or modify
+!! it under the terms of the GNU Library General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or (at your option) any later version. \n\n
+!! This library is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!! GNU Library General Public License for more details. \n\n
+!! You should have received a copy of the GNU Library General Public
+!! License along with this program (see the file COPYING.LIB for more
+!! details); if not, write to the Free Software Foundation, Inc.,
+!! 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
 
 !> (De)Allocate vectors and arrays.
 MODULE mpdalc
@@ -17,12 +34,12 @@ MODULE mpdalc
 
     !> allocate array
     INTERFACE mpalloc
-        MODULE PROCEDURE mpallocdvec, mpallocfvec, mpallocivec, &
+        MODULE PROCEDURE mpallocdvec, mpallocfvec, mpallocivec, mpalloclvec, &
             mpallocfarr, mpallociarr, mpalloclarr, mpalloclist, mpalloccvec
     END INTERFACE mpalloc
     !> deallocate array
     INTERFACE mpdealloc
-        MODULE PROCEDURE mpdeallocdvec, mpdeallocfvec, mpdeallocivec, &
+        MODULE PROCEDURE mpdeallocdvec, mpdeallocfvec, mpdeallocivec, mpdealloclvec, &
             mpdeallocfarr, mpdeallociarr, mpdealloclarr, mpdealloclist, mpdealloccvec
     END INTERFACE mpdealloc
 
@@ -60,6 +77,17 @@ CONTAINS
         ALLOCATE (array(length),stat=ifail)
         CALL mpalloccheck(ifail,length,text)
     END SUBROUTINE mpallocivec
+
+    !> allocate (1D) large integer array
+    SUBROUTINE mpalloclvec(array,length,text)
+        INTEGER(mpl), DIMENSION(:), INTENT(IN OUT), ALLOCATABLE :: array
+        INTEGER(mpl), INTENT(IN) :: length
+        CHARACTER (LEN=*), INTENT(IN) :: text
+
+        INTEGER(mpi) :: ifail
+        ALLOCATE (array(length),stat=ifail)
+        CALL mpalloccheck(ifail,length,text)
+    END SUBROUTINE mpalloclvec
 
     !> allocate (2D) single precision array
     SUBROUTINE mpallocfarr(array,rows,cols,text)
@@ -174,7 +202,18 @@ CONTAINS
         CALL mpdealloccheck(ifail,isize)
     END SUBROUTINE mpdeallocivec
 
-    !> allocate (2D) single precision array
+    !> deallocate (1D) large integer array
+    SUBROUTINE mpdealloclvec(array)
+        INTEGER(mpl), DIMENSION(:), INTENT(IN OUT), ALLOCATABLE :: array
+
+        INTEGER(mpi) :: ifail
+        INTEGER(mpl) :: isize
+        isize = size(array,kind=mpl)
+        DEALLOCATE (array,stat=ifail)
+        CALL mpdealloccheck(ifail,isize)
+    END SUBROUTINE mpdealloclvec
+
+    !> deallocate (2D) single precision array
     SUBROUTINE mpdeallocfarr(array)
         REAL(mps), DIMENSION(:,:), INTENT(IN OUT), ALLOCATABLE :: array
 
@@ -185,7 +224,7 @@ CONTAINS
         CALL mpdealloccheck(ifail,isize)
     END SUBROUTINE mpdeallocfarr
 
-    !> allocate (2D) integer array
+    !> deallocate (2D) integer array
     SUBROUTINE mpdeallociarr(array)
         INTEGER(mpi), DIMENSION(:,:), INTENT(IN OUT), ALLOCATABLE :: array
 

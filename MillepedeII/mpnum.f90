@@ -5,6 +5,25 @@
 !> \file
 !! General linear algebra routines.
 !!
+!! \author Volker Blobel, University Hamburg, 2005-2009 (initial Fortran77 version)
+!! \author Claus Kleinwort, DESY (maintenance and developement)
+!!
+!! \copyright
+!! Copyright (c) 2009 - 2021 Deutsches Elektronen-Synchroton,
+!! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+!! This library is free software; you can redistribute it and/or modify
+!! it under the terms of the GNU Library General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or (at your option) any later version. \n\n
+!! This library is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!! GNU Library General Public License for more details. \n\n
+!! You should have received a copy of the GNU Library General Public
+!! License along with this program (see the file COPYING.LIB for more
+!! details); if not, write to the Free Software Foundation, Inc.,
+!! 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
 !! ***** Collection of utility routines from V. Blobel *****
 !!
 !!     V. Blobel, Univ. Hamburg
@@ -20,12 +39,14 @@
 !!
 !!     Solution by Cholesky decomposition of symmetric matrix
 !!        CHOLDC
+!!        CHDEC2, CHSLV2 for large (positive definite) matrix, use OpenMP (CHK)
 !!
 !!     Solution by Cholesky decomposition of variable-band matrix
 !!        VABDEC
 !!
 !!     Solution by Cholesky decomposition of bordered band matrix
-!!        SQMIBB  (CHK)
+!!        SQMIBB    upper/left  border (CHK)
+!!        SQMIBB2   lower/right border (CHK)
 !!
 !!     Matrix/vector products
 !!        DBDOT     dot vector product
@@ -34,6 +55,7 @@
 !!        DBSVX     LARGE symmetric matrix vector (CHK)
 !!        DBGAX     general matrix vector
 !!        DBAVAT    AVAT product
+!!        DBAVATS   AVAT product for sparse A (CHK)
 !!        DBMPRV    print parameter and matrix
 !!        DBPRV     print matrix  (CHK)
 !!
@@ -47,6 +69,8 @@
 !!        HEAPF    heap sort reals direct
 !!        SORT1K   sort 1-dim key-array (CHK)
 !!        SORT2K   sort 2-dim key-array
+!!        SORT2I   sort 2-dim key-array with index (CHK)
+!!        SORT22   sort 2-dim key-array with two additional values (CHK)
 !!
 
 !----------------------------------------------------------------------
@@ -95,8 +119,11 @@ SUBROUTINE sqminv(v,b,n,nrank,diag,next)   ! matrix inversion
     REAL(mpd) :: vkk
     REAL(mpd) :: vjk
 
-    REAL(mpd), PARAMETER :: eps=1.0E-10_mpd
+    !REAL(mpd), PARAMETER :: eps=1.0E-10_mpd
+    REAL(mpd) eps
     !     ...
+    eps = 16.0_mpd * epsilon(eps) ! 16 * precision(mpd)
+
     next0=1
     l=1
     DO i=1,n
@@ -196,8 +223,10 @@ END SUBROUTINE sqminv
 !! \param [out]    NRANK rank of matrix V
 !! \param [out]    DIAG  double precision scratch array
 !! \param [out]    NEXT  integer aux array
+!! \param [out]    VK    double precision scratch array (pivot)
+!! \param [in]     MON   flag for progress monitoring
 
-SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
+SUBROUTINE sqminl(v,b,n,nrank,diag,next,vk,mon)   !
     USE mpdef
 
     IMPLICIT NONE
@@ -210,10 +239,13 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
 
     REAL(mpd), INTENT(IN OUT)         :: v(*)
     REAL(mpd), INTENT(OUT)            :: b(n)
-    INTEGER(mpi), INTENT(IN)                      :: n
-    INTEGER(mpi), INTENT(OUT)                     :: nrank
+    INTEGER(mpi), INTENT(IN)          :: n
+    INTEGER(mpi), INTENT(OUT)         :: nrank
     REAL(mpd), INTENT(OUT)            :: diag(n)
-    INTEGER(mpi), INTENT(OUT)                     :: next(n)
+    INTEGER(mpi), INTENT(OUT)         :: next(n)
+    REAL(mpd), INTENT(OUT)            :: vk(n)
+    INTEGER(mpi), INTENT(IN)          :: mon
+    
     INTEGER(mpl) :: i8
     INTEGER(mpl) :: j8
     INTEGER(mpl) :: jj
@@ -222,8 +254,6 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
     INTEGER(mpl) :: kkmk
     INTEGER(mpl) :: jk
     INTEGER(mpl) :: jl
-    INTEGER(mpl) :: llk
-    INTEGER(mpl) :: ljl
     
     REAL(mpd) :: vkk
     REAL(mpd) :: vjk
@@ -233,7 +263,7 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
     next0=1
     l=1
     DO i=1,n
-        i8=int8(i)
+        i8=INT(i,mpl)
         next(i)=i+1                ! set "next" pointer
         diag(i)=ABS(v((i8*i8+i8)/2))  ! save abs of diagonal elements
     END DO
@@ -241,12 +271,14 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
 
     nrank=0
     DO i=1,n                    ! start of loop
+        ! monitoring ?
+        IF(mon>0) CALL monpgs(i)
         k  =0
         vkk=0.0_mpd
         j=next0
         last=0
 05      IF(j > 0) THEN
-            j8=int8(j)
+            j8=INT(j,mpl)
             jj=(j8*j8+j8)/2
             IF(ABS(v(jj)) > MAX(ABS(vkk),eps*diag(j))) THEN
                 vkk=v(jj)
@@ -259,7 +291,7 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
         END IF
   
         IF(k /= 0) THEN            ! pivot found
-            k8=int8(k)
+            k8=INT(k,mpl)
             kk=(k8*k8+k8)/2
             kkmk=kk-k8
             IF(l == 0) THEN
@@ -277,63 +309,46 @@ SUBROUTINE sqminl(v,b,n,nrank,diag,next)   !
             DO j=1,n
                 IF(j == k) THEN
                     jk=kk
+                    vk(j)=0.
                 ELSE
                     IF(j < k) THEN
                         jk=jk+1
                     ELSE
-                        jk=jk+int8(j)-1
+                        jk=jk+INT(j,mpl)-1
                     END IF
                     v(jk)=v(jk)*vkk
+                    vk(j)=v(jk)
                 END IF
             END DO
             ! parallelize row loop
-            ! slot of 128 'J' for next idle thread
+            ! slot of 128 'J' for next idle thread (optimized on Intel Xeon)
             !$OMP PARALLEL DO &
-            !$OMP PRIVATE(JL,JK,L,LJL,LLK,VJK,J8) &
+            !$OMP PRIVATE(JL,VJK,J8) &
             !$OMP SCHEDULE(DYNAMIC,128)
             DO j=n,1,-1
-                j8=int8(j)
+                IF(j == k) CYCLE
+                j8=INT(j,mpl)
                 jl=j8*(j8-1)/2
-                IF(j /= k) THEN
-                    IF(j < k) THEN
-                        jk=kkmk+j8
-                    ELSE
-                        jk=k8+jl
-                    END IF
-                    vjk  =v(jk)/vkk
-                    b(j) =b(j)-b(k)*vjk
-                    ljl=jl
-                    llk=kkmk
-                    DO l=1,MIN(j,k-1)
-                        ljl=ljl+1
-                        llk=llk+1
-                        v(ljl)=v(ljl)-v(llk)*vjk
-                    END DO
-                    ljl=ljl+1
-                    llk=kk
-                    DO l=k+1,j
-                        ljl=ljl+1
-                        llk=llk+l-1
-                        v(ljl)=v(ljl)-v(llk)*vjk
-                    END DO
-                END IF
+                vjk  =vk(j)/vkk
+                b(j) =b(j)-b(k)*vjk
+                v(jl+1:jl+j)=v(jl+1:jl+j)-vk(1:j)*vjk
             END DO
-        !$OMP END PARALLEL DO
+            !$OMP END PARALLEL DO
         ELSE
             DO k=1,n
-                k8=int8(k)
+                k8=INT(k,mpl)
                 kk=(k8*k8-k8)/2
                 IF(next(k) /= 0) THEN
                     b(k)=0.0_mpd       ! clear vector element
                     DO j=1,k
-                        IF(next(j) /= 0) v(kk+int8(j))=0.0_mpd  ! clear matrix row/col
+                        IF(next(j) /= 0) v(kk+INT(j,mpl))=0.0_mpd  ! clear matrix row/col
                     END DO
                 END IF
             END DO
             GO TO 10
         END IF
     END DO             ! end of loop
-    10   DO jj=1,(int8(n)*int8(n)+int8(n))/2
+    10   DO jj=1,(INT(n,mpl)*INT(n+1,mpl))/2
         v(jj)=-v(jj)      ! finally reverse sign of all matrix elements
     END DO
 END SUBROUTINE sqminl
@@ -850,6 +865,126 @@ SUBROUTINE cholin(g,v,n)
     END DO
 END SUBROUTINE cholin
 
+!                                                 201026 C. Kleinwort, DESY-BELLE
+!> Cholesky decomposition (LARGE pos. def. matrices).
+!!
+!! Cholesky decomposition of the matrix G:      G =  L  D  L^T
+!!
+!!  - G = symmetric matrix, in symmetric storage mode, positive definite
+!!
+!!  - L = unit (upper!) triangular matrix (1's on diagonal)
+!!
+!!  - D = diagonal matrix (elements store on diagonal of L)
+!!
+!! The sqrts of the usual Cholesky decomposition are avoided by D.
+!! Matrices L and D are stored in the place of matrix G; after the
+!! decomposition, the solution is done by CHSLV2.
+!!
+!! \param [in,out] g symmetric matrix, replaced by D,L
+!! \param [in]     n size of matrix
+!! \param [out]    NRANK rank of matrix g
+!! \param [out]    EVMAX  largest element in D
+!! \param [out]    EVMIN  smallest element in D
+!! \param [in]     MON   flag for progress monitoring
+!!
+SUBROUTINE chdec2(g,n,nrank,evmax,evmin,mon)
+    USE mpdef
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: j
+    
+    INTEGER(mpl) :: ii
+    INTEGER(mpl) :: jj
+    REAL(mpd) :: ratio
+        
+    REAL(mpd), INTENT(IN OUT)         :: g(*)
+    INTEGER(mpi), INTENT(IN)          :: n
+    INTEGER(mpi), INTENT(OUT)         :: nrank
+    REAL(mpd), INTENT(OUT)            :: evmin
+    REAL(mpd), INTENT(OUT)            :: evmax
+    INTEGER(mpi), INTENT(IN)          :: mon
+    
+    nrank=0 
+    ii=(INT(n,mpl)*INT(n+1,mpl))/2
+    DO i=n,1,-1
+        ! monitoring ?
+        IF(mon>0) CALL monpgs(n+1-i)
+        IF (g(ii) > 0.0_mpd) THEN
+            ! update rank, min, max eigenvalue
+            nrank=nrank+1
+            IF (nrank == 1) THEN
+                evmax=g(ii)
+                evmin=g(ii)
+            ELSE
+                evmax=max(evmax,g(ii))
+                evmin=min(evmin,g(ii))
+            END IF
+            g(ii)=1.0/g(ii)  ! (I,I) div !
+        END IF    
+        ii=ii-i
+        ! parallelize row loop
+        ! slot of 32 'J' for next idle thread (optimized on Intel Xeon)
+        !$OMP PARALLEL DO &
+        !$OMP PRIVATE(RATIO,JJ) &
+        !$OMP SCHEDULE(DYNAMIC,32)
+        DO j=1,i-1
+            ratio=g(ii+j)*g(ii+i)              ! (I,J) (I,I)
+            IF (ratio == 0.0_mpd) CYCLE
+            jj=(INT(j-1,mpl)*INT(j,mpl))/2
+            g(jj+1:jj+j)=g(jj+1:jj+j)-g(ii+1:ii+j)*ratio   ! (K,J) (K,I)
+        END DO ! J
+        !$OMP END PARALLEL DO
+        g(ii+1:ii+i-1)=g(ii+1:ii+i-1)*g(ii+i)            ! (I,J)
+    END DO ! I  
+        
+END SUBROUTINE chdec2
+
+!                                                 201026 C. Kleinwort, DESY-BELLE
+!> Solve A*x=b using Cholesky decomposition.
+!!
+!! Backward, forward substitution.
+!!
+!! \param [in]      g  decomposed symmetric matrix
+!! \param [in,out]  x  rhs/solution
+!! \param [in]      n  size of matrix
+!!
+SUBROUTINE chslv2(g,x,n)
+    USE mpdef
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: k
+    INTEGER(mpl) :: ii
+    INTEGER(mpl) :: kk
+    REAL(mpd) :: dsum
+
+    REAL(mpd), INTENT(IN)            :: g(*)
+    REAL(mpd), INTENT(IN OUT)        :: x(n)
+    INTEGER(mpi), INTENT(IN)                     :: n
+    
+    ii=(INT(n,mpl)*INT(n+1,mpl))/2
+    DO i=n,1,-1
+        dsum=x(i)
+        kk=ii
+        DO k=i+1,n
+            dsum=dsum-g(kk+i)*x(k)             ! (K,I)
+            kk=kk+k
+        END DO
+        x(i)=dsum
+        ii=ii-i
+    END DO
+    DO i=1,n
+        dsum=x(i)*g(ii+i)                    ! (I,I)
+        DO k=1,i-1
+            dsum=dsum-g(k+ii)*x(k)             ! (K,I)
+        END DO
+        x(i)=dsum
+        ii=ii+i
+    END DO
+
+END SUBROUTINE chslv2
+
 !     variable band matrix operations ----------------------------------
 
 !> Variable band matrix decomposition.
@@ -1035,7 +1170,7 @@ SUBROUTINE vabslv(n,val,ilptr,x)
     INTEGER(mpi), INTENT(IN)                      :: ilptr(n)
     REAL(mpd), INTENT(IN OUT)         :: x(n)
     !     ...
-    DO k=1,n                  ! forward loop
+    DO k=2,n                  ! forward loop
         mk=k-ilptr(k)+ilptr(k-1)+1
         DO j=mk,k-1
             x(k)=x(k)-val(ilptr(k)-k+j)*x(j)  ! X_k := X_k - L_kj B_j
@@ -1046,7 +1181,7 @@ SUBROUTINE vabslv(n,val,ilptr,x)
         x(k)=x(k)*val(ilptr(k))            ! X_k := X_k*D_kk
     END DO
 
-    DO k=n,1,-1               ! backward loop
+    DO k=n,2,-1               ! backward loop
         mk=k-ilptr(k)+ilptr(k-1)+1
         DO j=mk,k-1
             x(j)=x(j)-val(ilptr(k)-k+j)*x(k)  ! X_j := X_j - L_kj X_k
@@ -1196,11 +1331,11 @@ SUBROUTINE dbsvxl(v,a,b,n)                  ! LARGE symm. matrix, vector
             IF(j < i) THEN
                 ij=ij+1
             ELSE
-                ij=ij+int8(j)
+                ij=ij+INT(j,mpl)
             END IF
         END DO
         b(i)=dsum
-        ijs=ijs+int8(i)
+        ijs=ijs+INT(i,mpl)
     END DO
 END SUBROUTINE dbsvxl
 
@@ -1311,6 +1446,89 @@ SUBROUTINE dbavat(v,a,w,n,ms)
     END DO                   ! end do I
 END SUBROUTINE dbavat
 
+!> A V AT product (similarity, sparse).
+!!
+!! Multiply symmetric N-by-N matrix from the left with sparse M-by-N
+!! matrix and from the right with the transposed of the same general
+!! matrix to form symmetric M-by-M matrix (used for error propagation).
+!!
+!! \param [in]     V  symmetric N-by-N matrix
+!! \param [in]     A  sparse M-by-N matrix, content 
+!! \param [in]     IS sparse M-by-N matrix, structure
+!! \param [in,out] W  symmetric M-by-M matrix
+!! \param [in]     MS rows of A (-rows: don't reset W)
+!! \param [in]     N  columns of A
+!! \param [in]     SC scratch array
+!!
+!! Sparsity structure:
+!!  - IS(1..M): row offsets
+!!  - IS(M+1..N+M+1): column offsets
+!!  - IS(IS(1)+1..IS(M+1)): non-zero columns (column number, index for A)
+!!  - IS(IS(M+1)+1..IS(M+N+1)): non-zero rows (row number, index for A)
+!!
+SUBROUTINE dbavats(v,a,is,w,n,ms,sc)
+    USE mpdef
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: ic
+    INTEGER(mpi) :: ij
+    INTEGER(mpi) :: ijs
+    INTEGER(mpi) :: in
+    INTEGER(mpi) :: ir
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: k
+    INTEGER(mpi) :: l
+    INTEGER(mpi) :: lk
+    INTEGER(mpi) :: m
+
+    REAL(mpd), INTENT(IN)             :: v(*)
+    REAL(mpd), INTENT(IN)             :: a(*)
+    INTEGER(mpi), INTENT(IN)          :: is(*)
+    REAL(mpd), INTENT(INOUT)          :: w(*)
+    INTEGER(mpi), INTENT(IN)          :: n
+    INTEGER(mpi), INTENT(IN)          :: ms
+    INTEGER(mpi), INTENT(OUT)          :: sc(*)
+
+    REAL(mpd) :: cik
+    !     ...
+    m=ms
+    IF (m > 0) THEN
+        DO i=1,(m*m+m)/2
+            w(i)=0.0_mpd             ! reset output matrix
+        END DO
+    ELSE
+        m=-m
+    END IF
+
+    ! offsets in V
+    sc(1)=0
+    DO k=2,n
+        sc(k)=sc(k-1)+k-1
+    END DO
+    
+    ijs=0
+    DO i=1,m
+        ijs=ijs+i-1
+        DO k=1,n
+            cik=0.0_mpd
+            DO l=is(i)+1,is(i+1),2
+                ic=is(l)
+                in=is(l+1)
+                lk=sc(max(k,ic))+min(k,ic)
+                cik=cik+a(in)*v(lk)
+            END DO
+            DO j=is(m+k)+1,is(m+k+1),2
+                ir=is(j)
+                in=is(j+1)
+                IF (ir > i) EXIT
+                ij=ijs+ir
+                w(ij)=w(ij)+cik*a(in)
+            END DO
+        END DO
+    END DO
+END SUBROUTINE dbavats
+
 !> Print symmetric matrix, vector.
 !!
 !! Prints the n-vector X and the symmetric N-by-N  covariance  matrix
@@ -1420,7 +1638,7 @@ SUBROUTINE dbprv(lun,v,n)
         ip =ips
 100 CONTINUE
     ipn=ip+istp
-    WRITE(lun,102), i, ip+1-ips, (v(k),k=ip+1,MIN(ipn,ipe))
+    WRITE(lun,102) i, ip+1-ips, (v(k),k=ip+1,MIN(ipn,ipe))
     IF (ipn < ipe) THEN
         ip=ipn
         GO TO 100
@@ -1649,7 +1867,7 @@ SUBROUTINE sort2k(a,n)
         END IF
         IF(lev+2 > nlev) THEN
             CALL peend(33,'Aborted, stack overflow in quicksort')
-          STOP 'SORT2K (quicksort): stack overflow'
+            STOP 'SORT2K (quicksort): stack overflow'
         END IF
         IF(r-i < j-l) THEN
             lr(lev+1)=l
@@ -1665,6 +1883,182 @@ SUBROUTINE sort2k(a,n)
     END IF
     GO TO 10
 END SUBROUTINE sort2k
+
+!> Quick sort 2 with index.
+!!
+!! Quick sort of A(3,N) integer.
+!!
+!! \param[in,out] a vector (pair) of integers, sorted at return and an index
+!! \param[in]     n size of vector
+
+SUBROUTINE sort2i(a,n)
+    USE mpdef
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: nlev          ! stack size
+    PARAMETER (nlev=2*32) ! ... for N = 2**32 = 4.3 10**9
+    INTEGER(mpi) :: i
+    INTEGER(mpi) ::j
+    INTEGER(mpi) ::l
+    INTEGER(mpi) ::r
+    INTEGER(mpi) ::lev
+    INTEGER(mpi) ::lr(nlev)
+    INTEGER(mpi) ::lrh
+    INTEGER(mpi) ::maxlev
+    INTEGER(mpi) ::a1       ! pivot key
+    INTEGER(mpi) ::a2       ! pivot key
+    INTEGER(mpi) ::at(3)
+
+    INTEGER(mpi), INTENT(IN OUT) :: a(3,*)
+    INTEGER(mpi), INTENT(IN)     :: n
+    !     ...
+    maxlev=0
+    lev=0
+    l=1
+    r=n
+10  IF(r-l == 1) THEN     ! sort two elements L and R
+        IF(a(1,l) > a(1,r).OR.( a(1,l) == a(1,r).AND.a(2,l) > a(2,r))) THEN
+            at=a(:,l)       ! exchange L <-> R
+            a(:,l)=a(:,r)
+            a(:,r)=at
+        END IF
+        r=l
+    END IF
+    IF(r == l) THEN
+        IF(lev <= 0) THEN
+            WRITE(*,*) 'SORT2I (quicksort): maxlevel used/available =', maxlev,'/64'
+            RETURN
+        END IF
+        lev=lev-2
+        l=lr(lev+1)
+        r=lr(lev+2)
+    ELSE
+        !        LRH=(L+R)/2
+        lrh=(l/2)+(r/2)          ! avoid bit overflow
+        IF(MOD(l,2) == 1.AND.MOD(r,2) == 1) lrh=lrh+1
+        a1=a(1,lrh)      ! middle
+        a2=a(2,lrh)
+        i=l-1            ! find limits [J,I] with [L,R]
+        j=r+1
+20      i=i+1
+        IF(a(1,i) < a1) GO TO 20
+        IF(a(1,i) == a1.AND.a(2,i) < a2) GO TO 20
+30      j=j-1
+        IF(a(1,j) > a1) GO TO 30
+        IF(a(1,j) == a1.AND.a(2,j) > a2) GO TO 30
+        IF(i <= j) THEN
+            IF(a(1,i) == a(1,j).AND.a(2,i) == a(2,j)) GO TO 20 ! equal -> keep order
+            at=a(:,i)       ! exchange I <-> J
+            a(:,i)=a(:,j)
+            a(:,j)=at
+            GO TO 20
+        END IF
+        IF(lev+2 > nlev) THEN
+            CALL peend(33,'Aborted, stack overflow in quicksort')
+            STOP 'SORT2I (quicksort): stack overflow'
+        END IF
+        IF(r-i < j-l) THEN
+            lr(lev+1)=l
+            lr(lev+2)=j
+            l=i
+        ELSE
+            lr(lev+1)=i
+            lr(lev+2)=r
+            r=j
+        END IF
+        lev=lev+2
+        maxlev=MAX(maxlev,lev)
+    END IF
+    GO TO 10
+END SUBROUTINE sort2i
+
+!> Quick sort 2 with index.
+!!
+!! Quick sort of A(4,N) integer.
+!!
+!! \param[in,out] a vector (pair) of integers, sorted at return and an index
+!! \param[in]     n size of vector
+
+SUBROUTINE sort22(a,n)
+    USE mpdef
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: nlev          ! stack size
+    PARAMETER (nlev=2*32) ! ... for N = 2**32 = 4.3 10**9
+    INTEGER(mpi) :: i
+    INTEGER(mpi) ::j
+    INTEGER(mpi) ::l
+    INTEGER(mpi) ::r
+    INTEGER(mpi) ::lev
+    INTEGER(mpi) ::lr(nlev)
+    INTEGER(mpi) ::lrh
+    INTEGER(mpi) ::maxlev
+    INTEGER(mpi) ::a1       ! pivot key
+    INTEGER(mpi) ::a2       ! pivot key
+    INTEGER(mpi) ::at(4)
+
+    INTEGER(mpi), INTENT(IN OUT) :: a(4,*)
+    INTEGER(mpi), INTENT(IN)     :: n
+    !     ...
+    maxlev=0
+    lev=0
+    l=1
+    r=n
+    IF (n<=1) RETURN
+10  IF(r-l == 1) THEN     ! sort two elements L and R
+        IF(a(1,l) > a(1,r).OR.( a(1,l) == a(1,r).AND.a(2,l) > a(2,r))) THEN
+            at=a(:,l)       ! exchange L <-> R
+            a(:,l)=a(:,r)
+            a(:,r)=at
+        END IF
+        r=l
+    END IF
+    IF(r == l) THEN
+        IF(lev <= 0) THEN
+            WRITE(*,*) 'SORT22 (quicksort): maxlevel used/available =', maxlev,'/64'
+            RETURN
+        END IF
+        lev=lev-2
+        l=lr(lev+1)
+        r=lr(lev+2)
+    ELSE
+        !        LRH=(L+R)/2
+        lrh=(l/2)+(r/2)          ! avoid bit overflow
+        IF(MOD(l,2) == 1.AND.MOD(r,2) == 1) lrh=lrh+1
+        a1=a(1,lrh)      ! middle
+        a2=a(2,lrh)
+        i=l-1            ! find limits [J,I] with [L,R]
+        j=r+1
+20      i=i+1
+        IF(a(1,i) < a1) GO TO 20
+        IF(a(1,i) == a1.AND.a(2,i) < a2) GO TO 20
+30      j=j-1
+        IF(a(1,j) > a1) GO TO 30
+        IF(a(1,j) == a1.AND.a(2,j) > a2) GO TO 30
+        IF(i <= j) THEN
+            at=a(:,i)       ! exchange I <-> J
+            a(:,i)=a(:,j)
+            a(:,j)=at
+            GO TO 20
+        END IF
+        IF(lev+2 > nlev) THEN
+            CALL peend(33,'Aborted, stack overflow in quicksort')
+            STOP 'SORT22 (quicksort): stack overflow'
+        END IF
+        IF(r-i < j-l) THEN
+            lr(lev+1)=l
+            lr(lev+2)=j
+            l=i
+        ELSE
+            lr(lev+1)=i
+            lr(lev+2)=r
+            r=j
+        END IF
+        lev=lev+2
+        maxlev=MAX(maxlev,lev)
+    END IF
+    GO TO 10
+END SUBROUTINE sort22
 
 !> Chi2/ndf cuts.
 !!
@@ -1728,6 +2122,7 @@ END FUNCTION chindl
 !! decomposition. No fill-in is created ahead in any row or ahead of the
 !! first entry in any column, but existing zero-values will become
 !! non-zero. The decomposition is done "in-place".
+!! (The diagonal will contain the inverse of the diaginal of L).
 !!
 !!  - NRKD = 0   no component removed
 !!
@@ -1741,13 +2136,16 @@ END FUNCTION chindl
 !! by about a word length (see line "test for linear dependence"),
 !! then the pivot is assumed as zero and the entire row/column is
 !! reset to zero, removing the corresponding element from the solution.
+!! Optionally use only diagonal element in this case to preserve rank
+!! (changing band to skyline matrix).
 !!
 !! \param [in]      n      size of matrix
 !! \param [in,out]  c      variable-band matrix, replaced by L
 !! \param [in]      india  pointer array
 !! \param [out]     nrkd   removed components
+!! \param [in]      iopt   >0: use diagonal to preserve rank ('skyline')
 
-SUBROUTINE lltdec(n,c,india,nrkd)
+SUBROUTINE lltdec(n,c,india,nrkd,iopt)
     USE mpdef
 
     IMPLICIT NONE
@@ -1763,8 +2161,12 @@ SUBROUTINE lltdec(n,c,india,nrkd)
     REAL(mpd), INTENT(IN OUT) :: c(*)
     INTEGER(mpi), INTENT(IN)              :: india(n)
     INTEGER(mpi), INTENT(OUT)             :: nrkd
-    
+    INTEGER(mpi), INTENT(IN)              :: iopt
+    REAL(mpd) eps
     !     ...
+    eps = 16.0_mpd * epsilon(eps) ! 16 * precision(mpd) 
+      
+    !     ..
     nrkd=0
     diag=0.0_mpd
     IF(c(india(1)) > 0.0) THEN
@@ -1790,17 +2192,21 @@ SUBROUTINE lltdec(n,c,india,nrkd)
             IF(j /= k) c(kj)=c(kj)*diag
         END DO ! J
   
-        IF(diag+c(india(k)) > diag) THEN      ! test for linear dependence
+        IF(c(india(k)) > eps*diag) THEN      ! test for linear dependence
             c(india(k))=1.0_mpd/SQRT(c(india(k))) ! square root
         ELSE
             DO j=mk,k                  ! reset row K
                 c(india(k)-k+j)=0.0_mpd
             END DO ! J
-            IF(nrkd == 0) THEN
-                nrkd=-k
+            IF (iopt > 0 .and. diag > 0.0) THEN ! skyline
+                c(india(k))=1.0_mpd/SQRT(diag) ! square root
             ELSE
-                IF(nrkd < 0) nrkd=1
-                nrkd=nrkd+1
+                IF(nrkd == 0) THEN
+                    nrkd=-k
+                ELSE
+                    IF(nrkd < 0) nrkd=1
+                    nrkd=nrkd+1
+                END IF
             END IF
         END IF
   
@@ -1840,6 +2246,7 @@ SUBROUTINE lltfwd(n,c,india,x)
         END DO ! J
         x(k)=x(k)*c(india(k))
     END DO ! K
+    
     RETURN
 END SUBROUTINE lltfwd
 
@@ -1860,13 +2267,13 @@ SUBROUTINE lltbwd(n,c,india,x)
 
     IMPLICIT NONE
     INTEGER(mpi) :: j
-    INTEGER(mpi) :: k
+    INTEGER(mpi) :: k   
 
     INTEGER(mpi), INTENT(IN)              :: n
     REAL(mpd), INTENT(IN)     :: c(*)
     INTEGER(mpi), INTENT(IN)              :: india(n)
     REAL(mpd), INTENT(IN OUT) :: x(n)
-
+    
     DO k=n,2,-1                    ! backward loop
         x(k)=x(k)*c(india(k))
         DO j=k-india(k)+india(k-1)+1,k-1
@@ -1874,6 +2281,8 @@ SUBROUTINE lltbwd(n,c,india,x)
         END DO ! J
     END DO ! K
     x(1)=x(1)*c(india(1))
+    
+    RETURN
 END SUBROUTINE lltbwd
 
 !> Decomposition of equilibrium systems.
@@ -1887,12 +2296,13 @@ END SUBROUTINE lltbwd
 !!
 !! \param [in]      n      size of symmetric matrix
 !! \param [in]      m      number of constrains
+!! \param [in]      ls     flag for skyline decomposition
 !! \param [in,out]  c      combined variable-band + constraints matrix, replaced by decomposition
 !! \param [in,out]  india  pointer array
 !! \param [out]     nrkd   removed components
 !! \param [out]     nrkd2  removed components
 !!
-SUBROUTINE equdec(n,m,c,india,nrkd,nrkd2)
+SUBROUTINE equdec(n,m,ls,c,india,nrkd,nrkd2)
     USE mpdef
 
     IMPLICIT NONE
@@ -1900,42 +2310,45 @@ SUBROUTINE equdec(n,m,c,india,nrkd,nrkd2)
     INTEGER(mpi) :: j
     INTEGER(mpi) :: jk
     INTEGER(mpi) :: k
-    INTEGER(mpi) :: ntotal
 
     INTEGER(mpi), INTENT(IN)              :: n
     INTEGER(mpi), INTENT(IN)              :: m
+    INTEGER(mpi), INTENT(IN)              :: ls    
     REAL(mpd), INTENT(IN OUT) :: c(*)
     INTEGER(mpi), INTENT(IN OUT)          :: india(n+m)
     INTEGER(mpi), INTENT(OUT)             :: nrkd
     INTEGER(mpi), INTENT(OUT)             :: nrkd2
 
-        !     ...
-    ntotal=n+n*m+(m*m+m)/2
+    !     ...
 
-    CALL lltdec(n,c,india,nrkd)                  ! decomposition G G^T
-    DO i=1,m
-        CALL lltfwd(n,c,india,c(india(n)+(i-1)*n+1)) ! forward solution K
-    END DO
+    nrkd=0
+    nrkd2=0
+    
+    CALL lltdec(n,c,india,nrkd,ls)             ! decomposition G G^T
+    
+    IF (m>0) THEN
+        DO i=1,m
+            CALL lltfwd(n,c,india,c(india(n)+(i-1)*n+1)) ! forward solution K
+        END DO
 
-    jk=india(n)+n*m
-    DO j=1,m
-        DO k=1,j
-            jk=jk+1
-            c(jk)=0.0_mpd                                 ! product K K^T
-            DO i=1,n
-                c(jk)=c(jk)+c(india(n)+(j-1)*n+i)*c(india(n)+(k-1)*n+i)
+        jk=india(n)+n*m
+        DO j=1,m
+            DO k=1,j
+                jk=jk+1
+                c(jk)=0.0_mpd                                 ! product K K^T
+                DO i=1,n
+                    c(jk)=c(jk)+c(india(n)+(j-1)*n+i)*c(india(n)+(k-1)*n+i)
+                END DO
             END DO
         END DO
-    END DO
 
-    india(n+1)=1
-    DO i=2,m
-        india(n+i)=india(n+i-1)+MIN(i,m)              ! pointer for K K^T
-    END DO
+        india(n+1)=1
+        DO i=2,m
+            india(n+i)=india(n+i-1)+MIN(i,m)              ! pointer for K K^T
+        END DO
 
-    CALL lltdec(m,c(india(n)+n*m+1),india(n+1),nrkd2)  ! decomp. H H^T
-
-    ntotal=n+n*m+(m*m+m)/2
+        CALL lltdec(m,c(india(n)+n*m+1),india(n+1),nrkd2,0)  ! decomp. H H^T
+    ENDIF
 
     RETURN
 END SUBROUTINE equdec
@@ -1967,27 +2380,33 @@ SUBROUTINE equslv(n,m,c,india,x)                   ! solution vector
     REAL(mpd), INTENT(IN)     :: c(*)
     INTEGER(mpi), INTENT(IN)              :: india(n+m)
     REAL(mpd), INTENT(IN OUT) :: x(n+m)
-
+    
     CALL lltfwd(n,c,india,x)                           ! result is u
-    DO i=1,m
-        DO j=1,n
-            x(n+i)=x(n+i)-x(j)*c(india(n)+(i-1)*n+j)         ! g - K u
+        
+    IF (m>0) THEN
+        DO i=1,m
+            DO j=1,n
+                x(n+i)=x(n+i)-x(j)*c(india(n)+(i-1)*n+j)         ! g - K u
+            END DO
         END DO
-    END DO
-    CALL lltfwd(m,c(india(n)+n*m+1),india(n+1),x(n+1)) ! result is v
+        CALL lltfwd(m,c(india(n)+n*m+1),india(n+1),x(n+1)) ! result is v
 
 
-    CALL lltbwd(m,c(india(n)+n*m+1),india(n+1),x(n+1)) ! result is -y
-    DO i=1,m
-        x(n+i)=-x(n+i)                                    ! result is +y
-    END DO
-
-    DO i=1,n
-        DO j=1,m
-            x(i)=x(i)-x(n+j)*c(india(n)+(j-1)*n+i)           ! u - K^T y
+        CALL lltbwd(m,c(india(n)+n*m+1),india(n+1),x(n+1)) ! result is -y
+        DO i=1,m
+            x(n+i)=-x(n+i)                                    ! result is +y
         END DO
-    END DO
+
+        DO i=1,n
+            DO j=1,m
+                x(i)=x(i)-x(n+j)*c(india(n)+(j-1)*n+i)           ! u - K^T y
+            END DO
+        END DO
+    ENDIF
+    
     CALL lltbwd(n,c,india,x)                           ! result is x
+    
+    RETURN
 END SUBROUTINE equslv
 
 !> Constrained preconditioner, decomposition.
@@ -2018,8 +2437,9 @@ END SUBROUTINE equslv
 !! \param [out]    cu    1/sqrt(c)
 !! \param [in,out] a     constraint matrix (size n*p), modified
 !! \param [out]    s     Cholesky decomposed symmetric (P,P) matrix
+!! \param [out]    nrkd  removed components
 
-SUBROUTINE precon(p,n,c,cu,a,s)
+SUBROUTINE precon(p,n,c,cu,a,s,nrkd)
     USE mpdef
 
     IMPLICIT NONE
@@ -2037,10 +2457,12 @@ SUBROUTINE precon(p,n,c,cu,a,s)
     REAL(mpd), INTENT(OUT)    :: cu(n)
     REAL(mpd), INTENT(IN OUT) :: a(n,p)
     REAL(mpd), INTENT(OUT)    :: s((p*p+p)/2)
+    INTEGER(mpi), INTENT(OUT) :: nrkd
 
     REAL(mpd) :: div
     REAL(mpd) :: ratio
     
+    nrkd=0
     DO i=1,(p*p+p)/2
         s(i)=0.0_mpd
     END DO
@@ -2051,6 +2473,7 @@ SUBROUTINE precon(p,n,c,cu,a,s)
             cu(i)=1.0_mpd/SQRT(div)
         ELSE
             cu(i)=0.0_mpd
+            nrkd=nrkd+1
         END IF
         DO j=1,p
             a(i,j)=a(i,j)*cu(i)              ! K = A C^{-1/2}
@@ -2422,3 +2845,262 @@ SUBROUTINE sqmibb(v,b,n,nbdr,nbnd,inv,nrank,vbnd,vbdr,aux,vbk,vzru,scdiag,scflag
     END IF
 
 END SUBROUTINE sqmibb
+
+!                                                 181105 C. Kleinwort, DESY-BELLE
+!> Band bordered matrix.
+!!
+!! Obtain solution of a system of linear equations with symmetric
+!! band bordered  matrix (V * X = B), on request inverse is calculated.
+!! For band part root-free Cholesky decomposition and forward/backward
+!! substitution is used.
+!!
+!! Use decomposition in band and border part for block matrix algebra:
+!!
+!!     | A  Ct |   | x1 |   | b1 |        , A  is the band part
+!!     |       | * |    | = |    |        , Ct is the mixed part
+!!     | C  D  |   | x2 |   | b2 |        , D  is the border part
+!!
+!! \param [in,out] v symmetric N-by-N matrix in symmetric storage mode
+!!                   (V(1) = V11, V(2) = V12, V(3) = V22, V(4) = V13, ...),
+!!                   replaced by inverse matrix
+!! \param [in,out] b N-vector, replaced by solution vector
+!! \param [in]     n size of V, B
+!! \param [in]     nbdr   border size
+!! \param [in]     nbnd   band width
+!! \param [in]     inv    =1 calculate band part of inverse (for pulls),
+!!                        >1 calculate complete inverse
+!! \param [out]    nrank  rank of matrix V
+!! \param [out]    vbnd   band part of V
+!! \param [out]    vbdr   border part of V
+!! \param [out]    aux    solutions for border rows
+!! \param [out]    vbk    matrix for border solution
+!! \param [out]    vzru   border solution
+!! \param [out]    scdiag workspace (D)
+!! \param [out]    scflag workspace (I)
+!!
+SUBROUTINE sqmibb2(v,b,n,nbdr,nbnd,inv,nrank,vbnd,vbdr,aux,vbk,vzru,scdiag,scflag)
+    USE mpdef
+
+    ! REAL(mpd) scratch arrays:
+    !     VBND(N*(NBND+1)) = storage of band   part
+    !     VBDR(N* NBDR)    = storage of border part
+    !     AUX (N* NBDR)    = intermediate results
+
+    ! cost[dot ops] ~= (N-NBDR)*(NBDR+NBND+1)**2 + NBDR**3/3 (leading term, solution only)
+
+    IMPLICIT NONE
+    INTEGER(mpi) :: i
+    INTEGER(mpi) :: ib
+    INTEGER(mpi) :: ij
+    INTEGER(mpi) :: ioff
+    INTEGER(mpi) :: ip
+    INTEGER(mpi) :: ip1
+    INTEGER(mpi) :: is
+    INTEGER(mpi) :: j
+    INTEGER(mpi) :: j0
+    INTEGER(mpi) :: jb
+    INTEGER(mpi) :: joff
+    INTEGER(mpi) :: koff
+    INTEGER(mpi) :: mp1
+    INTEGER(mpi) :: nb1
+    INTEGER(mpi) :: nmb
+    INTEGER(mpi) :: npri
+    INTEGER(mpi) :: nrankb
+
+    REAL(mpd), INTENT(IN OUT)         :: v(*)
+    REAL(mpd), INTENT(OUT)            :: b(n)
+    INTEGER(mpi), INTENT(IN)                      :: n
+    INTEGER(mpi), INTENT(IN)                      :: nbdr
+    INTEGER(mpi), INTENT(IN)                      :: nbnd
+    INTEGER(mpi), INTENT(IN)                      :: inv
+    INTEGER(mpi), INTENT(OUT)                     :: nrank
+
+    REAL(mpd), INTENT(OUT) :: vbnd(n*(nbnd+1))
+    REAL(mpd), INTENT(OUT) :: vbdr(n*nbdr)
+    REAL(mpd), INTENT(OUT) :: aux(n*nbdr)
+    REAL(mpd), INTENT(OUT) :: vbk((nbdr*nbdr+nbdr)/2)
+    REAL(mpd), INTENT(OUT) :: vzru(nbdr)
+    REAL(mpd), INTENT(OUT) :: scdiag(nbdr)
+    INTEGER(mpi), INTENT(OUT)          :: scflag(nbdr)
+
+    SAVE npri
+    DATA npri / 100 /
+    !           ...
+    nrank=0
+    mp1=nbnd+1
+    nmb=n-nbdr
+    nb1=nmb+1
+    !     copy band part
+    DO i=1,nmb
+        ip=(i*(i+1))/2
+        is=0
+        DO j=i,MIN(nmb,i+nbnd)
+            ip=ip+is
+            is=j
+            ib=j-i+1
+            vbnd(ib+(i-1)*mp1)=v(ip)
+        END DO
+    END DO
+    !     copy border part
+    IF (nbdr > 0) THEN
+        ioff=0
+        DO i=nb1,n
+            ip=(i*(i-1))/2
+            DO j=1,i
+                vbdr(ioff+j)=v(ip+j)
+            END DO
+            ioff=ioff+n
+        END DO
+    END IF
+
+    CALL dbcdec(vbnd,mp1,nmb,aux)
+    ! use? CALL DBFDEC(VBND,MP1,NMB) ! modified decomp., numerically more stable
+    !      CALL DBCPRB(VBND,MP1,NMB)
+    ip=1
+    DO i=1, nmb
+        IF (vbnd(ip) <= 0.0_mpd) THEN
+            npri=npri-1
+            IF (npri >= 0) THEN
+                IF (vbnd(ip) == 0.0_mpd) THEN
+                    PRINT *, ' SQMIBB2 matrix singular', n, nbdr, nbnd
+                ELSE
+                    PRINT *, ' SQMIBB2 matrix not positive definite', n, nbdr, nbnd
+                END IF
+            END IF
+            !           return zeros
+            DO ip=1,n
+                b(ip)=0.0_mpd
+            END DO
+            DO ip=1,(n*n+n)/2
+                v(ip)=0.0_mpd
+            END DO
+            RETURN
+        END IF
+        ip=ip+mp1
+    END DO
+    nrank=nmb
+
+    IF (nbdr == 0) THEN ! special case NBDR=0
+  
+        CALL dbcslv(vbnd,mp1,nmb,b,b)
+        IF (inv > 0) THEN
+            IF (inv > 1) THEN
+                CALL dbcinv(vbnd,mp1,nmb,v)
+            ELSE
+                CALL dbcinb(vbnd,mp1,nmb,v)
+            END IF
+        END IF
+  
+    ELSE ! general case NBDR>0
+  
+        ioff=0
+        DO ib=1,nbdr
+            !           solve for aux. vectors
+            CALL dbcslv(vbnd,mp1,nmb,vbdr(ioff+1),aux(ioff+1))
+            !           zT ru
+            vzru(ib)=b(nmb+ib)
+            DO i=1,nmb
+                vzru(ib)=vzru(ib)-b(i)*aux(ioff+i)
+            END DO
+            ioff=ioff+n
+        END DO
+        !        solve for band part only
+        CALL dbcslv(vbnd,mp1,nmb,b,b)
+        !        Ck - cT z
+        ip=0
+        ioff=0
+        koff=nmb
+        DO ib=1,nbdr
+            joff=0
+            DO jb=1,ib
+                ip=ip+1
+                vbk(ip)=vbdr(koff+jb)
+                DO i=1,nmb   
+                    vbk(ip)=vbk(ip)-vbdr(ioff+i)*aux(joff+i)
+                END DO
+                joff=joff+n
+            END DO
+            ioff=ioff+n
+            koff=koff+n
+        END DO
+        
+        !        solve border part
+        CALL sqminv(vbk,vzru,nbdr,nrankb,scdiag,scflag)
+        IF (nrankb == nbdr) THEN
+            nrank=nrank+nbdr
+        ELSE
+            npri=npri-1
+            IF (npri >= 0) PRINT *, ' SQMIBB2 undef border ', n, nbdr, nbnd, nrankb
+            DO ib=1,nbdr
+                vzru(ib)=0.0_mpd
+            END DO
+            DO ip=(nbdr*nbdr+nbdr)/2,1,-1
+                vbk(ip)=0.0_mpd
+            END DO
+        END IF
+        !        smoothed data points
+        ioff=0
+        DO ib=1, nbdr
+            DO i=1,nmb
+                b(i)=b(i)-vzru(ib)*aux(ioff+i)
+            END DO
+            ioff=ioff+n
+            b(nmb+ib)=vzru(ib)
+        END DO
+        !        inverse requested ?
+        IF (inv > 0) THEN
+            IF (inv > 1) THEN
+                CALL dbcinv(vbnd,mp1,nmb,v)
+            ELSE
+                CALL dbcinb(vbnd,mp1,nmb,v)
+            END IF
+            !           assemble band and border
+            IF (nbdr > 0) THEN
+                ! band part
+                ip1=(nmb*nmb+nmb)/2
+                DO i=nmb-1,0,-1
+                    j0=0
+                    IF (inv == 1) j0=MAX(0,i-nbnd)
+                    DO j=i,j0,-1
+                        ioff=1
+                        DO ib=1,nbdr
+                            joff=1
+                            DO jb=1,nbdr
+                                ij=MAX(ib,jb)
+                                ij=(ij*ij-ij)/2+MIN(ib,jb)
+                                v(ip1)=v(ip1)+vbk(ij)*aux(ioff+i)*aux(joff+j)
+                                joff=joff+n
+                            END DO
+                            ioff=ioff+n
+                        END DO
+                        ip1=ip1-1
+                    END DO
+                    ip1=ip1-j0
+                END DO
+                ! border part
+                ip1=(nmb*nmb+nmb)/2
+                ip=0
+                DO ib=1,nbdr
+                    DO i=1,nmb
+                        ip1=ip1+1
+                        v(ip1)=0.0_mpd
+                        joff=0
+                        DO jb=1,nbdr
+                            ij=MAX(ib,jb)
+                            ij=(ij*ij-ij)/2+MIN(ib,jb)
+                            v(ip1)=v(ip1)-vbk(ij)*aux(i+joff)
+                            joff=joff+n
+                        END DO
+                    END DO
+                    DO jb=1,ib
+                        ip1=ip1+1
+                        ip=ip+1
+                        v(ip1)=vbk(ip)
+                    END DO
+                END DO
+
+            END IF
+        END IF
+    END IF
+
+END SUBROUTINE sqmibb2

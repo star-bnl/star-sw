@@ -1,6 +1,9 @@
 # #################################################################
 # Makefile for MillePede II (Fortran90) with possible input from C
 # 
+# Author Volker Blobel, University Hamburg, 2005-2009
+# Updates by Gero Flucke, CERN, Claus Kleinwort, DESY
+#
 # Tested on - 64-bit SL5          with gcc version 4.4.4.
 #           - 64 bit Ubuntu 11.10 with gcc version 4.6.1.
 #
@@ -41,12 +44,21 @@ SUPPORT_ZLIB = yes
 # requires z library and header to be installed at places defined here:
 ZLIB_INCLUDES_DIR = =
 ZLIB_LIBS_DIR = =
+# LAPACK (64 bit) with Intel MKL
+SUPPORT_LAPACK64 = 
+#yes
+LAPACK64 = OPENBLAS
+LAPACK64_LIBS_DIR = /usr/lib64
+LAPACK64_LIB = openblasp64
+#LAPACK64 = MKL
+#LAPACK64_LIBS_DIR = <path to mkl_rt>
+#LAPACK64_LIB = mkl_rt
 #
 # If yes use multithreading with OpenMP (TM)
-#SUPPORT_OPENMP = yes
+SUPPORT_OPENMP = yes
 # ompP profiler (http://www.ompp-tool.com, needs Opari for source-to-source instrumentation)
-OMPP =
-# kinst-ompp
+OMPP = 
+#kinst-ompp
 #
 # make install copies the binary to $(PREFIX)/bin
 PREFIX = .
@@ -54,12 +66,10 @@ PREFIX = .
 # #################################################################
 #
 FCOMP = $(OMPP) $(GCC)
-#F_FLAGS = -Wall -fautomatic -fno-backslash -O3 -cpp
-F_FLAGS = -Wall -fautomatic -fno-backslash -g -cpp
+F_FLAGS = -Wall -fautomatic -fno-backslash -O3 -cpp
 #
 CCOMP = $(OMPP) $(GCC) 
-#C_FLAGS = -Wall -O3 -Df2cFortran
-C_FLAGS = -Wall -g -Df2cFortran
+C_FLAGS = -Wall -O3 -Df2cFortran
 C_INCLUDEDIRS =  # e.g. -I
 #.
 ifeq ($(findstring 4.4., $(GCCVERS)), 4.4.)
@@ -67,8 +77,7 @@ ifeq ($(findstring 4.4., $(GCCVERS)), 4.4.)
   C_LIBS = -lgfortran -lgfortranbegin
 else  
 # gcc45, gcc46:
-#  C_LIBS = -lgfortran -lm
-   C_LIBS = /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64/libgfortran.so -lm
+  C_LIBS = -lgfortran -lm
 # math library -lm or -lquadmath may be required  
 endif
 DEBUG =          # e.g. -g
@@ -79,13 +88,39 @@ ifeq ($(SUPPORT_OPENMP),yes)
   F_FLAGS += -fopenmp
 endif
 #
+ifeq ($(SUPPORT_LAPACK64),yes)
+# Using LAPACK64, tested: Intel MKL, OPENBLAS
+  C_LIBS  += -L$(LAPACK64_LIBS_DIR) -l$(LAPACK64_LIB)
+  F_FLAGS += -DLAPACK64=\"$(LAPACK64)\"
+  ifeq ($(LAPACK64),MKL)
+    $(info Using MKL for LAPACK64)
+    $(info - Provide $(LAPACK64_LIB) in runtime environment)
+     ifeq ($(SUPPORT_OPENMP),yes)
+      $(info - Set number of MKL threads in OMP_NUM_THREADS)
+     else 
+      $(info - Set number of MKL threads in MKL_NUM_THREADS)
+    endif
+    $(info - Set MKL_THREADING_LAYER=GNU)
+    $(info )
+  endif
+  ifeq ($(LAPACK64),OPENBLAS)
+    $(info Using OPENBLAS for LAPACK64)
+    $(info - Provide $(LAPACK64_LIB) in runtime environment)
+     ifeq ($(SUPPORT_OPENMP),yes)
+      $(info - Set number of OPENBLAS threads in OMP_NUM_THREADS)
+     else 
+      $(info - Set number of OPENBLAS threads in OPENBLAS_NUM_THREADS)
+    endif
+    $(info )
+  endif  
+endif
+#
 LOADER = $(OMPP) $(GCC)
-#L_FLAGS = -Wall -O3
-L_FLAGS = -Wall -g
+L_FLAGS = -Wall -O3
 #
 # objects for this project
 #
-USER_OBJ_PEDE = mpdef.o mpdalc.o mpmod.o mpbits.o mptest1.o mptest2.o mille.o mpnum.o mptext.o mphistab.o \
+USER_OBJ_PEDE = mpdef.o mpdalc.o mpmod.o mpmon.o mpbits.o mpqldec.o mptest1.o mptest2.o mille.o mpnum.o mptext.o mphistab.o \
 	minresDataModule.o minresModule.o minresqlpDataModule.o minresqlpBlasModule.o minresqlpModule.o \
         randoms.o vertpr.o linesrch.o Dbandmatrix.o pede.o
 #
@@ -104,8 +139,8 @@ ifeq ($(SUPPORT_READ_C),yes)
     endif
   endif
 endif
-#  
-#
+#  -L$(MKL_DIR) -lmkl_rt
+#  -lopenblasp64
 # Make the executables
 EXECUTABLES = pede 
 #
@@ -139,6 +174,7 @@ mpbits.o:  mpdef.o mpdalc.o
 mpdalc.o:  mpdef.o
 mpmod.o:   mpdef.o
 mpnum.o:   mpdef.o
+mpqldec.o: mpdef.o mpdalc.o
 pede.o:    mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o
 # ##################################################################
 # END

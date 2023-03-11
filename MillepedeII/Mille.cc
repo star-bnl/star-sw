@@ -1,9 +1,29 @@
-/**
- * \file
- * Create Millepede-II C-binary record.
+
+/** \file
+ *  Create Millepede-II C-binary record.
  *
- *  \author    : Gero Flucke
- *  date       : October 2006
+ *  \author Gero Flucke, University Hamburg, 2006
+ *
+ *  \copyright
+ *  Copyright (c) 2009 - 2015 Deutsches Elektronen-Synchroton,
+ *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+ *  This library is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as
+ *  published by the Free Software Foundation; either version 2 of the
+ *  License, or (at your option) any later version. \n\n
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details. \n\n
+ *  You should have received a copy of the GNU Library General Public
+ *  License along with this program (see the file COPYING.LIB for more
+ *  details); if not, write to the Free Software Foundation, Inc.,
+ *  675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ *  author    : Gero Flucke, University Hamburg, 2006
+ *  date      : October 2006
  *  $Revision: 1.3 $
  *  $Date: 2007/04/16 17:47:38 $
  *  (last update by $Author: flucke $)

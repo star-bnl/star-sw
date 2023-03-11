@@ -4,6 +4,26 @@
 
 !> \file
 !! Analyse text string.
+!!
+!! \author Volker Blobel, University Hamburg, 2005-2009 (initial Fortran77 version)
+!! \author Claus Kleinwort, DESY (maintenance and developement)
+!!
+!! \copyright
+!! Copyright (c) 2009 - 2019 Deutsches Elektronen-Synchroton,
+!! Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+!! This library is free software; you can redistribute it and/or modify
+!! it under the terms of the GNU Library General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or (at your option) any later version. \n\n
+!! This library is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!! GNU Library General Public License for more details. \n\n
+!! You should have received a copy of the GNU Library General Public
+!! License along with this program (see the file COPYING.LIB for more
+!! details); if not, write to the Free Software Foundation, Inc.,
+!! 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
 
 !> Keyword position.
 MODULE mptext
@@ -11,8 +31,9 @@ MODULE mptext
 
     IMPLICIT NONE
     SAVE
-    INTEGER(mpi) :: keya   !< start (position) of keyword
-    INTEGER(mpi) :: keyb   !< end (position) of keyword
+    INTEGER(mpi) :: keya   !< start (position) of first keyword
+    INTEGER(mpi) :: keyb   !< end (position) of first keyword
+    INTEGER(mpi) :: keyc   !< end (position) of last keyword
 
 END MODULE mptext
 
@@ -49,7 +70,6 @@ SUBROUTINE ratext(text,nums,dnum)
     INTEGER(mpi) :: last ! last non-blank character
     INTEGER(mpi), PARAMETER :: ndim=1000
     INTEGER(mpi), DIMENSION(2,ndim):: icd
-    CHARACTER (LEN=16) :: keywrd
     CHARACTER (LEN=1) :: ch
     REAL(mpd) :: dic(ndim)
     REAL(mpd) :: dumber
@@ -60,6 +80,7 @@ SUBROUTINE ratext(text,nums,dnum)
     last=0
     keya=0
     keyb=0
+    keyc=0
     IF(text(1:1) == '*') RETURN
     num=ICHAR('0')
     lent=0
@@ -194,16 +215,31 @@ SUBROUTINE ratext(text,nums,dnum)
         END IF
     END DO
 
-    keywrd=' '                     ! assemble keyword
+    ! range of keyword (and optional text argument)
     ia=0
-    ib=-1
+    ib=0
+    ic=0
+    k=0
     DO i=1,icd(1,1)-1
-        IF(ia == 0.AND.text(i:i) /= ' ') ia=i
-        IF(text(i:i) /= ' ') ib=i
+        ! (still) leading blanks ?
+        IF(ia == 0) THEN
+            IF(text(i:i) /= ' ') THEN
+                ia=i ! first non blank char
+            ELSE
+                CYCLE ! skip
+            END IF
+        END IF
+        ! non blank char ?
+        IF(text(i:i) /= ' ')  THEN
+            ic=i ! last non blank char
+        ELSE
+            k=i ! new blank
+        END IF
+        IF(k == 0) ib=i ! last non blank char in keyword
     END DO
-    IF(ib >= 0) keywrd=text(ia:ib)
     keya=ia
-    keyb=MAX(0,ib)
+    keyb=ib
+    keyc=ic
 END SUBROUTINE ratext
 
 !> Analyse text range.
@@ -250,8 +286,8 @@ END SUBROUTINE rltext
 
 !> Approximate string matching.
 !!
-!! Approximate string matching - case insensitive.
-!! Return number of matches of string PAT in string TEXT,
+!! Approximate (parallel) string matching - case insensitive.
+!! Return number of matching characters (in same order) in strings PAT and TEXT,
 !! and number NPAT, NTEXT of characters of string PAT and string TEXT.
 !! Strings are considered from first to last non-blank character.
 !!
@@ -264,7 +300,7 @@ END SUBROUTINE rltext
 !! \param[in]   text   text
 !! \param[out]  npat   number of characters in pattern
 !! \param[out]  ntext  number of characters in text
-!! \return      number of matching characters of pattern in text
+!! \return      number of matching characters in pattern and text
 
 INTEGER(mpi) FUNCTION matint(pat,text,npat,ntext)
     USE mpdef
@@ -272,7 +308,6 @@ INTEGER(mpi) FUNCTION matint(pat,text,npat,ntext)
     IMPLICIT NONE
     INTEGER(mpi) :: i
     INTEGER(mpi) :: ic
-    INTEGER(mpi) :: ideq
     INTEGER(mpi) :: ip
     INTEGER(mpi) :: ipa
     INTEGER(mpi) :: ipb
@@ -280,20 +315,14 @@ INTEGER(mpi) FUNCTION matint(pat,text,npat,ntext)
     INTEGER(mpi) :: itb
     INTEGER(mpi) :: j
     INTEGER(mpi) :: jc
-    INTEGER(mpi) :: jot
     INTEGER(mpi) :: jt
-    INTEGER(mpi) :: npatma
+    INTEGER(mpi) :: last
 
     CHARACTER (LEN=*), INTENT(IN) :: pat
     CHARACTER (LEN=*), INTENT(IN) :: text
     INTEGER(mpi), INTENT(OUT) :: npat
     INTEGER(mpi), INTENT(OUT) :: ntext
 
-    !GF
-    !      INTEGER ID(0:100,2)
-    PARAMETER (npatma=512)
-    INTEGER(mpi) :: id(0:npatma,2)
-    ! end GF
     LOGICAL :: start                        ! for case conversion
     CHARACTER (LEN=26) :: chu
     CHARACTER (LEN=26) :: chl
@@ -336,31 +365,31 @@ INTEGER(mpi) FUNCTION matint(pat,text,npat,ntext)
         IF(pat(i:i) /= ' ') ipb=i
     END DO
     npat=ipb-ipa+1
-    !GF      IF(NPAT.GT.100) STOP 'MATINT: string PAT too long!   '
-    IF(npat > npatma) THEN
-        WRITE(*,*) 'too long PAT (', pat,'):', npat, ' >', npatma
-        CALL peend(34,'Aborted, pattern string too long')
-        STOP 'MATINT: string PAT too long!   '
-    END IF
-    !GF end
-    id(0,1)=0
-    DO i=0,npat
-        id(i,2)=i
-    END DO
-    jot=2
-
-    DO j=1,ntext
-        jot=3-jot
-        jt=j+ita-1
+ 
+    ! parallel matching
+    ip=ipa
+    jt=ita
+    last=0
+    DO WHILE (ip <= ipb.AND.jt <= itb)
         jc=nj(ICHAR(text(jt:jt)))
-        DO i=1,npat
-            ip=i+ipa-1
-            ideq=id(i-1,3-jot)
-            ic=nj(ICHAR(pat(ip:ip)))
-            IF(ic /= jc) ideq=ideq+1
-            id(i,jot)=MIN(ideq,id(i,3-jot)+1,id(i-1,jot)+1)
-        END DO
-        matint=MAX(matint,npat-id(npat,jot))
+        ic=nj(ICHAR(pat(ip:ip)))
+        IF (ic == jc) THEN ! match, increment both
+            matint=matint+1
+            ip=ip+1
+            jt=jt+1
+        ELSE ! check remaining length
+            IF (ipb-ip == itb-jt) THEN ! equal, increment other than last
+                ip=ip+last
+                last=1-last ! 'invert' last
+                jt=jt+last
+            ELSE IF (ipb-ip > itb-jt) THEN ! increment ip (remaing pattern is larger)
+                ip=ip+1
+                last=0 ! ip was incremented last
+            ELSE ! increment jt (remaing text is larger)
+                jt=jt+1
+                last=1 ! jt was incremented last
+            ENDIF  
+        END IF
     END DO
 END FUNCTION matint
 
