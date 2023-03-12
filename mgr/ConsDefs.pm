@@ -637,6 +637,7 @@
    $xml .= "/xml2-config";
    $XMLINCDIR = `$xml --cflags`;
    chomp($XMLINCDIR);
+   $XMLINCDIR =~ s/ -I//; # merge on 03/12/2023
    $XMLINCDIR =~ s/-I//;
    my $XML  = `$xml --libs`; # die "$XML\n";
    my(@libs)= split(" ", $XML);
