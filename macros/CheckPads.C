@@ -1,5 +1,13 @@
 //   root.exe D/*/*20057003*.root 'CheckPads.C+(1)'
 /*
+  cd ~/work/dEdx/RunXIX_XXII_94
+  foreach f ( `ls -1d  2*.root` )  
+    set b = `basename ${f} .root`; 
+    set c = `echo ${b} | sed -e 's/hlt_//'`;
+    echo "${c}"
+    if (-r ${c}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
+  end
   cd ~/work/dEdx/RunXXII02
   foreach f ( `ls -1d   pp500_2022/hlt_2*.root` )  
     set b = `basename ${f} .root`; 
@@ -15,18 +23,12 @@
     if (-r ${b}.list) continue;
     root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
-  #grep Dead *.list > DeadFEE.list
-  #remove Dead  string >  DeadFEE2.list
 
-#  grep Dead *.list | awk -F\{ '{print "{"$2"}, /""* Dead  *""/"}' > DeadFEE2.list
   grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
                          add Dead
-#  grep Alive *.list > AliveFEE.list
-#  remove Alive  string >  AliveFEE2.list
-
   grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
   sort AliveFEE2.list > AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
@@ -89,6 +91,16 @@ end
     if (-r ${c}.list) continue;
     root.exe -q -b ${f}*.root CheckPads.C+ >& ${c}.list
 end
+  grep Dead *.list  | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  sort DeadFEE2.list > DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
+  sort DeadFeeRuns | tee DeadFeeRuns.sorted
+
+  grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
   
  */
 //________________________________________________________________________________

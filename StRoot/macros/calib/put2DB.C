@@ -25,6 +25,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
   Char_t *file = 0;
   Int_t NFiles = 0;
   TFile *f = 0;
+  Char_t row[40960] = {0};
   while ((file = (Char_t *) Dir.NextFile())) {
     if (f) {delete f; f = 0;}
     NFiles++;
@@ -124,18 +125,19 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
     if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
     Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" ) || myTable->IsA()->InheritsFrom( "St_MDFCorrection" );
-    if ( ok && N < 50) {
+    Nmax = 50; 
+    if (TName == "TpcPadCorrectionMDC")  Nmax = 96;
+    else if (TName == "TpcCurrentCorrectionX" ||
+	     TName == "TpcAccumulatedQ") Nmax = 192;
+    if ( ok && N < Nmax) {
       cout << "==================== St_tpcCorrection ====================" << endl;
       // enlarge table up to 50 rows
       //      const Int_t Nmax = 192; 
-      Nmax = 50; 
-      if (TName == "TpcCurrentCorrectionX" ||
-	  TName == "TpcAccumulatedQ")	Nmax = 192;
       if (N > Nmax) {cout << "Table " << TName.Data() << " has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
       myTable->ReAllocate(Nmax);
-      tpcCorrection_st row;
-      memset(&row, 0, sizeof(tpcCorrection_st));
-      for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
+      //      Char_t *row = new Char_t[myTable->GetRowSize()];
+      //      memset(&row, 0, myTable->GetRowSize());
+      for (Int_t i = N; i < Nmax; i++) myTable->AddAt(row);
 #if 0
       tpcCorrection_st *r = (tpcCorrection_st *) myTable->GetTable();
       for (Int_t i = 0; i < N; i++, r++) {
@@ -146,6 +148,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
       myTable->Print(0,N+1);
       N = Nmax;
       offset = 1;
+      //      delete [] row;
     }
     Int_t *rowIDs = new Int_t[N];
     for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;

@@ -48,10 +48,12 @@ end
 #  ps_OO_200GeV_2021	    ps_OO_200GeV_2021.root
 #  
 #  #  Sum
-#  foreach y (2019 2020 2021)
-
-
-
+# foreach y (2019 2020 2021)
+#   hadd FXT_${y}.root [0-9]*fixedTarget_${y}.root >&  FXT_${y}.log &
+#   hadd COL_${y}.root [0-9]*GeV_${y}.root >&  COL_${y}.log &
+# end 
+#
+#
 
 
 
