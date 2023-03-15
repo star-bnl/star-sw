@@ -1,5 +1,76 @@
 # Changelog
 
+## SL23a_0 - 2023-01-15
+
+## What's Changed
+
+* ci: Bump starenv to v0.2.3 by @plexoos in  ([#399](https://github.com/star-bnl/star-sw/pull/399))
+* Remove OnlTools/OnlinePlots by @plexoos in  ([#407](https://github.com/star-bnl/star-sw/pull/407))
+* Separate out FCS cluster seed thresholds by @akioogawa in  ([#400](https://github.com/star-bnl/star-sw/pull/400))
+* cons: Use `mysql_config` to set up external dependency for mysql by @plexoos in  ([#402](https://github.com/star-bnl/star-sw/pull/402))
+* cons: Use xml2-config to set up external dependency by @plexoos in  ([#404](https://github.com/star-bnl/star-sw/pull/404))
+* cons: Use pkg-config to set up external dependency on log4cxx by @plexoos in  ([#405](https://github.com/star-bnl/star-sw/pull/405))
+* Assorted updates to StRoot/RTS, including `char *` issue by @jml985 in  ([#406](https://github.com/star-bnl/star-sw/pull/406))
+* Update CODEOWNERS by @JohnTheBlindMilkman in  ([#414](https://github.com/star-bnl/star-sw/pull/414))
+* Add issue template for bug reports by @plexoos in  ([#391](https://github.com/star-bnl/star-sw/pull/391))
+* SpinPool Fcs pi0 finder fixing a crash by @akioogawa in  ([#412](https://github.com/star-bnl/star-sw/pull/412))
+* Bug fix on tower Et calculation for the tower selection before jet finder by @zlchang in  ([#403](https://github.com/star-bnl/star-sw/pull/403))
+* ci: Disable test throwing a `std::bad_alloc` by @plexoos in  ([#420](https://github.com/star-bnl/star-sw/pull/420))
+* ci: Upgrade GitHub actions by @plexoos in  ([#419](https://github.com/star-bnl/star-sw/pull/419))
+* Stargenerator Vertexing Options by @klendathu2k in  ([#408](https://github.com/star-bnl/star-sw/pull/408))
+* Fix copy of eTOF good channel flags to PicoEvent by @PhilippWeidenkaff in  ([#416](https://github.com/star-bnl/star-sw/pull/416))
+* ci: Switch to using specific version (v5) of test data container by @plexoos in  ([#418](https://github.com/star-bnl/star-sw/pull/418))
+* Add scripts to load dependency packages via Environment Modules by @jdbrice in  ([#409](https://github.com/star-bnl/star-sw/pull/409))
+* ci: Add test for FST chain with `st_fwd` stream data by @plexoos in  ([#421](https://github.com/star-bnl/star-sw/pull/421))
+* Encode Geometry Tag w/in DB macros by @klendathu2k in  ([#422](https://github.com/star-bnl/star-sw/pull/422))
+* [root6] Modify StRoot/StBFChain/BFC.C for ROOT6/cling by @klendathu2k in  ([#423](https://github.com/star-bnl/star-sw/pull/423))
+* change for yuri by @jml985 in  ([#429](https://github.com/star-bnl/star-sw/pull/429))
+* Avoid pointer cast to `time_t` from incompatible type by @plexoos in  ([#427](https://github.com/star-bnl/star-sw/pull/427))
+* ci: Enable more tests using star-test-data:v6 by @plexoos in  ([#415](https://github.com/star-bnl/star-sw/pull/415))
+* Fix GCC warning: forbidden conversion to `char*` by @plexoos in  ([#389](https://github.com/star-bnl/star-sw/pull/389))
+* Change TPX gain loading interface from `fTpx->put(... to fTpx->gain_al` by @fisyak in  ([#417](https://github.com/star-bnl/star-sw/pull/417))
+* ci: Delete untagged images after successful build by @plexoos in  ([#430](https://github.com/star-bnl/star-sw/pull/430))
+* docker: Add latest tag to default build configuration by @plexoos in  ([#433](https://github.com/star-bnl/star-sw/pull/433))
+* ci: Turn off CI for certain directories by @plexoos in  ([#434](https://github.com/star-bnl/star-sw/pull/434))
+* new ETOF table requested by Yannick by @dmarkh in  ([#435](https://github.com/star-bnl/star-sw/pull/435))
+* Add .devcontainer for GitHub codespaces by @plexoos in  ([#438](https://github.com/star-bnl/star-sw/pull/438))
+* Set search paths for included files for ROOT C++ interpreter by @plexoos in  ([#441](https://github.com/star-bnl/star-sw/pull/441))
+* [root6] StEvent/StEnumerations.cxx fix by @klendathu2k in  ([#440](https://github.com/star-bnl/star-sw/pull/440))
+* Update to StFcsWaveformFitMaker to use new algorithm by @dkapukchyan in  ([#401](https://github.com/star-bnl/star-sw/pull/401))
+* Add FST raw hits in StEvent and StMuDst by @techuan-huang in  ([#378](https://github.com/star-bnl/star-sw/pull/378))
+* [geometry] Add y2023 first cut and y2022a production geometries by @klendathu2k in  ([#432](https://github.com/star-bnl/star-sw/pull/432))
+* [root6] Set attributes on StrangeMuDstMaker in StBFChain, rather than using interpreter to configure by @klendathu2k in  ([#444](https://github.com/star-bnl/star-sw/pull/444))
+* [root6] Eliminate crash when creating the MuDst by @klendathu2k in  ([#442](https://github.com/star-bnl/star-sw/pull/442))
+* New RHICf table for Seunghwan by @dmarkh in  ([#446](https://github.com/star-bnl/star-sw/pull/446))
+* [root6] Fix undeclared identifier 'chain' in StarDb/AgMLGeometry/Geometry...C macro by @plexoos in  ([#448](https://github.com/star-bnl/star-sw/pull/448))
+* Adding eq4 for StTriggerData by @akioogawa in  ([#450](https://github.com/star-bnl/star-sw/pull/450))
+* build-pull-request.yml: cancel previous workflows by @veprbl in  ([#453](https://github.com/star-bnl/star-sw/pull/453))
+* Minimum viable pentagonal sTGC geometry with misalignment by @jdbrice in  ([#447](https://github.com/star-bnl/star-sw/pull/447))
+* Update to trigger simulator to save intermediate jet patch ADCs and minor cleanup to the jet maker by @zlchang in  ([#424](https://github.com/star-bnl/star-sw/pull/424))
+* build: Treat all warnings as errors by @plexoos in  ([#445](https://github.com/star-bnl/star-sw/pull/445))
+* Remove StBFChain dependence in StarDb/AgMLGeometry/CreateGeometry.h by @klendathu2k in  ([#462](https://github.com/star-bnl/star-sw/pull/462))
+* [root6] Address issues in TTable when interpreted by Cling by @plexoos in  ([#449](https://github.com/star-bnl/star-sw/pull/449))
+* update TpcRS parameters for Run19 AuAu19.6 GeV embedding by @zhux97 in  ([#463](https://github.com/star-bnl/star-sw/pull/463))
+* Revert "Remove StBFChain dependence in StarDb/AgMLGeometry/CreateGeometry.h (#462)" (partially) by @plexoos in  ([#468](https://github.com/star-bnl/star-sw/pull/468))
+* docker: Exit build immediately with non-zero status by @plexoos in  ([#469](https://github.com/star-bnl/star-sw/pull/469))
+* Hide include directive from ROOT5 interpreter by @klendathu2k in  ([#456](https://github.com/star-bnl/star-sw/pull/456))
+* cons: Extend `SKIP_DIRS` to match arbitrary path by @plexoos in  ([#467](https://github.com/star-bnl/star-sw/pull/467))
+* StGenericVertex: Clean up #include statements by @plexoos in  ([#443](https://github.com/star-bnl/star-sw/pull/443))
+* Run XIX-XXII new dE/dx model and calibration by @fisyak in  ([#464](https://github.com/star-bnl/star-sw/pull/464))
+* ci: Improve image tagging by @plexoos in  ([#474](https://github.com/star-bnl/star-sw/pull/474))
+* StFst: Fix GCC 4.8.5 warnings by @plexoos in  ([#472](https://github.com/star-bnl/star-sw/pull/472))
+* ci: Add more tests by @plexoos in  ([#473](https://github.com/star-bnl/star-sw/pull/473))
+* StETofHitMaker: Fix unused variable warnings by @plexoos in  ([#471](https://github.com/star-bnl/star-sw/pull/471))
+* Update clock jump correction, add new method for hit manipulation on counter level by @YannickSoehngen in  ([#457](https://github.com/star-bnl/star-sw/pull/457))
+
+## New Contributors
+
+* @JohnTheBlindMilkman made their first contribution in  ([#414](https://github.com/star-bnl/star-sw/pull/414))
+* @dkapukchyan made their first contribution in  ([#401](https://github.com/star-bnl/star-sw/pull/401))
+
+**Full Changelog**: https://github.com/star-bnl/star-sw/compare/SL22c_0...SL23a_0
+
+
 ## SL22c_0 - 2022-09-09
 
 * ci: Expand tests with 2012, 2021, and 2022 data samples by @plexoos in  ([#371](https://github.com/star-bnl/star-sw/pull/371))

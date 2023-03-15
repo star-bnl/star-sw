@@ -29,7 +29,14 @@ class StMessMgr;
 #include "TAttr.h"
 #include "Rtypes.h"
 #endif
-StBFChain    *chain=0; 
+
+#if !defined(__CINT__) || defined(__CLING__)
+// 'chain' is defined in StBFChain library (see StRoot/StBFChain.cxx)
+extern StBFChain* chain;
+#else
+StBFChain* chain = 0;
+#endif
+
 //_____________________________________________________________________
 //_________________ Prototypes _______________________________________________
 void Usage();
@@ -140,7 +147,7 @@ void bfc(Int_t First, Int_t Last,
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Dynamically link some shared libs
-  if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
+  Load(Chain);
   chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
   TString tChain(Chain);
   chain->cd();

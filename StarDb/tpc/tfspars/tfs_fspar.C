@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tfspars/tfs_fspar Allocated rows: 1  Used rows: 1  Row size: 160 bytes
 //  Table: tfs_fspar_st[0]--> tfs_fspar_st[0]
@@ -23,5 +23,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.zbmax	 =        512; // total time bins ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }
