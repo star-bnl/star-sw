@@ -24,6 +24,9 @@
  *  the StEpdHit object in StEvent
  *
  * - Mike Lisa Jan 2018
+ *
+ * - Updated March 2023 - Mike Lisa - see header for details.
+ *
  ************************************************/
 
 #include "StEvent/StEpdHit.h"
@@ -31,24 +34,27 @@
 
 ClassImp(StMuEpdHit)
 
-StMuEpdHit::StMuEpdHit() : StMuEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0){
+StMuEpdHit::StMuEpdHit() : StMuEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0, 0, 0.0){
   /* no-op */
 }
 
 StMuEpdHit::StMuEpdHit(Int_t position, Int_t tile,
 		       Short_t EW, Int_t ADC, Int_t TAC,
-		       Int_t TDC, bool hasTAC, Float_t nMIP,
-		       bool statusIsGood, Int_t truthId) :
+		       Int_t TDC, bool hasTAC, Float_t nMIP_QT,
+		       bool statusIsGood, Int_t truthId,
+		       UShort_t DEPdata, Float_t nMIP_DEP) :
   mId( (100*position + tile)*EW ),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
-  mnMIP(nMIP),
-  mTruthId(truthId)
+  mnMIP_QT(nMIP_QT),
+  mTruthId(truthId),
+  mDEPdata(DEPdata),
+  mnMIP_DEP(nMIP_DEP)
 {
   /* no-op */
 }
 
 StMuEpdHit::StMuEpdHit(StEpdHit* epdHit) :
-  mId(epdHit->id()),  mQTdata(epdHit->qtData()), mnMIP(epdHit->nMIP()), mTruthId(epdHit->idTruth())
+  mId(epdHit->id()),  mQTdata(epdHit->qtData()), mnMIP_QT(epdHit->nMIP_QT()), mTruthId(epdHit->idTruth()), mDEPdata(epdHit->depData()), mnMIP_DEP(epdHit->nMIP_DEP())
 {
   /* no-op */
 }
