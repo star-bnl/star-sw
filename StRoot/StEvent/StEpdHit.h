@@ -118,8 +118,8 @@ public:
     void setQTdata(int packedData);
     
     /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data
-    void setnMIP_QT(float nMIP_QT);
     void setnMIP(float nMIP);
+    void setnMIP_QT(float nMIP_QT);
     
     /// set identifier of particle most responsible for energy loss (simulation)
     void setIdTruth(int id);
@@ -144,7 +144,6 @@ public:
 
     /// returns true if there is QT data stored - added March 2023
     bool qtDataAvailable() const;
-
 
 protected:
     
@@ -174,13 +173,13 @@ protected:
     ClassDef(StEpdHit, 2)
 };
 
-inline int   StEpdHit::qtData() const {return mQTdata;}
-inline float StEpdHit::nMIP() const {return (this->qtDataAvailable())?mnMIP:mnMIP_DEP;}  // March 2023
-inline void  StEpdHit::setQTdata(int packedData) {mQTdata=packedData;}
-inline void  StEpdHit::setnMIP(float nMIP) {mnMIP = nMIP;}
-inline void  StEpdHit::setIdTruth(int id) {mTruthId = id;}
-inline int   StEpdHit::idTruth() const {return mTruthId;}
-inline short StEpdHit::side() const { return mId < 0 ? -1 : +1;}
+inline int   StEpdHit::qtData() const {return mQTdata; }
+inline float StEpdHit::nMIP() const { return qtDataAvailable() ? mnMIP : mnMIP_DEP; }
+inline void  StEpdHit::setQTdata(int packedData) { mQTdata = packedData; }
+inline void  StEpdHit::setnMIP(float nMIP) { mnMIP = nMIP; }
+inline void  StEpdHit::setIdTruth(int id) { mTruthId = id; }
+inline int   StEpdHit::idTruth() const { return mTruthId; }
+inline short StEpdHit::side() const { return mId < 0 ? -1 : +1; }
 inline short StEpdHit::id() const { return mId; }
 inline int   StEpdHit::position() const { return std::abs(mId / 100); }
 inline int   StEpdHit::tile() const { return std::abs(mId % 100); }
@@ -189,11 +188,11 @@ inline int   StEpdHit::tac() const { return (mQTdata >> 12) & 0x0FFF; }
 inline int   StEpdHit::tdc() const { return (mQTdata >> 24) & 0x001F; }
 inline bool  StEpdHit::hasTac() const { return (mQTdata >> 29) & 0x1; }
 inline bool  StEpdHit::isGood() const { return (mQTdata >> 30) & 0x1; }
-inline void  StEpdHit::setDEPdata(unsigned short DEPdata) {mDEPdata=DEPdata;}
-inline void  StEpdHit::setnMIP_DEP(float nMIP_DEP) {mnMIP_DEP=nMIP_DEP;}
-inline int   StEpdHit::depData() const {return mDEPdata;}
-inline float StEpdHit::nMIP_DEP() const {return mnMIP_DEP;}
-inline bool  StEpdHit::qtDataAvailable() const {return (this->adc()!=0);}
-inline float StEpdHit::nMIP_QT() const {return mnMIP;}
-inline void  StEpdHit::setnMIP_QT(float nMIP_QT){mnMIP=nMIP_QT;}
+inline void  StEpdHit::setDEPdata(unsigned short DEPdata) { mDEPdata = DEPdata; }
+inline void  StEpdHit::setnMIP_DEP(float nMIP_DEP) { mnMIP_DEP = nMIP_DEP; }
+inline int   StEpdHit::depData() const { return mDEPdata; }
+inline float StEpdHit::nMIP_DEP() const { return mnMIP_DEP; }
+inline bool  StEpdHit::qtDataAvailable() const { return adc() != 0; }
+inline float StEpdHit::nMIP_QT() const { return mnMIP; }
+inline void  StEpdHit::setnMIP_QT(float nMIP_QT){ mnMIP = nMIP_QT; }
 #endif
