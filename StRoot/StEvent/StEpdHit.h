@@ -62,7 +62,7 @@ public:
     /// \param TAC          TAC reported by QT board (if there is one) [0,4095]
     /// \param TDC          TDC reported by QT board [0,32]
     /// \param hasTAC       true/fals if this channel has a TAC
-    /// \param nMIP_QT      gain-calibrated signal from QT; energy loss in terms of MPV of Landau for a MIP - renamed from nMIP March 2023
+    /// \param nMIP         gain-calibrated signal from QT; energy loss in terms of MPV of Landau for a MIP
     /// \param statusIsGood good status, according to database
     /// \param truthId      particle id of particle most responsible for energy loss (simulation)
     /// \param DEPdata      raw DEP data, in summed ADCs - added May 2023
@@ -118,10 +118,8 @@ public:
     void setQTdata(int packedData);
     
     /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data
-    /// I have RENAMED this method from "setnMIP" to "setnMIP_QT".  I know such actions are to be minimized,
-    /// but I do not believe this will cause any
-    /// problems for the outside user.  And it is simply safer. - March 2023
     void setnMIP_QT(float nMIP_QT);
+    void setnMIP(float nMIP);
     
     /// set identifier of particle most responsible for energy loss (simulation)
     void setIdTruth(int id);
@@ -162,8 +160,7 @@ protected:
     
     /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
     /// important: prior to 2023, the ONLY information came from the QTs.  Now we also have the DEP
-    /// So, this variable has been RENAMED from mnMIP to mnMIP_QT.  I believe it the safest way - March 2023
-    Float_t mnMIP_QT;
+    Float_t mnMIP;
     
     /// identifier of particle most responsible for energy loss (simulation)
     Int_t mTruthId;
@@ -178,8 +175,9 @@ protected:
 };
 
 inline int   StEpdHit::qtData() const {return mQTdata;}
-inline float StEpdHit::nMIP() const {return (this->qtDataAvailable())?mnMIP_QT:mnMIP_DEP;}  // March 2023
+inline float StEpdHit::nMIP() const {return (this->qtDataAvailable())?mnMIP:mnMIP_DEP;}  // March 2023
 inline void  StEpdHit::setQTdata(int packedData) {mQTdata=packedData;}
+inline void  StEpdHit::setnMIP(float nMIP) {mnMIP = nMIP;}
 inline void  StEpdHit::setIdTruth(int id) {mTruthId = id;}
 inline int   StEpdHit::idTruth() const {return mTruthId;}
 inline short StEpdHit::side() const { return mId < 0 ? -1 : +1;}
@@ -196,6 +194,6 @@ inline void  StEpdHit::setnMIP_DEP(float nMIP_DEP) {mnMIP_DEP=nMIP_DEP;}
 inline int   StEpdHit::depData() const {return mDEPdata;}
 inline float StEpdHit::nMIP_DEP() const {return mnMIP_DEP;}
 inline bool  StEpdHit::qtDataAvailable() const {return (this->adc()!=0);}
-inline float StEpdHit::nMIP_QT() const {return mnMIP_QT;}
-inline void  StEpdHit::setnMIP_QT(float nMIP_QT){mnMIP_QT=nMIP_QT;}
+inline float StEpdHit::nMIP_QT() const {return mnMIP;}
+inline void  StEpdHit::setnMIP_QT(float nMIP_QT){mnMIP=nMIP_QT;}
 #endif
