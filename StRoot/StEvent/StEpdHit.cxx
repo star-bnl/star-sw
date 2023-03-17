@@ -24,7 +24,7 @@
 
 ClassImp(StEpdHit);
 
-StEpdHit::StEpdHit() : StEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0, 0, 0.0)
+StEpdHit::StEpdHit() : StEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0)
 {
   /* no-op */
 }
@@ -32,11 +32,7 @@ StEpdHit::StEpdHit() : StEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0, 0, 0.0)
 StEpdHit::StEpdHit(int position, int tile,
 		   short EW, int ADC, int TAC,
 		   int TDC, bool hasTAC, float nMIP,
-		   bool statusIsGood, int truthId) :
-  mId( (100*position + tile)*EW ),
-  mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
-  mnMIP(nMIP),
-  mTruthId(truthId)
+		   bool statusIsGood, int truthId) : StEpdHit(position, tile, EW, ADC, TAC, TDC, hasTAC, nMIP, statusIsGood, truthId, 0, 0)
 {
   /* no-op */
 }

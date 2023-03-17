@@ -65,7 +65,7 @@ public:
     /// \param nMIP         gain-calibrated signal from QT; energy loss in terms of MPV of Landau for a MIP
     /// \param statusIsGood good status, according to database
     /// \param truthId      particle id of particle most responsible for energy loss (simulation)
-    StEpdHit(int position, int tile, short EW, int ADC, int TAC, int TDC, bool hasTAC, float nMIP_QT, bool statusIsGood, int truthId);
+    StEpdHit(int position, int tile, short EW, int ADC, int TAC, int TDC, bool hasTAC, float nMIP, bool statusIsGood, int truthId);
     /// \param DEPdata      raw DEP data, in summed ADCs - added May 2023
     /// \param nMIP_DEP     gain-calibrated signal from DEP; energy loss in terms of MPV of Landau for a MIP - added May 2023
     StEpdHit(int position, int tile, short EW, int ADC, int TAC, int TDC, bool hasTAC, float nMIP_QT, bool statusIsGood, int truthId, unsigned short DEPdata, float nMIP_DEP);
