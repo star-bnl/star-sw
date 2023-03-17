@@ -41,6 +41,17 @@
  *  (Also works for StEpdHit::id() and StMuEpdHit::id())
  *
  * - Mike Lisa March 2018
+ *
+ * ================================================
+ * Update March 2023 (More than 5 years later.  Not bad.)  Mike Lisa
+ * - We now have the DAQ upgrade and DEP readout on the West side.
+ *   DEP information will *always* be there.  QT only at low rate.
+ *   So, now have to store DEP information.
+ *
+ * It means several new methods, and two new data members:
+ * 1) unsigned short DEPdata
+ * 2) float nMIP_DEP
+ * So, now the size of one StMuEpdHit is 16 bytes
  ************************************************/
 
 class StPicoEpdHit : public TObject {
@@ -57,15 +68,20 @@ class StPicoEpdHit : public TObject {
   /// \param TAC          TAC reported by QT board (if there is one) [0,4095]
   /// \param TDC          TDC reported by QT board [0,32]
   /// \param hasTAC       true/fals if this channel has a TAC
-  /// \param nMIP         gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP
+  /// \param nMIP_QT         gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP - based on QT data
   /// \param statusIsGood good status, according to database
+  /// \param DEPdata      raw data from DEP - March 2023
+  /// \param nMIP_DEP     gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP - based on DEP data - March 2023
+
   StPicoEpdHit(Int_t position, Int_t tile, Int_t EW, Int_t ADC, Int_t TAC, Int_t TDC,
-	       Bool_t hasTAC, Float_t nMIP, Bool_t statusIsGood);
+	       Bool_t hasTAC, Float_t nMIP_QT, Bool_t statusIsGood, UShort_t DEPdata, Float_t nMIP_DEP);
   /// constructor just taking id, QT, nMIP
   /// \param id           tile id, encoding size, position and tile
   /// \param QTdata       bit-compressed QT data
-  /// \nMIP               calibrated ADC
-  StPicoEpdHit(Short_t id, Int_t QTdata, Float_t nMIP);
+  /// \param nMIP_QT      calibrated ADC from QT
+  /// \param DEPdata      raw DEP data - March 2023
+  /// \param nMIP_DEP     calibrated DEP data - March 2023
+  StPicoEpdHit(Short_t id, Int_t QTdata, Float_t nMIP_QT, UShort_t DEPdata, Float_t nMIP_DEP);
   /// Copy constructor
   StPicoEpdHit(const StPicoEpdHit &hit);
   /// Destructor
@@ -98,10 +114,6 @@ class StPicoEpdHit : public TObject {
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
   Int_t qtData() const              { return mQTdata; }
-  /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  /// if the tile is identified as bad in the database, returns zero.  Note you
-  /// can always access the raw ADC value, regardless of good/bad
-  Float_t nMIP() const              { return this->isGood() ? mnMIP : 0.0; }
   /// false if tile is bad or missing, according to (time-dependent) database
   Bool_t isGood() const             { return (mQTdata >> 30) & 0x1; }
   /// truncated nMIP.  This is usually the most useful thing to the physics analyzer.
@@ -119,8 +131,27 @@ class StPicoEpdHit : public TObject {
   /// It is expected that this will not be invoked, but rather the constructor used
   /// \param id = sign*(100*position+tile) where sign=+/- for West/East wheel
   void setId(Short_t id)            { mId = id; }
-  /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  void setnMIP(Float_t nMIP)        { mnMIP = nMIP; }
+  /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT
+  void setnMIP_QT(Float_t nMIP_QT)        { mnMIP_QT = nMIP_QT; }
+
+
+  // Now a bunch of methods for DEP - March 2023
+  /// store the raw DEP data
+  void setDEPdata(unsigned short DEPdata){mDEPdata=DEPdata;}
+  /// store the gain-calibrated energy loss based on DEP data
+  void setnMIP_DEP(float nMipDep){mnMIP_DEP=nMipDep;}
+  /// get the raw DEP data
+  UShort_t depData() const     {return mDEPdata;}
+  /// get the gain-calibrated energy loss based on DEP data
+  Float_t nMIP_DEP() const     {return this->isGood() ? mnMIP_DEP : 0.0;}
+  /// true if there is QT information available for this (will be false for sure at high rates on west side)
+  bool qtDataAvailable() const {return this->adc()>0;}
+  /// gain calibrated energy loss in tile based on QT, in units of Landau MPV for one MIP
+  /// if the tile is identified as bad in the database, returns zero.  Note you
+  /// can always access the raw ADC value, regardless of good/bad
+  Float_t nMIP_QT() const      {return this->isGood() ? mnMIP_QT : 0.0; }
+  /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data if there is QT data.  Otherwise from DEP
+  Float_t nMIP() const         {if (!this->isGood()) return 0.0; return (this->qtDataAvailable())?mnMIP_QT:mnMIP_DEP;}
 
  protected:
 
@@ -134,10 +165,16 @@ class StPicoEpdHit : public TObject {
   ///                      bit 30 is the good/bad (1/0) status flag
   Int_t mQTdata;
 
-  /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  Float_t mnMIP;
+  /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data
+  Float_t mnMIP_QT;
 
-  ClassDef(StPicoEpdHit, 1)
+  /// raw DEP data - March 2023
+  UShort_t mDEPdata;
+
+  /// gain-calibrated energy loss in tile, in units of Landau MPV for one MIP - based on DEP - March 2023
+  Float_t mnMIP_DEP;
+
+  ClassDef(StPicoEpdHit, 2)
 };
 
 #endif

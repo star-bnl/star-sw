@@ -39,6 +39,7 @@
 #include "../StPicoEmcTrigger.h"
 #include "../StPicoBTofPidTraits.h"
 #include "../StPicoTrackCovMatrix.h"
+#include "../StPicoEpdHit.h"
 
 // Load libraries (for ROOT_VERSTION_CODE >= 393215)
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0) 
@@ -139,6 +140,9 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   TH1F *hBTofTrayHit = new TH1F("hBTofTrayHit","BTof tray number with the hit",
 				120, -0.5, 119.5);
 
+  // Epd - mal 13mar2023
+  TH1F* hEpdHitsByPP = new TH1F("hEpdHitsByPP","Number of EPD hits by PP",25,-12.5,12.5);
+  TH1F* hEpdMult     = new TH1F("hEpdMult","EPD hit multiplicity",800,0,800);
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -155,6 +159,12 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
 
     // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
+
+    // EPD histograms - mal 13mar2023
+    hEpdMult->Fill(dst->numberOfEpdHits());
+    for (unsigned int iepd=0; iepd<dst->numberOfEpdHits(); iepd++){
+      hEpdHitsByPP->Fill(dst->epdHit(iepd)->position()*dst->epdHit(iepd)->side());
+    }
 
     // Retrieve event information
     StPicoEvent *event = dst->event();
