@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ttepars/tte_control Allocated rows: 1  Used rows: 1  Row size: 12 bytes
 //  Table: tte_control_st[0]--> tte_control_st[0]
@@ -14,5 +14,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.res	 =          0; // Turn on/off calculation of the residuals ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

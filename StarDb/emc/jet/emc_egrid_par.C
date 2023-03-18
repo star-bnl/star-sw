@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/jet/emc_egrid_par Allocated rows: 1  Used rows: 1  Row size: 16 bytes
 //  Table: emc_egrid_par_st[0]--> emc_egrid_par_st[0]
@@ -15,5 +15,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.ideal_phi_nbin	 =        100; // Size of energy matrix for ideal egrid ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

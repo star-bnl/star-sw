@@ -56,6 +56,7 @@
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMD2.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDN.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionMDC.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
@@ -104,6 +105,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      //				      "TpcPadTBins",               
 				      "TpcZDC",                    
 				      "TpcPadCorrectionMDF",     
+				      "TpcPadCorrectionMDC",     
 				      //				      "TpcAdcI",            
 				      //				      "TpcnPad",                   
 				      //				      "TpcnTbk",            
@@ -186,6 +188,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
   m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
   m_Corrections[kTpcPadMDF             ] = dEdxCorrection_t("TpcPadCorrectionMDF" ,"Gain Variation along the anode wire"                                ,St_TpcPadCorrectionMDF::instance());         
+  m_Corrections[kTpcPadMDC             ] = dEdxCorrection_t("TpcPadCorrectionMDC" ,"Gain Variation along the anode wire with track curvature"           ,St_TpcPadCorrectionMDC::instance());         
   m_Corrections[kAdcI                  ] = dEdxCorrection_t("TpcAdcI"             ,"Gain on Accumulated Adc on a socket)"			        ,St_TpcAdcIC::instance());		     
   m_Corrections[knPad                  ] = dEdxCorrection_t("TpcnPad"             ,"Gain on cluster length in pads"					,St_TpcnPadC::instance());		     
   m_Corrections[knTbk                  ] = dEdxCorrection_t("TpcnTbk"             ,"Gain on cluster length i time buckets"				,St_TpcnTbkC::instance());		     
@@ -306,6 +309,23 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       SafeDelete(m_Corrections[x].Chair);
     }
   }      
+  // Use only TpcPadCorrection
+  Int_t PriorityListP[] = {kTpcPadMDC, kTpcPadMDF};
+  i = 0;
+  for (auto k : PriorityListP) {
+    i++;
+    if (! m_Corrections[k].Chair) continue;
+    Int_t j = 0;
+    for (auto x : PriorityListP) {
+      j++;
+      if (j <= i) continue;
+      if (! m_Corrections[x].Chair) continue;
+      if (x == k) continue;
+      LOG_WARN << "With " << m_Corrections[k].Name << " activated => Deactivate " << m_Corrections[x].Name << endm;
+      CLRBIT(m_Mask,x); 
+      SafeDelete(m_Corrections[x].Chair);
+    }
+  }      
 }
 //________________________________________________________________________________
 StTpcdEdxCorrection::~StTpcdEdxCorrection() {
@@ -322,6 +342,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
   Double_t dxC     	  = CdEdx.F.dx;    
+  Int_t qB                = CdEdx.qB;    
   Double_t adcCF = CdEdx.adc;
   Int_t iok = 0;
   if (dxC <= 0 || (dEU <= 0 && adcCF <= 0)) {
@@ -465,7 +486,14 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else if (k == kTpcPadMDF) {
       l = 2*(sector-1);
       if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
-      dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      goto ENDL;
+    } else if (k == kTpcPadMDC) {
+      Int_t nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
+      l = 2*(sector-1);
+      if (nrows > 48 && qB) l += 48*qB;
+      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
+      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow+24*qB,CdEdx.xpadR));
       goto ENDL;
     } else if (k == kAdcCorrectionMDF) {
       ADC = adcCF;
@@ -473,10 +501,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	return k;
       }
       l = kTpcOutIn;
-      Int_t nrows = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->nrows();
+      Int_t nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
       Double_t xx[2] = {TMath::Log(ADC), (Double_t)(CdEdx.Npads+CdEdx.Ntbks)};
-      Double_t Cor = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t Cor = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->Eval(l,xx);
       dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     } else if (k == kAdcCorrection3MDF) {
@@ -485,10 +513,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	return k;
       }
       l = kTpcOutIn;
-      Int_t nrows = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->nrows();
+      Int_t nrows = ((St_MDFCorrection3C *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
       Double_t xx[3] = {(Double_t)  CdEdx.Ntbks, TMath::Abs(CdEdx.zG), TMath::Log(ADC)};
-      Double_t Cor = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t Cor = ((St_MDFCorrection3C *) m_Corrections[k].Chair)->Eval(l,xx);
       dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     } else if (k == kAdcCorrection4MDF) {
@@ -603,12 +631,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } 
       if (k == kzCorrection || k == kzCorrectionC) {
 	// Take care about prompt hits and Gating Grid region in Simulation
-	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) {
 	    return k;
 	  }
-	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
+	}
+	if (VarXs[k] < 0) {// prompt hits
+	  dE *= TMath::Exp(1.2);
 	}
 	if (k == kzCorrectionC && corl->type == 20) {
 	  Int_t np = TMath::Abs(corl->npar)%100;

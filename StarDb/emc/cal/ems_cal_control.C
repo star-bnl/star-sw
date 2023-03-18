@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/ems_cal_control Allocated rows: 1  Used rows: 1  Row size: 52 bytes
 //  Table: ems_cal_control_st[0]--> ems_cal_control_st[0]
@@ -25,5 +25,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.occupancy	 =        0.5; // hit occupancy toy_simulator mode=1 ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }
