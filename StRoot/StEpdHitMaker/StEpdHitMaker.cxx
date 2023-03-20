@@ -12,11 +12,15 @@
   If it is not there, it creates one and fills it from the
   StTriggerData object and info from the StEpdDbMaker (database)
 
+
+  Update March 2023 - Mike Lisa
+  Updated to pull DEP information from the TriggerData and store in the newly-updated StEpdHit object
+
 */
 
 #include "StEpdHitMaker.h"
 #include "StMaker.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StEvent/StTriggerData.h"
 #include "StEpdHit.h"
 #include <TSystem.h> 
@@ -138,12 +142,12 @@ void StEpdHitMaker::FillStEpdData(){
 
   int nHitsAdded=0;
   for (short ew=0; ew<2; ew++){        // EastWest (ew) = 0,1 for east,west
+    short EWforHit=(ew==0)?-1:+1;
     for (short PP=1; PP<13; PP++){     // note position (PP) goes from 1..12
       for (short TT=1; TT<32; TT++){   // note tile number (TT) goes from 1..31
 
 	short crateAdc = mEpdDbMaker->GetCrateAdc(ew,PP,TT);
 
-	short EWforHit=(ew==0)?-1:+1;
 
 	//---------------------------------------------------
 	//  This below is for debugging only...
@@ -194,10 +198,14 @@ void StEpdHitMaker::FillStEpdData(){
 	    double gain = mEpdDbMaker->GetMip(ew,PP,TT);
 	    if (gain<=0.0) gain = 1.0;  // not yet calibrated.  Give it a gain of unity
 	  
-	    float nMIP = (ADC + mEpdDbMaker->GetOffset(ew,PP,TT)) / mEpdDbMaker->GetMip(ew,PP,TT);
+	    float nMIP_QT = (ADC + mEpdDbMaker->GetOffset(ew,PP,TT)) / mEpdDbMaker->GetMip(ew,PP,TT);
 
 	    int truthId=0;  // this is for simulation
 
+	    // March 2023 - now add DEP information
+	    unsigned short rawDEP;
+	    float calibratedDEP;
+	    getEpdDepInfo(ew,PP,TT,rawDEP,calibratedDEP);
 
 	    // EpdOfs2 << ew << "\t" << PP << "\t" << TT << "\t" 
 	    // 	  << mEpdDbMaker->GetCrateAdc(ew,PP,TT) << "\t"
@@ -208,14 +216,24 @@ void StEpdHitMaker::FillStEpdData(){
 	    // 	  << mEpdDbMaker->GetChannelTac(ew,PP,TT) << "\t"
 	    // 	  << ADC << "\t" << nMIP << endl;
 
-	    StEpdHit* hit = new StEpdHit(PP,TT,EWforHit,ADC,TAC,TDC,HasTac,nMIP,isGood,truthId);
+	    StEpdHit* hit = new StEpdHit(PP,TT,EWforHit,ADC,TAC,TDC,HasTac,nMIP_QT,isGood,truthId,rawDEP,calibratedDEP);
 	    mEpdCollection->addHit(hit);
 	    nHitsAdded++;
+	  }  // if ADC>0
+	  else{         // even if there is no ADC from the QT, there might still be info from the DEP - March 2023
+	    unsigned short rawDEP;
+	    float calibratedDEP;
+	    getEpdDepInfo(ew,PP,TT,rawDEP,calibratedDEP);
+	    if (rawDEP>0){
+	      StEpdHit* hit = new StEpdHit((int)PP,(int)TT,EWforHit,0,0,0,false,0.0,true,0,rawDEP,calibratedDEP);
+	      mEpdCollection->addHit(hit);
+	      nHitsAdded++;
+	    }
 	  }
-	}
-      }
-    }
-  }
+	}  // if crateADC>0
+      }  // loop over TT
+    }  // loop over PP
+  }  // loop over ew
 
   //  EpdOfs.close();
   //  EpdOfs2.close();
@@ -223,3 +241,25 @@ void StEpdHitMaker::FillStEpdData(){
   LOG_INFO << "StEpdHitMaker::FillStEpdData - added " << nHitsAdded << " to StEpdHitCollection" << endm;
 }
 
+
+//
+// March 2023 - get DEP data
+void StEpdHitMaker::getEpdDepInfo(short ew, short pp, short tt, unsigned short& rawDEP, float& calibratedDEP){
+  if (ew==0){ rawDEP=0; calibratedDEP=0.0; return;}  // only DEP on the west side
+
+  // -------------------------- March 2023 ---------------------------------
+  // Here is where I must fill in the code to
+  // 1) Get the raw DEP waveform from the TriggerData
+  // 2) Sum up the appropriate time buckets (this is DEPdata)
+  // 3) Get the gain constant from the database (which needs to exist!!!)
+  // 4) mnMIP_DEP = DEPdata / gain
+  // 5) put mnMIP_DEP and rawDEPdata into the StEpdHit
+  //
+  // 6) might want to impose a "zero suppression threshold" here, too
+
+
+  // right now I just return zero
+  rawDEP=0;
+  calibratedDEP=0.0;
+  return;
+}
