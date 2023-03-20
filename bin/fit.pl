@@ -93,9 +93,9 @@ if ($all) {
 	       NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
                TPoints70 TPoints70P TPointsF TPointsFP TPoints70U TPoints70UP TPointsFU TPointsFUP  TPointsN TPointsNP TPointsNU TPointsNUP
 	       NPoints70 NPoints70P NPointsF NPointsFP NPoints70U NPoints70UP NPointsFU NPointsFUP  NPointsN NPointsNP NPointsNU NPointsNUP
-               xyPad3 xyPad3P xyPad3+xyPad3P
 	      );
 }
+#               xyPad3 xyPad3P xyPad3+xyPad3P
 print "fit.pl for  @rootfiles \n"; 
 my $no = 0;
 foreach my $opt ( keys %Opts) {
