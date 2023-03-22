@@ -333,14 +333,14 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       maxHits[sector-1] = 0;
       if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
     }
-    if (maxBinZeroHits > 0) {
-      liveFrac = TMath::Max(0.1f, ((Float_t) livePads) / (1e-15f + (Float_t) totalPads));
-      maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
-      if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
-    } else {
-      maxBin0Hits = 0;
-      if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
-    }
+  } // end for(sector)
+  if (maxBinZeroHits > 0) {
+    liveFrac = TMath::Max(0.1f, ((Float_t) livePads) / (1e-15f + (Float_t) totalPads));
+    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
+  } else {
+    maxBin0Hits = 0;
+    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
   }
   /////////
   /////////     
