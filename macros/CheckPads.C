@@ -1,71 +1,4 @@
 //   root.exe D/*/*20057003*.root 'CheckPads.C+(1)'
-/*
-  cd ~/work/dEdx/RunXIX_XXII_94
-  foreach f ( `ls -1d  2*.root` )  
-    set b = `basename ${f} .root`; 
-    set c = `echo ${b} | sed -e 's/hlt_//'`;
-    echo "${c}"
-    if (-r ${c}.list) continue;
-    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
-  end
-  cd ~/work/dEdx/RunXXII02
-  foreach f ( `ls -1d   pp500_2022/hlt_2*.root` )  
-    set b = `basename ${f} .root`; 
-    set c = `echo ${b} | sed -e 's/hlt_//'`;
-    echo "${c}"
-    if (-r ${c}.list) continue;
-    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
-  end
-  cd ~/work/dEdx/RunXIX68
-  foreach f ( `ls -1d   *19/2*.root *20/2*.root` )  
-    set b = `basename ${f} .root`; 
-    echo "${b}"
-    if (-r ${b}.list) continue;
-    root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
-  end
-
-  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
-  sort DeadFEE2.list > DeadFEE.listSorted
-  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
-  sort DeadFeeRuns | tee DeadFeeRuns.sorted
-                         add Dead
-  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.sorted
-  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
-  sort AliveFeeRuns | tee AliveFeeRuns.sorted
-                          add Alive
-  
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XX.sorted
-================================================================================
-  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
-  sort DeadFEE2.list > DeadFEE.listSorted
-  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
-  sort DeadFeeRuns | tee DeadFeeRuns.sorted
-  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.sorted
-  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
-  sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XX.sorted
-
-==================== Run XXII ============================================================
-  foreach f ( `ls -1d   pp500_2022/hlt*.root` )  
-   set b = `basename ${f} .root`; 
-    echo "${b}"
-    if (-r ${b}.list) continue;
-    root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
-  end
-  grep Dead *.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
-  sort DeadFEE2.list > DeadFEE.listSorted
-  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
-  sort DeadFeeRuns | tee DeadFeeRuns.sorted
-
-  grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.sorted
-  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
-  sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_RunXXII.sorted
-==================== Run XIX - RunXXII ============================================================
-*/
 //foreach f ( `ls -1d   */2*.root` ) 
 /*
     set b = `basename ${f} .root`; 
@@ -101,8 +34,19 @@ end
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
   cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
-  
- */
+*/
+//________________________________________________________________________________
+/*
+foreach d (`ls -1d *GeV*`)
+  cd ${d}
+  set list = `ls -1d 2*.root | awk -F_ '{print $1}' | sort -u | xargs`
+  cd -
+  echo "${list}"
+  foreach f (${list})
+    root.exe -q -b ${d}/*${f}*.root CheckPads.C+ >& ${f}.list
+  end
+end
+*/
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -393,6 +337,11 @@ Int_t FEE(Int_t row, Int_t pad, Int_t &rdo) {
   return fee;
 }
 //________________________________________________________________________________
+void PrintPads(TString Dead, Int_t r, Int_t p1d, Int_t p2d, Int_t rdoG, Int_t feeG, TString RunC) {
+  r = p1d = p2d = -1;
+  cout << Dead.Data() << Form(",%3i,%3i,%3i,%2i,%3i}", r, p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+}
+//________________________________________________________________________________
 void CheckPads(Int_t sector = 0) {
   Int_t nPads[72] = { 
     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
@@ -408,6 +357,8 @@ void CheckPads(Int_t sector = 0) {
   if (! AlivePads) {cout << "AlivePads is missing" << endl; return;}
   TProfile3D *ActivePads = (TProfile3D *) gDirectory->Get("ActivePads");
   if (! ActivePads) {cout << "ActivePads is missing" << endl; return;}
+  TH3F *PVxyz = (TH3F *) gDirectory->Get("PVxyz");
+  if (! PVxyz) {cout << "Pvxyz is missing" << endl; return;}
   TSeqCollection *files = gROOT->GetListOfFiles();
   Int_t nn = files->GetSize();
   if (nn > 1) {
@@ -421,10 +372,15 @@ void CheckPads(Int_t sector = 0) {
       if (i == nn) break;
       TH3F *alivePads = (TH3F *) f->Get("AlivePads");
       if (alivePads) AlivePads->Add(alivePads);
+      TH3F *pvxyz = (TH3F *) f->Get("PVxyz");
+      if (pvxyz) PVxyz->Add(pvxyz);
       TProfile3D *activePads = (TProfile3D *) f->Get("ActivePads");
       if (activePads) ActivePads->Add(activePads);
     }
   }
+  Double_t entries = PVxyz->GetEntries();
+  cout << "Pvxyz entries = " << entries <<   endl; 
+  if (entries < 100) return;
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
   Dir.ReplaceAll("hlt_","");
   Int_t index = Dir.Index("_");
@@ -449,9 +405,11 @@ void CheckPads(Int_t sector = 0) {
   if (sector > 0) {s1 = s2 = sector;}
   Int_t minpaddiff = 5;
   for (Int_t s = s1; s <= s2; s++) {
+    TString  Dead(Form("/*Dead: */ {%2i",s));
+    TString  Alive(Form("/*Alive:*/ {%2i,",s));
     for (Int_t r = 1; r <= ny; r++) {
-      TString  Dead(Form("/*Dead: */ {%2i,%3i,",s,r));
-      TString  Alive(Form("/*Alive:*/ {%2i,%3i,",s,r));
+      //     TString  Dead(Form("/*Dead: */ {%2i,%3i,",s,r));
+      //      TString  Alive(Form("/*Alive:*/ {%2i,%3i,",s,r));
       Int_t p1d = 0, p2d = -1;
       Int_t p1a = 0, p2a = -1;
       Int_t edge1 = 1;
@@ -479,7 +437,8 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeG && p == p2d + 1) p2d = p;
 	    else {
-	      if (p1d + minpaddiff < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+	      //	      if (p1d + minpaddiff < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+	      if (p1d + minpaddiff < p2d) PrintPads(Dead, r,p1d, p2d, rdoG, feeG, RunC);
 	      p1d = p2d = p;
 	      feeG = fee;
 	      rdoG = rdo;
@@ -494,7 +453,8 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeA && p == p2a + 1) p2a = p;
 	    else {
-	      if (p1a + minpaddiff < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+	      //	      if (p1a + minpaddiff < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+	      if (p1a + minpaddiff < p2a) PrintPads(Alive, r, p1a, p2a, rdoA, feeA, RunC);
 	      p1a = p2a = p;
 	      feeA = fee;
 	      rdoA = rdo;
@@ -502,8 +462,10 @@ void CheckPads(Int_t sector = 0) {
 	  }
 	}
       }
-      if (p1d + minpaddiff < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
-      if (p1a + minpaddiff< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+      //      if (p1d + minpaddiff < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+      //      if (p1a + minpaddiff< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+      if (p1d + minpaddiff < p2d) PrintPads(Dead, r, p1d, p2d, rdoG, feeG, RunC);
+      if (p1a + minpaddiff < p2a) PrintPads(Alive, r, p1a, p2a, rdoA, feeA, RunC);
     }
     if (c1) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");
