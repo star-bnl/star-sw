@@ -102,7 +102,7 @@ $GITINFO = $LIB . "/etc/gitinfo.txt";
 if (-d .git) {
 #  my $opt = "'+%b %d %Y, %H:%M:%S";
   my @DEPS = ();
-  my @gitFiles = qw(.git/HEAD .git/FETCH_HEAD .git/ORIG_HEAD .git/COMMIT_EDITMSG);
+  my @gitFiles = qw(.git/HEAD .git/FETCH_HEAD .git/ORIG_HEAD .git/COMMIT_EDITMSG .git/logs/HEAD);
   foreach my $file (@gitfiles) {
     if (-r $file) {
       push  @DEPS, "#" . $file;
