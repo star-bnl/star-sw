@@ -1,73 +1,5 @@
 # Run Glauber simulation
 
-## Short summary
-
-Step-by-step actions are listed below.
-
-Rename directory "Makers" to "StRoot".
-
-Then:
-```bash
-./prepare.sh
-cons
-```
-
-Edit nEvents in all_submit_doFastGlauberMcMaker.csh. Recommended: nevents=200000
-```bash
-./all_submit_doFastGlauberMcMaker.csh RuRu_Case1 200 0 5 1
-```
-
-Edit creatList.csh
-```bash
-./creatList.csh
-```
-
-If you previously produced ncoll_npart.root, the following will replace it
-```bash
-root4star -b -q -l addNcollVsNpart.C
-```
-
-Change nevents, root filename, and lower multiplicity cut in doScanX_my.csh
-Change hist name in doNbdFitMaker.C
-Change parameters in submit_doScan.pl
-Remove all previous files from RatioChi2Files/
-Remove all previous files from LOG_Scan/
-```bash
-rm RatioChi2Files/*.root
-rm LOG_Scan/*
-./submit_doScan.pl
-```
-
-Wait for jobs to finish
-```bash
-mkdir LOG_Scan_Zr
-mkdir RatioChi2Files_Zr
-mv LOG_Scan/* LOG_Scan_Zr/
-mv RatioChi2Files/*.root RatioChi2Files_Zr/
-```
-or
-```bash
-mkdir LOG_Scan_Ru
-mkdir RatioChi2Files_Ru
-mv LOG_Scan/* LOG_Scan_Ru/
-mv RatioChi2Files/*.root RatioChi2Files_Ru/
-```
-Then (only once you've scanned both Ru and Zr)
-```bash
-cd getBestChi2_fromCat
-./extractChi2LinesForIsobars.sh
-```
-
-Edit nevents in genMinChi2ListForIsobars.sh: Recommended 2000000
-```bash
-./genMinChi2ListForIsobars.sh
-```
-
-### Step 0. Prerequisite
-
-Rename directory "Makers" to "StRoot". Currently, it is named Makers in
-order not to confuse autobuild (CI/CD) in git.
-
 ### Step 1. Initialization
 
 ```bash
@@ -175,6 +107,12 @@ If everything so far looks good, then you finished most parts of the steps. Now 
 Go the LOG_Scan, and find the output log files like “doScanX_my_1_27_1_8_0_16_0_11.out”, the name is defined based on the 
 parameter values, so it should be easy to find it.  Copy the line 173-204 and paste them to 
 “StRoot/StCentralityMaker/StCentrality.cxx” and change all the npp, k, x and eff values to those you obtained in the same code.
+
+Important! After updating `StCentrality.cxx` with the correct parameters, recompile and then re-generate the glauber trees that were created in the first step:
+```bash
+cons
+./all_submit_doFastGlauberMcMaker.csh RuRu_Case1 200 0 5 1
+```
 
 ```bash
 ./createList.csh
