@@ -170,23 +170,19 @@ void Db(const Char_t *tabNam  =
     }
 #endif
     if (Nrows > 10) Nrows = 10;
-#if 1
     if (table->GetRowSize() < 256 || name == "TpcAvgPowerSupply") {
-#endif
       table->Print(0,Nrows);
       cout << "==============================================" << endl;
       name += Form(".%06i.%06i.C",t[0].GetDate(),t[0].GetTime());
       ofstream out;
       out.open(name, ios::out);
       table->SavePrimitive(out,"");
-#if 1
     } else {
       name += Form(".%06i.%06i.root",t[0].GetDate(),t[0].GetTime());
       TFile *f = new TFile(name.Data(),"RECREATE");
       table->Write();
       delete f;
     }
-#endif
   }
   else cout << "Table:" << tabNam << " has not been found" << endl;
 }
