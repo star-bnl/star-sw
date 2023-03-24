@@ -285,6 +285,66 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   }
 #endif /*  __TFG__VERSION__ */
   PrintAttr();
+
+  //////////////////////////////////////
+  // XD: restore hit occupancy protection code to avoid long-hung of production jobs
+  //////////////////////////////////////
+  // Prepare scaled hit maxima
+  // No hit maxima if these DB params are 0
+  Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
+  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
+  if ( !(maxHitsPerSector > 0 || maxBinZeroHits > 0) ) return kStOK;
+  Int_t livePads = 0;
+  Int_t totalPads = 0;
+  Float_t liveFrac = 1;
+  for(Int_t sector=1;sector<=24;sector++) {
+    Int_t liveSecPads = 0;
+    Int_t totalSecPads = 0;
+
+    // Tpx
+    Int_t rowMin = 1;
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14;
+    for(Int_t row = rowMin; row <= 45; row++) {
+      Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(row);
+      totalSecPads += Npads;
+      if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
+          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+        liveSecPads += Npads;
+    }
+    
+    //iTPC
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+      for(Int_t row = 1; row <= 40; row++) {
+        Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+        totalSecPads += Npads;
+        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+          liveSecPads += Npads;
+      }
+    }  
+
+    livePads += liveSecPads;
+    totalPads += totalSecPads;
+    if (maxHitsPerSector > 0) {
+      liveFrac = TMath::Max(0.1f, ((Float_t) liveSecPads) / (1e-15f + (Float_t) totalSecPads));
+      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector << " = " << maxHits[sector-1] << endm;}
+    } else {
+      maxHits[sector-1] = 0;
+      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
+    }
+  } // end for(sector)
+  if (maxBinZeroHits > 0) {
+    liveFrac = TMath::Max(0.1f, ((Float_t) livePads) / (1e-15f + (Float_t) totalPads));
+    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
+  } else {
+    maxBin0Hits = 0;
+    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
+  }
+  /////////
+  /////////     
+
   return kStOK;
 }
 //________________________________________________________________________________
