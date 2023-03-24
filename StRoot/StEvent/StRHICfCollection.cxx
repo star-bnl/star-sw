@@ -9,6 +9,20 @@ StRHICfCollection::StRHICfCollection()
 
 StRHICfCollection::~StRHICfCollection()
 {
+  if(mRHICfRawHitColl){
+    delete mRHICfRawHitColl;
+    mRHICfRawHitColl = nullptr;
+  }
+  if(mRHICfHitColl){
+    delete mRHICfHitColl;
+    mRHICfHitColl = nullptr;
+  }
+  if(mRHICfPointColl.size() != 0){
+    for(unsigned int i=0; i<mRHICfPointColl.size(); i++){
+      delete mRHICfPointColl[i];
+      mRHICfPointColl[i] = nullptr;
+    }
+  }
 }
 
 void StRHICfCollection::clear()
