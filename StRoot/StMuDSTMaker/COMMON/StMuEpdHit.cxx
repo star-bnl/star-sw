@@ -34,18 +34,26 @@
 
 ClassImp(StMuEpdHit)
 
-StMuEpdHit::StMuEpdHit() : StMuEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0, 0, 0.0){
+StMuEpdHit::StMuEpdHit() : StMuEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0){
   /* no-op */
 }
 
 StMuEpdHit::StMuEpdHit(Int_t position, Int_t tile,
 		       Short_t EW, Int_t ADC, Int_t TAC,
-		       Int_t TDC, bool hasTAC, Float_t nMIP_QT,
+		       Int_t TDC, bool hasTAC, Float_t nMIP,
+		       bool statusIsGood, Int_t truthId) : StMuEpdHit(position, tile, EW, ADC, TAC, TDC, hasTAC, nMIP, statusIsGood, truthId, 0, 0)
+{
+  /* no-op */
+}
+
+StMuEpdHit::StMuEpdHit(Int_t position, Int_t tile,
+		       Short_t EW, Int_t ADC, Int_t TAC,
+		       Int_t TDC, bool hasTAC, Float_t nMIP,
 		       bool statusIsGood, Int_t truthId,
 		       UShort_t DEPdata, Float_t nMIP_DEP) :
   mId( (100*position + tile)*EW ),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
-  mnMIP_QT(nMIP_QT),
+  mnMIP(nMIP),
   mTruthId(truthId),
   mDEPdata(DEPdata),
   mnMIP_DEP(nMIP_DEP)
@@ -54,7 +62,7 @@ StMuEpdHit::StMuEpdHit(Int_t position, Int_t tile,
 }
 
 StMuEpdHit::StMuEpdHit(StEpdHit* epdHit) :
-  mId(epdHit->id()),  mQTdata(epdHit->qtData()), mnMIP_QT(epdHit->nMIP_QT()), mTruthId(epdHit->idTruth()), mDEPdata(epdHit->depData()), mnMIP_DEP(epdHit->nMIP_DEP())
+  mId(epdHit->id()),  mQTdata(epdHit->qtData()), mnMIP(epdHit->nMIP_QT()), mTruthId(epdHit->idTruth()), mDEPdata(epdHit->depData()), mnMIP_DEP(epdHit->nMIP_DEP())
 {
   /* no-op */
 }

@@ -55,9 +55,10 @@ public:
   /// \param TAC          TAC reported by QT board (if there is one) [0,4095]
   /// \param TDC          TDC reported by QT board [0,32]
   /// \param hasTAC       true/fals if this channel has a TAC
-  /// \param nMIP_QT      gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP - based on QT data
+  /// \param nMIP         gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP - based on QT data
   /// \param statusIsGood good status, according to database
   /// \param truthId      id of particle most responsible for energy loss (simulation)
+  StMuEpdHit(Int_t position, Int_t tile, Short_t EW, Int_t ADC, Int_t TAC, Int_t TDC, bool hasTAC, Float_t nMIP, bool statusIsGood, Int_t truthId);
   /// \param DEPdata      raw data from DEP - March 2023
   /// \param nMIP_DEP     gain-calibrated signal; energy loss in terms of MPV of Landau for a MIP - based on DEP data - March 2023
   StMuEpdHit(Int_t position, Int_t tile, Short_t EW, Int_t ADC, Int_t TAC, Int_t TDC, bool hasTAC, Float_t nMIP_QT, bool statusIsGood, Int_t truthId, UShort_t DEPdata, Float_t nMIP_DEP);
@@ -90,6 +91,8 @@ public:
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
   Int_t qtData() {return mQTdata;}
+  /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
+  Float_t nMIP() {return mnMIP;}
   /// false if tile is bad or missing, according to (time-dependent) database
   bool isGood() const;
 
@@ -103,10 +106,14 @@ public:
   /// It is expected that this will not be invoked, but rather the constructor used
   /// \param id = sign*(100*position+tile) where sign=+/- for West/East wheel
   void setId(Short_t id){mId = id;}
+  /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP
+  void SetnMIP(Float_t nMIP){mnMIP = nMIP;}
+
   /// \param gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data - March 2023
   void setnMIP_QT(Float_t nMIP_QT){mnMIP_QT = nMIP_QT;}
   /// set the id of particle most responsible for energy loss in tile (monte carlo)
   void setIdTruth(Int_t id){mTruthId = id;}
+
   /// returns the particle number for the particle most responsible for energy loss (monte carlo)
   Int_t idTruth(){return mTruthId;}
 
@@ -126,7 +133,6 @@ public:
   /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT data if there is QT data.  Otherwise from DEP
   Float_t nMIP() const {return (this->qtDataAvailable())?mnMIP_QT:mnMIP_DEP;}
 
-
 protected:
 
   /// Packed channel Id:
@@ -140,7 +146,7 @@ protected:
   Int_t mQTdata;
 
   /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP - based on QT
-  Float_t mnMIP_QT;
+  Float_t mnMIP;
 
   /// raw DEP data - March 2023
   UShort_t mDEPdata;
