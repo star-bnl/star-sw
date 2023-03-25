@@ -307,7 +307,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 		           kFcsPresId   = kFcsPresIdentifier,
                    kFttId       = kFttIdentifier,
                    kFstId       = kFstIdentifier,
-                   kMaxDetectorId = 46};
+                   kRHICfId     = kRHICfIdentifier,
+                   kMaxDetectorId = 47};
 
 /*!
  * \enum StTrackType
@@ -688,17 +689,20 @@ enum StFttConstants {
     kFttUnknownQuadrant = 4,
 };
 
-
-enum StRHICfConstants{
+/** RHICf basic constants **/
+enum StRHICfConstants {
     kRHICfNtower=2,     // 0=small, 1=large                                                        
     kRHICfNplate=16,    // longitudinal segmentations
+	kRHICfNrange=2,     // Wide and narrow Q/ch
     kRHICfNlayer=4,     // bar layers (longitudinal)
     kRHICfNxy=2,        // 0=x, 1=y 
     kRHICfNbarSmall=20, // bar# (0-19 for small) 
     kRHICfNbarLarge=40, // bar# (0-39 for large)
-    kRHICfNcad=10,      // Local counts for DAQ
+    kRHICfNorder=2,     // particle#, order#
     kRHICfNtdc=256,     // TDC
-    kRHICfNgpio=54      // Flags                                
+	kRHICfNcad0=5,      // Local counts for DAQ
+	kRHICfNgpi0=19,     // Flags for GPI0                               
+	kRHICfNgpi1=17,     // Flags for GPI1                               
 };
 
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
