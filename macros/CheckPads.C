@@ -24,8 +24,8 @@ end
     if (-r ${c}.list) continue;
     root.exe -q -b ${f}*.root CheckPads.C+ >& ${c}.list
 end
-  grep Dead *.list  | awk -F\{ '{print "{"$2}' > DeadFEE2.list
-  sort DeadFEE2.list > DeadFEE.listSorted
+  grep Dead *.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
+  sort DeadFEE2.list | tee  DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
 
@@ -43,9 +43,20 @@ foreach d (`ls -1d *GeV*`)
   cd -
   echo "${list}"
   foreach f (${list})
+    echo "${f}"
     root.exe -q -b ${d}/*${f}*.root CheckPads.C+ >& ${f}.list
   end
 end
+  grep Dead 2*.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
+  sort -u DeadFEE2.list | tee  DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
+  sort DeadFeeRuns | tee DeadFeeRuns.sorted
+
+  grep Alive 2*.list | awk -F\{ '{print "{"$2}' | tee AliveFEE2.list
+  sort -u AliveFEE2.list | tee AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
 */
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -338,7 +349,7 @@ Int_t FEE(Int_t row, Int_t pad, Int_t &rdo) {
 }
 //________________________________________________________________________________
 void PrintPads(TString Dead, Int_t r, Int_t p1d, Int_t p2d, Int_t rdoG, Int_t feeG, TString RunC) {
-  r = p1d = p2d = -1;
+  //  r = p1d = p2d = -1;
   cout << Dead.Data() << Form(",%3i,%3i,%3i,%2i,%3i}", r, p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
 }
 //________________________________________________________________________________
@@ -406,7 +417,7 @@ void CheckPads(Int_t sector = 0) {
   Int_t minpaddiff = 5;
   for (Int_t s = s1; s <= s2; s++) {
     TString  Dead(Form("/*Dead: */ {%2i",s));
-    TString  Alive(Form("/*Alive:*/ {%2i,",s));
+    TString  Alive(Form("/*Alive:*/ {%2i",s));
     for (Int_t r = 1; r <= ny; r++) {
       //     TString  Dead(Form("/*Dead: */ {%2i,%3i,",s,r));
       //      TString  Alive(Form("/*Alive:*/ {%2i,%3i,",s,r));
