@@ -1419,7 +1419,9 @@ void LoopOverFilesdYS(const Char_t *opt="") {
   TIter next(files);
   TFile *f = 0;
   TCanvas *c1 = new TCanvas("c1","c1");
-  TH1F *frame = c1->DrawFrame(0,-0.5,25,0.5);
+  TH1F *frame = c1->DrawFrame(0.5,-0.3,24.5,0.3);
+  frame->SetXTitle("sector");
+  frame->SetYTitle("dY (cm)");
   Int_t color = 1;
   TLegend *l = new TLegend(0.6,0.6,0.9,0.9);
   while ( (f = (TFile *) next()) ) { 
@@ -1433,7 +1435,7 @@ void LoopOverFilesdYS(const Char_t *opt="") {
     dYS_zx_1->SetLineColor(color);
     color++;
     dYS_zx_1->Draw("same");
-    l->AddEntry(dYS_zx_1, gDirectory->GetName());
+    l->AddEntry(dYS_zx_1, gSystem->DirName(gDirectory->GetName()));
   }  
   l->Draw();
 }
