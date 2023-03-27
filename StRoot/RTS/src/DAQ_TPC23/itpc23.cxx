@@ -844,6 +844,12 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	u_int fee_empty = d[6]&0xFFFF ;
 //	u_int sig = d[7] ;
 
+	// I need a special hack here when running in Offline (from a file)
+	// because I might have a FEE masked in online...
+	if(!online) {
+		fee_mask = fee_synced ;
+	}
+
 //	LOG(TERR,"fee_mask 0x%X, fee_synced 0x%X, fee_overrun 0x%X, fee_xoff 0x%X, rdo_stuff 0x%X, fee_empty 0x%X, sig 0x%X",
 //	    fee_mask,fee_synced,fee_overrun,fee_xoff,rdo_stuff,fee_empty,sig) ;
 
@@ -865,7 +871,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	}
 
 	if(rdo_stuff & 0xF000) {	// revisit this... what is it?
-		LOG(WARN,"%d: rdo_stuff 0x%04X",rdo1,rdo_stuff) ;
+		LOG(NOTE,"%d: rdo_stuff 0x%04X",rdo1,rdo_stuff) ;
 	}
 
 
@@ -1260,7 +1266,8 @@ static const char *hwicap_version(u_int v)
 }
 
 
-static const int itpc_fee_map[24][4][16] = {
+//static const int itpc_fee_map[24][4][16] = {
+static int itpc_fee_map[24][4][16] = {
 {//S1 checked
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},   //ok 
@@ -1432,4 +1439,9 @@ static u_int get_ifee_mask(int sec1, int rdo1)
 	}
 
 	return mask ;
+}
+
+void itpc23::itpc_fee_kill(int s0, int r0, int p0)
+{
+	itpc_fee_map[s0][r0][p0] = 0 ;
 }

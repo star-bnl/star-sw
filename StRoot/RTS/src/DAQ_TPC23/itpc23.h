@@ -41,6 +41,7 @@ public:
 
 	static struct row_pad_t (*rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;     // max for both dets; all sectors
 
+	static void itpc_fee_kill(int s0, int r0, int p0) ;
 
 private:
 	u_int *fee_non_trgd(u_int *d) ;

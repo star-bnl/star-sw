@@ -527,7 +527,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		if(rdo_fmt>22) {
 			if(it23==0) {
 				it23 = new itpc23 ;
-				it23->online = 1 ;
+				it23->online = 0 ;
 				it23->run_type = 3 ;	// NO CLUSTER FINDER PLEASE
 				it23->no_cld = 1 ;
 				it23->log_level = 0 ;
