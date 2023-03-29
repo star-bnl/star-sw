@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.73 2022/09/23 19:55:47 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.74 2023/02/13 14:37:41 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1748,8 +1748,10 @@ int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
 	const char *name = rts2name(i) ;
 	if(name == 0) continue ;
 
-	if(strcasecmp(name,which)==0) {
+	//LOG(TERR,"trying %s for %s",name,which) ;
 
+	if(strcasecmp(name,which)==0) {
+	  //LOG(TERR,"Creating %s",which) ;
 	  dets[i] = daq_det_factory::make_det(i) ;
 	  dets[i]->managed_by(this) ;
 
