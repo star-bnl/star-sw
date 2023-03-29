@@ -1,0 +1,15 @@
+/* fttHardwareMap.idl
+*
+* Table: fttHardwareMap
+*
+* description: sTGC (ftt) hardware map
+*
+*/
+
+struct fttHardwareMap {
+	octet feb[1251]; /* 1-6 */
+	octet vmm[1251]; /* 1-4 */
+	octet row[1251]; /* 0-4 */
+	octet vmm_ch[1251]; /* 0-64 */
+	octet strip[1251]; /* 0-166*/
+};

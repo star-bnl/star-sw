@@ -427,7 +427,7 @@ struct rts2011EvbxSuperMon {
     u_int stream;	   // which stream evts sent to
   } trgs[TRIGGERS_MAX+1] ;
 
-  u_int detectorErrors[32];
+  u_int detectorErrors[RTS_NUM_SYSTEMS];
 };
 
 // new, FY13, slow controls monitoring (via scDeamon)

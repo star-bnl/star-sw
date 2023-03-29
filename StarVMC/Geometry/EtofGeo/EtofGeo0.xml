@@ -37,7 +37,7 @@
 
         <Fill name="ETOG" comment="ETOF config from etof_v14s.root">
           <var  name="version" value="14.0" comment="default version, not ready for prime time" />
-          <var  name="zplane"  value="{209-489.01,209-501.01,209-513.01}"   comment="z position of the three planes" />
+          <var  name="zplane"  value="{-277.65, -290.52, -303.37}"   comment="z position of the three planes" /> 
           <var  name="active"  value="{1,1,1, 1,1,1, 1,1,1, 1,1,1}" comment="all sectors" />
           <var  name="sector"  value="{21,22,23,24,13,14,15,16,17,18,19,20}" comment="sector numbering" />
         </Fill>
@@ -60,151 +60,151 @@
 
 
 <!-- sector 21 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="121"  x="158.35"   y="0.0"      z="ETOG_zplane(1)"  if="ETOG_active(1).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="121"  x="157.06"   y="0.14"    z="ETOG_zplane(1)+0.21"  if="ETOG_active(1).eq.1"  >
         <Rotation matrix="{ 1.00000,  0.00000,  0.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 22 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="122"  x="137.135"  y="79.175"   z="ETOG_zplane(1)"  if="ETOG_active(2).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="122"  x="135.95"   y="78.65"   z="ETOG_zplane(1)+0.21"  if="ETOG_active(2).eq.1"  >
         <Rotation matrix="{ 0.86603, -0.50000,  0.00000,  0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 23 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="123"  x="79.175"   y="137.135"  z="ETOG_zplane(1)"  if="ETOG_active(3).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="123"  x="78.41"    y="136.09"  z="ETOG_zplane(1)"  if="ETOG_active(3).eq.1"  >
         <Rotation matrix="{ 0.50000, -0.86603,  0.00000,  0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 24 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="124"  x="0.0"      y="158.35"   z="ETOG_zplane(1)"  if="ETOG_active(4).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="124"  x="-0.14"    y="157.06"  z="ETOG_zplane(1)"  if="ETOG_active(4).eq.1"  >
         <Rotation matrix="{ 0.00000, -1.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 13 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="113"  x="-79.175"  y="137.135"  z="ETOG_zplane(1)"  if="ETOG_active(5).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="113"  x="-78.65"   y="135.95"  z="ETOG_zplane(1)"  if="ETOG_active(5).eq.1"  >
         <Rotation matrix="{-0.50000, -0.86603,  0.00000,  0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 14 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="114"  x="-137.135" y="79.175"   z="ETOG_zplane(1)"  if="ETOG_active(6).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="114"  x="-136.09"  y="78.41"   z="ETOG_zplane(1)"  if="ETOG_active(6).eq.1"  >
         <Rotation matrix="{-0.86603, -0.50000,  0.00000,  0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 15 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="115"  x="-158.35"  y="0.0"      z="ETOG_zplane(1)"  if="ETOG_active(7).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="115"  x="-157.06"  y="-0.14"   z="ETOG_zplane(1)+0.21"  if="ETOG_active(7).eq.1"  >
         <Rotation matrix="{-1.00000,  0.00000,  0.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 16 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="116"  x="-137.135" y="-79.175"  z="ETOG_zplane(1)"  if="ETOG_active(8).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="116"  x="-135.95"  y="-78.65"  z="ETOG_zplane(1)+0.21"  if="ETOG_active(8).eq.1"  >
         <Rotation matrix="{-0.86603,  0.50000,  0.00000, -0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 17 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="117"  x="-79.175"  y="-137.135" z="ETOG_zplane(1)"  if="ETOG_active(9).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="117"  x="-78.41"   y="-136.09" z="ETOG_zplane(1)"  if="ETOG_active(9).eq.1"  >
         <Rotation matrix="{-0.50000,  0.86603,  0.00000, -0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 18 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="118"  x="0.0"      y="-158.35"  z="ETOG_zplane(1)"  if="ETOG_active(10).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="118"  x="0.14"     y="-157.06" z="ETOG_zplane(1)"  if="ETOG_active(10).eq.1" >
         <Rotation matrix="{ 0.00000,  1.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 19 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="119"  x="79.175"   y="-137.135" z="ETOG_zplane(1)"  if="ETOG_active(11).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="119"  x="78.65"    y="-135.95" z="ETOG_zplane(1)"  if="ETOG_active(11).eq.1" >
         <Rotation matrix="{ 0.50000,  0.86603,  0.00000, -0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 20 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="120"  x="137.135"  y="-79.175"  z="ETOG_zplane(1)"  if="ETOG_active(12).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="120"  x="136.09"   y="-78.41"  z="ETOG_zplane(1)"  if="ETOG_active(12).eq.1" >
         <Rotation matrix="{ 0.86603,  0.50000,  0.00000, -0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 
 
 <!-- sector 21 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="221"  x="164.85"   y="-27.5"    z="ETOG_zplane(2)"  if="ETOG_active(1).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="221"  x="163.56"   y="-27.36"  z="ETOG_zplane(2)+0.21"  if="ETOG_active(1).eq.1"  >
         <Rotation matrix="{ 1.00000,  0.00000,  0.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 22 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="222"  x="156.514"  y="58.609"   z="ETOG_zplane(2)"  if="ETOG_active(2).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="222"  x="155.33"   y="58.09"   z="ETOG_zplane(2)+0.21"  if="ETOG_active(2).eq.1"  >
         <Rotation matrix="{ 0.86603, -0.50000,  0.00000,  0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 23 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="223"  x="106.241"  y="129.014"  z="ETOG_zplane(2)"  if="ETOG_active(3).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="223"  x="105.47"   y="127.97"  z="ETOG_zplane(2)"  if="ETOG_active(3).eq.1"  >
         <Rotation matrix="{ 0.50000, -0.86603,  0.00000,  0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 24 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="224"  x="27.5"     y="164.85"   z="ETOG_zplane(2)"  if="ETOG_active(4).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="224"  x="27.36"    y="163.56"  z="ETOG_zplane(2)"  if="ETOG_active(4).eq.1"  >
         <Rotation matrix="{ 0.00000, -1.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 13 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="213"  x="-58.609"  y="156.514"  z="ETOG_zplane(2)"  if="ETOG_active(5).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="213"  x="-58.09"   y="155.33"  z="ETOG_zplane(2)"  if="ETOG_active(5).eq.1"  >
         <Rotation matrix="{-0.50000, -0.86603,  0.00000,  0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 14 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="214"  x="-129.014" y="106.241"  z="ETOG_zplane(2)"  if="ETOG_active(6).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="214"  x="-127.97"  y="105.47"  z="ETOG_zplane(2)"  if="ETOG_active(6).eq.1"  >
         <Rotation matrix="{-0.86603, -0.50000,  0.00000,  0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 15 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="215"  x="-164.85"  y="27.5"     z="ETOG_zplane(2)"  if="ETOG_active(7).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="215"  x="-163.56"  y="27.36"   z="ETOG_zplane(2)+0.21"  if="ETOG_active(7).eq.1"  >
         <Rotation matrix="{-1.00000,  0.00000,  0.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 16 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="216"  x="-156.514" y="-58.609"  z="ETOG_zplane(2)"  if="ETOG_active(8).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="216"  x="-155.33"  y="-58.09"  z="ETOG_zplane(2)+0.21"  if="ETOG_active(8).eq.1"  >
         <Rotation matrix="{-0.86603,  0.50000,  0.00000, -0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 17 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="217"  x="-106.241" y="-129.014" z="ETOG_zplane(2)"  if="ETOG_active(9).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="217"  x="-105.47"  y="-127.97" z="ETOG_zplane(2)"  if="ETOG_active(9).eq.1"  >
         <Rotation matrix="{-0.50000,  0.86603,  0.00000, -0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 18 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="218"  x="-27.5"    y="-164.85"  z="ETOG_zplane(2)"  if="ETOG_active(10).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="218"  x="-27.36"  y="-163.56"  z="ETOG_zplane(2)"  if="ETOG_active(10).eq.1" >
         <Rotation matrix="{ 0.00000,  1.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 19 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="219"  x="58.609"   y="-156.514" z="ETOG_zplane(2)"  if="ETOG_active(11).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="219"  x="58.08"   y="-155.33"  z="ETOG_zplane(2)"  if="ETOG_active(11).eq.1" >
         <Rotation matrix="{ 0.50000,  0.86603,  0.00000, -0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 20 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="220"  x="129.014"  y="-106.241" z="ETOG_zplane(2)"  if="ETOG_active(12).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="220"  x="127.97"  y="-105.48"  z="ETOG_zplane(2)"  if="ETOG_active(12).eq.1" >
         <Rotation matrix="{ 0.86603,  0.50000,  0.00000, -0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 
 
 <!-- sector 21 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="321"  x="174.85"   y="28.1"     z="ETOG_zplane(3)"  if="ETOG_active(1).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="321"  x="173.75"  y="28.24"    z="ETOG_zplane(3)+0.21"  if="ETOG_active(1).eq.1"  >
         <Rotation matrix="{ 1.00000,  0.00000,  0.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 22 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="322"  x="137.375"  y="111.76"   z="ETOG_zplane(3)"  if="ETOG_active(2).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="322"  x="136.35"  y="111.33"   z="ETOG_zplane(3)+0.21"  if="ETOG_active(2).eq.1"  >
         <Rotation matrix="{ 0.86603, -0.50000,  0.00000,  0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 23 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="323"  x="63.09"    y="165.475"  z="ETOG_zplane(3)"  if="ETOG_active(3).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="323"  x="62.42"   y="164.59"   z="ETOG_zplane(3)"  if="ETOG_active(3).eq.1"  >
         <Rotation matrix="{ 0.50000, -0.86603,  0.00000,  0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 24 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="324"  x="-28.1"    y="174.85"   z="ETOG_zplane(3)"  if="ETOG_active(4).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="324"  x="-28.24"  y="173.75"   z="ETOG_zplane(3)"  if="ETOG_active(4).eq.1"  >
         <Rotation matrix="{ 0.00000, -1.00000,  0.00000,  1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 13 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="313"  x="-111.76"  y="137.375"  z="ETOG_zplane(3)"  if="ETOG_active(5).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="313"  x="-111.33" y="136.35"   z="ETOG_zplane(3)"  if="ETOG_active(5).eq.1"  >
         <Rotation matrix="{-0.50000, -0.86603,  0.00000,  0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 14 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="314"  x="-165.475" y="63.09"    z="ETOG_zplane(3)"  if="ETOG_active(6).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="314"  x="-164.59" y="62.42"    z="ETOG_zplane(3)"  if="ETOG_active(6).eq.1"  >
         <Rotation matrix="{-0.86603, -0.50000,  0.00000,  0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 15 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="315"  x="-174.85"  y="-28.1"    z="ETOG_zplane(3)"  if="ETOG_active(7).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="315"  x="-173.75" y="-28.24"   z="ETOG_zplane(3)+0.21"  if="ETOG_active(7).eq.1"  >
         <Rotation matrix="{-1.00000,  0.00000,  0.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 16 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="316"  x="-137.375" y="-111.76"  z="ETOG_zplane(3)"  if="ETOG_active(8).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="316"  x="-136.35" y="-111.33"  z="ETOG_zplane(3)+0.21"  if="ETOG_active(8).eq.1"  >
         <Rotation matrix="{-0.86603,  0.50000,  0.00000, -0.50000, -0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 17 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="317"  x="-63.09"   y="-165.475" z="ETOG_zplane(3)"  if="ETOG_active(9).eq.1"  >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="317"  x="-62.42"  y="-164.59"  z="ETOG_zplane(3)"  if="ETOG_active(9).eq.1"  >
         <Rotation matrix="{-0.50000,  0.86603,  0.00000, -0.86603, -0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 18 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="318"  x="28.1"     y="-174.85"  z="ETOG_zplane(3)"  if="ETOG_active(10).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="318"  x="28.24"   y="-173.75"  z="ETOG_zplane(3)"  if="ETOG_active(10).eq.1" >
         <Rotation matrix="{ 0.00000,  1.00000,  0.00000, -1.00000,  0.00000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 19 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="319"  x="111.76"   y="-137.375" z="ETOG_zplane(3)"  if="ETOG_active(11).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="319"  x="111.33"  y="-136.35"  z="ETOG_zplane(3)"  if="ETOG_active(11).eq.1" >
         <Rotation matrix="{ 0.50000,  0.86603,  0.00000, -0.86603,  0.50000,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 <!-- sector 20 -->
-      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="320"  x="165.475"  y="-63.09"   z="ETOG_zplane(3)"  if="ETOG_active(12).eq.1" >
+      <Placement  block="ETOF" in="CAVE" group="MagRefSys"  ncopy="320"  x="164.59"  y="-62.42"   z="ETOG_zplane(3)"  if="ETOG_active(12).eq.1" >
         <Rotation matrix="{ 0.86603,  0.50000,  0.00000, -0.50000,  0.86603,  0.00000,  0.00000,  0.00000,  1.00000}"  />
       </Placement>
 
@@ -215,7 +215,7 @@
             <Material a="26.98" dens="2.7" z="13.0" name="aluminium"  />
             <Medium epsil="0.001" name="aluminium" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="20.0" stemax="-1.0"  />
             <Attribute for="ETOF" lwid="1" seen="1" colo="416"  />
-            <Shape type="BBox" dx="51.075" dy="24.15" dz="5.55"  />
+            <Shape type="BBox" dx="51.4" dy="24.3" dz="5.6"  />
             <Create block="EGAS"  />
             <Placement in="ETOF" x="0.45" y="0.0" z="0.0" konly="ONLY" block="EGAS"  >
                 <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
@@ -223,22 +223,23 @@
 
         </Volume>
 
+        <!-- correct counter placement for modules 1 of USTC types -->
         <Volume name="EGAS" comment=""  >
             <Material a="17.4875239923" dens="0.00427" z="8.3896353167" name="RPCgas_noact"  />
             <Medium epsil="0.001" name="RPCgas_noact" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" stemax="-1.0"  />
             <Attribute for="EGAS" lwid="1" seen="1" colo="600"  />
-            <Shape type="BBox" dx="50.525" dy="24.05" dz="5.45"  />
+            <Shape type="BBox" dx="50.85" dy="24.2" dz="5.5"  />
             <Create block="ECOU"  />
-            <Placement in="EGAS" x="-27.74" y="0.0" z="0.0" konly="ONLY" block="ECOU"  >
-                <Rotation matrix="{0.98849, 0.0, -0.15126, 0.0, 1.0, 0.0, 0.15126, 0.0, 0.98849}"  />
+            <Placement in="EGAS" x="-27.7" y="0.0" z="0.7" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9848, 0.0, -0.1736, 0.0, 1.0, 0.0, 0.1736, 0.0, 0.9848}"  />
             </Placement>
 
-            <Placement in="EGAS" x="3.517"  y="0.0" z="0.0" konly="ONLY" block="ECOU"  >
-                <Rotation matrix="{0.98849, 0.0, -0.15126, 0.0, 1.0, 0.0, 0.15126, 0.0, 0.98849}"  />
+            <Placement in="EGAS" x="1.5"        y="0.0" z="0.7" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9848, 0.0, -0.1736, 0.0, 1.0, 0.0, 0.1736, 0.0, 0.9848}"  />
             </Placement>
 
-            <Placement in="EGAS" x="34.774" y="0.0" z="0.0" konly="ONLY" block="ECOU"  >
-                <Rotation matrix="{0.98849, 0.0, -0.15126, 0.0, 1.0, 0.0, 0.15126, 0.0, 0.98849}"  />
+            <Placement in="EGAS" x="32.3"  y="0.0" z="0.7" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9848, 0.0, -0.1736, 0.0, 1.0, 0.0, 0.1736, 0.0, 0.9848}"  />
             </Placement>
 
         </Volume>

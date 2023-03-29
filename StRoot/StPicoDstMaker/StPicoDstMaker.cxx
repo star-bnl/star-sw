@@ -29,6 +29,7 @@
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include "StarClassLibrary/PhysicalConstants.h"
 
+#include "StEvent/StEvent.h"
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEvent/StEmcCollection.h"
@@ -861,10 +862,14 @@ Int_t StPicoDstMaker::MakeWrite() {
   Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
     isFromDaq = kTRUE;
-    static StMuEmcUtil emcUtil;
+//    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
+    StEvent *evt = (StEvent *)GetDataSet("StEvent");
+    if(evt) {
+      mEmcCollection = evt->emcCollection();
+    }
+//    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {
@@ -902,7 +907,7 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mTTree->Fill();
   if ( isFromDaq ) {
-    delete mEmcCollection;
+//    delete mEmcCollection;
     mEmcCollection = nullptr;
   }
 
@@ -1938,11 +1943,13 @@ void StPicoDstMaker::fillEmcTrigger() {
   int bht1 = trigSimu->bemc->barrelHighTowerTh(1);
   int bht2 = trigSimu->bemc->barrelHighTowerTh(2);
   int bht3 = trigSimu->bemc->barrelHighTowerTh(3);
-  LOG_DEBUG << " bht thresholds " << bht0 << " " << bht1 << " " << bht2 << " " << bht3 << endm;
+  LOG_INFO << " bht thresholds " << bht0 << " " << bht1 << " " << bht2 << " " << bht3 << endm;
   for (int i = 0; i < 4; ++i) {
     mPicoDst->event()->setHighTowerThreshold(i, trigSimu->bemc->barrelHighTowerTh(i));
   }
 
+  if( bht0>0 || bht1>0 || bht2>0 || bht3>0 ) {  // avoid saving unuseful data in case all threshold values are zeros
+  
   // Loop over all towers
   for(Int_t towerId=1; towerId<=4800; towerId++) {
     Int_t status;
@@ -2065,16 +2072,22 @@ void StPicoDstMaker::fillEmcTrigger() {
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, towerId, adc, smdEHits, smdPHits);
     }
   } //for(Int_t towerId=1; towerId<=4800; towerId++)
+  
+  } // end if (bht threshold check)
 
     // BEMC Jet Patch trigger threshold
   int const bjpth0 = trigSimu->bemc->barrelJetPatchTh(0);
   int const bjpth1 = trigSimu->bemc->barrelJetPatchTh(1);
   int const bjpth2 = trigSimu->bemc->barrelJetPatchTh(2);
 
+  LOG_INFO << " bjp thresholds " << bjpth0 << " " << bjpth0 << " " << bjpth1 << " " << bjpth2 << endm;
+  
   for (int i = 0; i < 3; ++i) {
     mPicoDst->event()->setJetPatchThreshold(i, trigSimu->bemc->barrelJetPatchTh(i));
   }
 
+  if ( bjpth0 > 0 || bjpth1 > 0 || bjpth2 > 0 ) {
+  
   // Loop over triggers
   for (int jp = 0; jp < 18; ++jp) {
     // BEMC: 12 Jet Patch + 6 overlap Jet Patches. As no EEMC information
@@ -2099,6 +2112,8 @@ void StPicoDstMaker::fillEmcTrigger() {
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, jp, jpAdc);
     }
   } //for (int jp = 0; jp < 18; ++jp)
+  
+  }
 }
 
 //_________________

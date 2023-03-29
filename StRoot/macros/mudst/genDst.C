@@ -107,6 +107,14 @@ void loadLibsBTof()
   gSystem->Load("StBTofMatchMaker");
 }
 
+void loadLibsETof()
+{
+  gSystem->Load("StETofUtil");
+  gSystem->Load("StETofCalibMaker");
+  gSystem->Load("StETofHitMaker");
+  gSystem->Load("StETofMatchMaker");
+}
+
 void procGeoTag(TObjArray* optionTokens)
 {
   if (TClass::GetClass("AgBlock")) return; // arbitrarily chosen AgML class
@@ -264,6 +272,18 @@ void genDst(unsigned int First,
         //Disable the VPD as start detector, BTOF calib maker will switch to the "start-less" algorithm.
         vpdCalib->setUseVpdStart(kFALSE);
       }
+
+    }
+
+    if (findAndRemoveOption("etofmatch",optionTokens)) {
+
+      procGeoTag(optionTokens);
+      loadLibsETof();
+
+      // instantiate eTOF CalibMakers, HitMaker and MatchMaker
+      StETofCalibMaker* etofCalib = new StETofCalibMaker();
+      StETofHitMaker*   etofHit   = new StETofHitMaker();
+      StETofMatchMaker* etofMatch = new StETofMatchMaker();
 
     }
 
@@ -430,6 +450,10 @@ void genDst(unsigned int Last,
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//
+// $Log: genDst.C,v $
+// Revision 1.10  2022/05/12 07:16:56  weidenkaff
+// Added eTOF support
 //
 // $Log: genDst.C,v $
 // Revision 1.9  2020/10/10 07:16:56  genevb

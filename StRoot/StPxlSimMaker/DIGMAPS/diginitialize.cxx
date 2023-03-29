@@ -46,7 +46,7 @@ DIGInitialize::DIGInitialize()
 //______________________________________________________________________________
 //  
 
-DIGInitialize::DIGInitialize(char *name, char *title, TString aCP, TString aCFN, TString action)  : TNamed(name,title)
+DIGInitialize::DIGInitialize(const char *name, const char *title, TString aCP, TString aCFN, TString action)  : TNamed(name,title)
 {
 
 // --- open config file:

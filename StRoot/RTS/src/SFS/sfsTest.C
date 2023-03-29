@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
   idx.putfileheader((char *)buffer, name, 0,0);
 
-  printf("sizeof(SFS_File)=%d\n",sizeof(SFS_File));
+  printf("sizeof(SFS_File)=%ld\n",sizeof(SFS_File));
 
   printf("After: \n");
   for(int i=0;i<20;i++) {

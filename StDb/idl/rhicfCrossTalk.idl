@@ -1,0 +1,8 @@
+/*    rhicfCrossTalk.idl
+*
+*  Table: rhicfCrossTalk
+*
+*/
+struct rhicfCrossTalk {
+	float crossTalk[1030];          /* CrossTalk for All tower */
+};

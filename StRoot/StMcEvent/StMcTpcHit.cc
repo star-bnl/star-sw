@@ -60,17 +60,17 @@ static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.13 2011/10/17 00:24:01 fisya
 ClassImp(StMcTpcHit);
 ostream&  operator<<(ostream& os, const StMcTpcHit& h)
 {
-    os << "TpcHit" << endl;
+    os << "TpcHit:";
+    os << " Sector   :" << h.sector();
+    os << " PadRow   :" << h.padrow();
     os << *((StMcHit *) &h);
-    os << "Sector   :" << h.sector() << endl;
-    os << "PadRow   :" << h.padrow() << endl;
   return os;
 }
 //________________________________________________________________________________
 void StMcTpcHit::Print(Option_t *option) const {
   cout << "TpcHit\t"; 
-  StMcHit::Print();
-  cout << "\tSector:" << sector()    
+  cout << " Sector:" << sector()    
        << " PadRow:" << padrow();
+  StMcHit::Print();
 }
 

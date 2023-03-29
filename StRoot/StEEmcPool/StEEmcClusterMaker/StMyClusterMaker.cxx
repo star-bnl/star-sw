@@ -329,7 +329,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
 		  if ( energy > mSmdMinEnergy ) 
 		    {
 		      if ( !strip.fail() ) {
-			used[istrip]++;
+			used[istrip] = true;
 			cluster.add(strip);			
 		      }
 		      else
@@ -365,7 +365,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
                   if ( energy > mSmdMinEnergy )
                     {
                       if ( !strip.fail() ) {
-			used[istrip]++;
+			used[istrip] = true;
 			cluster.add(strip);
 		      }
 		      else

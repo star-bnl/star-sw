@@ -141,6 +141,10 @@ Remove the inner support tubes as it could not be attached to detector.
                 Declare structures
         -->
 
+	<Structure name="FSTG" comment="FstmGeo geometry configuration">
+	  <var name="version" comment="Geometry version" />
+	</Structure>
+
 
         <Structure name="mothervol" comment="tubes for the mother volume">
             <var name="version"   type="float" />
@@ -420,6 +424,8 @@ Remove the inner support tubes as it could not be attached to detector.
         dcool = oBaseThickness -0.15
 
 
+	<Fill name="FSTG"><var name="version" value="1.0" /></Fill>
+
 
         <Fill name="mothervol" comment=" TUBE for the mothervolume" >
             <var name="version"  value="1.0" />
@@ -429,7 +435,7 @@ Remove the inner support tubes as it could not be attached to detector.
             <var name="rmin"     value="4.1" />
             <var name="rmax"     value="34.00" />
             <var name="dz"       value="30.0" />
-         <var name="zdisk"    value="{149.713, 163.284, 176.35}" />
+            <var name="zdisk"    value="{151.750, 165.248, 178.781}" />
         </Fill>
 
         <Fill name="wholewedge" comment="whole wedge shape" >

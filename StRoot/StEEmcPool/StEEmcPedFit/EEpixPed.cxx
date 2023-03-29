@@ -59,9 +59,9 @@ void EEpixPed::findTowerHisto() {
 	  continue;  
 	}
 	// 3 channels with known (unfixable) stuck bits
-	bool A=strstr(tt1,"a04TB07")>0;
-	bool B=strstr(tt1,"a06TA07")>0;
-	bool C=strstr(tt1,"a08TB07")>0;
+	bool A=strstr(tt1,"a04TB07");
+	bool B=strstr(tt1,"a06TA07");
+	bool C=strstr(tt1,"a08TB07");
 	if (A||B||C){
 	  h->Rebin(4);
 	}
@@ -220,9 +220,9 @@ void EEpixPed::fitHisto(TString fPath){
     //h->Fit(fit,"OQN+","",x1,x2); // fit hist with gaussian 
     //h->Fit(fit,"OQ+W","",x1,x2); // fit hist with gaussian 
     // fit->Print();
-    bool A=strstr(h->GetName(),"a04TB07")>0;
-    bool B=strstr(h->GetName(),"a06TA07")>0;
-    bool C=strstr(h->GetName(),"a08TB07")>0;
+    bool A=strstr(h->GetName(),"a04TB07");
+    bool B=strstr(h->GetName(),"a06TA07");
+    bool C=strstr(h->GetName(),"a08TB07");
     if (A||B||C){
       //printf("\n\n Target chan=%s\n\n", h->GetName());
       //printf("x1=%f,     x2=%f\n",x1, x2);

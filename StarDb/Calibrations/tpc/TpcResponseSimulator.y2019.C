@@ -80,8 +80,8 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.0; // Old Tpc electronics or iTPC  1.4 => 1.0; Tonko 12/12/2019
-  row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
+  row.AveragePedestalRMS    = -1.0; // Tpx, Use St_TpcPadPedRMSC chair
+  row.AveragePedestalRMSX   = -1.0; // iTPC, -"- 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
   row.tauP                  = 775.0e-9;// secs Tpc 
@@ -89,14 +89,14 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0.52; //1.5*0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTI         = 0.0; //1.5*0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
   row.SigmaJitterTO         = 0.52; //1.5*0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
+  row.SigmaJitterXI         = 0.1027785/2./1.5;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
-  row.longitudinalDiffusionI= row.longitudinalDiffusion;
-  row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.transverseDiffusionI  = 0.896  *row.transverseDiffusion;
+  row.longitudinalDiffusionI= row.longitudinalDiffusion*0.51;
+  row.transverseDiffusion   = 0.02263*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
+  row.transverseDiffusionI  = 0.63  *row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -127,8 +127,8 @@ TDataSet *CreateTable() {
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   // row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   row.T0offset   = 0.50 -1.43663e-01 -0.00932877 + 0.0416;//g // 12/18/19 from Run 19 AuAu19.6 GeV simulation
-  row.T0offsetI  =  0.0803082                      -0.145027; // ~/work/Tpc/TpcRS/2019/TpcRS_19GeV; TI_1->Fit("pol2"); par[0]
-  row.T0offsetO  = 0.5*(-6.04314e-02-3.44168e-02)-0.00930199;// TO_1->Fit("pol2","er","",-100,0) => par[0] = -6.04314e-02; TO_1->Fit("pol2","er","",0,100); par[0] = -3.44168e-02 ?
+  row.T0offsetI  = -1.58786167960479896e-01;
+  row.T0offsetO  = -1.94071983062808762e-01-1.76429075511644329e-02;
 
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------

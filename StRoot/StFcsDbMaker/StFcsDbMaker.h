@@ -93,6 +93,7 @@
 #endif
 
 class StFcsDb;
+class StFcsDbPulse;
 
 class StFcsDbMaker : public StMaker {
 public: 
@@ -107,9 +108,10 @@ public:
 private:
   StFcsDb *mFcsDb;
   int mDbAccess=1;
+  StFcsDbPulse* mFcsDbPulse;
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
-  ClassDef(StFcsDbMaker,4)   //StAF chain virtual base class for Makers        
+  ClassDef(StFcsDbMaker,0)   //StAF chain virtual base class for Makers        
 };
 
 #endif

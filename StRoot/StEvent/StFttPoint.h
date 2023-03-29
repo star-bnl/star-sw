@@ -28,15 +28,15 @@ public:
     UChar_t quadrant()   const; // detector quadrant.
     float x() const;  // x position in cell unit at which point intersects the sub-detector in local coordinate
     float y() const;  // y position in cell unit at which point intersects the sub-detector in local coordinate
-    int nParentClusters()   const; // Number of points in the parent cluster.
+    int nClusters() const; // Number of points in the parent cluster.
     StFttCluster* cluster( size_t i); //  Parent cluster of the photon.
-    const StThreeVectorD& xyz()   const; // XYZ position in global STAR coordinate
+    const StThreeVectorD& xyz() const; // XYZ position in global STAR coordinate
 
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
     void setX(float x);
     void setY(float y);
-    void addCluster(StFttCluster* cluster);
+    void addCluster(StFttCluster* cluster, UChar_t dir);
     void setXYZ(const StThreeVectorD& p3);
 
     
@@ -47,7 +47,7 @@ private:
     UChar_t mQuadrant;
     Float_t  mX=0.0;         // x-position in local coordinate
     Float_t  mY=0.0;         // y-position in local coordinate
-    StSPtrVecFttCluster mClusters=0; // parent clusters (could be up to 3?)
+    StFttCluster *mClusters[4];
     StThreeVectorD  mXYZ;    // Photon position in STAR coordinate
 
     ClassDef(StFttPoint, 1)
@@ -57,14 +57,13 @@ inline UChar_t StFttPoint::plane() const { return mPlane; }
 inline UChar_t StFttPoint::quadrant() const { return mQuadrant; }
 inline float StFttPoint::x() const { return mX; } // x position (cm) in local coords.
 inline float StFttPoint::y() const { return mY; } // y position (cm) in local coords.
-inline int StFttPoint::nParentClusters() const { return mClusters.size(); } // Number of points in parent cluster
-inline StFttCluster* StFttPoint::cluster( size_t i ) { return mClusters[i]; } //  Parent cluster of the photon.
+inline StFttCluster* StFttPoint::cluster( size_t i ) { if ( i < 4 ) return mClusters[i]; return nullptr; } //  Parent cluster of the photon.
 inline const StThreeVectorD& StFttPoint::xyz() const { return mXYZ; }
 inline void StFttPoint::setPlane(UChar_t plane) { mPlane = plane; }
 inline void StFttPoint::setQuadrant(UChar_t quadrant) { mQuadrant = quadrant; }
 inline void StFttPoint::setX(float xpos) { mX = xpos; }
 inline void StFttPoint::setY(float ypos) { mY = ypos; }
-inline void StFttPoint::addCluster(StFttCluster* cluster) { mClusters.push_back( cluster); }
+inline void StFttPoint::addCluster(StFttCluster* cluster, UChar_t dir) { mClusters[dir] = (cluster); }
 inline void StFttPoint::setXYZ(const StThreeVectorD& p3) { mXYZ = p3; }
 
 #endif  // StFttPoint_h

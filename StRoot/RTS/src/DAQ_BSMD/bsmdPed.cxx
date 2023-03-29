@@ -339,16 +339,16 @@ int bsmdPed::to_evb(char *buff)
 	return ((char *)dta-buff) ;
 }
 
-int bsmdPed::from_cache(char *fname) 
+int bsmdPed::from_cache(const char *fname) 
 {
 	FILE *f ;
-	char *fn ;
+	const char *fn ;
 
 	init(0x3F) ;	// to clear ped storage for all 6 RDOs
 	
 	// trivial load from disk...
 	if(fname) {
-		fn = fname ;
+	        fn = fname ;
 		f = fopen(fname,"r") ;
 	}
 	else {
@@ -391,11 +391,11 @@ int bsmdPed::from_cache(char *fname)
 	return valid ;
 }
 
-int bsmdPed::to_cache(char *fname, u_int run)
+int bsmdPed::to_cache(const char *fname, u_int run)
 {
 	FILE *f ;
 	int r, p, t ;
-	char *fn ;
+	const char *fn ;
 
 
 	if(!valid) {
@@ -404,7 +404,7 @@ int bsmdPed::to_cache(char *fname, u_int run)
 	}
 
 	if(fname) {
-		fn = fname ;
+	        fn = fname ;
 	}
 	else {
 		fn = "/RTScache/pedestals.txt" ;

@@ -21,8 +21,8 @@ C ORIG. 03/02/89 K.M.STORR
 C
 
       DIMENSION    MS(99), MT(99), NCHP(9)
-      DATA IBLAN1  /x'20202020'/
-      DATA MASK1   /x'000000ff'/
+      DATA IBLAN1  /z'20202020'/
+      DATA MASK1   /z'000000ff'/
 
       NCH = NCHP(1)
       IF   (NCH)             91,39,11

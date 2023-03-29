@@ -444,6 +444,9 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_EQ1_QTD_INSTANCE 36
 #define TRG_EQ2_QTD_INSTANCE 37
 #define TRG_EQ3_QTD_INSTANCE 38
+#define TRG_EQ4_QTD_INSTANCE 39
+
+#define TRG_EQ4_INSTANCE 40
 
 
 #define L3EVP_INSTANCE      1
@@ -625,6 +628,8 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_EQ3_NODE    ((TRG_SYSTEM<<12) | TRG_EQ3_INSTANCE)     // Rename EPQ > EQ3.  JMN 8/15/17
 #define TRG_EQ1_NODE    ((TRG_SYSTEM<<12) | TRG_EQ1_INSTANCE)     // Rename FQ1 > EQ1.  JMN
 #define TRG_EQ2_NODE    ((TRG_SYSTEM<<12) | TRG_EQ2_INSTANCE)     // Rename FQ2 > EQ2.  JMN
+#define TRG_EQ4_NODE    ((TRG_SYSTEM<<12) | TRG_EQ4_INSTANCE)
+
 #define TRG_STP2_NODE   ((TRG_SYSTEM<<12) | TRG_STP2_INSTANCE)
 #define TRG_L1_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_L1_DSM2_INSTANCE)
 #define TRG_BBC_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_BBC_DSM2_INSTANCE)

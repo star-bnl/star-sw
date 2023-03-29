@@ -74,7 +74,7 @@ StDcaAnalysis::initHistograms()
   */
   //  int netabin=6; double etamin=-.5,etamax=.5;
 
-  char* type[] = {"Mean","Rms","Num" };
+  const char* type[] = {"Mean","Rms","Num" };
 
   for(int i=0; i<3; i++){
     // global pt

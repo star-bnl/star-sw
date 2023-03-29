@@ -55,14 +55,14 @@ class StTpcRSMaker : public StMaker {
   TF1F *GetChargeFraction(Int_t io = 0, Int_t sector = 20)     {return (TF1F *) mChargeFraction[io][sector-1];}     
   TF1F *GetPadResponseFunction(Int_t io = 0, Int_t sector = 20){return (TF1F *) mPadResponseFunction[io][sector-1];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
-  TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
-  TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
+  TF1  *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
+  TF1  *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
   TF1  *GetHeed()                    {return mHeed;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   StTpcDigitalSector *DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
-  static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
+  static Int_t    AsicThresholds();
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
   static Double_t shapeEI(Double_t *x, Double_t *par=0);
@@ -70,6 +70,8 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
+  static Double_t feiFunc(Double_t *x, Double_t *par) {return fei(x[0],par[0],par[1]);}
+  TF1            *Fei();
   static Double_t polya(Double_t *x, Double_t *par);
   SignalSum_t  *GetSignalSum(Int_t sector);
   SignalSum_t  *ResetSignalSum(Int_t sector);
@@ -93,8 +95,8 @@ class StTpcRSMaker : public StMaker {
   void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
   Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
 #endif
-  static TF1F     *fgTimeShape3[2];  //!
-  static TF1F     *fgTimeShape0[2];   //!
+  static TF1      *fgTimeShape3[2];   //!
+  static TF1      *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!
@@ -102,7 +104,6 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mShaperResponse;             //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
@@ -110,7 +111,7 @@ class StTpcRSMaker : public StMaker {
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
-  Altro *mAltro;                      //!
+  Altro *mAltro[2][24];               //!
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!
@@ -151,9 +152,10 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower;  //!
   const Int_t NoOfSectors;            //!
-  const Int_t NoOfPads;               //!
+  Int_t NoOfPads;                     //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
+  static Short_t mADCs[__MaxNumberOfTimeBins__];//!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 

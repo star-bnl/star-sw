@@ -1,0 +1,13 @@
+/* fstPedNoise.idl
+*
+* Table: fstPedNoise
+*
+* description: FST detector channel pedestal, rms noise and common mode noise
+*
+*/
+struct fstPedNoise {
+    unsigned short cmNoise[10368];       /* 100 * cm noise in ADC counts per chip      */
+    unsigned short pedestal[331776];     /* pedestal in ADC counts per channel   */
+    unsigned short totNoise[331776];     /* 100 * total noise in ADC counts per channel  */
+    unsigned short ranNoise[331776];     /* 100 * random noise in ADC counts per channel  */
+};

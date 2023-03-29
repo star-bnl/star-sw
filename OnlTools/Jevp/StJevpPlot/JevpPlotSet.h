@@ -107,7 +107,7 @@ class JevpPlotSet : public TObject {
   int minEvts;
   int maxEvts;
 
-  void addServerTags(char *tags);
+  void addServerTags(const char *tags);
   //char *getServerTags();
 
   RtsTimer_root *processingTimer;
@@ -124,8 +124,8 @@ class JevpPlotSet : public TObject {
 
   //StTriggerData *getStTriggerData(daqReader *rdr);
 
-  void logDbVariable(char *variable_name, double value);
-  static void staticLogDbVariable(char *name, double value, int my_run, int my_time, char *my_plotsetname, char *my_clientdatadir);
+  void logDbVariable(const char *variable_name, double value);
+  static void staticLogDbVariable(const char *name, double value, int my_run, int my_time, const char *my_plotsetname, const char *my_clientdatadir);
 
   JevpServer *parent;
 

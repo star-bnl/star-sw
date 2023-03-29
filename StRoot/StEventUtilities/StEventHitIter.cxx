@@ -19,6 +19,7 @@
 #include "StFgtHitCollection.h"
 #include "StFgtPointCollection.h"
 #include "StIstHitCollection.h"
+#include "StFstHitCollection.h"
 
 ClassImp(StHitIter)
 ClassImp(StHitIterGroup)
@@ -522,6 +523,82 @@ const TObject *StIstSensorHitIter::GetObject (int idx) const
 int StIstSensorHitIter::GetSize () const
 {
   return ((StIstSensorHitCollection*)fCont)->hits().size();
+}
+
+//_______FST_______FST_______FST_______FST_______FST_______FST_______FST_______FST
+//________________________________________________________________________________
+//..............................................................................
+class StFstHitIter : public StHitIter {
+public:
+                StFstHitIter();
+virtual        ~StFstHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kFstId;}
+protected:
+};
+//..............................................................................
+class StFstWedgeHitIter : public StHitIter {
+public:
+                StFstWedgeHitIter(){;}
+virtual        ~StFstWedgeHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StFstSensorHitIter : public StHitIter {
+public:
+                StFstSensorHitIter(){;}
+virtual        ~StFstSensorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//________________________________________________________________________________
+StFstHitIter::StFstHitIter()
+{
+  StHitIter *iter = this,*jter=0;
+  iter->SetDowIter((jter=new StFstWedgeHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StFstSensorHitIter ()));
+}
+//________________________________________________________________________________
+const TObject *StFstHitIter::Reset(const TObject *cont)
+{
+  const StFstHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->fstHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StFstHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StFstHitCollection*)fCont)->wedge(idx);
+}
+//________________________________________________________________________________
+int StFstHitIter::GetSize () const
+{
+  return kFstNumWedges;
+}
+//________________________________________________________________________________
+const TObject *StFstWedgeHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StFstWedgeHitCollection*)fCont)->sensor(idx);
+}
+//________________________________________________________________________________
+int StFstWedgeHitIter::GetSize () const
+{
+  return kFstNumSensorsPerWedge;
+}
+//________________________________________________________________________________
+const TObject *StFstSensorHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StFstSensorHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StFstSensorHitIter::GetSize () const
+{
+  return ((StFstSensorHitCollection*)fCont)->hits().size();
 }
 
 //________________________________________________________________________________

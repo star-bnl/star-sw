@@ -146,8 +146,8 @@ Int_t StTofHitMaker::Make()
    LOG_INFO << " getting the tof collection " << tofCollection << endm;
    if (tofCollection) {
       if ( GetNextRaw() ) {
-         // u_int ddl[4][10000] ;	/// content of up to 4 fibers
-     	   // u_int ddl_words[4] ;	/// the count of words (32bit) for above
+         // uint32_t ddl[4][10000] ;	/// content of up to 4 fibers
+     	   // uint32_t ddl_words[4] ;	/// the count of words (32bit) for above
         for (int rb =0; rb < 3;rb++) {
            LOG_INFO<<" Rdo = "<<rb<<endm;
            for (unsigned int i = 0; i<tof.ddl_words[rb]; i++ ) {

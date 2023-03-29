@@ -23,7 +23,7 @@ void fmsBitShiftGainB_db(char* opt="", char* year="15ofl", char* filename="bitsh
     printf("%s idx=%d f2=%s run=%d\n",f1.Data(),idx,f2.Data(),run);
     
     if(run>0){
-	char *onlserver="onldb",*bakserver="db04",*server=0;
+	char *onlserver="heston",*bakserver="db04",*server=0;
 	int  port;
 	int y=run/1000000 -1;
 	if(y == 18){

@@ -32,6 +32,8 @@ class TCut;
 class StMuEmcCollection;
 class StMuFmsCollection;
 class StMuFcsCollection;
+class StMuFttCollection;
+class StMuFstCollection;
 class StMuPmdCollection;
 
 class StEvent;
@@ -114,6 +116,8 @@ public:
 		    TClonesArray** emc_ptca=0, 
 		    TClonesArray** fms_ptca=0, 
             TClonesArray** fcs_ptca=0, 
+            TClonesArray** ftt_ptca=0, 
+            TClonesArray** fst_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
@@ -126,6 +130,8 @@ public:
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
             StMuFcsCollection *fcs_col=0, 
+            StMuFttCollection *ftt_col=0, 
+            StMuFstCollection *fst_col=0, 
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
@@ -179,6 +185,10 @@ public:
   static TClonesArray** fmsArrays;
   /// array of TClonesArrays for the stuff inherited from the Fcs
   static TClonesArray** fcsArrays;
+  /// array of TClonesArrays for the stuff inherited from the Ftt
+  static TClonesArray** fttArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fst
+  static TClonesArray** fstArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -203,6 +213,10 @@ public:
   static StMuFmsCollection *mMuFmsCollection;
   /// pointer to FcsCollection (manages the FcsArrays)
   static StMuFcsCollection *mMuFcsCollection; 
+  /// pointer to FttCollection (manages the FttArrays)
+  static StMuFttCollection *mMuFttCollection; 
+  /// pointer to FstCollection (manages the FstArrays)
+  static StMuFstCollection *mMuFstCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -236,8 +250,12 @@ public:
   static TClonesArray* emcArray(int type) { return emcArrays[type]; }
    /// returns pointer to the n-th TClonesArray from the fms arrays
   static TClonesArray* fmsArray(int type) { return fmsArrays[type]; }
-  /// returns pointer to the n-th TClonesArray from the fms arrays
+  /// returns pointer to the n-th TClonesArray from the fcs arrays
   static TClonesArray* fcsArray(int type) { return fcsArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the ftt arrays
+  static TClonesArray* fttArray(int type) { return fttArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the fst arrays
+  static TClonesArray* fstArray(int type) { return fstArrays[type]; }
     /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
@@ -348,8 +366,12 @@ public:
   static StMuEmcCollection* muEmcCollection() { if (mMuEmcCollectionArray) return (StMuEmcCollection*) mMuEmcCollectionArray->UncheckedAt(0); else return mMuEmcCollection; }
    /// returns pointer to current StMuFmsCollection
   static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
-   /// returns pointer to current StMuFcsCollection
+  /// returns pointer to current StMuFcsCollection
   static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
+  /// returns pointer to current StMuFttCollection
+  static StMuFttCollection* muFttCollection() { return mMuFttCollection; }
+  /// returns pointer to current StMuFstCollection
+  static StMuFstCollection* muFstCollection() { return mMuFstCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
   /// returns pointer to current StEmcCollection
@@ -495,7 +517,7 @@ public:
   friend class StMuIOMaker;
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,5)
+  ClassDef(StMuDst,6)
 };
 
 #endif

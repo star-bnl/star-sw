@@ -72,7 +72,7 @@ St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
 
 
 
-int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
+int St_l3_Coordinate_Transformer::LoadTPCLookupTable(const char * mapfilename)
 {
 
 #ifdef Solaris

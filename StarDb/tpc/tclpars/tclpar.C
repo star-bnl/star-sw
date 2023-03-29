@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tclpars/tclpar Allocated rows: 1  Used rows: 1  Row size: 48 bytes
 //  Table: tcl_tclpar_st[0]--> tcl_tclpar_st[0]
@@ -23,5 +23,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.triage_rmscut	 =          3; // cut on rms_pad + rms_tdc ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

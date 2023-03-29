@@ -26,6 +26,9 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StFttCollection.h"
 
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
+#include "StMuDSTMaker/COMMON/StMuFttUtil.h"
+
 
 //_____________________________________________________________
 StFttRawHitMaker::StFttRawHitMaker( const char* name )
@@ -33,7 +36,8 @@ StFttRawHitMaker::StFttRawHitMaker( const char* name )
   mEvent( 0 ),          /// pointer to StEvent
   mFttCollection( 0 ),  // StFttCollection
   mRunYear( 0 ),        /// year in which the data was taken (switch at 1st Oct)
-  mDebug( false )       /// print out of all full messages for debugging
+  mDebug( false ),      /// print out of all full messages for debugging
+  mReadMuDst(0)         /// read from MuDst->StEvent
 { /* no op */ }
 
 
@@ -81,6 +85,10 @@ StFttRawHitMaker::Make()
         AddData(mEvent);
         LOG_DEBUG <<"Added StEvent"<<endm;
     }
+
+	if ( mReadMuDst > 0 ) 
+			return readMuDst();
+
     mFttCollection=mEvent->fttCollection();
     if(!mFttCollection) {
         mFttCollection = new StFttCollection();
@@ -124,7 +132,7 @@ StFttRawHitMaker::Make()
             u_char vm = vmm[0].feb_vmm & 3 ;    // VMM [0..3]
 
             // create the StFttRawHit object
-            StFttRawHit *hit = new StFttRawHit( sec, rdo, feb, vm, vmm[0].ch, vmm[0].adc, vmm[0].bcid, vmm[0].tb );
+            StFttRawHit *hit = new StFttRawHit( sec, rdo, feb, vm, vmm[0].ch, vmm[0].adc, vmm[0].bcid, vmm[0].tb, vmm[0].bcid_delta );
             // add it to the collection in StEvent
             mFttCollection->addRawHit( hit );
             if ( mDebug ){
@@ -134,4 +142,14 @@ StFttRawHitMaker::Make()
     } // while daqdta
 
     return kStOk;
+}
+
+int StFttRawHitMaker::readMuDst() {
+    StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+    if(!mudst){LOG_ERROR<<"StFttRawHitMaker::readMuDst() found no MuDst"<<endm; return kStErr;}
+    StMuFttCollection* mufttColl= mudst->muFttCollection();
+    if(!mufttColl){LOG_ERROR<<"StFttRawHitMaker::readMuDst found no MuFttCollection"<<endm; return kStErr;}
+    StMuFttUtil util;    
+    mFttCollection = util.getFtt(mufttColl);
+    mEvent->setFttCollection(mFttCollection);
 }

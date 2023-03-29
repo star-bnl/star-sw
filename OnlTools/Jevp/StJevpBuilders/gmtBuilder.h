@@ -75,7 +75,7 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
   //*** As well as by name...
   union {
 
-    TH2 *hPedArray[];
+    TH2 *hPedArray[1];
     struct {
 
       TH2* pedestalsAPV[16];   // for 16 APPVs
@@ -85,7 +85,7 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
 
    union {
     
-    TH1 *hSignalArray[];
+    TH1 *hSignalArray[1];
     struct {
       
       TH1* Signals[8];  //For 8 Chambers (0-7)
@@ -95,7 +95,7 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
   
   union {
     
-    TH1 *hTimebinArray[];
+    TH1 *hTimebinArray[1];
     struct {
       
       TH1* Timebins[8];  //For 8 Chambers (0-7)
@@ -104,14 +104,14 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
   
   union {
     
-    TH1 *hSumArray[];
+    TH1 *hSumArray[1];
     struct {
       TH1* h1SumAllsignals; 
                  
     };
   } hSumContents;
   union {
-  TH2 *hSigtb[];
+  TH2 *hSigtb[1];
     struct {
       TH2* h2SignalTimebins; 
     };

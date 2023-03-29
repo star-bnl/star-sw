@@ -2,7 +2,7 @@
 #define STFTTCLUSTER_H
 
 #include "StObject.h"
-
+#include <Stiostream.h>
 #include "StContainers.h"  // For StPtrVecFttRawHit
 #include "StEnumerations.h"
 
@@ -18,6 +18,7 @@ public:
     int id() const; // Cluster ID
     UChar_t plane()   const; // Detector plane.
     UChar_t quadrant()   const; // detector quadrant.
+    UChar_t row()   const; // detector row.
     UChar_t orientation() const;
     int nStrips() const;
     int nPoints() const;
@@ -30,6 +31,7 @@ public:
     void setId(int cluid);
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
+    void setRow(UChar_t row);
     void setOrientation( UChar_t );
     void setNStrips(int numStrips);
     void setSumAdc(int theSumAdc);
@@ -51,6 +53,7 @@ private:
     Int_t mId=-1;             // Eventwise cluster ID
     UChar_t mPlane;
     UChar_t mQuadrant;
+    UChar_t mRow;
     UChar_t mOrientation = kFttUnknownOrientation;        // Orientation of cluster
     Int_t mNStrips=0;         // Number of strips
     Float_t mSumAdc=0.0;      // Total ADC (0th moment)
@@ -60,13 +63,16 @@ private:
     StPtrVecFttCluster mNeighbors;    // Neighbor clusters
     StPtrVecFttPoint mPoints;        // Fitted points (photons) in the cluster
 
-    ClassDef(StFttCluster, 1)
+    ClassDef(StFttCluster, 2)
 };
+
+std::ostream& operator << ( std::ostream&, const StFttCluster& clu ); // Printing operator
 
 
 inline int StFttCluster::id() const { return mId; } // Cluster ID
 inline UChar_t StFttCluster::plane() const { return mPlane; }
 inline UChar_t StFttCluster::quadrant() const { return mQuadrant; }
+inline UChar_t StFttCluster::row() const { return mRow; }
 inline UChar_t StFttCluster::orientation() const { return mOrientation; }
 inline int StFttCluster::nStrips() const { return mNStrips; }
 inline int StFttCluster::nRawHits() const { return mRawHits.size(); }
@@ -78,6 +84,7 @@ inline float StFttCluster::sigma() const { return mSigma; } // 2nd moment
 
 inline void StFttCluster::setPlane(UChar_t plane) { mPlane = plane; }
 inline void StFttCluster::setQuadrant(UChar_t quadrant) { mQuadrant = quadrant; }
+inline void StFttCluster::setRow(UChar_t row) { mRow = row; }
 inline void StFttCluster::setOrientation( UChar_t so ) { mOrientation = so; }
 inline void StFttCluster::setNStrips(int numStrips) { mNStrips = numStrips; }
 inline void StFttCluster::setSumAdc(int theSumAdc) { mSumAdc = theSumAdc; }

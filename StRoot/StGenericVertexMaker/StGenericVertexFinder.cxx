@@ -7,21 +7,21 @@
  * Description: Base class for vertex finders
  *
  ***************************************************************************/
-#include <algorithm>
 #include <cmath>
+#include <vector>
 
-#include "TH1F.h"
-#include "TSpectrum.h"
-#include "TClonesArray.h"
+#include <TClonesArray.h>
+#include <TH1F.h>
+#include <TSpectrum.h>
 
-#include "StarRoot/TRMatrix.h"
-#include "StarRoot/TRSymMatrix.h"
+#include "StEvent/StDcaGeometry.h"
+#include "StEvent/StEvent.h"
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
-#include "StEvent/StDcaGeometry.h"
-#include "StEvent/StEventTypes.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StarRoot/TRMatrix.h"
+#include "StarRoot/TRSymMatrix.h"
 
 
 // Initialize static variable with default values
@@ -294,13 +294,6 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    double ky_dy_zv_2 = ky_dy_zv*ky_dy_zv;
    double kx_dx_zv_2 = kx_dx_zv*kx_dx_zv;
 
-   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
-
-   // The denominator is zero when the point is exactly on the beamline
-   // We just return a zero for the chi2 in this case. This makes sense for all
-   // non-zero errors and if they are zero they are unphysical anyway.
-   if (denom_sqrt == 0) return 0;
-
    // The distance between the line and the point
    StThreeVectorD dist_vec (
       (  (ky2 + 1)*dx -     kx*ky*dy -          kx*zv)/kx2_ky2_1,
@@ -308,7 +301,19 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
       (       - kx*dx -        ky*dy + (kx2 + ky2)*zv)/kx2_ky2_1
    );
 
+   double dist_mag = dist_vec.mag();
 
+   // When the vertex (point) gets closer to the beamline there may not be
+   // enough precision to do the intermediate calculations for the
+   // transformation of the errors, i.e. the Jacobian below. The distance is
+   // measured in cm so, anything within a nanometer will be considered to be on
+   // the beam line and we just return a zero for the chi2 in such cases. This
+   // makes sense for all non-zero errors (that is what we actually expect and
+   // assume) and if they are zero they are unphysical anyway.
+   if (dist_mag < 1e-7) return 0;
+
+   // TODO check if the value of denom_sqrt is the same as dist_mag
+   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
    double denom = kx2_ky2_1 * denom_sqrt;
 
    // The Jacobian for the distance w.r.t. measured beamline parameters, i.e. x0, y0, kx, and ky
@@ -336,8 +341,7 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    // Finaly, calculate the covariance matrix along the vector connecting the beamline and the point
    // The result is a 1x1 matrix
    TRSymMatrix covarianceMprime(TRMatrix(1, 4, jacobian), TRArray::kAxSxAT, TRSymMatrix(4, covBeamline) );
-
-   double dist_mag = dist_vec.mag();
+   
    double chi2 = dist_mag*dist_mag/covarianceMprime[0];
 
    return chi2;

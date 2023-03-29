@@ -266,7 +266,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 {
 	int r_start, r_stop ;
-	int s = 1 ;	// for now...
+//	int s = 1 ;	// for now...
 	
 	zs->create(1000,"fgt_zs",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
 
@@ -283,6 +283,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 
 	int found_some = 0 ;
 
+	for(int s=1;s<=2;s++) {
 	for(int r=r_start;r<=r_stop;r++) {
 		u_short *d ;
 		int bytes ;
@@ -452,6 +453,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 
 		if(rdobuff == 0) free(d) ;
 
+	}
 	}
 
 	zs->rewind() ;
@@ -893,7 +895,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	int bad = 0 ;
 	u_int *d32 = (u_int *)buff ;
 	int id_check_failed = 0 ;
-	int last_ix = words - 1 ;
+//	int last_ix = words - 1 ;
 
 	// FIRST we check the length
 	int buff_bytes = 4 * words ;

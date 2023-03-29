@@ -71,7 +71,7 @@ StBadDcaAnalysis::initHistograms()
 
   char name[500];
 
-  char* cPM[2] = {"Plus","Minus"};
+  const char* cPM[2] = {"Plus","Minus"};
 
   for(int ipm=0; ipm<2; ipm++){
     

@@ -1,0 +1,15 @@
+/* fttDataWindows.idl
+*
+* Table: fttDataWindows
+*
+* description: sTGC (ftt) data time windows
+*
+*/
+
+struct fttDataWindows {
+	octet uuid[385]; /* fob(1-96) x vmm(1-4) = index 1 - 384 */
+	octet mode[385]; /* 0 = timebin, 1 = bcid */
+	short min[385]; /* time window min > -32768 */
+	short max[385]; /* time window max < 32768 */
+	short anchor[385]; /* calibrated time anchor for BCID */
+};

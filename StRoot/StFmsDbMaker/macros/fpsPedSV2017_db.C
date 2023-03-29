@@ -29,7 +29,7 @@ void fpsPedSV2017_db(char* opt="", char* year="", char* filename="fps_good_physi
 
   cout << f1.str() << " idx="<<idx  << " f2="<<f2.str() << " run="<<run << endl;
   
-  char *onlserver="onldb", *bakserver="dbbak", *server=0;
+  char *onlserver="onldb2", *bakserver="dbbak", *server=0;
   int  port = 0;
   int y=run/1000000 -1;
   if(y >= 18){

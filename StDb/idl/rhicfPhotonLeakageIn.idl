@@ -1,0 +1,9 @@
+/*    rhicfPhotonLeakageIn.idl
+*
+*  Table: rhicfPhotonLeakageIn
+*
+*/
+struct rhicfPhotonLeakageIn {
+	float smallplate[6000];          /* 400x15, Leakage-in for small tower */
+	float largeplate[24000];        /* 1600x15, Leakage-in for large tower */
+};

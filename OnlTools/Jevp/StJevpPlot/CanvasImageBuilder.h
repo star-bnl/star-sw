@@ -58,7 +58,7 @@ class CanvasImageBuilder {
  private:
     void writeIndexFiles(FILE *f, DisplayNode *node, int page, int tabs);
     // Does above recursively...
-    int writeIndexFromNode(FILE *f, DisplayNode *node, char *dir, int page, int tabs);
+    int writeIndexFromNode(FILE *f, DisplayNode *node, const char *dir, int page, int tabs);
 
     int writeImageFile(char *dir, DisplayNode *node, double ymax=-999);
     // Does above recursively...

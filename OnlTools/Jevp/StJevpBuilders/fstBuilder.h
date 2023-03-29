@@ -140,7 +140,7 @@ class fstBuilder : public JevpBuilder {
 
   //*** Histogram Declarations...
   union {
-    TH2 *adcArray[]; //ADC value of each module's channels (ADC value vs. channel index)
+    TH2 *adcArray[1]; //ADC value of each module's channels (ADC value vs. channel index)
     struct { // 3 disks * 12 modules
       TH2* hADCDisk1Mod1;
       TH2* hADCDisk1Mod2;
@@ -182,7 +182,7 @@ class fstBuilder : public JevpBuilder {
   } hAdcContents;
 
   union {
-    TH1 *multArray[]; //hit multiplicity of each module per event
+    TH1 *multArray[1]; //hit multiplicity of each module per event
     struct { // 3 disks * 12 modules
       TH1* hitMultDisk1Mod1;
       TH1* hitMultDisk1Mod2;
@@ -224,7 +224,7 @@ class fstBuilder : public JevpBuilder {
   } hMultContents;
 
   union {
-    TH2 *hitMapArray[]; //hit map for each module (phi vs. R --- 128 phi vs. 8 R)
+    TH2 *hitMapArray[1]; //hit map for each module (phi vs. R --- 128 phi vs. 8 R)
     struct { // 3 disks * 12 modules
       TH2* hitMapDisk1Mod1;
       TH2* hitMapDisk1Mod2;
@@ -266,7 +266,7 @@ class fstBuilder : public JevpBuilder {
   } hHitMapContents;
 
   union {
-    TH2 *tbVsAdcArray[];  // Time bin vs. ADC value per section
+    TH2 *tbVsAdcArray[1];  // Time bin vs. ADC value per section
     struct{ // 3 disks * 12 modules * 2 sections
       TH2* tbVsAdcDisk1Sec0;
       TH2* tbVsAdcDisk1Sec1;
@@ -344,7 +344,7 @@ class fstBuilder : public JevpBuilder {
   } hTbVsAdcContents;
 
   union {
-    TH1 *eventSumArray[];
+    TH1 *eventSumArray[1];
     struct {
       TH1* hMeanPed;//mean pedestal of all channels
       TH1* hMeanRMS;//mean total rms of all channels
@@ -366,7 +366,7 @@ class fstBuilder : public JevpBuilder {
   } hEventSumContents;
   
   union {
-    TH1 *mipArray[]; //MIP signal distribution per section
+    TH1 *mipArray[1]; //MIP signal distribution per section
     struct {  // 3 disks * 12 modules * 2 sections
       TH1* hMipDisk1Sec1;
       TH1* hMipDisk1Sec2;
@@ -516,7 +516,7 @@ class fstBuilder : public JevpBuilder {
   } hMipContents;
 
   union {
-    TH1 *maxTimeBinArray[]; //MaxTimeBin per section
+    TH1 *maxTimeBinArray[1]; //MaxTimeBin per section
     struct {  // 3 disks * 12 modules * 2 sections
       TH1* hMaxTBDisk1Sec1;
       TH1* hMaxTBDisk1Sec2;
@@ -594,7 +594,7 @@ class fstBuilder : public JevpBuilder {
   } hMaxTimeBinContents;
 
   union {
-    TH2 *sumArray[];
+    TH2 *sumArray[1];
     struct{
       TH2* hSumPed[totDisk];  	         //pedestal from pedestal run (ADC vs. channel index)
       TH2* hSumSig[totDisk];	         //pedestal RMS from pedestal run (totRMS vs. channel index)

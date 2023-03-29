@@ -73,7 +73,6 @@
 // #define DEBUG 1
 
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "TObjArray.h"

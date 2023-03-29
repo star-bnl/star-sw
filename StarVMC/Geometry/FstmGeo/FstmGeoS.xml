@@ -37,7 +37,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
             FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
             FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
-            FSIR,   <!-- Inner support Ring -->
+            <!--FSIR,-->   <!-- Inner support Ring -->
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSWT,   <!-- Tube for the FST support tubes between inner and outer -->
@@ -117,6 +117,10 @@ It was copied from FstmGeo.xml on June 15. 2021
         <!-- ////////////////////////////////////////////////////////////////////////////
                 Declare structures
         -->
+
+	<Structure name="FSTG" comment="FstmGeo geometry configuration">
+	  <var name="version" comment="Geometry version" />
+	</Structure>
 
 
         <Structure name="mothervol" comment="tubes for the mother volume">
@@ -328,6 +332,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
     <Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
 
+	<Fill name="FSTG"><var name="version" value="1.1" /></Fill>
 
         <Fill name="mothervol" comment=" TUBE for the mothervolume" >
             <var name="version"  value="1.0" />
@@ -337,7 +342,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="rmin"     value="4.1" />
             <var name="rmax"     value="34.00" />
             <var name="dz"       value="30.0" />
-            <var name="zdisk"    value="{149.713,163.284,176.351}" />
+            <var name="zdisk"    value="{151.750, 165.248, 178.781}" />
         </Fill>
 
         <Fill name="wholewedge" comment="whole wedge shape" >
@@ -722,9 +727,9 @@ The factors are the weights fraction for stainless and NOVEC
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
                 </Placement>
             </For>
-            <Create    block="FSIR" />
+            <!--Create    block="FSIR" />
             <Placement block="FSIR" in="FSTD" x="0" y="0" z="0" >
-            </Placement>
+            </Placement-->
 
         </Volume>
 
@@ -784,31 +789,31 @@ The factors are the weights fraction for stainless and NOVEC
             <!-- ///////////////////////////// -->
 
             <!-- straight part -->
-            <!--Create block="FSCT" />
+            <Create block="FSCT" />
             <For var="itube" from="1" to="7">
                 <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
                 </Placement>
-            </For-->
+            </For>
 
-            <Create block="FSCT" />
-            <For var="itube" from="1" to="7">
+            <!--Create block="FSCT" /-->
+            <!--For var="itube" from="1" to="7">
                 <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.277" rmax="0.318" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
                 </Placement>
-            </For>
+            </For-->
             <Create block="FSCL" />
-            <For var="itube" from="1" to="7">
+            <!--For var="itube" from="1" to="7">
                                  <Placement block="FSCL" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.000" rmax="0.277" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
                 </Placement>
-            </For>
+            </For-->
 
 
 
@@ -879,11 +884,11 @@ The factors are the weights fraction for stainless and NOVEC
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
-        <Volume name="FSIR" comment="inner support tube">
+        <!--Volume name="FSIR" comment="inner support tube">
             <Attribute for="FSIR" seen="1" colo="1" />
             <Material name="PEEK" />
            <Shape type="TUBE" rmin="iring_rmin" rmax="iring_rmax" dz="iring_dz" />
-        </Volume>
+        </Volume-->
 
         <Volume name="FTRO" comment="Trapizoid for FST outer wedge">
             <Attribute for="FTRO" seen="1" colo="14" />
@@ -1005,7 +1010,7 @@ The factors are the weights fraction for stainless and NOVEC
 
         <Volume name="FSCT" comment="Tube for FST cooling tube">
              <Attribute for="FSCT" seen="1" colo="795" />
-            <Material name="StainlessSteel316" />
+            <Material name="SteelNOVECMix" />
             <Shape type="TUBE" rmin="0" rmax="0" dz="0" />
         </Volume>
         <Volume name="FSCL" comment="Tube for FST coolant">

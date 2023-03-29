@@ -25,16 +25,17 @@ public:
 
     StFttRawHit(    UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                     UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                    UShort_t mBCID, Short_t mTB );
+                    UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta );
 
     ~StFttRawHit() {}
 
     void setRaw(    UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                     UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                    UShort_t mBCID, Short_t mTB );
+                    UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta );
 
     void setMapping( UChar_t mPlane, UChar_t mQuadrant, UChar_t mRow, UChar_t mStrip, UChar_t mOrientation );
 
+    void setTime( Short_t mTime ) { this->mTime = mTime; }
     // consant getters
 
     UChar_t sector() const;
@@ -44,7 +45,9 @@ public:
     UChar_t channel() const;
     UShort_t adc() const;
     UShort_t bcid() const;
+    Short_t dbcid() const;
     Short_t tb() const;
+    Short_t time() const;
 
     UChar_t plane() const;
     UChar_t quadrant() const;
@@ -61,6 +64,8 @@ protected:
     UShort_t mADC;
     UShort_t mBCID;
     Short_t mTB;  // from the trigger
+    Short_t mBCIDDelta;
+    Short_t mTime;  // calibrated BCID Delta
 
     // mapped information
     UChar_t mPlane;
@@ -72,7 +77,7 @@ protected:
     // StFttCluster *mCluster;
     // StFttPoint   *mPoint;
 
-    ClassDef( StFttRawHit, 1 );
+    ClassDef( StFttRawHit, 3 );
 };
 
 ostream& operator << ( ostream&, const StFttRawHit& digi ); // Printing operator
@@ -84,7 +89,9 @@ inline UChar_t  StFttRawHit::vmm()         const { return mVMM;         };
 inline UChar_t  StFttRawHit::channel()     const { return mChannel;     };
 inline UShort_t StFttRawHit::adc()         const { return mADC;         };
 inline UShort_t StFttRawHit::bcid()        const { return mBCID;        };
+inline Short_t  StFttRawHit::dbcid()       const { return mBCIDDelta;   };
 inline Short_t  StFttRawHit::tb()          const { return mTB;          };
+inline Short_t  StFttRawHit::time()        const { return mTime;        };
 
 inline UChar_t  StFttRawHit::plane()       const { return mPlane;       };
 inline UChar_t  StFttRawHit::quadrant()    const { return mQuadrant;    };

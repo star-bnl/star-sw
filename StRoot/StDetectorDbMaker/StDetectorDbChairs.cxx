@@ -37,8 +37,8 @@ void PrintTable(const Char_t *str, TTable *table) {
   Bool_t iprt = kTRUE;
   if (St_db_Maker::GetValidity(table,t) > 0) {
     if (table->InheritsFrom("St_tpcCorrection")) {
-      St_tpcCorrection *t = (St_tpcCorrection *) table;
-      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
+      St_tpcCorrection *tt = (St_tpcCorrection *) table;
+      tpcCorrection_st *s = tt->GetTable(); Nrows = s->nrows;}
     if (Nrows > 10) Nrows = 10;
     CHECKTABLE(tpcCorrection);
     CHECKTABLE(tpcHVPlanes);
@@ -94,12 +94,17 @@ MakeChairInstance(tpcChargeEvent,Calibrations/tpc/tpcChargeEvent);
 MakeChairInstance(tpcSCGL,Calibrations/tpc/tpcSCGL);
 ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
   return SumSeries(cor, x, z, NparMax);
 }
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) {
+Double_t St_tpcCorrectionC::CalcXDerivative(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
+  tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
+  return SumSeriesXDerivative(cor, x, z, NparMax);
+}
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
   Double_t Sum = 0;
   if (! cor) return Sum;
   Int_t N = TMath::Abs(cor->npar)%100;
@@ -114,6 +119,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     case 10:// ADC correction offset + poly for ADC
     case 11:// ADC correction offset + poly for log(ADC) and |Z|
     case 12:// ADC correction offset + poly for log(ADC) and TanL
+    case 13:// ADC correction without off set TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10) and offset correction via TpcAdcCorrection6MDF
       X = TMath::Log(x);      break;
     case 1: // Tchebyshev [-1,1]
       if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
@@ -189,6 +195,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     Sum = cor->a[1] + z*cor->a[2] + z*z*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
     Sum *= TMath::Exp(-cor->a[0]);
     break;
+  case 13: // ADC correction and offset correction via TpcAdcCorrection6MDF
+    Sum = x * TMath::Exp(cor->a[0] + cor->a[1] + TMath::Exp(cor->a[2] + cor->a[3]*x));
+    break;
+  case 30: // TanH saturation function: [0]+[1]*TMath::TanH([2]*(x-[3]))
+    Sum = cor->a[0]+cor->a[1]*TMath::TanH(cor->a[2]*(x-cor->a[3]));
+    break;
   case 1000:
   case 1100:
   case 1200:
@@ -254,6 +266,90 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   }
   return Sum;
 }
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeriesXDerivative(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
+  // Only for polynomials for now
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  if (NparMax > 0) N = NparMax;
+  // parameterization variable
+  Double_t X = x;
+  Double_t Jacobian = 1;
+  if (cor->npar  < 0) {X = TMath::Exp(x); Jacobian = X;}
+  else {
+    switch  (cor->type) {
+    case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|
+    case 12:// ADC correction offset + poly for log(ADC) and TanL
+    case 13:// ADC correction without off set TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10) and offset correction via TpcAdcCorrection6MDF
+      X = TMath::Log(x);      
+      Jacobian = 1./x;
+      break;
+    case 1: // Tchebyshev [-1,1]
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 3:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Log(1. - TMath::Abs(x));
+      Jacobian = 0;
+      break;
+    case 4:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      Jacobian = 0;
+      break;
+    case 5:
+      if (x < 1e-7) X = -16.118;
+      else          X = TMath::Log(x);
+      Jacobian = TMath::Exp(-X);
+      break;
+    case 6:
+      X = TMath::Abs(x);
+      Jacobian = TMath::Sign(1., x);
+      break;
+    default:      X = x;    break;
+    }
+  }
+  if (TMath::Abs(Jacobian) < 1e-7) return 0;
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
+    if (X < cor->min) X = cor->min;
+    if (X > cor->max) X = cor->max;
+  }
+  Sum = cor->a[N-1] * (N - 1);
+  for (int n = N-2; n>=1; n--) Sum = X*Sum + cor->a[n] * n;
+  Sum *= Jacobian;
+  return Sum;
+}
+//________________________________________________________________________________
+Int_t St_tpcCorrectionC::IsActiveChair() const {
+  const St_tpcCorrection  *tableC = (const St_tpcCorrection  *) Table();
+  Int_t npar = 0;
+  if (! tableC) return npar;
+  tpcCorrection_st *cor = tableC->GetTable();
+  Int_t N = tableC->GetNRows();
+  if (! cor || ! N) {
+    return npar;
+  }
+  N = cor->nrows;
+  for (Int_t i = 0; i < N; i++, cor++) {
+    if (cor->nrows == 0 && cor->idx == 0) continue;
+    if (TMath::Abs(cor->npar) > 0       ||
+	TMath::Abs(cor->OffSet) > 1.e-7 ||
+	TMath::Abs(cor->min)    > 1.e-7 ||
+	TMath::Abs(cor->max)    > 1.e-7) {
+      npar++;
+    }
+  }
+  return npar;
+}
 #include "St_TpcRowQC.h"
 MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
 #include "St_TpcDriftDistOxygenC.h"
@@ -266,16 +362,31 @@ MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrec
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrectionC);
 #include "St_TpcdXCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+#include "St_TpcEtaCorrectionC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionC,Calibrations/tpc/TpcEtaCorrection);
+#include "St_TpcEtaCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionBC,Calibrations/tpc/TpcEtaCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
+//________________________________________________________________________________
+#include "St_TpcPadPedRMSC.h"
+MakeChairInstance2(tpcCorrection,St_TpcPadPedRMSC,Calibrations/tpc/TpcPadPedRMS);
 #include "St_TpcEdgeC.h"
 MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 #include "St_TpcAdcCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
+#include "St_TpcAdcCorrectionCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionCC,Calibrations/tpc/TpcAdcCorrectionC);
 #include "St_TpcAdcCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcAdcCorrectionMDF,Calibrations/tpc/TpcAdcCorrectionMDF);
 #include "St_TpcAdcCorrection3MDF.h"
 MakeChairInstance2(MDFCorrection3,St_TpcAdcCorrection3MDF,Calibrations/tpc/TpcAdcCorrection3MDF);
+#include "St_TpcAdcCorrection4MDF.h"
+MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection4MDF,Calibrations/tpc/TpcAdcCorrection4MDF);
+#include "St_TpcAdcCorrection5MDF.h"
+MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection5MDF,Calibrations/tpc/TpcAdcCorrection5MDF);
+#include "St_TpcAdcCorrection6MDF.h"
+MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection6MDF,Calibrations/tpc/TpcAdcCorrection6MDF);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
@@ -306,11 +417,20 @@ MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
 //________________________________________________________________________________
 Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
-  if (x < 0) return 0;
-  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
   Double_t value = -10;
+  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
   if (x <= cor->t0) return value;
   Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
+  if (corD < 1e-4) return value;
+  return TMath::Log(corD);
+}
+#include "St_GatingGridBC.h"
+MakeChairInstance2(tpcCorrection,St_GatingGridBC,Calibrations/tpc/GatingGridB);
+//________________________________________________________________________________
+Double_t St_GatingGridBC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
+  Double_t value = -10;
+  if (x <= t0(i)) return value;
+  Double_t corD = 1. - TMath::Exp(-(x-t0(i))/(settingTime(i)/4.6));
   if (corD < 1e-4) return value;
   return TMath::Log(corD);
 }
@@ -345,8 +465,12 @@ MakeChairInstance2(tpcCorrection,St_TpcAccumulatedQC,Calibrations/tpc/TpcAccumul
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
 #include "St_TpcLengthCorrectionMD2.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMD2,Calibrations/tpc/TpcLengthCorrectionMD2);
+#include "St_TpcLengthCorrectionMDN.h"
+MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDN,Calibrations/tpc/TpcLengthCorrectionMDN);
 #include "St_TpcPadCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
+#include "St_TpcPadCorrectionMDC.h"
+MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDC,Calibrations/tpc/TpcPadCorrectionMDC);
 ClassImp(St_MDFCorrectionC);
 St_MDFCorrectionC *St_MDFCorrectionC::fgMDFCorrectionC = 0;
 //____________________________________________________________________
@@ -401,6 +525,14 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   assert(x);
   if (! fFunc[k]) {
     fgMDFCorrectionC = (St_MDFCorrectionC *) this;
+    if (_debug) {
+      MDFCorrection_st *corK = fgMDFCorrectionC->Struct(k);
+      cout << Table()->GetName() << " k = " << k << " Idx = " << (Int_t) corK->idx << " Nvar = " << corK->NVariables << " type = " << corK->PolyType;
+      for (Int_t v = 0; v < corK->NVariables; v++) {
+	cout << "\t" << v << " min = " << corK->XMin[v] << " max = " << corK->XMax[v];
+      }
+      cout << endl;
+    }
     if (NVariables(k) <= 0) {
       return 0;
     } else if (NVariables(k) == 1) {
@@ -483,6 +615,23 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
+//________________________________________________________________________________
+Int_t St_MDFCorrectionC::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection *tableMDF = (const St_MDFCorrection *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
 //________________________________________________________________________________
 ClassImp(St_MDFCorrection3C);
 St_MDFCorrection3C *St_MDFCorrection3C::fgMDFCorrection3C = 0;
@@ -620,7 +769,183 @@ Double_t St_MDFCorrection3C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
+//________________________________________________________________________________
+Int_t St_MDFCorrection3C::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection3 *tableMDF = (const St_MDFCorrection3 *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection3_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+ClassImp(St_MDFCorrection4C);
+St_MDFCorrection4C *St_MDFCorrection4C::fgMDFCorrection4C = 0;
+//____________________________________________________________________
+St_MDFCorrection4C::St_MDFCorrection4C(St_MDFCorrection4 *table) : TChair(table), fFunc(0) {
+  UInt_t N = table->GetNRows();
+  fFunc = new TF1*[N];
+  memset(fFunc, 0, N*sizeof(TF1*));
+}
+//____________________________________________________________________
+St_MDFCorrection4C::~St_MDFCorrection4C() {
+  UInt_t N = Table()->GetNRows();
+  for (UInt_t i = 0; i < N; i++) {SafeDelete(fFunc[i]);}
+  delete [] fFunc;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection4C::MDFunc(Double_t *x, Double_t *p) {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  UInt_t k = p[0];
+  assert(k >= 0 && k < fgMDFCorrection4C->getNumRows());
+  Double_t returnValue = fgMDFCorrection4C->DMean(k);
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < fgMDFCorrection4C->NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = fgMDFCorrection4C->Coefficients(k)[i];
+    for (j = 0; j < fgMDFCorrection4C->NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  fgMDFCorrection4C->Powers(k)[i * fgMDFCorrection4C->NVariables(k) + j];
+      Double_t y  =  1 + 2. / (fgMDFCorrection4C->XMax(k)[j] - fgMDFCorrection4C->XMin(k)[j])
+	* (x[j] - fgMDFCorrection4C->XMax(k)[j]);
+      term        *= fgMDFCorrection4C->EvalFactor(k,p,y);
+    }
+    // Add this term to the final result
+    returnValue += term;
+  }
+  return returnValue;
+}
 
+//____________________________________________________________________
+Double_t St_MDFCorrection4C::Eval(Int_t k, Double_t x0, Double_t x1, Double_t x2, Double_t x3) const {
+  Double_t x[4] = {x0, x1, x2, x3};
+  return Eval(k,x);
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection4C::Eval(Int_t k, Double_t *x) const {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  Double_t xx[4];
+  for (Int_t v = 0; v < NVariables(k); v++) {
+    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
+  }
+  Double_t returnValue = 0;
+  fgMDFCorrection4C = (St_MDFCorrection4C *) this;
+  if (NVariables(k) <= 3) { 
+    if (! fFunc[k]) {
+      if (NVariables(k) <= 0) {
+	return returnValue;
+      } else if (NVariables(k) == 1) {
+	fFunc[k] = new TF1(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection4C::MDFunc,
+			   XMin(k)[0],XMax(k)[0],1);
+	fFunc[k]->SetParameter(0,k);
+	fFunc[k]->Save(XMin(k)[0],XMax(k)[0],0,0,0,0);
+      } else if (NVariables(k) == 2) {
+	fFunc[k] = new TF2(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection4C::MDFunc,
+			   XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],1);
+	fFunc[k]->SetParameter(0,k);
+	((TF2 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],0,0);
+      } else if (NVariables(k) == 3) {
+	fFunc[k] = new TF3(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection4C::MDFunc,
+			   XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2],1);
+	fFunc[k]->SetParameter(0,k);
+	((TF3 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2]);
+      }
+    }
+    returnValue = fFunc[k]->GetSave(xx);
+  } else  {
+    Double_t par[1] = {(Double_t) k};
+    returnValue = St_MDFCorrection4C::MDFunc(xx,par);
+  }
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection4C::EvalError(Int_t k, Double_t *x) const {
+  // Evaluate parameterization error at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients(k)
+  // elements long.
+  assert(x);
+  Double_t returnValue = 0;
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = CoefficientsRMS(k)[i];
+    for (j = 0; j < NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  Powers(k)[i * NVariables(k) + j];
+      Double_t y  =  1 + 2. / (XMax(k)[j] - XMin(k)[j])
+	* (x[j] - XMax(k)[j]);
+      term        *= EvalFactor(p,y);
+    }
+    // Add this term to the final result
+    returnValue += term*term;
+  }
+  returnValue = TMath::Sqrt(returnValue);
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection4C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
+  // Evaluate function with power p at variable value x
+  Int_t    i   = 0;
+  Double_t p1  = 1;
+  Double_t p2  = 0;
+  Double_t p3  = 0;
+  Double_t r   = 0;
+
+  switch(p) {
+  case 1:
+    r = 1;
+    break;
+  case 2:
+    r =  x;
+    break;
+  default:
+    p2 = x;
+    for (i = 3; i <= p; i++) {
+      p3 = p2 * x;
+      if (PolyType(k) == kLegendre)
+	p3 = ((2 * i - 3) * p2 * x - (i - 2) * p1) / (i - 1);
+      else if (PolyType(k) == kChebyshev)
+	p3 = 2 * x * p2 - p1;
+      p1 = p2;
+      p2 = p3;
+    }
+    r = p3;
+  }
+  return r;
+}
+//________________________________________________________________________________
+Int_t St_MDFCorrection4C::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection4 *tableMDF = (const St_MDFCorrection4 *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection4_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
 #include "St_tpcEffectiveGeomC.h"
 MakeChairAltInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeomB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcElectronicsC.h"
@@ -944,7 +1269,34 @@ Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
 
   return AcCharge(sector,channel)/Length[channel-1];
 }
-
+//________________________________________________________________________________
+void St_TpcAvgPowerSupplyC::PrintC() const {
+  const St_TpcAvgPowerSupply *TpcAvgPowerSupply = (St_TpcAvgPowerSupply *) GetThisTable();
+  const TpcAvgPowerSupply_st &avgC = *TpcAvgPowerSupply->GetTable();
+  Double_t AcCharge[2] = {0, 0};
+  cout << "TpcAvgPowerSupply for run = " << avgC.run << endl;
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Voltage " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.3f",avgC.Voltage[8*(sec-1)+socket-1]);
+    cout << endl;
+  }
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Current " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.5f",avgC.Current[8*(sec-1)+socket-1]);
+    cout << endl;
+  }
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Charge " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) {
+      cout << "\t" << Form("%10.3f",avgC.Charge[8*(sec-1)+socket-1]);
+      Int_t io = 0;
+      if (socket > 4) io = 1;
+      AcCharge[io] += avgC.Charge[8*(sec-1)+socket-1];
+    }
+    cout << endl;
+  }
+  cout << "Run " << avgC.run << " Accumulated charge Inner = " << AcCharge[0] << " (C), Outer = " << AcCharge[1] << "(C)" << endl;
+}
 #include "St_tpcAnodeHVavgC.h"
 MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
 //________________________________________________________________________________
@@ -983,12 +1335,358 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 //________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+#include "St_itpcDeadFEEC.h"
+MakeChairInstance(itpcDeadFEE,Calibrations/tpc/itpcDeadFEE);
 #include "St_itpcPadGainT0C.h"
-MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
+//MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
+//#define MakeChairInstance(STRUCT,PATH)
+ClassImp(St_itpcPadGainT0C);
+St_itpcPadGainT0C *St_itpcPadGainT0C::fgInstance = 0;
+rowpadFEEmap_t  St_itpcPadGainT0C::rowpadFEE[] = {
+  //row, padMin, padMax, fee, rdo
+    { 1,  1, 26, 54, 1},
+    { 1, 27, 52, 55, 1},
+    { 2,  1, 27, 54, 1},
+    { 2, 28, 54, 55, 1},
+    { 3,  1, 22, 52, 1},
+    { 3, 23, 28, 54, 1},
+    { 3, 29, 34, 55, 1},
+    { 3, 35, 56, 53, 1},
+    { 4,  1, 24, 52, 1},
+    { 4, 25, 29, 54, 1},
+    { 4, 30, 34, 55, 1},
+    { 4, 35, 58, 53, 1},
+    { 5,  1, 10, 52, 1},
+    { 5, 11, 20, 49, 1},
+    { 5, 21, 40, 50, 1},
+    { 5, 41, 50, 51, 1},
+    { 5, 51, 60, 53, 1},
+    { 6,  1,  8, 52, 1},
+    { 6, 22, 41, 50, 1},
+    { 6, 42, 54, 51, 1},
+    { 6, 55, 62, 53, 1},
+    { 6,  9, 21, 49, 1},
+    { 7,  1,  3, 46, 1},
+    { 7, 26, 37, 50, 1},
+    { 7, 38, 59, 51, 1},
+    { 7,  4, 25, 49, 1},
+    { 7, 60, 62, 48, 1},
+    { 8,  1,  7, 46, 1},
+    { 8, 27, 38, 50, 1},
+    { 8, 39, 57, 51, 1},
+    { 8, 58, 64, 48, 1},
+    { 8,  8, 26, 49, 1},
+    { 9,  1, 25, 46, 1},
+    { 9, 26, 41, 47, 1},
+    { 9, 42, 66, 48, 1},
+    {10,  1, 25, 46, 1},
+    {10, 26, 43, 47, 1},
+    {10, 44, 68, 48, 1},
+    
+    {11,  1, 27, 43, 2},
+    {11, 28, 43, 47, 1},
+    {11, 44, 70, 45, 2},
+    
+    {12,  1, 29, 43, 2}, // ? correction from Irakli, 03/09/2020: 29 => 28 ?
+    {12, 30, 43, 47, 1},
+    {12, 44, 72, 45, 2},
+    
+    {13,  1,  4, 43, 2},
+    {13, 23, 52, 44, 2},
+    {13,  5, 22, 40, 2},
+    {13, 53, 70, 42, 2},
+    {13, 71, 74, 45, 2},
+    {14,  1, 22, 40, 2},
+    {14, 23, 52, 44, 2},
+    {14, 53, 74, 42, 2},
+    {15,  1,  8, 36, 2},
+    {15, 23, 54, 41, 2},
+    {15, 55, 68, 42, 2},
+    {15, 69, 76, 39, 2},
+    {15,  9, 22, 40, 2},
+    {16,  1, 13, 36, 2},
+    {16, 14, 23, 40, 2},
+    {16, 24, 55, 41, 2},
+    {16, 56, 65, 42, 2},
+    {16, 66, 78, 39, 2},
+    {17,  1, 24, 36, 2},
+    {17, 25, 40, 37, 2},
+    {17, 41, 56, 38, 2},
+    {17, 57, 80, 39, 2},
+    {18,  1, 19, 36, 2},
+    {18, 20, 41, 37, 2},
+    {18, 42, 63, 38, 2},
+    {18, 64, 82, 39, 2},
+    {19,  1, 26, 32, 2},
+    {19, 27, 42, 37, 2},
+    {19, 43, 58, 38, 2},
+    {19, 59, 84, 35, 2},
+    {20,  1, 22, 32, 2},
+    {20, 23, 33, 33, 2},
+    {20, 34, 43, 37, 2},
+    {20, 44, 53, 38, 2},
+    {20, 54, 64, 34, 2},
+    {20, 65, 86, 35, 2},
+    
+    {21,  1,  4, 32, 2},
+    {21, 25, 43, 33, 2},
+    {21, 44, 62, 34, 2},
+    {21,  5, 24, 28, 3},
+    {21, 63, 82, 31, 4},
+    {21, 83, 86, 35, 2},
+    
+    {22,  1,  8, 32, 2},
+    {22, 26, 44, 33, 2},
+    {22, 45, 63, 34, 2},
+    {22, 64, 80, 31, 4},
+    {22, 81, 88, 35, 2},
+    {22,  9, 25, 28, 3},
+    
+    {23,  1, 10, 28, 3},
+    {23, 11, 18, 24, 3},
+    {23, 19, 36, 29, 3},
+    {23, 37, 45, 33, 2},
+    {23, 46, 54, 34, 2},
+    {23, 55, 72, 30, 4},
+    {23, 73, 80, 27, 4},
+    {23, 81, 90, 31, 4},
+    
+    {24,  1, 15, 28, 3},
+    {24, 16, 26, 24, 3},
+    {24, 27, 44, 29, 3},
+    {24, 45, 46, 33, 2},
+    {24, 47, 48, 34, 2},
+    {24, 49, 66, 30, 4},
+    {24, 67, 77, 27, 4},
+    {24, 78, 92, 31, 4},
+    
+    {25,  1, 20, 24, 3},
+    {25, 21, 29, 29, 3},
+    {25, 30, 47, 25, 3},
+    {25, 48, 65, 26, 4},
+    {25, 66, 74, 30, 4},
+    {25, 75, 94, 27, 4},
+    
+    {26,  1, 21, 24, 3},
+    {26, 22, 35, 29, 3},
+    {26, 36, 48, 25, 3},
+    {26, 49, 61, 26, 4},
+    {26, 62, 75, 30, 4},
+    {26, 76, 96, 27, 4},
+    
+    {27,  1, 24, 19, 3},
+    {27, 25, 32, 20, 3},
+    {27, 33, 42, 25, 3},
+    {27, 43, 56, 21, 3},
+    {27, 57, 66, 26, 4},
+    {27, 67, 74, 22, 4},
+    {27, 75, 98, 23, 4},
+    
+    {28,  1, 16, 19, 3},
+    {28, 17, 24, 20, 3},
+    {28, 25, 42, 25, 3},
+    {28, 43, 56, 21, 3},
+    {28, 57, 74, 26, 4},
+    {28, 75, 82, 22, 4},
+    {28, 83, 98, 23, 4},
+    
+    {29,  1, 12, 17, 3},
+    {29, 13, 20, 19, 3},
+    {29, 21, 42, 20, 3},
+    {29, 43, 58, 21, 3},
+    {29, 59, 80, 22, 4},
+    {29, 81, 88, 23, 4},
+    {29, 89,100, 18, 4},
+    
+    {30,  1,  5, 17, 3},
+    {30, 22, 43, 20, 3},
+    {30, 44, 59, 21, 3},
+    {30, 60, 81, 22, 4},
+    {30,  6, 21, 19, 3},
+    {30, 82, 97, 23, 4},
+    {30, 98,102, 18, 4},
+    
+    {31,  1, 20, 17, 3},
+    {31, 21, 40, 13, 3},
+    {31, 41, 42, 20, 3},
+    {31, 43, 62, 14, 4},
+    {31, 63, 64, 22, 4},
+    {31, 65, 84, 15, 4},
+    {31, 85,104, 18, 4},
+    
+    {32,  1, 27, 17, 3},
+    {32, 28, 43, 13, 3},
+    {32, 44, 63, 14, 4},
+    {32, 64, 79, 15, 4},
+    {32, 80,106, 18, 4},
+    
+    {33,  1, 32, 12, 3},
+    {33, 33, 43, 13, 3},
+    {33, 44, 49, 14, 4},
+    {33, 50, 59,  9, 4},
+    {33, 60, 65, 14, 4},
+    {33, 66, 76, 15, 4},
+    {33, 77,108, 16, 4},
+    
+    {34,  1, 28, 12, 3},
+    {34, 29, 44, 13, 3},
+    {34, 45, 49, 14, 4},
+    {34, 50, 61,  9, 4},
+    {34, 62, 66, 14, 4},
+    {34, 67, 82, 15, 4},
+    {34, 83,110, 16, 4},
+    
+    {35,  1, 19,  7, 3},
+    {35, 20, 44,  8, 3},
+    {35, 45, 66,  9, 4},
+    {35, 67, 91, 10, 4},
+    {35, 92,110, 11, 4},
+    
+    {36,  1, 20,  7, 3},
+    {36, 21, 24, 12, 3},
+    {36, 25, 46,  8, 3},
+    {36, 47, 66,  9, 4},
+    {36, 67, 88, 10, 4},
+    {36, 89, 92, 16, 4},
+    {36, 93,112, 11, 4},
+    
+    {37,102,114,  6, 4},
+    {37,  1, 13,  1, 3},
+    {37, 14, 26,  7, 3},
+    {37, 27, 38,  2, 3},
+    {37, 39, 45,  8, 3},
+    {37, 46, 57,  3, 3},
+    {37, 58, 69,  4, 4},
+    {37, 70, 76, 10, 4},
+    {37, 77, 88,  5, 4},
+    {37, 89,101, 11, 4},
+    
+    {38,105,116,  6, 4},
+    {38,  1, 12,  1, 3},
+    {38, 13, 24,  7, 3},
+    {38, 25, 36,  2, 3},
+    {38, 37, 46,  8, 3},
+    {38, 47, 58,  3, 3},
+    {38, 59, 70,  4, 4},
+    {38, 71, 80, 10, 4},
+    {38, 81, 92,  5, 4},
+    {38, 93,104, 11, 4},
+    
+    {39,100,118,  6, 4},
+    {39,  1, 19,  1, 3},
+    {39, 20, 39,  2, 3},
+    {39, 40, 59,  3, 3},
+    {39, 60, 79,  4, 4},
+    {39, 80, 99,  5, 4},
+    
+    {40,101,120,  6, 4},
+    {40,  1, 20,  1, 3},
+    {40, 21, 40,  2, 3},
+    {40, 41, 60,  3, 3},
+    {40, 61, 80,  4, 4},
+    {40, 81,100,  5, 4},
+  };
+Int_t St_itpcPadGainT0C::NCrowpadFEE = sizeof(St_itpcPadGainT0C::rowpadFEE)/sizeof(rowpadFEEmap_t);
+St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
+  if (fgInstance) return fgInstance;
+  St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
+  if (! table) {
+    LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
+    assert(table);
+  }
+  St_itpcDeadFEEC *dead = St_itpcDeadFEEC::instance();
+  if (dead) {
+    itpcPadGainT0_st *g = table->GetTable();
+    Int_t N = dead->getNumRows();
+    for (Int_t i = 0; i < N; i++) {
+      Int_t s = dead->sector(i);
+      if (s <= 0) break;
+      Int_t r = dead->row(i);
+      Int_t pmin = dead->padMin(i);
+      Int_t pmax = dead->padMax(i);
+      Int_t fee = dead->FEE(i);
+      //      Int_t rdo = dead->RDO(i);
+      Int_t nFEE = 1;
+      if (fee > 0) {
+	nFEE = NCrowpadFEE;
+      }
+      for (Int_t j = 0; j < nFEE; j++) {
+	if (fee > 0) {
+	  if (rowpadFEE[j].fee != fee) continue;
+	  if (rowpadFEE[j].row != r  ) continue;
+	  r = rowpadFEE[j].row;
+	  pmin = rowpadFEE[j].padMin;
+	  pmax = rowpadFEE[j].padMax;
+	  if (pmin > 0 && pmax >= pmin) {
+	    for (Int_t pad = pmin; pad <= pmax; pad++) {
+	      if (_debug && g->Gain[s-1][r-1][pad-1] > 0) {
+		cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
+	      }
+	      g->Gain[s-1][r-1][pad-1] = 0;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  DEBUGTABLE(STRUCT);
+  fgInstance = new St_itpcPadGainT0C(table);
+  return fgInstance;
+}
+//________________________________________________________________________________
+#include "St_tpcExtraGainCorrectionC.h"
+MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection);
+//________________________________________________________________________________
 #include "St_tpcPadGainT0BC.h"
 // tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
-St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {
+  if (! fgInstance) {
+    fgInstance = new St_tpcPadGainT0BC(); 
+    // Apply additional correction for gain tables
+    Int_t run = StMaker::GetChain()->GetRunNumber();
+    St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
+    Int_t nrows = extra->nrows();
+    for (Int_t i = 0; i < nrows; i++) {
+      if (extra->idx(i) <= 0) continue;
+      if (run < extra->runMin(i) || run > extra->runMax(i)) continue;
+      Int_t sector = extra->sector(i);
+      if (sector < 0 || sector > 24) continue;
+      Int_t row    = extra->row(i);
+      Int_t padMin = extra->padMin(i);
+      Int_t padMax = extra->padMax(i);
+      Int_t RDO    = extra->RDO(i);
+      Int_t FEE    = extra->FEE(i);
+      Int_t status = extra->status(i);
+#if 0
+      LOG_WARN << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      if (! status) continue;
+      Int_t rowMin = row;
+      Int_t rowMax = row;
+      if (row <= 0) {rowMin = 1; rowMax = 45;}
+      if (padMin > padMax) {
+	// Calculate padMin/Max from FEE or RDO
+      }
+      for (Int_t r = rowMin; r <= rowMax; r++) {
+	Float_t *gains = St_tpcPadGainT0BC::instance()->Gains(sector, r);
+	for (Int_t p = padMin; p <= padMax; p++) {
+	  if (gains[p-1] > 0) {
+	    LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  }
+	  gains[p-1] = 0;
+	}
+      }
+#else
+      LOG_ERROR << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i should be moved to tpcRDOMaks", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+#endif
+    }
+  }
+  return fgInstance;
+}
 //________________________________________________________________________________
 Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
   Float_t gain = 0;
@@ -1002,6 +1700,20 @@ Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
     gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
   }
   return gain;
+}
+//________________________________________________________________________________
+Float_t        *St_tpcPadGainT0BC::Gains(Int_t sector, Int_t row) {
+  Float_t *gains = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) {
+      gains = St_itpcPadGainT0C::instance()->Gains(sector,row);
+    } else {
+      gains = St_tpcPadGainT0C::instance()->Gains(sector,row-40+13);
+    }
+  } else { // Tpx
+    gains = St_tpcPadGainT0C::instance()->Gains(sector,row);
+  }
+  return gains;
 }
 //________________________________________________________________________________
 Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
@@ -1025,6 +1737,18 @@ Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
       return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40+13);
   }
   return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
+}
+#include "StPath2tpxGain.h"
+MakeChairInstance2(FilePath,StPath2tpxGain,Calibrations/tpc/Path2tpxGain);
+#include "StPath2itpcGain.h"
+MakeChairInstance2(FilePath,StPath2itpcGain,Calibrations/tpc/Path2itpcGain);
+//________________________________________________________________________________
+const Char_t * St_FilePathC::GetPath(const Char_t *prepend) {
+  static TString path;
+  path = prepend;
+  path += file(); 
+  gSystem->ExpandPathName(path); 
+  return path.Data();
 }
 //________________________________________________________________________________
 #include "St_tpcSlewingC.h"
@@ -1075,8 +1799,8 @@ StTpcHitErrors *StTpcHitErrors::instance() {
   if (! fgInstance) {
     StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcHitErrors");
     LOG_INFO << "StTpcHitErrors have been instantiated with\n"
-     << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << ","
-     << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endm;
+	     << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << ","
+	     << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endm;
   }
   return fgInstance;
 }
@@ -1308,14 +2032,47 @@ MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tp
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
+//________________________________________________________________________________
+St_trigDetSumsC::~St_trigDetSumsC() {
+  fgInstance = 0;
+}
+//________________________________________________________________________________
 St_trigDetSumsC *St_trigDetSumsC::instance() {
-  if (fgInstance) return fgInstance;
-  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
-  if (! table) table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
+  if (fgInstance) {
+#if 0
+    static trigDetSums_st *sOld = 0;
+    static Int_t iBreak = 0;
+    if (iBreak < 3) {
+      St_trigDetSums *table = (St_trigDetSums *) fgInstance->Table();
+      trigDetSums_st *s = table->GetTable();
+      if (s != sOld) {
+	LOG_QA << "new trigDetSums" << endm;
+	DEBUGTABLE("trigDetSums");
+	sOld = s;
+	iBreak++;
+      }
+    }
+#endif
+    return fgInstance;
+  }
+  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("inputStream_DAQ/trigDetSums");
+  if (! table)    table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("StEvent/trigDetSums");
+  if (table) {
+    static Int_t iBreak = 0;
+    if (iBreak < 3) {
+      LOG_QA << "get trigDetSums from GetDataSet" << endm;
+      iBreak++;
+    }
+    fgInstance = new St_trigDetSumsC(table);
+    StMaker::GetChain()->AddData(fgInstance);
+    return fgInstance;
+  }
+  table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
   assert(table);
+  LOG_QA << "get trigDetSums from GetDataBase" << endm;
   fgInstance = new St_trigDetSumsC(table);
   fgInstance->SetName("trigDetSumsC");
-  StMaker::GetChain()->AddData(fgInstance);
+  StMaker::GetChain()->AddConst(fgInstance);
   return fgInstance;
 }
 ClassImp(St_trigDetSumsC);
@@ -1489,6 +2246,11 @@ Float_t        St_beamInfoC::Frequency() {
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
 UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
+  static UInt_t Sector = 0;
+  static UInt_t Mask   = 0;
+  if (Sector == sec) {
+    return Mask;
+  }
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
   if(sec < 1 || sec > 24 || getNumRows() == 0){
@@ -1500,13 +2262,17 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   // Take care about unsorted tpcRDOMaks table
   Int_t i = -1;
   UInt_t j = (sec + 1) / 2 - 1;
-  for (i = 0; i < 12; i++) {
-    if (sector(i) == 2*j + 1) {break;}
+  if (sector(j) == 2*j + 1) {
+    i = j;
+  } else { 
+    for (i = 0; i < 12; i++) {
+      if (sector(i) == 2*j + 1) {break;}
+    }
   }
   assert(i >= 0);
   //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
-  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sec != 20)) {// no iTPC
+  if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
     if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
     if( sec % 2 == 0){ // if its even relevent bits are 6-11
       MASK = MASK >> 6;
@@ -1519,9 +2285,28 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
     if( sec % 2 == 0){ // if its even relevent bits are 8-13
       MASK = MASK >> 8;
     }
-    // Otherwise want lower 6 bits
+    // Otherwise want lower 8 bits
     MASK &= 255; // Mask out higher order bits
   }
+  Sector = sec;
+  Mask   = MASK;
+  return MASK;
+}
+//________________________________________________________________________________
+Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
+  static Int_t Sector = -1;
+  static Int_t Rdo    = -1;
+  static Bool_t Mask  = kFALSE;
+  if (Sector == sector && Rdo == rdo) {
+    return Mask;
+  }
+  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
+  UInt_t MASK = getSectorMask(sector);
+  MASK = MASK >> (rdo - 1);
+  MASK &= 0x00000001;
+  Sector = sector;
+  Rdo    = rdo;
+  Mask   = MASK;
   return MASK;
 }
 //________________________________________________________________________________
@@ -1642,9 +2427,8 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
       St_db_Maker::GetValidity(fgTables[sec-1],t);
       Int_t Nrows = fgTables[sec-1]->GetNRows();
       LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName()
-	       << " with NRows = " << Nrows << " in db" << endm;
-      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
-	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+	       << " with NRows = " << Nrows << " in db" 
+	       << Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime()) << endm;
       fgTables[sec-1]->Print(0,1);
     }
   }

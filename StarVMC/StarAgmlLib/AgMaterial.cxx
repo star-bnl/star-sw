@@ -5,23 +5,13 @@ ClassImp(AgMaterial);
 #include <assert.h>
 #include "AgBlock.h"
 #include "AgModule.h"
-#include "StMessMgr.h"
+#include "StMessMgr.h"                                                                                                                  
 
-//std::vector< TString >            AgMaterial::mParameterList;
 std::map< TString, AgMaterial * > AgMaterial::mMaterialTable;
 std::vector< TString >            AgMaterial::mMaterialList;
 
 struct _MaterialDummy { // Initializes material database
   _MaterialDummy(){
-    /* lifted
-    AgMaterial::mParameterList.push_back("a");
-    AgMaterial::mParameterList.push_back("z");
-    AgMaterial::mParameterList.push_back("dens");
-    AgMaterial::mParameterList.push_back("radl");
-    AgMaterial::mParameterList.push_back("absl");
-    AgMaterial::mParameterList.push_back("isvol");
-    AgMaterial::mParameterList.push_back("nelem");
-    */
 
     AgMaterial &h = AgMaterial::Get("Hydrogen");
     h.par("a")=1.010; h.par("z")=1.000; h.par("dens")=0.071; h.par("radl")=0.865E+03; h.par("absl")=0.790E+03; h.lock();
@@ -105,8 +95,6 @@ struct _MaterialDummy { // Initializes material database
     si.par("absl")=0.455E+02;    
     si.lock();
 
-//        18 LIQUID_ARGON            39.950    18.000     1.400 0.140E+02 0.837E+02   1
-
     AgMaterial &ar = AgMaterial::Get("Argon_gas");
     ar.par("a")=39.950;
     ar.par("z")=18.000;
@@ -150,8 +138,6 @@ struct _MaterialDummy { // Initializes material database
     mylar.Component("O",16.0,8.0,0.333);
     mylar.lock();
 
-    //$$$    AgMaterial::List();
-
   };
 
 } _material_dummy;
@@ -187,23 +173,6 @@ Double_t &AgMaterial::par( const Char_t *name ){
   return mParameters[name]; 
 }
 
-#if 0
-Bool_t AgMaterial::isSet( const Char_t *par ) const
-{
-  TString key=par;
-  return ( mParameters.find(key) != mParameters.end() );
-}
-
-Bool_t AgMaterial::hasPar(const Char_t *par ) const
-{
-  const char* key=par;
-  std::vector<std::string> parlist = mParameterList;
-  for ( UInt_t i=0;i<parlist.size();i++ )
-    if ( parlist[i] == key ) return true;
-  return false;
-}
-#endif
-
 Bool_t AgMaterial::hasComponent( const Char_t *comp )const
 {
 	if ( mType == AgMaterial::kMaterial )
@@ -216,7 +185,6 @@ void AgMaterial::Print( Option_t *opts ) const
 {
   TString name   = GetName();
   TString output = "";
-  //LOG_INFO << "["<< ((mLock)?"-":"+") << "] " << Form("%20s:",name.Data()) << " ";
   output = TString("[") + TString((mLock)?"-":"+") + TString("] ") + Form("%20s:",name.Data()) + TString(" ");
   std::map<std::string, Double_t > mypar=mParameters;
   for ( UInt_t j=0;j<mParameterList.size();j++ )
@@ -256,8 +224,6 @@ AgMaterial &AgMaterial::Get( const Char_t *name )
 
   TString modname="None";
   if ( module ) modname = module->GetName();
-
-  //  std::cout << "Info in <AgMaterial::Get(name)>: module="<<modname.Data()<<" material="<<name<<std::endl;
 
   //////////////////////////////////////////////////////////////
   //
@@ -322,8 +288,6 @@ AgMaterial &AgMaterial::Get( const Char_t *name )
   //
   ////////////////////////////////////////////////////////////// 
 
-  //std::cout << "Returning new material " << matname.Data() << std::endl;
-
   material = new AgMaterial(matname);
 
   if ( AgBlock::previous() )                    // Inherit from creating block
@@ -331,13 +295,8 @@ AgMaterial &AgMaterial::Get( const Char_t *name )
   else if ( AgBlock::module() )                 // Or from the current material loaded in module    
     material->Inherit( AgBlock::module() );
 
-  //std::cout << "++ After inheritance from mother block" << std::endl;
-
   if ( AgBlock::active() )                      // And finally the active block
     material->Inherit( AgBlock::active() );   
-
-  //std::cout << "++ After inheritance from active block" << std::endl;
-  //material->Print();
 
   material->SetName(matname);
   mMaterialTable[matname]=material;
@@ -360,9 +319,6 @@ AgMaterial AgMaterial::CopyMaterial( const Char_t *name )
   if ( module  ) modname = module->GetName();
   if ( current ) volname = current->GetName();
   
-
-  //  std::cout << "Info in <AgMaterial::Get(name)>: module="<<modname.Data()<<" material="<<name<<std::endl;
-
   //////////////////////////////////////////////////////////////
   //
   // If there is no module, probably being intialized above.

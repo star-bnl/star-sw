@@ -1,0 +1,10 @@
+/* fstGain.idl
+*
+* Table: fstGain
+*
+* description: FST detector channel gain
+*
+*/
+struct fstGain {
+    float gain[36864];    	  /* gain: ~50.0 e^{-}/ADC counts       */
+};

@@ -1,0 +1,28 @@
+y2009 TpcRS
+TpcRS_pp200Lo          trans diffusion from y2008
+TpcRS_pp200Lo_GT       adjust gain, OmegaTauScaleX = 1e3, 0.62*trasf.diffusion, 
+TpcRS_pp200Lo_GnoT     -"-                              ,  trans diff. back to Mogboltz
+TpcRS_pp200Lo_GT2      tras diff * 0.92
+TpcRS_pp200Lo_GT3      + adjust Jitter
+              GT4N0    + adjust Jitter
+              GT5N0    + adjust Jitter
+              GT6N0    + adjust Jitter
+              GT7N0    + adjust Jitter
+TpcRS_pp200Lo_GT7N0x2  + tauXx/2
+TpcRS_pp200Lo_GT7N0X2  + tauXx*2
+
+01/25/2023 ================================================================================
+  static const Double_t xmaxD  = 100;// XC11 , XC15
+  //  static const Double_t xmaxD  = 20;// XC12
+  //  static const Double_t xmaxD  = 50;// XC13
+  //  static const Double_t xmaxD  = 35;// XC14
+TpcRS_pp200Lo_Y: static Double_t tmax = 6e-6; // Y
+TpcRS_pp200Lo_Y10.5 :    row.longitudinalDiffusion = 0.03624*0.5;
+TpcRS_pp200Lo_Z:         static Double_t tmax = 2e-6; // Z
+TpcRS_pp200Lo_Zx10:       row.tauX? = 10e-9
+TpcRS_pp200Lo_Zx10B:      T0offset and SigmaJitterTX : 0.25 => 0.50
+TpcRS_pp200Lo_Zx200:       row.tauXI = 200e-9, restore T0offset
+
+The best description is TpcRS_pp200Lo_Z
+TpcRS_pp200Lo_ZZ: restore row.tauX?, static Double_t tmax = 1e-6; // ZZ
+TpcRS_pp200Lo_ZZ1.5: static Double_t tmax = 1.5e-6; // ZZ1.5

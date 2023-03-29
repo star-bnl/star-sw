@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ems/ems_control Allocated rows: 1  Used rows: 1  Row size: 340 bytes
 //  Table: ems_control_st[0]--> ems_control_st[0]
@@ -96,5 +96,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.ideal_jet_mode	 =          1; // mode for idel jet finder 1=ideal,2=1-nuotrino,3=charged only ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

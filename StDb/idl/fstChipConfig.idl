@@ -1,0 +1,12 @@
+/* fstChipConfig.idl
+*
+* Table: fstChipConfig
+*
+* description: FST chip configuration status for 288 APV chips
+*
+*/
+
+struct fstChipConfig {
+    //long run;             
+    long s[288];   /* 1 good status */
+};

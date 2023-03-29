@@ -161,7 +161,7 @@ int StFssSectorReader::initialize()
   int pad_seq=0; 
   oldstart = 0;
   
-  u_char *adc_locn = (u_char *)(adcTable);
+  uint8_t *adc_locn = (uint8_t *)(adcTable);
   for (i=0; i<m_numSqndx; i++) 
     {
       int thisEntry=seqTable[i];

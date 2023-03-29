@@ -842,7 +842,7 @@ void tpxGain::do_default(int sec)
 	return ;
 }
 
-int tpxGain::from_file(char *fname, int sec)
+int tpxGain::from_file(const char *fname, int sec)
 {
 	FILE *f ;
 	int s, r, p ;
@@ -1013,7 +1013,7 @@ int tpxGain::from_file(char *fname, int sec)
 }
 
 
-int tpxGain::to_file(char *fname) 
+int tpxGain::to_file(const char *fname) 
 {
 
 	FILE *f ;
@@ -1054,7 +1054,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.36 2021/11/02 10:28:49 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.37 2022/09/23 19:55:47 jml Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {

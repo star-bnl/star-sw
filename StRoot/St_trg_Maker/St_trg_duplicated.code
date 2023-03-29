@@ -167,7 +167,7 @@ void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
 int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
-  char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
+  char *ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
   fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
   assert(fVictor->thereIsTriggerData()); // No TRG bank in .daq file.  Perhaps a pedestal or laser run?
@@ -193,7 +193,7 @@ int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Tri
   if((m_Mode&2)&&isLaser)   thisEventOk=7;
   if((m_Mode&4)&&isPulser)  thisEventOk=7;
 
-  oo="unkown";
+  const char *oo="unkown";
   if(isPhysics) oo="Physics"; 
   if(isLaser)   oo="Laser"; 
   if(isPulser)  oo="Pulser";
