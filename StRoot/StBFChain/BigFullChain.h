@@ -1715,8 +1715,8 @@ Bfc_st BFC[] = { // standard chains
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
   // RHICf
-  {"rhicfDat" ,"","", "StEvent,RhicfUtil,rhicfdb",
-   "StRHICfRawHitMaker","StRHICfRawHitMaker","Fill RHICf raw data", kFALSE},
+  {"rhicfDat" ,"","", "StEvent,RhicfUtil,rhicfdb"
+  ,                                 "StRHICfRawHitMaker","StRHICfRawHitMaker","Fill RHICf raw data",kFALSE},
   // FCS
   {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint",         "StMaker","StChain","FCS chain",kFALSE},
   {"fcsSim",""    ,"fcsChain","StEvent,fcsDb",
