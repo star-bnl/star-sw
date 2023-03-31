@@ -493,9 +493,6 @@ class ForwardTrackMaker {
 
         mGlobalTracks.clear();
 
-        // for (auto p : mTrackResults) {
-        //     delete p;
-        // }
         mTrackResults.clear();
         /************** Cleanup **************************/
 
