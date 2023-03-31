@@ -24,7 +24,7 @@
 
 ClassImp(StFcsTrackMatchMaker)
 
-    StFcsTrackMatchMaker::StFcsTrackMatchMaker(const char *name) : StMaker(name)
+StFcsTrackMatchMaker::StFcsTrackMatchMaker(const char *name) : StMaker(name)
 {
   mMinEnergy[0] = 0.1; // ~1/3 MIP
   mMinEnergy[1] = 0.5; // ~1/3 MIP
