@@ -50,7 +50,7 @@ struct StFwdTrackProjection {
 		mMom = mom;
         memcpy( mCov, c, sizeof(mCov) ); 
     }
-    void set(   StFwdTrackProjection &other ){
+    void set(const StFwdTrackProjection &other ){
         mDetId = other.mDetId;
         mXYZ   = other.mXYZ;
         mMom   = other.mMom;
