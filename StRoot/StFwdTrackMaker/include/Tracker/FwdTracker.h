@@ -37,10 +37,6 @@
 #include "StFwdTrackMaker/FwdTrackerConfig.h"
 #include "StFwdTrackMaker/Common.h"
 
-namespace FwdTrackerGlobal {
-    bool verbose = true;
-}
-
 // Utility class for evaluating ID and QA truth
 struct MCTruthUtils {
 
