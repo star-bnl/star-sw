@@ -733,8 +733,7 @@ class ForwardTrackMaker {
             }
         }
 
-        if (FwdTrackerGlobal::verbose){
-            LOG_INFO << "McTrackFinding Found: " << mRecoTracks.size() << " tracks" << endm;
+        LOG_DEBUG << "McTrackFinding Found: " << mRecoTracks.size() << " tracks" << endm;
         }
         
         doTrackFitting(mRecoTracks);
