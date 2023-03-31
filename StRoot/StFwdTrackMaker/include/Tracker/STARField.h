@@ -125,10 +125,6 @@ class StarFieldAdaptor : public genfit::AbsBField {
         Bz = B[2];
         return;
     };
-
-    // if you want histograms make sure to write them here so that they show up in the ROOT output
-    // void WriteHistograms(){
-    // }
 };
 
 
