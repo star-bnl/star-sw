@@ -88,9 +88,6 @@ class GenfitUtils{
 }; // GenfitUtils
 
 
-// 
-
-
 // Basic sanity cuts on genfit tracks
 template<> bool GenfitUtils::accept( genfit::Track *track )
 {
