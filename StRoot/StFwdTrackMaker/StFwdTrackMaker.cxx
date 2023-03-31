@@ -799,7 +799,6 @@ void StFwdTrackMaker::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
     if (!event) 
         return;
 
-
     StRnDHitCollection *rndCollection = event->rndHitCollection();
 
     const StSPtrVecRnDHit &hits = rndCollection->hits();
