@@ -628,7 +628,7 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
     St_g2t_fts_hit *g2t_stg_hits = (St_g2t_fts_hit *)GetDataSet("geant/g2t_stg_hit");
 
 
-    this->mTreeData.fttN = 0;
+    mTreeData.fttN = 0;
     if (!g2t_stg_hits){
         LOG_WARN << "geant/g2t_stg_hit is empty" << endm; 
         return;
