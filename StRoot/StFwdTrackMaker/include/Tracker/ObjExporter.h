@@ -382,48 +382,15 @@ public:
             for ( auto t : tracks ) {
                 size_t vStart = numVertices;
     
-                if ( false ) {
-    
-                    TVector3 point;
-                    point = startPos;
+                
+                TVector3 lpoint;
+                for ( float z = startPos.Z(); z < 875; z += zStep ){
+                    TVector3 point = trackPosition( t, z );
+                    if ( point.X() < -900 && point.Y() < -900 ) break;
+                    if ( point.X() < -90 && point.Y() < -90 ) { z+= 50; continue;}
+
                     vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                    point = trackPosition( t, 281.0 );
-                    if ( point.X() > -90 && point.Y() > -90 ) 
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                    point = trackPosition( t, 304.0 );
-                    if ( point.X() > -90 && point.Y() > -90 )
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                    point = trackPosition( t, 327.0 );
-                    if ( point.X() > -90 && point.Y() > -90 )
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                    point = trackPosition( t, 349.5 );
-                    if ( point.X() > -90 && point.Y() > -90 )
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                    point = trackPosition( t, 800.0 );
-                    if ( point.X() > -90 && point.Y() > -90 )
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-    
-                } else if ( true ){
-                    TVector3 lpoint;
-                    for ( float z = startPos.Z(); z < 875; z += zStep ){
-                        TVector3 point = trackPosition( t, z );
-                        // if ( point.X() == -99 && point.Y() == -99 && point.Z() == -99 ){
-                        //     point = lpoint;
-                        // }
-    
-                        if ( point.X() < -900 && point.Y() < -900 ) break;
-                        if ( point.X() < -90 && point.Y() < -90 ) { z+= 50; continue;}
-    
-                        vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
-                        // ofile << "v " << point.X() << " " << point.Y() << " " << point.Z() << endl;
-                        // ivert ++;
-                        lpoint = point;
-                    }
+                    lpoint = point;
                 }
                 
                 ofile << "l ";
@@ -431,9 +398,8 @@ public:
                     ofile << i+1 << " "; 
                 }
                 ofile << endl;
-            }
-        }
-
+            } // for t in tracks
+        } // if tracks.size() > 0
 
         ofile.close();	
     }
