@@ -1477,7 +1477,7 @@ StEvent::setFstHitCollection(StFstHitCollection* val)
 void
 StEvent::setFwdTrackCollection(StFwdTrackCollection* val)
 {
-        _lookupAndSet(val, mContent);
+    _lookupAndSet(val, mContent);
 }
 
 void
