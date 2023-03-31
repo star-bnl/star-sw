@@ -421,7 +421,7 @@ int StFwdTrackMaker::Init() {
 
     TString geoCache = dynamic_cast<StBFChain*>(GetChain())->GetFileOut();  
     if ( geoCache=="" ) 
-        geoCache = dynamic_cast<StBFChain*>(GetChain())->GetFileIn();
+        geoCache = GetChainOpt()->GetFileIn();
 
     // Strip out @ symbol
     geoCache = geoCache.ReplaceAll("@",""); 
