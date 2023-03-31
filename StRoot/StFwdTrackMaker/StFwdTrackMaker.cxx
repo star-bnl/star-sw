@@ -1084,7 +1084,7 @@ int StFwdTrackMaker::Make() {
     size_t nForwardTracks = loadMcTracks( mcTrackMap );
     size_t maxForwardTracks = mFwdConfig.get<size_t>( "McEvent.Mult:max", 10000 );
     if ( nForwardTracks > maxForwardTracks ){
-        LOG_DEBUG << "Skipping event with more than " << maxForwardTracks << " forward tracks" << endm;
+        LOG_WARN << "Skipping event with more than " << maxForwardTracks << " forward tracks" << endm;
         return kStOk;
     }
     LOG_DEBUG << "We have " << nForwardTracks << " forward MC tracks" << endm;
