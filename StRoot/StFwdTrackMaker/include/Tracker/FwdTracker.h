@@ -778,7 +778,6 @@ class ForwardTrackMaker {
         // Step 2
         // build 2-hit segments (setup parent child relationships)
         /*************************************************************/
-        LOG_INFO << "\tStep1" << endm;
         // Initialize the segment builder with sorted hits
         KiTrack::SegmentBuilder builder(hitmap);
 
@@ -810,8 +809,8 @@ class ForwardTrackMaker {
         // Get the segments and return an automaton object for further work
         
         KiTrack::Automaton automaton = builder.get1SegAutomaton();
-        LOG_INFO << TString::Format( "nSegments=%lu", automaton.getSegments().size() ).Data() << endm;
-        LOG_INFO << TString::Format( "nConnections=%u", automaton.getNumberOfConnections() ).Data() << endm;
+        LOG_DEBUG << TString::Format( "nSegments=%lu", automaton.getSegments().size() ).Data() << endm;
+        LOG_DEBUG << TString::Format( "nConnections=%u", automaton.getNumberOfConnections() ).Data() << endm;
 
         // at any point we can get a list of tracks out like this:
         // std::vector < std::vector< KiTrack::IHit* > > tracks = automaton.getTracks();
@@ -826,7 +825,6 @@ class ForwardTrackMaker {
         // Step 3
         // build 3-hit segments from the 2-hit segments
         /*************************************************************/
-        LOG_INFO << "\tStep3" << endm;
         automaton.clearCriteria();
         automaton.resetStates();
         criteriaPath = "TrackFinder.Iteration[" + std::to_string(iIteration) + "].ThreeHitSegments";
@@ -866,14 +864,13 @@ class ForwardTrackMaker {
         }
         itStart = FwdTrackerUtils::nowNanoSecond();
 
-        LOG_INFO << TString::Format( "nSegments=%lu", automaton.getSegments().size() ).Data() << endm;
-        LOG_INFO << TString::Format( "nConnections=%u", automaton.getNumberOfConnections() ).Data() << endm;
+        LOG_DEBUG << TString::Format( "nSegments=%lu", automaton.getSegments().size() ).Data() << endm;
+        LOG_DEBUG << TString::Format( "nConnections=%u", automaton.getNumberOfConnections() ).Data() << endm;
 
         /*************************************************************/
         // Step 4
         // Get the tracks from the possible tracks that are the best subset
         /*************************************************************/
-        LOG_INFO << "\tStep4" << endm;
         std::string subsetPath = "TrackFinder.Iteration[" + std::to_string(iIteration) + "].SubsetNN";
 
         if (false == mConfig.exists(subsetPath))
@@ -885,7 +882,6 @@ class ForwardTrackMaker {
         std::vector<Seed_t> rejectedTracks;
 
         if (findSubsets) {
-            LOG_INFO << "\tRunning HNN" << endm;
             size_t minHitsOnTrack = mConfig.get<size_t>(subsetPath + ":min-hits-on-track", 7);
             // Getting all tracks with at least minHitsOnTrack hits on them
             std::vector<Seed_t> tracks = automaton.getTracks(minHitsOnTrack);
@@ -925,7 +921,7 @@ class ForwardTrackMaker {
             LOG_WARN << "The took more than 500ms to process, duration: " << duration << " ms" << endm;
             LOG_WARN << "We got " << acceptedTracks.size() << " tracks this round" << endm;
         }
-        LOG_INFO << "We got " << acceptedTracks.size() << " tracks this round" << endm;
+        LOG_DEBUG << "We got " << acceptedTracks.size() << " tracks this round" << endm;
         return acceptedTracks;
     } // doTrackingOnHitmapSubset
 
@@ -946,14 +942,13 @@ class ForwardTrackMaker {
         if ( mGenHistograms ){
             mQualityPlotter->startIteration();
         }
-        LOG_INFO << "\tStep1" << endm;
+        
         std::string pslPath = "TrackFinder.Iteration["+ std::to_string(iIteration) + "]:nPhiSlices";
         if ( false == mConfig.exists( pslPath ) ) pslPath = "TrackFinder:nPhiSlices";
         size_t phi_slice_count = mConfig.get<size_t>( pslPath, 1 );
-        LOG_INFO << "Track finding in " << phi_slice_count << " phi slices" << endm;
 
         if ( phi_slice_count <= 1 || phi_slice_count > 100 ) { // no phi slicing!
-            LOG_INFO << "Tracking without phi slices" << endm;
+            LOG_DEBUG << "Tracking without phi slices" << endm;
             /*************************************************************/
             // Steps 2 - 4 here
             /*************************************************************/
@@ -1007,22 +1002,19 @@ class ForwardTrackMaker {
         if ( true == mConfig.get<bool>( hrmPath + ":active", true ) ){
             removeHits( hitmap, mRecoTracksThisItertion );
         }
-        LOG_INFO << ".";
-        // for (auto t : mRecoTracksThisItertion) {
-        //     fitTrack(t);
-        // }
-        LOG_INFO << " FITTING " << mRecoTracksThisItertion.size() << " now" << endm;
+        
+        LOG_DEBUG << " FITTING " << mRecoTracksThisItertion.size() << " now" << endm;
 
         if ( mRecoTracksThisItertion.size() < 201 ){
             doTrackFitting( mRecoTracksThisItertion );
         } else {
             LOG_ERROR << "BAILING OUT of fit, too many track candidates" << endm;
         }
-        LOG_INFO << ".";
+        
         if ( mGenHistograms ){
             mQualityPlotter->afterIteration( iIteration, mRecoTracksThisItertion );
         }
-        LOG_INFO << ".";
+        
         // Add the set of all accepted tracks (this iteration) to our collection of found tracks from all iterations
         mRecoTracks.insert( mRecoTracks.end(), mRecoTracksThisItertion.begin(), mRecoTracksThisItertion.end() );
 
