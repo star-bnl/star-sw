@@ -730,7 +730,6 @@ class ForwardTrackMaker {
         }
 
         LOG_DEBUG << "McTrackFinding Found: " << mRecoTracks.size() << " tracks" << endm;
-        }
         
         doTrackFitting(mRecoTracks);
 

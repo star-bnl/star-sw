@@ -40,6 +40,7 @@
 #include "StEvent/StFstHitCollection.h"
 #include "StEvent/StFstHit.h"
 #include "StEvent/StFwdTrackCollection.h"
+#include "StChain/StChainOpt.h"
 
 #include "StEventUtilities/StEventHelper.h"
 
