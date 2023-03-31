@@ -7,7 +7,6 @@
 #include "StFcsTrackMatchMaker.h"
 #include "StEnumerations.h"
 #include "StMessMgr.h"
-// #include "StEventTypes.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StFcsCollection.h"
 #include "StEvent/StFcsCluster.h"
