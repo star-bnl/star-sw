@@ -999,9 +999,9 @@ StEvent::fwdTrackCollection()
 const StFwdTrackCollection*
 StEvent::fwdTrackCollection() const
 {
-        StFwdTrackCollection *fwdTrack = 0;
-            _lookup(fwdTrack, mContent);
-                return fwdTrack;
+    StFwdTrackCollection *fwdTrack = 0;
+    _lookup(fwdTrack, mContent);
+    return fwdTrack;
 }
 
 
