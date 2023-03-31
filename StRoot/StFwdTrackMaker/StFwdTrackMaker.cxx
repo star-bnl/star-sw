@@ -76,8 +76,6 @@ float BDTCrit2::Crit2_DeltaRho = -999;
 float BDTCrit2::Crit2_DeltaPhi = -999;
 float BDTCrit2::Crit2_StraightTrackRatio = -999;
 
-size_t StarFieldAdaptor::sNCalls;
-
 //_______________________________________________________________________________________
 class GenfitUtils{
     public:
@@ -420,7 +418,7 @@ int StFwdTrackMaker::Init() {
 
 
 
-    TString geoCache = dynamic_cast<StBFChain*>(GetChain())->GetFileOut();  
+    TString geoCache = GetChainOpt()->GetFileOut();  
     if ( geoCache=="" ) 
         geoCache = GetChainOpt()->GetFileIn();
 
@@ -553,7 +551,7 @@ TMatrixDSym makeSiCovMat(TVector3 hit, FwdTrackerConfig &xfg) {
 void StFwdTrackMaker::loadFttHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
     LOG_DEBUG << "Loading FTT Hits" << endm;
     // Get the StEvent handle to see if the rndCollection is available
-    StEvent *event = (StEvent *)this->GetDataSet("StEvent");
+    StEvent *event = (StEvent *)GetDataSet("StEvent");
     string fttFromSource = mFwdConfig.get<string>( "Source:ftt", "" );
 
     if (!event){ 
@@ -580,7 +578,7 @@ void StFwdTrackMaker::loadFttHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdD
 
 void StFwdTrackMaker::loadFttHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
     LOG_DEBUG << "Loading FTT Hits from Data" << endm;
-    StEvent *event = (StEvent *)this->GetDataSet("StEvent");
+    StEvent *event = (StEvent *)GetDataSet("StEvent");
     StFttCollection *col = event->fttCollection();
     
     mTreeData.fttN = 0;
@@ -597,7 +595,7 @@ void StFwdTrackMaker::loadFttHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             FwdHit *hit = new FwdHit(count++, point->xyz().x()/10.0, point->xyz().y()/10.0, point->xyz().z(), -point->plane(), 0, hitCov3, nullptr);
             mFttHits.push_back( TVector3( point->xyz().x()/10.0, point->xyz().y()/10.0, point->xyz().z() )  );
             if ( mGenHistograms ) {
-                this->mHistograms[TString::Format("stgc%dHitMapSec", point->plane()).Data()]->Fill(point->xyz().x()/10.0, point->xyz().y()/10.0);
+                mHistograms[TString::Format("stgc%dHitMapSec", point->plane()).Data()]->Fill(point->xyz().x()/10.0, point->xyz().y()/10.0);
             }
             // Add the hit to the hit map
             hitMap[hit->getSector()].push_back(hit);
@@ -646,7 +644,7 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
 
     LOG_DEBUG << "This event has " << nstg << " stg hits in geant/g2t_stg_hit " << endm;
     if ( mGenHistograms ) {
-        this->mHistograms["nHitsSTGC"]->Fill(nstg);
+        mHistograms["nHitsSTGC"]->Fill(nstg);
     }
     
 
@@ -684,12 +682,12 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
         }
 
         if ( mGenHistograms ){
-            this->mHistograms["stgc_volume_id"]->Fill(volume_id);
+            mHistograms["stgc_volume_id"]->Fill(volume_id);
         }
 
         if (plane_id < 4 && plane_id >= 0) {
             if ( mGenHistograms ){
-                this->mHistograms[TString::Format("stgc%dHitMap", plane_id).Data()]->Fill(x, y);
+                mHistograms[TString::Format("stgc%dHitMap", plane_id).Data()]->Fill(x, y);
             }
         } else {
             continue;
@@ -700,10 +698,10 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
             if ( mcTrackMap[track_id] && fabs(mcTrackMap[track_id]->mEta) > 5.0 ){
                 
                 if ( mGenHistograms ) 
-                    this->mHistograms[TString::Format("stgc%dHitMapSec", plane_id).Data()]->Fill(x, y);
+                    mHistograms[TString::Format("stgc%dHitMapSec", plane_id).Data()]->Fill(x, y);
                 continue;
             } else if ( mcTrackMap[track_id] && fabs(mcTrackMap[track_id]->mEta) < 5.0 ){
-                if ( mGenHistograms ) this->mHistograms[TString::Format("stgc%dHitMapPrim", plane_id).Data()]->Fill(x, y);
+                if ( mGenHistograms ) mHistograms[TString::Format("stgc%dHitMapPrim", plane_id).Data()]->Fill(x, y);
             }
         }
 
@@ -727,7 +725,7 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
 } // loadFttHits
 
 void StFwdTrackMaker::loadFstHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
-    StEvent *event = (StEvent *)this->GetDataSet("StEvent");
+    StEvent *event = (StEvent *)GetDataSet("StEvent");
     StFstHitCollection *fstHitCollection = event->fstHitCollection();
 
     if ( fstHitCollection ){
@@ -796,7 +794,7 @@ void StFwdTrackMaker::loadFstHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdD
 void StFwdTrackMaker::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
 
     // Get the StEvent handle
-    StEvent *event = (StEvent *)this->GetDataSet("StEvent");
+    StEvent *event = (StEvent *)GetDataSet("StEvent");
     if (!event) 
         return;
 
@@ -859,7 +857,7 @@ void StFwdTrackMaker::loadFstHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
     // reuse this to store cov mat
     TMatrixDSym hitCov3(3);
     
-    if ( mGenHistograms ) this->mHistograms["nHitsFSI"]->Fill(nfsi);
+    if ( mGenHistograms ) mHistograms["nHitsFSI"]->Fill(nfsi);
 
     mTreeData.fstN = 0;
     for (int i = 0; i < nfsi; i++) {
@@ -882,22 +880,22 @@ void StFwdTrackMaker::loadFstHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
             TVector3 rastered = mSiRasterizer->raster(TVector3(git->x[0], git->x[1], git->x[2]));
             
             if ( mGenHistograms ) {
-                this->mHistograms["fsiHitDeltaR"]->Fill(std::sqrt(x * x + y * y) - rastered.Perp());
-                this->mHistograms["fsiHitDeltaPhi"]->Fill(std::atan2(y, x) - rastered.Phi());
+                mHistograms["fsiHitDeltaR"]->Fill(std::sqrt(x * x + y * y) - rastered.Perp());
+                mHistograms["fsiHitDeltaPhi"]->Fill(std::atan2(y, x) - rastered.Phi());
             }
             x = rastered.X();
             y = rastered.Y();
         }
 
 
-        if ( mGenHistograms ) this->mHistograms["fsi_volume_id"]->Fill(d);
+        if ( mGenHistograms ) mHistograms["fsi_volume_id"]->Fill(d);
 
         if (plane_id < 3 && plane_id >= 0) {
 
             if ( mGenHistograms ) {
-                this->mHistograms[TString::Format("fsi%dHitMap", plane_id).Data()]->Fill(x, y);
-                this->mHistograms[TString::Format("fsi%dHitMapR", plane_id).Data()]->Fill(std::sqrt(x * x + y * y));
-                this->mHistograms[TString::Format("fsi%dHitMapPhi", plane_id).Data()]->Fill(std::atan2(y, x) + TMath::Pi());
+                mHistograms[TString::Format("fsi%dHitMap", plane_id).Data()]->Fill(x, y);
+                mHistograms[TString::Format("fsi%dHitMapR", plane_id).Data()]->Fill(std::sqrt(x * x + y * y));
+                mHistograms[TString::Format("fsi%dHitMapPhi", plane_id).Data()]->Fill(std::atan2(y, x) + TMath::Pi());
             }
         } else {
             continue;
@@ -941,7 +939,7 @@ size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
 
     mTreeData.mcN = 1;
     LOG_DEBUG << g2t_track->GetNRows() << " mc tracks in geant/g2t_track " << endm;
-    if ( mGenHistograms ) this->mHistograms["nMcTracks"]->Fill(g2t_track->GetNRows());
+    if ( mGenHistograms ) mHistograms["nMcTracks"]->Fill(g2t_track->GetNRows());
 
     for (int irow = 0; irow < g2t_track->GetNRows(); irow++) {
         g2t_track_st *track = (g2t_track_st *)g2t_track->At(irow);
