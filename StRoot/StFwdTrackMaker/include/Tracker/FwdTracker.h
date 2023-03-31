@@ -968,7 +968,6 @@ class ForwardTrackMaker {
                 LOG_WARN << "Invalid phi_slice_count = " << phi_slice_count << ", resetting to 1" << endm;
                 phi_slice_count= 1;
             }
-            LOG_INFO << ".";
             float phi_slice = 2 * TMath::Pi() / (float) phi_slice_count;
             for ( size_t phi_slice_index = 0; phi_slice_index < phi_slice_count; phi_slice_index++ ){
 
