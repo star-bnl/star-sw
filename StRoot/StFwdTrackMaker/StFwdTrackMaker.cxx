@@ -1017,6 +1017,10 @@ void StFwdTrackMaker::loadFcs( ) {
         return;
     }
     StFcsCollection* fcsCol = stEvent->fcsCollection();
+    if ( !fcsCol ){
+        return;
+    }
+
     StEpdGeom epdgeo;
 
 
