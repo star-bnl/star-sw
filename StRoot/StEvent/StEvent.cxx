@@ -991,9 +991,9 @@ StEvent::trackDetectorInfo() const
 StFwdTrackCollection*
 StEvent::fwdTrackCollection()
 {
-        StFwdTrackCollection *fwdTracks = 0;
-            _lookup(fwdTracks, mContent);
-                return fwdTracks;
+    StFwdTrackCollection *fwdTracks = 0;
+    _lookup(fwdTracks, mContent);
+    return fwdTracks;
 }
 
 const StFwdTrackCollection*
