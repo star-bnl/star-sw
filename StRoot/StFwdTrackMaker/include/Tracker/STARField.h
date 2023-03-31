@@ -98,7 +98,6 @@ class StarFieldAdaptor : public genfit::AbsBField {
     inline virtual void get(const double &_x, const double &_y, const double &_z, double &Bx, double &By, double &Bz) const {
         double x[] = {_x, _y, _z};
         double B[] = {0, 0, 0};
-        // StarFieldAdaptor::sNCalls ++;
 
         if ( mUseMappedField ){
             mappedGet( _x, _y, _z, Bx, By, Bz );
