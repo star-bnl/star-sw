@@ -1004,9 +1004,6 @@ StEvent::fwdTrackCollection() const
     return fwdTrack;
 }
 
-
-
-
 StSPtrVecTrackNode&
 StEvent::trackNodes()
 {
