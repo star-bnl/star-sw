@@ -51,7 +51,6 @@ class StarFieldAdaptor : public genfit::AbsBField {
         double BRef[] = {0, 0, 0};
         double dB[] = {0, 0, 0};
         
-        // StarFieldAdaptor::sNCalls ++;
         if (StarMagField::Instance()){
 
             if ( mDebugField )
