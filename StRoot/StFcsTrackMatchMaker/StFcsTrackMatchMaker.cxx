@@ -31,7 +31,45 @@ StFcsTrackMatchMaker::StFcsTrackMatchMaker(const char *name) : StMaker(name)
   mMaxDistance[1] = 10.0;
 }
 
-StFcsTrackMatchMaker::~StFcsTrackMatchMaker() {}
+StFcsTrackMatchMaker::~StFcsTrackMatchMaker() {
+
+  if (mHdx[0]) {delete mHdx[0]; mHdx[0]=nullptr;}
+  if (mHdy[0]) {delete mHdy[0]; mHdy[0]=nullptr;}
+  if (mHdr[0]) {delete mHdr[0]; mHdr[0]=nullptr;}
+  if (mNtrk[0]) {delete mNtrk[0]; mNtrk[0]=nullptr;}
+  if (mNclu[0]) {delete mNclu[0]; mNclu[0]=nullptr;}
+  if (mHdx[1]) {delete mHdx[1]; mHdx[1]=nullptr;}
+  if (mHdy[1]) {delete mHdy[1]; mHdy[1]=nullptr;}
+  if (mHdr[1]) {delete mHdr[1]; mHdr[1]=nullptr;}
+  if (mNtrk[1]) {delete mNtrk[1]; mNtrk[1]=nullptr;}
+  if (mNclu[1]) {delete mNclu[1]; mNclu[1]=nullptr;}
+  if (mNtrk[2]) {delete mNtrk[2]; mNtrk[2]=nullptr;}
+  if (mNtrk[3]) {delete mNtrk[3]; mNtrk[3]=nullptr;}
+  if (mNclu[2]) {delete mNclu[2]; mNclu[2]=nullptr;}
+  if (mNclu[3]) {delete mNclu[3]; mNclu[3]=nullptr;}
+  if (mPtEt[0]) {delete mPtEt[0]; mPtEt[0]=nullptr;}
+  if (mPtEt[1]) {delete mPtEt[1]; mPtEt[1]=nullptr;}
+  if (mPtEt2[0]) {delete mPtEt2[0]; mPtEt2[0]=nullptr;}
+  if (mPtEt2[1]) {delete mPtEt2[1]; mPtEt2[1]=nullptr;}
+  if (mCharge[0]) {delete mCharge[0]; mCharge[0]=nullptr;}
+  if (mCharge[1]) {delete mCharge[1]; mCharge[1]=nullptr;}
+  if (mCharge[2]) {delete mCharge[2]; mCharge[2]=nullptr;}
+  if (mXY[0]) {delete mXY[0]; mXY[0]=nullptr;}
+  if (mXY[1]) {delete mXY[1]; mXY[1]=nullptr;}
+  if (mXY[2]) {delete mXY[2]; mXY[2]=nullptr;}
+
+  if (mEpdgeo){
+    delete mEpdgeo;
+    mEpdgeo = nullptr;
+  }
+
+  if (mFile){
+    delete mFile;
+    mFile = nullptr;
+  }
+
+
+}
 
 int StFcsTrackMatchMaker::Init()
 {
