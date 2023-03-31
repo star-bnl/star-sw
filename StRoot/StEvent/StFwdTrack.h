@@ -57,7 +57,7 @@ struct StFwdTrackProjection {
         memcpy( mCov, other.mCov, sizeof(mCov) ); 
     }
     StThreeVectorD mXYZ;
-	StThreeVectorD mMom;
+    StThreeVectorD mMom;
     unsigned char mDetId;
     float mCov[9];
 
