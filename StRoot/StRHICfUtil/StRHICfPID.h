@@ -3,6 +3,8 @@
 
 #include "StRoot/StRHICfUtil/StRHICfFunction.h"
 
+using namespace std;
+
 class StRHICfPID : public StRHICfFunction
 {
   public:
