@@ -528,12 +528,13 @@ Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) const 
   const Double_t par0_lum = mPar_luminosity[0][mParameterIndex] ;
   const Double_t par1_lum = mPar_luminosity[1][mParameterIndex] ;
   
-  if( mParameterIndex>=36 && mParameterIndex<=37 ) {
+  if( mParameterIndex==36 || mParameterIndex==37 || mParameterIndex==40 ) {
     // if(mYear[mParameterIndex] == 2018 && mIsZr) zdcmean = 96.9914;
     // if(mYear[mParameterIndex] == 2018 && mIsRu) zdcmean = 97.9927;
     Double_t b_prime = 1.;
     if(mParameterIndex==36) b_prime = 96.9914; // Zr
     if(mParameterIndex==37) b_prime = 97.9927; // Ru
+    if(mParameterIndex==40) b_prime = 213.383; // AuAu 200GeV Run19
     lumiCorr = (par0_lum<std::numeric_limits<double>::epsilon() ) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
   }
   else {
@@ -593,6 +594,10 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau14_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
+  else if ( mParameterIndex == 40 ) {  // Au+Au 200 GeV Run 19
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau14_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
 
   return vzCorr;
 }
@@ -601,7 +606,7 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
 Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
 
   Double_t refMult_d = -9999.;
-  if( mParameterIndex>=30 && mParameterIndex<=38 ) {
+  if( mParameterIndex>=30 && mParameterIndex<=40 ) {
     refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
   }
   else {
@@ -864,6 +869,16 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   } // else if ( mParameterIndex == 39 ) {  // Au+Au 14.6 GeV 2019
+  else if (mParameterIndex == 40) { // Au+Au 200 GeV 2019
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau200_run19_nVzBins) return 1.0;
+
+    weight = auau200_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
   else {
     weight = 1.0;
   }
@@ -1047,6 +1062,14 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 38 )
+  else if ( mParameterIndex == 40 ) {  // Au+Au 200 GeV 2019
+    for ( Int_t iVz=0; iVz<auau200_run19_nVzBins; iVz++ ) { // Utilize Vz binning: (20 bins, -100., 100.)
+      if ( auau200_run19_vzRangeLimits[iVz][0] <= mVz && mVz < auau200_run19_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau200_run19_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 40 )
   else {
     iBinVz = -1;
   }
