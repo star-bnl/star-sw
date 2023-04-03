@@ -664,6 +664,7 @@ class TrackFitter {
 
         if (fitTrack.getFitStatus(fitTrack.getCardinalRep())->isFitConverged() == false) {
             LOG_WARN << "GBL fit did not converge" << endm;
+            delete pFitTrack;
             return pOrig;
         } else { // we did converge, return new momentum
             
@@ -675,8 +676,11 @@ class TrackFitter {
             } catch (genfit::Exception &e) {
                 LOG_WARN << "Failed to get cardinal status from converged fit" << endm;
             }
-            return fitTrack.getCardinalRep()->getMom(fitTrack.getFittedState(1, fitTrack.getCardinalRep()));
+            auto mom = fitTrack.getCardinalRep()->getMom(fitTrack.getFittedState(1, fitTrack.getCardinalRep()));
+            delete pFitTrack;
+            return mom;
         }
+        delete pFitTrack;
         return pOrig;
     } //refitwith GBL
 
