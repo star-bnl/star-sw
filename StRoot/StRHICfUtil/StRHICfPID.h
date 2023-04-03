@@ -2,8 +2,7 @@
 #define StRHICfPID_hh
 
 #include "StRoot/StRHICfUtil/StRHICfFunction.h"
-
-using namespace std;
+#include "TMath.h"
 
 class StRHICfPID : public StRHICfFunction
 {

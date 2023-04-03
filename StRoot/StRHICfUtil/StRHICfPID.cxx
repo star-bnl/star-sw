@@ -96,8 +96,8 @@ float StRHICfPID::calculateEquation(int tower, int layer, float sumE)
   if(constB*constB - 4.*constA*constC < 0.){return -1;}
 
   // Case: 2 solution.
-  float solA = (-1. *constB - sqrt(constB *constB -4. *constA *constC))/(2. *constA);
-  float solB = (-1. *constB + sqrt(constB *constB -4. *constA *constC))/(2. *constA);
+  float solA = (-1. *constB - TMath::Sqrt(constB *constB -4. *constA *constC))/(2. *constA);
+  float solB = (-1. *constB + TMath::Sqrt(constB *constB -4. *constA *constC))/(2. *constA);
 
   if(solA >= 0. && solA <= checkStep(layer)){return solA;}
   if(solB >= 0. && solB <= checkStep(layer)){return solB;}
