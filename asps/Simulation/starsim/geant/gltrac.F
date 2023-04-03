@@ -226,11 +226,12 @@ C.    ------------------------------------------------------------------
 *                                                             END GLTRAC
       END
 
-      real function agsumlif( tlife )
+      real function agsumlif( tlife, vertex )
         integer, save :: uaddress = 0
         logical, save :: first = .true.
         integer       :: csaddr
         real          :: rndm(1)
+        real          :: vertex(3)
 !#include "geant321/gconsp.inc"
         double precision, PARAMETER :: CLIGHT=29979245800.
 
@@ -241,7 +242,8 @@ C.    ------------------------------------------------------------------
 
         if ( uaddress .gt. 0 ) then
 
-           call CsJCAL(uaddress,2, agsumlif,tlife,0,0,0, 0,0,0,0,0)
+           call CsJCAL(uaddress,5, agsumlif,tlife,
+     >                 vertex(1),vertex(2),vertex(3), 0,0,0,0,0)
 
         else
 
