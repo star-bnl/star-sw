@@ -42,6 +42,7 @@ inline void tpx23::set_rdo(int s, int r)
 u_int *tpx23::fee_scan() 
 {
 	u_int *h ;
+	int fee_wds ;
 
 	get_token((char *)d_start,words) ;
 
@@ -49,8 +50,6 @@ u_int *tpx23::fee_scan()
 	if(run_type==1 || run_type==5) {
 		int r0_logical = tpx36_from_real(subdet_id,sector1,rdo1) - 1 ;
 
-
-//		pthread_mutex_lock(&peds_mutex) ;
 
 		peds->valid_evts[r0_logical]++ ;
 		peds->evts[r0_logical]++ ;
@@ -63,19 +62,35 @@ u_int *tpx23::fee_scan()
 
 	}
 
-#if 0
-	int fee_wds = (d_end+1) - (d_start+2) ;
-
-	LOG(TERR,"Evt %d: S%02d:%d: T %d, trg %d, daq %d: fee words %d vs %d",evt_trgd,
-	    sector1,rdo1,
-	    token,trg_cmd,daq_cmd,
-	    fee_wds,words) ;
-
-#endif
-
 	// first valid FEE word is at d_start+2 ;
 	// last valid FEE word is at d_end
 	h = d_end ;
+
+	if(fmt>22) {
+
+
+		fee_wds = (d_end+1) - (d_start+2) ;
+
+		LOG(WARN,"Evt %d: S%02d:%d: T %d, trg %d, daq %d: fee words %d vs %d",evt_trgd,
+		    sector1,rdo1,
+		    token,trg_cmd,daq_cmd,
+		    fee_wds,words) ;
+		LOG(WARN,"   first altro words 0x%08X last, 0x%08X before last",h[0],h[-1]) ;
+#if 1
+		u_int *d = (u_int *)d_start ;
+//		printf("first h words: 0x%08X last, 0x%08X before-last\n",h[0],h[-1]) ;
+		for(int i=0;i<words;i++) {
+			printf("%d: 0x%08X\n",i,*d) ;
+			d++ ;
+		}
+#endif
+
+		LOG(ERR,"fmt %d: not yet done",fmt) ;
+		goto done ;
+	}
+
+
+	
 
 	// NOTE: ALTRO scans from the end!!!
 	while(h>(d_start+2)) {
@@ -110,7 +125,9 @@ u_int *tpx23::fee_scan()
 		}
 					
 
-		//LOG(TERR,"%d: A%03d:%02d: words %d",rdo1,id,ch,wc) ;
+		if(fmt>22) {
+			LOG(TERR,"%d: A%03d:%02d: words %d",rdo1,id,ch,wc) ;
+		}
 
 		while(wc%4) wc++ ;
 
@@ -131,7 +148,7 @@ u_int *tpx23::fee_scan()
 		u_short *d = s1_dta + last_ix ;	// this is where the raw data goes...
 		//u_short d[512] ;
 
-		//LOG(TERR,"%d: rp %d:%d; last_ix %d %p",rdo1,row,pad,last_ix,d) ;
+//		LOG(TERR,"%d: rp %d:%d; last_ix %d %p",rdo1,row,pad,last_ix,d) ;
 
 		int ix = 0 ;
 		for(int i=0;i<wc;) {	// NOTE: no increment!
@@ -434,6 +451,10 @@ u_int tpx23::get_token(char *c_addr, int wds)
 
 	d_end = d - 3 ;	// very last ALTRO datum
 
+	if(fmt>22) {
+		d_end -= 2 ;	// 2 more for the new RDO
+	}
+
 	return (trg_cmd<<16)|(daq_cmd<<12)|token ;
 }
 
@@ -708,7 +729,6 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 	evt++ ;
 
 
-
 	if(rdo!=rdo1 || sec!=sector1) {
 		LOG(ERR,"%d: wrong sec,rdo: rdo expect %d is %d; sector expect %d is %d",rdo1,
 		    rdo1,rdo,sector1,sec) ;
@@ -745,7 +765,7 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 
 tpx23::tpx23()
 {
-	LOG(TERR,"%s %d %p",__PRETTY_FUNCTION__,sizeof(rp_gain),rp_gain) ;
+//	LOG(TERR,"%s %d %p",__PRETTY_FUNCTION__,sizeof(rp_gain),rp_gain) ;
 
 	rts_id = TPX_ID ;
 

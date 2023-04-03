@@ -1043,7 +1043,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 	}
 
-	return 0 ;	// 0 is no error
+	return err ;	// 0 is no error
 }
 
 
