@@ -79,17 +79,18 @@ void StFwdTrack::sortHcalClusterByET() {
         });
 }
 
-bool StFwdTrack::getProjectionFor(  int detectorId, 
-                                    StFwdTrackProjection &rProj, 
+StFwdTrackProjection StFwdTrack::getProjectionFor(  int detectorId, 
                                     size_t index ){
+    StFwdTrackProjection result;
     size_t count = 0;
     for ( auto proj : mProjections ){
         if (proj.mDetId == detectorId){
-            rProj.set( proj );
+            result.set( proj );
             if ( count == index )
-                return true;
+                return result;
             count++;
         }
     }
-    return false;
+    StFwdTrackProjection resultNull;
+    return resultNull;
 }

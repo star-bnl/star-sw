@@ -164,16 +164,16 @@ int StFcsTrackMatchMaker::Make()
     // get the projections
     StFwdTrackProjection projECAL, projHCAL, projEPD;
     LOG_INFO << "nProjections: "<< trk->mProjections.size() << endm;
-    bool gotECAL = trk->getProjectionFor( StFwdTrackProjection::ECAL, projECAL );
-    bool gotHCAL = trk->getProjectionFor( StFwdTrackProjection::HCAL, projHCAL );
-    bool gotEPD  = trk->getProjectionFor( StFwdTrackProjection::EPD,  projEPD  );
+    projECAL = trk->getProjectionFor( kFcsWcalId );
+    projHCAL = trk->getProjectionFor( kFcsHcalId );
+    projEPD  = trk->getProjectionFor( kFcsPresId );
 
     if (Debug())
     {
       
-      LOG_INFO << Form("Proj0 [%d]: %6.2f %6.2f %6.2f", gotECAL, projECAL.mXYZ.x(), projECAL.mXYZ.y(), projECAL.mXYZ.z()) << endm;
-      LOG_INFO << Form("Proj1 [%d]: %6.2f %6.2f %6.2f", gotHCAL, projHCAL.mXYZ.x(), projHCAL.mXYZ.y(), projHCAL.mXYZ.z()) << endm;
-      LOG_INFO << Form("Proj2 [%d]: %6.2f %6.2f %6.2f", gotEPD, projEPD. mXYZ.x(), projEPD. mXYZ.y(), projEPD. mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj0: %6.2f %6.2f %6.2f", projECAL.mXYZ.x(), projECAL.mXYZ.y(), projECAL.mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj1: %6.2f %6.2f %6.2f", projHCAL.mXYZ.x(), projHCAL.mXYZ.y(), projHCAL.mXYZ.z()) << endm;
+      LOG_INFO << Form("Proj2: %6.2f %6.2f %6.2f", projEPD. mXYZ.x(), projEPD. mXYZ.y(), projEPD. mXYZ.z()) << endm;
     }
 
     // North or south from track
@@ -279,9 +279,9 @@ int StFcsTrackMatchMaker::Make()
 
       // get the projections
       StFwdTrackProjection projECAL, projHCAL, projEPD;
-      trk->getProjectionFor( StFwdTrackProjection::ECAL, projECAL );
-      trk->getProjectionFor( StFwdTrackProjection::HCAL, projHCAL );
-      trk->getProjectionFor( StFwdTrackProjection::EPD, projEPD );
+      projECAL = trk->getProjectionFor( kFcsWcalId );
+      projHCAL = trk->getProjectionFor( kFcsHcalId );
+      projEPD = trk->getProjectionFor( kFcsPresId );
 
       mCharge[2]->Fill(trk->charge());
       mXY[2]->Fill(projECAL.mXYZ.x(), projECAL.mXYZ.y());

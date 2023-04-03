@@ -70,15 +70,6 @@ struct StFwdTrackProjection {
     float dz(){
         return sqrt( mCov[8] );
     }
-
-    enum {
-        PrimaryVertex = 0,
-        FST = 1,
-        FTT = 2,
-        EPD = 3,
-        ECAL = 4, 
-        HCAL = 5
-    } DetectorId;
 };
 
 struct StFwdTrackSeedPoint {
@@ -108,8 +99,7 @@ public:
     vector<StFwdTrackSeedPoint> mFTTPoints;
     vector<StFwdTrackSeedPoint> mFSTPoints;
 
-    bool getProjectionFor(  int detectorId, 
-                            StFwdTrackProjection &rProj, 
+    StFwdTrackProjection getProjectionFor(  int detectorId, 
                             size_t index = 0 );
 
     StThreeVectorD momentum() const;

@@ -675,7 +675,6 @@ class TrackFitter {
             } catch (genfit::Exception &e) {
                 LOG_WARN << "Failed to get cardinal status from converged fit" << endm;
             }
-
             return fitTrack.getCardinalRep()->getMom(fitTrack.getFittedState(1, fitTrack.getCardinalRep()));
         }
         return pOrig;

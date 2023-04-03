@@ -1254,15 +1254,15 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     }
 
     // Match these to the z-planes above
-    const int FST = StFwdTrackProjection::FST;
-    const int FTT = StFwdTrackProjection::FTT;
+    const int FST = kFstId;
+    const int FTT = kFttId;
     vector<int> detMap = {
-        StFwdTrackProjection::PrimaryVertex, 
+        kTpcId, 
         FST, FST, FST, 
         FTT, FTT, FTT, FTT, 
-        StFwdTrackProjection::EPD,
-        StFwdTrackProjection::ECAL,
-        StFwdTrackProjection::HCAL
+        kFcsPresId,
+        kFcsWcalId,
+        kFcsHcalId
     };
 
     size_t zIndex = 0;
@@ -1274,7 +1274,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
         float cov[9];
 
         TVector3 tv3(0, 0, 0);
-        if ( detIndex != StFwdTrackProjection::HCAL ){
+        if ( detIndex != kFcsHcalId ){
             tv3 = ObjExporter::trackPosition( track, z, cov, mom );
         } else {
             // use a straight line projection to HCAL since GenFit cannot handle long projections
