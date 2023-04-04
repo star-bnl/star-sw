@@ -12,24 +12,19 @@ void StRHICfPID::init()
   std::fill(mL20, mL20+kRHICfNtower, 0.);
   std::fill(mL90, mL90+kRHICfNtower, 0.);
   std::fill(&mPlateE[0][0], &mPlateE[kRHICfNtower-1][kRHICfNplate], 0.);
-  mPlateEIs = false;
 }
 
-void StRHICfPID::setPlateEnergy(int tower, int layer, float val){
+void StRHICfPID::setPlateEnergy(int tower, int layer, float val)
+{
   mPlateE[tower][layer] = val;
-  mPlateEIs = checkPlateEnergy(mPlateE[tower][layer]);
 }
 
 int StRHICfPID::getPID(int tower){return mPID[tower];}
-
 float StRHICfPID::getL20(int tower){return mL20[tower];}
-
 float StRHICfPID::getL90(int tower){return mL90[tower];}
 
 bool StRHICfPID::calculate()
 {
-  if(!mPlateEIs){return kRHICfFatal;}
-
   for(int it=0; it<kRHICfNtower; it++){
     for(int ip=0; ip<mPlateIdxNum; ip++){mPlateSumE[it] += layerSumEnergy(it, ip);}
     mPlateSumE[it] += mPlateE[it][0];

@@ -29,7 +29,6 @@ class StRHICfPID : public StRHICfFunction
     float mPlateSumE[kRHICfNtower];
     float mL20[kRHICfNtower];
     float mL90[kRHICfNtower];
-    bool mPlateEIs;
 
     int mPlateIdxNum = kRHICfNplate - 1;
     float mL20Const = 0.2;
