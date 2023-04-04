@@ -2,22 +2,16 @@
 
 StRHICfPID::StRHICfPID()
 {
-}
-
-StRHICfPID::~StRHICfPID()
-{
+  init();
 }
 
 void StRHICfPID::init()
 {
-  initChecker();
-  for(int it=0; it<kRHICfNtower; it++){
-    for(int ip=0; ip<kRHICfNplate; ip++){mPlateE[it][ip] = 0.;}
-    mPID[it] = -1;
-    mPlateSumE[it] = 0.;
-    mL20[it] = 0.;
-    mL90[it] = 0.;
-  }
+  std::fill(mPID, mPID+kRHICfNtower, -1);
+  std::fill(mPlateSumE, mPlateSumE+kRHICfNtower, 0.);
+  std::fill(mL20, mL20+kRHICfNtower, 0.);
+  std::fill(mL90, mL90+kRHICfNtower, 0.);
+  std::fill(&mPlateE[0][0], &mPlateE[kRHICfNtower-1][kRHICfNplate], 0.);
   mPlateEIs = false;
 }
 

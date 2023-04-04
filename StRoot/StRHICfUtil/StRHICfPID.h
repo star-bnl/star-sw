@@ -8,7 +8,6 @@ class StRHICfPID : public StRHICfFunction
 {
   public:
     StRHICfPID();
-    ~StRHICfPID();
 
     void init();
     bool calculate();
