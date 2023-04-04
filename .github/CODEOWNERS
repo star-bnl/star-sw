@@ -47,6 +47,7 @@
 /StRoot/StETof*                                    @PhilippWeidenkaff @ideppner    @YannickSoehngen
 /StRoot/StEmc*                                     @kkauder           @rkunnawa    @Navagyan    @zlchang
 /StRoot/StEmbeddingUtilities                       @zhux97
+/StRoot/StEpd*					   @Femtoscopist
 /StRoot/StEvent*                                   @klendathu2k
 /StRoot/StEvent/StTpc*                             @fisyak
 /StRoot/StEventUtilities/StEbyET0*                 @genevb
@@ -58,6 +59,7 @@
 /StRoot/StFpd*                                     @akioogawa
 /StRoot/StFst*                                     @jdbrice           @sunxuhit    @yezhenyu2003   @techuan-huang
 /StRoot/StFtt*                                     @jdbrice
+/StRoot/StFwd*					   @jdbrice
 /StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov @akioogawa   @klendathu2k @fisyak
 /StRoot/StHbtMaker                                 @JohnTheBlindMilkman            @DanielWielanek
 /StRoot/StHeavyPool                                @starsdong         @fgeurts
@@ -71,6 +73,7 @@
 /StRoot/StMc*                                      @klendathu2k       @perevbnlgov
 /StRoot/StMcAnalysisMaker                          @klendathu2k
 /StRoot/StMcEvent*                                 @klendathu2k
+/StRoot/StMiniMc*				   @klendathu2k	      @fisyak	   @zhux97
 /StRoot/StMtd*                                     @marrbnl
 /StRoot/StMuDSTMaker                               @jdbrice
 /StRoot/StMuDSTMaker/EMC                           @kkauder           @rkunnawa    @Navagyan
@@ -78,7 +81,7 @@
 /StRoot/StPass0CalibMaker                          @genevb            @iraklic
 /StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
 /StRoot/StPxl*                                     @starsdong         @GuannanXie
-/StRoot/StRefMultCorr                              @nigmatkulov       @zsweger
+/StRoot/StRHICf*				   @ggfdsa10
 /StRoot/StRTSClient                                @jml985            @tonko-lj
 /StRoot/StShadowMaker                              @genevb
 /StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
@@ -92,7 +95,7 @@
 /StRoot/StTreeMaker                                @perevbnlgov
 /StRoot/StTriggerDataMaker                         @akioogawa
 /StRoot/StTriggerUtilities                         @zlchang           @akioogawa   @jml985
-/StRoot/StTrsMaker                                 @fisyak           @iraklic
+/StRoot/StTrsMaker                                 @fisyak            @iraklic
 /StRoot/StUtilities/StMess*                        @genevb
 /StRoot/StUtilities/StMultiH*                      @genevb
 /StRoot/StVpd*                                     @ZaochenYe         @fgeurts
@@ -126,10 +129,10 @@
 /StarDb/Calibrations                               @genevb
 /StarDb/Calibrations/emc                           @kkauder           @rkunnawa    @Navagyan
 /StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
-/StarDb/Calibrations/tpc                           @fisyak           @iraklic
+/StarDb/Calibrations/tpc                           @fisyak            @iraklic
 /StarDb/Calibrations/tracker                       @klendathu2k
 /StarDb/Geometry                                   @genevb            @klendathu2k
-/StarDb/Geometry/tpc                               @fisyak           @iraklic
+/StarDb/Geometry/tpc                               @fisyak            @iraklic
 /StarDb/VmcGeometry                                @klendathu2k
 /StarDb/emc                                        @kkauder           @rkunnawa    @Navagyan
 /StarVMC                                           @klendathu2k
