@@ -39,12 +39,14 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
 -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
--Dbuiltin_afterimage=ON \
 -Dtable=ON \
 -Dvmc=ON \
 -Dimt=OFF \
 -Druntime_cxxmodules=ON \
+-Dbuiltin_gtest=OFF \
 -Dr=OFF
+# -Dbuiltin_afterimage=ON \
+# -Dpyroot=ON \
 # -Droot7=OFF \  for 6.23.01
 #-Dcxx11=ON 
 #-DCMAKE_CXX_STANDARD
