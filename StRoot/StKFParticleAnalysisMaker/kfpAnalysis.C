@@ -12,7 +12,11 @@ class StGoodTrigger;
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg_tasks/tfg02/2010/11GeV/st_physics_11148001_raw_1010001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg/fisyak/Pico/2010AuAu11/11148001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "/net/l401/data/scratch1/reco/2020/TFG19m/RF/11p5GeV.B/347/20347034/hlt_20347034_13_02_000.picoDst.root", const Char_t *output = "Ana2020AuAu11p5GeV.root", const Char_t *triggerSet = "y2020", Bool_t idNdx = kFALSE) {
-void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", const Char_t *output = "Ana.root", const Char_t *triggerSet = "y2022", Bool_t idNdx = kFALSE) {
+//void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", const Char_t *output = "Ana.root", const Char_t *triggerSet = "y2022", Bool_t idNdx = kFALSE) {
+void kfpAnalysis(Int_t N = 10000000, 
+		 //		 const Char_t *input = "/star/data102/reco/production_OO_200GeV_2021/ReversedFullField/P23ib/2021/136/22136010/st_physics_22136010_raw_1500002.picoDst.root", 
+		 const Char_t *input = "st_physics_22136010_raw_1500002.picoDst.root", 
+		 const Char_t *output = "Ana.root", const Char_t *triggerSet = "y2021", Bool_t idNdx = kFALSE) {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
