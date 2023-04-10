@@ -108,6 +108,9 @@
 '' =>                                              'production_FF_OO_200GeV_2021/*/dev',
 '2021/FF_OO_200GeV_2021.P23ia_cali' =>		   'production_FF_OO_200GeV_2021/*/P23ia_calib',
 '2021/FF_OO_200GeV_2021.P23ib' =>		   'production_FF_OO_200GeV_2021/*/P23ib',
+'2021/ps_OO_200GeV.dev' =>			   'production_ps_OO_200GeV_2021/*/dev',
+'2021/ps_OO_200GeV_2021.P23ia_calib' =>		   'production_ps_OO_200GeV_2021/*/P23ia_calib',
+'2021/ps_OO_200GeV_2021.P23ib' =>		   'production_ps_OO_200GeV_2021/*/P23ib',
 '2021/OO_200GeV.dev' =>				   'production_OO_200GeV_2021/*/dev',
 '' =>                                              'production_OO_200GeV_2021/*/DEV',
 '2021/OO_200GeV_2021.P23ia_calib' =>		   'production_OO_200GeV_2021/*/P23ia_calib',
@@ -116,8 +119,6 @@
 '2021/p7p7_21_DEV_calib' =>			   '',
 '' =>                                              'production_pp500_2022/*/dev',
 '' =>						   'production_pp500_2022/*/DEV',
-'' =>						   'production_pp500_2022/pp500_22_DEV_fcs',
-'2021/ps_OO_200GeV.dev' =>			   'production_ps_OO_200GeV_2021/*/dev',
-'2021/ps_OO_200GeV_2021.P23ia_calib' =>		   'production_ps_OO_200GeV_2021/*/P23ia_calib'
+'' =>						   'production_pp500_2022/pp500_22_DEV_fcs'
 );
 1

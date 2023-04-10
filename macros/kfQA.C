@@ -40,6 +40,9 @@
 #include "TSystemFile.h"
 #include "TObjArray.h"
 #include "TObjectTable.h"
+#include "TFileMerger.h"
+#include "TDirIter.h"
+#include "TInterpreter.h"
 //#include "dEdxFit.C"
 #include "brtw.C"
 #endif
@@ -133,18 +136,80 @@ TString InitVars() {
   return Tuple;
 }
 //________________________________________________________________________________
-void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
-  TPRegexp Pattern(pattern);
-#if 0
-  if (gClassTable->GetID("StBichsel") < 0) {
-    gSystem->Load("libTable");
-    gSystem->Load("St_base");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StBichsel");
-    //    m_Bichsel = Bichsel::Instance();
+TDirectory *Merge(Int_t run) {
+  TString targetFile(Form("R%i.root",run));
+  const Char_t *targetname = targetFile.Data();
+  Char_t *tfile = gSystem->Which(".",targetFile,kReadPermission);
+  if (! tfile) {
+   gSystem->Load("libTreePlayer");
+   TClass::GetClass("ROOT::Cintex::Cintex"); // autoload Cintex if it exist.
+   if (gInterpreter->IsLoaded("libCintex")) {
+      gROOT->ProcessLine("ROOT::Cintex::Cintex::Enable();");
+   }
+   TDirIter Dir(Form("%i_*.root",run));
+   Bool_t force = kFALSE;
+   Bool_t skip_errors = kFALSE;
+   Bool_t reoptimize = kFALSE;
+   Bool_t noTrees = kFALSE;
+   Int_t maxopenedfiles = 0;
+   Int_t verbosity = 99;
+   Int_t newcomp = 1;
+   if (verbosity > 1) {
+     std::cout << "hadd Target file: " << targetname << std::endl;
+   }
+   
+   TFileMerger merger(kFALSE,kFALSE);
+   //    merger.SetMsgPrefix("hadd");
+   //    merger.SetPrintLevel(verbosity - 1);
+   if (maxopenedfiles > 0) {
+     merger.SetMaxOpenedFiles(maxopenedfiles);
+    }
+   if (!merger.OutputFile(targetname,force,newcomp) ) {
+     std::cerr << "hadd error opening target file (does " << targetname << " exist?)." << std::endl;
+     std::cerr << "Pass \"-f\" argument to force re-creation of output file." << std::endl;
+     exit(1);
+    }
+   
+   Char_t *file = 0;
+   while ((file = (Char_t *) Dir.NextFile())) {
+     if( ! merger.AddFile(file) ) {
+       if ( skip_errors ) {
+	 std::cerr << "hadd skipping file with error: " << file << std::endl;
+       } else {
+	 std::cerr << "hadd exiting due to error in " << file << std::endl;
+	  return 0;
+       }
+     }
+   }
+   if (reoptimize) {
+     merger.SetFastMethod(kFALSE);
+   } else {
+     if (merger.HasCompressionChange()) {
+       // Don't warn if the user any request re-optimization.
+       std::cout <<"hadd Sources and Target have different compression levels"<<std::endl;
+      std::cout <<"hadd merging will be slower"<<std::endl;
+     }
+   }
+   merger.SetNotrees(noTrees);
+   Bool_t status = merger.Merge();
+   
+   if (status) {
+     if (verbosity == 1) {
+       std::cout << "hadd merged " << merger.GetMergeList()->GetEntries() << " input files in " << targetname << ".\n";
+     }
+   } else {
+     if (verbosity == 1) {
+       std::cout << "hadd failure during the merge of " << merger.GetMergeList()->GetEntries() << " input files in " << targetname << ".\n";
+     }
+     return 0;
+   }
   }
-  gROOT->LoadMacro("dEdxFit.C+");
-#endif
+  return new TFile(tfile);
+}
+//________________________________________________________________________________
+void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
+  TDirectory *myDir = Merge(run);
+  if (! myDir) return;
   TString OutFile;
   if (!Out) OutFile = "kfQAN.root";
   else      OutFile = Out;
@@ -153,7 +218,6 @@ void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
   TNtuple *QA = new TNtuple("QA","Summary of PicoDst per Run",Tuple.Data()); 
   Int_t cachesize = 10000000; //this is the default value: 10 MBytes
   QA->SetCacheSize(cachesize);
-  Int_t run = 0;
   Int_t Run = 0;
   Int_t nFile = 0;
   TString title;
@@ -167,190 +231,128 @@ void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
   Int_t noRuns = 0;
   //  TDirIter Dir(files);
   //  const Char_t *file = Dir.NextFile();
-  TSystemDirectory Dir("",".");
-  TList *files = Dir.GetListOfFiles();
-  if (! files) return;
-  TIter next(files);
-  TSystemFile *file = 0;
-  multimap<Int_t,TString> fileMap;
-  while ((file = (TSystemFile *) next())) {
-    TString File(file->GetName());
-    if (! File.EndsWith(".root")) continue;
-    if (  File.BeginsWith("All")) continue;
-    if (! File.BeginsWith(pattern)) continue;
-    //    cout << file->GetName() << "\t" << file->GetTitle() << endl;
-    sscanf(File.Data(),"%i_",&run); 
-    TString path( file->GetTitle());
-    path += "/";
-    path += file->GetName();
-    fileMap.insert(pair<Int_t,TString>(run,path));
-    nFile++;
-  }
-#if 0
-  for (std::multimap<Int_t,TString>::iterator it=fileMap.begin(); it!=fileMap.end(); ++it) {
-    std::cout << (*it).first << " => " << (*it).second.Data() << '\n';
-  }
-#endif
-  // Unique keys
-  TH1F *hist = 0;
-  for( auto it = fileMap.begin(), end = fileMap.end();
-       it != end;
-       it = fileMap.upper_bound(it->first)) {
-    run = it->first;
-    cout << run << ' ' << it->second.Data() << endl;
-    std::pair <std::multimap<Int_t,TString>::iterator, std::multimap<Int_t,TString>::iterator> ret;
-    ret = fileMap.equal_range(run);
-    std::cout << run << " =>";
-    vector<TFile *> TFiles;
-    for (std::multimap<Int_t,TString>::iterator itt=ret.first; itt!=ret.second; ++itt) {
-      std::cout << ' ' << itt->second.Data();
-      cout << "\tOpen " <<  itt->second.Data() << endl;
-      TFile *f = new TFile(itt->second.Data());
-      if (f) TFiles.push_back(f);
-      else {cout << "\t====================== failed " << endl;}
+  myDir->cd();
+  no++;
+  Run = run%1000000;
+  Float_t params[100] = {0};
+  params[0] = run;
+  params[1] = Run;
+  params[2] = no;
+  Int_t p = 4;
+  for (Int_t i = 0; i < NoHists; i++) { // loop over histograms
+    TH1F *hist = (TH1F *) myDir->Get(Histos[i].Path);
+    if (! hist) continue;
+    TObjArray* arr = 0;
+    Double_t binWidth;
+    Double_t S;
+    if (i == 0) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
+      params[3] = hist->GetEntries();
+      if (params[3] < 100) break;;
     }
-    //    std::cout << '\n';
-    if (! TFiles.size()) continue;
-    no++;
-    Run = run%1000000;
-    Float_t params[100] = {0};
-    params[0] = run;
-    params[1] = Run;
-    params[2] = no;
-    Int_t p = 4;
-    for (Int_t i = 0; i < NoHists; i++) { // loop over histograms
-      if (hist) delete hist;
-      hist = 0;
-      for (auto f : TFiles) {
-	if (! hist) {
-	  hist = (TH1F *) f->Get(Histos[i].Path);
-	  hist->SetDirectory(0);
-	} else {
-	  TH1F *h = (TH1F *) f->Get(Histos[i].Path);
-	  if (h) hist->Add(h);
-	  delete h;
-	}
-      } 
-      TObjArray* arr = 0;
-      Double_t binWidth;
-      Double_t S;
-      if (! hist) continue;
-      if (i == 0) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
-	params[3] = hist->GetEntries();
-	if (params[3] < 100) break;;
-      }
-      p = Histos[i].p;
-      for (Int_t j = 0; j < NTVar; j++) { // loop over variables
-	if ((1 << j) &  Histos[i].opt) {
-	  params[p] = 0;
-	  params[p+1] = 0;
-	  if (hist && hist->GetEntries() > 0) {
-	    switch (j+1) {
-	    case 1: // mean
-	      params[p] = hist->GetMean(); 
-	      break;
-	    case 2: // RMS
-	      params[p] = hist->GetRMS();
-	      break;
-	    case 3: // mu
-	    case 4: // sigma
-	      hist->Fit("gaus");
-	      gaus = (TF1 *) hist->GetListOfFunctions()->FindObject("gaus");
-	      if (gaus) {
-		params[p] = gaus->GetParameter(1);
-		params[++p] = gaus->GetParameter(2);
+    p = Histos[i].p;
+    for (Int_t j = 0; j < NTVar; j++) { // loop over variables
+      if ((1 << j) &  Histos[i].opt) {
+	params[p] = 0;
+	params[p+1] = 0;
+	if (hist && hist->GetEntries() > 0) {
+	  switch (j+1) {
+	  case 1: // mean
+	    params[p] = hist->GetMean(); 
+	    break;
+	  case 2: // RMS
+	    params[p] = hist->GetRMS();
+	    break;
+	  case 3: // mu
+	  case 4: // sigma
+	    hist->Fit("gaus");
+	    gaus = (TF1 *) hist->GetListOfFunctions()->FindObject("gaus");
+	    if (gaus) {
+	      params[p] = gaus->GetParameter(1);
+	      params[++p] = gaus->GetParameter(2);
 #ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		hist->Draw();
-		c->Update();
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      hist->Draw();
+	      c->Update();
 #endif
+	    } else {
+	      ++p;
+	    }
+	    j++; 
+	    break;
+	  case 5:  // sg10
+	  case 6:  // sg100
+	    if (hist->GetDimension() == 2) {
+	      h2 = (TH2 *) hist;
+	      arr =  new TObjArray(4);
+	      arr->SetOwner(kTRUE);
+	      h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
+	      TH1* mu = (TH1 *) (*arr)[1];
+	      mu->Fit("pol4");
+	      pol4 = (TF1 *) mu->GetListOfFunctions()->FindObject("pol4");
+	      if (pol4) {
+		params[p] = pol4->Eval(1);
+		params[++p] = pol4->Eval(2);
 	      } else {
 		++p;
 	      }
-	      j++; 
-	      break;
-	    case 5:  // sg10
-	    case 6:  // sg100
-	      if (hist->GetDimension() == 2) {
-		h2 = (TH2 *) hist;
-		arr =  new TObjArray(4);
-		arr->SetOwner(kTRUE);
-		h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
-		TH1* mu = (TH1 *) (*arr)[1];
-		mu->Fit("pol4");
-		pol4 = (TF1 *) mu->GetListOfFunctions()->FindObject("pol4");
-		if (pol4) {
-		  params[p] = pol4->Eval(1);
-		  params[++p] = pol4->Eval(2);
-		} else {
-		  ++p;
-		}
-		delete arr;
-		j++;
-	      }
-	      break;
-	    case 7: // muGF
-	    case 8: // sigmaGP
-	      h2 = (TH2 *) hist;
-	      proj = h2->ProjectionY();
-	      gp = FitGP(proj,"Q",1,1,-2,2);
-	      if (gp) {
-#ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		proj->Draw();
-		c->Update();
-#endif
-		params[p] = gp->GetParameter(1);
-		p++;
-		params[p] = gp->GetParameter(2);
-	      }
-	      delete proj;
+	      delete arr;
 	      j++;
-	      break;
-	    case 9: // M
-	    case 10: // Gamma
-	    case 11 : // Significance
-	    case 12 : // PerEvent
-	      BW = K0BW(hist);
-	      if (BW) {
-		params[p]   = BW->GetParameter(1);
-		p++;
-		params[p] = BW->GetParameter(2);
-		p++;
-		params[p] = BRTW::Significance;
-#if 0
-		binWidth = BRTW::binWidth; // hist->GetBinWidth(1);
-		S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
-#endif
-		p++;
-		params[p] = BRTW::SperE;
-		j += 3;
-#ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		hist->Draw();
-		c->Update();
-#endif
-	      }
-	      break;
-	    default: 
-	      break;
 	    }
-	    p++;
+	    break;
+	  case 7: // muGF
+	  case 8: // sigmaGP
+	    h2 = (TH2 *) hist;
+	    proj = h2->ProjectionY();
+	    gp = FitGP(proj,"Q",1,1,-2,2);
+	    if (gp) {
+#ifdef __DRAW__
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      proj->Draw();
+	      c->Update();
+#endif
+	      params[p] = gp->GetParameter(1);
+	      p++;
+	      params[p] = gp->GetParameter(2);
+	    }
+	    delete proj;
+	    j++;
+	    break;
+	  case 9: // M
+	  case 10: // Gamma
+	  case 11 : // Significance
+	  case 12 : // PerEvent
+	    BW = K0BW(hist);
+	    if (BW) {
+	      params[p]   = BW->GetParameter(1);
+	      p++;
+	      params[p] = BW->GetParameter(2);
+	      p++;
+	      params[p] = BRTW::Significance;
+#if 0
+	      binWidth = BRTW::binWidth; // hist->GetBinWidth(1);
+	      S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
+#endif
+	      p++;
+	      params[p] = BRTW::SperE;
+	      j += 3;
+#ifdef __DRAW__
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      hist->Draw();
+	      c->Update();
+#endif
+	    }
+	    break;
+	  default: 
+	    break;
 	  }
+	  p++;
 	}
       }
     }
-    QA->Fill(params);
-  CLOSEFILES:
-    for (auto f : TFiles) {
-      delete f;
-    }
-    //    gObjectTable->Print();
   }
+  QA->Fill(params);
   fout->cd();
   QA->Write();
-  //  fout->Close();
-  //  delete fout;
 }
 #if 0
 //________________________________________________________________________________
@@ -465,4 +467,4 @@ void Plot(Int_t iplot1=0, Int_t iplot2=0, const Char_t *tfg = "kfQA.K.dEdx.W.roo
   QA->Draw("Mass_Ks_Gamma:run","Mass_Ks_Gamma<1&&Mass_Ks_Gamma>0.004")
   QA->Draw("1000*(Mass_Ks_M-0.497611):run","Mass_Ks_Gamma<0.009&&Mass_Ks_Gamma>0.004")
   QA->Draw("Mass_Ks_PerEvent:run","Mass_Ks_Gamma<0.009&&Mass_Ks_Gamma>0.004")
- */  
+*/  

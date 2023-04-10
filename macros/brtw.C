@@ -38,6 +38,15 @@ static Double_t Masses[3] = {0.497611, -1, -1}; // Initail parameters
 static Double_t Widths[3] = {0.0107, -1, -1};
 static const Char_t  *FuncNames[3] = {"Total","Background","Signal"};
 static Bool_t NoBackground = kFALSE;
+namespace BRTW {
+  Double_t nevents = 0;
+  Double_t binWidth = 0;
+  Double_t S = 0;
+  Double_t B = 0;
+  Double_t T = 0; 
+  Double_t SperE = 0;
+  Double_t Significance = -1;
+};
 //________________________________________________________________________________
 void SetReject(Bool_t r = kFALSE) {reject = r;}
 //________________________________________________________________________________
@@ -139,6 +148,13 @@ TH1F *SubstracF(TH1F *hist, TF1* total, const Option_t *opt="b") {
 }
 //________________________________________________________________________________
 TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
+  BRTW:: nevents = 0;
+  BRTW:: binWidth = 0;
+  BRTW:: S = 0;
+  BRTW:: B = 0;
+  BRTW:: T = 0; 
+  BRTW:: SperE = 0;
+  BRTW:: Significance = -1;
   if (! hist) return 0;
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1) c1 = new TCanvas("c1","brtw");
@@ -215,7 +231,7 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
   TFitResultPtr res;
   if (! NoBackground) {
     SetReject(kTRUE);
-    res = hist->Fit(Total,"r","",MMin,MMax);
+    res = hist->Fit(Total,"vr","",MMin,MMax);
     SetReject(kFALSE);
   } else {
     for (Int_t i = 3*NoSignals; i < NoParameters; i++) {
@@ -228,8 +244,8 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
     Total->ReleaseParameter(3*s+1);
     Total->ReleaseParameter(3*s+2);
   }
-  res = hist->Fit(Total,"r","same",MMin,MMax);
-  res = hist->Fit(Total,"rim","same",MMin,MMax);
+  res = hist->Fit(Total,"vrm","same",MMin,MMax);
+  //  res = hist->Fit(Total,"vrim","same",MMin,MMax);
   Double_t params[20];
   Total->GetParameters(params);
   Signal->SetParameters(params);
@@ -240,44 +256,45 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
     Background->FixParameter(3*s,-99.);
   }
   Background->Draw("same");
-  Double_t binWidth = hist->GetBinWidth(1);
-  Double_t S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2])/binWidth;
-  Double_t B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
-  Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
+  BRTW::binWidth = hist->GetBinWidth(1);
+  BRTW::S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2])/BRTW::binWidth;
+  BRTW::B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/BRTW::binWidth;
+  BRTW::T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/BRTW::binWidth;
   TString Out("Title.txt");
   ofstream out;
   out.open(Out.Data());
   cout << gSystem->BaseName(gDirectory->GetName()) << "\t";
-  cout << hist->GetName() << "\t S = " << S << "\tB = " << B;
+  cout << hist->GetName() << "\t S = " << BRTW::S << "\tB = " << BRTW::B;
   out << gSystem->BaseName(gDirectory->GetName()) << "\t";
-  out << hist->GetName() << "\t S = " << S << "\tB = " << B << endl;
-  if (B > 0) {
-    cout<< "\tS/B = " << S/B;
-    out<< "\tS/B = " << S/B;
+  out << hist->GetName() << "\t S = " << BRTW::S << "\tB = " << BRTW::B << endl;
+  if (BRTW::B > 0) {
+    cout<< "\tS/B = " << BRTW::S/BRTW::B;
+    out<< "\tS/B = " << BRTW::S/BRTW::B;
   }
-  cout << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
-  cout << "\tSignificance = " << 1./Total->GetParError(0);
-  out << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
-  out << "\tSignificance = " << 1./Total->GetParError(0) << endl;
+  if (Total->GetParError(0) > 0) BRTW::Significance =  1./Total->GetParError(0);
+  cout << "\tS/sqrt(T) = " << BRTW::S/TMath::Sqrt(BRTW::T);
+  cout << "\tSignificance = " << BRTW::Significance;
+   out << "\tS/sqrt(T) = " << BRTW::S/TMath::Sqrt(BRTW::T);
+   out << "\tSignificance = " << BRTW::Significance;
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
-    Double_t nevents = z->GetEntries();
-    if (nevents > 0) {
-      Double_t SperE = S/nevents;
+    BRTW::nevents = z->GetEntries();
+    if (BRTW::nevents > 0) {
+      BRTW::SperE = BRTW::S/BRTW::nevents;
       cout << "\tSignal per Event(";
       out << "\tSignal per Event(";
-      if (nevents < 1000) {
-	cout << Form("%7.0f",nevents);
-	out << Form("%7.0f",nevents);
-      } else if (nevents < 1e6) {
-	cout << Form("%7.3fK",nevents/1e3);
-	out << Form("%7.3fK",nevents/1e3);
+      if (BRTW::nevents < 1000) {
+	cout << Form("%7.0f",BRTW::nevents);
+	out << Form("%7.0f",BRTW::nevents);
+      } else if (BRTW::nevents < 1e6) {
+	cout << Form("%7.3fK",BRTW::nevents/1e3);
+	out << Form("%7.3fK",BRTW::nevents/1e3);
       } else {
-	cout << Form("%7.3fM",nevents/1e6);
-	out << Form("%7.3fM",nevents/1e6);
+	cout << Form("%7.3fM",BRTW::nevents/1e6);
+	out << Form("%7.3fM",BRTW::nevents/1e6);
       }
-      cout << ")  = " << SperE;
-      out << ")  = " << SperE << endl;
+      cout << ")  = " << BRTW::SperE;
+      out << ")  = " << BRTW::SperE << endl;
     }
   }
   cout << Form("\tM = %7.2f +/- %5.2f",1e3*Total->GetParameter(1),1e3*Total->GetParError(1))
@@ -299,13 +316,13 @@ TF1 *K0BW(TH1F *M) {
   Title.ReplaceAll("z projection","");
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
-   Double_t nevents = z->GetEntries();
-   if (nevents < 1000) 
-     Title += Form(" %7.0f",nevents);
-   else if (nevents < 1e6)
-     Title += Form(" %7.3fK",nevents/1e3);
+   BRTW::nevents = z->GetEntries();
+   if (BRTW::nevents < 1000) 
+     Title += Form(" %7.0f",BRTW::nevents);
+   else if (BRTW::nevents < 1e6)
+     Title += Form(" %7.3fK",BRTW::nevents/1e3);
    else 
-     Title += Form(" %7.3fM",nevents/1e6);
+     Title += Form(" %7.3fM",BRTW::nevents/1e6);
   }
   m->SetTitle(Title);
   Masses[0] = 0.497611; // Initail parameters
