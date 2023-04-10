@@ -18,7 +18,7 @@
 #include "TDirIter.h"
 #include "TFile.h"
 #endif
-void Recover(const Char_t *files ="./*.MuDst.root") {
+void Recover(const Char_t *files ="./*.MuDst.root", Bool_t update = kTRUE) {
   TDirIter Dir(files);
   Char_t *file = 0;
   Int_t NFiles = 0;
@@ -26,7 +26,8 @@ void Recover(const Char_t *files ="./*.MuDst.root") {
   //  gEnv->SetValue("TFile.Recover", 0); // don't recover files
   while ((file = (Char_t *) Dir.NextFile())) {
     cout << "Try to open " << file << endl;
-    f = new TFile(file,"update");// f = new TFile(file);
+    if (update)  f = new TFile(file,"update");// 
+    else         f = new TFile(file);
     cout << "File\t" << NFiles <<"\t" << file; 
     if (! f)                cout << " Can't be opened"; 
     else if (f->IsZombie()) cout << " is Zombie";

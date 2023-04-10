@@ -730,7 +730,8 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
       checkKHasTof = 1;
 
   if(dEdXPull[2] < nSigmaCut)                                           dEdXPDG.push_back(211*q);  
-  if(dEdXPull[3] < 2.f && ((checkKTof && checkKHasTof) || !checkKTof) ) dEdXPDG.push_back(321*q);
+  //  if(dEdXPull[3] < 2.f && ((checkKTof && checkKHasTof) || !checkKTof) ) dEdXPDG.push_back(321*q);
+  if(dEdXPull[3] < nSigmaCut )                                          dEdXPDG.push_back(321*q);
   if(dEdXPull[4] < nSigmaCut)                                           dEdXPDG.push_back(2212*q); 
       
   vector<int> totalPDG;
@@ -946,7 +947,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   else if(p>=4.0 && dEdX > 40. && dEdX < 55.)
     if( !isTofm2 || (isTofm2 && (m2>2) && (m2<4)) )
       totalPDG.push_back(1000040070*q);
-#endif
+#endif //  PID_2018
 
     
 #ifdef PID_MAY // Mai
@@ -1138,7 +1139,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   else if(p>=4.0 && dEdX > 40. && dEdX < 55.)
     if( !isTofm2 || (isTofm2 && (m2>2) && (m2<4)) )
       totalPDG.push_back(1000040070*q);
-#endif
+#endif //  PID_MAY
 
 #ifdef PID_JUNE //June
     //d
@@ -1329,7 +1330,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   else if(p>=4.0 && dEdX > 40. && dEdX < 55.)
     if( !isTofm2 || (isTofm2 && (m2>2) && (m2<4)) )
       totalPDG.push_back(1000040070*q);
-#endif
+#endif //  PID_JUNE
     
   if(totalPDG.size() == 0)
     totalPDG.push_back(-1);
@@ -3168,7 +3169,7 @@ Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgPa
     { -3122, "Lambdab",    -2212,  211},
     {    22, "gamma",         11,  -11}
   }; 
-  static TH2F *hist[Ndecays+1][Nparticles][6] = {0};
+  static TH2F *hist[Ndecays+1][Nparticles][8] = {0};
   if (! hist[0][0][0]) {
     TDirectory *top = StMaker::GetTopChain()->GetTFile();
     top->mkdir("PiDQA");
@@ -3192,12 +3193,17 @@ Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgPa
 	TDirectory *dir3 = dir1->GetDirectory(particles[p].name);
 	dir3->cd();
 	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  gDirectory->GetPath() << endl;
-	hist[d][p][0] = new TH2F("dEdx","dE/dx_{fit} / Bichsel prediction for I_{fit} versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][0] = new TH2F("dEdx","dE/dx_{fit} / dEdModel prediction for I_{fit} versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
 	hist[d][p][1] = new TH2F("dNdx","dN/dx_{fit} / dN/dx_{predicted} for N/dx versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
-	hist[d][p][2] = new TH2F("dM2BTof","dM^{2} fro BTof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
-	hist[d][p][3] = new TH2F("dM2ETof","dM^{2} fro ETof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
-	hist[d][p][4] = new TH2F("dEdxBTof","dE/dx_{fit} / Bichsel prediction for I_{fit} versus log_{10}(#beta #gamma with |sigmaBTOF| < 3)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][2] = new TH2F("dM2BTof","dM^{2} from BTof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
+	hist[d][p][3] = new TH2F("dM2ETof","dM^{2} from ETof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
+	hist[d][p][4] = new TH2F("dEdxBTof","dE/dx_{fit} / dEdModel prediction for I_{fit} versus log_{10}(#beta #gamma with |sigmaBTOF| < 3)",280,-1,4,200,-0.5,0.5);
 	hist[d][p][5] = new TH2F("dNdxBTof","dN/dx_{fit} / dN/dx_{predicted} for N/dx versus log_{10}(#beta #gamma) with |sigmaBTOF| < 3)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][6] = new TH2F("PulldEdx","(dE/dx_{fit} / dEdModel)/#sigma prediction for I_{fit} versus log_{10}(#beta #gamma)",280,-1,4,300,-3,3);
+	hist[d][p][7] = new TH2F("PulldEdxBTof","dE/dx_{fit} / dEdModel)/#sigma prediction for I_{fit} versus log_{10}(#beta #gamma with |sigmaBTOF| < 3)",280,-1,4,300,-3,3);
+	for (Int_t k = 0; k < 8; k++) {
+	  hist[d][p][k]->SetXTitle("log_{10}(#beta #gamma)");
+	}
       }
     }
   }
@@ -3224,7 +3230,11 @@ Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgPa
 	sigmaToF = PiD->fBTof->Sigma(l);
       }
       hist[d][p][0]->Fill(bgL10, PiD->fFit->dev[l]);
-      if (sigmaToF < 3) hist[d][p][4]->Fill(bgL10, PiD->fFit->dev[l]);
+      hist[d][p][6]->Fill(bgL10, PiD->fFit->devS[l]);
+      if (sigmaToF < 3) {
+	hist[d][p][4]->Fill(bgL10, PiD->fFit->dev[l]);
+	hist[d][p][7]->Fill(bgL10, PiD->fFit->devS[l]);
+      }
       if (PiD->fdNdx) {
 	hist[d][p][1]->Fill(bgL10, PiD->fdNdx->dev[l]);
 	if (sigmaToF < 3) hist[d][p][5]->Fill(bgL10, PiD->fdNdx->dev[l]);

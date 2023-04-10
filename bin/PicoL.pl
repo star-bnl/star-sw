@@ -113,7 +113,10 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
     print "key { |$key| }\t=> |$def->{$key}|\n" if ($debug);
     if (! $def->{$key}) {next;}
     print "    { |$key| }\t=> |$def->{$key}|\n" if ($debug);
-    if ($pwd =~ /$key/) {$glob = "/reco/" . $def->{$key}; print "pwd = $pwd, => key => $key, glob = $glob\n" if ($debug);}
+    if ($pwd =~ /$key/) {
+      $glob = "/reco/" . $def->{$key}; print "pwd = $pwd, => key => $key, glob = $glob\n" if ($debug);
+      last;
+    }
   }
   print "glob = $glob\n" if ($debug);
   die if ! $ glob;

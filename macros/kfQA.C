@@ -40,161 +40,184 @@
 #include "TSystemFile.h"
 #include "TObjArray.h"
 #include "TObjectTable.h"
+#include "TFileMerger.h"
+#include "TDirIter.h"
+#include "TInterpreter.h"
 //#include "dEdxFit.C"
 #include "brtw.C"
 #endif
 TF1 *FitGF(TH1 *proj, Option_t *opt="");
 TF1* FitGP(TH1* proj, Option_t* opt = "RQ", Double_t nSigma = 3, Int_t pow = 3, Double_t zmin = -0.2, Double_t zmax = 0.2);
-enum {NTVar = 12};
-const Char_t *Var[NTVar] = {"mean", "RMS", "mu", "sigma","sg10","sg100", "muGP", "sigmaGP", "M", "Gamma", "Significance", "PerEvent"};
-struct Plot_t {
-  const Char_t *VarInTuple;
-  const Char_t *particle;
+enum {NTVar = 12};     // bits   1      2     3        4      5       6       7          8       9       10              11          12
+const Char_t *Var[NTVar] = {"mean", "RMS", "mu", "sigma","sg10","sg100", "muGP", "sigmaGP", "Mass", "Gamma", "Significance", "PerEvent"};
+class Plot_t {
+public:
+  Plot_t(const Char_t *var="", const Char_t *path="", Int_t P=-1) : Var(var), Path(path), p(P) {}
   const Char_t *Var;
-  const Char_t *hTitle;
+  const Char_t *Path;
+  Int_t         p;
 };
-Plot_t Plots[] = {
-  {"Pr_x_mean",                   "",      "mean",         "PrimaryVertexQA x"},	 // 0  
-  {"Pr_y_mean",   	  	  "",      "mean",     	   "PrimaryVertexQA y"},	 // 1
-  {"Pr_z_mean",   	  	  "",      "mean",     	   "PrimaryVertexQA z"},	 // 2
-  {"Pr_x_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA x"},	 // 3
-  {"Pr_y_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA y"},	 // 4
-  {"Pr_z_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA z"},	 // 5
-  {"Pr_Ntracks_mean",     	  "",      "mean", 	   "PrimaryVertexQA Ntracks"},	 // 6
-  {"Tk_hPrimaryRatio_mean",       "",      "mean", 	   "hPrimaryRatio"},		 // 7
-  {"Tk_hPVError_mean",            "",      "mean", 	   "hPVError"},			 // 8
-  {"Pr_Ntracks_RMS",      	  "",      "RMS",  	   "PrimaryVertexQA Ntracks"},	 // 9
-  {"Tk_hPrimaryRatio_RMS",        "",      "RMS",  	   "hPrimaryRatio"},		 //10
-  {"Tk_hPVError_RMS",     	  "",      "RMS",  	   "hPVError"},			 //11  
-  {"Tk_hPVErrorVsNPVTracks_sg10", "",      "sg10", 	   "hPVErrorVsNPVTracks"},	 //12 
-  {"Tk_hPVErrorVsNPVTracks_sg100","",      "sg100",	   "hPVErrorVsNPVTracks"},	 //13
-  {"dEdx_Pull_piN_muGP",          "piN",   "muGP", 	   "hdEdXPull"},	  	 //14
-  {"dEdx_Pull_piP_muGP",          "piP",   "muGP",         "hdEdXPull"},	  	 //15
-  {"dEdx_Pull_KN_muGP",           "KN",    "muGP",         "hdEdXPull"},	  	 //16
-  {"dEdx_Pull_KP_muGP",           "KP",    "muGP",         "hdEdXPull"},	  	 //17
-  {"dEdx_Pull_p_muGP",            "p",     "muGP",         "hdEdXPull"},	  	 //18
-  {"dEdx_Pull_pN_muGP",           "pN",    "muGP",         "hdEdXPull"},	  	 //19
-  {"dNdx_Pull_piN_muGP",          "piN",   "muGP",         "hdNdXPull"},	         //20
-  {"dNdx_Pull_piP_muGP",          "piP",   "muGP",         "hdNdXPull"},	  	 //21
-  {"dNdx_Pull_KN_muGP",           "KN",    "muGP",         "hdNdXPull"},	  	 //22
-  {"dNdx_Pull_KP_muGP",           "KP",    "muGP",         "hdNdXPull"},	  	 //23
-  {"dNdx_Pull_p_muGP",            "p",     "muGP",         "hdNdXPull"},	  	 //24
-  {"dNdx_Pull_pN_muGP",           "pN",    "muGP",         "hdNdXPull"},	  	 //25
-  {"dEdx_Pull_piN_sigmaGP",       "piN",   "sigmaGP",      "hdEdXPull"},	  	 //26
-  {"dEdx_Pull_piP_sigmaGP",       "piP",   "sigmaGP",      "hdEdXPull"},	 	 //27
-  {"dEdx_Pull_KN_sigmaGP",        "KN",    "sigmaGP",      "hdEdXPull"},	  	 //28
-  {"dEdx_Pull_KP_sigmaGP",        "KP",    "sigmaGP",      "hdEdXPull"},	 	 //29
-  {"dEdx_Pull_p_sigmaGP",         "p",     "sigmaGP",      "hdEdXPull"},	         //30
-  {"dEdx_Pull_pN_sigmaGP",        "pN",    "sigmaGP",      "hdEdXPull"},	 	 //31
-  {"dNdx_Pull_piN_sigmaGP",       "piN",   "sigmaGP",      "hdNdXPull"},	 	 //32
-  {"dNdx_Pull_piP_sigmaGP",       "piP",   "sigmaGP",      "hdNdXPull"},	 	 //33
-  {"dNdx_Pull_KN_sigmaGP",        "KN",    "sigmaGP",      "hdNdXPull"},	 	 //34
-  {"dNdx_Pull_KP_sigmaGP",        "KP",    "sigmaGP",      "hdNdXPull"},	 	 //35
-  {"dNdx_Pull_p_sigmaGP",         "p",     "sigmaGP",      "hdNdXPull"},	 	 //36
-  {"dNdx_Pull_pN_sigmaGP",        "pN",    "sigmaGP",      "hdNdXPull"},	 	 //37
-  {"M2_piN_muGP",                 "piN",   "muGP",         "hTofPID"},		         //38
-  {"M2_piP_muGP",         	  "piP",   "muGP",         "hTofPID"},		         //39
-  {"M2_KN_muGP",          	  "KN",    "muGP",         "hTofPID"},		         //40
-  {"M2_KP_muGP",          	  "KP",    "muGP",         "hTofPID"},		 	 //41
-  {"M2_p_muGP",           	  "p",     "muGP",         "ToF M2 proton"},		 //42
-  {"M2_pN_muGP",          	  "pN",    "muGP",         "ToF M2 pbar"},		 //43
-  {"M2_piN_sigmaGP",      	  "piN",   "sigmaGP",      "hTofPID"},	 		 //44
-  {"M2_piP_sigmaGP",      	  "piP",   "sigmaGP",      "hTofPID"},	 		 //45
-  {"M2_KN_sigmaGP",       	  "KN",    "sigmaGP",      "hTofPID"},	 		 //46
-  {"M2_KP_sigmaGP",       	  "KP",    "sigmaGP",      "hTofPID"},	 		 //47
-  {"M2_p_sigmaGP",        	  "p",     "sigmaGP",      "hTofPID"},	 		 //48
-  {"M2_pN_sigmaGP",       	  "pN",    "sigmaGP",      "hTofPID"},	 		 //49
-  {"Mass_Ks_M",           	  "",      "M",            "Ks M"},                      //50
-  {"Mass_Ks_Gamma",       	  "",      "Gamma",        "Ks M"},			 //51
-  {"Mass_Ks_Significance",	  "",      "Significance", "Ks M"},			 //52
-  {"Mass_Ks_PerEvent",    	  "",      "PerEvent",     "Ks M"}			 //53
-};											
-											
+vector<Plot_t> Plots;
 class Hist_t {										
 public:											
-  Hist_t (const Char_t *name = "", const Char_t *path = "", const Int_t Opt = 0) : Name(name), Path(path), opt(Opt) {}
+  Hist_t (const Char_t *name = "", const Char_t *path = "", const Int_t Opt = 0, Int_t P = -1) : Name((Char_t *) name), Path(path), opt(Opt), p(P) {}
   //  virtual ~Hist_t() {}								
-  const Char_t *Name; 
+        Char_t *Name; 
   const Char_t *Path;
-  const Int_t opt; // 1 - mean, 2 - RMS, 4 - mu, 8 - sigma, 16 - sg10, 32 - sg100, 64 - muGP, 128 - sigmaGP, 256 - M, 512 - Gamma, 1024 - Significance
+  const Int_t   opt; // 1 - mean, 2 - RMS, 4 - mu, 8 - sigma, 16 - sg10, 32 - sg100, 64 - muGP, 128 - sigmaGP, 256 - M, 512 - Gamma, 1024 - Significance, 2048 - PerEvent
+  Int_t         p;   //  
+  void SetName(const Char_t *name) {Name = (Char_t *) name;}
 };
 
-static const Hist_t Histos[] = {
-  Hist_t("Pr","/Particles/KFParticlesFinder/PrimaryVertexQA/x", 1+2),
-  Hist_t("Pr","/Particles/KFParticlesFinder/PrimaryVertexQA/y", 1+2),
-  Hist_t("Pr","/Particles/KFParticlesFinder/PrimaryVertexQA/z", 1+2),
-  Hist_t("Pr","/Particles/KFParticlesFinder/PrimaryVertexQA/Ntracks", 1+2),
-  Hist_t("Tk","/Tracks/hPrimaryRatio", 1+2),
-  Hist_t("Tk","/Tracks/hPVError",1+2),
-  Hist_t("Tk","/Tracks/hPVErrorVsNPVTracks",16+32),
-  Hist_t("dEdx_Pull","/Tracks/pi-/hdEdXPull",64+128),
-  Hist_t("dEdx_Pull","/Tracks/pi+/hdEdXPull",64+128),
-  Hist_t("dEdx_Pull","/Tracks/K-/hdEdXPull",64+128),
-  Hist_t("dEdx_Pull","/Tracks/K+/hdEdXPull",64+128),
-  Hist_t("dEdx_Pull","/Tracks/p/hdEdXPull",64+128),
-  Hist_t("dEdx_Pull","/Tracks/p-/hdEdXPull",64+128),
-  
-  Hist_t("dNdx_Pull","/Tracks/pi-/hdNdXPull",64+128),
-  Hist_t("dNdx_Pull","/Tracks/pi+/hdNdXPull",64+128),
-  Hist_t("dNdx_Pull","/Tracks/K-/hdNdXPull",64+128),
-  Hist_t("dNdx_Pull","/Tracks/K+/hdNdXPull",64+128),
-  Hist_t("dNdx_Pull","/Tracks/p/hdNdXPull",64+128),
-  Hist_t("dNdx_Pull","/Tracks/p-/hdNdXPull",64+128),
-  
-  Hist_t("M2","/Tracks/pi-/hTofPID",64+128),
-  Hist_t("M2","/Tracks/pi+/hTofPID",64+128),
-  Hist_t("M2","/Tracks/K-/hTofPID",64+128),
-  Hist_t("M2","/Tracks/K+/hTofPID",64+128),
-  Hist_t("M2","/Tracks/p/hTofPID",64+128),
-  Hist_t("M2","/Tracks/p-/hTofPID",64+128),
-  Hist_t("Mass","/Particles/KFParticlesFinder/Particles/Ks/Parameters/M",256+512+1024+2048)
+static Hist_t Histos[] = {
+  Hist_t("PrZ","/Particles/KFParticlesFinder/PrimaryVertexQA/z", 1+2, -1),
+  Hist_t("PrX","/Particles/KFParticlesFinder/PrimaryVertexQA/x", 1+2, -1),
+  Hist_t("PrY","/Particles/KFParticlesFinder/PrimaryVertexQA/y", 1+2, -1),
+  Hist_t("Pr ","/Particles/KFParticlesFinder/PrimaryVertexQA/Ntracks", 1+2, -1),
+  Hist_t("PrRatio","/Tracks/hPrimaryRatio", 1+2, -1),
+  Hist_t("VxError","/Tracks/hPVError",1+2, -1),
+  Hist_t("PvsG","/Tracks/hPVErrorVsNPVTracks",16+32, -1),
+  Hist_t("dEdxPull","/Tracks/pi-/hdEdXPull",64+128, -1),
+  Hist_t("dEdx_Pull","/Tracks/pi+/hdEdXPull",64+128, -1),
+  Hist_t("dEdx_Pull","/Tracks/K-/hdEdXPull",64+128, -1),
+  Hist_t("dEdx_Pull","/Tracks/K+/hdEdXPull",64+128, -1),
+  Hist_t("dEdx_Pull","/Tracks/p/hdEdXPull",64+128, -1),
+  Hist_t("dEdx_Pull","/Tracks/p-/hdEdXPull",64+128, -1),
+#if 0  
+  Hist_t("dNdx_Pull","/Tracks/pi-/hdNdXPull",64+128, -1),
+  Hist_t("dNdx_Pull","/Tracks/pi+/hdNdXPull",64+128, -1),
+  Hist_t("dNdx_Pull","/Tracks/K-/hdNdXPull",64+128, -1),
+  Hist_t("dNdx_Pull","/Tracks/K+/hdNdXPull",64+128, -1),
+  Hist_t("dNdx_Pull","/Tracks/p/hdNdXPull",64+128, -1),
+  Hist_t("dNdx_Pull","/Tracks/p-/hdNdXPull",64+128, -1),
+#endif  
+  Hist_t("M2","/Tracks/pi-/hTofPID",64+128, -1),
+  Hist_t("M2","/Tracks/pi+/hTofPID",64+128, -1),
+  Hist_t("M2","/Tracks/K-/hTofPID",64+128, -1),
+  Hist_t("M2","/Tracks/K+/hTofPID",64+128, -1),
+  Hist_t("M2","/Tracks/p/hTofPID",64+128, -1),
+  Hist_t("M2","/Tracks/p-/hTofPID",64+128, -1),
+  Hist_t("Mass","/Particles/KFParticlesFinder/Particles/Ks/Parameters/M",256+512+1024+2048, -1)
   
 }; 
+const Int_t NoHists = sizeof(Histos)/sizeof(Hist_t); 
 //________________________________________________________________________________
-void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
-  const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
-  TPRegexp Pattern(pattern);
-#if 0
-  if (gClassTable->GetID("StBichsel") < 0) {
-    gSystem->Load("libTable");
-    gSystem->Load("St_base");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StBichsel");
-    //    m_Bichsel = Bichsel::Instance();
-  }
-  gROOT->LoadMacro("dEdxFit.C+");
-#endif
-  TString OutFile;
-  if (!Out) OutFile = "kfQAN.root";
-  else      OutFile = Out;
-  TFile *fout = new TFile(OutFile,"recreate");
+TString InitVars() {
+  cout << " NoHists " << NoHists << endl;
   TString Tuple("Run:run:no:events");
-  for (Int_t i = 0; i < N; i++) {
-    TString var(Histos[i].Name);
-    TString histName(gSystem->BaseName(Histos[i].Path));
-    TString part(gSystem->BaseName(gSystem->DirName(Histos[i].Path)));
-    TString part2(gSystem->BaseName(gSystem->DirName(gSystem->DirName(Histos[i].Path))));
-    part.ReplaceAll("+","P");
-    part.ReplaceAll("-","N");
+  Int_t p = 4;
+  for (Int_t i = 0; i < NoHists; i++) {
+    TString NameB(Histos[i].Path);
+    NameB.ReplaceAll("/Particles/KFParticlesFinder/PrimaryVertexQA/","");
+    NameB.ReplaceAll("/Tracks/","");
+    NameB.ReplaceAll("/Particles/KFParticlesFinder/Particles/","");
+    NameB.ReplaceAll("Parameters/","");
+    NameB.ReplaceAll("+","P");
+    NameB.ReplaceAll("-","N");
+    NameB.ReplaceAll("/","_");
+    NameB.ReplaceAll("_M","");
+    Histos[i].SetName(NameB);
+    Histos[i].p = p;
+    cout << i << "\t" << Histos[i].Name << "\t" << Histos[i].Path << "\topt = " << Histos[i].opt << "\tp = " << Histos[i].p << endl;
     for (Int_t j = 0; j < NTVar; j++) {
       if ((1 << j) &  Histos[i].opt) {
 	Tuple += ":"; 
-	TString variable(var); variable += "_";
-	if      (histName == "hdEdXPull") variable += part;
-	else if (histName == "hdNdXPull") variable += part;
-	else if (histName == "hTofPID") variable += part;
-	else if (histName == "M") variable += part2;
-	else                      variable += histName;
+	TString variable = NameB + "_" + Var[j];
+	p++;
 	Tuple += variable; 
-	Tuple += "_"; Tuple += Var[j];
+	Plot_t plot = Plot_t(variable, Histos[i].Path, p);
+	cout << plot.Var << "\t" << plot.Path << "\t" << plot.p << endl;
+	Plots.push_back(plot); 
       }
     }
   } 
   cout << "Tuple: \t" << Tuple << endl;
+
+  return Tuple;
+}
+//________________________________________________________________________________
+TDirectory *Merge(Int_t run) {
+  TString targetFile(Form("R%i.root",run));
+  const Char_t *targetname = targetFile.Data();
+  Char_t *tfile = gSystem->Which(".",targetFile,kReadPermission);
+  if (! tfile) {
+   gSystem->Load("libTreePlayer");
+   TClass::GetClass("ROOT::Cintex::Cintex"); // autoload Cintex if it exist.
+   if (gInterpreter->IsLoaded("libCintex")) {
+      gROOT->ProcessLine("ROOT::Cintex::Cintex::Enable();");
+   }
+   TDirIter Dir(Form("%i_*.root",run));
+   Bool_t force = kFALSE;
+   Bool_t skip_errors = kFALSE;
+   Bool_t reoptimize = kFALSE;
+   Bool_t noTrees = kFALSE;
+   Int_t maxopenedfiles = 0;
+   Int_t verbosity = 99;
+   Int_t newcomp = 1;
+   if (verbosity > 1) {
+     std::cout << "hadd Target file: " << targetname << std::endl;
+   }
+   
+   TFileMerger merger(kFALSE,kFALSE);
+   //    merger.SetMsgPrefix("hadd");
+   //    merger.SetPrintLevel(verbosity - 1);
+   if (maxopenedfiles > 0) {
+     merger.SetMaxOpenedFiles(maxopenedfiles);
+    }
+   if (!merger.OutputFile(targetname,force,newcomp) ) {
+     std::cerr << "hadd error opening target file (does " << targetname << " exist?)." << std::endl;
+     std::cerr << "Pass \"-f\" argument to force re-creation of output file." << std::endl;
+     exit(1);
+    }
+   
+   Char_t *file = 0;
+   while ((file = (Char_t *) Dir.NextFile())) {
+     if( ! merger.AddFile(file) ) {
+       if ( skip_errors ) {
+	 std::cerr << "hadd skipping file with error: " << file << std::endl;
+       } else {
+	 std::cerr << "hadd exiting due to error in " << file << std::endl;
+	  return 0;
+       }
+     }
+   }
+   if (reoptimize) {
+     merger.SetFastMethod(kFALSE);
+   } else {
+     if (merger.HasCompressionChange()) {
+       // Don't warn if the user any request re-optimization.
+       std::cout <<"hadd Sources and Target have different compression levels"<<std::endl;
+      std::cout <<"hadd merging will be slower"<<std::endl;
+     }
+   }
+   merger.SetNotrees(noTrees);
+   Bool_t status = merger.Merge();
+   
+   if (status) {
+     if (verbosity == 1) {
+       std::cout << "hadd merged " << merger.GetMergeList()->GetEntries() << " input files in " << targetname << ".\n";
+     }
+   } else {
+     if (verbosity == 1) {
+       std::cout << "hadd failure during the merge of " << merger.GetMergeList()->GetEntries() << " input files in " << targetname << ".\n";
+     }
+     return 0;
+   }
+  }
+  return new TFile(tfile);
+}
+//________________________________________________________________________________
+void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
+  TDirectory *myDir = Merge(run);
+  if (! myDir) return;
+  TString OutFile;
+  if (!Out) OutFile = "kfQAN.root";
+  else      OutFile = Out;
+  TFile *fout = new TFile(OutFile,"recreate");
+  TString Tuple = InitVars();
   TNtuple *QA = new TNtuple("QA","Summary of PicoDst per Run",Tuple.Data()); 
   Int_t cachesize = 10000000; //this is the default value: 10 MBytes
   QA->SetCacheSize(cachesize);
-  Int_t run = 0;
   Int_t Run = 0;
   Int_t nFile = 0;
   TString title;
@@ -208,188 +231,133 @@ void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
   Int_t noRuns = 0;
   //  TDirIter Dir(files);
   //  const Char_t *file = Dir.NextFile();
-  TSystemDirectory Dir("",".");
-  TList *files = Dir.GetListOfFiles();
-  if (! files) return;
-  TIter next(files);
-  TSystemFile *file = 0;
-  multimap<Int_t,TString> fileMap;
-  while ((file = (TSystemFile *) next())) {
-    TString File(file->GetName());
-    if (! File.EndsWith(".root")) continue;
-    if (  File.BeginsWith("All")) continue;
-    if (! File.BeginsWith(pattern)) continue;
-    //    cout << file->GetName() << "\t" << file->GetTitle() << endl;
-    sscanf(File.Data(),"%i_",&run); 
-    TString path( file->GetTitle());
-    path += "/";
-    path += file->GetName();
-    fileMap.insert(pair<Int_t,TString>(run,path));
-    nFile++;
-  }
-  if (! nFile) {cout << "Empty list for pattern " << pattern << endl; return;}
-#if 0
-  for (std::multimap<Int_t,TString>::iterator it=fileMap.begin(); it!=fileMap.end(); ++it) {
-    std::cout << (*it).first << " => " << (*it).second.Data() << '\n';
-  }
-#endif
-  // Unique keys
-  TH1F *hist = 0;
-  for( auto it = fileMap.begin(), end = fileMap.end();
-       it != end;
-       it = fileMap.upper_bound(it->first)) {
-    run = it->first;
-    cout << run << ' ' << it->second.Data() << endl;
-    std::pair <std::multimap<Int_t,TString>::iterator, std::multimap<Int_t,TString>::iterator> ret;
-    ret = fileMap.equal_range(run);
-    std::cout << run << " =>";
-    vector<TFile *> TFiles;
-    for (std::multimap<Int_t,TString>::iterator itt=ret.first; itt!=ret.second; ++itt) {
-      std::cout << ' ' << itt->second.Data();
-      cout << "\tOpen " <<  itt->second.Data() << endl;
-      TFile *f = new TFile(itt->second.Data());
-      if (f) TFiles.push_back(f);
-      else {cout << "\t====================== failed " << endl;}
+  myDir->cd();
+  no++;
+  Run = run%1000000;
+  Float_t params[100] = {0};
+  params[0] = run;
+  params[1] = Run;
+  params[2] = no;
+  Int_t p = 4;
+  for (Int_t i = 0; i < NoHists; i++) { // loop over histograms
+    TH1F *hist = (TH1F *) myDir->Get(Histos[i].Path);
+    if (! hist) continue;
+    TObjArray* arr = 0;
+    Double_t binWidth;
+    Double_t S;
+    if (i == 0) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
+      params[3] = hist->GetEntries();
+      if (params[3] < 100) break;;
     }
-    //    std::cout << '\n';
-    if (! TFiles.size()) continue;
-    no++;
-    Run = run%1000000;
-    Float_t params[100] = {0};
-    params[0] = run;
-    params[1] = Run;
-    params[2] = no;
-    Int_t p = 4;
-    for (Int_t i = 0; i < N; i++) { // loop over histograms
-      if (hist) delete hist;
-      hist = 0;
-      for (auto f : TFiles) {
-	if (! hist) {
-	  hist = (TH1F *) f->Get(Histos[i].Path);
-	  hist->SetDirectory(0);
-	} else {
-	  TH1F *h = (TH1F *) f->Get(Histos[i].Path);
-	  if (h) hist->Add(h);
-	  delete h;
-	}
-      } 
-      TObjArray* arr = 0;
-      Double_t binWidth;
-      Double_t S;
-      if (! hist) continue;
-      if (i == 2) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
-	params[3] = hist->GetEntries();
-	if (params[3] < 100) continue;
-      }
-      for (Int_t j = 0; j < NTVar; j++) { // loop over variables
-	if ((1 << j) &  Histos[i].opt) {
-	  params[p] = 0;
-	  params[p+1] = 0;
-	  if (hist && hist->GetEntries() > 0) {
-	    switch (j+1) {
-	    case 1: // mean
-	      params[p] = hist->GetMean(); 
-	      break;
-	    case 2: // RMS
-	      params[p] = hist->GetRMS();
-	      break;
-	    case 3: // mu
-	    case 4: // sigma
-	      hist->Fit("gaus");
-	      gaus = (TF1 *) hist->GetListOfFunctions()->FindObject("gaus");
-	      if (gaus) {
-		params[p] = gaus->GetParameter(1);
-		params[++p] = gaus->GetParameter(2);
+    p = Histos[i].p;
+    for (Int_t j = 0; j < NTVar; j++) { // loop over variables
+      if ((1 << j) &  Histos[i].opt) {
+	params[p] = 0;
+	params[p+1] = 0;
+	if (hist && hist->GetEntries() > 0) {
+	  switch (j+1) {
+	  case 1: // mean
+	    params[p] = hist->GetMean(); 
+	    break;
+	  case 2: // RMS
+	    params[p] = hist->GetRMS();
+	    break;
+	  case 3: // mu
+	  case 4: // sigma
+	    hist->Fit("gaus");
+	    gaus = (TF1 *) hist->GetListOfFunctions()->FindObject("gaus");
+	    if (gaus) {
+	      params[p] = gaus->GetParameter(1);
+	      params[++p] = gaus->GetParameter(2);
 #ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		hist->Draw();
-		c->Update();
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      hist->Draw();
+	      c->Update();
 #endif
+	    } else {
+	      ++p;
+	    }
+	    j++; 
+	    break;
+	  case 5:  // sg10
+	  case 6:  // sg100
+	    if (hist->GetDimension() == 2) {
+	      h2 = (TH2 *) hist;
+	      arr =  new TObjArray(4);
+	      arr->SetOwner(kTRUE);
+	      h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
+	      TH1* mu = (TH1 *) (*arr)[1];
+	      mu->Fit("pol4");
+	      pol4 = (TF1 *) mu->GetListOfFunctions()->FindObject("pol4");
+	      if (pol4) {
+		params[p] = pol4->Eval(1);
+		params[++p] = pol4->Eval(2);
 	      } else {
 		++p;
 	      }
-	      j++; 
-	      break;
-	    case 5:  // sg10
-	    case 6:  // sg100
-	      if (hist->GetDimension() == 2) {
-		h2 = (TH2 *) hist;
-		arr =  new TObjArray(4);
-		arr->SetOwner(kTRUE);
-		h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
-		TH1* mu = (TH1 *) (*arr)[1];
-		mu->Fit("pol4");
-		pol4 = (TF1 *) mu->GetListOfFunctions()->FindObject("pol4");
-		if (pol4) {
-		  params[p] = pol4->Eval(1);
-		  params[++p] = pol4->Eval(2);
-		} else {
-		  ++p;
-		}
-		delete arr;
-		j++;
-	      }
-	      break;
-	    case 7: // muGF
-	    case 8: // sigmaGP
-	      h2 = (TH2 *) hist;
-	      proj = h2->ProjectionY();
-	      gp = FitGP(proj);
-	      if (gp) {
-#ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		proj->Draw();
-		c->Update();
-#endif
-		params[p] = gp->GetParameter(1);
-		params[++p] = gp->GetParameter(2);
-	      }
-	      delete proj;
+	      delete arr;
 	      j++;
-	      break;
-	    case 9: // M
-	    case 10: // Gamma
-	      BW = K0BW(hist);
-	      if (BW) {
-		params[p] = BW->GetParameter(1);
-		params[p+1] = BW->GetParameter(2);
-		params[p+2] = 1./BW->GetParError(0);
-		binWidth = hist->GetBinWidth(1);
-		S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
-		params[p+3] = S/params[3];
-		p += 3;
-		j += 3;
-#ifdef __DRAW__
-		TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
-		hist->Draw();
-		c->Update();
-#endif
-	      }
-	      break;
-	    default: 
-	      break;
 	    }
-	    p++;
+	    break;
+	  case 7: // muGF
+	  case 8: // sigmaGP
+	    h2 = (TH2 *) hist;
+	    proj = h2->ProjectionY();
+	    gp = FitGP(proj,"Q",1,1,-2,2);
+	    if (gp) {
+#ifdef __DRAW__
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      proj->Draw();
+	      c->Update();
+#endif
+	      params[p] = gp->GetParameter(1);
+	      p++;
+	      params[p] = gp->GetParameter(2);
+	    }
+	    delete proj;
+	    j++;
+	    break;
+	  case 9: // M
+	  case 10: // Gamma
+	  case 11 : // Significance
+	  case 12 : // PerEvent
+	    BW = K0BW(hist);
+	    if (BW) {
+	      params[p]   = BW->GetParameter(1);
+	      p++;
+	      params[p] = BW->GetParameter(2);
+	      p++;
+	      params[p] = BRTW::Significance;
+#if 0
+	      binWidth = BRTW::binWidth; // hist->GetBinWidth(1);
+	      S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
+#endif
+	      p++;
+	      params[p] = BRTW::SperE;
+	      j += 3;
+#ifdef __DRAW__
+	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
+	      hist->Draw();
+	      c->Update();
+#endif
+	    }
+	    break;
+	  default: 
+	    break;
 	  }
+	  p++;
 	}
       }
     }
-    QA->Fill(params);
-  CLOSEFILES:
-    for (auto f : TFiles) {
-      delete f;
-    }
-    //    gObjectTable->Print();
   }
+  QA->Fill(params);
   fout->cd();
   QA->Write();
-  //  fout->Close();
-  //  delete fout;
 }
+#if 0
 //________________________________________________________________________________
 void PrintVars(const Char_t *file = "K/dEdx/21174052_1.root") {
-  const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
-  for (Int_t i = 0; i < N; i++) {
+  for (Int_t i = 0; i < NoHists; i++) {
     TString var(Histos[i].Name);
     TString histName(gSystem->BaseName(Histos[i].Path));
     
@@ -493,9 +461,10 @@ void Plot(Int_t iplot1=0, Int_t iplot2=0, const Char_t *tfg = "kfQA.K.dEdx.W.roo
     l->Draw();
   }
 }  
+#endif
 //________________________________________________________________________________
 /*
   QA->Draw("Mass_Ks_Gamma:run","Mass_Ks_Gamma<1&&Mass_Ks_Gamma>0.004")
   QA->Draw("1000*(Mass_Ks_M-0.497611):run","Mass_Ks_Gamma<0.009&&Mass_Ks_Gamma>0.004")
   QA->Draw("Mass_Ks_PerEvent:run","Mass_Ks_Gamma<0.009&&Mass_Ks_Gamma>0.004")
- */  
+*/  
