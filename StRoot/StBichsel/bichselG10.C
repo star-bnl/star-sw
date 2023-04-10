@@ -158,7 +158,7 @@ Double_t dEdxModelZ(Double_t *x,Double_t *par) { //new dEdxModel
   if (mass < 0) {mass = - mass; scale = 2;}
   Double_t poverm = pove/mass; 
   Double_t charge = par[1];
-  poverm *= charge;
+  poverm *= TMath::Abs(charge);
   return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
@@ -172,7 +172,7 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
   Double_t dx2 = 1;
   if (par[1] > 1.0) {
     charge = par[1];
-    poverm *= charge;
+    poverm *= TMath::Abs(charge);
     dx2 = TMath::Log2(5.);
   }
   return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
@@ -349,7 +349,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 }
 #endif /* __CINT__ */
 //________________________________________________________________________________
-void bichselG10(const Char_t *type="z", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
+void bichselG10(const Char_t *type="zN", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
   fgRigidity = rigidity;
   if (gClassTable->GetID("StBichsel") < 0) {
     gSystem->Load("libTable");
