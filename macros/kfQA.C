@@ -227,6 +227,7 @@ void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
     fileMap.insert(pair<Int_t,TString>(run,path));
     nFile++;
   }
+  if (! nFile) {cout << "Empty list for pattern " << pattern << endl; return;}
 #if 0
   for (std::multimap<Int_t,TString>::iterator it=fileMap.begin(); it!=fileMap.end(); ++it) {
     std::cout << (*it).first << " => " << (*it).second.Data() << '\n';

@@ -349,7 +349,7 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 }
 #endif /* __CINT__ */
 //________________________________________________________________________________
-void bichselG10(const Char_t *type="z", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
+void bichselG10(const Char_t *type="zN", Int_t Nhyps = 9, Bool_t rigidity = kFALSE) {
   fgRigidity = rigidity;
   if (gClassTable->GetID("StBichsel") < 0) {
     gSystem->Load("libTable");
