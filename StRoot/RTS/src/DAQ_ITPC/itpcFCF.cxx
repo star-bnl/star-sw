@@ -1403,7 +1403,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 
 #ifdef DO_DBG1
-		printf("...bytes %d vs %d\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
+		printf("...bytes %lu vs %lu\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
 #endif
 		memset(smooth_dta,0,dt_2*(dp+2)*sizeof(short)*2) ;	// clear both storages which is why there's a 2
 

@@ -35,7 +35,7 @@ public:
 	int rdo_scan(char *c_addr, int words) ;
 	int from22to23(char *dta, int words) ;
 	u_int get_token_s(char *c_addr, int words) ;
-	inline void set_rdo(int s, int r) ;
+	void set_rdo(int s, int r) ;  
 
 	int init(daq_dta *gain) ;
 
