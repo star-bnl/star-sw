@@ -4,10 +4,11 @@ if ($#ARGV < 0) {
   exit;
 }
 my $debug = 0;
-my $run1 = $ARGV[0];
-my $run2 = $run1;
+my $run1 = $ARGV[0]; $run1 =~ s/,//;
+my $run2 = $run1; 
 if ($#ARGV  == 1) {$run2 = $ARGV[1];}
 if ($#ARGV  == 2) {$run2 = $ARGV[2];}
+$run2 =~ s/,//;
 my @cmds = ("mysql -h robinson.star.bnl.gov --port=3306 -u \"fisyak\" RunLog_onl  -e 'select runNumber,DATE(beginTime)+0,TIME(beginTime)+0 from starMagOnl where runNumber >= $run1 limit 2';",
              "mysql -h robinson.star.bnl.gov --port=3306 -u \"fisyak\" RunLog_onl  -e 'select runNumber,DATE(beginTime)+0,TIME(beginTime)+0 from starMagOnl where runNumber >= $run2 limit 2';");
 #my $flag = system($cmd);

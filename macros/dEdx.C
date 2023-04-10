@@ -72,6 +72,7 @@ void dEdx(Int_t First, Int_t Last,
   } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";
   } else                            { Chain += ",CorrX"; // ,analysis to add OPr40 for <= 2018
   }
+  //  if (Year == "y2021" || year == "y2022") Chain += ",USE_GAIN_FROM_FILE";
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   Bool_t tfgV = kFALSE;
   if (STAR_VERSION.BeginsWith("TFG") && ! STAR_VERSION.Contains("Export") || STAR_VERSION.Contains("DEV2")) {

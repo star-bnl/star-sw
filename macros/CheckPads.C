@@ -1,41 +1,3 @@
-//   root.exe D/*/*20057003*.root 'CheckPads.C+(1)'
-//foreach f ( `ls -1d   */2*.root` ) 
-/*
-    set b = `basename ${f} .root`; 
-    set c = `echo ${b} | sed -e 's/hlt_//'`;
-    echo "${c}"
-    if (-r ${c}.list) continue;
-    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
-end
-  grep Dead 2*.list | awk -F\{ '{print "{"$2}' | tee DeadFEE2.list
-  sort DeadFEE2.list | tee  DeadFEE.listSorted
-  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
-  sort DeadFeeRuns | tee DeadFeeRuns.sorted
-  grep Alive 2*.list | awk -F\{ '{print "{"$2}' | tee AliveFEE2.list
-  sort AliveFEE2.list | tee  AliveFEE.sorted
-  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
-  sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
-*/
-//foreach f ( `ls -1d   */2*.root | awk -F_ '{print $1"_"$2}' | sort -u `)
-/*
-    set c = `basename ${f}`
-    echo "${c}"
-    if (-r ${c}.list) continue;
-    root.exe -q -b ${f}*.root CheckPads.C+ >& ${c}.list
-end
-  grep Dead *.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
-  sort DeadFEE2.list | tee  DeadFEE.listSorted
-  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
-  sort DeadFeeRuns | tee DeadFeeRuns.sorted
-
-  grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.sorted
-  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
-  sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
-*/
-//________________________________________________________________________________
 /*
 foreach d (`ls -1d *GeV*`)
   cd ${d}
@@ -43,10 +5,13 @@ foreach d (`ls -1d *GeV*`)
   cd -
   echo "${list}"
   foreach f (${list})
+    if (-r ${f}.list) continue;
     echo "${f}"
     root.exe -q -b ${d}/*${f}*.root CheckPads.C+ >& ${f}.list
   end
 end
+  mkdir empty
+  mv `grep 'Pvxyz entries' 2*.list | awk '{if ($4 < 2000) print $0}' | awk -F: '{print $1}'` empty
   grep Dead 2*.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
   sort -u DeadFEE2.list | tee  DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
@@ -56,7 +21,7 @@ end
   sort -u AliveFEE2.list | tee AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
+  cat *Runs.sorted | sort -u | tee DeadOrAlived_Runs_XIX_XXII.sorted
 */
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -348,6 +313,20 @@ Int_t FEE(Int_t row, Int_t pad, Int_t &rdo) {
   return fee;
 }
 //________________________________________________________________________________
+void Row4FEE(Int_t fee) {
+  for (Int_t i = 0; i < NC; i++) {
+    if (fee != rowpadFEE[i].fee) continue;  
+    cout << Form("%3i. %3i, %3i, %1i, %3i", rowpadFEE[i].row, rowpadFEE[i].padMin, rowpadFEE[i].padMax, rowpadFEE[i].rdo, fee) << endl;
+  }
+}
+//________________________________________________________________________________
+void Row4RDO(Int_t rdo) {
+  for (Int_t i = 0; i < NC; i++) {
+    if (rdo != rowpadFEE[i].rdo) continue;  
+    cout << Form("%3i. %3i, %3i, %1i, %3i", rowpadFEE[i].row, rowpadFEE[i].padMin, rowpadFEE[i].padMax, rowpadFEE[i].rdo,  rowpadFEE[i].fee) << endl;
+  }
+}
+//________________________________________________________________________________
 void PrintPads(TString Dead, Int_t r, Int_t p1d, Int_t p2d, Int_t rdoG, Int_t feeG, TString RunC) {
   //  r = p1d = p2d = -1;
   cout << Dead.Data() << Form(",%3i,%3i,%3i,%2i,%3i}", r, p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
@@ -364,34 +343,42 @@ void CheckPads(Int_t sector = 0) {
     130,132,134,136,138,138,140,142,144,144,
     144,144};
   // Merge files if any
-  TH3F *AlivePads = (TH3F *) gDirectory->Get("AlivePads");
-  if (! AlivePads) {cout << "AlivePads is missing" << endl; return;}
-  TProfile3D *ActivePads = (TProfile3D *) gDirectory->Get("ActivePads");
-  if (! ActivePads) {cout << "ActivePads is missing" << endl; return;}
-  TH3F *PVxyz = (TH3F *) gDirectory->Get("PVxyz");
-  if (! PVxyz) {cout << "Pvxyz is missing" << endl; return;}
+  TH3F *AlivePads = 0;
+  TProfile3D *ActivePads = 0;
+  TH3F *PVxyz = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   Int_t nn = files->GetSize();
   if (nn > 1) {
     cout << "Merge " << nn << " files" << endl;
-    TDirectory *savedir = gDirectory;
-    TFile *f = 0;
-    Int_t i = 0; 
-    TIter next(files);
-    while ( (f = (TFile *) next()) ) { 
-      i++;
-      if (i == nn) break;
-      TH3F *alivePads = (TH3F *) f->Get("AlivePads");
-      if (alivePads) AlivePads->Add(alivePads);
-      TH3F *pvxyz = (TH3F *) f->Get("PVxyz");
-      if (pvxyz) PVxyz->Add(pvxyz);
-      TProfile3D *activePads = (TProfile3D *) f->Get("ActivePads");
-      if (activePads) ActivePads->Add(activePads);
+  }
+  TDirectory *savedir = gDirectory;
+  TFile *f = 0;
+  Int_t i = 0; 
+  TIter next(files);
+  while ( (f = (TFile *) next()) ) { 
+    i++;
+    TH3F       *alivePads  = (TH3F *) f->Get("AlivePads");
+    TProfile3D *activePads = (TProfile3D *) f->Get("ActivePads");
+    TH3F       *pvxyz      = (TH3F *) f->Get("PVxyz");
+    if (alivePads) {
+      if (! AlivePads) AlivePads = alivePads;
+      else             AlivePads->Add(alivePads);
+    }
+    if (activePads) {
+      if (! ActivePads) ActivePads = activePads;
+      else              ActivePads->Add(activePads);
+    }
+    if (pvxyz) {
+      if (! PVxyz) PVxyz = pvxyz;
+      else         PVxyz->Add(pvxyz);
     }
   }
+  if (! AlivePads)  { cout << "AlivePads is missing" << endl; return;}
+  if (! ActivePads) { cout << "ActivePads is missing" << endl; return;}
+  if (! PVxyz)      { cout << "PVxyz is missing" << endl; return;}
   Double_t entries = PVxyz->GetEntries();
   cout << "Pvxyz entries = " << entries <<   endl; 
-  if (entries < 100) return;
+  if (entries < 2000) return;
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
   Dir.ReplaceAll("hlt_","");
   Int_t index = Dir.Index("_");

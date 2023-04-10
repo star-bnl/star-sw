@@ -197,6 +197,13 @@ void isRdosOn(UInt_t sec=1,  UInt_t MASK=65535) {
     cout << "rdo " << rdo << " is " << isRdoOn(sec, rdo, MASK) << endl;
 }
 //________________________________________________________________________________
+UInt_t SwitchOffRDO(UInt_t MASK=65535, UInt_t sec = 1, Int_t rdo1 = 1, Int_t rdo2 = -1) {
+  UInt_t mask = MASK;
+  if (rdo1 > 0) mask &= ~(1 << (8*((sec-1)%2) + rdo1 - 1));
+  if (rdo2 > 0) mask &= ~(1 << (8*((sec-1)%2) + rdo2 - 1));
+  return mask;
+}
+//________________________________________________________________________________
 Double_t xPad(Double_t pad, Int_t row) {
   Int_t nPads[72] = { //J.Thomas, 05/31/2016
     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,

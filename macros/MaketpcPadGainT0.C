@@ -623,37 +623,4 @@ MySQL [Calibrations_tpc]>  select entryTime,beginTime,flavor,deactive,run from t
 | 2021-12-13 15:30:14 | 2021-12-13 15:25:01 | ofl    |        0 | 1107731 |
 +---------------------+---------------------+--------+----------+---------+
 36 rows in set, 1 warning (0.00 sec)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 */

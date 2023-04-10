@@ -9,10 +9,19 @@ my $pwd = cwd();
 #my $glob = "/net/l401/data/scratch1/daq/2020/" . $Trigger . "/st_physics_adc*.daq";  print "glob = $glob\n" if ($debug);
 #my $glob = "/net/l401/data/scratch1/fisyak/Tpc/TpcRS/" . $Trigger . "/st_physics_adc*.MuDst.root";  print "glob = $glob\n" if ($debug);
 my $locdir  = File::Basename::basename($pwd);
-# File::Basename::basename($pwd); $Trigger =~ s/TpcRS_//; $Trigger =~ s/\..*$//;print "Trigger = $Trigger\n" if ($debug);
-my ($dum,$Trigger) =  split '_', $locdir; print "Trigger = $Trigger\n" if ($debug);
+$locdir =~ s/TpcRS_//; print "locdir = $locdir\n" if ($debug);
+my $glob = "";
+if (-d "../" . $locdir) {$glob = "../" . $locdir . "/*.MuDst.root"; print "glob = $glob\n" if ($debug);}
+else {
+  # File::Basename::basename($pwd); $Trigger =~ s/TpcRS_//; $Trigger =~ s/\..*$//;print "Trigger = $Trigger\n" if ($debug);
+  my ($Trigger,$dum,$dum2,$dum3,$dum4,$dum5) =  split '_', $locdir; print "Trigger = $Trigger\n" if ($debug);
+  if    ($dum5) {$Trigger .= "_" . $dum . "_" . $dum2 . "_" . $dum3 ;}
+  if    ($dum4) {$Trigger .= "_" . $dum . "_" . $dum2 . "_" . $dum3;}
+  elsif ($dum3) {$Trigger .= "_" . $dum . "_" . $dum2;}
+  elsif ($dum2) {$Trigger .= "_" .  dum;}
+  $glob = "../" . $Trigger . "/*.MuDst.root"; print "glob = $glob\n" if ($debug);
+}
 my $fNo = 0;
-my $glob = "../" . $Trigger . "/*.MuDst.root"; print "glob = $glob\n" if ($debug);
 #my @globs = glob $glob; print "globs = @globs\n" if ($debug);
 my $GlobL = "Glob.log";
 if (! -r $GlobL) {

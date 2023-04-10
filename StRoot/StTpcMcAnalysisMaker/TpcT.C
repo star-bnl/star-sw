@@ -226,6 +226,19 @@ void SetInnerPadrows() {
   if (! mPadResponseFunctionOuter)  mPadResponseFunctionOuter = (TF1 *) gDirectory->Get("PadResponseFunctionOuter_01");
   if (! mShaperResponseInner)       mShaperResponseInner      = (TF1 *) gDirectory->Get("ShaperFunc_I_S01");
   if (! mShaperResponseOuter)       mShaperResponseOuter      = (TF1 *) gDirectory->Get("ShaperFunc_O_S01");
+  if (! mShaperResponseOuter) {
+    TSeqCollection *files = gROOT->GetListOfFiles();
+    TIter next(files);
+    TFile *f = 0;
+    while ( (f = (TFile *) next()) ) { 
+      if (! mChargeFractionInner )      mChargeFractionInner      = (TF1 *) f->Get("ChargeFractionInner_01");
+      if (! mChargeFractionOuter )      mChargeFractionOuter      = (TF1 *) f->Get("ChargeFractionOuter_01");
+      if (! mPadResponseFunctionInner)  mPadResponseFunctionInner = (TF1 *) f->Get("PadResponseFunctionInner_01");
+      if (! mPadResponseFunctionOuter)  mPadResponseFunctionOuter = (TF1 *) f->Get("PadResponseFunctionOuter_01");
+      if (! mShaperResponseInner)       mShaperResponseInner      = (TF1 *) f->Get("ShaperFunc_I_S01");
+      if (! mShaperResponseOuter)       mShaperResponseOuter      = (TF1 *) f->Get("ShaperFunc_O_S01");
+    }
+  }
   if (NoInnerRows > 0) return;
   TH3 *h3 = (TH3 *) gDirectory->Get("SecRow3");
   if (! h3) {
@@ -3470,6 +3483,7 @@ void Fits(const Char_t *opt="Rc", Int_t tp = -1) {
   //  const Char_t *PadTimeFitOptions[2] = {"ConvNoise","NoiseConv"};
   //  const Char_t *PadTimeFitOptions[2] = {"ConvFWHM","Conv"};
   //  const Char_t *PadTimeFitOptions[2] = {"ConvFWHM","ConvNoise"};
+  SetInnerPadrows();
   const Char_t *X[2]                 = {"","X"};
   Int_t ip1 = 0;
   Int_t ip2 = 1;
@@ -4907,9 +4921,13 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     new TH2D("DI","time bucket difference for Inner sector versus tanL",200,-2,2,800,-2,2),
     new TH2D("DO","time bucket difference for Outer sector versus tanL",200,-2,2,800,-2,2)
   };
-  TH2D *B[2] = {
-    new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets",50,0.5,50.5,800,-2,2),
-    new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets",50,0.5,50.5,800,-2,2)
+  TH2D *B[3][2] = {
+    {new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets (tpcTimeBucketCor)",50,0.5,50.5,800,-2,2),
+     new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets (tpcTimeBucketCor)",50,0.5,50.5,800,-2,2)},
+    {new TH2D("BIW","time bucket difference for Inner sector versus no. of time buckets (tpcTimeBucketCor) Z > 0",50,0.5,50.5,800,-2,2),
+     new TH2D("BOW","time bucket difference for Outer sector versus no. of time buckets (tpcTimeBucketCor) Z > 0",50,0.5,50.5,800,-2,2)},
+    {new TH2D("BIE","time bucket difference for Inner sector versus no. of time buckets (tpcTimeBucketCor) Z < 0",50,0.5,50.5,800,-2,2),
+     new TH2D("BOE","time bucket difference for Outer sector versus no. of time buckets (tpcTimeBucketCor) Z < 0",50,0.5,50.5,800,-2,2)},
   };
   TH2D *Z[2] = {
     new TH2D("ZI","Z difference for Inner sector versus Z",210,-210,210,800,-2,2),
@@ -4981,7 +4999,10 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
       TR->Fill(row,dT);
       ZR->Fill(row,dZ);
       Int_t ntbk = fRcHit_mMaxtmbk[l] + fRcHit_mMintmbk[l] + 1;
-      B[io]->Fill(ntbk,dT);
+      B[0][io]->Fill(ntbk,dT);
+      Int_t side = 1;
+      if (fMcHit_mPosition_mX3[k] < 0) side = 2;
+      B[side][io]->Fill(ntbk,dT);
       Double_t pT = TMath::Sqrt(fMcHit_mLocalMomentum_mX1[k]*fMcHit_mLocalMomentum_mX1[k] + fMcHit_mLocalMomentum_mX2[k]*fMcHit_mLocalMomentum_mX2[k]);
       if (pT < 0.1) continue;
       Double_t tanL = fMcHit_mLocalMomentum_mX3[k]/pT;
