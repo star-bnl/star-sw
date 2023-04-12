@@ -7,7 +7,7 @@
 ##############################################
 ############   BEFORE YOU RUN   ##############
 ##############################################
-1. Saved the run-by-run information with TProfile in a root file. The x-axis should be the run-number/run-index. (See "qahist.root" as an example.)
+1. Saved the run-by-run information with TProfile in a root file. The x-axis should be the run-number/run-index. To do a test run with an example root file, please copy/download the root file from rcf. /star/u/huyu/Downloads/rbr_package_v2/qahist.root 
 2. Prepare the variable name you want to check in file, each variable take one line. (See the "QA_variable.list" as an example)
 3. Install the python3 and related pacage (see INSTALLATION section)
 
