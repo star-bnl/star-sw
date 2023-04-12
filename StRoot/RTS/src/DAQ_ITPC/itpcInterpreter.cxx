@@ -840,7 +840,7 @@ int itpcInterpreter::sampa_ch_scan()
 
 		int t_stop = t_start + t_cou - 1 ;
 
-//		LOG(TERR,"...%d %d %d",t_start,t_cou,t_stop) ;
+//		LOG(TERR,"DDD %d %d %d",t_start,t_cou,t_stop) ;
 
 		if(t_start <= t_stop_last) {
                         LOG(ERR,"%d: t_start %d, t_cou %d, t_stop %d, t_stop_last %d",rdo_id,t_start,t_cou,t_stop,t_stop_last) ;
