@@ -1392,7 +1392,9 @@ Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {
     return Mask;
   }
   if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
-  UInt_t MASK = getSectorMask(sector);
+  tpcRDOMasks_st *row = Struct((sector-1)/2);
+  assert(row->sector != 2*((sector-1)/2) + 1);
+  UInt_t MASK = row->mask;
   MASK = MASK >> (rdo - 1);
   MASK &= 0x00000001;
   Sector = sector;
@@ -1403,8 +1405,9 @@ Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {
 //________________________________________________________________________________
 void St_tpcRDOMasksC::setSectorRDOMaskOff(UInt_t sector,Int_t rdo)  {    
   if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return;
-  UInt_t &MASK = mask(sector);
-  MASK &= ~(1 << (8*((sector-1)%2) + rdo - 1));
+  tpcRDOMasks_st *row = Struct((sector-1)/2);
+  assert(row->sector != 2*((sector-1)/2) + 1);
+  row->mask &= ~(1 << (8*((sector-1)%2) + rdo - 1));
 }
 //________________________________________________________________________________
 #include "St_tpcExtraGainCorrectionC.h"
