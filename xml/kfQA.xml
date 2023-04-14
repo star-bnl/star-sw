@@ -9,7 +9,7 @@
   if (-r ${output}) exit 0;
 # if (-r ${log}) exit 0;
   ln -s ~/macros/.sl* .
-  root.exe -q -b lBichsel.C dEdxFit.C+  'kfQA.C+("'${input}'","'${output}'")'  &gt;&amp; ${log}
+  root.exe -q -b lBichsel.C dEdxFit.C+  'kfQA.C+('${input}',"'${output}'")'  &gt;&amp; ${log}
         </command>
     <ResourceUsage>
       <Priority>99</Priority>

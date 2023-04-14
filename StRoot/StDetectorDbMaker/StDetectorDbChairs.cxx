@@ -1334,7 +1334,48 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 }
 //________________________________________________________________________________
 #include "St_tpcRDOMasksC.h"
-MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
+//MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
+ClassImp(St_tpcRDOMasksC);
+St_tpcRDOMasksC *St_tpcRDOMasksC::fgInstance = 0;
+St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
+  if (fgInstance) return fgInstance;					
+  St_tpcRDOMasks *table = (St_tpcRDOMasks *) StMaker::GetChain()->GetDataBase("RunLog/onl/tpcRDOMasks");
+  if (! table) {							
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks was not found" << endm;
+    assert(table);							
+    assert(table->GetNRows() == 12);
+  }									
+  DEBUGTABLE(tpcRDOMasks);							
+  // Take care about unsorted tpcRDOMaks table
+  Bool_t needReorder = kFALSE;
+  tpcRDOMasks_st *row = table->GetTable();
+  for (Int_t i = 0; i < 12; i++) {
+    if ((row+i)->sector == 2*i + 1) continue;
+    needReorder = kTRUE;
+    break;
+  }
+  if (needReorder) {
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has to be reordered" << endm;
+    tpcRDOMasks_st rows[12];
+    for (Int_t i = 0; i < 12; i++) {
+      if ((row+i)->sector == 2*i + 1) {
+	rows[i] = *(row+i);
+      } else {
+	Int_t j = ((row+i)->sector-1)/2;
+	if (rows[j].sector != 0) {
+          LOG_ERROR << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has duplicated rows\t" << i << "\tand " << j <<  endm;
+	}
+	rows[j] =  *(row+i);
+      }
+    }
+    for (Int_t i = 0; i < 12; i++) {
+      table->AddAt(&rows[i],i);
+    }
+    DEBUGTABLE(tpcRDOMasks);							
+  }
+  fgInstance = new St_tpcRDOMasksC(table);				
+  return fgInstance;							
+}
 //________________________________________________________________________________
 UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   static UInt_t Sector = 0;
@@ -1351,16 +1392,7 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   }
   //  tpcRDOMasks_st *row = Struct();
   // Take care about unsorted tpcRDOMaks table
-  Int_t i = -1;
-  UInt_t j = (sec + 1) / 2 - 1;
-  if (sector(j) == 2*j + 1) {
-    i = j;
-  } else { 
-    for (i = 0; i < 12; i++) {
-      if (sector(i) == 2*j + 1) {break;}
-    }
-  }
-  assert(i >= 0);
+  Int_t i = ((sec+1)/2) - 1;
   //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
   if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC

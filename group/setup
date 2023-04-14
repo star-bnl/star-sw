@@ -100,21 +100,30 @@ switch ($pkg)
     case "cvmfs":
     case "afs":
       if ($?STAR_LEVEL) setenv LEVEL_STAR ${STAR_LEVEL}
-      unsetenv AFS_RHIC      unsetenv STAR*
-      if ($?STAR)       unsetenv ROOT*
-      if ($?GROUP_DIR)   unsetenv GROUP*
-      unsetenv STAF*
-      unsetenv CINTSYSDIR
-      unsetenv IVROOT
-      unsetenv *optstar
-      unsetenv *OPTSTAR
-      if ($?QTDIR) unsetenv QTDIR
-      unsetenv SITE
-      unsetenv *DEBUG
-      unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
-      unsetenv star*
-      unsetnev CERN* CLHEP*
-      unsetenv ROOT*
+      unsetenv AFS_RHIC      ; if ($?DECHO) echo "unsetenv AFS_RHIC"
+      unsetenv STAR*         ; if ($?DECHO) echo "unsetenv STAR*"
+      unsetenv ROOT*         ; if ($?DECHO) echo "unsetenv ROOT*"
+      if ($?GROUP_DIR) then
+        unsetenv GROUP*      ; if ($?DECHO) echo "unsetenv GROUP*"
+      endif
+      unsetenv STAF*         ; if ($?DECHO) echo "unsetenv STAF*"
+      unsetenv CINTSYSDIR    ; if ($?DECHO) echo "unsetenv CINTSYSDIR"
+      unsetenv IVROOT        ; if ($?DECHO) echo "unsetenv IVROOT"
+      unsetenv *optstar      ; if ($?DECHO) echo "unsetenv *optstar"
+      unsetenv *OPTSTAR      ; if ($?DECHO) echo "unsetenv *OPTSTAR"
+      if ($?QTDIR) then
+        unsetenv QTDIR       ; if ($?DECHO) echo "unsetenv QTDIR"
+      endif
+      unsetenv SITE          ; if ($?DECHO) echo "unsetenv SITE"
+      unsetenv *DEBUG        ; if ($?DECHO) echo "unsetenv *DEBUG"
+#     unsetenv XROOTDSYS XrdSecPWDALOGFILE XrdSecPWDSRVPUK
+      unsetenv star*         ; if ($?DECHO) echo "unsetenv star*"
+      if ($?CERN_ROOT) then 
+        unsetenv CERN*       ; if ($?DECHO) echo "unsetenv CERN*"
+      endif
+      if ($?CLHEP_ROOT) then
+        unsetenv CLHEP*        ; if ($?DECHO) echo "unsetenv CLHEP*"
+      endif
       if ($?LEVEL_STAR) setenv STAR_LEVEL ${LEVEL_STAR}
       if ( $pkg == "cvmfs") then
 	 setenv    USE_CVMFS 1
@@ -125,10 +134,15 @@ switch ($pkg)
          endif
       else
 	 unsetenv  USE_CVMFS
-	 setenv AFS_RHIC  /afs/rhic.bnl.gov/star
          if ($?TFG_STAR) then	 
-	   if (-d  /net/l402/data/fisyak/STAR)              setenv AFS_RHIC /net/l402/data/fisyak/STAR 
-	   else if (-d /gpfs01/star/subsys-tpc/fisyak/STAR) setenv setenv AFS_RHIC  /gpfs01/star/subsys-tpc/fisyak/STAR
+	   if (-d  /net/l402/data/fisyak/STAR) then 
+             setenv AFS_RHIC /net/l402/data/fisyak/STAR 
+	   else 
+	    if (-d /gpfs01/star/subsys-tpc/fisyak/STAR) then
+              setenv AFS_RHIC  /gpfs01/star/subsys-tpc/fisyak/STAR
+            else 
+              setenv AFS_RHIC  /afs/rhic.bnl.gov/star
+           endif
          endif
       endif
       if (-d ${AFS_RHIC}/packages/.DEV2/group) then 

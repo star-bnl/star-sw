@@ -62,8 +62,8 @@ class Hist_t {
 public:											
   Hist_t (const Char_t *name = "", const Char_t *path = "", const Int_t Opt = 0, Int_t P = -1) : Name((Char_t *) name), Path(path), opt(Opt), p(P) {}
   //  virtual ~Hist_t() {}								
-        Char_t *Name; 
-  const Char_t *Path;
+  TString      Name; 
+  TString      Path;
   const Int_t   opt; // 1 - mean, 2 - RMS, 4 - mu, 8 - sigma, 16 - sg10, 32 - sg100, 64 - muGP, 128 - sigmaGP, 256 - M, 512 - Gamma, 1024 - Significance, 2048 - PerEvent
   Int_t         p;   //  
   void SetName(const Char_t *name) {Name = (Char_t *) name;}
@@ -97,26 +97,28 @@ static Hist_t Histos[] = {
   Hist_t("M2","/Tracks/K+/hTofPID",64+128, -1),
   Hist_t("M2","/Tracks/p/hTofPID",64+128, -1),
   Hist_t("M2","/Tracks/p-/hTofPID",64+128, -1),
-  Hist_t("Mass","/Particles/KFParticlesFinder/Particles/Ks/Parameters/M",256+512+1024+2048, -1)
+  Hist_t("Mass","/Particles/KFParticlesFinder/Particles/Ks/Parameters/M",256+512+1024+2048, -1),
+  Hist_t("Mass1GeV","/Particles/KFParticlesFinder/Particles/Ks/Parameters/y-#phi-M",256+512+1024+2048, -1)
   
 }; 
 const Int_t NoHists = sizeof(Histos)/sizeof(Hist_t); 
 //________________________________________________________________________________
 TString InitVars() {
   cout << " NoHists " << NoHists << endl;
-  TString Tuple("Run:run:no:events");
-  Int_t p = 4;
+  TString Tuple("Run/I:run/I:no/I:events");
+  Int_t p = 0;
   for (Int_t i = 0; i < NoHists; i++) {
-    TString NameB(Histos[i].Path);
+    TString NameB = Histos[i].Path;
     NameB.ReplaceAll("/Particles/KFParticlesFinder/PrimaryVertexQA/","");
     NameB.ReplaceAll("/Tracks/","");
     NameB.ReplaceAll("/Particles/KFParticlesFinder/Particles/","");
     NameB.ReplaceAll("Parameters/","");
+    NameB.ReplaceAll("/y-#phi-M","1GeV");
     NameB.ReplaceAll("+","P");
     NameB.ReplaceAll("-","N");
     NameB.ReplaceAll("/","_");
     NameB.ReplaceAll("_M","");
-    Histos[i].SetName(NameB);
+    Histos[i].Name = NameB;
     Histos[i].p = p;
     cout << i << "\t" << Histos[i].Name << "\t" << Histos[i].Path << "\topt = " << Histos[i].opt << "\tp = " << Histos[i].p << endl;
     for (Int_t j = 0; j < NTVar; j++) {
@@ -207,8 +209,8 @@ TDirectory *Merge(Int_t run) {
   return new TFile(tfile);
 }
 //________________________________________________________________________________
-void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
-  TDirectory *myDir = Merge(run);
+void kfQA(Int_t Run = 22141041, const Char_t *Out = 0){
+  TDirectory *myDir = Merge(Run);
   if (! myDir) return;
   TString OutFile;
   if (!Out) OutFile = "kfQAN.root";
@@ -218,7 +220,6 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
   TNtuple *QA = new TNtuple("QA","Summary of PicoDst per Run",Tuple.Data()); 
   Int_t cachesize = 10000000; //this is the default value: 10 MBytes
   QA->SetCacheSize(cachesize);
-  Int_t Run = 0;
   Int_t nFile = 0;
   TString title;
   TF1 *gaus = 0;
@@ -228,17 +229,23 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
   TH1 *proj = 0;
   TH2 *h2 = 0;
   Int_t no = 0;
-  Int_t noRuns = 0;
   //  TDirIter Dir(files);
   //  const Char_t *file = Dir.NextFile();
   myDir->cd();
   no++;
-  Run = run%1000000;
-  Float_t params[100] = {0};
-  params[0] = run;
-  params[1] = Run;
-  params[2] = no;
-  Int_t p = 4;
+  struct BP_t {
+    Int_t Run;
+    Int_t run;
+    Int_t no;
+    Float_t events;
+    Float_t params[100];
+  };
+  BP_t BP;
+  memset (&BP.Run, 0, sizeof(BP_t));
+  BP.Run = Run;
+  BP.run = Run%1000000;
+  BP.no = no;
+  Int_t p = 0;
   for (Int_t i = 0; i < NoHists; i++) { // loop over histograms
     TH1F *hist = (TH1F *) myDir->Get(Histos[i].Path);
     if (! hist) continue;
@@ -246,29 +253,29 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
     Double_t binWidth;
     Double_t S;
     if (i == 0) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
-      params[3] = hist->GetEntries();
-      if (params[3] < 100) break;;
+      BP.events = hist->GetEntries();
+      if (BP.events < 100) break;;
     }
     p = Histos[i].p;
     for (Int_t j = 0; j < NTVar; j++) { // loop over variables
       if ((1 << j) &  Histos[i].opt) {
-	params[p] = 0;
-	params[p+1] = 0;
+	BP.params[p] = 0;
+	BP.params[p+1] = 0;
 	if (hist && hist->GetEntries() > 0) {
 	  switch (j+1) {
 	  case 1: // mean
-	    params[p] = hist->GetMean(); 
+	    BP.params[p] = hist->GetMean(); 
 	    break;
 	  case 2: // RMS
-	    params[p] = hist->GetRMS();
+	    BP.params[p] = hist->GetRMS();
 	    break;
 	  case 3: // mu
 	  case 4: // sigma
 	    hist->Fit("gaus");
 	    gaus = (TF1 *) hist->GetListOfFunctions()->FindObject("gaus");
 	    if (gaus) {
-	      params[p] = gaus->GetParameter(1);
-	      params[++p] = gaus->GetParameter(2);
+	      BP.params[p] = gaus->GetParameter(1);
+	      BP.params[++p] = gaus->GetParameter(2);
 #ifdef __DRAW__
 	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
 	      hist->Draw();
@@ -290,8 +297,8 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
 	      mu->Fit("pol4");
 	      pol4 = (TF1 *) mu->GetListOfFunctions()->FindObject("pol4");
 	      if (pol4) {
-		params[p] = pol4->Eval(1);
-		params[++p] = pol4->Eval(2);
+		BP.params[p] = pol4->Eval(1);
+		BP.params[++p] = pol4->Eval(2);
 	      } else {
 		++p;
 	      }
@@ -310,9 +317,9 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
 	      proj->Draw();
 	      c->Update();
 #endif
-	      params[p] = gp->GetParameter(1);
+	      BP.params[p] = gp->GetParameter(1);
 	      p++;
-	      params[p] = gp->GetParameter(2);
+	      BP.params[p] = gp->GetParameter(2);
 	    }
 	    delete proj;
 	    j++;
@@ -321,19 +328,26 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
 	  case 10: // Gamma
 	  case 11 : // Significance
 	  case 12 : // PerEvent
-	    BW = K0BW(hist);
+	    if (Histos[i].Name == "Ks1GeV") {
+	      //	      BW = brtw();
+	      TH3F *h3 = (TH3F *) hist;
+	      TH1D *h1 = (TH1D *) h3->Project3D("z");
+	      BW = K0BW(h1->GetName());
+	    } else {
+	      BW = K0BW(hist);
+	    }
 	    if (BW) {
-	      params[p]   = BW->GetParameter(1);
+	      BP.params[p]   = BW->GetParameter(1);
 	      p++;
-	      params[p] = BW->GetParameter(2);
+	      BP.params[p] = BW->GetParameter(2);
 	      p++;
-	      params[p] = BRTW::Significance;
+	      BP.params[p] = BRTW::Significance;
 #if 0
 	      binWidth = BRTW::binWidth; // hist->GetBinWidth(1);
-	      S = BW->Integral(params[p]-3*params[p+1],params[p]+3*params[p+1])/binWidth;
+	      S = BW->Integral(BP.params[p]-3*BP.params[p+1],BP.params[p]+3*BP.params[p+1])/binWidth;
 #endif
 	      p++;
-	      params[p] = BRTW::SperE;
+	      BP.params[p] = BRTW::SperE;
 	      j += 3;
 #ifdef __DRAW__
 	      TCanvas *c = new TCanvas(Histos[i].Path,Histos[i].Path);
@@ -350,7 +364,7 @@ void kfQA(Int_t run = 22141041, const Char_t *Out = 0){
       }
     }
   }
-  QA->Fill(params);
+  QA->Fill((Float_t *) &BP.Run);
   fout->cd();
   QA->Write();
 }
