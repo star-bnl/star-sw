@@ -27,6 +27,10 @@ public:
 
 	static struct row_pad_t (*rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;     // max for both dets; all sectors
 
+	u_int tdbg[10] ;	// debugging counters, etc
+
+	u_char hdr_version ;
+
 private:
 
 	u_int *fee_scan() ;
