@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-
 class daqReader;
 
 #include <TH1I.h>
@@ -199,7 +198,6 @@ public:
 #ifdef __CINT__
 class VMMHardwareMap;
 #endif
-
 
 // DAQ RTS format for sTGC data
 class stgc_vmm_t;

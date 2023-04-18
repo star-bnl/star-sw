@@ -1108,6 +1108,15 @@
     },
     {
         "jobid": "124",
+        "descr": "2017 RHICf raw data to StEvent conversion",
+        "chopts": "in,Event,l0,trgd,ZDCvtx,EvOut,CMuDst,eemcDb,emcDY2,rhicfdat,pp2pp,tpcDb",
+        "inpfile": "st_rhicf_18178002_raw_1000004.daq",
+        "inppath": "/star/rcf/test/daq/2017/178/18178002",
+        "outpath": "",
+        "nevents": "100"
+    },
+    {
+        "jobid": "125",
         "descr": "2023 dataset",
         "chopts": "pp2022,StiCA,BEmcChkStat,epdhit,FwdTrack",
         "inpfile": "st_physics_23072022_raw_4000001.daq",

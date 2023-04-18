@@ -334,6 +334,7 @@ TLine* PeakWindow::GetStartLine(Double_t ymin, Double_t ymax)
   }
   return mStartLine;
 }
+
 Color_t PeakWindow::GetStartLineColor() const
 { if( mStartLine!=0 ){return mStartLine->GetLineColor(); } return 0; }
 Style_t PeakWindow::GetStartLineStyle() const
@@ -357,6 +358,7 @@ TMarker* PeakWindow::GetPeakMarker()
   }
   return mPeakMarker;
 }
+
 Color_t PeakWindow::GetPeakMarkerColor() const
 { if( mPeakMarker!=0 ){return mPeakMarker->GetMarkerColor(); } return 0; }
 Style_t PeakWindow::GetPeakMarkerStyle() const
@@ -388,6 +390,7 @@ TLine* PeakWindow::GetEndLine(Double_t ymin, Double_t ymax)
   }
   return mEndLine;
 }
+
 Color_t PeakWindow::GetEndLineColor() const
 { if( mEndLine!=0 ){ return mEndLine->GetLineColor(); } return 0; }
 Style_t PeakWindow::GetEndLineStyle() const

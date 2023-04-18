@@ -45,6 +45,7 @@
 #include "Jevp/StJevpBuilders/mtdBuilder.h"
 //#include "Jevp/StJevpBuilders/tpxBuilder.h"
 #include "Jevp/StJevpBuilders/tpcBuilder.h"
+#include "Jevp/StJevpBuilders/laserBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 //#include "Jevp/StJevpBuilders/fgtBuilder.h"
@@ -141,7 +142,9 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 	l4sourceline = l4BuilderSourceLine;
     }
     
+
     const char *line_builder = "";
+
     int plotSetLine = 0;
     int plotSetCallParam = 0;
     int builderLine = 0;
@@ -929,6 +932,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new mtdBuilder(this));
 	//builders.Add(new tpxBuilder(this));
 	builders.Add(new tpcBuilder(this));
+	builders.Add(new laserBuilder(this));
 	builders.Add(new trgBuilder(this));
 	builders.Add(new upcBuilder(this));
 	//builders.Add(new fgtBuilder(this));
@@ -1342,6 +1346,7 @@ void JevpServer::performStartRun()
     LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
 
     const char *servername = "JevpServer";
+
     if(isL4) {
 	servername = "L4JevpServer";
     }
@@ -1489,9 +1494,12 @@ void JevpServer::clearForNewRun()
 	CP;
 	LOG("JEFF", "Send startrun for: %s", curr->getPlotSetName());
 	CP;
+	pthread_mutex_lock(&imageWriter->mux);
 	CP_ENTER_BUILDER(curr);
 	curr->_startrun(rdr);
 	CP_LEAVE_BUILDER;
+	pthread_mutex_unlock(&imageWriter->mux);
+
 	CP;
     }
 
@@ -1823,16 +1831,20 @@ void JevpServer::writeRunPdf(int display, int run)
     if(pdfdir) {
 	RtsTimer_root ttt;
 	ttt.record_time();
+	CP;
 	pthread_mutex_lock(&imageWriter->mux);
 	double tttt =  ttt.record_time();
 	if(tttt > .1) {
 	    LOG("JEFF", "writePDF mux took %lf seconds", tttt);
 	}
+	CP;
 	pdfFileBuilder->writePdf(filename, 1);
+	CP;
 	pthread_mutex_unlock(&imageWriter->mux);
-	
+	CP;
     }
 
+    CP;
     t = pdfclock.record_time();
     LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
     CP;

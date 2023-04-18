@@ -60,6 +60,10 @@ class StMuEmcUtil;
 #include "StMuFmsCollection.h"
 class StMuFmsUtil;
 
+/// RHICf stuff
+#include "StMuRHICfCollection.h"
+class StMuRHICfUtil;
+
 /// fcs stuff
 #include "StMuFcsCollection.h"
 class StMuFcsUtil;
@@ -182,12 +186,13 @@ class StMuDstMaker : public StIOInterFace {
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp=9);
 
-  StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
-  StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
-  StMuFcsUtil* muFcsUtil() { return mFcsUtil; } ///< return pointer to StMuFcsUtil;
-  StMuFttUtil* muFttUtil() { return mFttUtil; } ///< return pointer to StMuFttUtil;
-  StMuFstUtil* muFstUtil() { return mFstUtil; } ///< return pointer to StMuFstUtil;
-  StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
+  StMuEmcUtil*   muEmcUtil()   { return mEmcUtil; }   ///< return pointer to StMuEmcUtil;
+  StMuFmsUtil*   muFmsUtil()   { return mFmsUtil; }   ///< return pointer to StMuFmsUtil;
+  StMuRHICfUtil* muRHICfUtil() { return mRHICfUtil; } ///< return pointer to StMuRHICfUtil;
+  StMuFcsUtil*   muFcsUtil()   { return mFcsUtil; }   ///< return pointer to StMuFcsUtil;
+  StMuFttUtil*   muFttUtil()   { return mFttUtil; }   ///< return pointer to StMuFttUtil;
+  StMuFstUtil*   muFstUtil()   { return mFstUtil; }   ///< return pointer to StMuFstUtil;
+  StMuPmdUtil*   muPmdUtil()   { return mPmdUtil; }   ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
@@ -201,6 +206,7 @@ protected:
   /// routine to set up connection between mEmcCollection and Emc arrays
   void connectEmcCollection();
   void connectFmsCollection();
+  void connectRHICfCollection();
   void connectFcsCollection();
   void connectFttCollection();
   void connectFstCollection();
@@ -225,6 +231,7 @@ protected:
   StTreeMaker* mTreeMaker;
   StMuEmcUtil* mEmcUtil;
   StMuFmsUtil* mFmsUtil;
+  StMuRHICfUtil* mRHICfUtil;
   StMuFcsUtil* mFcsUtil;
   StMuFttUtil* mFttUtil;
   StMuFstUtil* mFstUtil;
@@ -304,6 +311,7 @@ virtual   void closeRead();
   void fillEpd(StEvent* ev);    // MALisa
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
+  void fillRHICf(StEvent* ev);
   void fillFcs(StEvent* ev);
   void fillFtt(StEvent* ev);
   void fillFst(StEvent* ev);
@@ -374,6 +382,7 @@ virtual   void closeRead();
   TClonesArray** mMCArrays;//[__NMCARRAYS__];
   TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
   TClonesArray** mFmsArrays;    //[__NFMSARRAYS__    ];
+  TClonesArray** mRHICfArrays;  //[__NRHICFARRAYS__  ];
   TClonesArray** mFcsArrays;    //[__NFCSARRAYS__    ];
   TClonesArray** mFttArrays;    //[__NFTTARRAYS__    ];
   TClonesArray** mFstArrays;    //[__NFSTARRAYS__    ];
@@ -391,6 +400,7 @@ virtual   void closeRead();
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
   StMuEmcCollection *mEmcCollection;
   StMuFmsCollection *mFmsCollection;
+  StMuRHICfCollection *mRHICfCollection;
   StMuFcsCollection *mFcsCollection;
   StMuFttCollection *mFttCollection;
   StMuFstCollection *mFstCollection;

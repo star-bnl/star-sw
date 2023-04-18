@@ -20,11 +20,10 @@
            if (isys.eq.1) CALL g2r_get_sys('STGM','STGP',Iprin,Idigi)
            if (isys.eq.2) CALL g2r_get_sys('STGM','STGL',Iprin,Idigi)
            if (isys.eq.3) CALL g2r_get_sys('STGM','STGS',Iprin,Idigi)
-           IF (Iprin.lt.0) go to 99
 
-           
+           IF (Iprin.ge.0 ) THEN
 
-           Do While (G2R_GET_HIT('stg') .eq. 0)
+              Do While (G2R_GET_HIT('stg') .eq. 0)
 
                  i=i+1
                  g2t_fts_hit_h.nok            = i
@@ -49,7 +48,10 @@
                  g2t_track(trac).hit_fts_p    = i
                  g2t_track(trac).n_stg_hit    = g2t_track(trac).n_stg_hit + 1
 
-           enddo * G2R_GET_HIT
+              enddo * G2R_GET_HIT
+
+           ENDIF
+
       enddo * Isys
     
  99   RETURN
