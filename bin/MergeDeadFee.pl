@@ -18,9 +18,9 @@ my $tagOld = "";
 my $run1 = 0;
 my $run2 = 0;
 my $iold = 1;
-my $nrus = 0;
+my $nruns = 0;
 #my @Runs = glob "2*.list"; print "Found $#Runs files\n";
-my @Runs = `ls -1d 2*.list | sed -e 's/\.list//'`; ; print "Found $#Runs files\n";
+my @Runs = `ls -1d 2*.list | sed -e 's/\.list//'`; if ($debug) { print "Found $#Runs files\n";}
 my %RunIndex = ();
 my $index = 0;
 foreach my $run (@Runs) {
@@ -54,12 +54,12 @@ while ($line = <In>) {
     if ($run1 != 0) {
 #      print "$tagOld /* $run1 - $run2 */\n"; 
       print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns iold = $iold */\n"; 
-      $run1 = $run;
-      $run2 = $run;
-      $tagOld = $tag;
-      $iold = $RunIndex{$run}; if ($debug) {print "run = $run => iold = $iold\n";}
-      $nruns = 1;
-    }      
+    }
+    $run1 = $run;
+    $run2 = $run;
+    $tagOld = $tag;
+    $iold = $RunIndex{$run}; if ($debug) {print "run = $run => iold = $iold\n";}
+    $nruns = 1;
   } else {
     my $inew = $RunIndex{$run}; if ($debug)       {print "run = $run => iold = $iold inew = $inew nruns = $nruns\n";}
     if ($inew - $iold == 1) {
@@ -68,7 +68,7 @@ while ($line = <In>) {
       $run2 = $run;
       $tagOld = $tag;
       #    print "run1 = $run1, run2 = $run2, tagOld = $tagOld\n"
-     } else {
+    } else {
       print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns*/\n"; 
       $run1 = $run;
       $run2 = $run;
@@ -80,6 +80,6 @@ while ($line = <In>) {
 }
 #print "$tagOld /* $run1 - $run2 */\n"; 
 #      print " /* $run1 - $run2 */ $tagOld\n"; 
-if ($nruns > 0) {
+if ($nruns > 1) {
 print " /* $run1 - $run2 */ $tagOld /* $flag */\n"; 
 }

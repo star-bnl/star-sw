@@ -11,7 +11,7 @@ foreach d (`ls -1d *GeV*`)
   end
 end
   mkdir empty
-  mv `grep 'Pvxyz entries' 2*.list | awk '{if ($4 < 2000) print $0}' | awk -F: '{print $1}'` empty
+  mv `grep 'Pvxyz entries' 2*.list | awk '{if ($4 < 1000) print $0}' | awk -F: '{print $1}'` empty
   grep Dead 2*.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
   sort -u DeadFEE2.list | tee  DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
@@ -378,6 +378,7 @@ void CheckPads(Int_t sector = 0) {
   if (! PVxyz)      { cout << "PVxyz is missing" << endl; return;}
   Double_t entries = PVxyz->GetEntries();
   cout << "Pvxyz entries = " << entries <<   endl; 
+  //  if (entries < 20) return;
   if (entries < 2000) return;
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
   Dir.ReplaceAll("hlt_","");

@@ -1349,7 +1349,7 @@ St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
   // Take care about unsorted tpcRDOMaks table
   Bool_t needReorder = kFALSE;
   tpcRDOMasks_st *row = table->GetTable();
-  for (Int_t i = 0; i < 12; i++) {
+  for (UInt_t i = 0; i < 12; i++) {
     if ((row+i)->sector == 2*i + 1) continue;
     needReorder = kTRUE;
     break;
@@ -1357,7 +1357,7 @@ St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
   if (needReorder) {
     LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has to be reordered" << endm;
     tpcRDOMasks_st rows[12];
-    for (Int_t i = 0; i < 12; i++) {
+    for (UInt_t i = 0; i < 12; i++) {
       if ((row+i)->sector == 2*i + 1) {
 	rows[i] = *(row+i);
       } else {
@@ -1425,7 +1425,7 @@ Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {
   }
   if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
   tpcRDOMasks_st *row = Struct((sector-1)/2);
-  assert(row->sector != 2*((sector-1)/2) + 1);
+  assert(row->sector == (UInt_t) 2*((sector-1)/2) + 1);
   UInt_t MASK = row->mask;
   MASK = MASK >> (rdo - 1);
   MASK &= 0x00000001;
@@ -1438,7 +1438,7 @@ Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {
 void St_tpcRDOMasksC::setSectorRDOMaskOff(UInt_t sector,Int_t rdo)  {    
   if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return;
   tpcRDOMasks_st *row = Struct((sector-1)/2);
-  assert(row->sector != 2*((sector-1)/2) + 1);
+  assert(row->sector == 2*((sector-1)/2) + 1);
   row->mask &= ~(1 << (8*((sector-1)%2) + rdo - 1));
 }
 //________________________________________________________________________________
