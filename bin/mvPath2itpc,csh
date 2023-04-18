@@ -1,0 +1,9 @@
+#! /bin/csh -f
+if ($#argv != 2) then
+	echo "Usage : $0 time_stamp2 => time_stamp1"
+        exit;
+endif
+if (-r Path2itpcGain.$2.C) then
+  echo "$2 => $1"
+	mv Path2itpcGain.$2.C Path2itpcGain.$1.C
+endif
