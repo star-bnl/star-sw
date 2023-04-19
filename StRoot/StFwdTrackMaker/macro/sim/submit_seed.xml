@@ -1,0 +1,32 @@
+<job  name="FwdTracking"  simulateSubmission="false" maxFilesPerProcess="1" filesPerHour="1000" >
+
+    <!-- <input URL="catalog:star.bnl.gov?filetype=daq_reco_MuDst,storage=local" nFiles="1000" /> -->
+    <input URL="filelist:/star/u/jdb/work/star-fwd-integration/tests/pythia.lis" nFiles="1000"/>
+
+    <stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
+    <stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
+
+    <output fromScratch="seed*.root" toURL="file:/star/data03/pwg/jdb/scratch/" />
+
+    <command>
+        starver dev
+        echo "JOBINDEX = ${JOBINDEX}"
+        echo "JOBID = ${JOBID}"
+        echo "INPUTFILE = ${INPUTFILE0}"
+        ls -1
+
+        ./tests/run_batch_seed $INPUTFILE0 $JOBID
+    </command>
+
+    <SandBox>
+        <Package>
+            <File>file:./StRoot</File>
+            <File>file:./.sl73_gcc485</File>
+            <File>file:./tests</File>
+        </Package>
+    </SandBox>
+
+    <Generator>
+        <Location>/star/data03/pwg/jdb/scratch/gen</Location>
+    </Generator>
+</job>

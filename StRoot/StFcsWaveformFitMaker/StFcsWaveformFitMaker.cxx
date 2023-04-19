@@ -68,7 +68,7 @@
 ClassImp(StFcsWaveformFitMaker)
 
 #include "StMessMgr.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StEvent/StFcsHit.h"
 #include "StFcsDbMaker/StFcsDb.h"
 #include "StFcsDbMaker/StFcsDbPulse.h"
