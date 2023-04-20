@@ -369,7 +369,7 @@ void StRHICfRecoPos::initSetParamaters()
         }
         else if(numHit>1){
           double bufferPeakValue = 0;
-          int primeIdx;
+          int primeIdx = -1;
 
           // searching for prime peak
           for(int in=0; in<numHit; in++){
