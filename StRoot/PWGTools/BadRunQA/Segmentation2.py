@@ -52,23 +52,28 @@ def kernseg(X, n_bkps_max, min_size):
 
     return segmentations_values[np.argmin(adjusted_costs)]
 
-def segmentation(pen, min_size, signal, gamma, useNormal=False, useJMLR=False):
+def segmentation(pen, min_size, signal, gamma, useNormal=False, useJMLR=False, removeLastRun=False):
     # use fancy change point calculation technique
     #c = rpt.costs.CostRbf(gamma=2).fit(signal)
     #algo = rpt.Pelt(custom_cost=c, min_size=min_size, jump=1)
     if useJMLR:
         # determine pen with heuristic from https://github.com/deepcharles/ruptures/issues/223
-        return kernseg(signal, int(0.5*signal.shape[0]/min_size), min_size)
-    if useNormal:
-        model = 'normal'
-        kwarg = {}
-        pen = np.log(signal.shape[0])*signal.shape[1]
+        result = kernseg(signal, int(0.5*signal.shape[0]/min_size), min_size)
     else:
-        model = 'rbf'
-        kwarg={'gamma': gamma}
-        pen = pen
-    algo = rpt.Pelt(model=model, min_size=min_size, jump=1, params=kwarg).fit(signal)
-    return algo.predict(pen=pen)
+        if useNormal:
+            model = 'normal'
+            kwarg = {}
+            pen = np.log(signal.shape[0])*signal.shape[1]
+        else:
+            model = 'rbf'
+            kwarg={'gamma': gamma}
+            pen = pen
+        algo = rpt.Pelt(model=model, min_size=min_size, jump=1, params=kwarg).fit(signal)
+        result = algo.predict(pen=pen)
+    if removeLastRun:
+        return result[:-1]
+    else:
+        return result
 
 def getWeightedMeanStd(data, err, useAveErr):
     ave = np.average(data, axis=0, weights=np.reciprocal(err*err))
@@ -100,12 +105,9 @@ def plotSegmentationAndRejection(signal, segmentArray, features, idNum=None):
     fig, axes = rpt.display(signal, segmentArray)
     for ax, title in zip(axes, features):
         ax.set_ylabel(title)
-    # idNum is numerical array of GOOD events
-    # it calculates bad id automatically
     if idNum is not None:
-        badId = badIdFromGoodId(signal.shape[0], idNum)
         for ax, value in zip(axes, signal.T):
-            ax.scatter(badId, value[badId], color='r')
+            ax.scatter(idNum, value[idNum], color='r')
     return fig, axes
 
 
