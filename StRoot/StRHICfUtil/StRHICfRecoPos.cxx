@@ -346,7 +346,7 @@ void StRHICfRecoPos::initSetParamaters()
         // Search the peak 
         mSpectrum[it][il][ixy]->Search(mGSOBarHistExpend[it][il][ixy], mTSpecSigma, "nodraw goff", mTSpecRatioThreshold);
         int numHit = mSpectrum[it][il][ixy]->GetNPeaks();
-				Double_t* tSpecPeak = mSpectrum[it][il][ixy]->GetPositionX();
+				auto tSpecPeak = mSpectrum[it][il][ixy]->GetPositionX();
 
         // Setting prime, sub position and hight
         if(numHit==0){
