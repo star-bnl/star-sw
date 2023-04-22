@@ -1,9 +1,9 @@
 TDataSet *CreateTable() { 
   // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_tpcExtraGainCorrection")) return 0;
-  Int_t nrows = 146;
+  Int_t nrows = 147;
   St_tpcExtraGainCorrection *tableSet = new St_tpcExtraGainCorrection("tpcExtraGainCorrection",nrows);
-  tpcExtraGainCorrection_st row[146] = {
+  tpcExtraGainCorrection_st row[147] = {
     { 0, 0, 23001002, 23001034, 4, -1, -1, -1, 2, -1, 0}, /* Dead nruns = 3 iold = 8237 */
     { 0, 0, 23001002, 23001034, 4, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 3 iold = 8237 */
     { 0, 0, 23001002, 23001059,20, -1, -1, -1, 1, -1, 0}, /* Dead nruns = 6*/
@@ -26,6 +26,8 @@ TDataSet *CreateTable() {
     { 0, 0, 23098050, 23098050, 5, -1, -1, -1, 8,  0, 0}, /* Dead nruns = 1 iold = 9127 */
     { 0, 0, 23098050, 23098050, 6, -1, -1, -1, 7,  0, 0}, /* Dead nruns = 1*/
     { 0, 0, 23098050, 23098050, 6, -1, -1, -1, 8,  0, 0}  /* Dead nruns = 1*/
+    { 0, 0, 23001002, 23001034, 4, -1, -1, -1, 2, -1, 1}, /* Alive nruns = 4 */
+
     { 0, 0, 23011011, 23013025,24, -1, -1, -1, 1, -1, 0}, /* Dead nruns = 15*/
     { 0, 0, 23011011, 23013025,24, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 15*/
     { 0, 0, 23011029, 23012020, 4, -1, -1, -1, 1, -1, 0}, /* Dead nruns = 7*/
