@@ -29,6 +29,12 @@ foreach my $run (@Runs) {
 #  if ($debug) {print "RunIndex[$run] = $index\n";}
   $index++;
 }
+sub Print($$$$$) {
+  my ($r1, $r2, $t, $n, $f) = @_;
+  my $d = 0;
+  if ($f ne "Dead") {$d = 1;}
+  print "    { 0, 0, $r1, $r2,$t, $d}, /* $f nruns = $n */\n"; 
+}
 while ($line = <In>) {
   print $line if ($debug);
   #  my ($tag,$run,$dummy1,$dummy2) = split('/',$line); print "tag = $tag,run = $run\n" if ($debug);
@@ -38,8 +44,11 @@ while ($line = <In>) {
   #     for (my $i = 0; $i <= $#words; $i++) {print "$i: |$words[$i]|\t";}
   #     print "\n";
   # }
-  my $tag = $words[0] . ", -1, -1, -1," . $words[4] . "," .  $words[5];
-  if ($words[5] > 0) {$tag = $words[0] . ", -1, -1, -1,-1," .  $words[5];}
+#  my $tag = $words[0] . ", -1, -1, -1," . $words[4] . "," .  $words[5];
+  my $tag = $words[0] . ", -1, -1, -1," . $words[4] . ", -1"; # .  $words[5];
+#  my $tag = $words[0] . ", -1, -1," . $words[3] . ", -1, -1";# .  $words[5];
+#  if ($words[5] > 0) {$tag = $words[0] . ", -1, -1, -1,-1," .  $words[5];}
+  $tag =~ s/{//;
   my ($dum,$run,$dum)  = split(" ",$words[6]);
   print "tag = $tag run = $run\n" if ($debug);
   if ($run < 2000000) {$nruns = 0; next;}
@@ -53,7 +62,8 @@ while ($line = <In>) {
   } elsif ($tag ne $tagOld) {
     if ($run1 != 0) {
 #      print "$tagOld /* $run1 - $run2 */\n"; 
-      print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns iold = $iold */\n"; 
+#      print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns iold = $iold */\n"; 
+      Print($run1,$run2,$tagOld,$nruns,$flag);
     }
     $run1 = $run;
     $run2 = $run;
@@ -69,7 +79,8 @@ while ($line = <In>) {
       $tagOld = $tag;
       #    print "run1 = $run1, run2 = $run2, tagOld = $tagOld\n"
     } else {
-      print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns*/\n"; 
+#      print " /* $run1 - $run2 */ $tagOld /* $flag nruns = $nruns*/\n"; 
+      Print($run1,$run2,$tagOld,$nruns,$flag);
       $run1 = $run;
       $run2 = $run;
       $tagOld = $tag;
@@ -81,5 +92,6 @@ while ($line = <In>) {
 #print "$tagOld /* $run1 - $run2 */\n"; 
 #      print " /* $run1 - $run2 */ $tagOld\n"; 
 if ($nruns > 1) {
-print " /* $run1 - $run2 */ $tagOld /* $flag */\n"; 
+  #print " /* $run1 - $run2 */ $tagOld /* $flag */\n"; 
+  Print($run1,$run2,$tagOld,$nruns,$flag);
 }
