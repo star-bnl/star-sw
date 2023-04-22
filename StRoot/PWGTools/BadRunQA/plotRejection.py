@@ -2,12 +2,12 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-import matplotlib.font_manager as font_manager
-font_dir = ['ttf']
-for font in font_manager.findSystemFonts(font_dir):
-    font_manager.fontManager.addfont(font)
-
-plt.rcParams['font.family'] = 'Helvetica'
+#import matplotlib.font_manager as font_manager
+#font_dir = ['ttf']
+#for font in font_manager.findSystemFonts(font_dir):
+#    font_manager.fontManager.addfont(font)
+#
+#plt.rcParams['font.family'] = 'Helvetica'
 
 SMALL_SIZE = 18#15
 MEDIUM_SIZE = 21#18
