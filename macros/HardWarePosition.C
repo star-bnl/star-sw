@@ -189,10 +189,15 @@ UInt_t getSectorMask(UInt_t sec=1, UInt_t MASK=65535) {
 }
 //________________________________________________________________________________
 UInt_t isRdoOn(UInt_t sec=1, Int_t rdo = 1, UInt_t MASK=65535) {
-  return getSectorMask(sec, MASK) >> (rdo-1) & 0x00000001;
+  Int_t m =  getSectorMask(sec, MASK);
+  Int_t b = m >> (rdo - 1);
+  Int_t c = b & 1;
+  //  cout << MASK << "\t" << m  << "\t" << b << "\t" << c << endl;
+  return c; // (getSectorMask(sec, MASK) >> (rdo-1)) & 1;
 }
 //________________________________________________________________________________
 void isRdosOn(UInt_t sec=1,  UInt_t MASK=65535) {
+  //  cout << "sec = " << sec << "\tMASK = " << MASK << endl;
   for (Int_t rdo = 1; rdo <= 8; rdo++) 
     cout << "rdo " << rdo << " is " << isRdoOn(sec, rdo, MASK) << endl;
 }

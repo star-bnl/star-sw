@@ -1,5 +1,5 @@
 /*
-foreach d (`ls -1d *GeV*`)
+foreach d (`ls -1dt *GeV*`)
   cd ${d}
   set list = `ls -1d 2*.root | awk -F_ '{print $1}' | sort -u | xargs`
   cd -
@@ -10,6 +10,7 @@ foreach d (`ls -1d *GeV*`)
     root.exe -q -b ${d}/*${f}*.root CheckPads.C+ >& ${f}.list
   end
 end
+
   mkdir empty
   mv `grep 'Pvxyz entries' 2*.list | awk '{if ($4 < 1000) print $0}' | awk -F: '{print $1}'` empty
   grep Dead 2*.list  | awk -F\{ '{print "{"$2}' | tee  DeadFEE2.list
