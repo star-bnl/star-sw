@@ -15,7 +15,7 @@ class St_tpcAnodeHVavgC : public TChair {
   Float_t 	    rms(Int_t i = 0) 	        const {return Struct(i)->rms;}
   Int_t 	    numentries(Int_t i = 0) 	const {return Struct(i)->numentries;}
   Int_t 	    numoutliers(Int_t i = 0) 	const {return Struct(i)->numoutliers;}
-  Bool_t	    livePadrow(Int_t sec = 1, Int_t padrow = 1) const { return voltagePadrow(sec,padrow) > 500; }
+  Bool_t	    livePadrow(Int_t sec = 1, Int_t padrow = 1) const { return voltagePadrow(sec,padrow) > 850; }
   Float_t	    voltagePadrow(Int_t sec = 1, Int_t padrow = 1) const; // sector=1..24 , padrow=1..100
   Bool_t            tripped(Int_t sec = 1, Int_t padrow = 1)       const;// { return (voltage() < -100); }
  protected:
