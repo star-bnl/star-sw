@@ -1,0 +1,31 @@
+<job  name="FwdTracking"  simulateSubmission="false" maxFilesPerProcess="1" filesPerHour="1000" >
+
+    <input URL="catalog:star.bnl.gov?filetype=daq_reco_MuDst,storage=local" nFiles="500" />
+
+    <stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
+    <stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
+
+    <output fromScratch="job*.root" toURL="file:/star/data03/pwg/jdb/scratch/" />
+    <output fromScratch="job*.LOG" toURL="file:/star/data03/pwg/jdb/scratch/" />
+
+    <command>
+        starver dev
+        echo "JOBINDEX = ${JOBINDEX}"
+        echo "JOBID = ${JOBID}"
+        ls -1
+
+        ./tests/run_batch_gen $JOBINDEX $JOBID
+    </command>
+
+    <SandBox>
+        <Package>
+            <File>file:./StRoot</File>
+            <File>file:./.sl73_gcc485</File>
+            <File>file:./tests</File>
+        </Package>
+    </SandBox>
+
+    <Generator>
+        <Location>/star/data03/pwg/jdb/scratch/gen</Location>
+    </Generator>
+</job>

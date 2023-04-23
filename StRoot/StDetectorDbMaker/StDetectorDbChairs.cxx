@@ -1349,29 +1349,59 @@ St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
   // Take care about unsorted tpcRDOMaks table
   Bool_t needReorder = kFALSE;
   tpcRDOMasks_st *row = table->GetTable();
-  for (UInt_t i = 0; i < 12; i++) {
-    if ((row+i)->sector == 2*i + 1) continue;
+  UInt_t Nactive = 0;
+  UInt_t N = table->GetNRows();
+  if (N != 12) {
     needReorder = kTRUE;
-    break;
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has NRows = " << N << " =! 12" << endm;
+  } else {
+    for (UInt_t i = 0; i < N; i++) {
+      if ((row+i)->sector == 2*i + 1) continue;
+      needReorder = kTRUE;
+      break;
+    }
   }
   if (needReorder) {
     LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has to be reordered" << endm;
     tpcRDOMasks_st rows[12];
-    for (UInt_t i = 0; i < 12; i++) {
+    Int_t OldRun = -1;
+    for (UInt_t i = 0; i < N; i++) {
       if ((row+i)->sector == 2*i + 1) {
 	rows[i] = *(row+i);
+	if ((row+i)->runNumber > 0 && OldRun < 0) OldRun = (row+i)->runNumber;
+	Nactive++;
       } else {
-	Int_t j = ((row+i)->sector-1)/2;
-	if (rows[j].sector != 0) {
-          LOG_ERROR << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has duplicated rows\t" << i << "\tand " << j <<  endm;
+	if ((row+i)->sector > 0 && (row+i)->sector <= 24) {
+	  if ((row+i)->runNumber > 0 && OldRun < 0) OldRun = (row+i)->runNumber;
+	  Int_t j = ((row+i)->sector-1)/2;
+	  if (rows[j].sector != 0) {
+	    LOG_ERROR << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has duplicated rows\t" << i << "\tand " << j <<  endm;
+	  }
+	  rows[j] =  *(row+i);
+	  Nactive++;
 	}
-	rows[j] =  *(row+i);
+      }
+    }
+    if (Nactive != 12) { // Add missing rows
+      delete table;
+      table = new St_tpcRDOMasks("tpcRDOMasks", 12);
+      // fill missing rows
+      for (Int_t i = 0; i < 12; i++) {
+	if (rows[i].sector == 0) {
+	  rows[i].sector = 2*i + 1;
+	  rows[i].runNumber = OldRun;
+	  if (St_tpcPadConfigC::instance()->iTpc(rows[i].sector)) {
+	    rows[i].mask = 65535;
+	  } else {
+	    rows[i].mask = 4095;
+	  }
+	}
       }
     }
     for (Int_t i = 0; i < 12; i++) {
       table->AddAt(&rows[i],i);
     }
-    DEBUGTABLE(tpcRDOMasks);							
+    table->Print(0,12);
   }
   fgInstance = new St_tpcRDOMasksC(table);				
   return fgInstance;							
@@ -1388,21 +1418,22 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   if(sec < 1 || sec > 24 || getNumRows() == 0){
     LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
      << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
+    Sector = 0;
     return MASK;
   }
   //  tpcRDOMasks_st *row = Struct();
   // Take care about unsorted tpcRDOMaks table
-  Int_t i = ((sec+1)/2) - 1;
-  //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
-  MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
+  tpcRDOMasks_st *row = Struct((sec-1)/2);
+  MASK = row->mask;
+  Int_t run = row->runNumber;
   if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
-    if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
+    if (sec == 16 && MASK == 0 && run > 8181000 && run < 9181000) MASK = 4095;
     if( sec % 2 == 0){ // if its even relevent bits are 6-11
       MASK = MASK >> 6;
     }
     // Otherwise want lower 6 bits
     MASK &= 0x000003F; // Mask out higher order bits
-  } else   if (runNumber() < 20000000 && sec == 20) { // Run XVIII, sector 20 
+  } else   if (run < 20000000 && sec == 20) { // Run XVIII, sector 20 
     MASK = 255;
   } else  { // Run XIX and higher
     if( sec % 2 == 0){ // if its even relevent bits are 8-13
@@ -1413,7 +1444,7 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   }
   Sector = sec;
   Mask   = MASK;
-  return MASK;
+  return Mask;
 }
 //________________________________________________________________________________
 Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
@@ -1423,23 +1454,35 @@ Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {
   if (Sector == sector && Rdo == rdo) {
     return Mask;
   }
-  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
+  Mask  = kFALSE;
+  Sector = sector;
+  Rdo = rdo;
+  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8) {
+    getSectorMask(0);
+    return 0;
+  }
   tpcRDOMasks_st *row = Struct((sector-1)/2);
   assert(row->sector == (UInt_t) 2*((sector-1)/2) + 1);
-  UInt_t MASK = row->mask;
+  UInt_t MASK = getSectorMask(sector);
   MASK = MASK >> (rdo - 1);
   MASK &= 0x00000001;
-  Sector = sector;
-  Rdo    = rdo;
   Mask   = MASK;
-  return MASK;
+  return Mask;
 }
 //________________________________________________________________________________
 void St_tpcRDOMasksC::setSectorRDOMaskOff(UInt_t sector,Int_t rdo)  {    
   if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return;
-  tpcRDOMasks_st *row = Struct((sector-1)/2);
-  assert(row->sector == 2*((sector-1)/2) + 1);
-  row->mask &= ~(1 << (8*((sector-1)%2) + rdo - 1));
+  if (isOn(sector,rdo)) {
+    tpcRDOMasks_st *row = Struct((sector-1)/2);
+    assert(row->sector == 2*((sector-1)/2) + 1);
+    if (! St_tpcPadConfigC::instance()->iTpc(sector)) {// no iTPC
+      row->mask &= ~(1 << (6*((sector-1)%2) + rdo - 1)); 
+    } else {                                           // with iTPC
+      row->mask &= ~(1 << (8*((sector-1)%2) + rdo - 1)); 
+    }
+    isOn(0,rdo); // Reset saved mask 
+    LOG_WARN << "St_tpcRDOMasksC::setSectorRDOMaskOff(" << sector << "," << rdo << ") = " << isOn(sector,rdo) << endm;
+  }
 }
 //________________________________________________________________________________
 #include "St_tpcExtraGainCorrectionC.h"
@@ -1482,7 +1525,7 @@ St_tpcPadGainT0C *St_tpcPadGainT0C::instance() {
 	if (row <= 40) continue;
 	r = row - 40 + 13;
       }
-      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
 	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 		       sector, r, padMin, padMax, RDO, FEE, status) << endm;
       Float_t *gains = St_tpcPadGainT0C::instance()->Gains(sector, r);
@@ -1492,13 +1535,14 @@ St_tpcPadGainT0C *St_tpcPadGainT0C::instance() {
 	}
 	gains[p-1] = 0;
       }
+    } else if (FEE > 0) { // iTPC stuff, ignorefor tpx
     } else if (RDO > 0) {
-      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
 	       << Form(" reset tpcRDOMasks for sector = %i and RDO = %i to zero with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 		       sector, RDO, sector, row, padMin, padMax, RDO, FEE, status) << endm;
       St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,RDO);
     } else {
-      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
 		<< Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i => whole sector is marker as DEAD", 
 			sector, row, padMin, padMax, RDO, FEE, status) << endm;
       Int_t rdoMin = 1;
@@ -1794,7 +1838,7 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     if (status) continue;
     if (padMin < padMax && row > 0) {
       Int_t r = row;
-      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
 	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 		       sector, r, padMin, padMax, RDO, FEE, status) << endm;
       Float_t *gains = St_itpcPadGainT0C::instance()->Gains(sector, r);
@@ -1810,7 +1854,7 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
 	Int_t r = St_itpcPadGainT0C::rowpadFEE[j].row;
 	padMin = St_itpcPadGainT0C::rowpadFEE[j].padMin;
 	padMax = St_itpcPadGainT0C::rowpadFEE[j].padMax;
-	LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run 
+	LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
 		 << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 			 sector, r, padMin, padMax, RDO, FEE, status) << endm;
 	Float_t *gains = St_itpcPadGainT0C::instance()->Gains(sector, r);
@@ -1822,12 +1866,12 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
 	}
       }
     } else if (RDO > 0) {
-      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
 	       << Form(" reset tpcRDOMasks for sector = %i and RDO = %i to zero with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
 		       sector, RDO, sector, row, padMin, padMax, RDO, FEE, status) << endm;
       St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,RDO);
     } else {
-      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run 
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
 		<< Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i => whole sector is marker as DEAD", 
 			sector, row, padMin, padMax, RDO, FEE, status) << endm;
       for (Int_t rdoD = 1; rdoD <= 4; rdoD++) {
