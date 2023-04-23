@@ -1,15 +1,18 @@
 TDataSet *CreateTable() { 
   // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_tpcExtraGainCorrection")) return 0;
-  Int_t nrows = 693;
+  Int_t nrows = 694;
   St_tpcExtraGainCorrection *tableSet = new St_tpcExtraGainCorrection("tpcExtraGainCorrection",nrows);
-  tpcExtraGainCorrection_st row[693] = {
+  tpcExtraGainCorrection_st row[694] = {
     // y2020
     { 0, 0, 20344045, 21258004,21, -1, -1, -1, 1, 47, 0}, /* Dead  S21_F47 20191210.162105        20200914.081917 */
 
     { 0, 0, 20348016, 20348022,14, -1, -1, -1, 6,  0, 0}, /* Dead nruns = 5*/
     { 0, 0, 20354003, 20354005,12, -1, -1, -1,-1, -1, 0}, /* Dead nruns = 3 dead sector 12*/
     { 0, 0, 20356015, 20356039,20, -1, -1, -1, 5,  0, 0}, /* Dead nruns = 14*/
+
+    { 0, 0, 21069008, 21069014,14, -1, -1, -1, 4, 27, 1}, /* Alive nruns = 6 */
+
     { 0, 0, 21004008, 21008016,10, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 144*/
     { 0, 0, 21028024, 21028028, 2, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 4 iold = 1301 */
     { 0, 0, 21029027, 21030001, 8, -1, -1, -1, 2, -1, 0}, /* Dead nruns = 14*/
@@ -49,6 +52,7 @@ TDataSet *CreateTable() {
     { 0, 0, 21060022, 21063008,20, -1, -1, -1, 3, -1, 0}, /* Dead nruns = 73*/
     { 0, 0, 21060005, 21060005,16, 39,  2,  9, 3,  1, 0}, /* Dead nruns = 1*/
     { 0, 0, 21060005, 21060005,16, 40,  2,  9, 3,  1, 0}, /* Dead nruns = 1*/
+    // 21062015 Low Voltage
     { 0, 0, 21063004, 21063008,10, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 4*/
     { 0, 0, 21063010, 21066025,20, -1, -1, -1, 3, -1, 0}, /* Dead nruns = 84*/
     { 0, 0, 21063010, 21066025,20, -1, -1, -1, 3, -1, 0}, /* Dead nruns = 84*/
@@ -67,7 +71,6 @@ TDataSet *CreateTable() {
     { 0, 0, 21071014, 21073021,10, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 28*/
     { 0, 0, 21073025, 21077002,10, -1, -1, -1, 4, -1, 0}, /* Dead nruns = 104*/
     { 0, 0, 21073025, 21077002,20, -1, -1, -1, 3, -1, 0}, /* Dead nruns = 104*/
-
 
     { 0, 0, 21176027, 21177012,11, -1, -1, -1, 5,  0, 0}, /* Dead nruns = 11*/
 
