@@ -171,7 +171,8 @@ void Db(const Char_t *tabNam  =
 #endif
     if (Nrows > 10) Nrows = 10;
     if (table->GetRowSize() < 256 || name == "TpcAvgPowerSupply") {
-      table->Print(0,Nrows);
+      if (name == "TpcAvgPowerSupply") {St_TpcAvgPowerSupplyC::instance()->PrintC();}
+      else                             {table->Print(0,Nrows);}
       cout << "==============================================" << endl;
       name += Form(".%06i.%06i.C",t[0].GetDate(),t[0].GetTime());
       ofstream out;

@@ -148,6 +148,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameTPX.Data() << " for TPX" << endm;
     fnameITPC = StPath2itpcGain::instance()->GetPath(); 
     LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameITPC.Data() << " for iTPC" << endm;
+  } else {
+    St_tpcPadGainT0C::instance();  // activate extra gain corrections for tpx
+    St_itpcPadGainT0C::instance(); // activate extra gain corrections for iTPC
   }
 #ifdef __TFG__VERSION__
   if ( IAttr("TPC23")) { // TPC23
