@@ -43,7 +43,6 @@ void Usage();
 void Load(const Char_t *options="");
 //TString defChain("y2010,gstar,Test.default.Fast.ITTF,NosvtIT,NossdIT,-sfs,-ssdFast");
 TString defChain("y2010,gstar,Test.default.ITTF,NosvtIT,NossdIT,-sfs,-ssdFast,sdt20100107.110000");
-//TString defChain("P2021a,StiCA,-in,TpcRS,TpxClu,bbcSim,btofsim,gstar,-trgSimu,sdt20210604.023046");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 //	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 

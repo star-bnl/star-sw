@@ -20,7 +20,7 @@ my $CPPFLAGS = $env->{CPPFLAGS};
 my $FLIBS = $env->{FLIBS};
 my $LD = $env->{LD};
 my $LDFLAGS = $env->{LDFLAGS};
-my $LIBS = $env->{LIBS};
+my $LIBS = "";#$env->{LIBS};
 my $Libraries = $env->{Libraries};
 my $FC        = $env->{FC};
 my $PGI       = $env->{ENV}->{PGI};
@@ -28,14 +28,8 @@ my $PGILIB    = $env->{ENV}->{PGILIB};
 my $FLIBS     = $env->{FLIBS};
 
 $LDFLAGS     .= $env->{LDEXPORT};# . " -pthread";
-#$LIBS        .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
-my $lpath = $LIB; $lpath =~ s/\#//;
-#$LIBS        .= " -lTable -lStarRoot -lSt_base";
-#$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $lpath . "/libg2t.a " . $lpath . "/libgstar.a ". $lpath . "/libxgeometry.a " . $env->{LDNONE};
-#$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $lpath . "/libg2t.a " . $env->{LDNONE} . " -lxgeometry";
-$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $env->{LDNONE};
-#$LIBS        .= $env->{LDALL} . " " . $lpath . "/libstarsim.a " . $lpath . "/libg2t.a " . $lpath . "/libxgeometry.a " . $env->{LDNONE};
-#print "LDALL = env->{LDALL}  ==> LIBS = $LIBS =========================\n";
+$LIBS        .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
+
 if ($FC =~ /pgf77/) {
     if ($PGILIB ne ""){
 	if (-d $PGILIB) {
@@ -56,27 +50,28 @@ if ($FC =~ /pgf77/) {
 #  if ($LD ne 'icc') {$LIBS .= " " . $env->{LIBSTDC}}
 #  $LIBS .= $env->{LDNONE};
 #}
-#$LIBS        .= " -lStarAgmlUtil";
-$FPPFLAGS .= " -D__ROOT__"; # -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
+
+$FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL ".
+  "-DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
 #  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
-$CPPFLAGS .= "-D__ROOT__"; # -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " . "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+  $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
+  "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($FC =~ /g77/ || $FC =~ /gfortran/) {
     $CPPFLAGS .= " -DPrivateMalloc";
 }
 
 print "build $pkg with cons\n";
-my $LIBPATH = $LIB .$main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
+my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
 $LIBS .= " " . $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
-# print "========== LIBPATH = $LIBPATH\n";
-#if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
+if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 
 my $FEXTEND   = $env->{FEXTEND};
 my $OSTYPE    = $ENV{OSTYPE};
 #print "**** DEBUG $OSTYPE\n";
-#if ( $OSTYPE =~ m/^linux/i ) {    # simplify this
-#    $FPPFLAGS .= " -DCERNLIB_LINUX";
-#}
+if ( $OSTYPE =~ m/^linux/i ) {    # simplify this
+    $FPPFLAGS .= " -DCERNLIB_LINUX";
+}
 if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
@@ -84,13 +79,8 @@ if ($FC =~ /^pgf/) {
 }
 $LIBS .= " -lgeant321 -lgcalor"; 
 $LIBS  .= " " . $env->{CERNLIBS};
-#$LIBS  .= $env->{LDALL};
 $LIBS  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
-#$LIBS  .= $env->{LDNONE};
 $LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;
-if ($FC eq 'gfortran') {
-  $LIBS .= " -lgfortran";
-}
 if ($STAR_SYS =~ /^sun4x_5.$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
     $LIBS .= " -lCstd";
@@ -112,8 +102,8 @@ $env2 = $env->clone('FC'           => $FC,
 		    'Libraries'    => $Libraries
 		   );
 
-#my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
-#$envN = $env2->clone('LIBS'         => $LIBSN);
+my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
+$envN = $env2->clone('LIBS'         => $LIBSN);
 my @src = qw(MAIN_rmain.cxx);#  dummy.g);
 my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};
 if ($FC =~ /g77/ || $FC =~ /gfortran/) { push @src, "df.F";}
@@ -156,8 +146,13 @@ foreach $h (@h_files) {#print "h = $h\n";
  ENDL:
 }
 if ($#Defs > -1) {
-  my @CintFiles = 
-  ( $PKG . "_Cint.cxx", $PKG . "_Cint.h");
+  my @CintFiles = ("${PKG}_Cint.cxx", "${PKG}_Cint.h");
+
+  if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {
+    push @CintFiles, "${PKG}_Cint_rdict.pcm";
+    Install $env $LIB, File::Basename::basename("${PKG}_Cint_rdict.pcm");
+  }
+
   my @defs = ();
   foreach my $def (@Defs) {
     next if $def =~ /LinkDef/;
@@ -186,25 +181,13 @@ if ($#src > -1) {
   script::Keep $pkg;
   Depends $env2 $pkg, $BIN . "/agetof";
   Depends $env2 $pkg, $BIN . "/stic";
-  Depends $env2 $pkg, $LIB . "/libstarsim.a";
-  Depends $env2 $pkg, $LIB . "/libgeant321.a"; 
-  Depends $env2 $pkg, $LIB . "/libgcalor.a";
-#  Depends $env2 $pkg, $LIB . "/libg2t.a";
-#  Depends $env2 $pkg, $LIB . "/libgstar.a";
-#  Depends $env2 $pkg, $LIB . "/libxgeometry.a";
-#  Depends $env2 $pkg, $LIB . "/libxgeometry.so";
-#  Depends $env2 $pkg, $LIB . "/libStarAgmlUtil.so";
-#  Depends $env2 $pkg, $LIB . "/libStarRoot.so";
-#  Depends $env2 $pkg, $LIB . "/libSt_base.so";
-  Program $env2 $pkg, @src;
+  Program      $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
-  if ($STAR_SYS !~ /darwin/) {
-    InstallAs $env2 $BIN . "/Root.exe", $pkg;
-  }
+  InstallAs $env2 $BIN . "/Root.exe", $pkg;
   my @o = Objects $env2 @src;
   script::Keep $pkgN;
-#  Program      $envN $pkgN, @o;
-#  Install $envN $BIN, $pkgN;
+  Program      $envN $pkgN, @o;
+  Install $envN $BIN, $pkgN;
   my $Starsim = "#asps/Simulation/starsim/";
   my @list = qw(atlsim.makefile atlsim.bank atlsim.logon.kumac);
   foreach my $f (@list) {
