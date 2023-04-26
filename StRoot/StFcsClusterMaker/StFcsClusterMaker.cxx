@@ -64,7 +64,7 @@
 #include "StLorentzVectorF.hh"
 
 #include "StMessMgr.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StFcsDbMaker/StFcsDb.h"

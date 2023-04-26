@@ -1,0 +1,21 @@
+jobId=${1:-0}
+pid=${2:-5}
+### pid : 3=e- 5=mu+ 8=pi+
+
+echo "jobId=${jobId}, pid=${pid}"
+
+nEvents=10
+
+strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+#echo starsim -w 0 -b sim/testg.kumac g3id=${pid} seed=${strongrandom} nevents=${nEvents} ntrack=1 etamn=3.0 etamx=3.5 ptmn=2.9 ptmx=3.1 ofn=sim.fzd
+# starsim -w 0 -b sim/testg.kumac g3id=${pid} seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=2.5 etamx=4.5 ptmn=14.5 ptmx=15.0 ofn=sim.fzd
+
+# FZD_FILE="/gpfs01/star/pwg/youqi/runPythia/out/${jIndex}.fzd"
+echo root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/fast_track.xml" )' 
+time root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/fast_track.xml" )'
+
+# mkdir -p out/fast_track_pid${pid}
+# mv sim.fzd out/fast_track_pid${pid}/${jobId}.fzd
+# mv fast_track.root out/fast_track_pid${pid}/job${jobId}_qa.root
+# mv fwdtree.root out/fast_track_pid${pid}/job${jobId}_fwdtree.root
+# mv fcstrk.root out/fast_track_pid${pid}/job${jobId}_fcstrk.root
