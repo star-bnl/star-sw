@@ -205,9 +205,9 @@ struct TrgPS;
 
 char *confNum2String(UINT32 conf_num);
 int string2ConfNum(char *str);
-UINT32 getCrateMask4TrgDet(int det);
+UINT32 getCrateMask4TrgDet(int det); //obsolete
 int getConfNumForNode(int node);
-UINT16 getTrgDetRequiredMask(char *node, int board=-1);
+UINT16 getTrgDetRequiredMask(char *node, int board=-1);   //obsolete
 
 //void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...
 void writeRCCNF(char *fn, SimpleXmlDoc *xml);
@@ -327,6 +327,8 @@ struct RHIC_Trigger2 {
 struct PrescaleReturnInfo {
     float ps[TRIGGERS_MAX];
     float measured_rate[TRIGGERS_MAX];
+
+    float trgDet_ps;
 
     float py_ps[TRIGGERS_MAX];
     float py_desiredRate[TRIGGERS_MAX];
