@@ -36,12 +36,15 @@ void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTa
 
 void PdfFileBuilder::writePdf(char *filename, int combo_index)
 {
-    LOG(DBG, "Writing pdf: %s index=%d",filename,combo_index);
+    LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
 
     //displays->displayRoot->dump(0, "dr:");
 
     LOG(DBG, "Now write it...");
 
+    if(displays == NULL) {
+	LOG(CRIT, "displays == NULL");
+    }
     DisplayNode *root = displays->getTab(combo_index);
 
     if(combo_index == 0) {
@@ -49,12 +52,12 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
 	root = displays->displayRoot;
     }
 
-    LOG(DBG, "writeNodePdf root: %s",filename);
+    LOG("JEFF", "create PDF File: %s",filename);
 
     PdfIndex index;
     writeNodePdf(root, &index, NULL, filename, 1);
   
-    LOG(DBG, "write endfilename: %s", filename);
+    LOG("JEFF", "created PDF File: %s", filename);
 
     // Now a summary....
     char endfilename[256];
@@ -69,20 +72,23 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
     char indexedfilename[256];
     strcpy(indexedfilename, filename);
     // strcat(indexedfilename, ".idx");
+    LOG("JEFF", "Create indexed file: %s", indexedfilename);
     index.CreateIndexedFile(filename, indexedfilename);
-
-    LOG(DBG, "Done indexing");
+    LOG("JEFF", "Created indexed file: %s", indexedfilename);
 }
 
 int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
     LOG(DBG, "Checking node %s against server tags %s", node->name, serverTags);
+    if(node == NULL) {
+	LOG("JEFF", "node == NULL! page=%d",page);
+    }
 
     int npages = 0;
 
     if(node->leaf) {   // We are writing histograms...
 	writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
-	LOG(DBG, "REturn pdf");
+	LOG(DBG, "Return pdf");
 	return 1;
     }
     else {   // We are just writing index entries
@@ -114,7 +120,7 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 //
 int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
-  LOG(DBG, "Write histogram leaves: %s",node->name);
+    LOG("JEFF", "Write histogram leaves: %s, page %d",node->name, page);
   	
   char fullName[1000];
   node->getTabName(fullName);

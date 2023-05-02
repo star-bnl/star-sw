@@ -131,7 +131,8 @@ int itpcInterpreter::itpc_fee_map[24][4][16] = {
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S17
-	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+//	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, // 29Mar03: bad port 3 moved to good port 5
+	{49,52, 0, 0,46, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
@@ -840,7 +841,7 @@ int itpcInterpreter::sampa_ch_scan()
 
 		int t_stop = t_start + t_cou - 1 ;
 
-//		LOG(TERR,"...%d %d %d",t_start,t_cou,t_stop) ;
+//		LOG(TERR,"DDD %d %d %d",t_start,t_cou,t_stop) ;
 
 		if(t_start <= t_stop_last) {
                         LOG(ERR,"%d: t_start %d, t_cou %d, t_stop %d, t_stop_last %d",rdo_id,t_start,t_cou,t_stop,t_stop_last) ;
