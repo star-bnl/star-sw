@@ -9,7 +9,7 @@ This code works on both Linux and Windows. It should work in Mac but it has not 
 
 To install the software, follow these steps:
 The EASY way (Linux only. For Windows and Mac, use the recommended way):
-1. Run the following command: `python3 -m pip install --user matplotlib ruptures pandas numpy scipy pyfiglet uproot scikit-learn`
+1. Run the following command: `pip3 install -r requirements.txt`
 
 The RECOMMENDED way (works across platforms):
 1.      Install miniconda from https://docs.conda.io/en/latest/miniconda.html

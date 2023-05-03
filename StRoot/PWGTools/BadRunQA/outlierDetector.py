@@ -1,12 +1,14 @@
+from functools import partial
 import numpy as np
 
-def outlierSegment(runs, values, uncert, stdRange=3, weights=None):
-    mean = np.average(values, axis=0, weights=weights)
+def weightedMean(values, weights=None):
+    tmp = values*weights
+    return np.sum(tmp, axis=0)/np.sum(weights, axis=0)
+
+def weightedStd(values, weights=None):
+    mean = weightedMean(values, weights)
     variance = np.average((values - mean)**2, weights=weights, axis=0)
-    std = np.sqrt(variance)
-    idRejectedReason = np.abs(values - mean) > stdRange*std + uncert
-    idRejected = np.any(idRejectedReason, axis=1)
-    return runs[idRejected], idRejectedReason[idRejected], mean, stdRange*std
+    return np.sqrt(variance)
 
 def weightedMedian(values, weights=None):
     if weights is None:
@@ -19,32 +21,77 @@ def weightedMedian(values, weights=None):
         med.append(v[idm])
     return np.array(med)
 
-def outlierSegmentMAD(runs, values, uncert, weights=None, stdRange=3):
-    stdRange = stdRange/0.683
+def MAD(values, weights=None):
     median = weightedMedian(values, weights)
     absDev = np.abs(values - median)
-    MAD = weightedMedian(absDev, weights)
-    idRejectedReason = np.abs(values - median) > stdRange*MAD + uncert
-    idRejected = np.any(idRejectedReason, axis=1)
-    return runs[idRejected], idRejectedReason[idRejected], median, stdRange*MAD
+    return weightedMedian(absDev, weights)/0.683
 
-def outlierDetector(runs, values, uncert, idSegments, useMAD, weights, **kwargs):
+def greater(values, mean, stdRange, std, uncert):
+    return np.abs(values - mean) > stdRange*std + uncert
+
+def greaterlegacy(values, mean, stdRange, std, uncert):
+    # how v2 estimate distance
+    return np.square(values - mean) > stdRange*stdRange*(std*std + uncert*uncert)
+
+def meanAndStdSequencial(values, weights, uncert, stdRange, returnMean=True):
+    # the runs rejected by previous observables won't count in the calculation of mean and std in the next observable
+    # result depends on the order of observables, which is not good
+    # needed to simulate the behavior of v2
+    weights = np.copy(weights)
+    ans = []
+    for i in range(values.shape[1]):
+        mean = weightedMean(values[:, i], weights[:, i])
+        std = weightedStd(values[:, i], weights[:, i])
+        id = greaterlegacy(values[:, i], mean, stdRange, std, uncert[:, i])
+        # ignore comparison results if weight is 0 to begin with
+        id[weights[:, i] == 0] = False
+        if i + 1 < values.shape[1]:
+            weights[id, i + 1:] = 0
+        ans.append(mean if returnMean else std)
+    return np.array(ans)
+
+
+def outlierSegment(runs, values, uncert, stdRange=3, weights=None, meanAlg=weightedMean, stdAlg=weightedStd, greater=greater):
+    mean = meanAlg(values, weights)
+    std = stdAlg(values, weights)
+    idRejectedReason = greater(values, mean, stdRange, std, uncert)
+    # if weight is zero, it's not being compared
+    idRejectedReason = idRejectedReason & (weights > 0)
+    idRejected = np.any(idRejectedReason, axis=1)
+    return runs[idRejected], idRejectedReason[idRejected], mean, stdRange*std
+
+
+def outlierDetector(runs, values, uncert, idSegments, useMAD, weights, legacy=False, seqRej=False, **kwargs):
     runsRejected = np.array([])
     idRejected = []
     stdRange = []
     mean = []
     if useMAD:
-        outSeg = outlierSegmentMAD
+        meanAlg = weightedMedian
+        stdAlg = MAD
     else:
-        outSeg = outlierSegment
+        meanAlg = weightedMean
+        stdAlg = weightedStd
 
-    for lowEdge, upEdge in zip([0] + idSegments, idSegments + [runs.shape[0]]):
+    if legacy:
+        gt = greaterlegacy
+    else:
+        gt = greater
+
+    for idEdge, (lowEdge, upEdge) in enumerate(zip([0] + idSegments, idSegments + [runs.shape[0]])):
         if lowEdge == upEdge:
             meanSeg = np.zeros(values.shape[1])
             stdRangeSet = np.zeros(values.shape[1])
             runsRejectedSeg = np.array([])
         else:
-            runsRejectedSeg, idRejectedSeg, meanSeg, stdRangeSeg = outSeg(runs[lowEdge:upEdge], values[lowEdge:upEdge], uncert[lowEdge:upEdge], weights=weights[lowEdge:upEdge], **kwargs)
+            if seqRej:
+                sr = kwargs['stdRange']
+                meanAlg = partial(meanAndStdSequencial, uncert=uncert[lowEdge:upEdge], stdRange=sr, returnMean=True)
+                stdAlg = partial(meanAndStdSequencial, uncert=uncert[lowEdge:upEdge], stdRange=sr, returnMean=False)
+
+            runsRejectedSeg, idRejectedSeg, meanSeg, stdRangeSeg = outlierSegment(runs[lowEdge:upEdge], values[lowEdge:upEdge], 
+                                                                                  uncert[lowEdge:upEdge], weights=weights[lowEdge:upEdge], 
+                                                                                  meanAlg=meanAlg, stdAlg=stdAlg, greater=gt, **kwargs)
         stdRange.append(stdRangeSeg)
         mean.append(meanSeg)
         if runsRejectedSeg.shape[0] > 0:

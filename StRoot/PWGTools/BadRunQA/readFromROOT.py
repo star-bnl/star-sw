@@ -15,11 +15,11 @@ def getNamesAllTProfile(filename):
     return TProfiles
        
 
-def readFromROOT(filename, varNames, runIDTranslate=None):
+def readFromROOT(filename, varNames, runIDTranslate=None, legacy=False):
     file_ = uproot.open(filename)
     runs = None
-    x_normal = []
-    x_err_normal = []
+    x_all = []
+    x_err_all = []
     counts = []
 
     for var in varNames:
@@ -31,12 +31,24 @@ def readFromROOT(filename, varNames, runIDTranslate=None):
         x_err = hist.errors()#error_mode="s")
         x_counts = hist.counts(False)
 
-        x_normal.append(x)
-        x_err_normal.append(x_err)
+        if legacy:
+            # round to 6 sig fig
+            # because that's the default precision of cout
+            # therefore that's the precision of of run-by-run v2
+            def signif(x, p):
+                x = np.asarray(x)
+                x_positive = np.where(np.isfinite(x) & (x != 0), np.abs(x), 10**(p-1))
+                mags = 10 ** (p - 1 - np.floor(np.log10(x_positive)))
+                return np.round(x * mags) / mags
+            x = signif(x, 6)
+            x_err = signif(x_err, 6)
+
+        x_all.append(x)
+        x_err_all.append(x_err)
         counts.append(x_counts)
 
-    x_normal = np.array(x_normal).T
-    x_err_normal = np.array(x_err_normal).T
+    x_all = np.array(x_all).T
+    x_err_all = np.array(x_err_all).T
     counts = np.array(counts).T
     if runIDTranslate is not None:
         with open(runIDTranslate) as f:
@@ -45,21 +57,17 @@ def readFromROOT(filename, varNames, runIDTranslate=None):
                 raise RuntimeError('Number of runs in mapping file disagrees with that from TProfile')
             idSort = np.argsort(runsTrans)
             runs = runsTrans[idSort]
-            x_normal = x_normal[idSort]
-            x_err_normal = x_err_normal[idSort]
+            x_all = x_all[idSort]
+            x_err_all = x_err_all[idSort]
             counts = counts[idSort]
 
-    id = np.all(counts > 0, axis=1) & np.all(x_err_normal > 0, axis=1)
-    x_normal = x_normal[id]
-    x_err_normal = x_err_normal[id]
+    id = np.all(counts > 0, axis=1)# & np.all(x_err_all > 0, axis=1)
+    x_all = x_all[id]
+    x_err_all = x_err_all[id]
     counts = counts[id]
     runs = runs[id]
 
-    std = x_normal.std(axis=0)
-    x_mean = x_normal.mean(axis=0)
-    x_normal = (x_normal - x_normal.mean(axis=0)) / std
-    x_err_normal = x_err_normal/std
-    return runs, x_normal, x_err_normal, x_mean, std, counts
+    return runs, x_all, x_err_all, counts
 
 
 if __name__ == '__main__':

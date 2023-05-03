@@ -76,11 +76,11 @@ def segmentation(pen, min_size, signal, gamma, useNormal=False, useJMLR=False, r
         return result
 
 def getWeightedMeanStd(data, err, useAveErr):
-    ave = np.average(data, axis=0, weights=np.reciprocal(err*err))
+    ave = np.average(data, axis=0, weights=np.reciprocal(err*err, where=err != 0))
     if useAveErr:
         std = np.average(err, axis=0)
     else:
-        std = np.sqrt(np.average((data - ave)**2, weights=np.reciprocal(err*err), axis=0)/np.sqrt(data.shape[0]))
+        std = np.sqrt(np.average((data - ave)**2, weights=np.reciprocal(err*err, where=err != 0), axis=0)/np.sqrt(data.shape[0]))
     return ave, std
 
 def mergeID(signal, signal_err, result, stdRange=5, useAveErr=False, minSize=0):
