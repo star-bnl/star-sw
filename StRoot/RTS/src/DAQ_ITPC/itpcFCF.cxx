@@ -37,7 +37,7 @@
 // 0x20180001 until Jun 6 -- had cuts in do_ch()
 
 
-#define DO_DBG1	1
+//#define DO_DBG1	1
 
 static double mark(void)
 {
