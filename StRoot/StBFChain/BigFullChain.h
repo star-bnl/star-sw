@@ -1147,7 +1147,15 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2022","" ,"",
    "B2022,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
+    "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
+
+  {"B2022a"  ,"","",
+   "ry2022a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2022 data (tpc)",kFALSE},
+
+  {"pp2022a","" ,"",
+   "B2022a,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
+      "","","Production chain for year 2022 pp data - CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
 
 
   // Other chains/Calibration
