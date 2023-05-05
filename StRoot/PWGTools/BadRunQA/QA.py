@@ -26,19 +26,19 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
     runsRejected = []
     reasonsRejected = []
 
-    if globalRejection:
-        runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, [], stdRange=stdRange, 
-                                                     useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False)
-        if runRj.shape[0] > 0:
-            runsRejected.append(runRj)
-            reasonsRejected.append(reasonRj)
+    edgeRuns = []
+    runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=stdRange, 
+                                                 useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False)
+    if globalRejection and runRj.shape[0] > 0:
+        runsRejected.append(runRj)
+        reasonsRejected.append(reasonRj)
 
-            idRejected = np.searchsorted(runs_copy, runRj)
+        idRejected = np.searchsorted(runs_copy, runRj)
 
-            runs_copy  = np.delete(runs_copy, idRejected)
-            x_copy     = np.delete(x_copy, idRejected, axis=0)
-            xerr_copy  = np.delete(xerr_copy, idRejected, axis=0)
-            weights = np.delete(weights, idRejected, axis=0)
+        runs_copy  = np.delete(runs_copy, idRejected)
+        x_copy     = np.delete(x_copy, idRejected, axis=0)
+        xerr_copy  = np.delete(xerr_copy, idRejected, axis=0)
+        weights = np.delete(weights, idRejected, axis=0)
 
     for i in range(maxIter):
         if i > 0 and segmentOnce:
@@ -54,13 +54,16 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
                 xerr_normal = (xerr_copy/x_std)[idValid, :]
                 result = mergeID(x_normal, xerr_normal, result, stdRange=5, useAveErr=False, minSize=min_size)
                 result = result[:-1]
-            edgeRuns = runs_copy[idValid][result]
-            result = np.searchsorted(runs_copy, edgeRuns).tolist()
-        runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, result, stdRange=stdRange, 
-                                                     useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0))
+            edgeRunsCand = runs_copy[idValid][result]
+            result = np.searchsorted(runs_copy, edgeRunsCand).tolist()
+        runRj, reasonRj, meanCand, stdCand = outlierDetector(runs_copy, x_copy, xerr_copy, result, stdRange=stdRange, 
+                                                              useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0))
 
         if runRj.shape[0] == 0:
             break
+        edgeRuns = edgeRunsCand
+        mean = meanCand
+        std = stdCand
         runsRejected.append(runRj)
         reasonsRejected.append(reasonRj)
 
