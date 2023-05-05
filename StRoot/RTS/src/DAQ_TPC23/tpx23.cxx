@@ -66,9 +66,9 @@ u_int *tpx23::fee_scan()
 	// last valid FEE word is at d_end
 	h = d_end ;
 
-	if(fmt>22) {
 
-
+	if(hdr_version) {
+#if 0
 		fee_wds = (d_end+1) - (d_start+2) ;
 
 		LOG(WARN,"Evt %d: S%02d:%d: T %d, trg %d, daq %d: fee words %d vs %d",evt_trgd,
@@ -76,7 +76,7 @@ u_int *tpx23::fee_scan()
 		    token,trg_cmd,daq_cmd,
 		    fee_wds,words) ;
 		LOG(WARN,"   first altro words 0x%08X last, 0x%08X before last",h[0],h[-1]) ;
-#if 1
+#if 0
 		u_int *d = (u_int *)d_start ;
 //		printf("first h words: 0x%08X last, 0x%08X before-last\n",h[0],h[-1]) ;
 		for(int i=0;i<words;i++) {
@@ -86,7 +86,8 @@ u_int *tpx23::fee_scan()
 #endif
 
 		LOG(ERR,"fmt %d: not yet done",fmt) ;
-		goto done ;
+#endif
+		//goto done ;
 	}
 
 
@@ -125,9 +126,9 @@ u_int *tpx23::fee_scan()
 		}
 					
 
-		if(fmt>22) {
-			LOG(TERR,"%d: A%03d:%02d: words %d",rdo1,id,ch,wc) ;
-		}
+//		if(fmt>22) {
+//			LOG(TERR,"%d: A%03d:%02d: words %d",rdo1,id,ch,wc) ;
+//		}
 
 		while(wc%4) wc++ ;
 
@@ -330,6 +331,11 @@ u_int *tpx23::fee_scan()
 	return 0 ;
 }
 
+/*
+	While not strictly static, this thing should not set or use
+	any class members
+*/
+
 u_int tpx23::get_token_s(char *c_addr, int wds)
 {
 	u_int *d = (u_int *)c_addr ;
@@ -341,12 +347,10 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 	trg = 0 ;
 	daq = 0 ;
 
-//	int rdo = (d[0]>>8)&0xF ;
-//	int sec = (d[0]>>12)&0xFF ;
-//	int subtype = (d[0]>>4)&0xF ;
-	int type = (d[0]>>0)&0xF ;
-				
 
+	int type = (d[0]>>0)&0xF ;
+	int hdr_type = (d[0]>>24)&0xF ;	 //0: pre-FY23 headers, 1:FY23 headers
+//	hdr_type = 1 ;
 	
 
 	switch(type) {
@@ -371,23 +375,26 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 	d += wds ;
 	d-- ;		// at the last datum
 
-//	for(int i=-16;i<=0;i++) {
-//		LOG(TERR,"%2d = 0x%08X",i,d[i]) ;
-//	}
+	if(hdr_type) {
+		//0:tick,1:status,2:1,3:trg
+
+		t = d[-2] & 0xFFF ;
+		daq = (d[-2] >> 12)&0xF ;
+		trg = (d[-2] >> 16)&0xF ;
+
+		goto done ;
+
+	}
+
+	// here we are with the old, pre-FY23 header format
 
 
 	d -= 2 ;	// skip 2 words trailer
-
-//	for(int i=0;i<16;i++) {
-//		LOG(TERR,"%2d = 0x%08X",i,d[i]) ;
-//	}
 
 
 	trg_cou = *d ;
 
 	d -= trg_cou * (sizeof(struct trg_data)/4) ;
-
-//	LOG(TERR,"get_token_s: trg_cou %d, %p",trg_cou,d) ;
 
 
 	trg_d = (struct trg_data *)d ;
@@ -416,23 +423,86 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 u_int tpx23::get_token(char *c_addr, int wds)
 {
 	u_int *d = (u_int *)c_addr ;
-
+	u_int *d_first ;
 	token = 4097 ;
 	trg_cmd = 0 ;
 	daq_cmd = 0 ;
 
+	d_first = d ;
+
+
+
+
+//	LOG(TERR,"get_token %u",d[1]) ;
+
+	tdbg[0] = d[1] ;	// RHIC counter
+
 	d += wds ;
 	d-- ;		// at the last datum
 
-	d -= 2 ;	// skip 2 words trailer
+
+//	LOG(TERR,"evt %d(hdr %d, wds %d): 0x%08X 0x%08X, 0x%08X 0x%08X 0x%08X 0x%08X",evt,hdr_version,wds,
+//	d_first[0],d_first[1],d[-3],d[-2],d[-1],d[0]) ;
+
+	// for the new FY23 format!
+	if(hdr_version) {
+		tdbg[0] = d_first[1] ;	// RHIC counter start
+		tdbg[1] = d[0] ;	// RHIC counter end
+		tdbg[2] = d[-1] ;	// event status
+		tdbg[3] = d[-2] ;	// trg word
+
+		tdbg[4] = d[-5] ;	// at start-altro
+		tdbg[5] = d[-4] ;	// at end-altr
+		tdbg[6] = d[-3] ;	// before DDL
+
+		token = d[-2] & 0xFFF ;
+		daq_cmd = (d[-2] >> 12)&0xF ;
+		trg_cmd = (d[-2] >> 16)&0xF ;
+
+		
+		u_int evt_err = d[-1] ;
+		if(evt_err) {
+			int cou ;
+
+			if(wds>20) cou = 20 ;
+			else cou = wds ;
+
+			LOG(ERR,"evt_err %d:%d: 0x%08X: 0x%08X, wds %u",evt,rdo1,d_first[0],evt_err,wds) ;
+			for(int i=0;i<cou;i++) {
+				LOG(TERR,"  %d: 0x%08X",i,d_first[i]) ;
+			}
+		}
+		
+
+#if 0
+		printf(" delta evt %d: all %d: %d %d %d %d - token %d, wds %d\n",evt,tdbg[1]-tdbg[0],
+		       	tdbg[4]-tdbg[0],
+		       	tdbg[5]-tdbg[4],
+		       	tdbg[6]-tdbg[5],
+		       	tdbg[1]-tdbg[6],
+			token,wds) ;
+
+#endif
+
+		d_end = d - 6 ;	// last word of the ALTRO contribution
+	
+		return (trg_cmd<<16)|(daq_cmd<<12)|token ;
+		
+	}
+	
+
+	d -= 2 ;	// skip 2 words trailer to position myself at "trigger count"
 
 	int trg_cou = *d ;
 
-	d -= trg_cou * (sizeof(struct trg_data)/4) ;
+	d -= trg_cou * (sizeof(struct trg_data)/4) ;	// move back 1
 
 	struct trg_data *trg = (struct trg_data *)d ;
 	for(int i=0;i<trg_cou;i++) {
-//		LOG(TERR,"trg_data %d: 0x%X 0x%X 0x%X",i,trg[i].rhic_counter, trg[i].csr, trg[i].data) ;
+
+//		if(hdr_version) {
+//			LOG(TERR,"trg_data %d: 0x%X 0x%X 0x%X",i,trg[i].rhic_counter, trg[i].csr, trg[i].data) ;
+//		}
 
 		switch(trg[i].csr & 0xFF000000) {
 		case 0xFF000000 :	// FIFO stuff?
@@ -450,10 +520,6 @@ u_int tpx23::get_token(char *c_addr, int wds)
 	done:;
 
 	d_end = d - 3 ;	// very last ALTRO datum
-
-	if(fmt>22) {
-		d_end -= 2 ;	// 2 more for the new RDO
-	}
 
 	return (trg_cmd<<16)|(daq_cmd<<12)|token ;
 }
@@ -510,11 +576,13 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 	non_ascii = 0 ;	
 
-//	max_cou = (words-4)*4 ;
+	int max_cou = (words-4)*4 ;
 	rdobuff = (char *)(c_addr+2*4) ;	// skip header
 
 	// one liner or more?
 	len = strlen(rdobuff) ;
+	if(len>max_cou) len = max_cou ;
+
 	cou = 0 ;
 
 	tmpbuff = (char *) malloc(len+1) ;
@@ -565,7 +633,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 			}
 			else {
 				err = -1 ;
-				LOG(ERR,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
+				//LOG(ERR,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
 			}
 		}
 
@@ -637,10 +705,10 @@ int tpx23::log_dump(char *c_addr, int wds)
 		
 		
 		if(err<0) {
-			LOG(ERR,"[S%d:%d LOG %d]: %s",s_real,r_real,rdo,tmpbuff+st) ;
+			LOG(ERR,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
 		}
 		else if(do_log) {
-			LOG(INFO,"[S%d:%d LOG %d]: %s",s_real,r_real,rdo,tmpbuff+st) ;
+			LOG(INFO,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
 		}
 		
 		while(tmpbuff[i]) {
@@ -710,14 +778,15 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 
 
 
-
-
 	int rdo = (d[0]>>8)&0xF ;
 	int sec = (d[0]>>12)&0xFF ;
 
 	subtype = (d[0]>>4)&0xF ;	//class
 	type = (d[0]>>0)&0xF ;		//class
-				
+		
+	hdr_version = (d[0]>>24)&0xF ;
+//	hdr_version = 1 ;
+
 	d_start = d ;
 	token = 4096 ;
 	trg_cmd = 0 ;
@@ -729,9 +798,13 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 	evt++ ;
 
 
+	if((d[0]&0xF0000000)!=0xF0000000) {
+		LOG(ERR,"%d:%d: bad header 0x%08X",evt,rdo1,d[0]) ;
+	}
+
 	if(rdo!=rdo1 || sec!=sector1) {
-		LOG(ERR,"%d: wrong sec,rdo: rdo expect %d is %d; sector expect %d is %d",rdo1,
-		    rdo1,rdo,sector1,sec) ;
+		LOG(ERR,"%d:%d: wrong sec,rdo: rdo expect %d is %d; sector expect %d is %d [0x%08X]",evt,rdo1,
+		    rdo1,rdo,sector1,sec,d[0]) ;
 	}
 
 
@@ -794,7 +867,7 @@ tpx23::tpx23()
 	row_max = 45 ;
 	for(int row=1;row<=45;row++) rowlen[row] = tpc_rowlen[row] ;
 
-
+	hdr_version = 0 ;	// 0:pre FY23
 	
 }
 
