@@ -89,6 +89,7 @@ struct FwdTreeData {
     int thdN;
     vector<float> thdX, thdY, thaX, thaY, thaZ;
 
+    bool saveCrit = false;
     std::map<string, std::vector<float>> Crits;
     std::map<string, std::vector<int>> CritTrackIds;
 

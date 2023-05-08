@@ -63,10 +63,6 @@
 #include "StMuFmsCollection.h"
 #include "StMuFmsUtil.h"
 #include "StMuFmsHit.h"
-#include "StMuRHICfCollection.h"
-#include "StMuRHICfUtil.h"
-#include "StMuRHICfHit.h"
-#include "StMuRHICfPoint.h"
 #include "StMuFcsCollection.h"
 #include "StMuFcsUtil.h"
 #include "StMuFcsHit.h"
@@ -74,6 +70,9 @@
 #include "StMuFttUtil.h"
 #include "StMuFttRawHit.h"
 #include "StMuFstCollection.h"
+#include "StMuFwdTrack.h"
+#include "StMuFwdTrackUtil.h"
+#include "StMuFwdTrackCollection.h"
 #include "StMuFstUtil.h"
 #include "StMuFstRawHit.h"
 #include "StMuFstHit.h"
@@ -162,8 +161,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mChain (0), mTTree(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4), mVtxList(100),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mFmsCollection(0),mRHICfCollection(0),mFcsCollection(0),mFttCollection(0),
-  mFstCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
+  mFmsCollection(0),mFcsCollection(0),mFttCollection(0),mFstCollection(0),mFwdTrackCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 
 {
   assignArrays();
@@ -179,7 +177,6 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mFmsUtil = new StMuFmsUtil();
-  mRHICfUtil = new StMuRHICfUtil();
   mFcsUtil = new StMuFcsUtil();
   mFttUtil = new StMuFttUtil();
   mFstUtil = new StMuFstUtil();
@@ -188,7 +185,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mBTofUtil = new StMuBTofUtil();   /// dongx
   mEpdUtil = new StMuEpdUtil();     /// MALisa
   mEzTree  = new StMuEzTree();
-  if ( ! mStMuDst || ! mEmcUtil || ! mFmsUtil || ! mRHICfUtil || ! mFcsUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEpdUtil || ! mEzTree ) /// dongx
+  if ( ! mStMuDst || ! mEmcUtil || ! mFmsUtil || ! mFcsUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEpdUtil || ! mEzTree ) /// dongx
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -223,11 +220,11 @@ void StMuDstMaker::assignArrays()
   mEmcArrays      = mMCArrays      + __NMCARRAYS__;
   mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
   mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;    
-  mRHICfArrays    = mFmsArrays     + __NFMSARRAYS__;    
-  mFcsArrays      = mRHICfArrays   + __NRHICFARRAYS__;  
+  mFcsArrays      = mFmsArrays     + __NFMSARRAYS__;  
   mFttArrays      = mFcsArrays     + __NFCSARRAYS__;  
   mFstArrays      = mFttArrays     + __NFTTARRAYS__;  
-  mTofArrays      = mFstArrays     + __NFSTARRAYS__;    
+  mFwdTrackArrays = mFstArrays     + __NFSTARRAYS__;  
+  mTofArrays      = mFstArrays     + __NFWDTRACKARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;    /// dongx
   mETofArrays     = mBTofArrays    + __NBTOFARRAYS__;   /// jdb
   mEpdArrays      = mETofArrays    + __NETOFARRAYS__;   /// MALisa
@@ -246,10 +243,10 @@ void StMuDstMaker::clearArrays()
     __NEMCARRAYS__+
     __NPMDARRAYS__+
     __NFMSARRAYS__+
-    __NRHICFARRAYS__+
     __NFCSARRAYS__+
     __NFTTARRAYS__+
     __NFSTARRAYS__+
+    __NFWDTRACKARRAYS__+
     __NTOFARRAYS__+
     __NBTOFARRAYS__+  /// dongx
     __NETOFARRAYS__+ //jdb
@@ -280,10 +277,10 @@ void StMuDstMaker::zeroArrays()
 			__NEMCARRAYS__+
 			__NPMDARRAYS__+
             __NFMSARRAYS__+
-            __NRHICFARRAYS__+
             __NFCSARRAYS__+
             __NFTTARRAYS__+
             __NFSTARRAYS__+
+            __NFWDTRACKARRAYS__+
             __NTOFARRAYS__+
             __NBTOFARRAYS__+ /// dongx
             __NETOFARRAYS__+ //jdb
@@ -329,16 +326,16 @@ void StMuDstMaker::zeroArrays()
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
 #ifndef __NO_STRANGE_MUDST__
-  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll","EmcAll","PmdAll","FMSAll","RHICfAll","FcsAll","FttAll","FstAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
+  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll","EmcAll","PmdAll","FMSAll","FcsAll","FttAll","FstAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
 #else
-  static const char *specNames[]={"MuEventAll",             "MCAll","EmcAll","PmdAll","FMSAll","RHICfAll","FcsAll","FttAll","FstAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
+  static const char *specNames[]={"MuEventAll",             "MCAll","EmcAll","PmdAll","FMSAll","FcsAll","FttAll","FstAll","TofAll","BTofAll","ETofAll","EpdAll","MTDAll","FgtAll","EztAll",0};  /// dongx, MALisa
 #endif
   static const int   specIndex[]={
   0, __NARRAYS__,
   #ifndef __NO_STRANGE_MUDST__
       __NSTRANGEARRAYS__,
   #endif
-  __NMCARRAYS__,__NEMCARRAYS__,__NPMDARRAYS__,__NFMSARRAYS__,__NRHICFARRAYS__,__NFCSARRAYS__,__NFTTARRAYS__,__NFSTARRAYS__,__NTOFARRAYS__,__NBTOFARRAYS__,__NETOFARRAYS__,__NEPDARRAYS__,__NMTDARRAYS__,__NFGTARRAYS__,__NEZTARRAYS__,-1};
+  __NMCARRAYS__,__NEMCARRAYS__,__NPMDARRAYS__,__NFMSARRAYS__,__NFCSARRAYS__,__NFTTARRAYS__,__NFSTARRAYS__,__NFWDTRACKARRAYS__,__NTOFARRAYS__,__NBTOFARRAYS__,__NETOFARRAYS__,__NEPDARRAYS__,__NMTDARRAYS__,__NFGTARRAYS__,__NEZTARRAYS__,-1};
 
     // jdb fixed with new implementation, 
     // this method was broken for several years
@@ -395,8 +392,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mFmsCollection(0), mRHICfCollection(0), mFcsCollection(0),
-  mFttCollection(0), mFstCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
+  mFmsCollection(0), mFcsCollection(0), mFttCollection(0), mFstCollection(0), mFwdTrackCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 {
   assignArrays();
   streamerOff();
@@ -411,7 +407,6 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mFmsUtil = new StMuFmsUtil();
-  mRHICfUtil = new StMuRHICfUtil();
   mFcsUtil = new StMuFcsUtil();
   mFttUtil = new StMuFttUtil();
   mFstUtil = new StMuFstUtil();
@@ -435,7 +430,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),mStTriggerYear(year),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-mFmsCollection(0), mRHICfCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
+mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 {
   assignArrays();
   streamerOff();
@@ -450,7 +445,6 @@ mFmsCollection(0), mRHICfCollection(0), mPmdCollectionArray(0), mPmdCollection(0
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mFmsUtil = new StMuFmsUtil();
-  mRHICfUtil = new StMuRHICfUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
@@ -852,12 +846,6 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     mStMuDst->set(this);
   }
 
-  if (!mRHICfCollection) {
-    mRHICfCollection=new StMuRHICfCollection();
-    connectRHICfCollection();
-    mStMuDst->set(this);
-  }
-
   if (!mFcsCollection) {
     mFcsCollection=new StMuFcsCollection();
     connectFcsCollection();
@@ -873,6 +861,12 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   if (!mFstCollection) {
     mFstCollection=new StMuFstCollection();
     connectFstCollection();
+    mStMuDst->set(this);
+  }
+
+  if (!mFwdTrackCollection) {
+    mFwdTrackCollection=new StMuFwdTrackCollection();
+    connectFwdTrackCollection();
     mStMuDst->set(this);
   }
 
@@ -1040,10 +1034,10 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillEmc(ev);
     fillPmd(ev);
     fillFms(ev);
-    fillRHICf(ev);
     fillFcs(ev);
     fillFtt(ev);
     fillFst(ev);
+    fillFwdTrack(ev);
     fillTof(ev);
     fillBTof(ev); 
     fillETof(ev);
@@ -1175,27 +1169,6 @@ void StMuDstMaker::fillFms(StEvent* ev) {
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillRHICf(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StRHICfCollection* rhicfcol=(StRHICfCollection*)ev->rhicfCollection();
-  if (!rhicfcol)  return; //throw StMuExceptionNullPointer("no StRHICfCollection",__PRETTYF__);
-  StTimer timer;
-  timer.start();
-
-  if (!mRHICfCollection) {
-    LOG_INFO << "no find a RHICfCollection !!! " << endm;
-    mRHICfCollection=new StMuRHICfCollection();
-    connectRHICfCollection();
-    mStMuDst->set(this);
-  }
-  LOG_DEBUG << "StMuDSTMaker filling StMuRHICfCollection from StEvent" << endm;
-  mRHICfUtil->fillMuRHICf(mRHICfCollection,rhicfcol);
-
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
 void StMuDstMaker::fillFcs(StEvent* ev) {
   DEBUGMESSAGE2("");
   StFcsCollection* fcscol=(StFcsCollection*)ev->fcsCollection();
@@ -1205,13 +1178,11 @@ void StMuDstMaker::fillFcs(StEvent* ev) {
 
   
   if (!mFcsCollection) {
-    LOG_INFO << "Making Fcs Collection" << endm;
     mFcsCollection=new StMuFcsCollection();
-    LOG_INFO << "Connecting Fcs Collection" << endm;
     connectFcsCollection();
     mStMuDst->set(this);
   }
-  LOG_INFO << "StMuDSTMaker filling StMuFcsCollection from StEvent" << endm;
+  
   mFcsUtil->fillMuFcs(mFcsCollection,fcscol);
 
   timer.stop();
@@ -1258,6 +1229,30 @@ void StMuDstMaker::fillFst(StEvent* ev) {
   }
 
   mFstUtil->fillMuFst(mFstCollection,fstcol,fstevtcol);
+
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillFwdTrack(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  LOG_INFO << "StMuDstMaker::fillFwdTrack(StEvent* ev)" << endm;
+  StFwdTrackCollection* fwdcol=(StFwdTrackCollection*)ev->fwdTrackCollection();
+  if (!fwdcol)  return; //throw StMuExceptionNullPointer("no StFstHitCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
+
+  LOG_INFO << "StMuDSTMaker filling StMuFwdTrackCollection from StEvent" << endm;
+
+  if (!mFwdTrackCollection) {
+    mFwdTrackCollection=new StMuFwdTrackCollection();
+    LOG_INFO << "Connecting StMuFwdTrackCollection" << endm;
+    connectFwdTrackCollection();
+    mStMuDst->set(this);
+  }
+
+  mFwdTrackUtil->fillMuFwdTrack(mFwdTrackCollection,fwdcol,mFcsUtil);
 
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1588,7 +1583,7 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
 #ifndef __NO_STRANGE_MUDST__
                       __NSTRANGEARRAYS__+
 #endif
-                      __NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NFTTARRAYS__+__NFSTARRAYS__+
+                      __NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NFTTARRAYS__+__NFSTARRAYS__+__NFWDTRACKARRAYS__+
 				      __NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__]; /// dongx, MALisa
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
@@ -2074,12 +2069,6 @@ void StMuDstMaker::connectFmsCollection() {
   mFmsCollection->setFmsInfoArray(mFmsArrays[muFmsInfo]);
 }
 //-----------------------------------------------------------------------
-void StMuDstMaker::connectRHICfCollection() {
-  mRHICfCollection->setRHICfRawHitArray(mRHICfArrays[muRHICfRawHit]);
-  mRHICfCollection->setRHICfHitArray(mRHICfArrays[muRHICfHit]);
-  mRHICfCollection->setRHICfPointArray(mRHICfArrays[muRHICfPoint]);
-}
-//-----------------------------------------------------------------------
 void StMuDstMaker::connectFcsCollection() {
   LOG_INFO << "Setting Fcs arrays" << endm;
   mFcsCollection->setFcsHitArray(mFcsArrays[muFcsHit]);
@@ -2099,6 +2088,11 @@ void StMuDstMaker::connectFstCollection() {
   LOG_INFO << "Setting Fst arrays" << endm;
   mFstCollection->setFstRawHitArray(mFstArrays[muFstRawHit]);
   mFstCollection->setFstHitArray(mFstArrays[muFstHit]);
+}
+//-----------------------------------------------------------------------
+void StMuDstMaker::connectFwdTrackCollection() {
+  LOG_INFO << "Setting FwdTrack arrays" << endm;
+  mFwdTrackCollection->setFwdTrackArray(mFwdTrackArrays[muFwdTrack]);
 }
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectPmdCollection() {

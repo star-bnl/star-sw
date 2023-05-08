@@ -29,10 +29,10 @@
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
 #include "StMuFmsUtil.h"
-#include "StMuRHICfUtil.h"
 #include "StMuFcsUtil.h"
 #include "StMuFttUtil.h"
 #include "StMuFstUtil.h"
+#include "StMuFwdTrackUtil.h"
 #include "StMuPmdUtil.h"
 ///dongx
 #include "StBTofCollection.h"
@@ -62,36 +62,35 @@ TClonesArray** StMuDst::strangeArrays= 0;
 #endif
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
-TClonesArray** StMuDst::mcArrays                 = 0;
-TClonesArray** StMuDst::emcArrays                = 0;
-TClonesArray** StMuDst::fmsArrays                = 0;
-TClonesArray** StMuDst::rhicfArrays              = 0;
-TClonesArray** StMuDst::fcsArrays                = 0;
-TClonesArray** StMuDst::fttArrays                = 0;
-TClonesArray** StMuDst::fstArrays                = 0;
-TClonesArray** StMuDst::pmdArrays                = 0;
-TClonesArray** StMuDst::tofArrays                = 0;
-TClonesArray** StMuDst::btofArrays               = 0;   /// dongx
-TClonesArray** StMuDst::etofArrays               = 0;   /// jdb
-TClonesArray** StMuDst::epdArrays                = 0;   /// MALisa
-TClonesArray** StMuDst::mtdArrays                = 0;
-TClonesArray** StMuDst::fgtArrays                = 0;
-TClonesArray *StMuDst::mMuEmcCollectionArray     = 0;
-StMuEmcCollection *StMuDst::mMuEmcCollection     = 0;
-StMuFmsCollection *StMuDst::mMuFmsCollection     = 0;
-StMuRHICfCollection *StMuDst::mMuRHICfCollection = 0;
-StMuFcsCollection *StMuDst::mMuFcsCollection     = 0;
-StMuFttCollection *StMuDst::mMuFttCollection     = 0;
-StMuFstCollection *StMuDst::mMuFstCollection     = 0;
-TClonesArray *StMuDst::mMuPmdCollectionArray     = 0;
-StMuPmdCollection *StMuDst::mMuPmdCollection     = 0;
-StEmcCollection *StMuDst::mEmcCollection         = 0;
-StFmsCollection *StMuDst::mFmsCollection         = 0;
-StRHICfCollection *StMuDst::mRHICfCollection     = 0;
-TClonesArray** StMuDst::eztArrays                = 0;
+TClonesArray** StMuDst::mcArrays             = 0;
+TClonesArray** StMuDst::emcArrays            = 0;
+TClonesArray** StMuDst::fmsArrays            = 0;
+TClonesArray** StMuDst::fcsArrays            = 0;
+TClonesArray** StMuDst::fttArrays            = 0;
+TClonesArray** StMuDst::fstArrays            = 0;
+TClonesArray** StMuDst::fwdTrackArrays       = 0;
+TClonesArray** StMuDst::pmdArrays            = 0;
+TClonesArray** StMuDst::tofArrays            = 0;
+TClonesArray** StMuDst::btofArrays           = 0;   /// dongx
+TClonesArray** StMuDst::etofArrays           = 0;   /// jdb
+TClonesArray** StMuDst::epdArrays            = 0;   /// MALisa
+TClonesArray** StMuDst::mtdArrays            = 0;
+TClonesArray** StMuDst::fgtArrays            = 0;
+TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
+StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
+StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
+StMuFcsCollection *StMuDst::mMuFcsCollection = 0;
+StMuFttCollection *StMuDst::mMuFttCollection = 0;
+StMuFstCollection *StMuDst::mMuFstCollection = 0;
+StMuFwdTrackCollection *StMuDst::mMuFwdTrackCollection = 0;
+TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
+StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
+StEmcCollection *StMuDst::mEmcCollection     = 0;
+StFmsCollection *StMuDst::mFmsCollection     = 0;
+TClonesArray** StMuDst::eztArrays            = 0;
 
-Int_t StMuDst::mCurrVertexId                     = -2;
-TObjArray* StMuDst::mCurrPrimaryTracks           = 0;
+Int_t StMuDst::mCurrVertexId                 = -2;
+TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -109,10 +108,10 @@ void StMuDst::unset() {
     mcArrays = 0;
     emcArrays     = 0;
     fmsArrays     = 0;
-    rhicfArrays   = 0;
     fcsArrays     = 0;
     fttArrays     = 0;
     fstArrays     = 0;
+    fwdTrackArrays= 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
@@ -122,16 +121,15 @@ void StMuDst::unset() {
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
     mMuEmcCollection = 0; 
-    mMuFmsCollection = 0;
-    mMuRHICfCollection = 0;
+	mMuFmsCollection = 0;
     mMuFcsCollection = 0;
     mMuFttCollection = 0;
     mMuFstCollection = 0;
+    mMuFwdTrackCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
     mEmcCollection = 0;
-    mFmsCollection = 0;
-    mRHICfCollection = 0;
+	mFmsCollection = 0;
     eztArrays      = 0;
     mtdArrays = 0;
 }
@@ -148,10 +146,10 @@ void StMuDst::set(StMuDstMaker* maker) {
   mcArrays = maker->mMCArrays;
   emcArrays     = maker->mEmcArrays;
   fmsArrays     = maker->mFmsArrays;
-  rhicfArrays   = maker->mRHICfArrays;
   fcsArrays     = maker->mFcsArrays;
   fttArrays     = maker->mFttArrays;
   fstArrays     = maker->mFstArrays;
+  fwdTrackArrays= maker->mFwdTrackArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;    // dongx
@@ -164,10 +162,10 @@ void StMuDst::set(StMuDstMaker* maker) {
     mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
   mMuFmsCollection      = maker->mFmsCollection;
-  mMuRHICfCollection    = maker->mRHICfCollection;
   mMuFcsCollection      = maker->mFcsCollection;
   mMuFttCollection      = maker->mFttCollection;
   mMuFstCollection      = maker->mFstCollection;
+  mMuFwdTrackCollection      = maker->mFwdTrackCollection;
    mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
@@ -189,26 +187,26 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theMCArrays, 
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
-      TClonesArray** theRHICfArrays,
-      TClonesArray** theFcsArrays,
-      TClonesArray** theFttArrays,
-      TClonesArray** theFstArrays,
+          TClonesArray** theFcsArrays,
+          TClonesArray** theFttArrays,
+          TClonesArray** theFstArrays,
+          TClonesArray** theFwdTrackArrays,
 		  TClonesArray** thePmdArrays,
 		  TClonesArray** theTofArrays,
 		  TClonesArray** theBTofArrays,    // dongx
 		  TClonesArray** theETofArrays,    // jdb
-      TClonesArray** theEpdArrays,     // MALisa
+          TClonesArray** theEpdArrays,     // MALisa
 		  TClonesArray** theMTDArrays,
 		  TClonesArray** theFgtArrays,
 		  TClonesArray** theEztArrays,
-      TClonesArray* emc_arr,
+          TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
  		  StMuFmsCollection *fms,
-      StMuRHICfCollection *rhicf,
-      StMuFcsCollection *fcs,		  
-      StMuFttCollection *ftt,
-      StMuFstCollection *fst,
-      TClonesArray* pmd_arr,
+          StMuFcsCollection *fcs,		  
+          StMuFttCollection *ftt,
+          StMuFstCollection *fst,
+          StMuFwdTrackCollection *fwdTrack,
+          TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd)
 {
   // I don't understand why this method is still needed,
@@ -221,10 +219,10 @@ void StMuDst::set(TClonesArray** theArrays,
   mcArrays = theMCArrays;
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
-  rhicfArrays   = theRHICfArrays;
   fcsArrays     = theFcsArrays;
   fttArrays     = theFttArrays;
   fstArrays     = theFstArrays;
+  fwdTrackArrays= theFwdTrackArrays;
   fgtArrays     = theFgtArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
@@ -232,12 +230,12 @@ void StMuDst::set(TClonesArray** theArrays,
   etofArrays    = theETofArrays;    // jdb
   epdArrays     = theEpdArrays;     // MALisa
   mMuEmcCollectionArray = emc_arr;  
-  mMuEmcCollection   = emc; 
-  mMuFmsCollection   = fms; 
-  mMuRHICfCollection = rhicf; 
-  mMuFcsCollection   = fcs;
-  mMuFttCollection   = ftt;
-  mMuFstCollection   = fst;
+  mMuEmcCollection = emc; 
+  mMuFmsCollection = fms;  
+  mMuFcsCollection = fcs;
+  mMuFttCollection = ftt;
+  mMuFstCollection = fst;
+  mMuFwdTrackCollection = fwdTrack;
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
   eztArrays     = theEztArrays;
@@ -794,14 +792,7 @@ StEvent* StMuDst::createStEvent() {
      StFmsCollection *FMS = mFmsUtil->getFms(fms);
      if(FMS) ev->setFmsCollection(FMS);
   }
-  // now get the RHICf stuff and put it in the StEvent
-  static StMuRHICfUtil* mRHICfUtil = new StMuRHICfUtil();
-  StMuRHICfCollection *rhicf = muRHICfCollection();
-  if(rhicf) { // transform to StEvent format and fill it
-     StRHICfCollection *RHICf = mRHICfUtil->getRHICf(rhicf);
-     if(RHICf) ev->setRHICfCollection(RHICf);
-  }
-  // now get the FMS stuff and put it in the StEvent
+  // now get the FCS stuff and put it in the StEvent
   static StMuFcsUtil* mFcsUtil = new StMuFcsUtil();
   StMuFcsCollection *fcs = muFcsCollection();
   if(fcs) { // transform to StEvent format and fill it
@@ -821,6 +812,13 @@ StEvent* StMuDst::createStEvent() {
   if(fst) { // transform to StEvent format and fill it
      StFstHitCollection *FST = mFstUtil->getFst(fst);
      if(FST) ev->setFstHitCollection(FST);
+  }
+ // now get the FWD Tracks and put it in the StEvent
+  static StMuFwdTrackUtil* mFwdTrackUtil = new StMuFwdTrackUtil();
+  StMuFwdTrackCollection *fwdTrack = muFwdTrackCollection();
+  if(fwdTrack) { // transform to StEvent format and fill it
+     StFwdTrackCollection *theFwdTrack = mFwdTrackUtil->getFwdTrack(fwdTrack);
+     if(theFwdTrack) ev->setFwdTrackCollection(theFwdTrack);
   }
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();
@@ -1008,10 +1006,6 @@ void StMuDst::Print(Option_t *option) const {
      cout << "FMS data present" << endl;
    else
      cout << "No FMS data present" << endl;
-   if (muRHICfCollection())
-     cout << "RHICf data present" << endl;
-   else
-     cout << "No RHICf data present" << endl;
    if (pmdCollection())
     cout << "PMD data present" << endl;
   else

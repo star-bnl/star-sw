@@ -73,7 +73,7 @@ public:
         this->trackSeed = seedTrack;
 
         try {
-            this->track = new genfit::Track(*track);
+            this->track = track;
             this->status = *(this->track->getFitStatus());
             this->trackRep = this->track->getCardinalRep();
 
@@ -86,9 +86,10 @@ public:
             this->nPV = this->track->getNumPoints() - (nFTT + nFST);
 
             this->momentum = this->trackRep->getMom( this->track->getFittedState(0, this->trackRep) );
+            LOG_DEBUG << "GenfitTrackResult::set Track successful" << endm;
 
         } catch ( genfit::Exception &e ) {
-            LOG_ERROR << "CANNOT GET TRACK" << endm;
+            LOG_ERROR << "GenfitTrackResult cannot get track" << endm;
             this->track = nullptr;
             this->trackRep = nullptr;
 
@@ -109,6 +110,7 @@ public:
     }
 
     void setFst( Seed_t &seedFst, genfit::Track *track ){
+        LOG_DEBUG << "GenfitTrackResult::setFSt" << endm;
         nFST = seedFst.size();
         fstSeed = seedFst;
 
@@ -125,7 +127,7 @@ public:
             this->fstMomentum = this->fstTrackRep->getMom( this->fstTrack->getFittedState(0, this->fstTrackRep) );
 
         } catch ( genfit::Exception &e ) {
-            LOG_ERROR << "CANNOT GET TRACK" << endm;
+            LOG_ERROR << "CANNOT GET FST TRACK" << endm;
             this->fstTrack = nullptr;
             this->fstTrackRep = nullptr;
 
@@ -528,6 +530,7 @@ class ForwardTrackMaker {
             if (mConfig.get<bool>("TrackFitter:refitSi", true)) {
                 addSiHitsMc();
             } else {
+                LOG_DEBUG << "Skipping FST Hits" << endm;
                 // skip Si refit
             }
             /***********************************************/
@@ -656,13 +659,13 @@ class ForwardTrackMaker {
             }
 
 
-            GenfitTrackResult gtr( track.size(), 0, track, mTrackFitter->getTrack() );
+            genTrack = new genfit::Track(*mTrackFitter->getTrack());
+            genTrack->setMcTrackId(idt);
+            GenfitTrackResult gtr( track.size(), 0, track, genTrack );
 
             // assign the fit results to be saved
             fitStatus = mTrackFitter->getStatus();
-            genTrack = new genfit::Track(*mTrackFitter->getTrack());
             trackRep = mTrackFitter->getTrackRep()->clone(); // Clone the track rep
-            genTrack->setMcTrackId(idt);
             
             if ( mGenHistograms && genTrack->getFitStatus(genTrack->getCardinalRep())->isFitConverged() && p.Perp() > 1e-3) {
                 mHist["FitStatus"]->Fill("GoodCardinal", 1);
@@ -679,6 +682,7 @@ class ForwardTrackMaker {
 
             mTrackResults.push_back( gtr );
             
+            LOG_DEBUG << "FwdTracker::fitTrack complete" << endm;
         } // if (mDoTrackFitting && !bailout)
     }
 
@@ -774,6 +778,9 @@ class ForwardTrackMaker {
      */
     vector<Seed_t> doTrackingOnHitmapSubset( size_t iIteration, FwdDataSource::HitMap_t &hitmap  ) {
         long long itStart = FwdTrackerUtils::nowNanoSecond();
+
+        std::vector<Seed_t> acceptedTracks;
+        std::vector<Seed_t> rejectedTracks;
         /*************************************************************/
         // Step 2
         // build 2-hit segments (setup parent child relationships)
@@ -811,6 +818,11 @@ class ForwardTrackMaker {
         KiTrack::Automaton automaton = builder.get1SegAutomaton();
         LOG_DEBUG << TString::Format( "nSegments=%lu", automaton.getSegments().size() ).Data() << endm;
         LOG_DEBUG << TString::Format( "nConnections=%u", automaton.getNumberOfConnections() ).Data() << endm;
+
+        if (automaton.getNumberOfConnections() > 900 ){
+            LOG_ERROR << "Got too many connections, bailing out of tracking" << endm;
+            return acceptedTracks;
+        }
 
         // at any point we can get a list of tracks out like this:
         // std::vector < std::vector< KiTrack::IHit* > > tracks = automaton.getTracks();
@@ -853,7 +865,7 @@ class ForwardTrackMaker {
         duration = (FwdTrackerUtils::nowNanoSecond() - itStart) * 1e-6; // milliseconds
         if (mGenHistograms)
             mHist["Step3Duration"]->Fill( duration );
-        if (duration > 200){
+        if (duration > 200 || automaton.getNumberOfConnections() > 900){
             LOG_WARN << "The Three Hit Criteria took more than 200ms to process, duration: " << duration << " ms" << endm;
             LOG_WARN << "bailing out (skipping subset HNN)" << endm;
             std::vector<Seed_t> acceptedTracks;
@@ -878,8 +890,6 @@ class ForwardTrackMaker {
 
         //  only for debug really
         bool findSubsets = mConfig.get<bool>(subsetPath + ":active", true);
-        std::vector<Seed_t> acceptedTracks;
-        std::vector<Seed_t> rejectedTracks;
 
         if (findSubsets) {
             size_t minHitsOnTrack = mConfig.get<size_t>(subsetPath + ":min-hits-on-track", 7);
@@ -1023,12 +1033,13 @@ class ForwardTrackMaker {
     void addSiHitsMc() {
         FwdDataSource::HitMap_t hitmap = mDataSource->getFstHits();
 
-        for (size_t i = 0; i < mGlobalTracks.size(); i++) {
-
-            if (mGlobalTracks[i]->getFitStatus(mGlobalTracks[i]->getCardinalRep())->isFitConverged() == false || mFitMoms[i].Perp() < 1e-3) {
+        for (size_t i = 0; i < mTrackResults.size(); i++) {
+            GenfitTrackResult &gtr = mTrackResults[i];
+            
+            if ( gtr.status.isFitConverged() == false || gtr.momentum.Perp() < 1e-3) {
+                LOG_DEBUG << "Skipping addSiHitsMc, fit failed" << endm;
                 return;
             }
-
 
             if ( mGenHistograms){
                 mHist["FitStatus"]->Fill("PossibleReFit", 1);
@@ -1038,7 +1049,7 @@ class ForwardTrackMaker {
 
             for (size_t j = 0; j < 3; j++) {
                 for (auto h0 : hitmap[j]) {
-                    if (dynamic_cast<FwdHit *>(h0)->_tid == mGlobalTracks[i]->getMcTrackId()) {
+                    if (dynamic_cast<FwdHit *>(h0)->_tid == gtr.track->getMcTrackId()) {
                         si_hits_for_this_track[j] = h0;
                         break;
                     }
@@ -1049,6 +1060,7 @@ class ForwardTrackMaker {
             if ( si_hits_for_this_track[0] != nullptr ) nSiHitsFound++;
             if ( si_hits_for_this_track[1] != nullptr ) nSiHitsFound++;
             if ( si_hits_for_this_track[2] != nullptr ) nSiHitsFound++;
+            LOG_DEBUG << "Found " << nSiHitsFound << " FST Hits on this track (MC lookup)" << endm;
 
             if ( mGenHistograms ){
                 this->mHist[ "nSiHitsFound" ]->Fill( 1, ( si_hits_for_this_track[0] != nullptr ? 1 : 0 ) );
@@ -1060,14 +1072,15 @@ class ForwardTrackMaker {
                 if ( mGenHistograms ){
                     mHist["FitStatus"]->Fill("AttemptReFit", 1);
                 }
-                TVector3 p = mTrackFitter->refitTrackWithSiHits(mGlobalTracks[i], si_hits_for_this_track);
+                TVector3 p = mTrackFitter->refitTrackWithSiHits(gtr.track, si_hits_for_this_track);
 
                 if ( mGenHistograms ){
                     if (p.Perp() == mFitMoms[i].Perp()) {
                         mHist["FitStatus"]->Fill("BadReFit", 1);
-
+                        LOG_DEBUG << "refitTrackWithSiHits failed refit" << endm;
                     } else {
                         mHist["FitStatus"]->Fill("GoodReFit", 1);
+                        gtr.setFst( si_hits_for_this_track, mTrackFitter->getTrack() );
                     }
                 }
 
