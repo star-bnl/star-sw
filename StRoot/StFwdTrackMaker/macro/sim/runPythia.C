@@ -120,10 +120,11 @@ void runPythia( Int_t nevents=100, Int_t run=1, char* particle="JPsi", float vz=
   cout<<"Random seed : "<<run<<endl;
 
   gROOT->ProcessLine(".L bfc.C");{
-    TString simple = "y2017 geant gstar agml usexgeom ";
+    TString simple = "y2023 geant gstar agml usexgeom ";
     bfc(0, simple );
   }
   
+  gSystem->Load("libfastjet.so");
   gSystem->Load( "libVMC.so");
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
@@ -238,7 +239,7 @@ void runPythia( Int_t nevents=100, Int_t run=1, char* particle="JPsi", float vz=
   //
   //geometry("fwddev1a");
   //geometry("ftsref6a");
-  geometry("dev2022");
+  geometry("y2023");
   //geometry("sitrver0");
   command("gkine -4 0");
   command(Form("gfile o pythia_%s_vz%d_run%d.fzd",particle,int(vz),run));

@@ -1,16 +1,62 @@
+#!/usr/bin/bash
 
 
-nEvents=5
-strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
-echo starsim -w 0 -b sim/testg.kumac g3id=5 seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=2.5 etamx=4.0 ptmn=0.2 ptmx=5.0 ofn=sim.fzd
-starsim -w 0 -b sim/testg.kumac g3id=5 seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=3.0 etamx=3.5 ptmn=0.2 ptmx=1.0 ofn=sim.fzd
+# 
+# Setup arguments
+# 
 
-jobId=$1
+jobId=${1:-FULL} # default FAST
+nEvents=${2:-10}
+sim=${3:-true}
+pid=${4:-5} # default muon
+
+
+# 
+# Print job parameters
+# 
+echo "Usage:\n rbfull <jobId> <nEvents> <run_sim> <pid>"
+echo "jobId=${jobId}, nEvents=${nEvents}, run_sim=${sim}, pid=${pid}"
+source env.sh
+
+# 
+# Run simulation if needed
+# 
+if [ "$sim" = true ] ; then
+    strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+    echo "strong random ${strongrandom}"
+    echo root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+    time root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+else
+    echo "Skipping simulation - use existing sim.fzd"
+fi
+
+
+# 
+# Run tracking
+# 
 echo root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/full_track.xml" )' 
 time root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/full_track.xml" )'
 
 
-mkdir -p out/full_track
-mv sim.fzd out/full_track/${jobId}.fzd
-mv full_track.root out/full_track/job${jobId}_qa.root
-mv mltree.root out/full_track/job${jobId}_mltree.root
+# 
+# Copy output files into JOB prefixed names
+# 
+if [ -f "fwdtree.root" ]; then
+    mv fwdtree.root ${jobId}_fwdtree.root
+else 
+    echo "WARNING: no fwdtree.root produced"
+fi 
+
+if [ -f "fast_track.root" ]; then
+    mv full_track.root ${jobId}_trackingQA.root
+else 
+    echo "WARNING: no full_track.root produced (tracking QA)"
+fi 
+
+if [ -f "fcstrk.root" ]; then
+    mv fcstrk.root ${jobId}_fcstrk.root
+else 
+    echo "No fcstrk.root output found, double check if FCS is included"
+fi
+
+
