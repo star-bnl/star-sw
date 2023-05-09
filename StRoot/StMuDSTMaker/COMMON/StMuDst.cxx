@@ -81,6 +81,7 @@ TClonesArray** StMuDst::fgtArrays            = 0;
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
 StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
 StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
+StMuRHICfCollection *StMuDst::mMuRHICfCollection = 0;
 StMuFcsCollection *StMuDst::mMuFcsCollection = 0;
 StMuFttCollection *StMuDst::mMuFttCollection = 0;
 StMuFstCollection *StMuDst::mMuFstCollection = 0;
@@ -89,6 +90,7 @@ TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
 StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
 StEmcCollection *StMuDst::mEmcCollection     = 0;
 StFmsCollection *StMuDst::mFmsCollection     = 0;
+StRHICfCollection *StMuDst::mRHICfCollection = 0;
 TClonesArray** StMuDst::eztArrays            = 0;
 
 Int_t StMuDst::mCurrVertexId                 = -2;

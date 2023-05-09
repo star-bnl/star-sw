@@ -230,7 +230,7 @@ void StMuDstMaker::assignArrays()
   mFttArrays      = mFcsArrays     + __NFCSARRAYS__;  
   mFstArrays      = mFttArrays     + __NFTTARRAYS__;  
   mFwdTrackArrays = mFstArrays     + __NFSTARRAYS__;  
-  mTofArrays      = mFstArrays     + __NFWDTRACKARRAYS__;    
+  mTofArrays      = mFwdTrackArrays     + __NFWDTRACKARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;    /// dongx
   mETofArrays     = mBTofArrays    + __NBTOFARRAYS__;   /// jdb
   mEpdArrays      = mETofArrays    + __NETOFARRAYS__;   /// MALisa
@@ -454,6 +454,7 @@ mFmsCollection(0), mRHICfCollection(0), mPmdCollectionArray(0), mPmdCollection(0
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mFmsUtil = new StMuFmsUtil();
+  mRHICfUtil = new StMuRHICfUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
