@@ -27,6 +27,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
     reasonsRejected = []
 
     edgeRuns = []
+    i = 0
     runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=stdRange, 
                                                  useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False)
     if globalRejection and runRj.shape[0] > 0:
@@ -116,6 +117,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='run-by-run QA program')
     parser.add_argument('-i', '--input', required=True, help='ROOT files that contains all the QA TProfile')
     parser.add_argument('-o', '--output', required=True, help='Filename for the output text file with all the bad runs')
+    parser.add_argument('-bo', '--breakptOutput', default='breakpt.txt', help='Filename for the output text file with the break points.')
     parser.add_argument('-v', '--varNames', help='Txt files with all the variable names for QA. If it is not set, it will read ALL TProfiles in the ROOT file.')
     parser.add_argument('-e', '--element', default='??+??', help='Element of your reaction')
     parser.add_argument('-s', '--sNN', default='??', help='Beam energy')
@@ -234,6 +236,10 @@ if __name__ == '__main__':
     #    reasonsRejected = reasonsRejected[id, :]
 
     writeBadRuns(runsRejected, reasonsRejected, varNames, args.output, args.noReasons)
+
+    print('Writing break points to %s' % args.breakptOutput)
+    with open(args.breakptOutput, 'w') as file_:
+        file_.write('\n'.join(['%d' % er for er in edgeRuns]))
 
     # plot every observable
     statSummary = pr.main(runs, mean, std,
