@@ -1,0 +1,43 @@
+<job  name="FwdTracking"  simulateSubmission="false" maxFilesPerProcess="1" filesPerHour="10" fileListSyntax="paths">
+
+    <input URL="filelist:/gpfs01/star/pwg_tasks/FwdCalib/DAQ/zeroField_Alignment.lis" nFiles="1" />
+
+    <!-- Modify these for your case -->
+    <stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
+    <stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
+
+    <output fromScratch="job_*.root" toURL="file:/star/data03/pwg/jdb/scratch/" />
+    <!-- <output fromScratch="job_*.LOG" toURL="file:/star/data03/pwg/jdb/scratch/" /> -->
+
+    <command>
+        echo "JOBINDEX = ${JOBINDEX}"
+        echo "JOBID = ${JOBID}"
+        ln -s StRoot/StFwdTrackMaker/macro/daq/ daq
+        ls -lah
+
+        setup 64b
+        starver dev
+        module use /cvmfs/star.sdcc.bnl.gov/star-spack/spack/share/spack/modules/linux-rhel7-x86_64/
+        module load star-env-root-5.34.38
+        module load kitrack-root-5.34.38
+        module load genfit-root-5.34.38
+        module load rave-2020-08-11
+
+        root4star -b -q -l 'daq/daq_track.C( 2, "'$INPUTFILE0'" )' 
+
+        mv daq.root job_${JOBID}_daq.root
+        mv fwdtree.root job_${JOBID}_fwdtree.root
+    </command>
+
+    <SandBox>
+        <Package>
+            <File>file:./StRoot</File>
+            <File>file:./.sl73_x8664_gcc485/</File>
+            <File>file:./fGeom.root</File>
+        </Package>
+    </SandBox>
+
+    <Generator>
+        <Location>/star/data03/pwg/jdb/scratch/gen</Location>
+    </Generator>
+</job>

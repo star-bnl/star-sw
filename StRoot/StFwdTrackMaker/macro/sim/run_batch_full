@@ -1,0 +1,16 @@
+
+
+nEvents=5
+strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+echo starsim -w 0 -b sim/testg.kumac g3id=5 seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=2.5 etamx=4.0 ptmn=0.2 ptmx=5.0 ofn=sim.fzd
+starsim -w 0 -b sim/testg.kumac g3id=5 seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=3.0 etamx=3.5 ptmn=0.2 ptmx=1.0 ofn=sim.fzd
+
+jobId=$1
+echo root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/full_track.xml" )' 
+time root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/full_track.xml" )'
+
+
+mkdir -p out/full_track
+mv sim.fzd out/full_track/${jobId}.fzd
+mv full_track.root out/full_track/job${jobId}_qa.root
+mv mltree.root out/full_track/job${jobId}_mltree.root
