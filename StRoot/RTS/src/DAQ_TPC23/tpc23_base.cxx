@@ -1339,7 +1339,8 @@ int tpc23_base::run_start()
 	evt = 0 ;
 	evt_trgd = 0 ;
 
-	
+	run_errors = 0 ;
+
 	return 0 ;
 
 }
@@ -1348,7 +1349,7 @@ int tpc23_base::run_start()
 // Called at run-stop: generally dumps statistics
 int tpc23_base::run_stop()
 {
-	LOG(NOTE,"%d: run_stop: %d/%d events",id,evt_trgd,evt) ;
+	LOG(TERR,"%d: run_stop: %d/%d events, run_errors %d",id,evt_trgd,evt,run_errors) ;
 
 	return 0 ;
 }
