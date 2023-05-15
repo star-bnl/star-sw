@@ -116,6 +116,8 @@ public:
 
         try {
             this->fstTrack = new genfit::Track(*track);
+            // make sure the McTrackId is set correctly 
+            this->fstTrack->setMcTrackId( this->track->getMcTrackId() );
             this->fstStatus = *(this->fstTrack->getFitStatus());
             this->fstTrackRep = this->fstTrack->getCardinalRep();
 
