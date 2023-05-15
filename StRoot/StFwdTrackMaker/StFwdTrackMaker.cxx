@@ -299,6 +299,12 @@ int StFwdTrackMaker::Init() {
         mTree->Branch("fstZ",         &mTreeData. fstZ  );
         mTree->Branch("fstTrackId",   &mTreeData. fstTrackId  );
 
+        mTree->Branch("fcsN",         &mTreeData. fcsN, "fcsN/I");
+        mTree->Branch("fcsX",         &mTreeData. fcsX  );
+        mTree->Branch("fcsY",         &mTreeData. fcsY  );
+        mTree->Branch("fcsZ",         &mTreeData. fcsZ  );
+        mTree->Branch("fcsDet",       &mTreeData. fcsDet  );
+
         // mc tracks
         mTree->Branch("mcN",        &mTreeData. mcN, "mcN/I");
         mTree->Branch("mcPt",       &mTreeData. mcPt );
@@ -1023,7 +1029,8 @@ void StFwdTrackMaker::loadFcs( ) {
 
     StEpdGeom epdgeo;
 
-
+    mTreeData.fcsN = 0;
+    
     // LOAD ECAL / HCAL CLUSTERS
     for ( int idet = 0; idet  < 4; idet++ ){
         StSPtrVecFcsCluster& clusters = fcsCol->clusters(idet);
@@ -1033,6 +1040,11 @@ void StFwdTrackMaker::loadFcs( ) {
             StThreeVectorD xyz = fcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
             mFcsClusters.push_back( TVector3( xyz.x(), xyz.y(), xyz.z() - 2 ) );
             mFcsClusterEnergy.push_back( clu->energy() );
+
+            mTreeData.fcsX.push_back( xyz.x() );
+            mTreeData.fcsY.push_back( xyz.y() );
+            mTreeData.fcsZ.push_back( xyz.z() - 2 );
+            mTreeData.fcsDet.push_back( idet );
         }
     }
 
@@ -1045,16 +1057,22 @@ void StFwdTrackMaker::loadFcs( ) {
             StFcsHit* hit=hits[i];
 
             if(det==kFcsPresNorthDetId || det==kFcsPresSouthDetId){ //EPD
-                 double zepd=375.0;
-                 int pp,tt,n;
-                 double x[5],y[5];
+                double zepd=375.0;
+                int pp,tt,n;
+                double x[5],y[5];
 
-                 if ( hit->energy() < 0.2 ) continue;
-                 fcsDb->getEPDfromId(det,hit->id(),pp,tt);
-                 epdgeo.GetCorners(100*pp+tt,&n,x,y);
-                 double x0 = (x[0] + x[1] + x[2] + x[3]) / 4.0;
-                 double y0 = (y[0] + y[1] + y[2] + y[3]) / 4.0;
-                 mFcsPreHits.push_back( TVector3( x0, y0, zepd ) );
+                if ( hit->energy() < 0.2 ) continue;
+                fcsDb->getEPDfromId(det,hit->id(),pp,tt);
+                epdgeo.GetCorners(100*pp+tt,&n,x,y);
+                double x0 = (x[0] + x[1] + x[2] + x[3]) / 4.0;
+                double y0 = (y[0] + y[1] + y[2] + y[3]) / 4.0;
+                mFcsPreHits.push_back( TVector3( x0, y0, zepd ) );
+
+                mTreeData.fcsX.push_back( x0 );
+                mTreeData.fcsY.push_back( y0 );
+                mTreeData.fcsZ.push_back( zepd );
+                mTreeData.fcsDet.push_back( det );
+
             }
         }
     }
@@ -1589,7 +1607,7 @@ void StFwdTrackMaker::Clear(const Option_t *opts) {
     mForwardData->clear();
 
     if (mGenTree){
-        mTreeData.thdN = mTreeData.fttN = mTreeData.rcN = mTreeData.mcN = mTreeData.vmcN = mTreeData.vrcN = 0;
+        mTreeData.thdN = mTreeData.fttN = mTreeData.rcN = mTreeData.mcN = mTreeData.vmcN = mTreeData.vrcN = mTreeData.fcsN = 0;
         mTreeData.fttX.clear();
         mTreeData.fttY.clear();
         mTreeData.fttZ.clear();
@@ -1602,6 +1620,11 @@ void StFwdTrackMaker::Clear(const Option_t *opts) {
         mTreeData.fstY.clear();
         mTreeData.fstZ.clear();
         mTreeData.fstTrackId.clear();
+
+        mTreeData.fcsX.clear();
+        mTreeData.fcsY.clear();
+        mTreeData.fcsZ.clear();
+        mTreeData.fcsDet.clear();
 
         mTreeData.rcPt.clear();
         mTreeData.rcEta.clear();

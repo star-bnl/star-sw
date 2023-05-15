@@ -62,6 +62,10 @@ struct FwdTreeData {
     vector<float> fstX, fstY, fstZ;
     vector<int> fstTrackId;
 
+    int fcsN;
+    vector<float> fcsX, fcsY, fcsZ;
+    vector<int> fcsDet;
+
     // RC tracks
     int rcN;
     vector<float> rcPt, rcEta, rcPhi, rcQuality;
