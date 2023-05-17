@@ -56,6 +56,7 @@ public:
 
 	u_int err ;		// cleared at rdo_scan?
 
+	u_int run_errors ;
 
 	static itpcData *data_c ;
 
