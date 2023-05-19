@@ -89,7 +89,8 @@ int itpc23::from22to23(char *c_dta, int words)
 
 
 	if((data[0]&0xFFFF000F) != 0x98000004) {
-		LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
+		run_errors++ ;
+		if(run_errors<5) LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
 	}
 
 //	LOG(TERR,"wds 0x%08X 0x%08X; data end 0x%08X",data[0],data[1],data_end[0]) ;
@@ -133,7 +134,8 @@ int itpc23::from22to23(char *c_dta, int words)
 	}
 
 	if(!found) {
-		LOG(ERR,"%d: can't find data_end!",rdo1) ;
+		run_errors++ ;
+		if(run_errors<5) LOG(ERR,"%d: can't find data_end!",rdo1) ;
 	}
 
 #endif
@@ -152,7 +154,8 @@ int itpc23::from22to23(char *c_dta, int words)
 	// data_end[0] is 0x9800.... : trigger header
 
 	if(!found) {
-		LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
+		run_errors++ ;
+		if(run_errors<5) LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
 	}
 
 	n_words = data_end - data ;
@@ -184,7 +187,15 @@ int itpc23::from22to23(char *c_dta, int words)
 		d++ ;
 	}
 
-	fee_mask = l_fee_mask ;
+	if(online) {
+		if(l_fee_mask != fee_mask) {
+			run_errors++ ;
+			if(run_errors<5) LOG(ERR,"%d: FEE mask 0x%X, expect 0x%X, words %d/%d",rdo1,l_fee_mask,fee_mask,words,n_words) ;
+		}
+	}
+
+
+	fee_mask = l_fee_mask ;	// NOTE the re-write!
 
 //	fee_mask = get_ifee_mask(sector1,rdo1) ;
 
@@ -229,15 +240,33 @@ int itpc23::from22to23(char *c_dta, int words)
 			if(no_cpy==0) {
 				d_fee[ix] = p[0] ;
 				ix++ ;
+
+				if(ix>(n_words)) {
+					run_errors++ ;
+					if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
+					free(d_use) ;
+					return 0 ;
+				}
 			}
+
 			p++ ;
 		}
 		
 		d_fee[ix] = p[0] ;
 		ix++ ;
+
+		if(ix>(n_words)) {
+			run_errors++ ;
+			if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
+		}
 	}
 
-
+	if(n_words<12) {
+		run_errors++ ;
+		if(run_errors<5) LOG(ERR,"%d: n_words %d",rdo1,n_words) ;
+		free(d_use) ;
+		return 0 ;
+	}
 
 	// trailer
 	d_use[n_words-1] = 0xDEADC0DE ;
@@ -321,7 +350,7 @@ u_int *itpc23::ch_scan(u_int *start)
 	if(unlikely(pkt!=4 || sampa_ch>31 || words10>512)) {
 		err |= 0x1000000 ;
 		fee_errs++ ;
-		LOG(ERR,"%d: ch_scan %d:%d: pkt %d, sampa_ch %2d, words10 %d [0x%08X]",rdo1,fee_ix,ch_ix,
+		if(fee_errs<10) LOG(ERR,"%d: ch_scan %d:%d: pkt %d, sampa_ch %2d, words10 %d [0x%08X]",rdo1,fee_ix,ch_ix,
 		    pkt,sampa_ch,words10,
 		    d[0]) ;
 	}
@@ -396,7 +425,9 @@ u_int *itpc23::ch_scan(u_int *start)
 		// tb_cou, tb_start, adc, adc, adc x tb_cou times
 		// from low tb_start to high
 		if(unlikely(d[i]&0xC0000000)) {
-			LOG(ERR,"ch_scan %d:%d: bad word 0x%08X",fee_ix,ch_ix,d[i]) ;
+			fee_errs++ ;
+			if(fee_errs<10) LOG(ERR,"%d: ch_scan %d:%d: SAMPA %d:%d: bad word 0x%08X",rdo1,fee_ix,ch_ix,
+			    sampa_id,sampa_ch,d[i]) ;
 		}
 
 		if(log_level>=2) LOG(TERR,"FEE %d:%d -- %d = 0x%08X",fee_ix,ch_ix,i,d[i]) ;
@@ -416,7 +447,8 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(log_level>=100) LOG(TERR,"  tb_cou %d",tb_cou) ;
 
 				if(unlikely(tb_cou>500)) {
-					LOG(ERR,"tb_cou %d [0x%08X,%d]",tb_cou,d[i],i) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"%d: tb_cou %d [0x%08X,%d]",rdo1,tb_cou,d[i],i) ;
 				}
 				ix = 1 ;
 				break ;
@@ -445,14 +477,16 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(log_level>=100)) LOG(TERR,"  tb_start %d",tb_start) ;
 
 				if(unlikely(tb_start<=tb_last)) {
-					LOG(ERR,"tb_start %d, tb_last %d",tb_start,tb_last) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"tb_start %d, tb_last %d",tb_start,tb_last) ;
 				}
 
 
 
 				tb_last = tb_start + tb_cou ;
 				if(unlikely(tb_last>500)) {
-					LOG(ERR,"tb_last %d [0x%08X,%d]",tb_last,d[i],i) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"%d: tb_last %d [0x%08X,%d]",rdo1,tb_last,d[i],i) ;
 				}
 
 
@@ -909,6 +943,13 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	u_int mhz_end = trl[1] ;
 
 
+	// happens, why?
+	if(evt_status==0x0EEDC0DE) {
+		for(int i=-8;i<=8;i++) {
+			LOG(ERR,"%d: %d = 0x%08X",rdo1,i,trl[i]) ;
+		}
+	}
+
 //	LOG(TERR,"trl0 0x%08X, trl1 0x%08X",trl[0],trl[1]) ;
 
 	u_int evt_type = (d[1]>>28)&0xF ;
@@ -1011,7 +1052,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 
 	if(err||prog_fulls) {
-		LOG(ERR,"%d: evt %d/%d: T %d,%d,%d: error 0x%06X, prog_fulls %d: words %d, %d us",rdo1,evt_trgd,evt,
+		LOG(ERR,"%d: evt %d/%d: T %d,%d,%d: error 0x%08X, prog_fulls %d: words %d, %d us",rdo1,evt_trgd,evt,
 		    token,trg_cmd,daq_cmd,
 		    err,
 		    prog_fulls,
@@ -1137,7 +1178,7 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 		if(sig==0x98000004) rdo_version = 0 ;
 		else if((sig&0xFF00000F)==0x98000004) rdo_version = (sig>>4)&0xFF ;
 		else {
-			LOG(ERR,"%d: fmt 22: not triggered: ds 0x%08X, words",rdo1,sig,words) ;
+			LOG(WARN,"%d: fmt 22: not triggered: ds 0x%08X, words",rdo1,sig,words) ;
 			t = 4096 ;
 			goto done ;
 		}
@@ -1145,13 +1186,13 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 
 
 
-		if(trg_w==0) {
-			if(rdo_version==1) {
-				if(sub==0x980000FC) {
-					LOG(WARN,"%d: RDO_mon, words %d",rdo1,words) ;
-				}
-			}
-		}
+//		if(trg_w==0) {
+//			if(rdo_version==1) {
+//				if(sub==0x980000FC) {
+//					LOG(WARN,"%d: RDO_mon, words %d",rdo1,words) ;
+//				}
+//			}
+//		}
 
 
 		t = ((trg_w>>8)&0xF)<<8 ;
@@ -1378,7 +1419,8 @@ static int itpc_fee_map[24][4][16] = {
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S17
-	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+//	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, // 29Mar03: bad port 3 moved to good port 5
+        {49,52, 0, 0,46, 54,0,47, 0,50, 0,55,48, 0,51,53},
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
