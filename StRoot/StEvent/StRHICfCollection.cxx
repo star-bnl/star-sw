@@ -30,6 +30,8 @@ void StRHICfCollection::clear()
   mRHICfRawHitColl = new StRHICfRawHit();
   mRHICfHitColl = 0;
 
+  mRHICfRunNumber = 0;
+  mRHICfEventNumber = 0;
   mBunchNumber = 0;
   mRHICfTrigger = 0;
   mRunTime[0] = 0;
@@ -50,6 +52,8 @@ const std::vector<StRHICfPoint*>& StRHICfCollection::pointCollection() const {re
 void StRHICfCollection::isAllSave(){mRHICfHitColl = new StRHICfHit();}
 
 //=========== Set ===========//
+void StRHICfCollection::setRHICfRunNumber(UInt_t run){mRHICfRunNumber = run;}
+void StRHICfCollection::setRHICfEventNumber(UInt_t event){mRHICfEventNumber = event;}
 void StRHICfCollection::setBunchNumber(UInt_t bunch){mBunchNumber = bunch;}
 void StRHICfCollection::setRunType(UInt_t type){mRunType = type;}
 void StRHICfCollection::setTriggerNumber(UInt_t trigger){mRHICfTrigger = trigger;}
@@ -58,6 +62,8 @@ void StRHICfCollection::setRunTRGM(UInt_t trgm){mRunTRGM = trgm;}
 
 //=========== Get ===========//
 UInt_t StRHICfCollection::numberOfPoints() const {return mRHICfPointColl.size();}
+UInt_t StRHICfCollection::getRHICfRunNumber(){return mRHICfRunNumber;}
+UInt_t StRHICfCollection::getRHICfEventNumber(){return mRHICfEventNumber;}
 UInt_t StRHICfCollection::getBunchNumber(){return mBunchNumber;}
 UInt_t StRHICfCollection::getRunType(){return mRunType;}
 UInt_t StRHICfCollection::getTriggerNumber(){return mRHICfTrigger;}

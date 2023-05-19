@@ -31,6 +31,8 @@ class StRHICfCollection : public StObject
 
     // run header 
     void isAllSave();
+    void setRHICfRunNumber(UInt_t run);
+    void setRHICfEventNumber(UInt_t event);
     void setBunchNumber(UInt_t bunch);
     void setRunType(UInt_t type);
     void setTriggerNumber(UInt_t trigger);
@@ -38,6 +40,8 @@ class StRHICfCollection : public StObject
     void setRunTRGM(UInt_t trgm);
 
     UInt_t numberOfPoints() const;
+    UInt_t getRHICfRunNumber();
+    UInt_t getRHICfEventNumber();
     UInt_t getBunchNumber();
     UInt_t getRunType();
     UInt_t getTriggerNumber();
@@ -49,6 +53,8 @@ class StRHICfCollection : public StObject
     StRHICfHit* mRHICfHitColl; 
     std::vector<StRHICfPoint*> mRHICfPointColl; 
 
+    UInt_t mRHICfRunNumber;
+    UInt_t mRHICfEventNumber;
     UInt_t mBunchNumber;
     UInt_t mRunType;
     UInt_t mRHICfTrigger;
