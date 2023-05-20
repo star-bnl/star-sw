@@ -53,6 +53,8 @@ class StRHICfCollection : public StObject
     StRHICfHit* mRHICfHitColl; 
     std::vector<StRHICfPoint*> mRHICfPointColl; 
 
+    // Important note: the _RHICf_ Run and Event numbers are distinct from the _STAR_ Run and Event numbers,
+    // originating from RHICf's own raw data acquisition and studies outside of the STAR framework
     UInt_t mRHICfRunNumber;
     UInt_t mRHICfEventNumber;
     UInt_t mBunchNumber;
