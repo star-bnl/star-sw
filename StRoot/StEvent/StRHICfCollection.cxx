@@ -62,8 +62,8 @@ void StRHICfCollection::setRunTRGM(UInt_t trgm){mRunTRGM = trgm;}
 
 //=========== Get ===========//
 UInt_t StRHICfCollection::numberOfPoints() const {return mRHICfPointColl.size();}
-UInt_t StRHICfCollection::getRHICfRunNumber(){return mRHICfRunNumber;}
-UInt_t StRHICfCollection::getRHICfEventNumber(){return mRHICfEventNumber;}
+UInt_t StRHICfCollection::getRHICfRunNumber() const { return mRHICfRunNumber; }
+UInt_t StRHICfCollection::getRHICfEventNumber() const { return mRHICfEventNumber; }
 UInt_t StRHICfCollection::getBunchNumber(){return mBunchNumber;}
 UInt_t StRHICfCollection::getRunType(){return mRunType;}
 UInt_t StRHICfCollection::getTriggerNumber(){return mRHICfTrigger;}
