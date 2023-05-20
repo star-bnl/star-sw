@@ -40,8 +40,8 @@ class StRHICfCollection : public StObject
     void setRunTRGM(UInt_t trgm);
 
     UInt_t numberOfPoints() const;
-    UInt_t getRHICfRunNumber();
-    UInt_t getRHICfEventNumber();
+    UInt_t getRHICfRunNumber() const;
+    UInt_t getRHICfEventNumber() const;
     UInt_t getBunchNumber();
     UInt_t getRunType();
     UInt_t getTriggerNumber();
