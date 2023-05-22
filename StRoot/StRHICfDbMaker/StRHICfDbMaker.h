@@ -44,6 +44,8 @@ class StRHICfDbMaker : public StMaker
 
     void setDebug(Int_t debug); ///< debug mode, 0 for minimal message, >0 for more debug messages
 
+    unsigned int getRHICfRunNumberAddress() const;
+    unsigned int getRHICfEventNumberAddress() const;
     unsigned int getRunTRGMAddress() const;
     unsigned int getTriggerAddress() const;
     unsigned int getBunchNumberAddress() const;
