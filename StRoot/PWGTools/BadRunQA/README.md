@@ -8,11 +8,17 @@ This code works on both Linux and Windows. It should work in Mac but it has not 
 ## Installation
 
 To install the software, follow these steps:
-The EASY way (Linux only. For Windows and Mac, use the recommended way):
+The EASY way (Linux with python version >= 3.11 only. For Windows, Mac or Linux with older python, use the recommended way):
 1. Run the following command: `pip3 install -r requirements.txt`
 
 The RECOMMENDED way (works across platforms):
 1.      Install miniconda from https://docs.conda.io/en/latest/miniconda.html
+2.      Create d dedicated environment using environment.yml called "QA":
+
+`conda env create -n "QA" --file enviornment.yml`
+
+That should be it. IF it doesn't work, it means the recommended package versions doesn't work in your machine. Do the following 3 steps instead,
+
 2.      Create a dedicated environment by running the following command to create an environment called “QA”: 
 
 `conda config --add channels conda-forge`
@@ -21,7 +27,11 @@ The RECOMMENDED way (works across platforms):
 
 3.      Activate the environment by running `conda activate QA`
 4.      Install the remining packages with `pip install pyfiglet`
-The environment is called “QA” in the example, but you can call it whatever you want. You need to run step 3 EVERY TIME you restart your terminal if you use the recommended way.
+
+
+The environment is called “QA” in the example, but you can call it whatever you want. You need to activate the environment EVERY TIME you restart your terminal if you use the recommended way by
+
+`conda activate QA`
 
 If you are using "conda" or any other virtual environment, you can replace all "python3" with just "python" in the following sections. I just want user with older OS to be sure that they are using python3 instead of python2. 
 
