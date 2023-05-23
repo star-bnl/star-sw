@@ -14,7 +14,8 @@ import pyfiglet
 
 def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, maxIter=100, 
                      useJMLR=False, useMAD=False, weights=None, segmentOnce=False, 
-                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=False, **kwargs):
+                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=False, 
+                     quadRange=False, **kwargs):
     if useJMLR:
         print('Execution with JMLR')
     else:
@@ -29,7 +30,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
     edgeRuns = []
     i = 0
     runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=stdRange, 
-                                                 useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False)
+                                                 useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False, quadRange=quadRange)
     if globalRejection and runRj.shape[0] > 0:
         runsRejected.append(runRj)
         reasonsRejected.append(reasonRj)
@@ -58,7 +59,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
             edgeRunsCand = runs_copy[idValid][result]
             result = np.searchsorted(runs_copy, edgeRunsCand).tolist()
         runRj, reasonRj, meanCand, stdCand = outlierDetector(runs_copy, x_copy, xerr_copy, result, stdRange=stdRange, 
-                                                              useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0))
+                                                              useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0), quadRange=quadRange)
 
         if runRj.shape[0] == 0:
             break
@@ -139,10 +140,11 @@ if __name__ == '__main__':
     parser.add_argument('-pg', '--plotGood', action='store_true', help='Plot QA plots again, but only with good runs')
     parser.add_argument('-m', '--mapping', help='If x-axis of TProfile does not corresponds to STAR run ID, you can supply a file that translate bin low edge to STAR ID')
     parser.add_argument('-so', '--segmentOnce', action='store_true', help='Only run segmentation algorithm once. You can still iterate, but the segment edges will remain unchanged in each iteration')
-    parser.add_argument('-ei', '--excludeInvalid', action='store_false', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
-    parser.add_argument('-rn', '--reCalculateNormal', action='store_true', help='mean and standard deviation of data set is re-calculated in each iteration.')
+    parser.add_argument('-ei', '--excludeInvalid', action='store_true', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
+    parser.add_argument('-rn', '--reCalculateNormal', action='store_false', help='mean and standard deviation of data set is re-calculated in each iteration. (default: %(default)s)')
     parser.add_argument('-mi', '--mergeID', action='store_true', help='Merge nearby segments if their means are too close to each other, like within 5 SDs.')
-    parser.add_argument('-g', '--globalRejection', action='store_true', help='Run outliner rejection once before segmentation iteration.')
+    parser.add_argument('-g', '--globalRejection', action='store_false', help='Run outliner rejection once before segmentation iteration. (default: %(default)s)')
+    parser.add_argument('-q', '--quadRange', action='store_false', help='Reject runs by adding uncertainty in quaduature instead of absolute value. (default: %(default)s)')
     parser.add_argument('-lg', '--legacy', action='store_true', help='Use legacy mode to emulate run-by-run v2')
 
 
@@ -166,6 +168,7 @@ if __name__ == '__main__':
         args.reCalculateNormal = True
         args.mergeID = True
         args.globalRejection = False
+        args.quadRange = True
 
     # read data from file
     print('Reading TProfile from %s' % (args.input))
@@ -213,7 +216,7 @@ if __name__ == '__main__':
         for ruj, rej, me, st, ed, pe, i in pool.imap(partial(segmentAndReject, runs, x, xerr, useJMLR=args.JMLR, useMAD=args.MAD,
                                                               min_size=args.minSize, stdRange=args.rejectionRange, maxIter=args.maxIter,
                                                               weights=weights, segmentOnce=args.segmentOnce, merge=args.mergeID, 
-                                                              reCalculateNormal=args.reCalculateNormal, legacy=args.legacy, globalRejection=args.globalRejection), 
+                                                              reCalculateNormal=args.reCalculateNormal, legacy=args.legacy, globalRejection=args.globalRejection, quadRange=args.quadRange), 
                                                         args.pen): 
             # choose penalty that rejectes the most number of runs
             print('%d runs rejected when pen = %f' % (len(ruj), pe))

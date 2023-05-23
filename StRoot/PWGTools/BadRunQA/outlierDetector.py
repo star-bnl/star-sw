@@ -61,7 +61,7 @@ def outlierSegment(runs, values, uncert, stdRange=3, weights=None, meanAlg=weigh
     return runs[idRejected], idRejectedReason[idRejected], mean, stdRange*std
 
 
-def outlierDetector(runs, values, uncert, idSegments, useMAD, weights, legacy=False, seqRej=False, **kwargs):
+def outlierDetector(runs, values, uncert, idSegments, useMAD, weights, legacy=False, seqRej=False, quadRange=False, **kwargs):
     runsRejected = np.array([])
     idRejected = []
     stdRange = []
@@ -73,7 +73,7 @@ def outlierDetector(runs, values, uncert, idSegments, useMAD, weights, legacy=Fa
         meanAlg = weightedMean
         stdAlg = weightedStd
 
-    if legacy:
+    if quadRange:
         gt = greaterlegacy
     else:
         gt = greater
