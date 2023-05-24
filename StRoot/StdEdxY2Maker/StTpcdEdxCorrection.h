@@ -73,19 +73,20 @@ class StTpcdEdxCorrection : public TObject {
       kTpcPadTBins           = 33,//d  					     
       kTpcZDC                = 34,//   					     
       kTpcPadMDF             = 35, 
-      kAdcI                  = 36,
-      knPad                  = 37, 
-      knTbk                  = 38,
-      kdZdY                  = 39, 
-      kdXdY                  = 40,
-      kTpcLast               = 41,//                                             
-      kTpcNoAnodeVGainC      = 42,//   					     
-      kTpcLengthCorrection   = 43,//                                             
-      kTpcLengthCorrectionMDF= 44,//   					   
-      kTpcLengthCorrectionMD2= 45,//   					   
-      kTpcLengthCorrectionMDN= 46,//   					   
-      kTpcdEdxCor            = 47,//   					   
-      kTpcAllCorrections     = 48 //                                             
+      kTpcPadMDC             = 36,
+      kAdcI                  = 37,
+      knPad                  = 38, 
+      knTbk                  = 39,
+      kdZdY                  = 40, 
+      kdXdY                  = 41,
+      kTpcLast               = 42,//                                             
+      kTpcNoAnodeVGainC      = 43,//   					     
+      kTpcLengthCorrection   = 44,//                                             
+      kTpcLengthCorrectionMDF= 45,//   					   
+      kTpcLengthCorrectionMD2= 46,//   					   
+      kTpcLengthCorrectionMDN= 47,//   					   
+      kTpcdEdxCor            = 48,//   					   
+      kTpcAllCorrections     = 49 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -180,8 +181,10 @@ class dEdxY2_t {
   Float_t  adc;     //  adc count from cluster finder
   Float_t  TanL;
   Float_t  Voltage; // Anode Voltage
-  Float_t  xpad;    // relative position in pad [-1.0,1.0]
+  Float_t  xpad;    // relative position in pad [-1.0,1.0] from G->L->Pad
   Float_t  yrow;    // relative position in row [-0.5,0.0] inner, and [0.0,0.5] outer
+  Float_t  xpadR;   // relative position in pad [-1.0,1.0] from TpcHit
+  Int_t    qB;      // sign of curvature charge * sign of mag. field
   Float_t  tpcTime;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
   dE_t     F;     //! 

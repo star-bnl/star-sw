@@ -264,7 +264,7 @@ my $items = "";# print "items $#items  = @items\n";
 if ( defined($SKIP_DIRS) ) {
   $items = join("|", split(" ", $SKIP_DIRS));
 } else {
-  $items = "StShadowMaker";
+  $items = "StShadowMaker|PWGTools";
 }
 
 if ( $#items > -1){

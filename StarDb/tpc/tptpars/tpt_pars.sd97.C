@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tptpars/tpt_pars Allocated rows: 2  Used rows: 2  Row size: 160 bytes
 //  Table: tpt_pars_st[0]--> tpt_pars_st[1]
@@ -95,5 +95,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.lfit     =          0; // straigth line fit;
 tableSet->AddAt(&row,1);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }
