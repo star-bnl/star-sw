@@ -9,6 +9,7 @@
 #include "L2UpsilonResult.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
+#include <TH1.h>
 #include <TH1I.h>
 #include <TH2F.h>
 
@@ -216,7 +217,10 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.eq3_board_occ_h->Sumw2();
     contents.eq3_readout_time_h = new TH1D("eq3_readout_time_h", "EQ3 Readout Time", 100, 0, 1000);
 
-
+    contents.BlueByTrigger_h = new TH1F("BlueBeamByTrigger_h", "Blue Beam By Trigger", 64,0,63);
+    contents.YellowByTrigger_h= new TH1F("YellowBeamByTrigger_h","Yellow Beam By Trigger", 64,0,63);
+    
+    
     // Add root histograms to Plots
     int np = sizeof(contents) / sizeof(TH1 *);
 
@@ -523,7 +527,25 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     plots[++n] = new JevpPlot(contents.eq3_readout_time_h);
     plots[n]->getHisto(0)->histo->GetXaxis()->SetTitle("Readout Time (usec)");
 
-  
+    plots[++n] = new JevpPlot(contents.BlueByTrigger_h);
+    plots[n]->setDrawOpts("hist");
+    for(int i=0;i<64;i+=10) {
+	contents.BlueByTrigger_h->GetXaxis()->SetBinLabel(i+1, Form("%d", i));
+    }    
+    contents.BlueByTrigger_h->GetXaxis()->SetTitle("Trigger Index");
+    contents.BlueByTrigger_h->GetYaxis()->SetTitle("Average Blue Sync Set");
+    contents.BlueByTrigger_h->SetFillColor(4);
+
+    plots[++n] = new JevpPlot(contents.YellowByTrigger_h);
+    plots[n]->setDrawOpts("hist");
+    for(int i=0;i<64;i+=10) {
+	contents.YellowByTrigger_h->GetXaxis()->SetBinLabel(i+1, Form("%d", i));
+    }    
+    contents.YellowByTrigger_h->GetXaxis()->SetTitle("Trigger Index");
+    contents.YellowByTrigger_h->GetYaxis()->SetTitle("Average Yellow Sync Set");
+    contents.YellowByTrigger_h->SetFillColor(5);
+ 
+
     // Add Plots to plot set...
     for(int i=0;i<=n;i++) {
 	LOG(NOTE, "Adding plot %d",i);
@@ -535,6 +557,12 @@ void trgBuilder::startrun(daqReader *rdr) {
   LOG(DBG, "TriggerPlotBuilder starting run #%d",rdr->run);
   resetAllPlots();
   first_event = 0;
+
+  for(int i=0;i<64;i++) {
+      nBlueByTrigger[i] = 0;
+      nYellowByTrigger[i] = 0;
+      nTrigger[i] = 0;
+  }
 }
 
 void trgBuilder::fillQtHisto(int conf_num, TriggerDataBlk *trg, TH1D *sz, TH1D *usec, TProfile *board_occ) {
@@ -694,18 +722,52 @@ void trgBuilder::event(daqReader *rdr)
     
     //Spin Bits    
     // int ispinb = trgd->spinBit();
-    if(trgd->spinBitYellowFilled()) contents.h442_bunch_yellow_fill->Fill(bunch7bit);
+    bool blueFilled = false;
+    bool yellowFilled = false;
+    if(trgd->spinBitYellowFilled()) {
+	contents.h442_bunch_yellow_fill->Fill(bunch7bit);
+	yellowFilled = true;
+    }
+
     /*  
     if(trgd->spinBitYellowUp()) contents.h443_bunch_yellow_up->Fill(bunch7bit);  
     if(trgd->spinBitYellowDown()) contents.h444_bunch_yellow_down->Fill(bunch7bit);  
     if(trgd->spinBitYellowUnpol()) contents.h445_bunch_yellow_unpol->Fill(bunch7bit); 
     */ 
-    if(trgd->spinBitBlueFilled()) contents.h446_bunch_blue_fill->Fill(bunch7bit);  
+    if(trgd->spinBitBlueFilled()) {
+	contents.h446_bunch_blue_fill->Fill(bunch7bit);  
+	blueFilled = true;
+    }
     /*
     if(trgd->spinBitBlueUp()) contents.h447_bunch_blue_up->Fill(bunch7bit);  
     if(trgd->spinBitBlueDown()) contents.h448_bunch_blue_down->Fill(bunch7bit);  
     if(trgd->spinBitBlueUnpol()) contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
     */
+
+    for(int i=0;i<64;i++) {
+       
+
+	    
+	if(rdr->daqbits64 & (1ll << i)) {
+	    if(blueFilled) nBlueByTrigger[i]++;
+	    if(yellowFilled) nYellowByTrigger[i]++;
+	    nTrigger[i]++;
+	}
+	float bval = 0;
+	if(nTrigger[i] > 0) {
+	    bval = nBlueByTrigger[i];
+	    bval /= nTrigger[i];
+	}    
+	contents.BlueByTrigger_h->SetBinContent(i+1, bval);
+	//if(bval > 0) printf("[%d] bval=%f\n",i, bval);	
+	float yval = 0;
+	if(nTrigger[i] > 0) {
+	    yval = nYellowByTrigger[i];
+	    yval /= nTrigger[i];
+	}    
+	contents.YellowByTrigger_h->SetBinContent(i+1, yval);
+	//if(bval > 0) printf("[%d] bval=%f\n",i, yval);
+    }
     
     // zdcsmd...
     TH1 *zdcsmd[12];
