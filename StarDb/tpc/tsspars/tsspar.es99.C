@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tsspars/tsspar Allocated rows: 1  Used rows: 1  Row size: 240 bytes
 //  Table: tss_tsspar_st[0]--> tss_tsspar_st[0]
@@ -52,5 +52,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.z_laser	 =        100; // z drift length of pointlaser source(cm) ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

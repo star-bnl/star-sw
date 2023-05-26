@@ -130,6 +130,8 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	fcf_run_compatibility = 9 ;		// FY09 default, for now...
 	fcf_do_cuts = 2 ;		// run09 default
 
+	cld23 = 0 ;
+
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 	return ;
 }
@@ -1175,19 +1177,29 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
-
+		char *full_name ;
 
 		//sprintf(str,"%s/%s/sec%02d/rb%02d/adc",caller->fs_cur_evt, "tpx", s, r) ;
 		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name, s, r) ;
 	
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
-		char *full_name = caller->get_sfs_name(str) ;
-		if(full_name == 0) continue ;
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) {
+			sprintf(str,"%s/sec%02d/rb%02d/adc23",sfs_name, s, r) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			full_name = caller->get_sfs_name(str) ;
+			
+			if(full_name==0) continue ;
+
+		}
+
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG(DBG,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
+		LOG(NOTE,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
 
 		if(size <= 0) {
 			if(size < 0) {
@@ -1216,7 +1228,19 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 		
 		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name,obj[i].sec, obj[i].rb) ;
 		char *full_name = caller->get_sfs_name(str) ;
-		if(!full_name) continue ;
+
+		if(full_name == 0) {
+			sprintf(str,"%s/sec%02d/rb%02d/adc23",sfs_name, obj[i].sec, obj[i].rb) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			full_name = caller->get_sfs_name(str) ;
+			
+			if(full_name==0) continue ;
+
+		}
+
+
 
 		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
 		
@@ -1275,43 +1299,164 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	assert(caller) ;
 
 
+	cld23 = 0 ;
+
 	// calc total bytes
 	tot_bytes = 0 ;
 	int o_cou = 0 ;
 	for(int s=min_sec;s<=max_sec;s++) {
-	for(int r=min_rdo;r<=max_rdo;r++) {
-
-
-		sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld23",sfs_name, s) ;
 	
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
 		char *full_name = caller->get_sfs_name(str) ;
-		if(full_name == 0) continue ;
+		if(full_name && min_rdo==1) {
+			cld23 = 1 ;
+		}
 
-		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+		if(cld23==1) {	// old, broken version in FY23 until 09-May ;
 
-		LOG(NOTE,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 23 : cld size %d",name,s,size) ;
 
 
-		if(size <= 0) {
-			if(size < 0) {
-				LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
 			}
-			continue ;
+			else {
+				obj[o_cou].rb = 23 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+
+			continue ;	// NOTE: continue
 		}
-		else {
-			obj[o_cou].rb = r ;
-			obj[o_cou].sec = s ;
-			obj[o_cou].bytes = size ;
 
-			o_cou++ ;
 
-			tot_bytes += size ;
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld10",sfs_name, s) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
-			LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name && min_rdo==1) {
+			cld23 = 2 ;
 		}
-	}
+
+
+		if(cld23==2) {	// FY23 version, RDOs 3 & 4
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 10 : cld size %d",name,s,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = 10 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
+
+
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld11",sfs_name, s) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name && min_rdo==2) {
+			cld23 = 3 ;
+		}
+
+
+		if(cld23==3) {	// FY23: RDOs 5 & 6 
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 11 : cld size %d",name,s,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = 11 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
+
+
+		if(cld23) continue ;
+
+		// OLD code
+
+		for(int r=min_rdo;r<=max_rdo;r++) {
+
+
+			sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			char *full_name = caller->get_sfs_name(str) ;
+			if(full_name == 0) continue ;
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = r ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
 	}
 
 	cld_raw->create(tot_bytes,(char *)"cld_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
@@ -1395,7 +1540,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		daq_dta *dd ;
 
 
-		LOG(DBG,"Calling handle_cld_raw for %d:%d",s,r) ;		
+		LOG(NOTE,"Calling handle_cld_raw for %d:%d",s,r) ;		
 		dd = handle_cld_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
 
 
@@ -1408,7 +1553,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 			continue ;
 		}
 
-		LOG(DBG,"Called handle_cld_raw for %d:%d, iterate %d, returned %d objs",s,r,ret,dd->ncontent) ;				
+		LOG(NOTE,"Called handle_cld_raw for %d:%d, iterate %d, returned %d objs",s,r,ret,dd->ncontent) ;				
 
 		int bytes = dd->ncontent ;
 		if(bytes <= 0) continue ;
@@ -1421,6 +1566,11 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		while(p_buff < end_buff) {
 			u_int row = *p_buff++ ;
 			u_int cou = *p_buff++ ;
+
+			if(cld23) {
+				LOG(NOTE,"CLD23 %d: S%02d:%d: row 0x%08X, cou 0x%08X",cld23,s,r,row,cou) ;
+				cou /= 2 ;
+			}
 			
 			if(cou > 1000000) {
 				LOG(WARN,"Bad data in S%02d-%d, row %d -- count is %d -- skipping",
@@ -1433,6 +1583,9 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 			daq_cld *dc = (daq_cld *) cld->request(cou) ;	// ask for storage; we know exactly how much...
 			
+			if(cld23) {
+				LOG(NOTE,"CLD23: S%02d:%d: row %d, version 0x%04X, count %d",s,r,row,version,cou) ;
+			}
 
 			for(u_int i=0;i<cou;i++) {
 				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;

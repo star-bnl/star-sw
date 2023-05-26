@@ -99,6 +99,11 @@ Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_
   return SumSeries(cor, x, z, NparMax);
 }
 //________________________________________________________________________________
+Double_t St_tpcCorrectionC::CalcXDerivative(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
+  tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
+  return SumSeriesXDerivative(cor, x, z, NparMax);
+}
+//________________________________________________________________________________
 Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
   Double_t Sum = 0;
   if (! cor) return Sum;
@@ -193,6 +198,9 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 13: // ADC correction and offset correction via TpcAdcCorrection6MDF
     Sum = x * TMath::Exp(cor->a[0] + cor->a[1] + TMath::Exp(cor->a[2] + cor->a[3]*x));
     break;
+  case 30: // TanH saturation function: [0]+[1]*TMath::TanH([2]*(x-[3]))
+    Sum = cor->a[0]+cor->a[1]*TMath::TanH(cor->a[2]*(x-cor->a[3]));
+    break;
   case 1000:
   case 1100:
   case 1200:
@@ -259,6 +267,68 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   return Sum;
 }
 //________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeriesXDerivative(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
+  // Only for polynomials for now
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  if (NparMax > 0) N = NparMax;
+  // parameterization variable
+  Double_t X = x;
+  Double_t Jacobian = 1;
+  if (cor->npar  < 0) {X = TMath::Exp(x); Jacobian = X;}
+  else {
+    switch  (cor->type) {
+    case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|
+    case 12:// ADC correction offset + poly for log(ADC) and TanL
+    case 13:// ADC correction without off set TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10) and offset correction via TpcAdcCorrection6MDF
+      X = TMath::Log(x);      
+      Jacobian = 1./x;
+      break;
+    case 1: // Tchebyshev [-1,1]
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 3:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Log(1. - TMath::Abs(x));
+      Jacobian = 0;
+      break;
+    case 4:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      Jacobian = 0;
+      break;
+    case 5:
+      if (x < 1e-7) X = -16.118;
+      else          X = TMath::Log(x);
+      Jacobian = TMath::Exp(-X);
+      break;
+    case 6:
+      X = TMath::Abs(x);
+      Jacobian = TMath::Sign(1., x);
+      break;
+    default:      X = x;    break;
+    }
+  }
+  if (TMath::Abs(Jacobian) < 1e-7) return 0;
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
+    if (X < cor->min) X = cor->min;
+    if (X > cor->max) X = cor->max;
+  }
+  Sum = cor->a[N-1] * (N - 1);
+  for (int n = N-2; n>=1; n--) Sum = X*Sum + cor->a[n] * n;
+  Sum *= Jacobian;
+  return Sum;
+}
+//________________________________________________________________________________
 Int_t St_tpcCorrectionC::IsActiveChair() const {
   const St_tpcCorrection  *tableC = (const St_tpcCorrection  *) Table();
   Int_t npar = 0;
@@ -292,60 +362,12 @@ MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrec
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrectionC);
 #include "St_TpcdXCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+#include "St_TpcEtaCorrectionC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionC,Calibrations/tpc/TpcEtaCorrection);
+#include "St_TpcEtaCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionBC,Calibrations/tpc/TpcEtaCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
-#include "St_TpcdEdxModelC.h"
-MakeChairInstance2(tpcCorrection,St_TpcdEdxModelC,Calibrations/tpc/TpcdEdxModel);
-TF1 *St_TpcdEdxModelC::fProb = 0;
-#if 0
-//________________________________________________________________________________
-Double_t St_TpcdEdxModelC::MostProbablenN(Double_t N) {
-  // Most probable no. of conducting electons (ne) versus no. of primary clusters
-  if (N <= 1.0) return 0;
-  Double_t X = TMath::Log(N);
-  Double_t mu = instance()->CalcCorrection(0, X);
-  return N*TMath::Exp(TMath::Exp(mu));
-}
-#endif
-//________________________________________________________________________________
-Double_t St_TpcdEdxModelC::funcProb(Double_t *x, Double_t *p) {
-  Double_t e = x[0]; // deposited energy (GeV)
-  Double_t P = p[0]; // no. of primary clusters
-  Double_t ne = n(e);// no. of connduction electrons
-  if (P < 1 || ne < P) return 0;
-  Double_t X = TMath::Log(P);
-  Double_t Y = TMath::Log(ne/P);
-  if (Y <= 0.0) return 0;
-  /*
-    dNde  = dnde * dNdn 
-    =       dnde * dNdY                      * dYdn  
-    =       dnde * dNdZ                      * dZdY         * dYdn 
-    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/Y          * 1/n // ne == n
-    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
-    dNdn  =        Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
-    d(dNdn)/dn = 0 = dNdn*[(-(Z-mu)/sigma**2)*dZ/dn - 1/(n*log(n/P)) 
-   */
-  Double_t Z = TMath::Log(Y);
-  Double_t mu    = instance()->CalcCorrection(0, X);
-  Double_t sigma = instance()->CalcCorrection(1, X);
-  Double_t dNdZ = TMath::Gaus(Z, mu, sigma, kTRUE);
-  Double_t dZdY = 1./Y;
-  Double_t dNdY = dNdZ * dZdY;
-  Double_t dYdn = 1./ne;
-  Double_t dNdn = dNdY * dYdn;
-  Double_t dnde = E(1.);
-  Double_t dNde  = dnde * dNdn;
-  return dNde;
-}
-//________________________________________________________________________________
-TF1 *St_TpcdEdxModelC::Prob() {
-  if (! fProb) {
-    fProb = new TF1("St_TpcdEdxModelC::Prob",St_TpcdEdxModelC::funcProb,0.0, 20e-6, 1);
-    fProb->SetParName(0,"N");
-    fProb->SetParameter(0,29.7); // MIP
-  }
-  return fProb;
-}
 //________________________________________________________________________________
 #include "St_TpcPadPedRMSC.h"
 MakeChairInstance2(tpcCorrection,St_TpcPadPedRMSC,Calibrations/tpc/TpcPadPedRMS);
@@ -447,6 +469,8 @@ MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMD2,Calibrations/tpc/TpcL
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDN,Calibrations/tpc/TpcLengthCorrectionMDN);
 #include "St_TpcPadCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
+#include "St_TpcPadCorrectionMDC.h"
+MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDC,Calibrations/tpc/TpcPadCorrectionMDC);
 ClassImp(St_MDFCorrectionC);
 St_MDFCorrectionC *St_MDFCorrectionC::fgMDFCorrectionC = 0;
 //____________________________________________________________________
@@ -501,6 +525,14 @@ Double_t St_MDFCorrectionC::Eval(Int_t k, Double_t *x) const {
   assert(x);
   if (! fFunc[k]) {
     fgMDFCorrectionC = (St_MDFCorrectionC *) this;
+    if (_debug) {
+      MDFCorrection_st *corK = fgMDFCorrectionC->Struct(k);
+      cout << Table()->GetName() << " k = " << k << " Idx = " << (Int_t) corK->idx << " Nvar = " << corK->NVariables << " type = " << corK->PolyType;
+      for (Int_t v = 0; v < corK->NVariables; v++) {
+	cout << "\t" << v << " min = " << corK->XMin[v] << " max = " << corK->XMax[v];
+      }
+      cout << endl;
+    }
     if (NVariables(k) <= 0) {
       return 0;
     } else if (NVariables(k) == 1) {
@@ -1310,16 +1342,8 @@ MakeChairInstance(itpcDeadFEE,Calibrations/tpc/itpcDeadFEE);
 //#define MakeChairInstance(STRUCT,PATH)
 ClassImp(St_itpcPadGainT0C);
 St_itpcPadGainT0C *St_itpcPadGainT0C::fgInstance = 0;
-St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
-  if (fgInstance) return fgInstance;
-  St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
-  if (! table) {
-    LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
-    assert(table);
-  }
-  static struct rowpadFEEmap_t {// FEE & RDO map for iTPC
-    Int_t row, padMin, padMax, fee, rdo;
-  } rowpadFEE[] = {
+rowpadFEEmap_t  St_itpcPadGainT0C::rowpadFEE[] = {
+  //row, padMin, padMax, fee, rdo
     { 1,  1, 26, 54, 1},
     { 1, 27, 52, 55, 1},
     { 2,  1, 27, 54, 1},
@@ -1561,9 +1585,15 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     {40, 41, 60,  3, 3},
     {40, 61, 80,  4, 4},
     {40, 81,100,  5, 4},
-    
   };
-  static Int_t NC = sizeof(rowpadFEE)/sizeof(rowpadFEEmap_t);
+Int_t St_itpcPadGainT0C::NCrowpadFEE = sizeof(St_itpcPadGainT0C::rowpadFEE)/sizeof(rowpadFEEmap_t);
+St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
+  if (fgInstance) return fgInstance;
+  St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
+  if (! table) {
+    LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
+    assert(table);
+  }
   St_itpcDeadFEEC *dead = St_itpcDeadFEEC::instance();
   if (dead) {
     itpcPadGainT0_st *g = table->GetTable();
@@ -1578,20 +1608,23 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
       //      Int_t rdo = dead->RDO(i);
       Int_t nFEE = 1;
       if (fee > 0) {
-	nFEE = NC;
+	nFEE = NCrowpadFEE;
       }
       for (Int_t j = 0; j < nFEE; j++) {
 	if (fee > 0) {
 	  if (rowpadFEE[j].fee != fee) continue;
+	  if (rowpadFEE[j].row != r  ) continue;
 	  r = rowpadFEE[j].row;
 	  pmin = rowpadFEE[j].padMin;
 	  pmax = rowpadFEE[j].padMax;
-	}
-	for (Int_t pad = pmin; pad <= pmax; pad++) {
-	  if (_debug) {
-	    cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
+	  if (pmin > 0 && pmax >= pmin) {
+	    for (Int_t pad = pmin; pad <= pmax; pad++) {
+	      if (_debug && g->Gain[s-1][r-1][pad-1] > 0) {
+		cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
+	      }
+	      g->Gain[s-1][r-1][pad-1] = 0;
+	    }
 	  }
-	  g->Gain[s-1][r-1][pad-1] = 0;
 	}
       }
     }
@@ -1600,10 +1633,60 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
   fgInstance = new St_itpcPadGainT0C(table);
   return fgInstance;
 }
+//________________________________________________________________________________
+#include "St_tpcExtraGainCorrectionC.h"
+MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection);
+//________________________________________________________________________________
 #include "St_tpcPadGainT0BC.h"
 // tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
-St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {
+  if (! fgInstance) {
+    fgInstance = new St_tpcPadGainT0BC(); 
+    // Apply additional correction for gain tables
+    Int_t run = StMaker::GetChain()->GetRunNumber();
+    St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
+    Int_t nrows = extra->nrows();
+    for (Int_t i = 0; i < nrows; i++) {
+      if (extra->idx(i) <= 0) continue;
+      if (run < extra->runMin(i) || run > extra->runMax(i)) continue;
+      Int_t sector = extra->sector(i);
+      if (sector < 0 || sector > 24) continue;
+      Int_t row    = extra->row(i);
+      Int_t padMin = extra->padMin(i);
+      Int_t padMax = extra->padMax(i);
+      Int_t RDO    = extra->RDO(i);
+      Int_t FEE    = extra->FEE(i);
+      Int_t status = extra->status(i);
+#if 0
+      LOG_WARN << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      if (! status) continue;
+      Int_t rowMin = row;
+      Int_t rowMax = row;
+      if (row <= 0) {rowMin = 1; rowMax = 45;}
+      if (padMin > padMax) {
+	// Calculate padMin/Max from FEE or RDO
+      }
+      for (Int_t r = rowMin; r <= rowMax; r++) {
+	Float_t *gains = St_tpcPadGainT0BC::instance()->Gains(sector, r);
+	for (Int_t p = padMin; p <= padMax; p++) {
+	  if (gains[p-1] > 0) {
+	    LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  }
+	  gains[p-1] = 0;
+	}
+      }
+#else
+      LOG_ERROR << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i should be moved to tpcRDOMaks", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+#endif
+    }
+  }
+  return fgInstance;
+}
 //________________________________________________________________________________
 Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
   Float_t gain = 0;
@@ -1617,6 +1700,20 @@ Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
     gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
   }
   return gain;
+}
+//________________________________________________________________________________
+Float_t        *St_tpcPadGainT0BC::Gains(Int_t sector, Int_t row) {
+  Float_t *gains = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) {
+      gains = St_itpcPadGainT0C::instance()->Gains(sector,row);
+    } else {
+      gains = St_tpcPadGainT0C::instance()->Gains(sector,row-40+13);
+    }
+  } else { // Tpx
+    gains = St_tpcPadGainT0C::instance()->Gains(sector,row);
+  }
+  return gains;
 }
 //________________________________________________________________________________
 Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
@@ -1640,6 +1737,18 @@ Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
       return St_tpcPadGainT0C::instance()->livePadrow(sector,row-40+13);
   }
   return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
+}
+#include "StPath2tpxGain.h"
+MakeChairInstance2(FilePath,StPath2tpxGain,Calibrations/tpc/Path2tpxGain);
+#include "StPath2itpcGain.h"
+MakeChairInstance2(FilePath,StPath2itpcGain,Calibrations/tpc/Path2itpcGain);
+//________________________________________________________________________________
+const Char_t * St_FilePathC::GetPath(const Char_t *prepend) {
+  static TString path;
+  path = prepend;
+  path += file(); 
+  gSystem->ExpandPathName(path); 
+  return path.Data();
 }
 //________________________________________________________________________________
 #include "St_tpcSlewingC.h"
@@ -1923,9 +2032,14 @@ MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tp
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
+//________________________________________________________________________________
+St_trigDetSumsC::~St_trigDetSumsC() {
+  fgInstance = 0;
+}
+//________________________________________________________________________________
 St_trigDetSumsC *St_trigDetSumsC::instance() {
   if (fgInstance) {
-#if 1
+#if 0
     static trigDetSums_st *sOld = 0;
     static Int_t iBreak = 0;
     if (iBreak < 3) {
@@ -1941,9 +2055,14 @@ St_trigDetSumsC *St_trigDetSumsC::instance() {
 #endif
     return fgInstance;
   }
-  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
+  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("inputStream_DAQ/trigDetSums");
+  if (! table)    table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("StEvent/trigDetSums");
   if (table) {
-    LOG_QA << "get trigDetSums from GetDataSet" << endm;
+    static Int_t iBreak = 0;
+    if (iBreak < 3) {
+      LOG_QA << "get trigDetSums from GetDataSet" << endm;
+      iBreak++;
+    }
     fgInstance = new St_trigDetSumsC(table);
     StMaker::GetChain()->AddData(fgInstance);
     return fgInstance;

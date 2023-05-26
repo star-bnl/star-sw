@@ -47,6 +47,8 @@
 #include "StDetectorDbMaker/St_TpcdZdYC.h"
 #include "StDetectorDbMaker/St_TpcdXdYC.h"
 #include "StDetectorDbMaker/St_TpcdXCorrectionBC.h"
+#include "StDetectorDbMaker/St_TpcEtaCorrectionC.h"
+#include "StDetectorDbMaker/St_TpcEtaCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcEffectivedXC.h" 
 #include "StDetectorDbMaker/St_TpcZDCC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
@@ -54,6 +56,7 @@
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMD2.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDN.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionMDC.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
@@ -97,10 +100,12 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      "TpcPhiDirection",           
 				      "TpcTanL",            
 				      "TpcdXCorrectionB",   
+				      "TpcEtaCorrectionB",   
 				      "TpcEffectivedX",     
 				      //				      "TpcPadTBins",               
 				      "TpcZDC",                    
 				      "TpcPadCorrectionMDF",     
+				      "TpcPadCorrectionMDC",     
 				      //				      "TpcAdcI",            
 				      //				      "TpcnPad",                   
 				      //				      "TpcnTbk",            
@@ -177,10 +182,13 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kPhiDirection          ] = dEdxCorrection_t("TpcPhiDirection"     ,"Gain on interception angle"				                ,St_TpcPhiDirectionC::instance());	     
   m_Corrections[kTanL                  ] = dEdxCorrection_t("TpcTanL"             ,"Gain on Tan(lambda)"					        ,St_TpcTanLC::instance());		     
   m_Corrections[kdXCorrection          ] = dEdxCorrection_t("TpcdXCorrectionB"    ,"dX correction"							,St_TpcdXCorrectionBC::instance());	     
+  m_Corrections[kEtaCorrection         ] = dEdxCorrection_t("TpcEtaCorrection"    ,"Eta correction MC"							,St_TpcEtaCorrectionC::instance());	     
+  m_Corrections[kEtaCorrectionB        ] = dEdxCorrection_t("TpcEtaCorrectionB"   ,"Eta correction RC"							,St_TpcEtaCorrectionBC::instance());	     
   m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"			,St_TpcEffectivedXC::instance()); 	     
   m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
   m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
   m_Corrections[kTpcPadMDF             ] = dEdxCorrection_t("TpcPadCorrectionMDF" ,"Gain Variation along the anode wire"                                ,St_TpcPadCorrectionMDF::instance());         
+  m_Corrections[kTpcPadMDC             ] = dEdxCorrection_t("TpcPadCorrectionMDC" ,"Gain Variation along the anode wire with track curvature"           ,St_TpcPadCorrectionMDC::instance());         
   m_Corrections[kAdcI                  ] = dEdxCorrection_t("TpcAdcI"             ,"Gain on Accumulated Adc on a socket)"			        ,St_TpcAdcIC::instance());		     
   m_Corrections[knPad                  ] = dEdxCorrection_t("TpcnPad"             ,"Gain on cluster length in pads"					,St_TpcnPadC::instance());		     
   m_Corrections[knTbk                  ] = dEdxCorrection_t("TpcnTbk"             ,"Gain on cluster length i time buckets"				,St_TpcnTbkC::instance());		     
@@ -253,16 +261,14 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     LOG_WARN << CommentLine.Data() << endm;
   }
   // Check consistency of active chairs
-  k = kzCorrection;
-  if (m_Corrections[k].Chair) {
-    if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
-      LOG_WARN << "\t" << m_Corrections[kzCorrectionC].Name << " is already active => disanle " << m_Corrections[k].Name << endm;
-      CLRBIT(m_Mask,k); 
-      SafeDelete(m_Corrections[k].Chair);
-    } else {	 // disabled GatingGrid
-      LOG_WARN << "\t" << m_Corrections[k].Name << " is activated =>  Disable " << m_Corrections[kGatingGrid].Name << endm;
-      CLRBIT(m_Mask,kGatingGrid); 
-      SafeDelete(m_Corrections[kGatingGrid].Chair);
+  if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
+    vector<Int_t> kvect = {kzCorrection, kGatingGrid};
+    for (auto k : kvect) {
+      if (m_Corrections[k].Chair) {
+	LOG_WARN << m_Corrections[kzCorrectionC].Name << " is already active => disable " << m_Corrections[k].Name << endm;
+	CLRBIT(m_Mask,k); 
+	SafeDelete(m_Corrections[k].Chair);
+      }
     }
   }
   // Use only one set of ADC correction
@@ -303,6 +309,23 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       SafeDelete(m_Corrections[x].Chair);
     }
   }      
+  // Use only TpcPadCorrection
+  Int_t PriorityListP[] = {kTpcPadMDC, kTpcPadMDF};
+  i = 0;
+  for (auto k : PriorityListP) {
+    i++;
+    if (! m_Corrections[k].Chair) continue;
+    Int_t j = 0;
+    for (auto x : PriorityListP) {
+      j++;
+      if (j <= i) continue;
+      if (! m_Corrections[x].Chair) continue;
+      if (x == k) continue;
+      LOG_WARN << "With " << m_Corrections[k].Name << " activated => Deactivate " << m_Corrections[x].Name << endm;
+      CLRBIT(m_Mask,x); 
+      SafeDelete(m_Corrections[x].Chair);
+    }
+  }      
 }
 //________________________________________________________________________________
 StTpcdEdxCorrection::~StTpcdEdxCorrection() {
@@ -318,11 +341,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
-  Double_t dx     	  = CdEdx.F.dx;    
+  Double_t dxC     	  = CdEdx.F.dx;    
+  Int_t qB                = CdEdx.qB;    
   Double_t adcCF = CdEdx.adc;
   Int_t iok = 0;
-  if (dx <= 0 || (dEU <= 0 && adcCF <= 0)) {
-    iok = 3;
+  if (dxC <= 0 || (dEU <= 0 && adcCF <= 0)) {
+    iok = 1;
     return iok;
   }
   Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row); 
@@ -357,7 +381,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     if (u2() < u() + 30) {
       LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply stop time = " << u2() << " GMT from local " << u2.GetGString() 
 		<< " < event time = " << u()  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
-      iok = kStErr;
+      iok = 1;
       return iok;
     }
   }
@@ -382,7 +406,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   }
   if (St_tpcPadConfigC::instance()->iTpc(sector) && row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
   if (gasGain <= 0.0) {
-    iok = 3;
+    iok = 1;
     return iok;
   }
   CdEdx.driftTime = driftDistance2GG/gStTpcDb->DriftVelocity(sector)*1e6 - m_TrigT0;// musec
@@ -394,7 +418,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
-  Double_t gc, ADC = 0, xL2, dXCorr;
+  Double_t gc, ADC = 0, xL2, dXCorr;//, gcRMS;
   Double_t slope = 0;
   Int_t nrows = 0;
   Double_t VarXs[kTpcLast] = {-999.};
@@ -424,6 +448,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[knTbk]                 = CdEdx.Ntbks; 
   VarXs[kdZdY]                 = CdEdx.dZdY;
   VarXs[kdXdY]                 = CdEdx.dXdY;
+  VarXs[kEtaCorrection]        = CdEdx.etaG*CdEdx.etaG;
+  VarXs[kEtaCorrectionB]       = CdEdx.etaG;
   Int_t NLoops = 0;
   Int_t m = 0;
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
@@ -443,55 +469,60 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! table) goto ENDL;
       const TpcSecRowCor_st *gain = table->GetTable() + sector - 1;
       gc =  gain->GainScale[row-1];
+      //      gcRMS = gain->GainRms[row-1];
+      //      if (gc <= 0.0 || gcRMS <= 0.0) {
       if (gc <= 0.0) {
-	iok = 1;
-	return iok;
+	return k;
       }
       dE *= gc;
       CdEdx.Weight = 1;
       if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
       goto ENDL;
     } else if (k == kTpcEffectivedX) {
-      if      (kTpcOutIn == kTpcOuter) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
+      if      (kTpcOutIn == kTpcOuter) dxC *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
       else if (kTpcOutIn == kTpcInner ||
-	       kTpcOutIn == kiTpc )    dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
+	       kTpcOutIn == kiTpc )    dxC *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
       goto ENDL;
     } else if (k == kTpcPadMDF) {
       l = 2*(sector-1);
       if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
-      dE *= TMath::Exp(-((St_TpcPadCorrectionMDF *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow,CdEdx.xpad));
+      goto ENDL;
+    } else if (k == kTpcPadMDC) {
+      Int_t nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
+      l = 2*(sector-1);
+      if (nrows > 48 && qB) l += 48*qB;
+      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) l += kTpcInner; // for both tpc and iTPC inner sectors
+      dE *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(l,CdEdx.yrow+24*qB,CdEdx.xpadR));
       goto ENDL;
     } else if (k == kAdcCorrectionMDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
-      Int_t nrows = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->nrows();
+      Int_t nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
       Double_t xx[2] = {TMath::Log(ADC), (Double_t)(CdEdx.Npads+CdEdx.Ntbks)};
-      Double_t Cor = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t Cor = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->Eval(l,xx);
       dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     } else if (k == kAdcCorrection3MDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
-      Int_t nrows = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->nrows();
+      Int_t nrows = ((St_MDFCorrection3C *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
       Double_t xx[3] = {(Double_t)  CdEdx.Ntbks, TMath::Abs(CdEdx.zG), TMath::Log(ADC)};
-      Double_t Cor = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t Cor = ((St_MDFCorrection3C *) m_Corrections[k].Chair)->Eval(l,xx);
       dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     } else if (k == kAdcCorrection4MDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrection4MDF *) m_Corrections[k].Chair)->nrows();
@@ -517,8 +548,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
       Double_t dEcor = ((St_GatingGridC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[kGatingGrid]);
       if (dEcor < -9.9) {
-	iok = 3; 
-	return iok;
+	return k;
       }
       dE *= TMath::Exp(-dEcor);
       goto ENDL;
@@ -543,16 +573,14 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (k == kAdcCorrection) {
 	ADC = adcCF;
 	if (ADC <= 0) {
-	  iok = 3; //HACK to avoid FPE (VP)
-	  return iok;
+	  return k;
 	}
 	if (corl->type == 12) 
 	  dE = Adc2GeVReal*chairC->CalcCorrection(l,ADC,VarXs[kTanL]);
 	else 
 	  dE = Adc2GeVReal*chairC->CalcCorrection(l,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) {
-	  iok = 3; 
-	  return iok;
+	  return k;
 	}
 	goto ENDL;
       } else if (k == kAdcCorrection6MDF) { 
@@ -560,8 +588,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else if (k == kAdcCorrectionC) {
 	ADC = adcCF;
 	if (adcCF <= 0) {
-	  iok = 3; //HACK to avoid FPE (VP)
-	  return iok;
+	  return k;
 	}
 	ADC = chairC->CalcCorrection(l,adcCF);
 	if (m_Corrections[kAdcCorrection6MDF].Chair) {
@@ -577,18 +604,18 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *=  TMath::Exp(-chairC->CalcCorrection(2+l,CdEdx.dCharge));
 	goto ENDL;
       } else if (k == kdXCorrection) {
-	xL2 = TMath::Log2(dx);
+	xL2 = TMath::Log2(dxC);
 	dXCorr = chairC->CalcCorrection(l,xL2); 
 	if (TMath::Abs(dXCorr) > 10) {
-	  iok = 3; 
-	  return iok;
+	  return k;
 	}
 	if (nrows == 7) {// old schema without iTPC
 	  dXCorr += chairC->CalcCorrection(2,xL2);
 	  dXCorr += chairC->CalcCorrection(5+kTpcOutIn,xL2);
 	}
-	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
-	dE *= TMath::Exp(-dXCorr);
+	dxC       = TMath::Exp(dXCorr)*CdEdx.F.dx;
+	CdEdx.dxC = dxC;
+	dE *= TMath::Exp(-dXCorr); //   Check !!!!!!
 	goto ENDL;
       } else if (k == kSpaceCharge) {
 	if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
@@ -604,21 +631,20 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } 
       if (k == kzCorrection || k == kzCorrectionC) {
 	// Take care about prompt hits and Gating Grid region in Simulation
-	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) {
-	    iok = 2; 
-	    return iok;
+	    return k;
 	  }
-	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
+	}
+	if (VarXs[k] < 0) {// prompt hits
+	  dE *= TMath::Exp(1.2);
 	}
 	if (k == kzCorrectionC && corl->type == 20) {
 	  Int_t np = TMath::Abs(corl->npar)%100;
 	  if (TMath::Abs(corl->a[np]) > 1e-7) {// extra exponent 
 	    Double_t dEcor = corl->a[np]*TMath::Exp( corl->a[np+1]*VarXs[k]);
 	    if (dEcor < -9.9) {
-	      iok = 3; 
-	      return iok;
+	      return k;
 	    }
 	    dE *= TMath::Exp(-dEcor);
 	  }
@@ -626,8 +652,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       }
       if (corl->type == 200 && (corl->min < corl->max) &&  ! IsSimulation() ) {// cut out the range
 	if ((corl->min > VarXs[k] || corl->max < VarXs[k])) {
-	  iok = 4; 
-	  return iok;
+	  return k;
 	}
       }
       if (corl->type == 300 && (corl->min < corl->max)) {
@@ -643,7 +668,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  }
 	}
 	if (iok) {
-	  return iok;
+	  return k;
 	}
       }
     }
@@ -678,7 +703,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
   ENDL:
     CdEdx.C[k].dE = dE;
-    CdEdx.C[k].dx = dx;
+    CdEdx.C[k].dx = dxC;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.C[k].dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
     if (! k) CdEdx.C[k].ddEdxL = 0;

@@ -11,6 +11,8 @@ public:
 	~ddlDriver() { ; } ;
 
 	int open(char *vbuff = 0, u_int pbuff = 0) ;	// open device
+	int open_23(char *vbuff = 0, u_int pbuff = 0) ;	// open device
+	int init() ; // new for FY23 & TPX
 	void close() ;	// close device
 
 	int start(u_int what=4) ;	// start run
@@ -55,6 +57,8 @@ private:
 //	int ch ;	// channel:	0=lower fiber,1=upper fiber
 
 	rorcDescriptor_t dev ;
+	int board_23 ;
+	int ch_23 ;
 
 	// storage
 //	volatile rorcReadyFifo_t *sfifo ;

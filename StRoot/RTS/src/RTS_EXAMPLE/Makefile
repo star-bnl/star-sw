@@ -10,13 +10,13 @@ DEFINES += -DRTS_LOG_COLORED
 VOBJS += libbsmd.a libbtow.a libemc.a libesmd.a libfpd.a libftp.a libl3.a libpmd.a libpp2pp.a  \
 	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libfgt.a libmtd.a libhlt.a libl4.a libetow.a \
 	libpxl.a libsst.a libfps.a librhicf.a libetof.a libitpc.a libfcs.a libstgc.a \
-	libdaqReader.a libsfs.a librtslog.a
+	libdaqReader.a libsfs.a librtslog.a libtpc23.a
 
 VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ../DAQ_L3 ../DAQ_PMD \
 	../DAQ_PP2PP ../DAQ_RIC ../DAQ_SC ../DAQ_SSD ../DAQ_SVT ../DAQ_TOF ../DAQ_TPC ../FCF ../DAQ_HLT ../DAQ_ETOW \
 	../DAQ_TPX ../DAQ_TRG ../DAQ_FGT ../DAQ_MTD ../DAQ_PXL ../DAQ_L4 ../DAQ_SST ../DAQ_FPS ../DAQ_RHICF ../DAQ_ETOF \
 	../DAQ_ITPC ../DAQ_FCS ../DAQ_STGC \
-	../DAQ_READER  ../SFS ../LOG 
+	../DAQ_READER  ../SFS ../LOG ../DAQ_TPC23
 
 
 BINS = rts_example daqFileMerger daqFileHacker daqFileChopper testReader testReader2 tpc_rerun tpx_read_gains
@@ -61,41 +61,6 @@ testReader2: testReader2.o $(VOBJS)
 
 # DO NOT DELETE
 
-blah.o: ../../../../StRoot/RTS/include/rtsLog.h
-blah.o: ../../../../StRoot/RTS/include/rtsSystems.h
-blah.o: ../DAQ_READER/daqReader.h
-blah.o: ../DAQ_READER/daqConfig.h
-blah.o: ../DAQ_READER/daq_dta.h
-blah.o: ../../../../StRoot/RTS/include/rts.h
-blah.o: ../DAQ_READER/daq_dta_structs.h
-blah.o: ../DAQ_BSMD/daq_bsmd.h
-blah.o: ../DAQ_READER/daq_det.h
-blah.o: ../DAQ_EMC/daq_emc.h
-blah.o: ../DAQ_BTOW/daq_btow.h
-blah.o: ../DAQ_ESMD/daq_esmd.h
-blah.o: ../DAQ_ETOW/daq_etow.h
-blah.o: ../DAQ_FPD/daq_fpd.h
-blah.o: ../DAQ_FTP/daq_ftp.h
-blah.o: ../DAQ_L3/daq_l3.h
-blah.o: ../../../../StRoot/RTS/include/daqFormats.h
-blah.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-blah.o: ../../trg/include/trgDataDefs_47.h
-blah.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
-blah.o: ../DAQ_PMD/daq_pmd.h
-blah.o: ../DAQ_PP2PP/daq_pp2pp.h
-blah.o: ../DAQ_RIC/daq_ric.h
-blah.o: ../DAQ_SC/daq_sc.h
-blah.o: ../DAQ_SSD/daq_ssd.h
-blah.o: ../DAQ_SVT/daq_svt.h
-blah.o: ../DAQ_TOF/daq_tof.h
-blah.o: ../DAQ_TPC/daq_tpc.h
-blah.o: ../DAQ_TPX/daq_tpx.h
-blah.o: ../DAQ_TRG/daq_trg.h
-blah.o: ../DAQ_HLT/daq_hlt.h
-blah.o: ../DAQ_L4/daq_l4.h
-blah.o: ../DAQ_FGT/daq_fgt.h
-blah.o: ../DAQ_MTD/daq_mtd.h
-blah.o: ../DAQ_PXL/daq_pxl.h
 daqFileChopper.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqFileChopper.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daqFileChopper.o: ../DAQ_READER/daqReader.h
@@ -217,6 +182,9 @@ rts_example.trg.o: ../DAQ_L4/daq_l4.h
 rts_example.trg.o: ../DAQ_FGT/daq_fgt.h
 rts_example.trg.o: ../DAQ_MTD/daq_mtd.h
 rts_example.trg.o: ../DAQ_PXL/daq_pxl.h
+sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
+sfs_stuff.o: ../DAQ_READER/daqReader.h
+sfs_stuff.o: ../DAQ_READER/daqConfig.h
 testReader2.o: ../../../../StRoot/RTS/include/rtsLog.h
 testReader2.o: ../../../../StRoot/RTS/include/rtsSystems.h
 testReader2.o: ../DAQ_READER/daqReader.h
@@ -242,3 +210,16 @@ tpx_read_gains.o: ../DAQ_TPX/tpxGain.h
 tpx_read_gains.o: ../DAQ_TPX/tpxCore.h
 tpx_read_gains.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpx_read_gains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpx_rerun.o: ../DAQ_READER/daqReader.h
+tpx_rerun.o: ../DAQ_READER/daqConfig.h
+tpx_rerun.o: ../DAQ_READER/daq_dta.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/rts.h
+tpx_rerun.o: ../DAQ_READER/daq_dta_structs.h
+tpx_rerun.o: ../DAQ_TPX/daq_tpx.h
+tpx_rerun.o: ../DAQ_READER/daq_det.h
+tpx_rerun.o: ../DAQ_TPX/tpxGain.h
+tpx_rerun.o: ../DAQ_TPX/tpxCore.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpx_rerun.o: ../DAQ_TPX/tpxFCF.h
+tpx_rerun.o: ../DAQ_TPX/tpxFCF_flags.h

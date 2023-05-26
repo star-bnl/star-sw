@@ -306,7 +306,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     plots[n]->gridx = 1;
     plots[n]->gridy = 1;
   }
-  plots[n]->optlogz = 0;		// HACK as there's no ->logz option!!!
+  //plots[n]->optlogz = 0;		// HACK as there's no ->logz option!!!
  
   //---------------------------------------------------
   // Add Plots to plot set...

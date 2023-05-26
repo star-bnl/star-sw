@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/fmtpars/fmtpar Allocated rows: 1  Used rows: 1  Row size: 88 bytes
 //  Table: tfc_fmtpar_st[0]--> tfc_fmtpar_st[0]
@@ -33,5 +33,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.printf	 =          0; // output flag ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

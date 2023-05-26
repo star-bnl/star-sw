@@ -1,0 +1,18 @@
+
+nEvents=5
+fzd='seed.fzd'
+strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+starsim -w 0 -b sim/testg.kumac seed=${strongrandom} nevents=${nEvents} ntrack=3 etamn=2.0 etamx=4.5 ptmn=0.2 ptmx=1.0 ofn=seed.fzd
+
+# just a unique ID for each job
+jobId=$1
+
+
+echo root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "'"${fzd}"'", "sim/seed.xml" )' 
+time root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "'"${fzd}"'", "sim/seed.xml" )'
+
+
+mkdir -p out/seed
+mv seed.fzd out/seed/${jobId}_simu.fzd
+mv seed.root out/seed/${jobId}_qa.root
+mv mltree.root out/seed/${jobId}_mltree.root

@@ -126,6 +126,10 @@ class dEdxParameterization {
   Double_t IfitTrsB(Int_t part, Double_t log10bg) const {return Get(fTrs[part][4], log10bg);}  // Estimation for Ifit - Bichsel from TpcRS
   Double_t IfitTrsS(Int_t part, Double_t log10bg) const {return Get(fTrs[part][5], log10bg);}  // Estimation for relative sigma beta*gamma dependence for Ifit from TpcRS normalized to MIP
 
+  Double_t     MostProbableZShift() {return fMostProbableZShift;}  //!
+  Double_t     AverageZShift     () {return fAverageZShift;}       //!
+  Double_t     I70Shift          () {return fI70Shift;}            //!
+  Double_t     I60Shift          () {return fI60Shift;}            //!
     
   ClassDef(dEdxParameterization,0)
 };

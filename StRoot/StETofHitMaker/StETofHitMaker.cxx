@@ -75,9 +75,15 @@
 
 #include "StETofHitMaker.h"
 #include "StETofUtil/StETofConstants.h"
+#include "StETofUtil/StETofGeometry.h"
 
 #include "tables/St_etofHitParam_Table.h"
 #include "tables/St_etofSignalVelocity_Table.h"
+#include "tables/St_etofModCounter_Table.h"
+
+#include "StarClassLibrary/SystemOfUnits.h"
+#include "StarClassLibrary/PhysicalConstants.h"
+#include "StBTofUtil/tofPathLength.hh"
 
 
 //_____________________________________________________________
@@ -85,30 +91,35 @@ StETofHitMaker::StETofHitMaker( const char* name )
 : StMaker( "etofHit", name ),
   mEvent( nullptr ),          /// pointer to StEvent
   mMuDst( nullptr ),          /// pointer to MuDst
+  mETofGeom( nullptr ),       /// pointer to EToF-Geo
   mFileNameHitParam( "" ),
   mFileNameSignalVelocity( "" ),
-  mMaxYPos( 15. ),
+  mFileNameModMatrix( "" ),
+  mFileNameAlignParam( "" ),
+  mStoreDigi(),
+  mMapDigiIndex(),
+  mStoreHit(),
+  mMapHitDigiIndices(),
+  mMapHitIndexDigiIndices(),
+  mMaxYPos( 15. ), 
   mMergingRadius( 1. ),
-  mSoftwareDeadTime( 50. ),
+  mSigVel(),
+  mSoftwareDeadTime( 5. ),
   mDoClockJumpShift( true ),
+  mDoDoubleClockJumpShift( true ),
+  mClockJumpDirection(),
+  mModMatrix(),
+  mGet4doublejumpTmin(-1.0),
+  mGet4doublejumpFlag(),
+  mGet4doublejumpTimes(),  
+  mIsSim( false ), 
   mDoQA( false ),
   mDebug( false ),
-  mHistFileName( "" )
+  mHistFileName( "" ),
+  mHistograms(),
+  mCounterActive()
 {
     LOG_DEBUG << "StETofHitMaker::ctor"  << endm;
-
-    mStoreDigi.clear();
-    mStoreHit.clear();
-    mMapDigiIndex.clear();
-    mMapHitDigiIndices.clear();
-    mMapHitIndexDigiIndices.clear();
-
-    mSigVel.clear();
-
-    mClockJumpDirection.clear();
-
-    mHistograms.clear();
-    mCounterActive.clear();
 }
 
 //_____________________________________________________________
@@ -199,6 +210,8 @@ StETofHitMaker::InitRun( Int_t runnumber )
         dbDataSet = GetDataBase( "Calibrations/etof/etofSignalVelocity" );
 
         St_etofSignalVelocity* etofSignalVelocity = static_cast< St_etofSignalVelocity* > ( dbDataSet->Find( "etofSignalVelocity" ) );
+       
+	
         if( !etofSignalVelocity ) {
             LOG_ERROR << "unable to get the signal velocity from the database" << endm;
             return kStFatal;
@@ -248,16 +261,111 @@ StETofHitMaker::InitRun( Int_t runnumber )
     }
 
 
+    // --------------------------------------------------------------------------------------------  
+    //initialize Counter Modification map (flip local xy etc.)
+
+    if(!mFileNameModMatrix.empty()){ // "from file"
+      
+      LOG_INFO << "etofModMatrix: filename provided --> use parameter file: " << mFileNameSignalVelocity.c_str() << endm;
+      
+      paramFile.open( mFileNameModMatrix.c_str() );
+      
+      if( !paramFile.is_open() ) {
+	LOG_ERROR << "unable to get the 'etofModMatrix' parameters from file --> file does not exist" << endm;
+	return kStFatal;
+      }
+	
+      std::vector< int > modMatrix;
+      int temp;
+      while( paramFile >> temp ) {
+	  modMatrix.push_back( temp );
+      }
+      
+      paramFile.close();
+      
+      
+      if( modMatrix.size() != eTofConst::nCountersInSystem ) {
+	LOG_ERROR << "parameter file for 'etofModMatrix' has not the right amount of entries: ";
+	LOG_ERROR << modMatrix.size() << " instead of " << eTofConst::nCountersInSystem << " !!!!" << endm;
+	return kStFatal;
+      }
+
+      for( size_t i=0; i<eTofConst::nCountersInSystem; i++ ) {
+	if( modMatrix.at( i ) > 0 ) {
+	  mModMatrix[ detectorToKey( i ) ] = modMatrix.at( i );
+	}
+      }
+      
+    }else{ //from Db
+      
+      dbDataSet = GetDataBase( "Geometry/etof/etofModCounter" );
+
+      //  TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofModCounter");
+       if( !dbDataSet ) {
+      	LOG_ERROR << "unable to get the dataset from the database" << endm;
+	return kStFatal; 
+        }
+                 
+      St_etofModCounter* etofModCounter = static_cast< St_etofModCounter* > ( dbDataSet->Find("etofModCounter") );
+       
+      if( !etofModCounter ) {
+	LOG_WARN << "unable to get the ModMap from the database" << endm;
+        return kStFatal;
+
+      }else{
+
+        etofModCounter_st* ModCounterTable = etofModCounter->GetTable();
+  
+        for( size_t i=0; i<eTofConst::nCountersInSystem; i++ ) {
+	  mModMatrix[ detectorToKey( i ) ] = ModCounterTable->detectorModFlag[ i ];           
+        }	
+      }
+    }
+
     // --------------------------------------------------------------------------------------------
     for( int i=0; i<eTofConst::nCountersInSystem * 8; i++ ) {
-        int key = detectorToKey( i / 8 ) * 10 + ( i % 8 ) + 1;
-        mClockJumpDirection[ key ] = -1; //changed default to -1, read: backwards in time, to reduce losses before algoritm identifies direction.
-        LOG_DEBUG << key << "  " << mClockJumpDirection.at( key ) << endm;
+      int key = detectorToKey( i / 8 ) * 10 + ( i % 8 ) + 1;
+      mClockJumpDirection[ key ] = -1; //changed default to -1, read: backwards in time, to reduce losses before algoritm identifies direction.
+
+      LOG_DEBUG << key << "  " << mClockJumpDirection.at( key ) << endm;
+
+      mGet4doublejumpFlag[ key ] = 0;
+
+      for(int k=0; k<3; k++){
+        mGet4doublejumpTimes[key].push_back(-999);
+      }
     }
 
     // --------------------------------------------------------------------------------------------
     for( int i=0; i<eTofConst::nCountersInSystem; i++ ) {
         mCounterActive.push_back( false );
+    }
+    // --------------------------------------------------------------------------------------------
+    // initializie etof geometry
+    // --------------------------------------------------------------------------------------------
+
+    if( !mETofGeom ) {
+      LOG_INFO << " creating a new eTOF geometry . . . " << endm;
+      mETofGeom = new StETofGeometry( "etofGeometry", "etofGeometry in HitMaker" );
+    }
+
+    if( mETofGeom && !mETofGeom->isInitDone() ) {
+      LOG_INFO << " eTOF geometry initialization ... " << endm;
+
+      if( !gGeoManager ) GetDataBase( "VmcGeometry" );
+
+      if( !gGeoManager ) {
+        LOG_ERROR << "Cannot get GeoManager" << endm;
+        return kStFatal;
+      }
+
+      LOG_DEBUG << " gGeoManager: Should set alignment file now! " << mFileNameAlignParam <<" ! "<< endm;
+      if (mFileNameAlignParam !=  ""){
+        LOG_INFO << " gGeoManager: Setting alignment file: " << mFileNameAlignParam << endm;
+        mETofGeom->setFileNameAlignParam(mFileNameAlignParam);
+      }
+      mETofGeom->init(gGeoManager);
+      LOG_DEBUG << " init done " << endm;
     }
 
     return kStOk;
@@ -279,7 +387,9 @@ StETofHitMaker::FinishRun( Int_t runnumber )
         }
     }
 
-
+    if( mETofGeom ) {
+      mETofGeom->reset();
+    }
 
     return kStOk;
 }
@@ -412,13 +522,7 @@ StETofHitMaker::processStEvent()
     }
 
     if( etofCollection->hitsPresent() ) {
-        StSPtrVecETofHit& etofHits = etofCollection->etofHits();
-        //LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
-
         fillHitQA( isMuDst, tstart );
-    }
-    else {
-       // LOG_INFO << "processStEvent() - no hits" << endm;
     }
 }
 
@@ -461,7 +565,7 @@ StETofHitMaker::processMuDst()
             nDigisInStore++;
         }
     }
-    //LOG_INFO << "processMuDst() - storage is filled with " << nDigisInStore << " digis" << endm;
+    // LOG_INFO << "processMuDst() - storage is filled with " << nDigisInStore << " digis" << endm;
 
     matchSides();
 
@@ -482,25 +586,26 @@ StETofHitMaker::processMuDst()
 
 
     if( mMuDst->numberOfETofHit() ) {
-        size_t nHits = mMuDst->numberOfETofHit();
-        //LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
-
         fillHitQA( isMuDst, tstart );
-    }
-    else {
-        //LOG_INFO << "processMuDst() - no hits" << endm;
     }
 }
 //_____________________________________________________________
 
 
 //_____________________________________________________________
-// get the start time -- from bTOF header from bTOF header for now
+// get the start time -- from bTOF header for now
 double
 StETofHitMaker::startTime()
 {
     if( mDebug ) {
         LOG_INFO << "startTime(): -- loading start time from bTOF header" << endm;
+    }
+
+    if(mIsSim){
+    
+      LOG_INFO << "mIsSim = true --> startTime set to 0" << endm;
+    
+      return 0.;
     }
 
     StBTofHeader* btofHeader = nullptr; 
@@ -809,30 +914,30 @@ StETofHitMaker::matchSides()
     std::string histNameDigisErased;
 
     for( auto kv = mStoreDigi.begin(); kv != mStoreDigi.end(); kv++ ) {
-        unsigned int stripIndex             = kv->first;
-        std::vector< StETofDigi* > *digiVec = &( kv->second );
-
-        // timeorder digis from both sides via lambda functions of C++11
-        std::sort( digiVec->begin(), digiVec->end(), [] ( StETofDigi* lhs, StETofDigi* rhs ) {
-                                                        return lhs->calibTime() < rhs->calibTime();
-                                                    }
+      unsigned int stripIndex             = kv->first;
+      std::vector< StETofDigi* > *digiVec = &( kv->second );
+      
+      // timeorder digis from both sides via lambda functions of C++11
+      std::sort( digiVec->begin(), digiVec->end(), [] ( StETofDigi* lhs, StETofDigi* rhs ) {
+	  return lhs->calibTime() < rhs->calibTime();
+	}
                  );
-
-        int nDigisOnStrip = digiVec->size();
-        //--------------------------------------------------------------------------------
-        // print out for testing
-        if( mDebug ) {
-            LOG_INFO << stripIndex << "  size: " << nDigisOnStrip << endm;
-
-            for( size_t i=0; i<digiVec->size(); i++ ) {
-                LOG_INFO << "matchSides() - DIGI: " << digiVec->at( i ) << "  ";
-                LOG_INFO << "calibTime=" << setprecision( 16 ) << digiVec->at( i )->calibTime() << "  " << endm;
-                LOG_INFO << "calibTot="  << setprecision( 4 )  << digiVec->at( i )->calibTot()  << "  ";
-                LOG_INFO << "side="      << setprecision( 4 )  << digiVec->at( i )->side()      << endm;
-            }
-        }
-        //--------------------------------------------------------------------------------
-
+      
+      int nDigisOnStrip = digiVec->size();
+      //--------------------------------------------------------------------------------
+      // print out for testing
+      if( mDebug ) {
+	LOG_INFO << stripIndex << "  size: " << nDigisOnStrip << endm;
+	
+	for( size_t i=0; i<digiVec->size(); i++ ) {
+	  LOG_INFO << "matchSides() - DIGI: " << digiVec->at( i ) << "  ";
+	  LOG_INFO << "calibTime=" << setprecision( 16 ) << digiVec->at( i )->calibTime() << "  " << endm;
+	  LOG_INFO << "calibTot="  << setprecision( 4 )  << digiVec->at( i )->calibTot()  << "  ";
+	  LOG_INFO << "side="      << setprecision( 4 )  << digiVec->at( i )->side()      << endm;
+	}
+      }
+      //--------------------------------------------------------------------------------
+      
         int detIndex = stripIndex / 100;
         int sector   =   detIndex / 100;
         int plane    = ( detIndex % 100 ) / 10;
@@ -840,64 +945,40 @@ StETofHitMaker::matchSides()
         int strip    = stripIndex % 100;
 
         if( mDoQA ) {
-            std::string histNameDigisPerStrip = "digisPerStrip_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-            mHistograms.at( histNameDigisPerStrip )->Fill( strip, nDigisOnStrip );
+	  std::string histNameDigisPerStrip = "digisPerStrip_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+	  mHistograms.at( histNameDigisPerStrip )->Fill( strip, nDigisOnStrip );
 
-            histNameDigisErased = "digisErased_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+	  histNameDigisErased = "digisErased_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
         }
 
 
         //--------------------------------------------------------------------------------
         // remove digis from the vector that fall within the dead time caused by another digi on the same side of a strip
         std::vector< double > deadTime( 2, -60. );
-/*
-        for( auto it = digiVec->begin(); it != digiVec->end(); it++ ) { //TODO: move to hit candidate check!!
-            if( fabs( (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) ) < mSoftwareDeadTime ) {
-
-                if( mDebug ) {
-                    LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
-                    LOG_INFO << " dead time: "  << setprecision( 16 ) << deadTime.at( (*it)->side() - 1 );
-                    LOG_INFO << " calib time: " << setprecision( 16 ) << (*it)->calibTime();
-                    LOG_INFO << " difference: " << (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) << endm;
-                }
-
-                delete *it;
-                digiVec->erase( it );
-                it--;
-                if( mDoQA ) {
-                    mHistograms.at( histNameDigisErased )->Fill( 1 );
-                }
-            }
-            else {
-                deadTime.at( (*it)->side() - 1 ) = (*it)->calibTime();
-            }
-        }
-
 
         for( auto it = digiVec->begin(); it != digiVec->end(); it++ ) {
-            if( (*it)->rawTime() - deadTime.at( (*it)->side() - 1 ) < mSoftwareDeadTime ) { //TODO: move to DB. use raw time
-
+	  if( (*it)->rawTime() - deadTime.at( (*it)->side() - 1 ) < mSoftwareDeadTime ) { //TODO: move to DB. use raw time
+	    
                 if( mDebug ) {
-                    LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
-                    LOG_INFO << " dead time: "  << setprecision( 16 ) << deadTime.at( (*it)->side() - 1 );
+		  LOG_INFO << "digi within dead time --> ignore ... ( geomId : " << stripIndex * 10 + (*it)->side();
+		  LOG_INFO << " dead time: "  << setprecision( 16 ) << deadTime.at( (*it)->side() - 1 );
                     LOG_INFO << " calib time: " << setprecision( 16 ) << (*it)->calibTime();
                     LOG_INFO << " difference: " << (*it)->calibTime() - deadTime.at( (*it)->side() - 1 ) << endm;
                 }
-
+		
                 delete *it;
                 digiVec->erase( it );
                 if( mDoQA ){
-                    mHistograms[ histNameDigisErased ]->Fill(1);
+		  mHistograms[ histNameDigisErased ]->Fill(1);
                 }
                 it--;
-            }
-            else {
-                deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
-            }
+	  }
+	  else {
+	    deadTime.at( (*it)->side() - 1 ) = (*it)->rawTime();
+	  }
         }
-*/
         //--------------------------------------------------------------------------------
-
+	
 
         double posX     = 0.0;
         double posY     = 0.0;
@@ -908,203 +989,220 @@ StETofHitMaker::matchSides()
 
 
         if( mDoQA && digiVec->size() == 1 ) {
-            mHistograms.at( histNameDigisErased )->Fill( 2 );
+	  mHistograms.at( histNameDigisErased )->Fill( 2 );
         }
-
+	
         // loop over digis on the same strip
         while( digiVec->size() > 1 ) {	        
-            if( mDebug ) { 
+	  if( mDebug ) { 
                 LOG_DEBUG << stripIndex << " -- digiVec->size() -- " << digiVec->size() << endm;
-            }
-            // treat consecutive digis on the same side:
-            // we want to have the first and second digi to be on different sides
-            // of the strip in order to build hits out of them
-            while( digiVec->at( 0 )->side() == digiVec->at( 1 )->side() ) {
+	  }
+	  // treat consecutive digis on the same side:
+	  // we want to have the first and second digi to be on different sides
+	  // of the strip in order to build hits out of them
+	  while( digiVec->at( 0 )->side() == digiVec->at( 1 )->side() ) {
 
-                if( digiVec->size() > 2 ) { //more than 2 digis left on strip
-
-                    // test for three (or more) consecutive digis on the same side
-                    if( digiVec->at( 2 )->side() == digiVec->at( 0 )->side() ) {
-
-                        // delete first digi
-                        iterDigi = digiVec->begin();
-                        delete *iterDigi;
-                        digiVec->erase( iterDigi );
-                        if( mDoQA ) {
-                            mHistograms.at( histNameDigisErased )->Fill( 3 );
-                        }
-                    }
-                    else { // --> third digi is on the other side compared to first and second digi
+	    if( digiVec->size() > 2 ) { //more than 2 digis left on strip
+	      
+	      // test for three (or more) consecutive digis on the same side
+	      if( digiVec->at( 2 )->side() == digiVec->at( 0 )->side() ) {
+		
+		// delete first digi
+		iterDigi = digiVec->begin();
+		delete *iterDigi;
+		digiVec->erase( iterDigi );
+		if( mDoQA ) {
+		  mHistograms.at( histNameDigisErased )->Fill( 3 );
+		}
+	      }
+	      else { // --> third digi is on the other side compared to first and second digi
                         if( digiVec->at( 2 )->calibTime() - digiVec->at( 0 )->calibTime() >
                             digiVec->at( 2 )->calibTime() - digiVec->at( 1 )->calibTime() ) {
-
-                            // third digi is not same side and fits better with second digi
-                            // --> delete first digi
-                            iterDigi = digiVec->begin();
-                            delete *iterDigi;
-                            digiVec->erase( iterDigi );                           
-                            //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-                            t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); //CHECK IF THAT actually makes things better!!
-                            if( mDoQA ) {
-                                mHistograms.at( histNameDigisErased )->Fill( 4 );
-                            }
+			  
+			  // third digi is not same side and fits better with second digi
+			  // --> delete first digi
+			  iterDigi = digiVec->begin();
+			  delete *iterDigi;
+			  digiVec->erase( iterDigi );                           
+			  //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
+			  t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); //CHECK IF THAT actually makes things better!!
+			  if( mDoQA ) {
+			    mHistograms.at( histNameDigisErased )->Fill( 4 );
+			  }
                         }
                         else {
-                            // third digi is not same side and fits better with first digi
-                            // --> delete second digi
-                            iterDigi = digiVec->begin() + 1;
-                            delete *iterDigi;
-                            digiVec->erase( iterDigi );
-                            if( mDoQA ) {
-                                mHistograms.at( histNameDigisErased )->Fill( 7 );  //TODO: Seperate in QA. Missed afterpulse side?! Should be rare
-                            }
+			  // third digi is not same side and fits better with first digi
+			  // --> delete second digi
+			  iterDigi = digiVec->begin() + 1;
+			  delete *iterDigi;
+			  digiVec->erase( iterDigi );
+			  if( mDoQA ) {
+			    mHistograms.at( histNameDigisErased )->Fill( 7 );  //TODO: Seperate in QA. Missed afterpulse side?! Should be rare
+			  }
                         }
-                    }
-                }
-                else{ // --> 2 or less digis left on the strip (on the same side of the strip)
-                      // delete the remaining digi
-                    iterDigi = digiVec->begin();
-                    delete *iterDigi;
-                    digiVec->erase( iterDigi );
-                    if( mDoQA && digiVec->size() == 1 ){
-                        mHistograms.at( histNameDigisErased )->Fill( 5 );
-                    }
-                }
-
-                if( digiVec->size() < 2 ) { //only one digi left on strip. break loop.
-                    if(mDoQA &&  digiVec->size() == 1) {
-                        mHistograms.at( histNameDigisErased )->Fill( 5 );
-                    }
-                    break;
-                }
-            } // first and second digi in the vector are on different sides
-
-            if( mDebug ) {
-                LOG_DEBUG << "matchSides() - digi processing for sector " << stripIndex / 10000;
-                LOG_DEBUG << " plane " << ( stripIndex % 10000 ) / 1000  << " counter " << ( stripIndex % 1000 ) / 100;
-                LOG_DEBUG << " strip " << stripIndex % 100;
-                LOG_DEBUG << " size: " << digiVec->size() << endm;
-            }
-
+	      }
+	    }
+	    else{ // --> 2 or less digis left on the strip (on the same side of the strip)
+	      // delete the remaining digi
+	      iterDigi = digiVec->begin();
+	      delete *iterDigi;
+	      digiVec->erase( iterDigi );
+	      if( mDoQA && digiVec->size() == 1 ){
+		mHistograms.at( histNameDigisErased )->Fill( 5 );
+	      }
+	    }
+	    
+	    if( digiVec->size() < 2 ) { //only one digi left on strip. break loop.
+	      if(mDoQA &&  digiVec->size() == 1) {
+		mHistograms.at( histNameDigisErased )->Fill( 5 );
+	      }
+	      break;
+	    }
+	  } // first and second digi in the vector are on different sides
+	  
+	  if( mDebug ) {
+	    LOG_DEBUG << "matchSides() - digi processing for sector " << stripIndex / 10000;
+	    LOG_DEBUG << " plane " << ( stripIndex % 10000 ) / 1000  << " counter " << ( stripIndex % 1000 ) / 100;
+	    LOG_DEBUG << " strip " << stripIndex % 100;
+	    LOG_DEBUG << " size: " << digiVec->size() << endm;
+	  }
+	  
             if( digiVec->size() < 2 ) {
-                // only one digi left on strip. break loop.
-                if( mDoQA ) {
-                    mHistograms.at( histNameDigisErased )->Fill( 5 );
+	      // only one digi left on strip. break loop.
+	      if( mDoQA ) {
+		mHistograms.at( histNameDigisErased )->Fill( 5 );
                 }
-                break;
+	      break;
             }
-
+	    
             // two digis --> both sides present    
             StETofDigi* xDigiA = digiVec->at( 0 );
             StETofDigi* xDigiB = digiVec->at( 1 );
-
+	    
             timeDiff = xDigiA->calibTime() - xDigiB->calibTime();
-
+	    
             if( mDebug ) {
-                LOG_DEBUG << "matchSides() - time difference in ns: " << timeDiff << endm;
+	      LOG_DEBUG << "matchSides() - time difference in ns: " << timeDiff << endm;
             }
 
             // side 1 is the top, side 2 is bottom
             if( xDigiA->side() == 2 ) {
-                posY = mSigVel.at( detIndex ) * timeDiff * 0.5;
+	      posY = mSigVel.at( detIndex ) * timeDiff * 0.5;
             }
             else {                            
-                posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
+	      posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
             }
-
-
+	    
+	    
             // check for a better match if the local y position is outside the detector bounds
             if( fabs( posY ) > mMaxYPos && digiVec->size() > 2 ) {
-                if( mDebug ) {
-                    LOG_DEBUG << "matchSides() - hit candidate outside correlation window, check for better possible digis" << endm;
-                    LOG_DEBUG << "size of digi vector: " << digiVec->size() << endm;
-                }
-
-                StETofDigi* xDigiC = digiVec->at( 2 );
+	      if( mDebug ) {
+		LOG_DEBUG << "matchSides() - hit candidate outside correlation window, check for better possible digis" << endm;
+		LOG_DEBUG << "size of digi vector: " << digiVec->size() << endm;
+	      }
+	      
+	      StETofDigi* xDigiC = digiVec->at( 2 );
                 
-                double posYNew     = 0.;
-                double timeDiffNew = 0.;
-
-                if( xDigiC->side() == xDigiA->side() ) {
+	      double posYNew     = 0.;
+	      double timeDiffNew = 0.;
+	      
+	      if( xDigiC->side() == xDigiA->side() ) {
                     timeDiffNew = xDigiC->calibTime() - xDigiB->calibTime();
+	      }
+	      else {
+		timeDiffNew = xDigiA->calibTime() - xDigiC->calibTime();
+	      }
+	      
+	      if( xDigiA->side() == 2 ) {
+		posYNew = mSigVel.at( detIndex ) * timeDiffNew * 0.5;
                 }
-                else {
-                    timeDiffNew = xDigiA->calibTime() - xDigiC->calibTime();
-                }
-
-                if( xDigiA->side() == 2 ) {
-                    posYNew = mSigVel.at( detIndex ) * timeDiffNew * 0.5;
-                }
-                else {                              
-                    posYNew = -1 * mSigVel.at( detIndex ) * timeDiffNew * 0.5;
-                }
-
+	      else {                              
+		posYNew = -1 * mSigVel.at( detIndex ) * timeDiffNew * 0.5;
+	      }
+	      
                 if( fabs( posYNew ) < fabs( posY ) ) {
-                    if( mDebug ) {
-                        LOG_DEBUG << "matchSides() - found better match for hit candidate -> changing out digis" << endm;
-                    }
-
-                    timeDiff = timeDiffNew;
-                    posY     = posYNew;
-
-                    if( xDigiC->side() == xDigiA->side() ) {
+		  if( mDebug ) {
+		    LOG_DEBUG << "matchSides() - found better match for hit candidate -> changing out digis" << endm;
+		  }
+		  
+		  timeDiff = timeDiffNew;
+		  posY     = posYNew;
+		  
+		  if( xDigiC->side() == xDigiA->side() ) {
 	                     //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-	                     t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
-                        xDigiA = xDigiC;
-                        iterDigi = digiVec->begin();
-                        delete *iterDigi;
-                        digiVec->erase( iterDigi );
-                        if( mDoQA ){
-                            mHistograms.at( histNameDigisErased )->Fill( 4 );
-                        }
-                    }
-                    else {
-	                     //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-	                    	t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
-                        xDigiB = xDigiC;
-                        iterDigi = digiVec->begin() + 1;
-                        delete *iterDigi;
-                        digiVec->erase( iterDigi );
-                        if( mDoQA ){
-                            mHistograms.at( histNameDigisErased )->Fill( 4 );
-                        }
-                    }
+		    t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		    xDigiA = xDigiC;
+		    iterDigi = digiVec->begin();
+		    delete *iterDigi;
+		    digiVec->erase( iterDigi );
+		    if( mDoQA ){
+		      mHistograms.at( histNameDigisErased )->Fill( 4 );
+		    }
+		  }
+		  else {
+		    //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
+		    t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		    xDigiB = xDigiC;
+		    iterDigi = digiVec->begin() + 1;
+		    delete *iterDigi;
+		    digiVec->erase( iterDigi );
+		    if( mDoQA ){
+		      mHistograms.at( histNameDigisErased )->Fill( 4 );
+		    }
+		  }
                 }
                 else { // --> keeps candidate even if it is outside correlation window
-                    if( mDebug ) {
-                        LOG_DEBUG << "matchSides() - no better match -> keep this hit candidate" << endm;
-                    }
+		  if( mDebug ) {
+		    LOG_DEBUG << "matchSides() - no better match -> keep this hit candidate" << endm;
+		  }
                 }
             } // check for better match with third digi done
-
-
+	    
+	    
             if( xDigiA->side() == xDigiB->side() ) {
-                LOG_ERROR << "matchSides() - wrong combinations of digis:" << endm;
-                LOG_ERROR << *xDigiA << endm;
-                LOG_ERROR << *xDigiB << endm; 
+	      LOG_ERROR << "matchSides() - wrong combinations of digis:" << endm;
+	      LOG_ERROR << *xDigiA << endm;
+	      LOG_ERROR << *xDigiB << endm; 
             }
-
-
-
+	    
+	    
+	    
             // create the hit candidate:
             // the "strip" time is the mean time between each end
             time = 0.5 * ( xDigiA->calibTime() + xDigiB->calibTime() );
             //TODO: Afterpulse handling: correct hit time by the time difference between the first and second digi on the same side
-            time += t_corr_afterpulse;
-
+	    if(!mIsSim){//merge skip corrections for simulation
+	      time += t_corr_afterpulse;
+	    }
             // weight of merging of hits (later) is the total charge => sum of both ends ToT
             totSum = xDigiA->calibTot() + xDigiB->calibTot();
 
             // use local coordinates... (0,0,0) is in the center of counter
             posX = ( -1 * eTofConst::nStrips / 2. + strip - 0.5 ) * eTofConst::stripPitch;
-
-
-
+	    	   
             // check if the hit position (and hence time) is likely wrong due to a clock jumps in one of the Get4s 
             bool hasClockJump = false;
             if( fabs( posY ) > 0.5 * ( eTofConst::coarseClockCycle * mSigVel.at( detIndex ) - eTofConst::stripLength ) * 0.9 ) {
                 hasClockJump = true;
             }
+
+	    
+	    //check for position jumps -> get clock jumps
+	    bool leftjump  = false;
+	    bool outsider  = false;
+	    double dt = 0;	   
+
+	    if(xDigiA->side() == 2 ){
+	      dt = xDigiA->calibTime() - xDigiB->calibTime();
+	    }else{
+	      dt = xDigiB->calibTime() - xDigiA->calibTime();
+	    }
+	    if(abs(dt)> 8.5 ){
+		outsider = true;
+	    }
+	    if(dt < 8.5 && dt > 0){
+	      leftjump = true;
+	    }
 
             //---------------------------------------------------------
             // correct for single side clock jumps. Sync signal recovers time jumps, so no double jumps *should* occur
@@ -1120,39 +1218,106 @@ StETofHitMaker::matchSides()
                 time     -= eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 );
                 timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );
 
-                if( mDoQA ) {
-                    LOG_INFO << "shifted hit on: " << sector << "-" << plane << "-" << counter << " -- " << strip << " Direction " << mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ) << endm;
-                }
+		if(leftjump && mDoDoubleClockJumpShift){
+		  time     += 2*(eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ));		   
+		}
 
+		// shift "uncorrectable" (improper RbR offsets, doublejumps, missmatches etc. ) hits far off in time and position to be sorted out later
+		if(outsider && mDoDoubleClockJumpShift){		 
+		  time     += 100*(eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ));
+		  timeDiff -= 100*(eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) )) + 2.0;       
+		}
+		
+                if( mDoQA ) {
+		  LOG_INFO << "shifted hit on: " << sector << "-" << plane << "-" << counter << " -- " << strip << " Direction " << mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ) << endm;
+                }
+		
                 if( xDigiA->side() == 2 ) { // recalculate Y-Position based on new time.
                     posY = mSigVel.at( detIndex ) * timeDiff * 0.5;
                 }
                 else {
-                    posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
+		  posY = -1 * mSigVel.at( detIndex ) * timeDiff * 0.5;
                 }
             }
 
 
-
             if( mDebug ) {
-                LOG_DEBUG << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
+	      LOG_DEBUG << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
             }
 
             // build a hit (clustersize is one strip at this point)
             unsigned int clusterSize = 1;
             if( hasClockJump ) {
-                // add 100 to the cluster size to identify jumped hits in the matchMaker
-                clusterSize += 100;
+	      // add 100 to the cluster size to identify jumped hits in the matchMaker
+	      clusterSize += 100;
             }
 
             StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 
+	    //Modify individual counters if needed (e.g. flip in local y due to switched cables)
+	    if(mModMatrix.at(detIndex) > 0){
+	      int mode = mModMatrix.at(detIndex);
+	      modifyHit(mode, posX , posY , time);
+	    }
+	    
+	    	    
+	    //Check for "same direction double clockjumps" and update FlagMap
+	    if(mDoDoubleClockJumpShift){
+	    double starttime = startTime();
+	    
+	    if( starttime > 0){
+
+		   double tof = fmod( constructedHit->time() , eTofConst::bTofClockCycle ) - starttime;       
+		   double exptof = 0;	
+
+		   if(mETofGeom){
+		   
+		     StMuPrimaryVertex* pVtx = mMuDst->primaryVertex( 0 );
+		     StThreeVectorD posGlo = mETofGeom->hitLocal2Master( constructedHit );
+		    
+		     if( pVtx ) {
+		       StThreeVectorF vtxPos = pVtx->position();	
+		       exptof =  tofPathLength(&vtxPos , &posGlo , 0) / ( nanosecond * c_light );
+		     }
+		   }
+		           		   
+		   int get4Nr = detIndex * 10 + ( strip - 1 ) / 4 + 1;
+		   
+		     double tMin = mGet4doublejumpTmin; 
+		     double t1   = mGet4doublejumpTimes.at(get4Nr).at(0);
+		     double t2   = mGet4doublejumpTimes.at(get4Nr).at(1);
+        
+		     mGet4doublejumpTimes.at(get4Nr).erase(mGet4doublejumpTimes.at(get4Nr).begin());
+		     mGet4doublejumpTimes.at(get4Nr).push_back(tof - exptof);
+		     if(mGet4doublejumpTimes.at(get4Nr).size() > 2 ){
+		       mGet4doublejumpTimes.at(get4Nr).erase(mGet4doublejumpTimes.at(get4Nr).begin());
+		     }		 
+		     
+		     t1   = mGet4doublejumpTimes.at(get4Nr).at(0);
+		     t2   = mGet4doublejumpTimes.at(get4Nr).at(1);
+		     
+		     if(t2 < tMin && t1 < tMin && t2 > -999 && t1 > -999){
+		       mGet4doublejumpFlag.at(get4Nr) = 1;
+		     }
+		     
+		     if(t2 > tMin && t1 > tMin ){
+		     mGet4doublejumpFlag.at(get4Nr) = 0;
+		     }
+		     
+		     if(mGet4doublejumpFlag.at(get4Nr) == 1){
+		       constructedHit->setTime(constructedHit->time() + eTofConst::coarseClockCycle);
+		       constructedHit->setClusterSize(constructedHit->clusterSize() + 200);
+		       tof += eTofConst::coarseClockCycle;
+		     }		        
+	    }
+	    }   
+	    
             // push hit into intermediate collection
             mStoreHit[ detIndex ].push_back( constructedHit ); 
-
+	    
             // fill pointer vector
             std::vector< unsigned int > containedDigiIndices;
-
+	    
             containedDigiIndices.push_back( mMapDigiIndex.at( xDigiA ) );
             containedDigiIndices.push_back( mMapDigiIndex.at( xDigiB ) );
 
@@ -1161,7 +1326,15 @@ StETofHitMaker::matchSides()
             //reset afterpulse time correction!
             t_corr_afterpulse   = 0.0;
 
+	    // pass IdTruth to hit 
+	    if(mIsSim){
+	      int DigiIdA = xDigiA->rawTot();  
+	      int DigiIdB = xDigiB->rawTot();
 
+	      if(DigiIdB==DigiIdA){constructedHit->setIdTruth(DigiIdA);}
+	      else{constructedHit->setIdTruth(9999);}
+	    }
+	    
             LOG_DEBUG << *( mStoreHit.at( detIndex ).back() ) << endm;
 
             // erase the two used digis!
@@ -1199,9 +1372,6 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
     // ---------------------------------------
 
     int nHitsPrinted = 0;
-
-    int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
-    //LOG_INFO << "fillUnclusteredHitQA(): -- event time: " << eventTime << endm;
 
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;
@@ -1284,9 +1454,6 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
 
             std::string histNamePosJump = "unclusteredHit_jump_pos_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
             if( hit->clusterSize() > 100 ) mHistograms.at( histNamePosJump )->Fill( hit->localX(), hit->localY() );
-
-            //std::string histNamePosTime = "unclusteredHit_pos_time_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
-            //mHistograms.at( histNamePosTime )->Fill( eventTime, hit->localY() );
 
             // ---------------------------------------
             if( fabs( tstart + 9999. ) < 1.e-5 ) continue;
@@ -1380,6 +1547,9 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 LOG_DEBUG << "mergeClusters() - checking hit vector for possible hits to merge with..." << endm;
             }
 
+	    bool isMissmatch = false; 
+	    int  idTruth     = 0; 
+	    
             StETofHit* pHit = hitVec->at( 0 );
 
             // scale with tot for weigthed average
@@ -1485,6 +1655,19 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     }
 
 
+		    // merge IdTruth information
+		    if(mIsSim){
+		      
+		      if(pMergeHit->idTruth() !=pHit->idTruth()){
+			idTruth = -99999;
+			isMissmatch = 1;
+		      }
+		      else if(!isMissmatch){
+			idTruth = pHit->idTruth();	
+		      }
+		    }
+		    
+
                     // erase the hit that was merged
                     iterHit = hitVec->begin() + index;
                     delete *iterHit;
@@ -1506,7 +1689,13 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
             } // end of loop over hits for merging
 
-
+	    // set idTruth if nothing to merge
+	    if(mIsSim){
+	      if(idTruth == 0){
+		idTruth = pHit->idTruth();
+	      }
+	    }
+	    
             // renormalize with the total ToT
             weightedTime /= weightsTotSum;
             weightedPosX /= weightsTotSum;
@@ -1532,7 +1721,12 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
             // create combined hit
             StETofHit* combinedHit = new StETofHit( sector, plane, counter, weightedTime, weightsTotSum, clusterSize, weightedPosX, weightedPosY );
+	    
+	    if(mIsSim){
+	      combinedHit->setIdTruth(idTruth);
+	    }
 
+	    
             // fill hit into the eTOF collection or the eTOf hit array depending on StEvent or MuDst input
             if( !isMuDst ) {
                 mEvent->etofCollection()->addHit( combinedHit );
@@ -1679,7 +1873,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             }
 
             // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+            if( (fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001) || mIsSim ) {
                 double tof = aHit->time() - tstart;
                 if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
@@ -1725,7 +1919,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             updateCyclicRunningMean( aHit->leadingEdgeTime(), averageBTofHitTime, nHitsBTof, eTofConst::bTofClockCycle );
 
             // if doQA && tstart exists
-            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+            if( mDoQA && ((fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001) || mIsSim) ) {
                 double tof = aHit->leadingEdgeTime() - tstart;
                 if( tof < 0 ) {
                     tof += eTofConst::bTofClockCycle;
@@ -1823,7 +2017,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             }
 
             // if tstart exists
-            if( fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+            if( (fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001) || mIsSim ) {
                 double tof = aHit->time() - tstart;
                 if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
@@ -1865,7 +2059,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             updateCyclicRunningMean( aHit->leadingEdgeTime(), averageBTofHitTime, nHitsBTof, eTofConst::bTofClockCycle );
 
             // if doQA && tstart exists
-            if( mDoQA && fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001 ) {
+            if( mDoQA && ((fabs( tstart ) > 0.001 && fabs( tstart - ( eTofConst::bTofClockCycle - 9999. ) ) > 0.001) || mIsSim) ) {
                 double tof = aHit->leadingEdgeTime() - tstart;
                 if( tof < -800 ) {
                     tof += eTofConst::bTofClockCycle;
@@ -2161,4 +2355,42 @@ StETofHitMaker::updateClockJumpMap( const std::map< int, int >& clockJumpDir )
             }
         }
     }
+}
+
+//_____________________________________________________________
+
+void
+StETofHitMaker::modifyHit( int modMode, double& localX,double& localY, double& time )
+{
+  switch (modMode) {
+
+  case 0:
+    return;
+
+  case 1:
+    localX *= -1;
+    localY *= -1;
+    break;
+
+  case 2:
+    localX *= -1;
+    break;
+
+  case 3:
+    localY *= -1;
+    break;
+
+  case 4:
+    std::swap(localX, localY), localY = -localY;
+    break;
+
+  case 5:
+    std::swap(localX, localY), localX = -localX;    
+    break;
+  
+  case 99:
+    localX = 9999;
+    localY = 9999;
+    break;
+  }
 }

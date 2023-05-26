@@ -90,6 +90,11 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
 
+  if ( 1 == IAttr( "DoV0" ) ) DoV0();
+  if ( 1 == IAttr( "DoXi" ) ) DoXi();
+  if ( 1 == IAttr( "DoKink" ) ) DoKink();
+  if ( 1 == IAttr( "SetNoKeep" ) ) SetNoKeep(); 
+
   abortEvent = kFALSE;
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
