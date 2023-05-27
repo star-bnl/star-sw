@@ -44,6 +44,10 @@ class StRHICfDbMaker : public StMaker
 
     void setDebug(Int_t debug); ///< debug mode, 0 for minimal message, >0 for more debug messages
 
+    // Important note: the _RHICf_ Run and Event numbers are distinct from the _STAR_ Run and Event numbers,
+    // originating from RHICf's own raw data acquisition and studies outside of the STAR framework
+    unsigned int getRHICfRunNumberAddress() const;
+    unsigned int getRHICfEventNumberAddress() const;
     unsigned int getRunTRGMAddress() const;
     unsigned int getTriggerAddress() const;
     unsigned int getBunchNumberAddress() const;
