@@ -6,11 +6,17 @@
   A macro to plot the results from testing the StFcsWaveformFitMaker methods using StFcsWaveformFitMaker set to test level 6. The "prefix" is to set the output save file names prefix.
 
   How to determine the sum8 vs. Fit scale factor.
-  1. Run Wff using setTest(6) on a sufficiently large data sample, setFileOutFileName(), and setEnergySumScale(1,1,1)
-  2. Take output root file and run this macro giving it the file name and a prefix for the saved image files
-  3. Look at prefix_sum8vfit.png to check what values to scale by. slope of fitted line is the value to use
-  4. Run Wff on same data except setEnergySumScale(slopecal,slopehcal,slopepres);
-  5. Run this macro again and and check same plot. Slopes should be close to 1?
+  
+  1. Run StFcsWaveformFitMaker on a microdst file `root4star -b -q testWff6MuDst.C'(nevents,"OutFileName.root","InFile.MuDst.root")'`
+     - Before running check to make sure that the line that sets the energy sum scale reads *wff->setEnergySumScale(1.0,1.0,1.0)*
+  2. Take output root file "OutFileName.root" and run this macro giving it the file name and a prefix for the saved image files
+     - `root -b -q Plot6.C'("OutFileName.root","TestScale1")'`
+  3. Look at *TestScale1_sum8vfit.png* to check what values to scale by. slope of fitted line is the value to use
+  4. Change the line in *testWff6MuDst.C* that sets the energy sum scale to the values you get from the slopes of the fit.
+     - *wff->setEnergySumScale(slopecal,slopehcal,slopepres)*
+  5. Run StFcsWaveformFitMaker on the same microdst file with same number of events `root4star -b -q testWff6MuDst.C'(nevents,"OutFileNameNew.root","InFile.MuDst.root")'`
+     - You can change the output file name if you want
+  6. Go to step 2 and repeat for new output file 
 
 */
 

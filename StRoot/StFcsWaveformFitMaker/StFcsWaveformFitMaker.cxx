@@ -98,9 +98,10 @@ StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mEnergySelect[1]=13; //default PulseFit2 for Hcal
     mEnergySelect[2]=1;  //default sum8 for Pres
 
-    mEnergySumScale[0] = 1.0;  //default is to not divide sum8 by anything
-    mEnergySumScale[1] = 1.0;  //default is to not divide sum8 by anything
-    mEnergySumScale[2] = 1.0;  //default is to not divide sum8 by anything
+    //Values to divide sum8 method to match the fitted result as determined by looking at data from Run 22
+    mEnergySumScale[0] = 1.226;
+    mEnergySumScale[1] = 1.195;
+    mEnergySumScale[2] = 1.29;
 
     mAnaWaveform = true; //default is to compute integral for the waveform
 
@@ -1768,10 +1769,5 @@ void StFcsWaveformFitMaker::SetupDavidFitterMay2022(Double_t ped)
   //mPulseFit->SetTunnelThreshold(-0.9);//Negative value >=-1 means do merging after peak finding
   //mPulseFit->SetTunnelThreshold(0.1);//Negative value >=-1 means do merging after peak finding
   //mPulseFit->SetTunnelThreshold(-2.0);//Negative value >=-1 means do merging after peak finding
-
-  //Values to divide sum8 method to match the fitted result as determined by looking at data from Run 22
-  mEnergySumScale[0] = 1.226;
-  mEnergySumScale[1] = 1.195;
-  mEnergySumScale[2] = 1.29;
 }
 
