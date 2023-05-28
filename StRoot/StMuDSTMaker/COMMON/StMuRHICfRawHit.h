@@ -12,8 +12,10 @@ class StMuRHICfRawHit : public TObject
 
     void clear();
 
-    void setBunchNumber(UInt_t bunch);
+    void setRHICfRunNumber(UInt_t run);
+    void setRHICfEventNumber(UInt_t event);
     void setRunType(UInt_t type);
+    void setBunchNumber(UInt_t bunch);
     void setTriggerNumber(UInt_t trigger);
     void setRunTime(Int_t idx, UInt_t time);
     void setRunTRGM(UInt_t trgm);
@@ -26,8 +28,10 @@ class StMuRHICfRawHit : public TObject
     void setGPI0(Int_t idx, UInt_t val);
     void setGPI1(Int_t idx, UInt_t val);
 
-    UInt_t getBunchNumber();
+    UInt_t getRHICfRunNumber();
+    UInt_t getRHICfEventNumber();
     UInt_t getRunType();
+    UInt_t getBunchNumber();
     UInt_t getTriggerNumber();
     UInt_t getRunTime(Int_t idx);
     UInt_t getRunTRGM();
@@ -41,8 +45,10 @@ class StMuRHICfRawHit : public TObject
     UInt_t getGPI1(Int_t idx);
 
   private:
-    UInt_t mBunchNumber;
+    UInt_t mRHICfRunNumber;
+    UInt_t mRHICfEventNumber;
     UInt_t mRunType;
+    UInt_t mBunchNumber;
     UInt_t mRHICfTrigger;
     UInt_t mRunTime[kRHICfNorder];
     UInt_t mRunTRGM;
