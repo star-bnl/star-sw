@@ -45,6 +45,9 @@ class StMuRHICfRawHit : public TObject
     UInt_t getGPI1(Int_t idx);
 
   private:
+
+    // Important note: the _RHICf_ Run and Event numbers are distinct from the _STAR_ Run and Event numbers,
+    // originating from RHICf's own raw data acquisition and studies outside of the STAR framework.
     UInt_t mRHICfRunNumber;
     UInt_t mRHICfEventNumber;
     UInt_t mRunType;
