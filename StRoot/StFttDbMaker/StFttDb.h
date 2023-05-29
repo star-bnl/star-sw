@@ -46,7 +46,6 @@ public:
   void setDbAccess(int v=1);  //! enable(1) or disable(0) offline DB access
   void setRun(int run);       //! set run# 
 
-
   static size_t uuid( StFttRawHit * h, bool includeStrip = false ) ;
   static size_t uuid( StFttCluster * c ) ;
 
@@ -56,6 +55,8 @@ public:
     uint16_t packVal( int row, int strip ) const;
     void unpackVal( int val, int &row, int &strip ) const;
     void loadHardwareMapFromFile( std::string fn );
+    bool loadStripCenterFromFile( std::string fn );
+    bool loadStripEdgeFromFile( std::string fn );
     void loadHardwareMapFromDb( St_fttHardwareMap * );
     void loadDataWindowsFromFile( std::string fn );
     void loadDataWindowsFromDb( St_fttDataWindows * );
@@ -69,6 +70,9 @@ public:
 
     static double stripPitch; // mm
     static double rowLength; // mm
+    static double pentShift; // mm
+    static double HVStripShift; // mm
+    static double DiagStripShift; // mm
     static double lowerQuadOffsetX; //mm
     static double idealPlaneZLocations[4];
 
@@ -152,10 +156,14 @@ public:
   TimeCutMode mTimeCutMode;
   int mTimeCutLow, mTimeCutHigh;
 
-    std :: map< uint16_t , uint16_t > mMap;
-    std :: map< uint16_t , uint16_t > rMap; // reverse map 
-
-    std :: map< uint16_t , FttDataWindow > dwMap;
+  std :: map< uint16_t , uint16_t > mMap;
+  std :: map< uint16_t , uint16_t > rMap; // reverse map 
+  //  data windows map
+  std :: map< uint16_t , FttDataWindow > dwMap;
+  std :: map< int , Float_t > scMapXY; // strip center map 
+  std :: map< int , Float_t > scMapDiag; // strip center map 
+  std :: map< int , Float_t > seMapDiagLeft; // strip left edge map, just for the diagonal strips 
+  std :: map< int , Float_t > seMapDiagRight; // strip right edge map, just for the diagonal strips
 
   ClassDef(StFttDb,1)   //StAF chain virtual base class for Makers        
 };

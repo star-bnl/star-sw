@@ -24,7 +24,8 @@ double StFttDb::stripPitch = 3.2; // mm
 double StFttDb::rowLength = 180; // mm
 double StFttDb::lowerQuadOffsetX = 101.6; // mm
 double StFttDb::idealPlaneZLocations[] = { 281.082,304.062,325.058,348.068 };
-
+double StFttDb::HVStripShift = 15.95;//mm
+double StFttDb::DiagStripShift = 19.42;//mm
 vector<string> StFttDb::orientationLabels = { "Horizontal", "Vertical", "DiagonalH", "DiagonalV", "Unknown" };
 
 
@@ -209,6 +210,132 @@ void StFttDb::loadHardwareMapFromFile( std::string fn ){
     inf.close();
 }
 
+//read the strip center file to get the position information
+//for the local coordinate, zero point will be the pin hole, that may changed depends on survey result
+bool StFttDb::loadStripCenterFromFile( std::string fn ){
+    std::ifstream inf;
+    inf.open( fn.c_str() );
+    if ( !inf ) {
+        LOG_WARN << "sTGC Hardware map file not found" << endm;
+        return kFALSE;
+    }
+    std::string st1 = "Row1";
+    std::string st2 = "Row4";
+
+    //check the input file, input file should be Row1 or Row4
+    //Row1 for H&V; Row4 for Diagonal
+    size_t idx1 = fn.find(st1);
+    size_t idx2 = fn.find(st2);
+    if( idx1 == string::npos && idx2 == string::npos )
+    {
+        cout<< "Wrong Input Strip Center File !!!!!!!!!!!" << endl;
+        return kFALSE;
+    }
+
+    if ( idx1 == string::npos ) // load the Row4(Diagonal)
+    {
+        scMapDiag.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripCenter;
+        inf >> nStrip >> StripCenter;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripCenter.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_center;
+        while (inf >> nStrip >> StripCenter)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_center = atof(StripCenter.c_str());
+
+            scMapDiag[n_strip] = pos_strip_center;
+        }
+
+    }
+
+    if ( idx2 == string::npos ) // load the Row1(H&V)
+    {
+        scMapXY.clear();
+
+        //File Header
+        std::string nStrip, StripCenter;
+        inf >> nStrip >> StripCenter;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripCenter.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_center;
+        while (inf >> nStrip >> StripCenter)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_center = atof(StripCenter.c_str());
+
+            scMapXY[n_strip] = pos_strip_center;
+        }
+
+    }
+
+    inf.close();
+    return kTRUE;
+}
+
+//read the strip edge file, it will be used for reject ghost hits
+//for the local coordinate, zero point will be the pin hole, that may changed depends on survey result
+bool StFttDb::loadStripEdgeFromFile( std::string fn ){
+    std::ifstream inf;
+    inf.open( fn.c_str() );
+    if ( !inf ) {
+        LOG_WARN << "sTGC Hardware map file not found" << endm;
+        return kFALSE;
+    }
+    std::string st1 = "Row4_edge";
+
+    //check the input file, input file should include Row4_edge
+    //Row4 for Diagonal
+    size_t idx1 = fn.find(st1);
+    if( idx1 == string::npos)
+    {
+        cout<< "Wrong Input Strip Edge File !!!!!!!!!!!" << endl;
+        return kFALSE;
+    }
+
+    if ( idx1 != string::npos ) // load the Row4(Diagonal)
+    {
+        seMapDiagLeft.clear();
+        seMapDiagRight.clear();
+
+        //File Header
+        std::string nStrip, StripEdge_L, StripEdge_R;
+        inf >> nStrip >> StripEdge_L >> StripEdge_R;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s, %s", nStrip.c_str(), StripEdge_L.c_str(), StripEdge_R.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_edge_L, pos_strip_edge_R;
+        while (inf >> nStrip >> StripEdge_L >> StripEdge_R)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_edge_L = atof(StripEdge_L.c_str());
+            pos_strip_edge_R = atof(StripEdge_R.c_str());
+
+            seMapDiagLeft[n_strip] = pos_strip_edge_L;
+            seMapDiagRight[n_strip] = pos_strip_edge_R;
+        }
+
+    }
+
+    inf.close();
+    return kTRUE;
+}
+
 // same for all planes
 // we have quadrants like:
 // 
@@ -224,7 +351,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
     }
 
     if ( rob % 2 == 0 ){ // even rob
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // odd
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalH;    
@@ -237,7 +364,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttVertical;
     } else { // odd rob
         
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // odd
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalV;
@@ -292,6 +419,21 @@ bool StFttDb::hardwareMap( StFttRawHit * hit ) const{
 
         UChar_t orientation = getOrientation( rob, hit->feb()+1, hit->vmm()+1, row );
         hit->setMapping( iPlane, iQuad, row, strip, orientation );
+
+        // set strip info
+        Float_t stripCenter = -1;
+        Float_t stripLeftEdge = -1;
+        Float_t stripRightEdge = -1;
+        if (orientation == kFttHorizontal || orientation == kFttVertical){
+            stripCenter = scMapXY.at(strip);
+        }
+        if (orientation == kFttDiagonalH || orientation == kFttDiagonalV) {
+            stripCenter    = scMapDiag.at(strip);
+            stripLeftEdge  = seMapDiagLeft.at(strip);
+            stripRightEdge = seMapDiagRight.at(strip);
+        }
+        hit->setStripEdges( stripCenter, stripLeftEdge, stripRightEdge );
+
         return true;
     }
     return false;
