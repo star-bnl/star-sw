@@ -23,7 +23,7 @@ ClassImp(StFttDb)
 double StFttDb::stripPitch = 3.2; // mm
 double StFttDb::rowLength = 180; // mm
 double StFttDb::lowerQuadOffsetX = 101.6; // mm
-double StFttDb::idealPlaneZLocations[] = { 280.90499, 303.70498, 326.60501, 349.40499 };
+double StFttDb::idealPlaneZLocations[] = { 281.082,304.062,325.058,348.068 };
 
 vector<string> StFttDb::orientationLabels = { "Horizontal", "Vertical", "DiagonalH", "DiagonalV", "Unknown" };
 
@@ -344,7 +344,7 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
     // shifts
     dx = 0.0;
-    dy = 0.0;
+    dy = 6.0;
     dz = 0.0;
 
     if ( plane < 4 )
