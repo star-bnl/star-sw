@@ -70,7 +70,6 @@ public:
 
     static double stripPitch; // mm
     static double rowLength; // mm
-    static double pentShift; // mm
     static double HVStripShift; // mm
     static double DiagStripShift; // mm
     static double lowerQuadOffsetX; //mm

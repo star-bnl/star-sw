@@ -81,7 +81,6 @@ Int_t
 StFttPointMaker::Make()
 { 
     LOG_DEBUG << "StFttPointMaker::Make()" << endm;
-    LOG_INFO << "StFttPointMaker::Make()" << endm;
 
     mEvent = (StEvent*)GetInputDS("StEvent");
     if(mEvent) {
@@ -121,9 +120,9 @@ StFttPointMaker::Make()
         // if ( clu->nStrips() < 2 ) continue;// add cluster width limit
          if(mDebug)
         {
-            cout << "rob = " << (int)rob << endl;
-            cout << "direction = " << (int)clu->orientation() << endl;
-            cout << "cluster x = " << clu->x() << endl;
+            LOG_INFO << "rob = " << (int)rob << endm;
+            LOG_INFO << "direction = " << (int)clu->orientation() << endm;
+            LOG_INFO << "cluster x = " << clu->x() << endm;
         }
         clustersPerRob[ (int)rob ][ clu->orientation() ].push_back( clu );// clustersPerRob[ rob ] [ orientation ]
         // clustersPerRob[ clu->orientation() ] [ rob ].push_back( clu ); 
@@ -133,14 +132,15 @@ StFttPointMaker::Make()
     {
         if (mDebug) 
         {
-            cout << "nCluster kFttVertical = " << clustersPerRob[ i ][ kFttVertical ].size() << endl;
-            cout << "nCluster kFttHorizontal = " << clustersPerRob[ i ][ kFttHorizontal ].size() << endl;
-            cout << "nCluster kFttDiagonalV = " << clustersPerRob[ i ][ kFttDiagonalV ].size() << endl;
-            cout << "nCluster kFttDiagonalH = " << clustersPerRob[ i ][ kFttDiagonalH ].size() << endl;
+            LOG_INFO << "nCluster kFttVertical = " << clustersPerRob[ i ][ kFttVertical ].size() << endm;
+            LOG_INFO << "nCluster kFttHorizontal = " << clustersPerRob[ i ][ kFttHorizontal ].size() << endm;
+            LOG_INFO << "nCluster kFttDiagonalV = " << clustersPerRob[ i ][ kFttDiagonalV ].size() << endm;
+            LOG_INFO << "nCluster kFttDiagonalH = " << clustersPerRob[ i ][ kFttDiagonalH ].size() << endm;
         }
 
         MakeLocalPoints((UChar_t)i); // make local points for each Quadrand
     }
+    MakeGlobalPoints();
     LOG_INFO << "StFttPointMaker made " << mFttCollection->numberOfPoints() << " points this event" << endm;
 
     return kStOk;
@@ -154,35 +154,21 @@ void StFttPointMaker::InjectTestData(){
     // hit->setMapping( plane, quadrant, row, strip ) 
 }
 
-void StFttPointMaker::MakeGlobalPoints(Int_t Rob)
-{
-    //after reconstruct the 2D points
-    for (StFttPoint* point : mFttCollection->points())
-    {
-        UChar_t mQuadrant = point->quadrant();
-        if ( kFttQuadrantA == mQuadrant ) 
-        {
-            point->setX(point->x());
-            point->setY(point->y());
-        }
+void StFttPointMaker::MakeGlobalPoints() {
+    for ( StFttPoint * p : mFttCollection->points() ){
 
-        if ( kFttQuadrantB == mQuadrant ) 
-        {
-            point->setX(point->x()+StFttDb::pentShift);
-            point->setY(-point->y());
-        }
+        float x = p->x();
+        float y = p->y();
+        float z = 0.0;
+        StThreeVectorD global;
 
-        if ( kFttQuadrantC == mQuadrant ) 
-        {
-            point->setX((-point->x())-StFttDb::pentShift);
-            point->setY(-point->y());
-        }
-
-        if ( kFttQuadrantD == mQuadrant ) 
-        {
-            point->setX(-point->x());
-            point->setY(point->y());
-        }
+        // dx is a local shift
+        float dx = 0, dy = 0, dz = 0;
+        // sx is only {1,-1} -> reflected or normal
+        float sx = 0, sy = 0, sz = 0;
+        mFttDb->getGloablOffset( p->plane(), p->quadrant(), dx, sx, dy, sy, dz, sz );
+        global.set( (x + dx) * sx, (y + dy) * sy, (z + dz) * sz );
+        p->setXYZ( global );
     }
 }
 
@@ -208,7 +194,6 @@ bool StFttPointMaker::GhostHitRejection_StripGroup( int row_x, int row_y, double
 //using diagnoal horizontal strip to reject method, 
 bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &i_cluster)
 {
-    cout << "start do GhostHitRejection_DiagH" << endl;
     // TODO: how to confirm i_cluster
     bool is_pair = kFALSE;
     i_cluster = -999;
@@ -230,8 +215,8 @@ bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &
         // LEdge = LEdge-1.6*sqrt(2);
         // REdge = REdge+1.6*sqrt(2);
 
-        cout << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endl;
-        cout << "cluster x = " << clu_dx->x()*sqrt(2) << endl;
+        // LOG_INFO << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endm;
+        // LOG_INFO << "cluster x = " << clu_dx->x()*sqrt(2) << endm;
 
         // if(intercept >= LEdge && intercept <= REdge) 
         // {
@@ -243,7 +228,7 @@ bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &
                 // i_cluster = iClu_DH;
             // }
         // }
-        // cout << "i_cluster = " << i_cluster << endl;
+        // LOG_INFO << "i_cluster = " << i_cluster << endm;
         if(clu_dx->x()*sqrt(2)+1.60*3 > intercept && clu_dx->x()*sqrt(2)-1.60*3 < intercept)
         {
             is_pair = kTRUE;
@@ -254,16 +239,16 @@ bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &
                 i_cluster = iClu_DH;
             }
         }
-        // cout << "i_cluster = " << i_cluster << endl;
+        // LOG_INFO << "i_cluster = " << i_cluster << endm;
     }
-    cout << "is pair = " << (int)is_pair << endl;
+    // LOG_INFO << "is pair = " << (int)is_pair << endm;
     return is_pair;
 }
 
 //using diagnoal vertical strip to reject method, 
 bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &i_cluster)
 {
-    cout << "starting do GhostHitRejection_DiagV " << endl;
+    // LOG_INFO << "starting do GhostHitRejection_DiagV " << endm;
     // TODO: how to confirm i_cluster
     bool is_pair = kFALSE;
     i_cluster = -999;
@@ -285,8 +270,8 @@ bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &
                 //  REdge = REdge+1.6*sqrt(2);
           
 
-        cout << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endl;
-        cout << "cluster x = " << clu_dx->x()*sqrt(2) << endl;
+        // LOG_INFO << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endm;
+        // LOG_INFO << "cluster x = " << clu_dx->x()*sqrt(2) << endm;
 
         // if(intercept >= LEdge && intercept <= REdge) 
         // {
@@ -298,7 +283,7 @@ bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &
                 // i_cluster = iClu_DV;
             // }
         // }
-        // cout << "i_cluster = " << i_cluster << endl;
+        // LOG_INFO << "i_cluster = " << i_cluster << endm;
         if(clu_dx->x()*sqrt(2) < intercept+1.60*3 && clu_dx->x()*sqrt(2) > intercept-1.60*3)
         {
             is_pair = kTRUE;
@@ -309,9 +294,9 @@ bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &
                 i_cluster = iClu_DV;
             }
         }
-        // cout << "i_cluster = " << i_cluster << endl;
+        // LOG_INFO << "i_cluster = " << i_cluster << endm;
     }
-    cout << "is pair = " << (int)is_pair << endl;
+    // LOG_INFO << "is pair = " << (int)is_pair << endm;
     return is_pair;
 }
 
@@ -330,10 +315,10 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
 
     if(mDebug)
     {
-        cout << "rob = " << (int)Rob << endl;
-        cout << "nClusterX = " << nClusters_X << " nClusterY = " << nClusters_Y << endl;
-        cout << "nCluster dV = " << clustersPerRob[(UChar_t)Rob][kFttDiagonalV].size()<< endl;
-        cout << "nCluster dH = " << clustersPerRob[(UChar_t)Rob][kFttDiagonalH].size()<< endl;
+        LOG_INFO << "rob = " << (int)Rob << endm;
+        LOG_INFO << "nClusterX = " << nClusters_X << " nClusterY = " << nClusters_Y << endm;
+        LOG_INFO << "nCluster dV = " << clustersPerRob[(UChar_t)Rob][kFttDiagonalV].size()<< endm;
+        LOG_INFO << "nCluster dH = " << clustersPerRob[(UChar_t)Rob][kFttDiagonalH].size()<< endm;
     }
 
     
@@ -346,8 +331,8 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
 
         if(mDebug)
         {
-            cout << "x cluster plane = " << (int)clu_x->plane() << " quad = " << (int)clu_x->quadrant() << endl;
-            cout << "start x loop, x = " << x << endl;
+            LOG_INFO << "x cluster plane = " << (int)clu_x->plane() << " quad = " << (int)clu_x->quadrant() << endm;
+            LOG_INFO << "start x loop, x = " << x << endm;
         }
 
         for ( size_t iClu_Y = 0; iClu_Y < nClusters_Y; iClu_Y++ )
@@ -358,8 +343,8 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
             int Row_y = clu_y->row();
             if(mDebug)
             {
-                if (iClu_Y == 0) cout << "y cluster plane = " << (int)clu_y->plane() << " quad = " << (int)clu_y->quadrant() << endl;
-                cout << "start y loop, y = " << y << endl;
+                if (iClu_Y == 0) LOG_INFO << "y cluster plane = " << (int)clu_y->plane() << " quad = " << (int)clu_y->quadrant() << endm;
+                LOG_INFO << "start y loop, y = " << y << endm;
             }
 
             // get the x-y pair and check the region
@@ -376,13 +361,14 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                 int i_cluster = -1;//the the index of d_V cluster
                 if(mDebug)
                 {
-                    cout << "x>y" << endl;
+                    LOG_INFO << "x>y" << endm;
                 }
                 if( GhostHitRejection_DiagV(x,y,Rob,i_cluster) ) 
                 {
-                    // cout << "debug Diag V1" << endl;
+                    // LOG_INFO << "debug Diag V1" << endm;
                     point->setX(x);
                     point->setY(y);
+                    LOG_INFO << "Point (X,Y) = " << x << ", " << y << endm;
                     point->setPlane(clu_x->plane());
                     point->setQuadrant(clu_x->quadrant());
                     point->addCluster(clu_x,kFttVertical);
@@ -390,47 +376,50 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                     auto clu_dv =  clustersPerRob[(UChar_t)Rob][kFttDiagonalV][i_cluster];
                     // if( ((x+y) - clu_dv->x()*sqrt(2)) < 10 && ((x+y) - clu_dv->x()*sqrt(2)) > 6 )
                     // {
-                        // // cout << "x = " << x << " y = " << y <<"cluster center = " << clu_dv->x() <<" cluster x * sqrt(2) = " << clu_dv->x()*sqrt(2) << " MaxADC strip center = " << clu_dv->SC_MaxStrip() << endl;
+                        // // LOG_INFO << "x = " << x << " y = " << y <<"cluster center = " << clu_dv->x() <<" cluster x * sqrt(2) = " << clu_dv->x()*sqrt(2) << " MaxADC strip center = " << clu_dv->SC_MaxStrip() << endm;
                     // }
-                    // cout << "match diagonal cluster is " << i_cluster << " DV cluster" << endl;
+                    // LOG_INFO << "match diagonal cluster is " << i_cluster << " DV cluster" << endm;
                     clu_dv->print();
                     point->addCluster(clu_dv,kFttDiagonalV);
                     point->setD1(clu_dv->x());
                     is_pair = kTRUE;
-                    // cout << "debug Diag V2" << endl;
+                    // LOG_INFO << "debug Diag V2" << endm;
                     if ( GhostHitRejection_DiagH(x,y,Rob,i_cluster) )
                     {
                         auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
                         point->setD2(clu_dh->x());
-                        // cout << "debug Diag H1" << endl;
+                        // LOG_INFO << "debug Diag H1" << endm;
                         point->addCluster(clu_dh,kFttDiagonalH);
                     }
                     
                 } else if ( GhostHitRejection_DiagH(x,y,Rob,i_cluster) )
                 {
 
-                    // cout << "debug Diag H2" << endl;
+                    // LOG_INFO << "debug Diag H2" << endm;
                     is_pair = kTRUE;
+                    LOG_INFO << "Point (X,Y) = " << x << ", " << y << endm;
                     point->setX(x);
                     point->setY(y);
                     point->setPlane(clu_x->plane());
                     point->setQuadrant(clu_x->quadrant());
-                    // cout << "debug Diag H3" << endl;
+                    // LOG_INFO << "debug Diag H3" << endm;
                     point->addCluster(clu_x,kFttVertical);
-                    // cout << "debug Diag H4" << endl;
+                    // LOG_INFO << "debug Diag H4" << endm;
                     point->addCluster(clu_y,kFttHorizontal);
-                    cout << "match diagonal cluster is " << i_cluster << " DH cluster" << endl;
+                    LOG_INFO << "match diagonal cluster is " << i_cluster << " DH cluster" << endm;
                     auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
                     clu_dh->print();
                     point->setD1(clu_dh->x());
                     point->addCluster(clu_dh,kFttDiagonalH);
                 }
-                else continue;
+                else 
+                    continue;
 
-                // cout << "is pair = " << is_pair << endl;
+                // LOG_INFO << "is pair = " << is_pair << endm;
                 if(is_pair)
                 {
                     point->print();
+                    LOG_INFO << "PAIR Point (X,Y) = " << point->x() << ", " << point->y() << endm;
                     mFttPoint.push_back(point);
                     mFttCollection->addPoint(point);
                 }
@@ -439,7 +428,7 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
             {
                 if(mDebug)
                 {
-                    cout << "x<y" << endl;
+                    LOG_INFO << "x<y" << endm;
                 }
                 bool is_pair = kFALSE;
                 int i_cluster = -1;//the the index of d_V cluster
@@ -455,9 +444,9 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                     auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
                     // if( ((x+y) - clu_dh->x()*sqrt(2)) < 10 && ((x+y) - clu_dh->x()*sqrt(2)) > 6 )
                     // {
-                        // // cout << "x = " << x << " y = " << y << "cluster center = " << clu_dh->x() << " cluster x * sqrt(2) = " << clu_dh->x()*sqrt(2) << " MaxADC strip center = " << clu_dh->SC_MaxStrip() << endl;
+                        // // LOG_INFO << "x = " << x << " y = " << y << "cluster center = " << clu_dh->x() << " cluster x * sqrt(2) = " << clu_dh->x()*sqrt(2) << " MaxADC strip center = " << clu_dh->SC_MaxStrip() << endm;
                     // }
-                    // cout << "match diagonal cluster is " << i_cluster << " DH cluster" << endl;
+                    // LOG_INFO << "match diagonal cluster is " << i_cluster << " DH cluster" << endm;
                     clu_dh->print();
                     point->setD1(clu_dh->x());
                     point->addCluster(clu_dh,kFttDiagonalH);
@@ -476,16 +465,17 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                     point->setQuadrant(clu_x->quadrant());
                     point->addCluster(clu_x,kFttVertical);
                     point->addCluster(clu_y,kFttHorizontal);
-                    cout << "match diagonal cluster is " << i_cluster << " DV cluster" << endl;
+                    LOG_INFO << "match diagonal cluster is " << i_cluster << " DV cluster" << endm;
                     auto clu_dv =  clustersPerRob[(UChar_t)Rob][kFttDiagonalV][i_cluster];
                     clu_dv->print();
                     point->setD1(clu_dv->x());
                     point->addCluster(clu_dv,kFttDiagonalV);
                 } else continue;
 
-                // cout << "is pair = " << is_pair << endl;nn
+                // LOG_INFO << "is pair = " << is_pair << endm;nn
                 if(is_pair)
                 {
+                    LOG_INFO << "PAIR Point (X,Y) = " << point->x() << ", " << point->y() << endm;
                     point->print();
                     mFttPoint.push_back(point);
                     mFttCollection->addPoint(point);
@@ -493,7 +483,7 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
             }
             if (!point)
             {
-                cout << "empty point !!!!!!" << endl;
+                LOG_INFO << "empty point !!!!!!" << endm;
                 continue;
             }
             // point->print();

@@ -301,7 +301,7 @@ bool StFttDb::loadStripEdgeFromFile( std::string fn ){
     size_t idx1 = fn.find(st1);
     if( idx1 == string::npos)
     {
-        cout<< "Wrong Input Strip Edge File !!!!!!!!!!!" << endl;
+        LOG_ERROR << "Wrong Input Strip Edge File !!!!!!!!!!!" << endm;
         return kFALSE;
     }
 
@@ -333,6 +333,7 @@ bool StFttDb::loadStripEdgeFromFile( std::string fn ){
     }
 
     inf.close();
+    LOG_INFO << "sTGC Strip Edges loaded from File: " << fn << endm;
     return kTRUE;
 }
 
@@ -425,12 +426,28 @@ bool StFttDb::hardwareMap( StFttRawHit * hit ) const{
         Float_t stripLeftEdge = -1;
         Float_t stripRightEdge = -1;
         if (orientation == kFttHorizontal || orientation == kFttVertical){
-            stripCenter = scMapXY.at(strip);
+            if ( scMapXY.count( strip ) > 0 )
+                stripCenter = scMapXY.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripCenter for " << strip << endm;
+            }
         }
         if (orientation == kFttDiagonalH || orientation == kFttDiagonalV) {
-            stripCenter    = scMapDiag.at(strip);
-            stripLeftEdge  = seMapDiagLeft.at(strip);
-            stripRightEdge = seMapDiagRight.at(strip);
+            if ( scMapDiag.count(strip) > 0 )
+                stripCenter    = scMapDiag.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripCenter for Diag " << strip << endm;
+            }
+            if (seMapDiagLeft.count(strip) > 0)
+                stripLeftEdge  = seMapDiagLeft.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripLeftEdge for Diag " << strip << endm;
+            }
+            if (seMapDiagRight.count(strip) > 0)
+                stripRightEdge = seMapDiagRight.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripRightEdge for " << strip << endm;
+            }
         }
         hit->setStripEdges( stripCenter, stripLeftEdge, stripRightEdge );
 

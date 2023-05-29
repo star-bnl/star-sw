@@ -39,7 +39,7 @@ public:
 private:
     void InjectTestData();
     void MakeLocalPoints(UChar_t Rob);
-    void MakeGlobalPoints(Int_t Rob);
+    void MakeGlobalPoints();
     bool GhostHitRejection_StripGroup(int row_x, int row_y, double x, double y);
     //return kTRUE when a diagoanl cluster was find to match (x,y)
     bool GhostHitRejection_DiagH(double x, double y, int Rob, int &i_cluster);
