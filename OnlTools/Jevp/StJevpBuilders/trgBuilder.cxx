@@ -217,8 +217,8 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.eq3_board_occ_h->Sumw2();
     contents.eq3_readout_time_h = new TH1D("eq3_readout_time_h", "EQ3 Readout Time", 100, 0, 1000);
 
-    contents.BlueByTrigger_h = new TH1F("BlueBeamByTrigger_h", "Blue Beam By Trigger", 64,0,63);
-    contents.YellowByTrigger_h= new TH1F("YellowBeamByTrigger_h","Yellow Beam By Trigger", 64,0,63);
+    contents.BlueByTrigger_h = new TH1F("BlueBeamByTrigger_h", "Blue Beam By Trigger", 64,0,64);
+    contents.YellowByTrigger_h= new TH1F("YellowBeamByTrigger_h","Yellow Beam By Trigger", 64,0,64);
     
     
     // Add root histograms to Plots
