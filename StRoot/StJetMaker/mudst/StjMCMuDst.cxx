@@ -12,6 +12,8 @@
 
 #include <StjMCParticleCutParton.h>
 #include <StjMCMuDst.h>
+#include "StarGenerator/StarGenEventReader/StarGenEventReader.h"
+#include "StarGenerator/EVENT/StarGenParticle.h"
 
 StjPrimaryVertex StjMCMuDst::getMCVertex() const
 {
@@ -22,7 +24,7 @@ StjPrimaryVertex StjMCMuDst::getMCVertex() const
       if (const g2t_vertex_st* g2t_vertex_table = g2t_vertex_descriptor->GetTable())
 	{
 	  const float* geantvertex = g2t_vertex_table[0].ge_x;
-	  vertex.mPosition.SetXYZ(geantvertex[0],geantvertex[1],geantvertex[2]);
+        vertex.mPosition.SetXYZ(geantvertex[0],geantvertex[1],geantvertex[2]);
 	}
   }
   return vertex;
@@ -81,7 +83,45 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
 	}
       }
     }
-  }
+  }else if(genEvent){
+      
+      LOG_INFO <<"There is no geant in _maker. Proceed with Particle info from StarGenEventReader. " << endm;
+      
+      StarGenParticle* particle = 0;
+      
+      int nparts = genEvent->GetNumberOfParticles();
+      
+      int runNumber   = -1;
+      int eventNumber = -1;
 
+      runNumber = genEvent->GetRunNumber();
+      eventNumber = genEvent->GetEventNumber();
+      
+      for(int ipar = 0; ipar < nparts; ipar++){
+          particle = (StarGenParticle*)(genEvent->operator[](ipar));
+          
+          StjMCParticle mcParticle;
+          mcParticle.runNumber       = runNumber;
+          mcParticle.eventId         = eventNumber;
+          
+          mcParticle.status          = particle->GetStatus();
+//          mcParticle.mcparticleId    = particle->GetId();
+          mcParticle.pdg = particle->GetId();
+          mcParticle.firstMotherId   = particle->GetFirstMother();
+          mcParticle.lastMotherId    = particle->GetLastMother();
+          mcParticle.firstDaughterId = particle->GetFirstDaughter();
+          mcParticle.lastDaughterId  = particle->GetLastDaughter();
+          mcParticle.vertexZ         = particle->GetVz();
+          
+          TLorentzVector p4 = particle->momentum();
+          mcParticle.pt  = p4.Pt();
+          mcParticle.eta = p4.Eta();
+          mcParticle.phi = p4.Phi();
+          mcParticle.m   = p4.M();
+          mcParticle.e   = p4.E();
+          
+          theList.push_back(mcParticle);
+      }
+  }
   return theList;
 }
