@@ -65,7 +65,7 @@ class StMuRHICfRawHit : public TObject
     UInt_t mGPI0[kRHICfNgpi0]; // GPI0
     UInt_t mGPI1[kRHICfNgpi1]; // GPI1
 
-  ClassDef(StMuRHICfRawHit,1)
+  ClassDef(StMuRHICfRawHit,2)
 };
 
 #endif
