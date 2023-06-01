@@ -230,6 +230,7 @@ private:
 
 
 inline void StETofMatchMaker::setFileNameMatchParam(         const char* fileName  ) { mFileNameMatchParam         = fileName;   }
+inline void StETofMatchMaker::setFileNameAlignParam(         const char* fileName  ) { mFileNameAlignParam         = fileName;   }
 inline void StETofMatchMaker::setOuterGeometry(              const bool outerGeom  ) { mOuterTrackGeometry         = outerGeom;  }
 inline void StETofMatchMaker::setUseHelixSwimmer(            const bool useSwimmer ) { mUseHelixSwimmer            = useSwimmer; }
 inline void StETofMatchMaker::setUseOnlyBTofHeaderStartTime( const bool useBTofT0  ) { mUseOnlyBTofHeaderStartTime = useBTofT0;  }
