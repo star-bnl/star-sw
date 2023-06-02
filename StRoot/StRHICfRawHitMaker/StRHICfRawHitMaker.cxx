@@ -67,7 +67,7 @@ Int_t StRHICfRawHitMaker::Make()
     unsigned short* rawdata = (unsigned short*) daqData->GetTable();
 
     // Insert general data
-      unsigned int rhicfRunIdx = mRHICfDbMaker->getRHICfRunNumberAddress();
+    unsigned int rhicfRunIdx   = mRHICfDbMaker->getRHICfRunNumberAddress();
     unsigned int rhicfEventIdx = mRHICfDbMaker->getRHICfEventNumberAddress();
     mRHICfCollection -> setRHICfRunNumber(gendata[rhicfRunIdx]);
     mRHICfCollection -> setRHICfEventNumber(gendata[rhicfEventIdx]);
