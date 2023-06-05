@@ -233,6 +233,7 @@ unsigned short StTriggerData::mAddBits() const {return 0;}
 unsigned short StTriggerData::bcData(int address) const {return 0;}
 unsigned short StTriggerData::getTrgDetMask() const {return 0;}
 unsigned int   StTriggerData::getTrgCrateMask() const {return 0;}
+unsigned int StTriggerData::zdcKillerBit() const {return 0;}
 unsigned short StTriggerData::busyStatus() const {return 0;}
 unsigned int StTriggerData::tcuCounter() const {return 0;}
 unsigned int StTriggerData::rccCounter(int crate) const {return 0;}
