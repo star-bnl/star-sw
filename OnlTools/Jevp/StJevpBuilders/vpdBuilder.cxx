@@ -252,7 +252,8 @@ void vpdBuilder::event(daqReader *rdr) {
 		}
 	}
 
-	contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
+	contents.tac_east_vs_tac_west->Fill(maxTAC[0], maxTAC[1]);
+	//contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
 
 	if (maxTAC[0]>200){
 			contents.earliestTAC_vs_eastchan->Fill(earliestChan[0],maxTAC[0]);
