@@ -27,6 +27,11 @@ using namespace std;
 StjFCSMuDst::StjFCSMuDst()
 {
     _setVertex = false;
+    
+    _vx = 0.0;
+    _vy = 0.0;
+    _vz = 0.0;
+    
     useECal = false;
     useHCal = false;
     
@@ -95,9 +100,9 @@ StjTowerEnergy StjFCSMuDst::hitenergyDeposit(const StMuFcsHit& hit){
     energyDeposit.towerR = TMath::Sqrt(x*x + y*y);
     energyDeposit.towerEta = xyz.pseudoRapidity();
     energyDeposit.towerPhi = xyz.phi();
-    energyDeposit.vertexX = 0; //To be use with FwdTracks vertext reconstruction
-    energyDeposit.vertexY = 0;
-    energyDeposit.vertexZ = 0;
+    energyDeposit.vertexX = _vx;
+    energyDeposit.vertexY = _vy;
+    energyDeposit.vertexZ = _vz;
     energyDeposit.energy   = hit.energy();
     energyDeposit.adc      = hit.adcSum();
     energyDeposit.pedestal = 0;

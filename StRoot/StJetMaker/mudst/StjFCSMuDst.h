@@ -18,7 +18,7 @@ public:
     StjFCSMuDst();
     virtual ~StjFCSMuDst() {}
 
-    void setVertex(float vx, float vy, float vz)
+    void setVertex(double vx, double vy, double vz)
     {
       _setVertex = true;
       _vx = vx;

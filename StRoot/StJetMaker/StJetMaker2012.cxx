@@ -185,12 +185,16 @@ int StJetMaker2012::Make()
 	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
 	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
 	copy(fmsEnergyList.begin(),fmsEnergyList.end(),back_inserter(energyList));
+          
+    // Apply hadronic correction to towers
+    energyList = jetbranch->anapars->correctTowerEnergyForTracks()(energyList,trackList);
+          
+    //Merge FCS towers with general energyList
     copy(fcsECalEnergyList.begin(),fcsECalEnergyList.end(),back_inserter(energyList));
     copy(fcsHCalEnergyList.begin(),fcsHCalEnergyList.end(),back_inserter(energyList));
-          
-	// Apply hadronic correction to towers
-	energyList = jetbranch->anapars->correctTowerEnergyForTracks()(energyList,trackList);
 
+    // Currently no hadronic corrections to towers for FCS
+    
 	// Convert tracks and towers to Lorentz vectors
 	FourList tpc4pList = StjeTrackListToStMuTrackFourVecList()(trackList);
 	FourList energy4pList = StjeTowerEnergyListToStMuTrackFourVecList()(energyList);
@@ -200,7 +204,6 @@ int StJetMaker2012::Make()
 
 	copy(tpc4pList.begin(),tpc4pList.end(),back_inserter(particles));
 	copy(energy4pList.begin(),energy4pList.end(), back_inserter(particles));
-
 
 	// Run jet finder
 	StJetFinder::JetList protojets;	// list<StProtoJet>

@@ -1,4 +1,4 @@
-void RunJetFinder2012pro(int nevents = 100,
+void RunJetFinder2012pro_fcs(int nevents = 100,
 const char* indir = "./",
 const char* MuDst = "_e45.MuDst.root",
 const char* Jetfile = "test.jets.root",

@@ -105,7 +105,7 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
           mcParticle.eventId         = eventNumber;
           
           mcParticle.status          = particle->GetStatus();
-//          mcParticle.mcparticleId    = particle->GetId();
+          mcParticle.mcparticleId    = ipar+1;
           mcParticle.pdg = particle->GetId();
           mcParticle.firstMotherId   = particle->GetFirstMother();
           mcParticle.lastMotherId    = particle->GetLastMother();
