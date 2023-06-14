@@ -1,5 +1,52 @@
 # Changelog
 
+## SL23d_0 - 2023-06-14
+
+## What's Changed
+
+* Added centrality procedure instructions by @zsweger in  ([#513](https://github.com/star-bnl/star-sw/pull/513))
+* Assorted updates in OnlTools/Jevp for 2023 run by @jml985 in  ([#515](https://github.com/star-bnl/star-sw/pull/515))
+* Remove unused file StRoot/StEvent/StDetectorId.inc by @plexoos in  ([#517](https://github.com/star-bnl/star-sw/pull/517))
+* new RHICf library (only raw data saving part) by @ggfdsa10 in  ([#511](https://github.com/star-bnl/star-sw/pull/511))
+* update CODEOWNERS for PWGTools directory by @starsdong in  ([#518](https://github.com/star-bnl/star-sw/pull/518))
+* Auau200gev run19 strefmultcorr by @zsweger in  ([#514](https://github.com/star-bnl/star-sw/pull/514))
+* added owners for a few subsystems by @starsdong in  ([#520](https://github.com/star-bnl/star-sw/pull/520))
+* Summer 2023 updates by @jml985 in  ([#516](https://github.com/star-bnl/star-sw/pull/516))
+* Automated run-by-run QA package (version-2) for STAR BES-II dataset QA. by @EllipticFlow in  ([#521](https://github.com/star-bnl/star-sw/pull/521))
+* fix: remove ClassDef from StEpdGeom by @plexoos in  ([#522](https://github.com/star-bnl/star-sw/pull/522))
+* Additon of StFwdTrack to StEvent, updates to StFwdTrackMaker to accomodate by @jdbrice in  ([#492](https://github.com/star-bnl/star-sw/pull/492))
+* RHICf Sub-reconstruction tool (StRHICfPID) by @ggfdsa10 in  ([#519](https://github.com/star-bnl/star-sw/pull/519))
+* StNbdFitMaker.cxx: update centrality calculation by @zsweger in  ([#512](https://github.com/star-bnl/star-sw/pull/512))
+* New RHICf sub-reconstruction tool (StRHICfRecoPos) by @ggfdsa10 in  ([#524](https://github.com/star-bnl/star-sw/pull/524))
+* Update to remove logging from itpc cluster finder by @jml985 in  ([#532](https://github.com/star-bnl/star-sw/pull/532))
+* Edited mistake in params file by @zsweger in  ([#531](https://github.com/star-bnl/star-sw/pull/531))
+* New RHICf sub-reconstruction tool (StRHICfRecoEnergy) by @ggfdsa10 in  ([#527](https://github.com/star-bnl/star-sw/pull/527))
+* Star simulations 2023 ideal timestamp by @klendathu2k in  ([#534](https://github.com/star-bnl/star-sw/pull/534))
+* Run23 prep by @genevb in  ([#536](https://github.com/star-bnl/star-sw/pull/536))
+* run by run v3 with font removed by @ssedd1123 in  ([#526](https://github.com/star-bnl/star-sw/pull/526))
+* Enable default STAR Spack environment by @plexoos in  ([#496](https://github.com/star-bnl/star-sw/pull/496))
+* fix(env): clean up previously loaded module before activating new env by @plexoos in  ([#542](https://github.com/star-bnl/star-sw/pull/542))
+* Fix for DAQ5k cluster finder dropping outer two RDOs of TPX bug by @jml985 in  ([#541](https://github.com/star-bnl/star-sw/pull/541))
+* fix: load libiconv module into envs by @plexoos in  ([#543](https://github.com/star-bnl/star-sw/pull/543))
+* Remove some functions in StRHICfFunction by @ggfdsa10 in  ([#533](https://github.com/star-bnl/star-sw/pull/533))
+* RHICf Run and Event number added in StRHICfCollection by @ggfdsa10 in  ([#544](https://github.com/star-bnl/star-sw/pull/544))
+* Updated default behavior of run-by-run QA according to agreement in QA meeting on 5/19 by @ssedd1123 in  ([#545](https://github.com/star-bnl/star-sw/pull/545))
+* Add RHICf Run and Event number address in StRHICfDbMaker by @ggfdsa10 in  ([#546](https://github.com/star-bnl/star-sw/pull/546))
+* Add RHICf Run and Event number in StMuRHICfxxx by @ggfdsa10 in  ([#548](https://github.com/star-bnl/star-sw/pull/548))
+* Add RHICfRun and Event number in StRHICfRawHitMaker by @ggfdsa10 in  ([#551](https://github.com/star-bnl/star-sw/pull/551))
+* Mask counters for production by @YannickSoehngen in  ([#550](https://github.com/star-bnl/star-sw/pull/550))
+* Small additions to StFcsWaveformFitMaker and some macros for test level 6 by @dkapukchyan in  ([#549](https://github.com/star-bnl/star-sw/pull/549))
+
+## New Contributors
+
+* @zsweger made their first contribution in  ([#513](https://github.com/star-bnl/star-sw/pull/513))
+* @ggfdsa10 made their first contribution in  ([#511](https://github.com/star-bnl/star-sw/pull/511))
+* @EllipticFlow made their first contribution in  ([#521](https://github.com/star-bnl/star-sw/pull/521))
+* @ssedd1123 made their first contribution in  ([#526](https://github.com/star-bnl/star-sw/pull/526))
+
+**Full Changelog**: https://github.com/star-bnl/star-sw/compare/SL23b_0...SL23d_0
+
+
 ## SL23a_0 - 2023-01-15
 
 ## What's Changed
