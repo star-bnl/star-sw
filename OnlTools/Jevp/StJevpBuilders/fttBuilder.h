@@ -242,8 +242,8 @@ class fttBuilder : public JevpBuilder {
   
   static const size_t maxADC       = 1024 + 1; // 10 bits;
   static const size_t maxBCID      = 4096 + 1; // 12 bits;
-  static const int minTb        = -32768 - 1000; // get the under and overflow
-  static const int maxTb        = 32768 + 1000;
+  static const int minTb        = -3000; // get the under and overflow
+  static const int maxTb        = 3000;
 
   static const std::string quadLabels[4];
   static const std::string dirLabels[4];
@@ -288,6 +288,8 @@ class fttBuilder : public JevpBuilder {
         TH1 *chargePerFob[nFob];
         
         TH1 *nStripsFired;
+        TH1 *nStripsFiredAll;
+        TH1 *nStripsFiredOutOfTime;
     };
   } contents;
 
@@ -335,7 +337,9 @@ class fttBuilder : public JevpBuilder {
 #endif
 
 
-  int nStripsFired;
+  size_t nStripsFired;
+  size_t nStripsFiredOutOfTime;
+  size_t nStripsFiredAll;
 
   ClassDef(fttBuilder, 1);
 };
