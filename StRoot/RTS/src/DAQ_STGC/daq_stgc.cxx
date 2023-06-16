@@ -534,7 +534,7 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 	stgc_d->xing_min = xing_min ;
 	stgc_d->xing_max = xing_max ;
 
-//	LOG(WARN,"xing_min %d, xing_max %d",stgc_d->xing_min,stgc_d->xing_max) ;
+	LOG(NOTE,"xing_min %d, xing_max %d",stgc_d->xing_min,stgc_d->xing_max) ;
 
 	// calc total bytes
 	tot_bytes = 0 ;
@@ -613,7 +613,7 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 
 			// fixed bug
 			if(hits >= vmm_max) {
-				//LOG(ERR,"S%d:%d -- too many hits %d/%d",obj[i].sec,obj[i].rb,hits,vmm_max) ;
+				LOG(NOTE,"ERROR: S%d:%d -- too many hits %d/%d",obj[i].sec,obj[i].rb,hits,vmm_max) ;
 				//break ;
 			}
 			else {

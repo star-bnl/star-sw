@@ -805,9 +805,12 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 		if(crc != crc_in_data) {
 			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
-			bad |= 1 ;
+			//bad |= 1 ;
 		}
 	}	
+	else {
+//		LOG(WARN,"RDO %d: no CRC in data",rdo) ;
+	}
 
 	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
 #endif
