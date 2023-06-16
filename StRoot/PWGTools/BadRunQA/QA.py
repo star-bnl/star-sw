@@ -14,8 +14,8 @@ import pyfiglet
 
 def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, maxIter=100, 
                      useJMLR=False, useMAD=False, weights=None, segmentOnce=False, 
-                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=False, 
-                     quadRange=False, **kwargs):
+                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=None, 
+                     quadRange=False, grVarID=None, **kwargs):
     if useJMLR:
         print('Execution with JMLR')
     else:
@@ -29,9 +29,19 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
 
     edgeRuns = []
     i = 0
-    runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=stdRange, 
+       
+    if globalRejection is None:
+        globalRejection = np.inf
+
+    if grVarID is not None:
+        grStdRange=np.full(x_copy.shape[1], np.inf, dtype=float)
+        grStdRange[grVarID] = globalRejection
+    else:
+        grStdRange=np.full(x_copy.shape[1], globalRejection, dtype=float)
+
+    runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=grStdRange, 
                                                  useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False, quadRange=quadRange)
-    if globalRejection and runRj.shape[0] > 0:
+    if globalRejection is not None and runRj.shape[0] > 0:
         runsRejected.append(runRj)
         reasonsRejected.append(reasonRj)
 
@@ -143,7 +153,8 @@ if __name__ == '__main__':
     parser.add_argument('-ei', '--excludeInvalid', action='store_true', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
     parser.add_argument('-rn', '--reCalculateNormal', action='store_false', help='mean and standard deviation of data set is re-calculated in each iteration. (default: %(default)s)')
     parser.add_argument('-mi', '--mergeID', action='store_true', help='Merge nearby segments if their means are too close to each other, like within 5 SDs.')
-    parser.add_argument('-g', '--globalRejection', action='store_false', help='Run outliner rejection once before segmentation iteration. (default: %(default)s)')
+    parser.add_argument('-g', '--globalRejection', type=int, default=10, help='Run outliner rejection once before segmentation iteration. (default: %(default)s)')
+    parser.add_argument('-gv', '--globalRejectionVariable', help='Filename of txt file that contains observable that needs global rejection. Without it, global rejection is done on all observable.')
     parser.add_argument('-q', '--quadRange', action='store_false', help='Reject runs by adding uncertainty in quaduature instead of absolute value. (default: %(default)s)')
     parser.add_argument('-lg', '--legacy', action='store_true', help='Use legacy mode to emulate run-by-run v2')
 
@@ -167,8 +178,9 @@ if __name__ == '__main__':
         args.excludeInvalid = False
         args.reCalculateNormal = True
         args.mergeID = True
-        args.globalRejection = False
+        args.globalRejection = None
         args.quadRange = True
+        args.globalRejectionVariable = None
 
     # read data from file
     print('Reading TProfile from %s' % (args.input))
@@ -183,6 +195,17 @@ if __name__ == '__main__':
     else:
         print('Those are the names of TProfiles in %s' % args.varNames)
     print('*'*100)
+
+    print('*'*100)
+    if args.globalRejectionVariable is not None:
+        grVar = getVarNames(args.globalRejectionVariable)
+    else: 
+        grVar = varNames
+    print('Observable used in global rejection:')
+    print('\n'.join(grVar))
+    print('*'*100)
+    grVarID = [i for i, name in enumerate(varNames) if name in grVar]
+
     runs, x, xerr, counts = readFromROOT(args.input, varNames, args.mapping, args.legacy)
     if args.excludeInvalid:
         id = np.all(xerr > 0, axis=1)
@@ -215,7 +238,7 @@ if __name__ == '__main__':
         # run different penalty setting on different cores
         for ruj, rej, me, st, ed, pe, i in pool.imap(partial(segmentAndReject, runs, x, xerr, useJMLR=args.JMLR, useMAD=args.MAD,
                                                               min_size=args.minSize, stdRange=args.rejectionRange, maxIter=args.maxIter,
-                                                              weights=weights, segmentOnce=args.segmentOnce, merge=args.mergeID, 
+                                                              weights=weights, segmentOnce=args.segmentOnce, merge=args.mergeID, grVarID=grVarID,
                                                               reCalculateNormal=args.reCalculateNormal, legacy=args.legacy, globalRejection=args.globalRejection, quadRange=args.quadRange), 
                                                         args.pen): 
             # choose penalty that rejectes the most number of runs
