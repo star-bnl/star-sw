@@ -16,6 +16,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
                      useJMLR=False, useMAD=False, weights=None, segmentOnce=False, 
                      merge=False, reCalculateNormal=False, legacy=False, globalRejection=None, 
                      quadRange=False, grVarID=None, **kwargs):
+
     if useJMLR:
         print('Execution with JMLR')
     else:
@@ -29,6 +30,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
 
     edgeRuns = []
     i = 0
+
        
     if globalRejection is None:
         globalRejection = np.inf
@@ -178,6 +180,7 @@ if __name__ == '__main__':
         args.excludeInvalid = False
         args.reCalculateNormal = True
         args.mergeID = True
+
         args.globalRejection = None
         args.quadRange = True
         args.globalRejectionVariable = None

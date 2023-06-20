@@ -34,7 +34,7 @@ static inline u_int sw16(u_int d)
         return d ;
 }
 
-inline void itpc23::set_rdo(int sec, int rdo)
+inline u_int itpc23::set_rdo(int sec, int rdo)
 {
 //	LOG(TERR,"set_rdo %d: S%02d:%d",id,sec,rdo) ;
 
@@ -42,6 +42,8 @@ inline void itpc23::set_rdo(int sec, int rdo)
 	rdo1 = rdo ;
 
 	fee_mask = get_ifee_mask(sector1,rdo1) ;
+
+	return fee_mask ;
 } ;
 
 // Change the data format from the old FY22 version to the new
@@ -51,10 +53,12 @@ int itpc23::from22to23(char *c_dta, int words)
 	int n_words = words ;
 	u_int *data = (u_int *)c_dta ;
 
-	u_int *d_use = (u_int *)malloc(words*4) ;	// allocate sotrage
+	u_int *d_use = (u_int *)malloc(words*4+1024) ;	// allocate sotrage
 
 	u_int *data_end = data + words ;
 	u_int *data_start = data ;
+
+	err = 0 ;	// in class
 
 	// this is wrong! I need to get it from the data!!
 	fee_mask = get_ifee_mask(sector1,rdo1) ;
@@ -91,6 +95,7 @@ int itpc23::from22to23(char *c_dta, int words)
 	if((data[0]&0xFFFF000F) != 0x98000004) {
 		run_errors++ ;
 		if(run_errors<5) LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
+		err |= 0x10000000 ;
 	}
 
 //	LOG(TERR,"wds 0x%08X 0x%08X; data end 0x%08X",data[0],data[1],data_end[0]) ;
@@ -135,6 +140,7 @@ int itpc23::from22to23(char *c_dta, int words)
 
 	if(!found) {
 		run_errors++ ;
+		err |= 0x20000000 ;
 		if(run_errors<5) LOG(ERR,"%d: can't find data_end!",rdo1) ;
 	}
 
@@ -155,6 +161,7 @@ int itpc23::from22to23(char *c_dta, int words)
 
 	if(!found) {
 		run_errors++ ;
+		err |= 0x20000000 ;
 		if(run_errors<5) LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
 	}
 
@@ -189,8 +196,11 @@ int itpc23::from22to23(char *c_dta, int words)
 
 	if(online) {
 		if(l_fee_mask != fee_mask) {
+			err |= 0x40000000 ;
 			run_errors++ ;
 			if(run_errors<5) LOG(ERR,"%d: FEE mask 0x%X, expect 0x%X, words %d/%d",rdo1,l_fee_mask,fee_mask,words,n_words) ;
+			free(d_use) ;
+			return 0 ;
 		}
 	}
 
@@ -243,6 +253,7 @@ int itpc23::from22to23(char *c_dta, int words)
 
 				if(ix>(n_words)) {
 					run_errors++ ;
+					err |= 0x80000000 ;
 					if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
 					free(d_use) ;
 					return 0 ;
@@ -258,12 +269,16 @@ int itpc23::from22to23(char *c_dta, int words)
 		if(ix>(n_words)) {
 			run_errors++ ;
 			if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
+			err |= 0x80000000 ;
+			free(d_use) ;
+			return 0 ;
 		}
 	}
 
 	if(n_words<12) {
 		run_errors++ ;
 		if(run_errors<5) LOG(ERR,"%d: n_words %d",rdo1,n_words) ;
+		err |= 0x80000000 ;
 		free(d_use) ;
 		return 0 ;
 	}
@@ -448,7 +463,7 @@ u_int *itpc23::ch_scan(u_int *start)
 
 				if(unlikely(tb_cou>500)) {
 					fee_errs++ ;
-					if(fee_errs<10) LOG(ERR,"%d: tb_cou %d [0x%08X,%d]",rdo1,tb_cou,d[i],i) ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_cou %d [0x%08X,%d]",rdo1,row,pad,tb_cou,d[i],i) ;
 				}
 				ix = 1 ;
 				break ;
@@ -478,7 +493,7 @@ u_int *itpc23::ch_scan(u_int *start)
 
 				if(unlikely(tb_start<=tb_last)) {
 					fee_errs++ ;
-					if(fee_errs<10) LOG(ERR,"tb_start %d, tb_last %d",tb_start,tb_last) ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_start %d, tb_last %d",rdo1,row,pad,tb_start,tb_last) ;
 				}
 
 
@@ -486,7 +501,7 @@ u_int *itpc23::ch_scan(u_int *start)
 				tb_last = tb_start + tb_cou ;
 				if(unlikely(tb_last>500)) {
 					fee_errs++ ;
-					if(fee_errs<10) LOG(ERR,"%d: tb_last %d [0x%08X,%d]",rdo1,tb_last,d[i],i) ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_last %d [0x%08X,%d]",rdo1,row,pad,tb_last,d[i],i) ;
 				}
 
 
@@ -740,7 +755,7 @@ u_int *itpc23::fee_scan(u_int *start)
 	u_int *d_save = start ;
 
 	bx_count = -1 ;
-	fee_errs = 0 ;
+//	fee_errs = 0 ;
 	fee_evt_type = 0 ;
 	fee_pp = 0 ;
 
@@ -822,7 +837,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	d += 4 ;
 	d_start = d ;	// remember
 
-	err = 0 ;
+	err = 0 ;	// clear class error
 	//evt++ ;
 
 	fee_ix = 0 ;
@@ -1259,6 +1274,7 @@ itpc23::itpc23()
 
 	data_c = 0 ;
 
+	fee_errs = 0 ;	// just in case
 
 	fmt = 0 ;
 
@@ -1340,7 +1356,7 @@ static int itpc_fee_map[24][4][16] = {
 {//S5 checked
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
-	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 3,20,29,25,21, 0}, // 17May23: moved 16 to 11
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 
 },
