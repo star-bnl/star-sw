@@ -1,7 +1,7 @@
 #ifndef STAR_StDetectorDbMaker
 #define STAR_StDetectorDbMaker
 
-#ifndef StMaker_H
+#ifndef STAR_StMaker
 #include "StMaker.h"
 #endif
 
