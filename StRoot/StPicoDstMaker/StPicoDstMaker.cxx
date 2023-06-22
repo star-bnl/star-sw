@@ -29,6 +29,7 @@
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include "StarClassLibrary/PhysicalConstants.h"
 
+#include "StEvent/StEvent.h"
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEvent/StEmcCollection.h"
@@ -55,6 +56,7 @@
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
+#include "StMuDSTMaker/COMMON/StMuETofHeader.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 
@@ -860,10 +862,14 @@ Int_t StPicoDstMaker::MakeWrite() {
   Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
     isFromDaq = kTRUE;
-    static StMuEmcUtil emcUtil;
+//    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
+    StEvent *evt = (StEvent *)GetDataSet("StEvent");
+    if(evt) {
+      mEmcCollection = evt->emcCollection();
+    }
+//    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {
@@ -901,7 +907,7 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mTTree->Fill();
   if ( isFromDaq ) {
-    delete mEmcCollection;
+//    delete mEmcCollection;
     mEmcCollection = nullptr;
   }
 
@@ -1825,6 +1831,10 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
   picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
+  StMuETofHeader *header = mMuDst->etofHeader();
+  if( header ) {
+      picoEvent->setETofGoodEventFlag( header->goodEventFlagVec() );
+  }
 
   // Save the number of etof digis that were useable in the hit building process
   unsigned short nUseableETofDigis = 0;
@@ -1933,11 +1943,13 @@ void StPicoDstMaker::fillEmcTrigger() {
   int bht1 = trigSimu->bemc->barrelHighTowerTh(1);
   int bht2 = trigSimu->bemc->barrelHighTowerTh(2);
   int bht3 = trigSimu->bemc->barrelHighTowerTh(3);
-  LOG_DEBUG << " bht thresholds " << bht0 << " " << bht1 << " " << bht2 << " " << bht3 << endm;
+  LOG_INFO << " bht thresholds " << bht0 << " " << bht1 << " " << bht2 << " " << bht3 << endm;
   for (int i = 0; i < 4; ++i) {
     mPicoDst->event()->setHighTowerThreshold(i, trigSimu->bemc->barrelHighTowerTh(i));
   }
 
+  if( bht0>0 || bht1>0 || bht2>0 || bht3>0 ) {  // avoid saving unuseful data in case all threshold values are zeros
+  
   // Loop over all towers
   for(Int_t towerId=1; towerId<=4800; towerId++) {
     Int_t status;
@@ -2060,16 +2072,22 @@ void StPicoDstMaker::fillEmcTrigger() {
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, towerId, adc, smdEHits, smdPHits);
     }
   } //for(Int_t towerId=1; towerId<=4800; towerId++)
+  
+  } // end if (bht threshold check)
 
     // BEMC Jet Patch trigger threshold
   int const bjpth0 = trigSimu->bemc->barrelJetPatchTh(0);
   int const bjpth1 = trigSimu->bemc->barrelJetPatchTh(1);
   int const bjpth2 = trigSimu->bemc->barrelJetPatchTh(2);
 
+  LOG_INFO << " bjp thresholds " << bjpth0 << " " << bjpth0 << " " << bjpth1 << " " << bjpth2 << endm;
+  
   for (int i = 0; i < 3; ++i) {
     mPicoDst->event()->setJetPatchThreshold(i, trigSimu->bemc->barrelJetPatchTh(i));
   }
 
+  if ( bjpth0 > 0 || bjpth1 > 0 || bjpth2 > 0 ) {
+  
   // Loop over triggers
   for (int jp = 0; jp < 18; ++jp) {
     // BEMC: 12 Jet Patch + 6 overlap Jet Patches. As no EEMC information
@@ -2094,6 +2112,8 @@ void StPicoDstMaker::fillEmcTrigger() {
       new((*(mPicoArrays[StPicoArrays::EmcTrigger]))[counter]) StPicoEmcTrigger(flag, jp, jpAdc);
     }
   } //for (int jp = 0; jp < 18; ++jp)
+  
+  }
 }
 
 //_________________
@@ -2574,11 +2594,9 @@ bool StPicoDstMaker::selectVertex() {
     } //if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
   } //else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
   else if ( mVtxMode == PicoVtxMode::Mtd ) {
-    
+
     // Set the first primary vertex as a default vertex
-    mMuDst->setVertexIndex(0);
-    // Set pointer to the first primary vertex
-    selectedVertex = mMuDst->primaryVertex();
+    int VtxIndex = 0;
 
     // Loop over primary vertices
     for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++) {
@@ -2592,30 +2610,33 @@ bool StPicoDstMaker::selectVertex() {
       // Loop over primary tracks
       for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++) {
 
-	// Retrieve i-th primary track from that belongs
-	// to the current primary vertex
-	StMuTrack* pTrack = mMuDst->primaryTracks( iTrk );
-	// Track must exist
-	if( !pTrack ) continue;
+        // Retrieve i-th primary track from that belongs
+        // to the current primary vertex
+        StMuTrack* pTrack = mMuDst->primaryTracks( iTrk );
+        // Track must exist
+        if( !pTrack ) continue;
 
-	// Check if track matches MTD
-	if( pTrack->index2MtdHit()<0 ) continue;
-	// Increment number of tracks that matched MTD
-	nMtdMatched++;
-       
+        // Check if track matches MTD
+        if( pTrack->index2MtdHit()<0 ) continue;
+        // Increment number of tracks that matched MTD
+        nMtdMatched++;
+
       } // for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++)
 
-	// Take the first primary vertex that has at least 2 tracks
-	// that matched MTD
+      // Take the first primary vertex that has at least 2 tracks
+      // that matched MTD
       if( nMtdMatched >= 2 ) {
-	// Reset vertex index
-	mMuDst->setVertexIndex( iVtx );
-	// Reset pointer to the primary vertex
-	selectedVertex = mMuDst->primaryVertex();
-	// Quit vertex loop
-	break;
+        // Change vertex index
+        VtxIndex = iVtx;
+        // Quit vertex loop
+        break;
       } // if( nMtdMatched >= 2 )
     } // for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++)
+
+    // Set the vertex index
+    mMuDst->setVertexIndex(VtxIndex);
+    // Set pointer to the primary vertex
+    selectedVertex = mMuDst->primaryVertex();
   } //  else if ( mVtxMode == PicoVtxMode::Mtd )
   else { // default case
     LOG_ERROR << "Pico Vtx Mode not set!" << endm;

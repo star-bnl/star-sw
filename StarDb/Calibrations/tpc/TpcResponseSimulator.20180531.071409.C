@@ -97,12 +97,14 @@ TDataSet *CreateTable() {
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
   row.tauP                  = 775.0e-9;// secs Tpc 
+  //row.tauXI                 =  80.6e-9;// secs Tpx Inner integration time 
+  //row.tauXO                 =  88.6e-9;// secs Tpx Outer integration time 
   row.tauXI                 =  60.0e-9;// secs Tpx Inner integration time 
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterTI         = 0.5300;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0.3300;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
   row.SigmaJitterXI         = 0;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
@@ -118,10 +120,10 @@ TDataSet *CreateTable() {
   // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.11; // IRAKLI : based on shift seen in the MuDst based simulation;
 #if 1
   const Double_t RowMuTrs[8] = {
-    4.45505e-02,  3.63901e-03,  // Inner W
-    3.52547e-02,  3.85726e-03,  // Outer W
-    5.28188e-02,  3.94541e-03,  // Inner E
-    -9.11388e-03, 2.63198e-03};  // Outer E
+    4.45505e-02+2.e-01-9.531e-02-1.82321556793954592e-01+0.03243-0.02,  3.63901e-03-4.693e-03,  // Inner W
+    3.52547e-02-9.1492e-02-1.222e-01+0.1858-0.02,  3.85726e-03-4.874e-03,  // Outer W
+    5.28188e-02+2.e-01-9.531e-02-1.82321556793954592e-01-1.84571276527970035e-01+5.79418410380801580e-02,  3.94541e-03,  // Inner E
+    -9.11388e-03-9.1492e-02-1.222e-01+9.01563105819495891e-02+0.09564, 2.63198e-03-1.972e-03};  // Outer E
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
     a[i] = RowMuTrs[i];

@@ -1,0 +1,9 @@
+/*    rhicfNeutronLeakageOut.idl
+*
+*  Table: rhicfNeutronLeakageOut
+*
+*/
+struct rhicfNeutronLeakageOut {
+	float smallplate[400];          /* Leakage-out for small tower */
+	float largeplate[1600];        /* Leakage-out for large tower */
+};

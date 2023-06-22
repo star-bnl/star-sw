@@ -1,0 +1,12 @@
+/* fttFobToStation.idl
+*
+* Table: fttFobToStation
+*
+* description: sTGC (ftt) map from FOB to Station
+*
+*/
+
+struct fttFobToStation {
+    octet fob[96]; /* fob 1-96 */
+    octet station[96]; /* station identifier 1 - 35 */
+};

@@ -42,6 +42,8 @@
 TableImpl(Bfc);
 ClassImp(StBFChain);
 
+StBFChain *chain = nullptr;
+
 //_____________________________________________________________________________
 // Hack constructor.
 /*!
@@ -56,15 +58,15 @@ ClassImp(StBFChain);
  */
 void StBFChain::Setup(Int_t mode) {
   static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
-  TString chain("BFC.C");
-  Char_t *file = gSystem->Which(path,chain,kReadPermission);
+  TString fileName("BFC.C");
+  Char_t *file = gSystem->Which(path,fileName,kReadPermission);
 #ifdef STAR_LOGGER
-  if (! file) { LOG_FATAL  << Form("StBFChain::Setup\tFile %s has not been found in path %s",chain.Data(),path) << endm; }
-  else        { LOG_WARN   << Form("StBFChain::Setup\tFile %s has been found as %s",chain.Data(),file) << endm; }
+  if (! file) { LOG_FATAL  << Form("StBFChain::Setup\tFile %s has not been found in path %s",fileName.Data(),path) << endm; }
+  else        { LOG_WARN   << Form("StBFChain::Setup\tFile %s has been found as %s",fileName.Data(),file) << endm; }
 #else
 
-  if (! file)   Fatal("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path);
-  else        Warning("StBFChain::Setup","File %s has been found as %s",chain.Data(),file);
+  if (! file)   Fatal("StBFChain::Setup","File %s has not been found in path %s",fileName.Data(),path);
+  else        Warning("StBFChain::Setup","File %s has been found as %s",fileName.Data(),file);
 #endif
   TString cmd(".L ");
   cmd += file;
@@ -289,6 +291,9 @@ Int_t StBFChain::Instantiate()
 
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
+
+	  // fixed target flavor
+	  if (GetOption("FXT")) flavors.Prepend("FXT+");
 
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
@@ -635,12 +640,12 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
-      cmd += "pSMMk->DoXi();";
-      cmd += "pSMMk->DoKink();";
-      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
-      ProcessLine(cmd);
+
+      mk -> SetAttr( "DoV0", 1 );
+      mk -> SetAttr( "DoXi", 1 );
+      mk -> SetAttr( "DoKink", 1 );
+      mk -> SetAttr( "SetNoKeep", 1 );
+
     }
 
     // Alex requested an option (not turned by default) to disable all
@@ -651,6 +656,16 @@ Int_t StBFChain::Instantiate()
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
+      
+    // trigger simu maker
+    if ( maker == "StEmcRawMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production - save all BTOW hits for triggerSimuMaker
+    }
+
+    // trigger simu maker
+    if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production
+    }
 
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
@@ -663,6 +678,16 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
 
+    // FST Raw hits in StEvent
+    if (maker == "StFstRawHitMaker" && GetOption("fstEvtRawHit") ){
+      mk->SetAttr("fstEvtRawHit", kTRUE);
+    }
+
+    // FST Raw hits in MuDST
+    if (maker == "StMuDstMaker" && GetOption("fstMuRawHit") ){
+      mk->SetAttr("fstMuRawHit", kTRUE);
+    }
+
     if ( maker == "StPicoDstMaker"){
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
@@ -673,14 +698,8 @@ Int_t StBFChain::Instantiate()
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
-      //<<<<<<< StBFChain.cxx
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
-
-      //=======
-      if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
-      else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
-      //>>>>>>> 1.660.2.3
     }
 
 
@@ -774,7 +793,10 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);
 	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);
 	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);
-	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);
+	if( GetOption("OSpaceZ2")   ) {
+          if( GetOption("FXT")      ) mk->SetAttr("OSpaceFXT"  , kTRUE);
+          else                        mk->SetAttr("OSpaceZ2"   , kTRUE);
+        }
 	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
@@ -891,6 +913,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 
@@ -1078,13 +1101,13 @@ Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort
   for (k = 0; k < nParsed; k++) {if (obj->At(k)) {if (k != N) obj->AddAt(obj->At(k),N); N++;}}
   nParsed = N;
   // sort options
-  StBFChain *chain = (StBFChain *) StMaker::GetChain();
-  if (chain && Sort) {// sort options
+  StBFChain *curChain = (StBFChain *) StMaker::GetChain();
+  if (curChain && Sort) {// sort options
     TArrayI idT(nParsed); Int_t *idx = idT.GetArray();
     TArrayI kdT(nParsed); Int_t *kdx = kdT.GetArray();
     for (k = 0; k < nParsed; k++) {
       TString string = ((TObjString *) obj->At(k))->GetString();
-      kdx[k] = TMath::Abs(chain->kOpt(string,kFALSE));
+      kdx[k] = TMath::Abs(curChain->kOpt(string,kFALSE));
     }
     TMath::Sort(nParsed,kdx,idx,0);
     TString sChain;
@@ -1093,7 +1116,7 @@ Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort
       if (k == 0) sChain = ((TObjString *)Opt[k])->GetString();
       else {sChain += ","; sChain += ((TObjString *)Opt[k])->GetString();}
     }
-    if (N > 1 && chain->Debug() > 2) {
+    if (N > 1 && curChain->Debug() > 2) {
       gMessMgr->QAInfo() << "Requested chain is :\t" << tChain.Data() << endm;
       gMessMgr->QAInfo() << "Sorted    chain is :\t" << sChain.Data() << endm;
     }
@@ -1190,7 +1213,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   return 0;
 }
 //_____________________________________________________________________
-void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
+void StBFChain::SetOptions(const Char_t *options, const Char_t *chainName) {
   TString tChain(options);
   TObjArray Opts;
   Int_t nParsed = ParseString(tChain,Opts,kTRUE);
@@ -1219,7 +1242,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
       // printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(Tag.Data(),kFALSE);
       if (kgo != 0) {
-	SetOption(kgo,chain);
+	SetOption(kgo,chainName);
 	if (kgo > 0) {
 	  TString Comment(fBFC[kgo].Comment);
 	  TString Opts(fBFC[kgo].Opts);
@@ -1374,7 +1397,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);
 	  if (kgo != 0){
-	    SetOption(kgo,chain);
+	    SetOption(kgo,chainName);
 	  } else {
 	    // Check that option can be library name or / and Maker
 	    static const Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
@@ -1393,7 +1416,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	    }
 	    kgo = kOpt(Tag.Data(),kFALSE);
 	    if (kgo != 0) {
-	      SetOption(kgo,chain);
+	      SetOption(kgo,chainName);
 	    } else {
 	      gMessMgr->QAInfo() << " Invalid Option " << Tag.Data() << ". !! ABORT !! " << endm;
 	      abort(); //assert(1);
@@ -1408,20 +1431,20 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 }
 //_____________________________________________________________________
 /// Enable/disable valid command line options
-void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
+void StBFChain::SetOption(const Int_t k, const Char_t *chainName) {
   if (k > 0) {
     assert(k<fNoChainOptions);
     Int_t n = strlen(fBFC[k].Opts);
     if (n >  0) SetOptions(fBFC[k].Opts,fBFC[k].Key);
     if (!fBFC[k].Flag) {
       fBFC[k].Flag = kTRUE;
-      gMessMgr->QAInfo() << Form(" Switch On  %20s by %s", fBFC[k].Key, chain) << endm;
+      gMessMgr->QAInfo() << Form(" Switch On  %20s by %s", fBFC[k].Key, chainName) << endm;
     }
   } else {
     assert(-k<fNoChainOptions);
     if (k < 0 && fBFC[-k].Flag) {
       fBFC[-k].Flag = kFALSE;
-      gMessMgr->QAInfo() << Form(" Switch Off %20s by %s", fBFC[-k].Key, chain) << endm;
+      gMessMgr->QAInfo() << Form(" Switch Off %20s by %s", fBFC[-k].Key, chainName) << endm;
     }
   }
 }
@@ -1491,9 +1514,9 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
   of the values <tt>vvvvvv</tt> must be clearly added to the documentation
 
 */
-void StBFChain::SetFlags(const Char_t *Chain)
+void StBFChain::SetFlags(const Char_t *chainOpts)
 {
-  TString tChain(Chain);
+  TString tChain(chainOpts);
   Int_t mode = 1;
   Setup(mode);
   Int_t k=0;

@@ -8,6 +8,7 @@
 
 #include "StRoot/StEvent/StTriggerData.h"
 #include "StRoot/StEvent/StTriggerData2019.h"
+#include "StRoot/StEvent/StTriggerData2022.h"
 
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include <TH1I.h>
@@ -75,19 +76,19 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 
     int ecal_xmax = nColumn(0)+OFF[0];
     int ecal_ymax = nRow(0);
-    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal",Form("Ecal; +-Col   North <-> South; %d-Row",nRow(0)+1),
+    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal","Ecal; +-Col   North <-> South; -Row",
 					    ecal_xmax*2+1,-ecal_xmax-0.5,ecal_xmax+0.5,
-					    ecal_ymax,0.0,ecal_ymax); 
+					    ecal_ymax,-ecal_ymax-0.5,-0.5); 
     int hcal_xmax = nColumn(2)+OFF[1];
     int hcal_ymax = nRow(2);
-    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal",Form("Hcal; +-Col   North <-> South; %d-Row",nRow(2)+1),
+    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal","Hcal; +-Col   North <-> South; -Row",
 					    hcal_xmax*2+1,-hcal_xmax-0.5,hcal_xmax+0.5,
-					    hcal_ymax,0.0,hcal_ymax); 
+					    hcal_ymax,-hcal_ymax-0.5,-0.5); 
     int pres_xmax = nColumn(4);
     int pres_ymax = nRow(4);
-    contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; +-Radius (North <-> South); Phi",
+    contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; +-Radius/Col (North <-> South); Phi/-Row",
 					    pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
-					    pres_ymax,0.0,pres_ymax); 
+					    pres_ymax,-pres_ymax-0.5,-0.5); 
     //contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; View from back",
     //				    pres_ymax*2,-pres_ymax,pres_ymax,
     //					    pres_xmax+1,0.0,pres_xmax+1);
@@ -173,7 +174,7 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 }
   
 void fcsBuilder::startrun(daqReader *rdr) {
-    LOG(NOTE, "fcsBuilder starting run #%d",rdr->run);
+    LOG("JEFF", "fcsBuilder starting run #%d",rdr->run);
     resetAllPlots();    
     mEvt=-1;
     mPhyLed=-1;
@@ -208,6 +209,8 @@ void fcsBuilder::event(daqReader *rdr){
 	  unsigned short fcs8   = (lastdsm4 >> 15) & 0x1;	  
 	  printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
 		 mEvt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
+	  unsigned short lastdsm5 = trg->lastDSM(5);
+	  printf("evt=%8d FMSBITS = 0x%4x\n",lastdsm5);
 	  delete trg;
 	  trg = NULL;
 	}	
@@ -302,8 +305,9 @@ void fcsBuilder::event(daqReader *rdr){
 	int c = getColumnNumber(detid,id);
 	int r = getRowNumber(detid,id);
 	float x = (c+OFF[ehp]) * (ns*2-1);
-	float y = (nRow(detid) - r + 0.5);
-	contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(sum));		
+	float y = - r;
+	//if(ehp==1) printf("ehp=%1d r=%2d c=%2d sum=%4d\n",ehp,r,c,sum);
+	if(sum>3) contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(sum));		
 	contents.h_fcs_ehpns_id_adcsum[ehp][ns]->Fill((id+0.5)/nColumn(detid),float(sum));
       }
     }
@@ -324,8 +328,8 @@ void fcsBuilder::event(daqReader *rdr){
 	      int c = getColumnNumber(detid,id);
 	      int r = getRowNumber(detid,id);
 	      float x = (c+OFF[ehp]) * (ns*2-1);
-	      float y = (nRow(detid) - r + 0.5);
-	      contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(adc));		
+	      float y = - r;
+	      if(adc>0) contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(adc));		
 	      if(TBTRG[0]-3 <= tb && tb <= TBTRG[0]+4) sum+=adc;
 	    }
 	    contents.h_fcs_ehpns_id_adcsum[ehp][ns]->Fill((id+0.5)/nColumn(detid),float(sum));

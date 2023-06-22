@@ -27,7 +27,7 @@
 #include "tpxFCF_2D.h"
 #include "tpxStat.h"
 
-
+#include <DAQ_TPC23/tpx23.h>
 
 
 class daq_det_tpx_factory : public daq_det_factory
@@ -129,6 +129,10 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	fcf_afterburner_disable = 0 ;
 	fcf_run_compatibility = 9 ;		// FY09 default, for now...
 	fcf_do_cuts = 2 ;		// run09 default
+
+	cld23 = 0 ;
+
+	t23 = 0 ;
 
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 	return ;
@@ -877,6 +881,7 @@ daq_dta *daq_tpx::handle_ped(int sec)
 
 daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 {
+	class tpx23Data tpx_d ;
 
 	int min_sec, max_sec ;
 	int min_rdo, max_rdo ;
@@ -911,6 +916,8 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 	}
 	}
 
+	tpx_d.dta = adc ;
+
 	// guess the byte size...
 	int guess_bytes = rdos * 1152 * (sizeof(daq_store) + 10*sizeof(daq_adc_tb)) ;
 
@@ -926,6 +933,7 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 		struct tpx_rdo_event rdo ;
 		struct tpx_altro_struct a ;
 		int rdo_words ;
+		int token ;
 
 		LOG(NOTE,"Calling handle_raw for %d:%d",s,r) ;		
 		rdo_dta = handle_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
@@ -947,50 +955,100 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 		rdo_ptr = (char *)rdo_dta->Byte ;
 		rdo_words = rdo_dta->ncontent / 4 ;
 
-		int token = tpx_get_start(rdo_ptr, rdo_words, &rdo, 0) ;
-
-		if(token <= 0) {
-			LOG(ERR,"horrible error, token is %d?",token) ;
-			continue ;
-		}
-
-		if(rdo.rdo != r) {
-			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
-		}
-
-		u_int *data_end = rdo.data_end ;
-
-		a.rdo = rdo.rdo -1 ;
-		a.t = token ;
-		a.what = TPX_ALTRO_DO_ADC ;
-		a.log_err = 0 ;
-		a.sector = s ;
-
-		do {
-			data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
-
-			if(a.count == 0) continue ;	// no data for this guy...
-
-			// unallowed rows, pads...
-			if((a.row>45) || (a.pad==0) || (a.pad>182)) {
-				LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
-			}
-
-			daq_adc_tb *at = (daq_adc_tb *) adc->request(a.count) ;
+		// check header version here
+		u_int *hdr_version = (u_int *)rdo_ptr ;
 	
-			//LOG(DBG,"%d: %d:%d %d",adc->obj_cou,a.row,a.pad,a.count) ;
+		int t23_started = 0 ;
 
-			for(u_int i=0 ; i < a.count ; i++) {
-				at[i].adc = a.adc[i] ;
-				at[i].tb = a.tb[i] ;
+		if((hdr_version[0]>>24)&0xF) {
+			// handle_adc 
+			//altro_c.dta = adc ;
+			//altro_c.in_adc = 1 ;
 
+
+			if(t23==0) {
+				t23 = new tpx23 ;
+				t23->online = 0 ;
+				t23->run_type = 3 ;
+				t23->no_cld = 1 ;
+				t23->log_level = 0 ;
+
+				t23->data_c = 0 ; // &altro_c ;
+				t23->tpx_d = 0 ;
 			}
 
-			adc->finalize(a.count, s, a.row, a.pad) ;
 
-		} while(data_end && (data_end > rdo.data_start)) ;	
+			t23->tpx_d = &tpx_d ;
+
+			t23->run_start() ;
+			t23->evt_start() ;
+			t23_started = 1 ;
+
+			tpx_d.sector = s ;
+			tpx_d.rdo = r ;
 
 
+			t23->set_rdo(s,r) ;
+			ret = t23->rdo_scan((char *)rdo_ptr,rdo_words) ;
+			token = t23->token ;
+			
+			u_int *dd = (u_int *)rdo_ptr+rdo_words ;
+
+			if(dd[-2]&0xFF000000) {
+				LOG(NOTE,"Token %d, bad event 0x%08X",token,dd[-2]) ;
+			}
+			LOG(NOTE,"FMT23: handle_adc(%d,%d), token %d, ret 0x%X, status 0x%X",s,r,token,ret,dd[-2]) ;
+		}
+		else {
+
+			token = tpx_get_start(rdo_ptr, rdo_words, &rdo, 0) ;
+
+			if(token <= 0) {
+				LOG(ERR,"horrible error, token is %d?",token) ;
+				continue ;
+			}
+
+			if(rdo.rdo != r) {
+				LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
+			}
+
+			u_int *data_end = rdo.data_end ;
+
+			a.rdo = rdo.rdo -1 ;
+			a.t = token ;
+			a.what = TPX_ALTRO_DO_ADC ;
+			a.log_err = 0 ;
+			a.sector = s ;
+
+			do {
+				data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
+
+				if(a.count == 0) continue ;	// no data for this guy...
+
+				// unallowed rows, pads...
+				if((a.row>45) || (a.pad==0) || (a.pad>182)) {
+					LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
+				}
+
+				daq_adc_tb *at = (daq_adc_tb *) adc->request(a.count) ;
+	
+				//LOG(DBG,"%d: %d:%d %d",adc->obj_cou,a.row,a.pad,a.count) ;
+
+				for(u_int i=0 ; i < a.count ; i++) {
+					at[i].adc = a.adc[i] ;
+					at[i].tb = a.tb[i] ;
+
+				}
+
+				adc->finalize(a.count, s, a.row, a.pad) ;
+
+			} while(data_end && (data_end > rdo.data_start)) ;	
+		}
+
+		if(t23_started) {
+			t23->evt_stop() ;
+			t23->run_stop() ;
+		}
 	}
 	}
 
@@ -1049,7 +1107,7 @@ daq_dta *daq_tpx::handle_altro(int sec, int rdo)
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		daq_dta *rdo_dta ;
-
+		int token ;
 
 		char *rdo_ptr ;
 		struct tpx_rdo_event rdo ;
@@ -1059,6 +1117,8 @@ daq_dta *daq_tpx::handle_altro(int sec, int rdo)
 		LOG(NOTE,"Calling handle_raw for %d:%d",s,r) ;		
 		rdo_dta = handle_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
 
+
+		int t23_started = 0 ;
 
 		if(rdo_dta == 0) {
 			LOG(WARN,"rdo_dta NULL?") ;
@@ -1076,52 +1136,97 @@ daq_dta *daq_tpx::handle_altro(int sec, int rdo)
 		rdo_ptr = (char *)rdo_dta->Byte ;
 		rdo_words = rdo_dta->ncontent / 4 ;
 
-		int token = tpx_get_start(rdo_ptr, rdo_words, &rdo, 0) ;
 
-		if(token <= 0) {
-			LOG(ERR,"horrible error, token is %d?",token) ;
-			continue ;
+		// check header version here
+		u_int *hdr_version = (u_int *)rdo_ptr ;
+		
+		rdo_fmt = 0 ;
+		if((hdr_version[0]>>24)&0xF) {
+			LOG(NOTE,"FMT23: handle_altro(%d,%d): version 0x%X",s,r,hdr_version[0]) ;
+			rdo_fmt = 23 ;
 		}
 
-		if(rdo.rdo != r) {
-			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
-		}
+		if(rdo_fmt>22) {
+			if(t23==0) {	// class member
+				t23 = new tpx23 ;
+				t23->online = 0 ;
+				t23->run_type = 3 ;
+				t23->no_cld = 1 ;
+				t23->log_level = 0 ;
 
-		u_int *data_end = rdo.data_end ;
-
-		a.rdo = rdo.rdo -1 ;
-		a.t = token ;
-		a.what = TPX_ALTRO_DO_ADC ;
-		a.log_err = 0 ;
-		a.sector = s ;
-
-		do {
-			data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
-
-			if(a.count == 0) continue ;	// no data for this guy...
-
-			// unallowed rows, pads...
-			//if((a.row>45) || (a.pad==0) || (a.pad>182)) {
-			//	LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
-			//}
-
-			daq_adc_tb *at = (daq_adc_tb *) altro->request(a.count) ;
-	
-			//LOG(DBG,"%d: %d:%d %d",altro->obj_cou,a.row,a.pad,a.count) ;
-
-			for(u_int i=0 ; i < a.count ; i++) {
-				at[i].adc = a.adc[i] ;
-				at[i].tb = a.tb[i] ;
-
+				t23->data_c = 0 ; // &altro_c ;
+				
 			}
 
-			altro->finalize(a.count, s, a.id, a.ch) ;
+			t23->tpx_d = 0 ;
 
-		} while(data_end && (data_end > rdo.data_start)) ;	
+			if(t23_started==0) {
+				t23->run_start() ;
+				t23->evt_start() ;
+				t23_started = 1 ;
+			}
+		}
 
+		if(rdo_fmt>22) {
+			// handle_altro
+			t23->set_rdo(s,r) ;
+			ret = t23->rdo_scan((char *)rdo_ptr,rdo_words) ;
+			token = t23->token ;
 
-	}
-	}
+			//LOG(TERR,"FMT23 token %d",token) ;
+		}
+		else {
+
+			token = tpx_get_start(rdo_ptr, rdo_words, &rdo, 0) ;
+
+			if(token <= 0) {
+				LOG(ERR,"horrible error, token is %d?",token) ;
+				continue ;
+			}
+
+			if(rdo.rdo != r) {
+				LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
+			}
+
+			u_int *data_end = rdo.data_end ;
+
+			a.rdo = rdo.rdo -1 ;
+			a.t = token ;
+			a.what = TPX_ALTRO_DO_ADC ;
+			a.log_err = 0 ;
+			a.sector = s ;
+
+			do {
+				data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
+
+				if(a.count == 0) continue ;	// no data for this guy...
+
+				// unallowed rows, pads...
+				//if((a.row>45) || (a.pad==0) || (a.pad>182)) {
+				//	LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
+				//}	
+
+				daq_adc_tb *at = (daq_adc_tb *) altro->request(a.count) ;
+	
+				//LOG(DBG,"%d: %d:%d %d",altro->obj_cou,a.row,a.pad,a.count) ;
+
+				for(u_int i=0 ; i < a.count ; i++) {
+					at[i].adc = a.adc[i] ;
+					at[i].tb = a.tb[i] ;
+				}
+
+				altro->finalize(a.count, s, a.id, a.ch) ;
+
+			} while(data_end && (data_end > rdo.data_start)) ;	
+		}
+
+		if(t23_started) {
+			t23->evt_stop() ;
+			t23->run_stop() ;
+		}
+
+	}	// loop over RDOs
+	}	// loop over sectors
 
 
 	altro->rewind() ;	// wind data pointers to the beginning so that they can be used
@@ -1175,19 +1280,30 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
-
+		char *full_name ;
 
 		//sprintf(str,"%s/%s/sec%02d/rb%02d/adc",caller->fs_cur_evt, "tpx", s, r) ;
 		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name, s, r) ;
 	
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
-		char *full_name = caller->get_sfs_name(str) ;
-		if(full_name == 0) continue ;
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) {
+			sprintf(str,"%s/sec%02d/rb%02d/adc23",sfs_name, s, r) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			full_name = caller->get_sfs_name(str) ;
+			
+			if(full_name==0) continue ;
+
+
+		}
+
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG(DBG,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
+		LOG(NOTE,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
 
 		if(size <= 0) {
 			if(size < 0) {
@@ -1216,7 +1332,19 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 		
 		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name,obj[i].sec, obj[i].rb) ;
 		char *full_name = caller->get_sfs_name(str) ;
-		if(!full_name) continue ;
+
+		if(full_name == 0) {
+			sprintf(str,"%s/sec%02d/rb%02d/adc23",sfs_name, obj[i].sec, obj[i].rb) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			full_name = caller->get_sfs_name(str) ;
+			
+			if(full_name==0) continue ;
+
+		}
+
+
 
 		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
 		
@@ -1275,43 +1403,164 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	assert(caller) ;
 
 
+	cld23 = 0 ;
+
 	// calc total bytes
 	tot_bytes = 0 ;
 	int o_cou = 0 ;
 	for(int s=min_sec;s<=max_sec;s++) {
-	for(int r=min_rdo;r<=max_rdo;r++) {
-
-
-		sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld23",sfs_name, s) ;
 	
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
 		char *full_name = caller->get_sfs_name(str) ;
-		if(full_name == 0) continue ;
+		if(full_name && min_rdo==1) {
+			cld23 = 1 ;
+		}
 
-		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+		if(cld23==1) {	// old, broken version in FY23 until 09-May ;
 
-		LOG(NOTE,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 23 : cld size %d",name,s,size) ;
 
 
-		if(size <= 0) {
-			if(size < 0) {
-				LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
 			}
-			continue ;
+			else {
+				obj[o_cou].rb = 23 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+
+			continue ;	// NOTE: continue
 		}
-		else {
-			obj[o_cou].rb = r ;
-			obj[o_cou].sec = s ;
-			obj[o_cou].bytes = size ;
 
-			o_cou++ ;
 
-			tot_bytes += size ;
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld10",sfs_name, s) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
-			LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name && min_rdo==1) {
+			cld23 = 2 ;
 		}
-	}
+
+
+		if(cld23==2) {	// FY23 version, RDOs 3 & 4
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 10 : cld size %d",name,s,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = 10 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
+
+
+		// test for new bank first
+		sprintf(str,"%s/sec%02d/cld11",sfs_name, s) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+		full_name = caller->get_sfs_name(str) ;
+		if(full_name && min_rdo==2) {
+			cld23 = 3 ;
+		}
+
+
+		if(cld23==3) {	// FY23: RDOs 5 & 6 
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: CLD23: sector %d, rdo 11 : cld size %d",name,s,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = 11 ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
+
+
+		if(cld23) continue ;
+
+		// OLD code
+
+		for(int r=min_rdo;r<=max_rdo;r++) {
+
+
+			sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
+	
+			LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+			char *full_name = caller->get_sfs_name(str) ;
+			if(full_name == 0) continue ;
+
+			int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			LOG(NOTE,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+
+
+			if(size <= 0) {
+				if(size < 0) {
+					LOG(DBG,"%s: %s: not found in this event",name,str) ;
+				}
+				continue ;
+			}
+			else {
+				obj[o_cou].rb = r ;
+				obj[o_cou].sec = s ;
+				obj[o_cou].bytes = size ;
+
+				o_cou++ ;
+
+				tot_bytes += size ;
+
+				LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"cld_raw", size) ;
+			}
+		}
 	}
 
 	cld_raw->create(tot_bytes,(char *)"cld_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
@@ -1395,7 +1644,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		daq_dta *dd ;
 
 
-		LOG(DBG,"Calling handle_cld_raw for %d:%d",s,r) ;		
+		LOG(NOTE,"Calling handle_cld_raw for %d:%d",s,r) ;		
 		dd = handle_cld_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
 
 
@@ -1408,7 +1657,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 			continue ;
 		}
 
-		LOG(DBG,"Called handle_cld_raw for %d:%d, iterate %d, returned %d objs",s,r,ret,dd->ncontent) ;				
+		LOG(NOTE,"Called handle_cld_raw for %d:%d, iterate %d, returned %d objs",s,r,ret,dd->ncontent) ;				
 
 		int bytes = dd->ncontent ;
 		if(bytes <= 0) continue ;
@@ -1421,6 +1670,11 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		while(p_buff < end_buff) {
 			u_int row = *p_buff++ ;
 			u_int cou = *p_buff++ ;
+
+			if(cld23) {
+				LOG(NOTE,"CLD23 %d: S%02d:%d: row 0x%08X, cou 0x%08X",cld23,s,r,row,cou) ;
+				cou /= 2 ;
+			}
 			
 			if(cou > 1000000) {
 				LOG(WARN,"Bad data in S%02d-%d, row %d -- count is %d -- skipping",
@@ -1433,6 +1687,9 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 			daq_cld *dc = (daq_cld *) cld->request(cou) ;	// ask for storage; we know exactly how much...
 			
+			if(cld23) {
+				LOG(NOTE,"CLD23: S%02d:%d: row %d, version 0x%04X, count %d",s,r,row,version,cou) ;
+			}
 
 			for(u_int i=0;i<cou;i++) {
 				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;
@@ -1845,6 +2102,31 @@ int daq_tpx::get_token(char *addr, int words)
 
 }
 
+
+// HACK for Dec 2019 Trigger Cable problem of TPC Sector 12
+// 3rd and 4th bit were reversed on the TCD cable.
+static u_int swap_s12(u_int dta)
+{
+	u_int n_dta = (dta & 0xFFF00000) ;
+	for(int n=0;n<5;n++) {
+		int dd = (dta>>(n*4)) & 0xF ;
+				
+		int b4 = (dd & 0x8)?1:0 ;
+		int b3 = (dd & 0x4)?1:0 ;
+		int b2 = (dd & 0x2)?1:0 ;
+		int b1 = (dd & 0x1)?1:0 ;
+
+		int sdd = (b3<<3)|(b4<<2)|(b2<<1)|(b1<<0) ;
+		//LOG(TERR,"   %d: 0x%X %d %d %d %d 0x%X",n,dd,b4,b3,b2,b1,sdd) ;
+
+		n_dta |= (sdd<<(n*4)) ;
+	}
+
+	return n_dta ;
+
+}
+
+
 // dumps the known accept/abort trigger decisions from
 // the FIFO part of the event.
 // returns the count
@@ -1869,6 +2151,22 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int marker = rdo.trg[i].csr >> 24 ;
 		u_int rhic = rdo.trg[i].rhic_counter ;
 
+#if 0
+		if(rdo.sector==12) {
+			dta = swap_s12(dta) ;
+
+#if 0
+			LOG(WARN,"RDO %d: %d/%d: T %d, trg %d, daq %d: 0x%08X: marker 0x%X",rdo.rdo,i,rdo.trg_cou,
+			    dta&0xFFF,
+			    (dta>>16)&0xF,
+			    (dta>>12)&0xF,
+			    dta,marker) ;
+#endif
+
+
+		}
+#endif
+
 
 //#define WANT_LOGGING
 #ifdef WANT_LOGGING
@@ -1891,11 +2189,15 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].rhic = rhic ;
 			trgs[cou].reserved[0] = 0xF0000000 | (0x0FFFFFFF & dta) ;	// 0xF for "fired"
 
+			
+
 			switch(trgs[cou].trg) {
 			case 4 :	// physics
 			case 8 :	// interleaved laser
 			case 9 :	// usual laser
 			case 10 :	// pulser
+			case 6 :	// sector 12 interleaved laser
+			case 7 :	// sector 12 normal laser
 				break ;
 			default :
 				LOG(ERR,"RDO %d: T %d: prompt: bad trg: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
@@ -1967,6 +2269,11 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int dta = rdo.trg[i].data ;
 		u_int marker = rdo.trg[i].csr >> 24 ;
 		u_int rhic = rdo.trg[i].rhic_counter ;
+#if 0
+		if(rdo.sector==12) {
+			dta = swap_s12(dta) ;
+		}
+#endif
 
 		if(marker==0xFF) {	// FIFO
 			int daq10k = 0 ;
@@ -2020,6 +2327,8 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 				case 8 :	// interspersed laser
 				case 9 :	// laser
 				case 10 :	// pulser
+				case 6 :
+				case 7 :
 					break ;
 				default:
 					if(trgs[0].trg == 9) { //laser!	

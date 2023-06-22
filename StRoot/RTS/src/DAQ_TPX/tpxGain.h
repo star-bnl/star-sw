@@ -7,10 +7,10 @@
 
 // clock types aka frequencies
 #define TPX_CLOCK_TCU_LOC	9215889	// exactly
-#define TPX_CLOCK_TCU_RHIC	9383000	// typical value
+#define TPX_CLOCK_TCU_RHIC	9381000	// typical value
 #define TPX_CLOCK_TCD_OLD	9434800	// exactly; with the old, pre FY11, TCD
 #define TPX_CLOCK_TCD		9370000	// exactly
-
+#define TPX_CLOCK_NEW_TCD	9383000	// exactly
 
 // default is TCU local
 #define TPX_TCU_LOC_PED_STOP		96
@@ -42,19 +42,32 @@
 //#define TPX_TCD_PED_STOP		173
 //define TPX_TCD_START			174
 //#define TPX_TCD_STOP			177
-//#define TPX_TCD_TIME_0			175.667713
+//#define TPX_TCD_TIME_0		175.667713
 
 //FY13-FY17, TCD
 //#define TPX_TCD_PED_STOP		173
 //#define TPX_TCD_START			177
 //#define TPX_TCD_STOP			180
-//#define TPX_TCD_TIME_0			178.679
+//#define TPX_TCD_TIME_0		178.679
 
 //FY18, TCD
+//#define TPX_TCD_PED_STOP		174
+//#define TPX_TCD_START			178
+//#define TPX_TCD_STOP			181
+//#define TPX_TCD_TIME_0		179.679
+
+//FY21, TCD, God damn Alexei and his constantly changing tb
 #define TPX_TCD_PED_STOP		174
-#define TPX_TCD_START			178
+#define TPX_TCD_START			179
 #define TPX_TCD_STOP			181
 #define TPX_TCD_TIME_0			179.679
+
+//FY22, TCD, New frequency
+#define TPX_NEW_TCD_PED_STOP		175
+#define TPX_NEW_TCD_START		178
+#define TPX_NEW_TCD_STOP		182
+#define TPX_NEW_TCD_TIME_0		178.679
+
 
 
 /* FY10 and previous value.
@@ -139,7 +152,7 @@ public:
 		return (gains[s-1] + r*TPX_MAX_PAD + (p-1)) ;
 	}
 
-	int from_file(char *fname, int sector = 0) ;
+	int from_file(const char *fname, int sector = 0) ;
 
 
 	// [sector 1-24][RDO 1-6][fee-index 0-35]
@@ -193,7 +206,7 @@ public:
 
 
 	// below used only during calculation
-	int to_file(char *fname) ;
+	int to_file(const char *fname) ;
 
 	void init(int sec=0) ;			// zap's structs; assume all TPX
 	void accum(char *evbuff, int bytes) ;	// parses one RDO's worth of pulser data

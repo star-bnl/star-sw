@@ -14,10 +14,16 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 	u_int mask = 0 ;
 	u_int thr = ht_threshold[geo.det] ;	// depends on detector
 	
+
+	
+
 	for(int i=0;i<32;i++) {
+//		if(s0[i]) printf("S1: %d:%d:%d: xing %d, ch %d = %d, thr %d\n",geo.det,geo.ns,geo.dep,dbg_xing,i,s0[i],thr) ;
+
 		if(s0[i] > thr) {
 			mask |= (1<<i) ;
 			t[i] = 1 ;
+			self_trigger = 1 ;
 		}
 		else {
 			mask &= ~(1<<i) ;
@@ -27,7 +33,9 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 
 	// Tonko: new 16-Feb-21
 	// stage_params[0][2] overrides the algo
-	if((stage_params[0][2]&0x3)==1) geo.det = 2 ;	// force FPRE "high tower lookalike"
+
+	// nah, not yet since stage_params doesn't know about DEPs
+	//if((stage_params[0][2]&0x3)==1) geo.det = 2 ;	// force FPRE "high tower lookalike"
 
 	// debugging marker in the stream, only for FPRE algo
 	if(stage_params[0][2]&4) {

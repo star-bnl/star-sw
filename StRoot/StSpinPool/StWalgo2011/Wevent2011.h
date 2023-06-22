@@ -8,9 +8,6 @@
 #ifndef W_EVENT_2011_HH
 #define W_EVENT_2011_HH
 
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 #include <TVector3.h>
 #include <TH1.h>
 //get L2
@@ -153,7 +150,7 @@ class WeveVertex { // info about vertex
   
   void print( int flag=0){
     printf(" Vertex ID=%d Z=%.1f cm  nTrack=%d\n",id,z, eleTrack.size());
-    for(uint i=0;i< eleTrack.size();i++) 
+    for(unsigned int i=0;i< eleTrack.size();i++) 
       eleTrack[i].print();
   }
 
@@ -343,7 +340,7 @@ class Wevent2011 : public TObject {
     int  yyyymmdd,  hhmmss; getGmt_day_hour( yyyymmdd,  hhmmss);
     printf("  event time is: day=%d, hour=%d (GMT)\n",yyyymmdd,hhmmss);
 
-    for(uint i=0;i< vertex.size();i++) vertex[i].print(flag);
+    for(unsigned int i=0;i< vertex.size();i++) vertex[i].print(flag);
     bemc.print(flag);
     
   }// end of PRINT

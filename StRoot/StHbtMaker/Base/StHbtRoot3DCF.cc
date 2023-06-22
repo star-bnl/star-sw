@@ -108,7 +108,7 @@ void StHbtRoot3DCF::Finish(){
 
 //____________________________
 StHbtString StHbtRoot3DCF::Report(){
-  ostrstream tStr; 
+  std::ostringstream tStr; 
   tStr << GetName() << " Correlation Function Report:"<< endl;
   tStr << "Number of entries in numerator: " << mNumerator->GetEntries() << endl;;
   tStr << "Number of entries in denominator: " << mDenominator->GetEntries() << endl;

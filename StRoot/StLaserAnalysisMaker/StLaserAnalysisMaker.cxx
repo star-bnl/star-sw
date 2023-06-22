@@ -92,7 +92,8 @@ Int_t StLaserAnalysisMaker::Init(){
 #if ROOT_VERSION_CODE <= ROOT_VERSION(5,34,10)
     Int_t split = 99;
 #else
-    Int_t split  = -2;       // by default, split Event in sub branches << old style
+    //    Int_t split  = -2;       // by default, split Event in sub branches << old style
+    Int_t split = 99;
 #endif
     if (split)  bufsize /= 4;
     Int_t branchStyle = 1; //new style by default
@@ -311,10 +312,10 @@ Int_t StLaserAnalysisMaker::Make(){
   StEvtHddr *EvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
   if (! EvtHddr) return kStWarn;
   event->SetHeader(EvtHddr->GetEventNumber(), EvtHddr->GetRunNumber(), EvtHddr->GetDate(), EvtHddr->GetTime(),
-		   gStTpcDb->Electronics()->tZero(), gStTpcDb->DriftVelocity(), gStTpcDb->Electronics()->samplingFrequency(), 
+		   gStTpcDb->Electronics()->tZero(), gStTpcDb->DriftVelocity(24,0), gStTpcDb->Electronics()->samplingFrequency(), 
 		   EvtHddr->GetInputTriggerMask());
-  event->SetDVWest(gStTpcDb->DriftVelocity(1));
-  event->SetDVEast(gStTpcDb->DriftVelocity(13));
+  event->SetDVWest(gStTpcDb->DriftVelocity(1,0));
+  event->SetDVEast(gStTpcDb->DriftVelocity(13,0));
 #if 0
   event->SetScaleY(gStTpcDb->ScaleY());
 #endif
@@ -352,8 +353,8 @@ Int_t StLaserAnalysisMaker::Make(){
     Double_t rMax = 0;
     Int_t jmax = -1;
     //    StThreeVectorD *pred = 0;
-    StTpcHit *tpcHit;
-    Int_t sector, s = -1;
+    StTpcHit *tpcHit = 0;
+    Int_t sector = -1, s = -1;
     Int_t bundle = -1;
     Double_t dZ, dZmin  = 9999;
     Int_t b, m;

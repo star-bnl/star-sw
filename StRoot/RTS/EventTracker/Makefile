@@ -10,12 +10,12 @@ include ../src/rtsplus.def
 DEFINES += -DRTS_LOG_COLORED
 
 VOBJS += libbsmd.a libbtow.a libemc.a libesmd.a libfpd.a libftp.a libl3.a libpmd.a libpp2pp.a \
-	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libetow.a \
-	libdaqReader.a libsfs.a librtslog.a
+	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libitpc.a libtrg.a libetow.a libtpc23.a \
+	libdaqReader.a libsfs.a  librtslog.a
 
 VPATH += ../src/DAQ_BSMD ../src/DAQ_BTOW ../src/DAQ_EMC ../src/DAQ_ESMD ../src/DAQ_FPD ../src/DAQ_FTP ../src/DAQ_L3 ../src/DAQ_PMD \
-	../src/DAQ_PP2PP ../src/DAQ_RIC ../src/DAQ_SC ../src/DAQ_SSD ../src/DAQ_SVT ../src/DAQ_TOF ../src/DAQ_TPC ../src/FCF ../src/DAQ_ETOW \
-	../src/DAQ_TPX ../src/DAQ_TRG \
+	../src/DAQ_PP2PP ../src/DAQ_RIC ../src/DAQ_SC ../src/DAQ_SSD ../src/DAQ_SVT ../src/DAQ_TOF ../src/DAQ_TPC ../src/DAQ_TPC23 ../src/FCF ../src/DAQ_ETOW \
+	../src/DAQ_TPX ../src/DAQ_ITPC ../src/DAQ_TRG \
 	../src/DAQ_READER  ../src/SFS ../src/LOG 
 
 

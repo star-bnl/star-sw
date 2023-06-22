@@ -235,8 +235,8 @@ int
 St2011WMaker::accessTracks(){ // return non-zero on abort 
   int nTrOK=0;
   // printf("\n nInp=%d eveID=%d nPVer=%d nAnyV= %d\n",nInpEve,mMuDstMaker->muDst()->event()->eventId(),wEve->vertex.size(),mMuDstMaker->muDst()->numberOfPrimaryVertices());
-  for(uint iv=0;iv<wEve->vertex.size(); iv++) {
-	uint vertID=wEve->vertex[iv].id;
+  for(unsigned int iv=0;iv<wEve->vertex.size(); iv++) {
+	unsigned int vertID=wEve->vertex[iv].id;
 	assert(vertID<mMuDstMaker->muDst()->numberOfPrimaryVertices());
 	assert(vertID>=0);
 	StMuPrimaryVertex* V= mMuDstMaker->muDst()->primaryVertex(vertID);

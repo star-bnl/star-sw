@@ -115,6 +115,10 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	    }
 //	    if(pres[i].d[j] > PHTTHR) fpre_or |= 1 ;	// Tonko: the FPRE S2 inputs are bitmasks so we _do_not_ apply PHTTHR here
 	    if(pres[i].d[j]) fpre_or |= 1 ;
+
+	    //if(pres[i].d[j]) {
+	    //	printf("S2:DEP %d:%d, j %d = %d\n",geo.ns,i,j,pres[i].d[j]) ;
+	    //}
 	}
     }
     
@@ -228,9 +232,12 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	    em[ns][r][c]=0;	
 	    had[ns][r][c]=0;
 	    u_int h128 = h*128 ;
-	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
+
+// Tonko: matches newest Christian code
+//	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
+	    if(h128 <= esum[ns][r][c] * EM_HERATIO_THR){
   	        em[ns][r][c]=1;
-	        if(sum[ns][r][c] > EMTHR1){
+		if(sum[ns][r][c] > EMTHR1){
 		    EM1 = 1;
 		    if(epdcoin[ns][r][c]==0) {GAM1 = 1;} 
 		    else                     {ELE1 = 1;}
@@ -308,7 +315,8 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     output[0].d[4] = JP1  + (JP2 <<1);
     output[0].d[5] = ETOT + (HTOT<<1);
     output[0].d[6] = (fpre_or<<2) | (hcal_ht<<1) | (ecal_ht); //HT
-    output[0].d[7] = 0xCD ;   
+//    output[0].d[7] = 0xCD ;   
+    output[0].d[7] = 0 ;   
 
     // upper 8 bits
     output[1].d[0] = 0 ;
@@ -318,7 +326,8 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     output[1].d[4] = 0 ;
     output[1].d[5] = 0 ;
     output[1].d[6] = 0 ;
-    output[1].d[7] = 0xAB ;
+//    output[1].d[7] = 0xAB ;
+    output[1].d[7] = 0 ;
 
     if(fcs_trgDebug>=1){    
       printf("STG2 NS%1d = %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n",

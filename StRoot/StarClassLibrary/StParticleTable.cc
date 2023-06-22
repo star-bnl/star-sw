@@ -412,9 +412,12 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 63053, kHyperTriton,         H3(Lambda) --> quasi 2 body);
        Geant2Pdg( 63054, kAntiHyperTriton, AntiH3(Lambda) --> quasi 2 body);
 
-       Geant2Pdg( 61055, hid(1,3,1), H4(Lambda) --> He4 proton piminus );
+       Geant2Pdg( 61055, hid(1,3,1), H4(Lambda) --> He4 piminus );
        Geant2Pdg( 61057, hid(2,3,1), He4(Lambda) --> He3 proton piminus );
        Geant2Pdg( 61059, hid(2,4,1), He5(Lambda) --> He4 proton piminus );
+
+       Geant2Pdg( 61056, -hid(1,3,1), H4(Lambda)Bar --> He4Bar piplus );
+
 
     ///@}
 

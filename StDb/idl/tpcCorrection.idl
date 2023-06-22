@@ -14,18 +14,27 @@ struct tpcCorrection {
                 // type = 3 X => Log(1 - |x|)                                       use only [min,max]
                 // type = 4 X => Log(1 - |x|)*sign(x)                                -"-
                 // type = 5 X => Log(x), for x <= 1 => 0
+                // type = 6 X = abs(x);
                 // type = 10 (== log(1. + OffSet/x) + poly(x,npar))                  -"-
                 // type = 11 (== log(1. + OffSet/x) + poly(x,npar) for log(ADC) and |Z|
+                // type = 20 has extra 2 parameters to add expo => a[npar]*exp(a[npar+1]*x) to polynomical fit 
+                // type = 30 TanH saturation function: [0]+[1]*TMath::TanH([2]*(x-[3]))
                 // type = 200 cut on range [min,max]
                 // type = 300 don't correct out of range [min,max]
+                // type = 400 special for TpcZCorrectionB, to enable Gating Grid correction
                 // type = 1000      ; gaus(0)+pol0(3);
                 // type = 1000 + 100; gaus(0)+pol1(3)
                 // type = 1000 + 200; gaus(0)+pol2(3)
                 // type = 1000 + 300; gaus(0)+pol3(3)
+                // type = 1000 + 400; gaus(0)+pol4(3)
+                // type = 1000 + 500; gaus(0)+pol5(3)
                 // type = 2000      ; expo(0)+pol0(2);
                 // type = 2000 + 100; expo(0)+pol1(2)
                 // type = 2000 + 200; expo(0)+pol2(2)
                 // type = 2000 + 300; expo(0)+pol3(2)
+                // type = 2000 + 400; expo(0)+pol4(2)
+                // type = 2000 + 500; expo(0)+pol5(2)
+                // type += 100000*nLoops : nLoops = no. repeeatable sections of corrections 
   long   idx; // row index
   long   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
   long   npar;  // npar < 0, X = exp(x) paramterization; abs(npar) >= 100 cut on range [min.max]

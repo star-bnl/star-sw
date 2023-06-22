@@ -27,9 +27,9 @@ St2011WMaker::findEndcap_W_boson(){
   if(wEve->zTag) return;
 
   // search for  Ws ............ 
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
       if(T.isMatch2Cl==false) continue;
@@ -320,9 +320,9 @@ St2011WMaker::analyzeESMD(){
   if(!wEve->l2EbitET) return;
 
   //printf("========= analyzeESMD \n");
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
       if(T.isMatch2Cl==false) continue;
@@ -418,9 +418,9 @@ St2011WMaker::analyzeEPRS(){
   if(!wEve->l2EbitET) return;
 
   //printf("========= analyzeEPRS \n");
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
       if(T.isMatch2Cl==false) continue;
@@ -480,9 +480,9 @@ St2011WMaker::extendTrack2Endcap(){// return # of extended tracks
 
   double parE_zSMD=geomE->getZSMD(); // (cm), smd depth
   int nTrE=0;
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.prMuTrack->eta()<parE_trackEtaMin) 
 	continue; // to avoid extrapolation nonsense
@@ -556,10 +556,10 @@ St2011WMaker::matchTrack2EtowCluster(){
   if(!wEve->l2EbitET) return 0;
 
   int nTr=0;
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
     float zVert=V.z;
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
             

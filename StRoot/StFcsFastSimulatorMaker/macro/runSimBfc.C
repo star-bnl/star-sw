@@ -1,14 +1,15 @@
 TString input_dir   = "./";
 TString output_dir  = "./";
 //TString input_chain = "sdt20161210.120000,fzin,geant,evout,y2015,FieldOn,logger,MakeEvent,McEvout,IdTruth,ReverseField,db,fcsSim,fcsCluster,fcsPoint,-tpcDB";
-TString input_chain = "fzin,geant,FieldOn,logger,MakeEvent,fcsSim,fcsWFF,fcsCluster,fcsPoint";
+TString input_chain = "sdt20211025.120000,fzin,geant,FieldOn,logger,MakeEvent,fcsSim,fcsWFF,fcsCluster,fcsPoint";
 
 class StFmsSimulatorMaker;
 
-void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="ele", int e=0, float pt=1.5, float vz=0.0,
+void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="jet", int TrgVersion=202207,
+		int debug=0, int e=0, float pt=1.5, float vz=0.0,
 		char* epdmask="0.0100",
 		int leakyHcal=0, 
-		int eventDisplay=1,
+		int eventDisplay=0,
 		TString myDir=input_dir, TString myOutDir=output_dir,
 		TString myChain=input_chain, Int_t mnEvents=0){
     
@@ -61,7 +62,8 @@ void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="ele", int e=0,
   StFcsFastSimulatorMaker *fcssim = (StFcsFastSimulatorMaker*) chain->GetMaker("fcsSim");
   fcssim->setDebug(1);
   fcssim->setLeakyHcal(leakyHcal);
-    
+
+  /*
   StFcsWaveformFitMaker *wff=(StFcsWaveformFitMaker *)chain->GetMaker("StFcsWaveformFitMaker");
   wff->setDebug(1);
   wff->setEnergySelect(0);
@@ -72,16 +74,22 @@ void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="ele", int e=0,
   StFcsPointMaker *poi=(StFcsPointMaker *)chain->GetMaker("StFcsPointMaker");
   poi->setDebug(1);
   poi->setShowerShape(3);
+  */
 
   gSystem->Load("RTS");
   gSystem->Load("StFcsTriggerSimMaker");
   StFcsTriggerSimMaker* fcsTrgSim = new StFcsTriggerSimMaker(); 
-  fcsTrgSim->setTrigger(202201);
-  fcsTrgSim->setDebug(3);
-  TString txfile(outfile); txfile.ReplaceAll(".root",".event.txt");  fcsTrgSim->setWriteEventText(txfile.Data());
-  TString qafile(outfile); qafile.ReplaceAll(".root",Form(".thr%s.trgflt.root",epdmask)); fcsTrgSim->setWriteQaFile(qafile.Data());
-  fcsTrgSim->setReadPresMask(Form("mask/fcs_ecal_epd_mask.ele.pt0.6.vz0.thr%s.txt",epdmask));
-  
+  fcsTrgSim->setSimMode(1);
+  fcsTrgSim->setTrigger(TrgVersion);
+  fcsTrgSim->setDebug(debug);
+  fcsTrgSim->setEtGain(1.0); //ET match
+  //fcsTrgSim->setEtGain(0.5); //halfway
+  //fcsTrgSim->setEtGain(0.0); //E match
+  //fcsTrgSim->setReadPresMask(Form("mask/fcs_ecal_epd_mask.ele.pt0.6.vz0.thr%s.txt",epdmask));
+  //TString txfile(outfile); txfile.ReplaceAll(".root",".event.txt");  fcsTrgSim->setWriteEventText(txfile.Data());
+  TString qafile(outfile); qafile.ReplaceAll(".root",".qahist.root"); fcsTrgSim->setWriteQaHist(qafile.Data());
+  fcsTrgSim->setThresholdFile("stage_params.txt");
+
   gSystem->Load("StFcsTrgQaMaker");
   StFcsTrgQaMaker* fcsTrgQa = new StFcsTrgQaMaker(); 
   TString tqafile(outfile); tqafile.ReplaceAll(".root",Form(".thr%s.trgqa.root",epdmask)); 

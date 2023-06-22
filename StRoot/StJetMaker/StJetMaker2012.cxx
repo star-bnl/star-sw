@@ -74,7 +74,7 @@ int StJetMaker2012::Init()
       TString branchname(jetbranch->name);
       branchname.Append(jetuebranch->name);
       mTreeUe->Branch(branchname, "StUeOffAxisConesEvent",&((jetuebranch->eventUe)[iBranch]));
-      cout<<jetbranch->name<<" initialized!"<<endl;
+      LOG_INFO<<jetbranch->name<<" and "<<jetuebranch->name<<" initialized!"<<endm;
     }
   }
   
@@ -395,16 +395,13 @@ double StJetMaker2012::addJetUe(StProtoJet::FourVecList particles, StUeOffAxisCo
     pt[ii] = 0.;
     number[ii] = 0;
   }
-  cout<<"calculating UE from particles size: "<<particles.size()<<endl;
+
   for(size_t ii = 0; ii < particles.size(); ii++){
     StMuTrackFourVec * vect = (StMuTrackFourVec*)particles.at(ii);                           
-    //const AbstractFourVec * vect = particles.at(ii);
-    //cout<<"particle pt: "<<p_pt<<endl;                                                   
     StThreeVector<double> mom(vect->px(), vect->py(), vect->pz());
     double p_pt = mom.perp();
     double p_eta = vect->eta();
     double p_phi = vect->phi();
-    //    cout<<"p_pt = "<<p_pt<<" p_eta = "<<p_eta<<" p_phi = "<<p_phi<<endl;                 
 
     int index = -1;
     double dR = DeltaR(p_eta, p_phi, cone_eta[0], cone_phi[0]);
@@ -460,7 +457,6 @@ double StJetMaker2012::addJetUe(StProtoJet::FourVecList particles, StUeOffAxisCo
   jcones->setE(je);
   jcones->setArea(jarea);
   jcones->setDensity(density);
-  cout<<"add new jet to underlying event"<<endl;
   jcones->addCone(cones[0]);
   jcones->addCone(cones[1]);
   StUeVertex *ueVertex = ueEvent->lastVertex();
@@ -479,6 +475,5 @@ double StJetMaker2012::DeltaR(double etaA, double phiA, double etaB, double phiB
   if(dphi < -1.*PI) dphi += 2.*PI;
 
   double dR = TMath::Sqrt(deta*deta+dphi*dphi);
-  //  cout<<etaA<<" "<<phiA<<" "<<etaB<<" "<<phiB<<" "<<dR<<"\n";                            
   return dR;
 }

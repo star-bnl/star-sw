@@ -27,7 +27,8 @@ void fcs_trg_base::stage_3_202203(link_t link[], u_short *dsm_out)
     if( (link[0].d[2] & 0x01) && (link[2].d[2] & 0x01) ) *dsm_out |= 0x1000; //DiGAM1 FCS12
     if( (link[0].d[1] & 0x01) && (link[2].d[1] & 0x01) ) *dsm_out |= 0x2000; //DiELE1 FCS13
     if( (link[0].d[6] & 0x04) || (link[2].d[6] & 0x04) ) *dsm_out |= 0x4000; //PresOR FCS14
-    *dsm_out |= 0x8000;                                       // always 1 as a marker FCS15
+
+//    *dsm_out |= 0x8000;                                       // always 1 as a marker FCS15
 
     dsmout = *dsm_out;
 

@@ -1,0 +1,10 @@
+/* fstMapping.idl
+*
+* Table: fstMapping
+*
+* description: FST detector channel mapping
+*
+*/
+struct fstMapping {
+    long mapping[36864];    	  /* geometry ID: 0 - 36863      */
+};

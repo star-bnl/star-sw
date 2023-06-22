@@ -141,7 +141,7 @@ if (gErrorIgnoreLevel == kUnset) {
 //________________________________________
 std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
 // std::ostream& operator<<(std::ostream& os, StMessage* stm) {
-  ostrstream &thisStream =  Stream();
+  std::ostringstream &thisStream =  Stream();
   if ( (&thisStream == &os) && (stm == endm) ) {
     // There was a StMessage terminator
      os << ends;
@@ -309,7 +309,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
   return mInstance;
 }
 //______________________________________________________________________________
-ostrstream &StLoggerManager::Stream()
+std::ostringstream &StLoggerManager::Stream()
 {
    // return the stream allocated for the particular "fCurType"
    // Create the new stream if there was none.
@@ -342,7 +342,7 @@ bool  StLoggerManager::isQAInfoEnabled() const{ return fgQALogger? fgQALogger->i
 //______________________________________________________________________________
 bool  StLoggerManager::isUCMInfoEnabled() const{ return fgUCMLogger? fgUCMLogger->isInfoEnabled():false; }
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Message(const char* mess, const char* type,
+std::ostringstream& StLoggerManager::Message(const char* mess, const char* type,
   const char* opt,const char *sourceFileName,int lineNumber) {
 //
 // Message declarator - creates a new message if mess is not empty,
@@ -560,7 +560,7 @@ void StLoggerManager::PrintInfo() {
 //
 // Info Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Info(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::Info(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "I", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintInfos()
@@ -597,7 +597,7 @@ messVec* StLoggerManager::FindInfoList(const char* s1, const char* s2,
 //
 // Warning Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Warning(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::Warning(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "W", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintWarnings()
@@ -634,7 +634,7 @@ messVec* StLoggerManager::FindWarningList(const char* s1, const char* s2,
 //
 // Error Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Error(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::Error(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "E", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintErrors()
@@ -671,7 +671,7 @@ messVec* StLoggerManager::FindErrorList(const char* s1, const char* s2,
 //
 // Debug Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Debug(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::Debug(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "D", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintDebug()
@@ -706,13 +706,13 @@ _NO_IMPLEMENTATION_;   return 0;
 //
 // QAInfo Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::QAInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::QAInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "Q", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 //
 // UCMInfo Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::UCMInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+std::ostringstream& StLoggerManager::UCMInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "U", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 void StLoggerManager::IgnoreRepeats()
@@ -797,15 +797,15 @@ _NO_IMPLEMENTATION_;   return 0;
 }
 
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::Fatal(const char* mess, const char* opt,const char *sourceFileName, int lineNumber)
+std::ostringstream& StLoggerManager::Fatal(const char* mess, const char* opt,const char *sourceFileName, int lineNumber)
 { return Message(mess,"F",opt,sourceFileName,lineNumber);}
 
 // "As is" Messages:
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::out(const char* mess)
+std::ostringstream& StLoggerManager::out(const char* mess)
 {return Message(mess,"I","OP-");}
 //_____________________________________________________________________________
-ostrstream& StLoggerManager::err(const char* mess)
+std::ostringstream& StLoggerManager::err(const char* mess)
 {return Message(mess,"E","EP-");}
 
 
@@ -979,7 +979,7 @@ const char *GetName()
   // Instantiate the (singleton) class upon loading
   //
 // static StMessMgr* temp=StLoggerManager::Instance();
-// ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
+// std::ostringstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
 // $Id: StLoggerManager.cxx,v 1.50 2013/07/23 20:03:05 dmitry Exp $

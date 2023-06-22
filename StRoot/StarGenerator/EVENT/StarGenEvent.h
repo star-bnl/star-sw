@@ -205,6 +205,14 @@ class StarGenEvent : public TObject
   /// Returns the filter result
   UInt_t GetFilterResult(){ return mFilterResult; }
 
+  /// Attach a user-weight to the event
+  void AddUserWeight( double w ){ mWeights.push_back(w); }
+
+  /// Retrieve the user weights vector
+  const std::vector<double>& GetUserWeights()       { return mWeights; }
+  /// Retrieve the user weights vector
+  const std::vector<double>& GetUserWeights() const { return mWeights; }
+
  private:
   /// Copy ctor is private.  
   StarGenEvent( const StarGenEvent &other );

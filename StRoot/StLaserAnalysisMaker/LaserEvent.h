@@ -38,7 +38,7 @@
 #include "StDcaGeometry.h"
 #include "TString.h"
 #include "TGeoMatrix.h"
-#ifdef __CINT__
+#if defined(__CINT__) || defined(__CLING__)
 class StPrimaryVertex;
 class StTrack;
 class StTpcHit;
@@ -131,7 +131,7 @@ class  LaserB {
 
 class EventHeader {
 
- private:
+  public:
    Int_t   fEvtNum;
    Int_t   fRun;
    Int_t   fDate;
@@ -141,7 +141,7 @@ class EventHeader {
  public:
    Float_t fDriVelWest;
    Float_t fDriVelEast;
- private:
+ public:
    Float_t fClock;
    Float_t fTrigger;
    Float_t fDriftDistance;  
@@ -214,8 +214,9 @@ class Hit : public TObject {
   Float_t  pad;
   Float_t  tbk;
   Int_t    trackKey;
-  StTpcHit hit;
-  ClassDef(Hit,6) 
+  Int_t    adc;
+  //  StTpcHit *hit;
+  ClassDef(Hit,8) 
 };
 class Track : public TObject {
  public:

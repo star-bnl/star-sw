@@ -159,6 +159,8 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.beta = mutrack->globalTrack() ? mutrack->globalTrack()->btofPidTraits().beta() : 0;
   track.trackIndex = i;
   track.id = mutrack->id();
+  track.idTruth = mutrack->idTruth();
+  track.qaTruth = mutrack->qaTruth();
   track.firstPoint = mutrack->firstPoint().xyz();
   track.lastPoint  = mutrack->lastPoint().xyz();
 

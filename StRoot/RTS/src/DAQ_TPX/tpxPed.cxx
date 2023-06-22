@@ -312,7 +312,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	tpx36_to_real(sector,rb+1,s_real,r_real) ;
 
-//	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
+	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
@@ -465,6 +465,8 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 		*addr = (aid << 24) | (ch << 16) | tcou ;
 
+//		LOG(TERR,"to_altro: sector %d, rb %d: ALTRO %3d:%02d tcou %d",sector,rb,aid,ch,tcou) ;
+
 		rbuff += 2 * tcou ;	// skip stored...
 	}
 	}
@@ -547,7 +549,7 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 {
 	FILE *f ;
 	char fn[64]  ;
-	char *pn ;
+	const char *pn ;
 
 	// trivial load from disk...
 	if(fname) {
@@ -629,7 +631,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 	int r, p, t ;
 	char fn[64] ;
 //	char f_sum_name[128] ;
-	char *pn ;
+	const char *pn ;
 	char *asc_date ;
 
 	static float old_sum[46][183] ;
@@ -962,7 +964,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 }
 
 
-void tpxPed::smooth()
+void tpxPed::smooth(int mode)
 {
 	int r, p, t ;
 
@@ -1044,6 +1046,18 @@ void tpxPed::smooth()
 		// finally, we need to round off correctly!
 		for(t=0;t<512;t++) {
 			ped->ped[t] = (double) ((u_short) (smoother[t]+0.5)) ;	
+			if(mode==1) {	// new in May2023, kills GG pickup
+				if(t>=18 && t<=20) {
+					ped->ped[t] = 1023.0 ;
+				}
+			}
+			else if(mode==2) {	// slight increase
+				if(t>=18 && t<=20) {
+					ped->ped[t] += 5.0 ;
+					if(ped->ped[t]>1023.0) ped->ped[t] = 1023.0 ;
+				}
+
+			}
 		}
 
 
@@ -1053,7 +1067,7 @@ void tpxPed::smooth()
 	}
 	}
 
-	LOG(TERR,"Pedestals smoothed: sector %2d",sector) ;
+	LOG(TERR,"Pedestals smoothed: sector %2d, mode %d",sector,mode) ;
 	smoothed = 1 ;
 
 	return ;

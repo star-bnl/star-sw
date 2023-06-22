@@ -737,7 +737,7 @@ L2jetAlgo2012::clearEvent(){
 //=======================================
 int 
 L2jetAlgo2012::projectAdc(const HitTower1 *hit,const int hitSize,
-	     ushort *phiBin, ushort *patchBin,
+	     unsigned short *phiBin, unsigned short *patchBin,
 	     L2Histo *hHot	 ){
   int tmpNused=0; /* counts mapped & used ADC channels */
   short rdo;

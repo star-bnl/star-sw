@@ -48,9 +48,9 @@
 
 Bool_t StTofrNode::mDebug = kFALSE;
 Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
-char* const StTofrGeometry::sectorPref = "BSEC";
-char* const StTofrGeometry::trayPref   = "BTRA";
-char* const StTofrGeometry::senPref    = "BRMD";
+const char* const StTofrGeometry::sectorPref = "BSEC";
+const char* const StTofrGeometry::trayPref   = "BTRA";
+const char* const StTofrGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
 StTofrNode::StTofrNode(TVolumeView *element, TVolumeView *top)

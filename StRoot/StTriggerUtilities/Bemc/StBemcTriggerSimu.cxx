@@ -14,6 +14,7 @@
 #include "StEmcRawMaker/defines.h"
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+#include "StEmcRawMaker/StEmcRawMaker.h"
 #include "StBemcTriggerDbThresholds.h"
 
 //StEvent
@@ -43,7 +44,7 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mTables   = NULL;
   mHList    = NULL;
   mConfig   = 0;
-
+  mTestMode = false;
 }
 //==================================================
 //==================================================
@@ -77,11 +78,13 @@ void StBemcTriggerSimu::Init(){
   }
   else {
     mAdc2e = static_cast<StEmcADCtoEMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcADCtoEMaker") );
-    if(!mAdc2e) {
-      LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker in chain" << endm;
+    StEmcRawMaker *emcRaw = static_cast<StEmcRawMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcRawMaker") );
+    if(mAdc2e) mTables = mAdc2e->getBemcData()->getTables();
+    else if(emcRaw) mTables = emcRaw->getBemcRaw()->getTables();
+    else {
+      LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker and StEmcRawMaker in chain" << endm;
       assert(0);
     }
-    mTables = mAdc2e->getBemcData()->getTables();
   }
 
   mDbThres->LoadTimeStamps();
@@ -604,7 +607,7 @@ void StBemcTriggerSimu::FEEout() {
   
   if(!mEvent) {LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;}
   
-  StEmcCollection *emc = mEvent->emcCollection();
+  StEmcCollection *emc = (mEvent ? mEvent->emcCollection() : 0);
   if(!emc)    {LOG_WARN << "StBemcTriggerSimu -- no StEmcCollection!" << endm;}
   
   StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
@@ -1027,7 +1030,7 @@ void StBemcTriggerSimu::FEEout2009()
 {
   const bool debug = false;
 
-  StEmcCollection* emc = mEvent->emcCollection();
+  StEmcCollection* emc = (mEvent ? mEvent->emcCollection() : 0);
   if (!emc) {
     LOG_WARN << "No StEmcCollection" << endm;
     return;
@@ -3184,6 +3187,8 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 int StBemcTriggerSimu::barrelJetPatchTh(int i) const { return mB101->getRegister(i); }
 int StBemcTriggerSimu::barrelHighTowerTh(int i) const { return mB001->getRegister(i); }
 int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp/6+2)%3]; }
+int StBemcTriggerSimu::barrelPartialJetPatchAdc(int jp) const { //jp from 0 to 5, 6 high eta partical jet patch sum
+return (*mB101)[jp%6].info[3]; }
 
 void StBemcTriggerSimu::fillStEmcTriggerDetector()
 {

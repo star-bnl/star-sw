@@ -85,7 +85,7 @@ St2009ZMaker::find_Z_boson(){
   hA[0]->Fill("inp",1.);
 
   // search for  Zs ............
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve.vertex.size();iv++) {
     hA[0]->Fill("vert",1.);
     WeveVertex &V=wEve.vertex[iv];
     hA[32]->Fill(V.eleTrack.size());
@@ -93,12 +93,12 @@ St2009ZMaker::find_Z_boson(){
     hA[0]->Fill("TT",1.); // at least 2 tracks exist
 
     //fill stack plots before doing full Z algo below
-    for(uint itStack=0;itStack<V.eleTrack.size()-1;itStack++) {
+    for(unsigned int itStack=0;itStack<V.eleTrack.size()-1;itStack++) {
       WeveEleTrack &stackT1=V.eleTrack[itStack]; //get first track
       
       //make plot of mached clusters
       if(stackT1.pointTower.id==0) continue;
-      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+      for (unsigned int itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
 	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
 	if(stackT2.pointTower.id==0) continue;
 	// invariant mass of "matched clusters"
@@ -110,7 +110,7 @@ St2009ZMaker::find_Z_boson(){
       if(stackT1.cluster.ET<par_clusterEtZ) continue;
       TVector3 stackD1=stackT1.pointTower.R-stackT1.cluster.position;
       if(stackD1.Mag()>par_delR3DZ) continue;
-      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+      for (unsigned int itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
 	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
 	if(stackT2.cluster.ET<par_clusterEtZ) continue;
 	TVector3 stackD2=stackT2.pointTower.R-stackT2.cluster.position;
@@ -122,7 +122,7 @@ St2009ZMaker::find_Z_boson(){
 
       //make plot of clusters passing 2x2/4x4 cut
       if(stackT1.cluster.ET/stackT1.cl4x4.ET < par_clustFrac24Z) continue;
-      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+      for (unsigned int itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
 	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
 	if(stackT2.cluster.ET<par_clusterEtZ) continue;
 	TVector3 stackD2=stackT2.pointTower.R-stackT2.cluster.position;
@@ -135,7 +135,7 @@ St2009ZMaker::find_Z_boson(){
 
       //make plot of clusters passing near cone cut
       if(stackT1.cluster.ET/stackT1.nearTotET < par_nearTotEtFracZ) continue;
-      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+      for (unsigned int itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
 	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
 	if(stackT2.cluster.ET<par_clusterEtZ) continue;
 	if(stackT2.cluster.ET/stackT2.cl4x4.ET < par_clustFrac24Z) continue;
@@ -152,7 +152,7 @@ St2009ZMaker::find_Z_boson(){
     //only one Z can come from a vertex, and it should be the highest-energy object
     //hence, the two highest-et clusters should correspond to the z.  Pick those 
     //eventually, but for now, just try all of them.
-    for(uint it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
+    for(unsigned int it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
       WeveEleTrack &T1=V.eleTrack[it];
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
@@ -171,7 +171,7 @@ St2009ZMaker::find_Z_boson(){
       if(fracET1< par_nearTotEtFracZ) continue; 
       hA[0]->Fill("con1",1.);
 
-      for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
+      for (unsigned int it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
 	if(T2.isMatch2Cl==false) continue;
 	assert(T2.cluster.nTower>0); // internal logical error

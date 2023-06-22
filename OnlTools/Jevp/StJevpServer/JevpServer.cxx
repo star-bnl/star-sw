@@ -45,6 +45,7 @@
 #include "Jevp/StJevpBuilders/mtdBuilder.h"
 //#include "Jevp/StJevpBuilders/tpxBuilder.h"
 #include "Jevp/StJevpBuilders/tpcBuilder.h"
+#include "Jevp/StJevpBuilders/laserBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 //#include "Jevp/StJevpBuilders/fgtBuilder.h"
@@ -62,6 +63,7 @@
 #include "Jevp/StJevpBuilders/etofBuilder.h"
 #include "Jevp/StJevpBuilders/fcsBuilder.h"
 #include "Jevp/StJevpBuilders/fttBuilder.h"
+#include "Jevp/StJevpBuilders/fstBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 #include "DAQ_READER/daqReader.h"
@@ -82,12 +84,14 @@ static char tmpServerTags[MSTL];
 
 
 static int line_number=0;
-static char *line_builder = NULL;
+//static char *line_builder = NULL;
 static int readerTid;
 
+JevpPlotSet *loggingBuilder = NULL;
+
 #define CP line_number=__LINE__
-#define CP_ENTER_BUILDER(x) line_builder = x
-#define CP_LEAVE_BUILDER line_builder = NULL;
+#define CP_ENTER_BUILDER(x) loggingBuilder = x
+#define CP_LEAVE_BUILDER loggingBuilder = NULL;
 static sigjmp_buf env;
 
 int JEVPSERVERport;
@@ -113,9 +117,9 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
     static char str[255];
  
-    if(arg == 28) return;
+    if(arg == 28) return;  // sigwinch (resize window)
 
-    if(arg == SIGCHLD) {
+    if(arg == SIGCHLD) {   // child, don't worry
 	int status;
 	waitpid(-1, &status, WNOHANG);
 	LOG(DBG, "Got signal SIGCHLD (reading pdf?) ");
@@ -138,13 +142,25 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 	l4sourceline = l4BuilderSourceLine;
     }
     
-    
-    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %s)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder ? line_builder: "", ImageWriterDrawingPlot, canvasBuilderLine, l4sourceline);
+
+    const char *line_builder = "";
+
+    int plotSetLine = 0;
+    int plotSetCallParam = 0;
+    int builderLine = 0;
+    if(loggingBuilder) {
+	line_builder = loggingBuilder->getPlotSetName();
+	plotSetLine = loggingBuilder->dbgCallSourceLine;
+	plotSetCallParam = loggingBuilder->dbgCallParam;
+	builderLine = loggingBuilder->dbgBuilderLine;
+    }
+	
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %s:%d(%d):%d)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder,plotSetLine, plotSetCallParam, builderLine, ImageWriterDrawingPlot, canvasBuilderLine, l4sourceline);
 
     // If we are trying to cleam up after a builder!
     //
     //   Must both be in right thread, and be inside a builder!
-    if((mythread != readerTid) && line_builder) {
+    if((mythread != readerTid) && loggingBuilder) {
 	LOG(ERR, "signal in builder: %d", arg);
 	sleep(10);
 	siglongjmp(env,1);
@@ -454,16 +470,20 @@ void JevpServer::readSocket()
 		    }
 		    else {
 			int telapsed = time(NULL) - lastImageBuilderSendTime;
-			if(telapsed >= 20) {
+			if(telapsed >= 28) {
 			    sendNow = true;
 			}
 		    }
 		    if(sendNow) {
 			CP;
 			lastImageBuilderSendTime = time(NULL);
+			CP;
 			writingImageClock.record_time();
+			CP;
 			getServerTags(tmpServerTags, MSTL);
+			CP;
 			displays->setServerTags(tmpServerTags);
+			CP;
 			displays->updateDisplayRoot();
 
 			CP;
@@ -640,17 +660,19 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    throttle_time = .05;
 	}
 	else if (strcmp(argv[i], "-test")==0) {
+	    log_output = RTS_LOG_STDERR;
 	    nodb = 1;
-	    log_dest = (char *)"172.16.0.1";
+	    myport = JEVP_PORT + 10;
+	    maxevts = 10000001;
+	    die = 1; 
+	    runCanvasImageBuilder = 0;
+	    //log_dest = (char *)"172.16.0.1";
 	    //log_output = RTS_LOG_STDERR;
-	    basedir = (char *)"/RTScache/conf/jevp";
+	    //basedir = (char *)"/RTScache/conf/jevp";
 	    //pdfdir = (char *)"/a/jevp_test/pdf";
 	    //refplotdir = (char *)"/a/jevp_test/refplots";
 	    //rootfiledir = (char *)"/a/jevp_test/rootfiles";
-	    myport = JEVP_PORT + 10;
-	    maxevts = 10000001;
-	    die = 1;
-	    runCanvasImageBuilder = 0;
+	    //runCanvasImageBuilder = 0;
 	}
 	else if (strcmp(argv[i], "-pallete") == 0) {
 	    log_output = RTS_LOG_STDERR;
@@ -843,23 +865,27 @@ int JevpServer::updateDisplayDefs()
     LOG("JEFF","new PdfFileBuilder(): %d %d", strlen(displays->textBuff), displays->textBuffLen);
 
     displays->setDisplay(displays->getDisplayNodeFromIndex(0));
+    LOG("JEFF", "setdisplay");
     displays->updateDisplayRoot();
-
+    LOG("JEFF", "updatedisplayroot");
 
     if(pdfFileBuilder) delete pdfFileBuilder;
+    LOG("JEFF", "deleted");
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
-
+    LOG("JEFF", "built");
     
     if(canvasImageBuilder) canvasImageBuilder->setDisplays(displays);
- 
+    LOG("JEFF", "set");
+
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
     args[1] = basedir;
     args[2] = displays_fn;
     args[3] = NULL;
 
-    LOG(DBG, "archiveHistoDefs HistoDefs");
+    LOG("JEFF", "archiveHistoDefs HistoDefs");
     execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+    LOG("JEFF", "archived");
     return 0;
 }
 
@@ -906,6 +932,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new mtdBuilder(this));
 	//builders.Add(new tpxBuilder(this));
 	builders.Add(new tpcBuilder(this));
+	builders.Add(new laserBuilder(this));
 	builders.Add(new trgBuilder(this));
 	builders.Add(new upcBuilder(this));
 	//builders.Add(new fgtBuilder(this));
@@ -922,6 +949,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new etofBuilder(this));
 	builders.Add(new fcsBuilder(this));
 	builders.Add(new fttBuilder(this));
+	builders.Add(new fstBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));
@@ -958,7 +986,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
     eventHandlingClock.record_time();
 
-  // LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
+    //LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
 
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
        strcmp(m->cmd,"stoprun") == 0) {
@@ -967,6 +995,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	if(runStatus.running() || daqfilename) {
 	    CP;
 	    performStopRun();
+
+	    evtsInRun = 0;
 
 	    if(ndaqfilenames) {
 		cdaqfilename++;
@@ -1067,7 +1097,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 		CP_LEAVE_BUILDER;
 	    }
 	    else {
-		CP_ENTER_BUILDER(curr->getPlotSetName());
+		CP_ENTER_BUILDER(curr);
 		curr->_event(rdr);
 		CP_LEAVE_BUILDER;
 	    }
@@ -1305,24 +1335,28 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 
 void JevpServer::performStartRun()
 {
-  runStatus.run = rdr->run;
+    CP;
+    runStatus.run = rdr->run;
 
-  eventsThisRun = 0;
-  lastImageBuilderSendTime = time(NULL);
+    eventsThisRun = 0;
+    lastImageBuilderSendTime = time(NULL);
 
-  double mem = getMemUse();
-  mem /= 1024.0;
-  LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
+    double mem = getMemUse();
+    mem /= 1024.0;
+    LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
 
-  char *servername = "JevpServer";
-  if(isL4) {
-      servername = "L4JevpServer";
-  }
-  JevpPlotSet::staticLogDbVariable("MB_used", mem, runStatus.run, time(NULL), servername, clientdatadir);
+    const char *servername = "JevpServer";
 
-  clearForNewRun();
+    if(isL4) {
+	servername = "L4JevpServer";
+    }
+    JevpPlotSet::staticLogDbVariable("MB_used", mem, runStatus.run, time(NULL), servername, clientdatadir);
 
-  runStatus.setStatus("running");
+    CP;
+    clearForNewRun();
+    CP;
+    runStatus.setStatus("running");
+    CP;
 }
 
 void JevpServer::writeRootFiles()
@@ -1405,7 +1439,9 @@ void JevpServer::performStopRun()
 	CP;
 
 	pthread_mutex_lock(&imageWriter->mux);
+	CP_ENTER_BUILDER(curr);
 	curr->stoprun(rdr);
+	CP_LEAVE_BUILDER;
 	pthread_mutex_unlock(&imageWriter->mux);
 	CP;
 
@@ -1416,16 +1452,16 @@ void JevpServer::performStopRun()
     getServerTags(tmpServerTags, MSTL);
     displays->setServerTags(tmpServerTags);
     displays->ignoreServerTags = 0;
-
+    CP;
     runStatus.setStatus("stopped");
-
+    CP;
     for(int i=0;i<displays->nDisplays();i++) {
 	LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
 	CP;
 	writeRunPdf(i, runStatus.run);
 	CP;
     }
-
+    CP;
   
     writeRootFiles();
     eventsThisRun = 0;
@@ -1445,7 +1481,8 @@ void JevpServer::clearForNewRun()
     // Delete all from histogram list
     // First free the actual histo, then remove the link...
     LOG(NOTE, "Clear for new run  #%d",runStatus.run);
-
+    CP;
+    
     eventHandlingTime = 0;
     waitingTime = 0;
     writingImageTime = 0;
@@ -1454,12 +1491,21 @@ void JevpServer::clearForNewRun()
 
     JevpPlotSet *curr;
     while((curr = (JevpPlotSet *)next())) {
-
-	LOG(DBG, "Send startrun for: %s", curr->getPlotSetName());
+	CP;
+	LOG("JEFF", "Send startrun for: %s", curr->getPlotSetName());
+	CP;
+	pthread_mutex_lock(&imageWriter->mux);
+	CP_ENTER_BUILDER(curr);
 	curr->_startrun(rdr);
+	CP_LEAVE_BUILDER;
+	pthread_mutex_unlock(&imageWriter->mux);
+
+	CP;
     }
 
+    CP;
     freeServerTags();
+    CP;
 }
 
 
@@ -1755,15 +1801,17 @@ void JevpServer::writeRunPdf(int display, int run)
     RtsTimer_root pdfclock;
     pdfclock.record_time();
 
- 
-
     displays->setDisplay(displays->getDisplayNodeFromIndex(display));
     displays->updateDisplayRoot();
 
     if(runCanvasImageBuilder) {
 	LOG("JEFF", "status: %s", runStatus.status);
+	CP;
 	getServerTags(tmpServerTags, MSTL);
+	CP;
+	LOG("JEFF", "sentToImage");
 	int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, tmpServerTags, true);
+	CP;
 
 	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
 	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);
@@ -1783,16 +1831,20 @@ void JevpServer::writeRunPdf(int display, int run)
     if(pdfdir) {
 	RtsTimer_root ttt;
 	ttt.record_time();
+	CP;
 	pthread_mutex_lock(&imageWriter->mux);
 	double tttt =  ttt.record_time();
 	if(tttt > .1) {
 	    LOG("JEFF", "writePDF mux took %lf seconds", tttt);
 	}
+	CP;
 	pdfFileBuilder->writePdf(filename, 1);
+	CP;
 	pthread_mutex_unlock(&imageWriter->mux);
-	
+	CP;
     }
 
+    CP;
     t = pdfclock.record_time();
     LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
     CP;
@@ -2232,6 +2284,7 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
 	waitpid(pid,&stat,0);
     } while(WIFEXITED(stat) == 0);
 
+    CP;
     return WEXITSTATUS(stat);
 }
 

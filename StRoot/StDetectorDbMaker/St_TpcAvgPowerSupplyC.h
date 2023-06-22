@@ -34,7 +34,8 @@ class St_TpcAvgPowerSupplyC : public TChair {
   Float_t       AcChargeRow(Int_t sector = 1, Int_t row = 1) {return AcCharge(sector,ChannelFromRow(sector,row));}
   Float_t       AcChargeL(Int_t sector = 1, Int_t channel = 1); // C/cm
   Float_t       AcChargeRowL(Int_t sector = 1, Int_t row = 1) {return AcChargeL(sector,ChannelFromRow(sector,row));}
-  Bool_t        livePadrow(Int_t sec = 1, Int_t padrow = 1) const { return voltagePadrow(sec,padrow) >  500;}
+  Bool_t        livePadrow(Int_t sec = 1, Int_t padrow = 1) const { return voltagePadrow(sec,padrow) >  850;}
+  void          PrintC() const;
  protected:
   St_TpcAvgPowerSupplyC(St_TpcAvgPowerSupply *table=0) : TChair(table) {}
   virtual ~St_TpcAvgPowerSupplyC() {fgInstance = 0;}

@@ -50,7 +50,7 @@ public:
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH2 *array[];
+    TH2 *array[1];
     struct {
       TH2* q1;
       TH2* q2;
@@ -80,7 +80,7 @@ public:
   } contents;
 union
 {
-  TH2 *tbVsAdcArray[];
+  TH2 *tbVsAdcArray[1];
   struct{
     TH2* tbVsAdcD1;
     TH2* tbVsAdcD2;
@@ -92,7 +92,7 @@ union
 }tbVsAdcContents;
 
   union {
-    TH1 *hArray[];
+    TH1 *hArray[1];
     struct {
       TH1* h1;
       TH1* h2;
@@ -105,7 +105,7 @@ union
   } hContents;
 
   union {
-    TH2 *sumHArray[];
+    TH2 *sumHArray[1];
     struct{
       TH2* hSumPed;
       TH2* hSumSig;

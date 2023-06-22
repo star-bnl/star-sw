@@ -156,8 +156,17 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2021",       20201215,     0, "y2021",    "y2021 development geometry, AgML,xgeometry"},   
   {"y2021a",      20201215,     1, "y2021a",   "y2021 first production geometry, AgML,xgeometry"},   
   
-  {"dev2021",     20221210,     0, "dev2021",  "-deprecated- geometry for 2021+ forward program,AgML,xgeometry"},
-  {"dev2022",     20221210,     1, "dev2022",  "development geometry for 2022+ forward program,AgML,xgeometry"},
+  {"y2022",       20211015,     0, "y2022",    "y2022 first cut geometry, AgML,xgeometry"},   
+  {"y2022a",      20211015,     1, "y2022a",   "y2022 production geometry, AgML,xgeometry"},  
+
+ { "y2023",       20230410,     0, "y2023",    "y2023 first cut geometry, AgML,xgeometry"},    
+ { "y2023a",      20230410,     1, "y2023a",    "y2023a production geometry, AgML,xgeometry"},    
+
+  {"dev2021",     21201210,     1, "dev2021",  "-deprecated- geometry for 2021+ forward program,AgML,xgeometry"},
+  {"dev2022",     21211210,     1, "dev2022",  "development geometry for 2022+ forward program,AgML,xgeometry"},
+
+  {"dev2022m",     20221210,     2, "dev2022m",  "development geometry with misalignment support"},
+  {"dev2022sm",     20221210,     3, "dev2022sm",  "developmen geometry with misalignment support and simplified"},
 
   //
   // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs

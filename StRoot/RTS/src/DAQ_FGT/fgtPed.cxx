@@ -593,7 +593,7 @@ double fgtPed::do_thresh(double ns, int k, int do_log)
 				b_bad_all++ ;
 			}
 			else if(p->thr[arm][apv][c] >= 0xFFFD) {
-				LOG(WARN,"Killed but not marked: %d %d %d %d",r,arm,apv,c) ;
+				//LOG(WARN,"Killed but not marked: %d %d %d %d",r,arm,apv,c) ;
 				b_unknown++ ;
 				b_bad_all++ ;
 			}

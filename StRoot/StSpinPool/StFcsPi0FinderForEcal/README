@@ -1,0 +1,6 @@
+critical plots to check for offline QA in FCS ECal pi0 reconstruction
+1. h1_inv_mass_cluster : invariant mass plot for FCS ECal cluster pair
+2. h1_dgg_cluster : 2 cluster distance for FCS Ecal
+3. h1_two_cluster_energy_allcut : 2 cluster total energy for FCS ECal cluster pair
+4. h2_cluster_dgg_vs_E1pE2 : 2 cluster distance vs total energy for FCS ECal cluster pair
+

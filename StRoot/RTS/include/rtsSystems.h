@@ -431,6 +431,24 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_EQ1_INSTANCE 25      // Rename FQ1 EQ1.  JMN 8/15/17    
 #define TRG_EQ2_INSTANCE 26      // Rename FQ2 EQ2.  JMN 8/15/17
 
+// DSM2/QTD node instances    8/25/21
+#define TRG_STP2_INSTANCE 27
+#define TRG_L1_DSM2_INSTANCE 28
+#define TRG_BBC_DSM2_INSTANCE 29
+#define TRG_BBQ_QTD_INSTANCE 30
+#define TRG_MIX_DSM2_INSTANCE 31
+#define TRG_MXQ_QTD_INSTANCE 32
+#define TRG_BCE_DSM2_INSTANCE 33
+#define TRG_BCW_DSM2_INSTANCE 34
+#define TRG_BC1_DSM2_INSTANCE 35
+#define TRG_EQ1_QTD_INSTANCE 36
+#define TRG_EQ2_QTD_INSTANCE 37
+#define TRG_EQ3_QTD_INSTANCE 38
+#define TRG_EQ4_QTD_INSTANCE 39
+
+#define TRG_EQ4_INSTANCE 40
+
+
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
 
@@ -448,9 +466,9 @@ extern inline const char *getTrgDetBitName(int x) {
 //#define EVB_NODES(x)	((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
 #define EVBL_NODES(x)   ((DAQ_SYSTEM<<12) | (EVBL_SUBSYS<<8) | (x))
 #define EVBX_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
-#define EVBX_NODE_COUNT	14	// was 6 before FY13; in a run epoch, used by monitoring and RICH scalers!
+#define EVBX_NODE_COUNT	24	// was 14 before FY23; was 6 before FY13; in a run epoch, used by monitoring and RICH scalers!
 
-#define MAX_EVB_NODES 14
+#define MAX_EVB_NODES 24
 
 #define GB_NODES(x)	((DAQ_SYSTEM<<12) | (GB_SUBSYS<<8 ) | (x))
 #define GB_NODE		GB_NODES(1)
@@ -610,7 +628,21 @@ extern inline const char *getTrgDetBitName(int x) {
 #define TRG_EQ3_NODE    ((TRG_SYSTEM<<12) | TRG_EQ3_INSTANCE)     // Rename EPQ > EQ3.  JMN 8/15/17
 #define TRG_EQ1_NODE    ((TRG_SYSTEM<<12) | TRG_EQ1_INSTANCE)     // Rename FQ1 > EQ1.  JMN
 #define TRG_EQ2_NODE    ((TRG_SYSTEM<<12) | TRG_EQ2_INSTANCE)     // Rename FQ2 > EQ2.  JMN
+#define TRG_EQ4_NODE    ((TRG_SYSTEM<<12) | TRG_EQ4_INSTANCE)
 
+#define TRG_STP2_NODE   ((TRG_SYSTEM<<12) | TRG_STP2_INSTANCE)
+#define TRG_L1_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_L1_DSM2_INSTANCE)
+#define TRG_BBC_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_BBC_DSM2_INSTANCE)
+#define TRG_BBQ_QTD_NODE ((TRG_SYSTEM<<12) | TRG_BBQ_QTD_INSTANCE)
+#define TRG_MIX_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_MIX_DSM2_INSTANCE)
+#define TRG_MXQ_QTD_NODE  ((TRG_SYSTEM<<12) | TRG_MXQ_QTD_INSTANCE)
+#define TRG_BCE_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_BCE_DSM2_INSTANCE)
+#define TRG_BCW_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_BCW_DSM2_INSTANCE)
+#define TRG_BC1_DSM2_NODE ((TRG_SYSTEM<<12) | TRG_BC1_DSM2_INSTANCE)
+#define TRG_EQ1_QTD_NODE  ((TRG_SYSTEM<<12) | TRG_EQ1_QTD_INSTANCE)
+#define TRG_EQ2_QTD_NODE  ((TRG_SYSTEM<<12) | TRG_EQ2_QTD_INSTANCE)
+#define TRG_EQ3_QTD_NODE  ((TRG_SYSTEM<<12) | TRG_EQ3_QTD_INSTANCE)
+#define TRG_EQ4_QTD_NODE  ((TRG_SYSTEM<<12) | TRG_EQ4_QTD_INSTANCE)
 
 #define TRG_SCALER48_NODE  ((TRG_SYSTEM<<12) | TRG_SCALER48_INSTANCE)
 

@@ -18,8 +18,7 @@
 #include "StarPDGEncoding.hh"
 #include "SystemOfUnits.h"
 
-
-class StH4Lambda : public StIon {
+class StH4Lambda  : public StIon {
 public:
     static StH4Lambda* instance() {
       return &mH4Lambda;
@@ -85,7 +84,89 @@ private:
     StHe5Lambda(const string  &aName="He5Lambda",  
 		  double mass =4.83978 *GeV,
 		  double width=0.0*MeV, /* TODO */
-		  double charge=+3 *eplus,
+		  double charge=+2 *eplus,
+		  int              iSpin=0,
+		  int              iParity=0,
+		  int              iConjugation=0,
+		  int              iIsospin=0,   
+		  int              iIsospinZ=0, 
+		  int              gParity=0,
+		  const string  &  pType="hypernucleus",
+		  int              lepton=0,
+		  int              baryon=4,
+ 		  int              encoding=hid(2,4,1),
+		  bool             stable=false,
+		double           lifetime=2.632e-10) : StIon(aName,mass,width,charge,iSpin,iParity,iConjugation,iIsospin,iIsospinZ,gParity,pType,lepton,baryon,encoding,stable,lifetime)
+  { /* nada */ }
+};
+
+class StH4LambdaBar  : public StIon {
+public:
+    static StH4LambdaBar* instance() {
+      return &mH4LambdaBar;
+    };
+    
+private:
+    static StH4LambdaBar mH4LambdaBar;
+    
+    StH4LambdaBar(const string  &aName="H4LambdaBar",  
+		  double mass =3.92727 *GeV,
+		  double width=0.0*MeV, /* TODO */
+		  double charge=-1 *eplus,
+		  int              iSpin=0,
+		  int              iParity=0,
+		  int              iConjugation=0,
+		  int              iIsospin=0,   
+		  int              iIsospinZ=0, 
+		  int              gParity=0,
+		  const string  &  pType="hypernucleus",
+		  int              lepton=0,
+		  int              baryon=4,
+                  int              encoding=hid(1,3,1),
+		  bool             stable=false,
+    	       double           lifetime=2.632e-10) : StIon(aName,mass,width,charge,iSpin,iParity,iConjugation,iIsospin,iIsospinZ,gParity,pType,lepton,baryon,encoding,stable,lifetime)
+  { /* nada */ }
+};
+class StHe4LambdaBar : public StIon {
+public:
+    static StHe4LambdaBar* instance() {
+      return &mHe4LambdaBar;
+    };
+    
+private:
+    static StHe4LambdaBar mHe4LambdaBar;
+    
+    StHe4LambdaBar(const string  &aName="He4LambdaBar",  
+		  double mass =3.92168 *GeV,
+		  double width=0.0*MeV, /* TODO */
+		  double charge=-2 *eplus,
+		  int              iSpin=0,
+		  int              iParity=0,
+		  int              iConjugation=0,
+		  int              iIsospin=0,   
+		  int              iIsospinZ=0, 
+		  int              gParity=0,
+		  const string  &  pType="hypernucleus",
+		  int              lepton=0,
+		  int              baryon=4,
+   		  int              encoding=hid(2,3,1),
+		  bool             stable=false,
+		double           lifetime=2.632e-10) : StIon(aName,mass,width,charge,iSpin,iParity,iConjugation,iIsospin,iIsospinZ,gParity,pType,lepton,baryon,encoding,stable,lifetime)
+  { /* nada */ }
+};
+class StHe5LambdaBar : public StIon {
+public:
+    static StHe5LambdaBar* instance() {
+      return &mHe5LambdaBar;
+    };
+    
+private:
+    static StHe5LambdaBar mHe5LambdaBar;
+    
+    StHe5LambdaBar(const string  &aName="He5LambdaBar",  
+		  double mass =4.83978 *GeV,
+		  double width=0.0*MeV, /* TODO */
+		  double charge=-2 *eplus,
 		  int              iSpin=0,
 		  int              iParity=0,
 		  int              iConjugation=0,

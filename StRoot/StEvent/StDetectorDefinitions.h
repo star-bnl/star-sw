@@ -143,6 +143,23 @@
 #define kFcsPresIdentifier            43 
 
 /*
+ ** Add the sTGC (Ftt)
+ */
+
+#define kFttIdentifier                44 
+
+/*
+ *  ** Add the Forward Silicon Tracker (Fst)
+ *   */
+
+#define kFstIdentifier                45
+
+/*
+ ** RHICf
+ */
+#define kRHICfIdentifier              46
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)

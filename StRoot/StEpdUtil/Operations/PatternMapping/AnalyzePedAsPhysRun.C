@@ -62,15 +62,15 @@ void AnalyzePedAsPhysRun(char* inputDirectory, char* inputFileName)
 
 // Here, we'll loop over all StEpdHits
 // Every hit will have its outline drawn
-// If a hit has ADC > 10, then it will also
-// be filled in with dots
 void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
 
 
-  int lowLimitB[4] = {-1,10,149,3001};
-  int hiLimitB[4]  = {9,150,3000,5000};
-  int lowLimitC[4] = {-1,10,149,3001};
-  int hiLimitC[4]  = {9,150,3000,5000};
+  int lowLimitB[4] = {-1,10,150,3001};
+  int hiLimitB[4]  = {9,149,3000,5000};
+  int lowLimitC[4] = {-1,10,150,3001};
+  int hiLimitC[4]  = {9,149,3000,5000};
+
+
   int levelColor[4] = {4,3,2,6};
 
 
@@ -97,7 +97,7 @@ void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
     for (Level=0; Level<4; Level++){
       if (tt<10){lowCutoff=lowLimitC[Level];  hiCutoff=hiLimitC[Level];}
       else {lowCutoff=lowLimitB[Level];  hiCutoff=hiLimitB[Level];}
-      if ((adc>lowCutoff)&&(adc<hiCutoff)) break;
+      if ((adc>=lowCutoff)&&(adc<=hiCutoff)) break; 
     }
     if (Level>3) cout << "ERROR!!\n\n";
     tileLevel[pp-1][tt-1][ewIndex] = Level;

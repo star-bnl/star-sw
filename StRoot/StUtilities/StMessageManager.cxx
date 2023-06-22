@@ -85,9 +85,6 @@ StMessageManager::StMessageManager() : StMessMgr()
 #ifdef __linux__
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
 #endif
-  // Initialize buffer with 1024 bytes
-  *this << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64
-        << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64;
 }
 //_____________________________________________________________________________
 StMessageManager::~StMessageManager() {
@@ -115,7 +112,7 @@ StMessMgr* StMessageManager::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-ostrstream& StMessageManager::Message(const char* mess, const char* type,
+std::ostringstream& StMessageManager::Message(const char* mess, const char* type,
   const char* opt,const char *,int) {
 //
 // Message declarator - creates a new message if mess is not empty,
@@ -204,24 +201,7 @@ void StMessageManager::Print() {
   if (building) {
     *this << std::ends;
 
-    if (fail()) {                   // Check to see if input has failed
-      int pos0 = tellp();
-      int pos1 = pos0 - 160;
-      clear();
-      if (pos1 >= 0) {
-        seekp(pos1);
-        *this << "\n\n WARNING!!!  ATTEMPT TO INPUT PAST END OF BUFFER"
-          << " IN StMessageManager!\n Buffer Size = " << pos0
-          << ".  IGNORING REMAINDER OF MESSAGE...";
-      } else {
-        seekp(0);
-        myerr << "StMessage: ERROR!!! StMessageManager BUFFER TOO SMALL!"
-          << endl;
-      }
-      *this << std::ends;
-    }
-
-    BuildMessage(str(), curType, curOpt);
+    BuildMessage(str().c_str(), curType, curOpt);
     building = 0;
 
   } else {

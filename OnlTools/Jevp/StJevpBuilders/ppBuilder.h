@@ -31,7 +31,7 @@ public:
   //*** As well as by name...
 
   union {
-    TH2 *array[];
+    TH2 *array[1];
     struct {
       TH2* PMT;
       TH2* SVX;
@@ -42,21 +42,21 @@ public:
   } contVIP;
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1* h1_P2P[16];
     };
   } contPMT_ADC;
 
   union {
-    TH2 *array[];
+    TH2 *array[1];
     struct {
       TH2* h2_P2P[8];
     };
   } contPMT_TAC;
 
   union {
-    TProfile *array[];
+    TProfile *array[1];
     struct {
       TProfile* hp_P2P[32];
     };

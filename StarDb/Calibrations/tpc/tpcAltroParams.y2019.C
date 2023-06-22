@@ -44,6 +44,7 @@ TDataSet *CreateTable()
 |         3 |         2 | 57158 | 21787 | 26699 | 7449 | 37911 | 58775 | 2019-04-17 13:34:01 |      20107029 |      20113048 | production_7.3GeV_fixedTarget_2019 |
 +-----------+-----------+-------+-------+-------+------+-------+-------+---------------------+---------------+---------------+------------------------------------+
 */
+	memset(&row,0,tableSet->GetRowSize());
 	row.N         =       6;
 	row.Altro_thr =       3;
 	row.Altro_seq =       2;
@@ -54,14 +55,18 @@ TDataSet *CreateTable()
 	row.Altro_L2  =   37911; //L2 coefficient of the TCF
 	row.Altro_L3  =   58775; //L3 coefficient of the TCF
 
-	cout << "[ALTRO] : Usin local configuration with row.Altro_thr = " << row.Altro_thr << endl; 
+	cout << "[ALTRO] : Usin local configuration with Outer row.Altro_thr = " << row.Altro_thr << endl; 
 
 	for (Int_t i  = 0; i < 24; i++)
 		{
 		tableSet->AddAt(&row);
 		}
+#ifdef __FPGA__
+	memset(&row,0,tableSet->GetRowSize());
+#endif
 	row.Altro_thr =       4; // iTPC, Tonko 12/12/2019
-	cout << "[ALTRO] : Usin local configuration with row.Altro_thr = " << row.Altro_thr << endl; 
+	row.Altro_seq =       2;
+	cout << "[ALTRO] : Usin local configuration with Inner row.Altro_thr = " << row.Altro_thr << endl; 
 
 	for (Int_t i  = 0; i < 24; i++)
 		{

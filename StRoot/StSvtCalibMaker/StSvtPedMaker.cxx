@@ -547,7 +547,7 @@ Int_t StSvtPedMaker::CalcPed2ndOrd()
 }
 
 //_____________________________________________________________________________
-Int_t StSvtPedMaker::WriteToFile(const char* fileName, char* option)
+Int_t StSvtPedMaker::WriteToFile(const char* fileName)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::WriteToFile" << endm;
 
@@ -578,7 +578,7 @@ Int_t StSvtPedMaker::WriteToFile(const char* fileName, char* option)
 }
 
 //_____________________________________________________________________________
-Int_t StSvtPedMaker::WriteRMSToFile(const char* fileName, char* option)
+Int_t StSvtPedMaker::WriteRMSToFile(const char* fileName)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::WriteToFile" << endm;
 

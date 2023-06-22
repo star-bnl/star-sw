@@ -45,6 +45,15 @@
 //epd
 #include "StEpdCollection.h"
 
+//fcs
+#define SKIPDefImp
+#include "StSpinPool/StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.cxx"
+#undef SKIPDefImp
+                                                                            
+#include "StEvent/StTpcRawData.h"
+
+static int tblow = 31;
+static int tbhigh = 431;
 
 static StEmcGeom* emcGeom[4];
 
@@ -100,6 +109,7 @@ StQAMakerBase(name,title,"StE"), event(0), primVtx(0), mHitHist(0), mPmdGeom(0),
   multiplicity = 0;
   qaEvents = 0;
   evtTime = -1;
+  if (GetMaker("fcsDbMkr") && GetMaker("StFcsClusterMaker")) AddMaker(new StFcsPi0FinderForEcal());
 }
 
 //_____________________________________________________________________________
@@ -335,7 +345,9 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=20) {
+  if (run_year >=23) {
+    if (realData) histsSet = StQA_run22; // for now, everything from run22 on uses this set
+  } else if (run_year >=20) {
     if (realData) histsSet = StQA_run19; // for now, everything from run19 on uses this set
   } else if (run_year >=19) {
     if (realData) histsSet = StQA_run18; // for now, everything from run18 on uses this set
@@ -394,6 +406,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run17):
       case (StQA_run18):
       case (StQA_run19):
+      case (StQA_run22):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -438,15 +451,15 @@ Int_t StEventQAMaker::Make() {
   }
   mNullPrimVtx->Fill(vertExists);
   
-  for (int i=0; i<nEvClasses; i++) {
-    eventClass = evClasses[i];
+  for (eventClassIdx=0; eventClassIdx<nEvClasses; eventClassIdx++) {
+    eventClass = evClasses[eventClassIdx];
     makeStat = StQAMakerBase::Make();
-    if ((evClasses[i]) && (histsSet != StQA_MC) && (hists))
+    if ((evClasses[eventClassIdx]) && (histsSet != StQA_MC) && (hists))
       hists->mNullPrimVtxClass->Fill(vertExists);
     if (makeStat != kStOk) break;
   }
   qaEvents++;
-  return makeStat;
+  return (makeStat == kStOk ? StMaker::Make() : makeStat);
 }
 
 
@@ -611,7 +624,7 @@ void StEventQAMaker::MakeHistGlob() {
 
       hists->m_glb_impactT->Fill(logImpact,2.);
       hists->m_glb_simpactT->Fill(sImpact,2.);
-      m_glb_simpactTime->Fill(evtTime,sImpact);
+      if (!eventClassIdx) m_glb_simpactTime->Fill(evtTime,sImpact);
       if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
         hists->m_glb_impactT->Fill(logImpact,0.);
         hists->m_glb_simpactT->Fill(sImpact,0.);
@@ -1829,6 +1842,37 @@ void StEventQAMaker::MakeHistPoint() {
           float density_correction = (j<innerRows ? (innerRows == 13 ? 4.8/2.0 : 1.6/2.0) : 2.0/2.0);
           // scale charge by length of pads (1/1.55cm, 1/1.15cm, and 1/1.95cm)
           float hit_charge = tpcHitsVec[k]->charge() * density_correction * (j<innerRows ? (innerRows == 13 ? 1.95/1.15 : 1.95/1.55) : 1.95/1.95);
+	                                                                                                                                   
+          //clusters                                                                                                                                      
+          if (!eventClassIdx) { // don't fill for multiple event classes
+            m_tpc_clust_statsvsrow[i]->Fill(j+1,tpcHitsVec[k]->flag());
+            m_tpc_clust_stats[i]->Fill(tpcHitsVec[k]->flag());
+            if (j < innerRows) {//iTPC                                                                                                                      
+              if ((tpcHitsVec[k]->flag() == 0 || tpcHitsVec[k]->flag() == 2) && (tpcHitsVec[k]->adc() > 40)) {
+                m_tpc_clust_pxltb->Fill(i+1,tpcHitsVec[k]->maxTmbk() - tpcHitsVec[k]->minTmbk()+1);
+                m_tpc_clust_pxlp->Fill(i+1,tpcHitsVec[k]->maxPad() - tpcHitsVec[k]->minPad()+1);
+                if ((tb > tblow) && (tb < tbhigh)) {
+                  m_tpc_clust_charge[i]->Fill(tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargesum[i]->Fill(tpcHitsVec[k]->pad(),j+1,tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargevstb[i]->Fill(tb,tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargevsrow[i]->Fill(j+1,tpcHitsVec[k]->adc());
+                }
+              }
+            }
+            else {//TPX                                                                                                                                     
+              if ((tpcHitsVec[k]->flag() == 0) && (tpcHitsVec[k]->adc() > 15)) {
+                m_tpc_clust_pxltbTPX->Fill(i+1,tpcHitsVec[k]->maxTmbk() - tpcHitsVec[k]->minTmbk()+1);
+                m_tpc_clust_pxlpTPX->Fill(i+1,tpcHitsVec[k]->maxPad() - tpcHitsVec[k]->minPad()+1);
+                if ((tb > tblow) && (tb < tbhigh)) {
+                  m_tpc_clust_chargeTPX[i]->Fill(tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargesum[i]->Fill(tpcHitsVec[k]->pad(),j+1,tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargevstbTPX[i]->Fill(tb,tpcHitsVec[k]->adc());
+                  m_tpc_clust_chargevsrow[i]->Fill(j+1,tpcHitsVec[k]->adc());
+                }
+              }
+            }
+          }
+	  
           // TPC East is sectors 13-24, and (generally) z<0
           // TPC West is sectors  1-12, and (generally) z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
@@ -1838,17 +1882,19 @@ void StEventQAMaker::MakeHistPoint() {
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
 	    hists->m_pnt_rpTE->Fill(hitPos.perp(),phi*degree,density_correction);
-	    m_pnt_rpTQE->Fill(hitPos.perp(),phi*degree,hit_charge);
+	    if (!eventClassIdx) m_pnt_rpTQE->Fill(hitPos.perp(),phi*degree,hit_charge);
 	  } else {
             rotator = i-11;
             hists->m_pnt_timeT->Fill(tb,1);
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
 	    hists->m_pnt_rpTW->Fill(hitPos.perp(),phi*degree,density_correction);
-	    m_pnt_rpTQW->Fill(hitPos.perp(),phi*degree,hit_charge);
+	    if (!eventClassIdx) m_pnt_rpTQW->Fill(hitPos.perp(),phi*degree,hit_charge);
 	  }
-          hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
-          mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
+          if (!eventClassIdx) {
+            hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
+            mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
+	  }
 	}
       }
     }
@@ -2889,6 +2935,50 @@ void StEventQAMaker::MakeHistEPD() {
   }
 
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistTPC() {
+  TDataSet* rawDataSet = FindDataSet("TpxRaw/.data/Event");
+  if (rawDataSet) {
+    StTpcRawData* tpcRawData = (StTpcRawData *) rawDataSet->GetObject();
+    if (tpcRawData) {
+      for (unsigned int sector = 1; sector <= tpcRawData->getNoSectors(); sector++) {//for sectors                                                        
+        StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sector);
+        if (digitalSector) {
+          //  digitalSector->Print();                                                                                                                     
+          unsigned int nrows = digitalSector->numberOfRows();
+          unsigned int innerRows = St_tpcPadConfigC::instance()->numberOfInnerRows(sector);
+          for (unsigned int rowi = 1; rowi <= nrows; rowi ++) {//for rows                                                                                 
+            StVectPixel pixV;
+            unsigned int npix = tpcRawData->getVecOfPixels(pixV, (int) sector, rowi);
+            for (unsigned int iii = 0; iii<npix; iii++) {//for pixels                                                                                     
+              m_tpc_adc_chargevsrowvstb[sector-1]->Fill(pixV[iii].timebin(),rowi,pixV[iii].adc());
+              m_tpc_adc_numhitsvsrowvssector->Fill(sector,rowi);
+              if (rowi < innerRows) {//iTPC rows                                                                                                          
+                m_tpc_adc_chargevstb[sector-1]->Fill(pixV[iii].timebin(),pixV[iii].adc());
+                if((pixV[iii].timebin() > tblow) && (pixV[iii].timebin() < tbhigh)) {
+                  m_tpc_adc_chargesum[sector-1]->Fill(pixV[iii].pad(),rowi,pixV[iii].adc());
+                  if (pixV[iii].adc() > 3) {
+                    m_tpc_adc_chargepersector->Fill(sector,pixV[iii].adc());
+                  }
+                }
+              }
+              else {//TPX rows                                                                                                                            
+                m_tpc_adc_chargevstbTPX[sector-1]->Fill(pixV[iii].timebin(),pixV[iii].adc());
+                if((pixV[iii].timebin() > tblow) && (pixV[iii].timebin() < tbhigh)) {
+                  m_tpc_adc_chargesum[sector-1]->Fill(pixV[iii].pad(),rowi,pixV[iii].adc());
+                  if (pixV[iii].adc() > 3) {
+                    m_tpc_adc_chargepersectorTPX->Fill(sector,pixV[iii].adc());
+                  }
+                }
+                //pixV[iii].Print();                                                                                                                      
+              }
+            }//for pixels                                                                                                                                 
+          }//for rows                                                                                                                                     
+        }
+      }//for sectors                                                                                                                                      
+    }
+  }
+}  
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistiTPC() {
   StSPtrVecTrackNode & trackNode = event->trackNodes();

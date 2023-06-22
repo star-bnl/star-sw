@@ -22,7 +22,7 @@ private:
   int m_numSqndx, m_numAdc;
   struct Pad Pad_array[FTP_PADROWS][FTP_MAXPADS];
   struct PadRow Row_array[FTP_PADROWS];
-  u_char padlist[FTP_PADROWS][FTP_MAXPADS];
+  uint8_t padlist[FTP_PADROWS][FTP_MAXPADS];
 
 };
 

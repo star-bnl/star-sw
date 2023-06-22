@@ -222,7 +222,7 @@ Int_t StFgtLenTreeMaker::Make()
      {
        for(int iD=0;iD<6;iD++)
 	 {
-	   if(trkArray[iTr].clArray[iD]>0)
+	   if(trkArray[iTr].clArray[iD])
 	     {
 	       char hname[100];
 	       StFgtHit* clTr=trkArray[iTr].clArray[iD];

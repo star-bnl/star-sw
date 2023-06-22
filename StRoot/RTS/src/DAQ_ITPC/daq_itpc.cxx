@@ -19,6 +19,8 @@
 #include "itpcPed.h"
 #include "itpcFCF.h"
 
+#include <DAQ_TPC23/itpc23.h>
+
 const char *daq_itpc::help_string = "\
 \n\
 ITPC Help: \n\
@@ -71,6 +73,11 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	gain = new daq_dta ;
 
 	it = new itpcInterpreter ;
+
+	it23 = 0 ;	// assume we won't use it
+//	it23 = new itpc23 ;	
+//	it23->no_cld = 1 ;
+//	it23->log_level = 2 ;
 
 	memset(fcf,0,sizeof(fcf)) ;
 	fcf_det_type = 1 ;	// ITPC
@@ -258,6 +265,9 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		memset(track_array,0,sizeof(track_array)) ;
 
 		for(u_int i=0;i<sim->ncontent;i++) {
+			// new in Jun 2022
+			if(sim_dta[i].adc==0) sim_dta[i].adc = 0xFFFF ;	// transliterate 0's to 0xFFFF ;
+
 			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
 			track_array[sim_dta[i].tb] = sim_dta[i].track_id ;
 
@@ -349,6 +359,7 @@ daq_dta *daq_itpc::handle_raw(int sec, int rdo)
 	raw->create(16*1024,(char *)"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 
+	rdo_fmt = 0 ;
 
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
@@ -361,7 +372,23 @@ daq_dta *daq_itpc::handle_raw(int sec, int rdo)
 
 		LOG(DBG,"name [%s] -> full_name [%s]",str,full_name) ;
 
-		if(full_name == 0) continue ;	
+		
+		if(full_name == 0) {
+
+			sprintf(str,"%s/sec%02d/rdo%d/ifee23",sfs_name,s,r) ;
+
+			full_name = caller->get_sfs_name(str) ;
+			
+			LOG(DBG,"name [%s] -> full_name [%s]",str,full_name) ;
+
+			if(full_name==0) continue ;
+
+			rdo_fmt = 23 ;
+
+		}
+
+		LOG(DBG,"full name %p",full_name) ;
+		LOG(DBG,"full name %s",full_name) ;
 
 		int size = caller->sfs->fileSize(full_name) ;
 
@@ -473,7 +500,12 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 	it->start_event(0) ;	// I don't thihnk I need this?
 
 
+
 	for(int s=min_sec;s<=max_sec;s++) {
+
+	int it23_started = 0 ;
+
+
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		daq_dta *rdo_dta ;
 		u_int *dta ;
@@ -492,6 +524,25 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 
 		if(words==0) continue ;
 
+		if(rdo_fmt>22) {
+			if(it23==0) {
+				it23 = new itpc23 ;
+				it23->online = 0 ;
+				it23->run_type = 3 ;	// NO CLUSTER FINDER PLEASE
+				it23->no_cld = 1 ;
+				it23->log_level = 0 ;
+			}
+			it23->data_c = &sampa_c ;
+
+			if(it23_started==0) {
+				it23->run_start() ;
+				it23->evt_start() ;
+				it23_started=1 ;
+			}
+		}
+
+
+
 		// first 4 words are the GTP header so let's skip
 		//dta += 4 ;
 		//words -= 4 ;
@@ -500,14 +551,27 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		it->rdo_id = r ;
 		sampa_c.rdo = r ;
 
-//		ret = it->rdo_scan(dta,words) ;
-		ret = it->rdo_scan_top(dta,words) ;
+		if(rdo_fmt>22) {
+			//LOG(WARN,"S%02d:%d: rdo_fmt %d -- scan will fail",s,r,rdo_fmt) ;
+			it23->set_rdo(s,r) ;
+			ret = it23->rdo_scan((char *)dta,words) ;
+		}
+		else {
+			ret = it->rdo_scan_top(dta,words) ;
+		}
 
 		if(ret < 0) LOG(ERR,"rdo_scan S%d:%d, words %d, ret %d",s,r,words,ret) ;
 		else LOG(NOTE,"rdo_scan S%d:%d, words %d, ret %d",s,r,words,ret) ;
 
 
-	}}
+	}	// loop over rdos
+
+	if(it23_started) {
+		it23->evt_stop();
+		it23->run_stop() ;
+	}
+
+	}	// loop over sectors
 
 	sampa->rewind() ;
 
@@ -578,7 +642,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
 
-			//LOG(TERR,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
+			LOG(DBG,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
 
 			int clusters = int_cou/ints_per_cluster ;	
 
@@ -795,14 +859,14 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	char buff[128] ;
 	int buff_cou ;
 	u_int want_dump = 0 ;
-	int sector ;
+//	int sector ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
 
 
 	//from Dec 2019
-	sector = rdo>>4 ;
+//	sector = rdo>>4 ;
 	rdo &= 0xF ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
@@ -982,9 +1046,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		LOG(ERR,"%d: evt_status 0x%08X:0x%08X, trg_fired 0x%08X, trg_cou %d, errs %d",rdo,evt_status,fee_status,trg_fired,trg_cou,b_cou) ;
 
 		// We'll let it pass for now with just the error message
-		trg[0].t = -ETIMEDOUT ;
-		trg[0].daq = trg[0].trg = 0 ;
-		return 1 ;
+		//trg[0].t = -ETIMEDOUT ;
+		//trg[0].daq = trg[0].trg = 0 ;
+		//return 1 ;
 	}
 
 	//LOG(TERR,"trg_cou %d, fired %d",trg_cou,trg_fired) ;

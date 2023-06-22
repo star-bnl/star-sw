@@ -65,6 +65,7 @@ daq_det *daq_det_factory::make_det(int wh)
 		use_factory = det_factories[wh] ;
 	}
 
+	//LOG(TERR,"make_det: %d %p",wh,use_factory) ;
 
 	if(use_factory == 0) {	// not inserted? need shared lib load...
 #if 0	// this was never completed...
@@ -313,7 +314,7 @@ daq_dta  *daq_det::put(const char *bank,int c1, int c2, int c3, void *p1, void *
 
 
 // helpers
-int checkBank(char *in, char *expect) 
+int checkBank(const char *in, const char *expect) 
 { 
 	char buff[12] ;
 

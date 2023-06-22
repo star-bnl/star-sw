@@ -90,6 +90,11 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
 
+  if ( 1 == IAttr( "DoV0" ) ) DoV0();
+  if ( 1 == IAttr( "DoXi" ) ) DoXi();
+  if ( 1 == IAttr( "DoKink" ) ) DoKink();
+  if ( 1 == IAttr( "SetNoKeep" ) ) SetNoKeep(); 
+
   abortEvent = kFALSE;
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
@@ -495,7 +500,7 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, const char* treeName) {
   }
   
   // Try to add the file
-  Int_t nEntries = (Int_t) chain->GetEntriesFast();
+  Long_t nEntries = chain->GetEntriesFast();
   if (fileBlind) chain->Add(eFile);
   else chain->Add(eFile,0);
 
@@ -510,7 +515,8 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, const char* treeName) {
 
   // Have not yet found an appropriate TTree - attempting to find one
   // GetEntries() will increase if the tree is found
-  Int_t nEnt = (Int_t) chain->GetEntries();
+  Long_t nEnt = chain->GetEntries();
+
   if (nEnt == TChain::kBigNumber) {
     gMessMgr->Error("StStrangeMuDstMaker::SetRead(): bad file! Giving up.");
     return;
@@ -523,7 +529,7 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, const char* treeName) {
     if (strcmp(treeName,trNames[trial])) {
       SetTreeName(trNames[trial]);
       chain->Add(eFile,0);
-      nEnt = (Int_t) chain->GetEntries();
+      nEnt = chain->GetEntries();
     }
     trial++;
   }

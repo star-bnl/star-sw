@@ -170,7 +170,7 @@ L2btowCalAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 /* ========================================
   ======================================== */
 void 
-L2btowCalAlgo12::calibrateBtow(int token, int bemcIn, ushort *rawAdc){
+L2btowCalAlgo12::calibrateBtow(int token, int bemcIn, unsigned short *rawAdc){
   // Btow calibration is a special case,  must have one exit  at the end
   computeStart();
 
@@ -194,9 +194,9 @@ L2btowCalAlgo12::calibrateBtow(int token, int bemcIn, ushort *rawAdc){
     int adc; // pedestal subtracted
     float et;
     float low_noise_et; // bit-chopped
-    ushort *thr=geom->btow.thr_rdo;
-    ushort *ped=geom->btow.ped_rdo;
-    ushort *ped_shifted=geom->btow.ped_shifted_rdo;
+    unsigned short *thr=geom->btow.thr_rdo;
+    unsigned short *ped=geom->btow.ped_rdo;
+    unsigned short *ped_shifted=geom->btow.ped_shifted_rdo;
     float *gain2ET=geom->btow.gain2ET_rdo;
     float *gain2Ene=geom->btow.gain2Ene_rdo;
     HitTower1 *hit=btowCalibData.hit;

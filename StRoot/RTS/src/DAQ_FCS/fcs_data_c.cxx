@@ -31,12 +31,15 @@ struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[FCS_SECTOR_COU][8] ;	// FCS_SEC
 struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][24] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
+u_char fcs_data_c::fcs_bad_ch[8][34] ;
+u_char fcs_data_c::fcs_bad_ch_all[FCS_SECTOR_COU][8][34] ;
 
 u_int fcs_data_c::run_number ;
 u_int fcs_data_c::run_type ;
 
 // for ZS
 float fcs_data_c::n_sigma ;
+float fcs_data_c::n_sigma_epd ;
 short fcs_data_c::n_pre ;
 short fcs_data_c::n_post ;
 short fcs_data_c::n_cou ;
@@ -52,6 +55,9 @@ u_char fcs_data_c::ascii_no ;
 pthread_mutex_t fcs_data_c::ped_mutex ;
 	
 fcs_data_c::statistics_t fcs_data_c::statistics[8] ;
+
+int fcs_data_c::stage_params_txt[32] ;
+
 
 long fcs_data_c::dep_to_char(int det, int ns, int dep)
 {
@@ -87,6 +93,169 @@ long fcs_data_c::dep_to_char(int det, int ns, int dep)
 
 }
 
+#if 0
+// this was for stage2 and stage1 _before_ 23-Nov-2021
+const char *fcs_data_c::stage_labels[] = {
+	"FCS_HAD-HERATIO-THR", //
+        "FCS_EM-HERATIO-THR", //
+        "FCS_HADTHR1", //
+        "FCS_HADTHR2", //
+        "FCS_HADTHR3",
+        "FCS_EMTHR1", //
+        "FCS_EMTHR2", //
+        "FCS_EMTHR3",
+        "FCS_JETTHR1",
+        "FCS_JETTHR2",
+        "FCS_ETOTTHR", //
+        "FCS_HTOTTHR",	// 11 //
+
+        "FCS_EHTTHR",	// 12 //
+        "FCS_HHTTHR",	// 13 //
+        "FCS_PHTTHR"	// 14 //
+} ;
+#endif
+
+// FY22
+#if 0
+// From Christian
+Word	Type		Value
+0		2x uint8	(had_ratio_thr << 8) || em_ratio_thr
+1		uint11		had_thr_0
+2		uint11		had_thr_1
+3		uint11		had_thr_2
+4		uint11		em_thr_0
+5		uint11		em_thr_1
+6		uint11		em_thr_2
+7		uint11		ele_thr_0
+8		uint11		ele_thr_1
+9		uint11		ele_thr_2
+10		2x uint8	(jp_a_thr_1  << 8) || jp_a_thr_0
+11		2x uint8	(0x00 << 8)	   || jp_a_thr_2
+12		2x uint8	(jp_bc_thr_1 << 8) || jp_bc_thr_0
+13		2x uint8	(jp_bc_thr_d << 8) || jp_bc_thr_2
+14		2x uint8	(jp_de_thr_1 << 8) || jp_de_thr_0
+15		2x uint8	(jp_de_thr_d << 8) || jp_de_thr_2
+16		uint11		etot_thr
+17		uint11		htot_thr
+18		2x uint8	(hcal_ht_thr << 8) || ecal_ht_thr
+19		bit16		signature
+20		N/A
+
+
+#endif
+
+const char *fcs_data_c::stage_labels[32] = {
+	"FCS_HAD-HERATIO-THR", //0
+        "FCS_EM-HERATIO-THR", //1
+
+        "FCS_HADTHR0", //2
+        "FCS_HADTHR1", //3
+        "FCS_HADTHR2", //4
+
+        "FCS_EMTHR0", //5
+        "FCS_EMTHR1", //6
+        "FCS_EMTHR2", //7
+
+        "FCS_ELETHR0", //8
+        "FCS_ELETHR1", //9
+        "FCS_ELETHR2", //10
+
+        "FCS_JPATHR0", //11
+        "FCS_JPATHR1", //12
+        "FCS_JPATHR2", //13
+
+        "FCS_JPBCTHR0", //14
+        "FCS_JPBCTHR1", //15
+        "FCS_JPBCTHR2", //16
+        "FCS_JPBCTHRD", //17
+
+        "FCS_JPDETHR0", //18
+        "FCS_JPDETHR1", //19
+        "FCS_JPDETHR2", //20
+        "FCS_JPDETHRD", //21
+
+        "FCS_ETOTTHR",	//22
+        "FCS_HTOTTHR",	//23
+
+        "FCS_EHTTHR",	//24
+        "FCS_HHTTHR",	//25
+        "FCS_PHTTHR"	//26
+} ;
+
+
+
+
+
+int fcs_data_c::load_stage_params(int sec1, const char *fname)
+{
+	if(fname==0) {
+		fname="/RTS/conf/fcs/stage_params.txt" ;
+	}
+
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"sector %2d: %s: [%s]",sec1,fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"sector %2d: stage_params %s opened",sec1,fname) ;
+
+	u_int max_i = 0 ;
+
+	while(!feof(f)) {
+		char buff[128] ;
+		char name[64] ;
+		int val ;
+		int ix ;
+		int dummy ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+
+		name[0] = '?' ;
+		name[1] = 0 ;
+		val = -1 ;
+
+		int ret = sscanf(buff,"%d %d %d %s %d",&dummy,&dummy,&ix,name,&val) ;
+		if(ret != 5) continue ;
+
+//		LOG(TERR,"ret %d: [%s]=%d",ret,name,val) ;
+
+		char got_it = -1 ;
+		for(u_int i=0;i<sizeof(stage_labels)/sizeof(stage_labels[0]);i++) {
+			if(stage_labels[i]==0) continue ;
+
+			if(strcasecmp(stage_labels[i],name)==0) {
+				stage_params_txt[i] = val ;
+				got_it = i ;
+				if(i>max_i) max_i = i ;
+				break ;
+			}
+		}
+
+		if(sec1==11) {	// LOG only from this one
+			if(got_it<0) {
+				LOG(ERR,"stage_param_txt [%s]=%d NOT coded locally",name,val) ;
+			}
+			else {
+				LOG(INFO,"stage_param_txt [%s]=%d, index %d, ix %d",name,val,got_it,ix) ;
+			}
+		}
+	}
+
+	if(sec1==11) {	// LOG from this one only
+		for(u_int i=0;i<max_i;i++) {
+			LOG(TERR,"stage_params_txt: %d/%d = %d",i,max_i,stage_params_txt[i]) ;
+		}
+	}
+
+	fclose(f) ;
+	return 0 ;
+}
+
+	
 
 int fcs_data_c::zs_start(u_short *buff)
 {
@@ -95,6 +264,10 @@ int fcs_data_c::zs_start(u_short *buff)
 	int l_pre, l_post ;
 	int is_trg = 0 ;
 	int i_ped ;
+	float sigma ;
+
+	if(hdr_det==2) sigma = n_sigma_epd ;
+	else sigma = n_sigma ;
 
 	// trigger channels are special so figure this out
 	if(ch >= 32) is_trg = 1 ;
@@ -113,16 +286,16 @@ int fcs_data_c::zs_start(u_short *buff)
 		LOG(DBG,"S%d:%d:%d mean %f, n_sigma %f, rms %f",
 		    sector,rdo,ch,
 		    (float)ped[sector-1][rdo-1].mean[ch],
-		    (float)n_sigma,
+		    (float)sigma,
 		    (float)ped[sector-1][rdo-1].rms[ch]) ;
 
 		// I don't think that a threshold as a function of RMS is a good idea.
 		// I should do what the ASICs do and have a fixed digital threshold
 		if(n_mode==0) {
-			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		}
 		else {
-			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma) ;
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + sigma) ;
 		}
 
 		l_cou = n_cou ;
@@ -985,7 +1158,7 @@ int fcs_data_c::event()
 		//complain = 1 ;
 		if(board_id_xpect != board) complain = 1 ;
 
-		if(ch>35) complain = 1 ;
+		if(ch>36) complain = 1 ;	// Sep21: stage2 can have 37 chs
 		else {
 			if(ch_mask_seen & (1LL<<ch)) {
 				if(realtime) LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
@@ -1074,7 +1247,7 @@ int fcs_data_c::event()
 
 int fcs_data_c::ana_ch()
 {
-	if(ch>=32) return 0 ;
+
 
 	switch(run_type) {
 	case 1 :
@@ -1084,6 +1257,73 @@ int fcs_data_c::ana_ch()
 	default:
 		return 0 ;
 	}
+
+	if(run_type==2 && sector==11 && trg_cmd==4) {
+		static int first ;
+
+		
+		static u_char expect[3][37] ;
+		
+		if(first==0) {
+		expect[0][0]=0xC1 ;
+		expect[0][1]=0xC1 ;
+		expect[0][2]=0xE1 ;
+		expect[0][3]=0xE1 ;
+
+		expect[1][34]=0xC1 ;
+		expect[1][35]=0xC1 ;
+		expect[1][36]=0x66 ;
+
+		expect[2][34]=0xE1 ;
+		expect[2][35]=0xE1 ;
+		expect[2][36]=0x77 ;
+
+		for(int i=0;i<20;i++) {
+			expect[1][i]= i ;
+			expect[2][i]=(1<<5)|i ;
+		}
+
+		for(int i=20;i<28;i++) {
+			expect[1][i] = (1<<6)|(i-20) ;
+			expect[2][i] = (1<<6)|(1<<5)|(i-20) ;
+		}
+
+		for(int i=28;i<34;i++) {
+			expect[1][i] = (2<<6)|(i-28) ;
+			expect[2][i] = (2<<6)|(1<<5)|(i-28) ;
+		}
+
+		first = 1 ;
+		}
+
+		int errs = 0 ;
+		for(int tb=0;tb<tb_cou;tb++) {
+			int r=rdo-5 ;
+			int d = adc[tb] & 0xFF ;
+
+			if(ch==36) {
+				if(d && (expect[r][ch] != d)) {
+					errs++ ;
+				}
+			}
+			else if(expect[r][ch] != d) {
+				errs++ ;
+			}
+		}
+		
+
+//		if(errs) {
+			ped_lock() ;
+			ped[sector-1][rdo-1].cou[ch]++ ;
+			ped[sector-1][rdo-1].bad_4[ch] += errs ;
+			ped_unlock() ;
+//		}
+
+		return 0 ;
+
+	}
+
+	if(ch>=32 || sector==11) return 0 ;
 
 	ped_lock() ;
 
@@ -1257,10 +1497,12 @@ void fcs_data_c::ped_stop(int bad_ped)
 	u_int max_c = 0 ;
 
 
-	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
-		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
-		return ;
-	}
+	if(sector==11 && run_type==1) return ;
+
+//	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
+//		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
+//		return ;
+//	}
 
 
 	// check for bad pedestals... since we can have masked channels just find the max
@@ -1362,14 +1604,22 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 	fprintf(pedf,"\n") ;
 
-	for(int c=0;c<32;c++) {
+	int c_max ;
+
+	if((s+1)==11) {
+		if((r+1)==5) c_max = 4 ;
+		else c_max = 37 ;
+	}
+	else c_max = 32 ;
+	
+	for(int c=0;c<c_max;c++) {
 		int err = 0 ;
 		double m = ped[s][r].mean[c] ;
 		double rms = ped[s][r].rms[c] ;
 
 		switch(run_type) {
 		case 1 :
-			if((m<6.0)||(m>200.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
+			if((m<3.0)||(m>200.0)||(rms<0.3)||(rms>2.2)) err = 1 ;
 			break ;
 		case 2 :
 			if(ped[s][r].bad_4[c]) {
@@ -1380,7 +1630,12 @@ void fcs_data_c::ped_stop(int bad_ped)
 		}
 		
 		if(err) {
-			LOG(WARN,"S%02d:%d ch %02d: ped %.1f, rms %.1f: bad cou %u",sector,rdo,c,m,rms,ped[s][r].bad_4[c]) ;
+			const char *masked ;
+
+			if(ped[s][r].i_gain[c]==0) masked = " -- MASKED" ;
+			else masked = "" ;
+
+			LOG(ERR,"S%02d:%d ch %02d: ped %.1f, rms %.1f: bad cou %u%s",sector,rdo,c,m,rms,ped[s][r].bad_4[c],masked) ;
 		}
 
 		//LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
@@ -1399,6 +1654,62 @@ void fcs_data_c::ped_stop(int bad_ped)
 	}
 
 	fclose(pedf) ;
+
+
+	if(!bad_ped && run_type==1) {
+
+		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_f%u.txt",sector,rdo,rhic_freq) ;
+
+		LOG(WARN,"also making pedestals formal to [%s]",fname) ;
+
+		pedf = fopen(fname,"w") ;
+		if(pedf==0) {
+			LOG(ERR,"Can't open %s [%s]",fname,strerror(errno)) ;
+			return ;
+		}
+
+
+		int d = rdo_map[s][r].det ;
+		int n = rdo_map[s][r].ns ;
+		int p = rdo_map[s][r].dep ;
+
+		fprintf(pedf,"# Sector %2d, RDO %d\n",sector,rdo) ;
+		fprintf(pedf,"# Det %d, NS %d, DEP %d\n",d,n,p) ;
+		fprintf(pedf,"# RUN %08u, type %d %s\n",run_number,run_type,status) ;
+		fprintf(pedf,"# TIME %u\n",(unsigned int)now) ;
+		char *ctm = ctime(&now) ;
+		fprintf(pedf,"# DATE %s",ctm) ;
+		fprintf(pedf,"# RHIC %u, FEE state %d\n",rhic_freq,fee_state) ;
+
+		fprintf(pedf,"\n") ;
+
+		int c_max ;
+
+		if((s+1)==11) {
+			if((r+1)==5) c_max = 4 ;
+			else c_max = 37 ;
+		}
+		else c_max = 32 ;
+	
+		for(int c=0;c<c_max;c++) {
+			//double m = ped[s][r].mean[c] ;
+			//double rms = ped[s][r].rms[c] ;
+			
+			double rms8 = ped[s][r].rms_8[c] ;
+
+			if(run_type==2) rms8 = ped[s][r].bad_4[c] ;
+		
+			fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,
+				ped[s][r].mean[c],ped[s][r].rms[c],
+				ped[s][r].mean_8[c],rms8) ;
+
+		}
+
+		fclose(pedf) ;
+	}
+	else {
+		LOG(ERR,"S%d:%d: not caching pedestals 0x%X",sector,rdo,bad_ped) ;
+	}
 
 }
 
@@ -1478,7 +1789,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 		FILE *f = fopen(ff,"r") ;
 		if(f==0) {
-			LOG(WARN,"gain_from_cache: %s [%s]",ff,strerror(errno)) ;
+			LOG(ERR,"gain_from_cache: %s [%s] (perhaps not an error)",ff,strerror(errno)) ;
 			if(!is_dir) goto read_done ;
 			continue ;
 		}
@@ -1541,7 +1852,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ; // Akio changing to 4.8 fixed
 
 			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
-				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
+				LOG(NOTE,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
 			}
 			else {
 
@@ -1819,7 +2130,7 @@ int fcs_data_c::load_sc_map(const char *fname)
 		rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
 	}}}
 
-	for(u_int dd=0;dd<2;dd++) {
+	for(u_int dd=0;dd<3;dd++) {
 
 
 	switch(dd) {
@@ -1830,15 +2141,60 @@ int fcs_data_c::load_sc_map(const char *fname)
 		fn = "/RTS/conf/fcs/fcs_hcal_sc_map.csv" ;
 		break ;
 	case 2 :
-		fn = "/RTS/conf/fcs/fcs_fpre_sc_map.csv" ;
+		fn = "/RTS/conf/fcs/fcs_pres_sc_map.csv" ;
 		break ;
 	case 3 :
 		fn = "/RTS/conf/fcs/fcs_main_sc_map.csv" ;
 		break ;
 	}
 		
+#if 0
+	if(dd==2) {	// SPECIAL HACKS FOR EPD Splitter!
+		LOG(INFO,"load_sc_map: constructing FPRE map") ;
 
-	
+		for(int s=0;s<10;s++) {
+		for(int r=0;r<8;r++) {
+			if(rdo_map[s][r].det != 2) continue ;	// skip non preshower
+
+			int dep = rdo_map[s][r].dep ;
+
+			for(int c=0;c<32;c++) {
+				rdo_map[s][r].ch[c].sc_sipm = 0 ;	// make them ALL active
+				rdo_map[s][r].ch[c].sc_dep = dep ;
+				rdo_map[s][r].ch[c].sc_add = 0 ;
+				rdo_map[s][r].ch[c].sc_bra = 0 ;
+			}
+
+			int ns = rdo_map[s][r].ns ;
+
+
+			// and now kill some of them according to Akio's Aug-2021 recipe
+
+			if(ns==0) {	// North
+				rdo_map[s][r].ch[16].sc_sipm= 0xFF ;
+			}
+			else {
+				rdo_map[s][r].ch[0].sc_sipm = 0xFF ;
+			}
+
+			if(dep==0) {
+				for(int c=0;c<16;c++) {
+					rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
+				}
+			}
+			else if(dep==5) {
+				for(int c=16;c<32;c++) {
+					rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
+				}
+
+			}
+
+		}}
+
+		return 0 ;
+	}
+
+#endif	
 
 	FILE *f = fopen(fn,"r") ;
 
@@ -1901,6 +2257,17 @@ int fcs_data_c::load_sc_map(const char *fname)
 				rdo_map[s][r].ch[c].sc_dep = dep ;
 				rdo_map[s][r].ch[c].sc_bra = bra ;
 				rdo_map[s][r].ch[c].sc_add = add ;
+
+
+				// FPRE is special: Akio marked unused channels with non-0
+				if(dd==2) {
+					//if(sipm!=0) {
+					if(sipm>=2) {	// new for FY23 EPD use
+						//LOG(TERR,"%d %d %d = %d",s,r,c,sipm) ;
+						sipm = 0xFF ;
+					}
+				}
+
 				rdo_map[s][r].ch[c].sc_sipm = sipm ;
 
 				found_it = 1 ;
@@ -2104,4 +2471,63 @@ u_short fcs_data_c::set_board_id()
 //	LOG(TERR,"set_board_id: %d %d --> %d %d %d --> 0x%X",sector,rdo,det,ns,dep,board_id) ;
 
 	return board_id ;
+}
+
+int fcs_data_c::load_bad_ch(const char *fname, int sector)
+{
+	memset(fcs_bad_ch,0,sizeof(fcs_bad_ch)) ;
+	memset(fcs_bad_ch_all,0,sizeof(fcs_bad_ch_all)) ;
+
+	if(fname==0) {
+		fname = "/RTS/conf/fcs/bad_channels.txt" ;
+	}
+
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"fcs_load_bad_ch: %s [%s]",fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"fcs_load_bad_ch: %s",fname) ;
+
+	while(!feof(f)) {
+		char buff[1024] ;
+
+//		LOG(ERR,"asd") ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+//		LOG(ERR,"--- %s",buff) ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+
+		int s,r,det,ns,dep,ch,flag ;
+		float ped, rms ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %f %f 0x%X",&s,&r,&det,&ns,&dep,&ch,&ped,&rms,&flag) ;
+
+//		LOG(WARN,"ret [%s]",buff) ;
+
+		if(ret != 9) continue ;
+
+		if(sector==0) LOG(WARN,"Bad ch: S%02d:%d:%02d",s,r,ch) ;
+
+		if((r<1)||(r>8)) continue ;
+		if((ch<0)||(ch>33)) continue ;
+		if((s<1)||(s>10)) continue ;
+
+		fcs_bad_ch_all[s-1][r-1][ch] = 1 ;
+
+		if(s != sector) continue ;
+
+		LOG(WARN,"Bad ch: S%02d:%d:%02d",s,r,ch) ;
+
+		fcs_bad_ch[r-1][ch] = 1 ;
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+
 }

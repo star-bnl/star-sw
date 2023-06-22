@@ -35,7 +35,7 @@ private:
     //*** Use the union to be able to treat in bulk
     //*** As well as by name...
     union {
-	TH1 *array[];
+	TH1 *array[1];
 	struct {
 	    TH1 *h_evt_size;	    
 	    TH2 *h_fcs_crt_depch_tbin[5];

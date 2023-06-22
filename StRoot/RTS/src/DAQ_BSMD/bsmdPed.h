@@ -26,8 +26,8 @@ public:
 	int do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum=0) ;
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	int from_cache(char *fname = 0) ;		// from cached file to ped_store
-	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
+	int from_cache(const char *fname = 0) ;		// from cached file to ped_store
+	int to_cache(const char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
 
 	int special_setup(int run_type, int sub_type) ;
 

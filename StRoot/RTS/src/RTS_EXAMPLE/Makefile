@@ -10,13 +10,13 @@ DEFINES += -DRTS_LOG_COLORED
 VOBJS += libbsmd.a libbtow.a libemc.a libesmd.a libfpd.a libftp.a libl3.a libpmd.a libpp2pp.a  \
 	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libfgt.a libmtd.a libhlt.a libl4.a libetow.a \
 	libpxl.a libsst.a libfps.a librhicf.a libetof.a libitpc.a libfcs.a libstgc.a \
-	libdaqReader.a libsfs.a librtslog.a
+	libdaqReader.a libsfs.a librtslog.a libtpc23.a
 
 VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ../DAQ_L3 ../DAQ_PMD \
 	../DAQ_PP2PP ../DAQ_RIC ../DAQ_SC ../DAQ_SSD ../DAQ_SVT ../DAQ_TOF ../DAQ_TPC ../FCF ../DAQ_HLT ../DAQ_ETOW \
 	../DAQ_TPX ../DAQ_TRG ../DAQ_FGT ../DAQ_MTD ../DAQ_PXL ../DAQ_L4 ../DAQ_SST ../DAQ_FPS ../DAQ_RHICF ../DAQ_ETOF \
 	../DAQ_ITPC ../DAQ_FCS ../DAQ_STGC \
-	../DAQ_READER  ../SFS ../LOG 
+	../DAQ_READER  ../SFS ../LOG ../DAQ_TPC23
 
 
 BINS = rts_example daqFileMerger daqFileHacker daqFileChopper testReader testReader2 tpc_rerun tpx_read_gains
@@ -72,7 +72,7 @@ daqFileHacker.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqFileHacker.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daqFileHacker.o: ../../../../StRoot/RTS/include/daqFormats.h
 daqFileHacker.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daqFileHacker.o: ../../trg/include/trgDataDefs_46.h
+daqFileHacker.o: ../../trg/include/trgDataDefs_47.h
 daqFileHacker.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daqFileHacker.o: ../SFS/sfs_index.h
 daqFileHacker.o: ../SFS/fs_index.h
@@ -113,7 +113,7 @@ rts_example.o: ../DAQ_FTP/daq_ftp.h
 rts_example.o: ../DAQ_L3/daq_l3.h
 rts_example.o: ../../../../StRoot/RTS/include/daqFormats.h
 rts_example.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-rts_example.o: ../../trg/include/trgDataDefs_46.h
+rts_example.o: ../../trg/include/trgDataDefs_47.h
 rts_example.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 rts_example.o: ../DAQ_PMD/daq_pmd.h
 rts_example.o: ../DAQ_PP2PP/daq_pp2pp.h
@@ -165,7 +165,7 @@ rts_example.trg.o: ../DAQ_FTP/daq_ftp.h
 rts_example.trg.o: ../DAQ_L3/daq_l3.h
 rts_example.trg.o: ../../../../StRoot/RTS/include/daqFormats.h
 rts_example.trg.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-rts_example.trg.o: ../../trg/include/trgDataDefs_46.h
+rts_example.trg.o: ../../trg/include/trgDataDefs_47.h
 rts_example.trg.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 rts_example.trg.o: ../DAQ_PMD/daq_pmd.h
 rts_example.trg.o: ../DAQ_PP2PP/daq_pp2pp.h

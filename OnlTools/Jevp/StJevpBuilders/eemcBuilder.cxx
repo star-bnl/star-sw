@@ -321,15 +321,18 @@ void eemcBuilder::initialize(int argc, char *argv[]) {
  
   while(defs[n].name) {
     if(strcmp(defs[n].name,"MAPMHitsCopy") == 0) {
-      hist = new TH1F("MAPMHits2","blah",10,0,10);
-      // LOG("JEFF", "hist 0x%x",hist);
-      plots[n] = new JevpPlot(hist);
-      addPlot(plots[n]);
-      MAPMHitsCopy = n;
-      plots[n]->setDrawOpts("colz");
-      plots[n]->optstat = 11;
-      n++;
-      continue;
+	gROOT->GetObject("MAPMHits",hist);
+	TH2F *h = (TH2F *)hist->Clone("MAPMHits2");
+	plots[n] = new JevpPlot(h);
+
+	addPlot(plots[n]);
+	MAPMHitsCopy = n;
+	plots[n]->setDrawOpts("colz");
+	plots[n]->optstat = 11;
+	h->SetAxisRange(88,120);
+	h->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
+	n++;
+	continue;
     }
 
     gROOT->GetObject(defs[n].name, hist);
@@ -437,29 +440,38 @@ void eemcBuilder::event(daqReader *rdr)
 
   PCP;
   // LOG("JEFF", "Done with fillHisto");
-  // Hack to double up MAPMHits histo 2!  
-  // Delete and recreate each time...
+  // Copy MAPMHits to MAPMHits2
 
+  PCP; TH2F *hist1 = (TH2F *)plots[MAPMHits]->getHisto(0)->histo;
+  PCP; TH2F *hist2 = (TH2F *)plots[MAPMHitsCopy]->getHisto(0)->histo;
+  PCP; hist2->Scale(0);
+  PCP; hist2->Add(hist1);
+  PCP;
+  // The deletion causes a thread corruption with the image writer
+  // Also less efficient
+  /*
   // can this possibly work?
   TH2F *oh = (TH2F *)plots[MAPMHits]->getHisto(0)->histo;
   PCP;
   TH2F *h = (TH2F *)oh->Clone("MAPMHits2");
   PCP;
   PlotHisto *ph = plots[MAPMHitsCopy]->getHisto(0);
+
+
   PCP;
   delete(ph->histo);
   PCP;
   ph->histo = h;
   h->SetAxisRange(88,120);
   h->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
-
+  */
   PCP;
 
   if(trgd) {
     delete trgd;
     trgd = NULL;
   }
- 
+  PCP;
   //LOG("JEFF", "Done with event");
 }
 

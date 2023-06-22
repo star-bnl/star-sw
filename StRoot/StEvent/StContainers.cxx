@@ -135,14 +135,21 @@
 #include "StFcsCluster.h"
 #include "StFcsHit.h"
 #include "StFcsPoint.h"
+#include "StFttRawHit.h"
+#include "StFttCluster.h"
+#include "StFttPoint.h"
 #include "StFgtHit.h"
 #include "StFgtPoint.h"
 #include "StFgtStrip.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
+#include "StRHICfRawHit.h"
+#include "StRHICfHit.h"
+#include "StRHICfPoint.h"
 #include "StFpsSlat.h"
 #include "StFtpcHit.h"
+#include "StFwdTrack.h"
 #include "StHltBEmcTowerHit.h"
 #include "StHltBTofHit.h"
 #include "StHltDiElectron.h"
@@ -153,6 +160,8 @@
 #include "StHltTriggerReason.h"
 #include "StHltVpdHit.h"
 #include "StIstHit.h"
+#include "StFstRawHit.h"
+#include "StFstHit.h"
 #include "StKinkVertex.h"
 #include "StL3AlgorithmInfo.h"
 #include "StMtdHit.h"
@@ -202,14 +211,21 @@ StCollectionImp(EtrHit)
 StCollectionImp(FcsCluster)
 StCollectionImp(FcsHit)
 StCollectionImp(FcsPoint)
+StCollectionImp(FttRawHit)
+StCollectionImp(FttCluster)
+StCollectionImp(FttPoint)
 StCollectionImp(FgtHit)
 StCollectionImp(FgtPoint)
 StCollectionImp(FgtStrip)
 StCollectionImp(FmsCluster)
 StCollectionImp(FmsHit)
 StCollectionImp(FmsPoint)
+StCollectionImp(RHICfRawHit)
+StCollectionImp(RHICfHit)
+StCollectionImp(RHICfPoint)
 StCollectionImp(FpsSlat)
 StCollectionImp(FtpcHit)
+StCollectionImp(FwdTrack)
 StCollectionImp(Hit)
 StCollectionImp(HltBEmcTowerHit)
 StCollectionImp(HltBTofHit)
@@ -221,6 +237,8 @@ StCollectionImp(HltTrackNode)
 StCollectionImp(HltTriggerReason)
 StCollectionImp(HltVpdHit)
 StCollectionImp(IstHit)
+StCollectionImp(FstRawHit)
+StCollectionImp(FstHit)
 StCollectionImp(KinkVertex)
 StCollectionImp(L3AlgorithmInfo)
 StCollectionImp(MtdHit)

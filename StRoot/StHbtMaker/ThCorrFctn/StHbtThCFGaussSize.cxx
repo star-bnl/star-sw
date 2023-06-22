@@ -80,7 +80,7 @@ void StHbtThCFGaussSize::Finish() {
 }
 
 StHbtString StHbtThCFGaussSize::Report() {
-  ostrstream tStr; 
+  std::ostringstream tStr; 
   tStr << "Gaussian Size Report - Size=(X="<< mSizeX <<"Y="<< mSizeY 
        <<"Z="<< mSizeZ<< "T="<< mTime << ")" << endl;
   tStr << mThCorrFctnColl.size() << " Correlation Function Plugged " << endl;

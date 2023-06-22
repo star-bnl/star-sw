@@ -46,6 +46,8 @@ public:
   double         beta;
   int            trackIndex;
   short          id;
+  int            idTruth;
+  int            qaTruth;
   TVector3       firstPoint;
   TVector3       lastPoint;
 
@@ -55,7 +57,7 @@ public:
   double         nSigmaTofProton;
   double         nSigmaTofElectron;
 
-  ClassDef(StjTrack,5);
+  ClassDef(StjTrack,6);
 };
 
 typedef std::vector<StjTrack> StjTrackList;
@@ -99,6 +101,8 @@ inline bool operator==(const StjTrack& v1, const StjTrack& v2)
   if(v1.nSigmaTofKaon     != v2.nSigmaTofKaon)     return false;
   if(v1.nSigmaTofProton   != v2.nSigmaTofProton)   return false;
   if(v1.nSigmaTofElectron != v2.nSigmaTofElectron) return false;
+  if(v1.idTruth           != v2.idTruth)           return false;
+  if(v1.qaTruth           != v2.qaTruth)           return false;
   return true;
 }
 

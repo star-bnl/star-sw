@@ -106,6 +106,7 @@ public:
 
   int  overlapJetPatchTh(int i) const;
   void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;
+  int overlapJetPatchAdc(int jp) const;
 
 private:
   // returns value of bit from x at position pos

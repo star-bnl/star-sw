@@ -1,12 +1,12 @@
 /* EEMC geometry constants */
-const ushort kEEmcNumEtas      = 12;     /* number of eta bins */
-const ushort kEEmcNumPhis      = 60;     /* number of phi bins */
-const ushort kEEmcNumSubs      = 5;      /* number of subsectors per sector */
-const ushort kEEmcNumSecs      = kEEmcNumPhis / kEEmcNumSubs;
+const unsigned short kEEmcNumEtas      = 12;     /* number of eta bins */
+const unsigned short kEEmcNumPhis      = 60;     /* number of phi bins */
+const unsigned short kEEmcNumSubs      = 5;      /* number of subsectors per sector */
+const unsigned short kEEmcNumSecs      = kEEmcNumPhis / kEEmcNumSubs;
 
-const ushort kEEmcNumTower     = 720;
-const ushort kEEmcNumPatch     = kEEmcNumTower;
-const ushort kEEmcNumRdo       = kEEmcNumTower;
+const unsigned short kEEmcNumTower     = 720;
+const unsigned short kEEmcNumPatch     = kEEmcNumTower;
+const unsigned short kEEmcNumRdo       = kEEmcNumTower;
 
 const float kEEmcEtaBins[]=
   {
@@ -15,11 +15,11 @@ const float kEEmcEtaBins[]=
   };
 
 /* EEMC calibration constants */
-const ushort kEEmcMaxADC       = 4095;
+const unsigned short kEEmcMaxADC       = 4095;
 const float  kEEmcMaxET        = 60;
 const float  kEEmcIdealGainT   = kEEmcMaxADC / kEEmcMaxET;
 
 
 /* other control flags/settings for the algorithm */
 const int    kEEmcHistoBase    = 1000;
-const ushort kEEmcQAPrescale   = 10;  // reduce frequency of qa histograming
+const unsigned short kEEmcQAPrescale   = 10;  // reduce frequency of qa histograming

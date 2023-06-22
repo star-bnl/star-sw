@@ -323,8 +323,8 @@ L2adc2energyAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 bool
 L2adc2energyAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
-				 int bemcIn, ushort *bemcData,
-				 int eemcIn, ushort *eemcData){
+				 int bemcIn, unsigned short *bemcData,
+				 int eemcIn, unsigned short *eemcData){
   /* STRICT TIME BUDGET  START ....*/
   rdtscl_macro(mEveTimeStart);
 
@@ -535,9 +535,9 @@ L2adc2energyAlgo::clearEvent(){
 //=======================================
 //=======================================
 int 
-L2adc2energyAlgo::projectAdc( ushort *rawAdc, int nRdo,
-	     ushort *thr, ushort *pedS, ushort *gainCorr,
-	     ushort *phiBin, ushort *patchBin,
+L2adc2energyAlgo::projectAdc( unsigned short *rawAdc, int nRdo,
+	     unsigned short *thr, unsigned short *pedS, unsigned short *gainCorr,
+	     unsigned short *phiBin, unsigned short *patchBin,
 	     L2Histo *hHot	 ){
   
   int tmpNused=0; /* counts mapped & used ADC channels */

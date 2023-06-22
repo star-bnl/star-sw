@@ -23,7 +23,7 @@ public:
 	u_char sector1 ;
 	u_char rdo1 ;
 
-	u_char bad_error ;
+	u_int bad_error ;	// flags
 	u_char want_saved ;
 	u_char realtime ;
 
@@ -33,13 +33,15 @@ public:
 	int start_0001(u_short *d16, int shorts) ;
 	int event_0001() ;
 
+	int run_start() ;
+
 	int start(u_short *d16, int shorts) ;
 	int event() ;
 	int event_end(int flag) ;
 
 	static const char *type_c(u_short type) ;
 
-	void set_rdo(int r1) { rdo1 = r1 ; } ;
+//	void set_rdo(int r1) { rdo1 = r1 ; } ;
 
 
 	static struct feb_t {
@@ -64,19 +66,29 @@ public:
 	int xing_min ;
 	int xing_max ;
 
-	int event_any ;
-	int event_data ;
+	u_int event_any ;
+	u_int event_data ;
 
 	u_short version ;	// 0x0001 is the version in May 2021
 	u_short evt_type ;
+	u_short status ;	// from d[3]
+	u_short echo ;		// if echo command
+	unsigned long response ;	// from FEE response packet
+	unsigned long fee_status ;
+
+	u_int datum_ix ;
 
 	u_short *d16_start ;
 	u_short *d16_data ;
 	u_short *d16_last ;
+	
 
-	u_int mhz_start_evt_marker ;
+	
+
+	unsigned long mhz_start_evt_marker ;
 	u_int mhz_stop_evt_marker ;
-	u_int mhz_trg_marker ;
+	unsigned long mhz_trg_marker ;
+	u_short trg_counter ;
 
 	struct stgc_vmm_t vmm ;
 

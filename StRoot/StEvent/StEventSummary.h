@@ -58,6 +58,7 @@ class StEventSummary : public StObject {
 public:
     StEventSummary();
     virtual ~StEventSummary();
+    virtual void Clear (Option_t * opt="");
     
     // StEventSummary& operator=(const StEventSummary&); use default
     // StEventSummary(const StEventSummary&);            use default

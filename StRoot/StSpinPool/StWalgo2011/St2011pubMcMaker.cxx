@@ -63,9 +63,9 @@ St2011pubMcMaker::doWanalysis(){
   //has access to whole W-algo-maker data via pointer 'wMK'
  
   // run through W cuts to fill other histos............
-  for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -230,9 +230,9 @@ St2011pubMcMaker::doWefficiency(){
   //cout<<"diff="<<diff<<endl;
 
   //reco efficiency
-  for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -272,7 +272,7 @@ St2011pubMcMaker::doMCanalysis(){
   StMcVertex *V=mMcEvent->primaryVertex(); 
   mVertex=TVector3(V->position().x(),V->position().y(),V->position().z());
   
-  uint i=1;
+  unsigned int i=1;
   int found=0;
   while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];

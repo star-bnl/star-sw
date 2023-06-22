@@ -103,4 +103,6 @@ void DSMAlgo_BC101_2009::operator()(DSM& dsm)
   dsm.info[0] = jpx;
   dsm.info[1] = jpy;
   dsm.info[2] = jpz;
+  //partial sum
+  dsm.info[3] = jpPartial;
 }

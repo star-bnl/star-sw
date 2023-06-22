@@ -49,6 +49,7 @@ class StETofGeometry;
 class StTrack;
 class StMuTrack;
 class StTrackGeometry;
+class StETofHitMaker;
 
 class TH1;
 class TH2;
@@ -117,7 +118,8 @@ public:
 
     /// read matching parameters from file
     void setFileNameMatchParam( const char* fileName );
-
+    void setFileNameAlignParam( const char* fileName );
+    
     void setOuterGeometry(              const bool outerGeom  );
     void setUseHelixSwimmer(            const bool useSwimmer );
     void setUseOnlyBTofHeaderStartTime( const bool useBTofT0  );
@@ -130,6 +132,8 @@ public:
     void setDebug( const bool debug );
 
     void setMatchDistXYT( const double x, const double y, const double t );
+
+    void setYmax( const double ymax ); 
 
 
 
@@ -165,6 +169,7 @@ private:
     double  timeOfFlight( const double& startTime, const double& stopTime );
     double  expectedTimeOfFlight( const double& pathLength, const double& momentum, const double& mass );
 
+    void    checkClockJumps();
     void    fillQaHistograms(   eTofHitVec& finalMatchVec );
     void    fillSlewHistograms( eTofHitVec& finalMatchVec );
     void    bookHistograms();
@@ -180,9 +185,11 @@ private:
     StEvent*          mEvent;
     StMuDst*          mMuDst;
     StETofGeometry*   mETofGeom;   // pointer to the ETof geometry utility class
-
+    StETofHitMaker*   mETofHitMaker;  // pointer to the HitMaker to pass over correction for clock jumps
+ 
     std::string       mFileNameMatchParam;   // name of parameter file for matching parameters
-
+    std::string	      mFileNameAlignParam;
+    
     Bool_t            mIsStEventIn;
     Bool_t            mIsMuDstIn;
 
@@ -206,7 +213,11 @@ private:
     std::map< Int_t, Int_t >  mIndex2Primary;
 
     Double_t                  mMatchRadius;
+    double                    mLocalYmax;
     std::vector< Double_t >   mTrackCuts;
+
+    std::map< Int_t, Int_t >  mClockJumpCand;
+    std::map< Int_t, Int_t >  mClockJumpDirection;
 
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
@@ -219,6 +230,7 @@ private:
 
 
 inline void StETofMatchMaker::setFileNameMatchParam(         const char* fileName  ) { mFileNameMatchParam         = fileName;   }
+inline void StETofMatchMaker::setFileNameAlignParam(         const char* fileName  ) { mFileNameAlignParam         = fileName;   }
 inline void StETofMatchMaker::setOuterGeometry(              const bool outerGeom  ) { mOuterTrackGeometry         = outerGeom;  }
 inline void StETofMatchMaker::setUseHelixSwimmer(            const bool useSwimmer ) { mUseHelixSwimmer            = useSwimmer; }
 inline void StETofMatchMaker::setUseOnlyBTofHeaderStartTime( const bool useBTofT0  ) { mUseOnlyBTofHeaderStartTime = useBTofT0;  }
@@ -229,6 +241,7 @@ inline void StETofMatchMaker::setNupdatesT0( const int    nUpdatesT0 ) { mNupdat
 inline void StETofMatchMaker::setIsSim(  const bool   isSim  ) { mIsSim = isSim;   }
 inline void StETofMatchMaker::setDoQA(   const bool   doQA   ) { mDoQA  = doQA;    }
 inline void StETofMatchMaker::setDebug(  const bool   debug  ) { mDebug = debug;   }
+inline void StETofMatchMaker::setYmax( const double ymax ) { mLocalYmax = ymax; }
 
 inline StETofGeometry* StETofMatchMaker::etofGeometry() const { return mETofGeom; }
 

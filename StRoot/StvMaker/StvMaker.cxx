@@ -85,6 +85,9 @@ More detailed: 				<br>
 #include "Stv/StvTrack.h"
 #include "Stv/StvNode.h"
 #include "StvStEventMaker.h"
+#include "TString.h"
+#include "TObjString.h"
+
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems

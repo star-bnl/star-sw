@@ -176,12 +176,12 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
             nline =  (d & 0x000000ff);
             oldch = -1;
 	    if (addr > 15 || (oldcrt!=-1 && crate!=oldcrt)){
-		    printf("i=%3d crt=%3d adr=%3d nline=%3d oldcrt=%3d QTBd header bad crt or addr\n",
-			   i,crate,addr,nline,oldcrt);
+		    printf("i=%3d d=%08x crt=%3d adr=%08x nline=%3d oldcrt=%3d QTBd header bad crt or addr\n",
+			   i,d,crate,addr+0x10,nline,oldcrt);
 		    return;
 	    }
             // else {
-		//printf("i=%3d crt=%3d adr=%3d nline=%3d\n",i,crate,addr,nline);
+		//printf("i=%3d d=%08x crt=%3d adr=0x%02x nline=%3d\n",i,d,crate,addr+0x10,nline);
 	    // }
             if(nline>0) header=0;
 	    if(oldcrt==-1) oldcrt=crate;
@@ -194,15 +194,17 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
             if(a==0) flag+=1; 
 	    if((int)ch<=oldch) flag+=2;  
 	    if(ch==31 && a==4095 && t==31) flag+=4;
+	    if(d==0xffffffff) flag+=8;
 	    if(flag>0){
-	      printf("i=%3d crt=%3d adr=%3d ch=%3d oldch=%3d adc=%4d tdc=%4d",
-		     i,crate,addr,ch,oldch,a,t);
+	      printf("i=%3d d=%08x crt=%3d adr=0x%02x ch=%3d oldch=%3d adc=%4d tdc=%4d",
+		     i,d,crate,addr+0x10,ch,oldch,a,t);
 	      if((flag & 0x1)>0) printf(" ADC=0!");
 	      if((flag & 0x2)>0) printf(" OrderWrong!");
-	      if((flag & 0x4)>0) printf(" FFFF!");
+	      if((flag & 0x4)>0) printf(" ffff!");
+	      if((flag & 0x8)>0) printf(" FFFF!");
 	      printf("\n");
 	    }else{
-	      //printf("i=%3d crt=%3d adr=%3d ch=%3d adc=%4d tdc=%4d\n",i,crate,addr,ch,a,t);
+	      //printf("i=%3d d=%08x crt=%3d adr=0x%02x ch=%3d adc=%4d tdc=%4d\n",i,d,crate,addr+0x10,ch,a,t);
 	      adc[addr][ch] = a;
 	      tdc[addr][ch] = t;
 	      oldch=ch;
@@ -239,6 +241,9 @@ unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
 unsigned int StTriggerData::bunchCounterLow() const {return 0;}
 unsigned int StTriggerData::bunchId48Bit() const {return 0;}
 unsigned int StTriggerData::bunchId7Bit() const {return 0;}
+unsigned int StTriggerData::revTick1() const {return 0;}
+unsigned int StTriggerData::revTick2() const {return 0;}
+unsigned int StTriggerData::revTick3() const {return 0;}
 unsigned int StTriggerData::spinBit() const {return 0;}
 unsigned int StTriggerData::spinBitYellowFilled() const {return 0;}
 unsigned int StTriggerData::spinBitYellowUp() const {return 0;}

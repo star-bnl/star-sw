@@ -1,73 +1,69 @@
-/***************************************************************************
- *
- * $Id: StRHICfCollection.h,v 2.1 2018/12/11 19:52:21 ullrich Exp $
- *
- * Author: Akio Ogawa, Minho Kim
- ***************************************************************************
- *
- * RHICf data 
- *
- ***************************************************************************
- *
- * $Log: StRHICfCollection.h,v $
- * Revision 2.1  2018/12/11 19:52:21  ullrich
- * Initial Revision.
- *
- *
- **************************************************************************/
 #ifndef StRHICfCollection_hh
 #define StRHICfCollection_hh
+
+#include <vector>
 
 #include "Stiostream.h"
 #include "StObject.h"
 #include "StContainers.h"
 #include "StEnumerations.h"
 
-class StRHICfCollection : public StObject {
-public:
+#include "StRHICfRawHit.h"
+#include "StRHICfHit.h"
+#include "StRHICfPoint.h"
+
+class StRHICfCollection : public StObject 
+{
+  public:
     StRHICfCollection();
     ~StRHICfCollection();
-    
-    void reset();
-    
-    unsigned int localRunNumber() const;
-    unsigned int localEventNumber() const;
-    unsigned int trgm() const;
-    float        plateE  (unsigned int tower, unsigned int plate);
-    float        barE  (unsigned int tower, unsigned int layer, unsigned int xy, unsigned int bar);
-    unsigned cad (unsigned int cadnum);
-    unsigned tdc (unsigned int tdcnum);
-    unsigned gpio(unsigned int gpionum);
-    
-    void setLocalRunNumber(unsigned int);
-    void setLocalEventNumber(unsigned int);
-    void setTrgm(unsigned);
-    void setPlateE(unsigned int tower, unsigned int plate, float E);
-    void setBarE(unsigned int tower, unsigned int layer, unsigned int xy, unsigned int bar, float E);
-    void setCad(unsigned int cadnum, unsigned int cad);
-    void setTdc(unsigned int tdcnum, unsigned int tdc);
-    void setGpio(unsigned int gpionum, unsigned int gpio);
-    
-    void print(int option=0);
-    
-private:
-    bool check(unsigned int tower, unsigned int plate);
-    bool check(unsigned int tower, unsigned int layer, unsigned int xy, unsigned int bar);
-    bool checkCad(unsigned int num);
-    bool checkTdc(unsigned int num);
-    bool checkGpio(unsigned int num);
-    
-protected:
-    UInt_t   mLocalRunNumber;
-    UInt_t   mLocalEventNumber;
-    UInt_t   mTrgm;
-    float          mPlateE         [kRHICfNtower][kRHICfNplate];
-    float          mBarE           [kRHICfNtower][kRHICfNlayer][kRHICfNxy][kRHICfNbarLarge];
-    unsigned int   mCad            [kRHICfNcad];
-    unsigned int   mTdc            [kRHICfNtdc];
-    unsigned int   mGpio           [kRHICfNgpio];
 
-	ClassDef(StRHICfCollection,1)
+    void clear();
+
+    // main RHICf data structure
+    StRHICfRawHit* rawHitCollection();
+    StRHICfHit* hitCollection();
+
+    void addPoint(StRHICfPoint* pointColl); 
+    void addPointCollection(std::vector<StRHICfPoint*> coll);
+    std::vector<StRHICfPoint*>& pointCollection();    // Return the point list
+    const std::vector<StRHICfPoint*>& pointCollection() const;
+
+    // run header 
+    void isAllSave();
+    void setRHICfRunNumber(UInt_t run);
+    void setRHICfEventNumber(UInt_t event);
+    void setBunchNumber(UInt_t bunch);
+    void setRunType(UInt_t type);
+    void setTriggerNumber(UInt_t trigger);
+    void setRunTime(Int_t idx, UInt_t time);
+    void setRunTRGM(UInt_t trgm);
+
+    UInt_t numberOfPoints() const;
+    UInt_t getRHICfRunNumber() const;
+    UInt_t getRHICfEventNumber() const;
+    UInt_t getBunchNumber();
+    UInt_t getRunType();
+    UInt_t getTriggerNumber();
+    UInt_t getRunTime(Int_t idx);
+    UInt_t getRunTRGM();
+
+  private:
+    StRHICfRawHit* mRHICfRawHitColl; 
+    StRHICfHit* mRHICfHitColl; 
+    std::vector<StRHICfPoint*> mRHICfPointColl; 
+
+    // Important note: the _RHICf_ Run and Event numbers are distinct from the _STAR_ Run and Event numbers,
+    // originating from RHICf's own raw data acquisition and studies outside of the STAR framework
+    UInt_t mRHICfRunNumber;
+    UInt_t mRHICfEventNumber;
+    UInt_t mBunchNumber;
+    UInt_t mRunType;
+    UInt_t mRHICfTrigger;
+    UInt_t mRunTime[kRHICfNorder];
+    UInt_t mRunTRGM;
+
+  ClassDef(StRHICfCollection,2)
 };
 
 #endif

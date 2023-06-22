@@ -12,20 +12,6 @@
 #include "Rstrstream.h"
 #ifdef R__SSTREAM
 using std::streamsize;
-class ostrstream : public std::ostringstream {
-std::string myString;
-public:
-const char *str()         
-{
-  std::string tmp = std::ostringstream::str();
-  if (myString != tmp) myString=tmp;
-  return myString.c_str();
-}	
-int        pcount()       {return int(tellp()) ;}
-void       seekp(int pos) {if (int(tellp())>=0) std::ostringstream::seekp(pos);}
-void freeze(bool) const{;}
-};	
-
 
 class istrstream : public std::istringstream {
 public:

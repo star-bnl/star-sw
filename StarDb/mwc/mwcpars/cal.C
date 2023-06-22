@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/mwcpars/cal Allocated rows: 384  Used rows: 384  Row size: 12 bytes
 //  Table: mwc_cal_st[0]--> mwc_cal_st[383]
@@ -1929,5 +1929,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.ps	 =          0; // Pedestal dispersion ;
 tableSet->AddAt(&row,383);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

@@ -27,6 +27,8 @@
 #include "StEvent/StTriggerData2018.h"
 #include "StDaqLib/TRG/trgStructures2019.h"
 #include "StEvent/StTriggerData2019.h"
+#include "StDaqLib/TRG/trgStructures2022.h"
+#include "StEvent/StTriggerData2022.h"
 #include "TFile.h"
 #include "TH1.h"
 
@@ -60,6 +62,7 @@ Int_t StTriggerDataMaker::Make()
   const TriggerDataBlk2017 *trgdata2017=0;
   const TriggerDataBlk2018 *trgdata2018=0;
   const TriggerDataBlk2019 *trgdata2019=0;
+  const TriggerDataBlk2022 *trgdata2022=0;
 
   St_DataSet* daqReaderDS = GetDataSet("StDAQReader");
   if (!daqReaderDS) return kStWarn;
@@ -107,10 +110,8 @@ Int_t StTriggerDataMaker::Make()
       char* data = daqData->GetTable();
       if(data){
 	char version = data[3];
-	{ 
-	  LOG_INFO << Form("StTriggerDataMaker Make() found new data formt with version = %02x%02x%02x%02x\n",
-			   data[0],data[1],data[2],data[3]);
-	}
+	LOG_INFO << Form("StTriggerDataMaker Make() found new data formt with version = %02x%02x%02x%02x",
+			 data[0],data[1],data[2],data[3]) << endm;
 	switch(version){
 	case 0x40:
 	  year=2009;
@@ -147,6 +148,11 @@ Int_t StTriggerDataMaker::Make()
 	  trgdata2019 = (TriggerDataBlk2019*)data;
 	  AddData(new TObjectSet("StTriggerData",new StTriggerData2019(trgdata2019,run,1,mDebug),kTRUE));	
 	  break;	
+	case 0x47:
+	  year=2022;
+	  trgdata2022 = (TriggerDataBlk2022*)data;
+	  AddData(new TObjectSet("StTriggerData",new StTriggerData2022(trgdata2022,run,1,mDebug),kTRUE));	
+	  break;	
 	default:
 	  LOG_INFO << "StTriggerDataMaker Make() found new data but with unknown version = " << version << endm;
 	}
@@ -166,7 +172,7 @@ Int_t StTriggerDataMaker::Make()
     if (os) {
       StTriggerData* pTrg = (StTriggerData*)os->GetObject();
       if(pTrg){
-	//if(mDebug>0) pTrg->dump();
+	// if(mDebug>0) pTrg->dump();
 	unsigned int err = pTrg->errorFlag();
 	LOG_DEBUG << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year <<" mErrorFlag="<<err<<endm;  
 	if(err==0){

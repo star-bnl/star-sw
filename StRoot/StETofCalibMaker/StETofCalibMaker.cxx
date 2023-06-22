@@ -43,21 +43,27 @@
 #include <fstream>
 #include <cmath>
 #include <iterator>
+#include <algorithm>
 
 #include "TString.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TClass.h"
+#include "TObject.h"
 #include "TProfile.h"
 
 #include "StChain/StChainOpt.h" // for renaming the histogram file
 
 #include "StEvent.h"
+
 #include "StETofCollection.h"
+#include "StETofHeader.h"
 #include "StETofDigi.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
+#include "StMuDSTMaker/COMMON/StMuETofHeader.h"
 
 #include "StETofCalibMaker.h"
 #include "StETofUtil/StETofHardwareMap.h"
@@ -104,8 +110,10 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mResetTimeCorr( 0. ),
   mTriggerTime( 0. ),
   mResetTime( 0. ),
+  mResetTs( 0 ),
   mPulserPeakTime( 0. ),
   mReferencePulserIndex( 0 ),
+  mStrictPulserHandling( 0 ),
   mUsePulserGbtxDiff( true ),
   mDoQA( false ),
   mDebug( false ),
@@ -124,8 +132,15 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
     mPulserPeakTot.clear();
     mPulserTimeDiff.clear();
     mPulserTimeDiffGbtx.clear();
+	 mNPulsersCounter.clear();
+	 mNStatusBitsCounter.clear();
+	 mPulserPresent.clear();
 
     mJumpingPulsers.clear();
+
+    mUnlockPulserState.clear();
+
+    mStuckFwDigi.clear();
 
     mHistograms.clear();
 }
@@ -333,7 +348,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     for( const auto& kv : mPulserWindow ) {
         LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> pulser window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
     }
-    LOG_INFO << "pulser time peak at " << mPulserPeakTime << " ns" << endm;
+    LOG_DEBUG << "pulser time peak at " << mPulserPeakTime << " ns" << endm;
     // --------------------------------------------------------------------------------------------
 
     // calib param
@@ -405,6 +420,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     LOG_INFO << " minimal number of digis required in slewing bin: " << mMinDigisPerSlewBin   << endm;
     LOG_INFO << " reference pulser index: "                          << mReferencePulserIndex << endm;
 
+   
     // --------------------------------------------------------------------------------------------
 
     // signal velocities
@@ -603,7 +619,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             kv.second->SetDirectory( 0 );
         }
     }
-    else {
+    else {//input from file
         LOG_INFO << "etof calibration histograms: filename provided --> use parameter file: " << mFileNameCalibHistograms.c_str() << endm;
 
         if( !isFileExisting( mFileNameCalibHistograms ) ) {
@@ -612,10 +628,40 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
         TFile* histFile = new TFile( mFileNameCalibHistograms.c_str(), "READ" );
 
-        if( !histFile || histFile->IsZombie() ) {
-            LOG_ERROR << "unable to open file: " << mFileNameCalibHistograms.c_str() << endm;
+        if( !histFile ) {
+            LOG_ERROR << "No calibration file found: " << mFileNameCalibHistograms.c_str() << endm;
             LOG_INFO  << "setting all parameters to default" << endm;
+        }else if( histFile->IsZombie() ){
+            LOG_ERROR << "Zombie calibration file: " << mFileNameCalibHistograms.c_str() << endm;
+            LOG_INFO  << "stopping execution" << endm;
+            return kStFatal;        
         }
+
+        TFile* histOffsetFile = new TFile( mFileNameOffsetHistograms.c_str(), "READ" ); //create setter!
+
+        if( !histOffsetFile ) {
+            LOG_INFO << "No offset file found: " << mFileNameOffsetHistograms.c_str() << endm;
+            LOG_INFO  << "setting all parameters to default" << endm;
+        }else if( histOffsetFile->IsZombie() ) {
+            LOG_ERROR << "Zombie offset file: " << mFileNameOffsetHistograms.c_str() << endm;
+            LOG_INFO  << "stopping execution" << endm;
+            return kStFatal;        
+        }else{
+            LOG_INFO  << "Successfully opened RunOffset file  "<< mFileNameOffsetHistograms.c_str() << endm;
+			}
+
+
+
+        TString hPosOffsetName = Form( "calib_Run%d_PosOffsets_pfx", runnumber );
+        TString hT0OffsetName = Form( "calib_Run%d_T0Offsets_pfx", runnumber );
+		  TProfile* hPosOffsetProfile = nullptr;
+		  TProfile* hT0OffsetProfile = nullptr;
+		  		  
+		  if( histOffsetFile && !(histOffsetFile->IsZombie()) ){
+           LOG_INFO  << "Getting run offset histograms Pos: "<< hPosOffsetName << " T0: "<< hT0OffsetName << endm;
+		  	  hPosOffsetProfile = ( TProfile* ) histOffsetFile->Get( hPosOffsetName );
+		  	  hT0OffsetProfile = ( TProfile* ) histOffsetFile->Get( hT0OffsetName );
+		  }
 
         for( unsigned int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
 
@@ -630,6 +676,8 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
                     TString hname;
                     TProfile* hProfile;
+
+					
                     //-------------------
                     // digi tot corr
                     //-------------------
@@ -644,14 +692,14 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                     if( hProfile ) {
                         for( size_t i=1; i<=2 * eTofConst::nStrips; i++ ) {
                             if( hProfile->GetBinContent( i ) != 0 ) {
-                                mDigiTotCorr.at( key )->SetBinContent( i , 2. / hProfile->GetBinContent( i ) );
+                                mDigiTotCorr.at( key )->SetBinContent( i , hProfile->GetBinContent( i ) );
                             }
                             else {
                                 mDigiTotCorr.at( key )->SetBinContent( i , 1. );
                             }
 
 
-                            if( mDigiTotCorr.at( key )->GetBinContent( i ) > 10. ) {
+                            if( mDigiTotCorr.at( key )->GetBinContent( i ) < 0.05 || mDigiTotCorr.at( key )->GetBinContent( i ) > 10 ) {
                                 mDigiTotCorr.at( key )->SetBinContent( i , 1. );
                             }
                         }
@@ -681,10 +729,19 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                     hname = Form( "calib_Sector%02d_ZPlane%d_Det%d_Pos_pfx", sector, zPlane, counter );
                     hProfile = ( TProfile* ) histFile->Get( hname );
 
+						  double dRunOffset = 0;
+						  if (hPosOffsetProfile) {						  
+						  		int mCounterBin = hPosOffsetProfile->FindBin(  9*(sector -13) + 3 * (zPlane - 1) + counter );
+			 					dRunOffset = hPosOffsetProfile->GetBinContent( mCounterBin );
+            			   LOG_DEBUG  << "setting run position offset to "<< dRunOffset<< " for counter "<< ( 9*(sector -13) + 3 * (zPlane - 1) + counter ) << endm;
+						  }else{
+            			   LOG_INFO  << "position offset histogram "<<hPosOffsetName <<" not found" << endm;
+						  }
+
                     if( hProfile ) {
                         for( size_t i=1; i<= eTofConst::nStrips; i++ ) {
-                            mDigiTimeCorr.at( key )->AddBinContent( i , -1. * hProfile->GetBinContent( i ) / mSignalVelocity.at( key ) );
-                            mDigiTimeCorr.at( key )->AddBinContent( eTofConst::nStrips + i , hProfile->GetBinContent( i ) / mSignalVelocity.at( key ) );
+                            mDigiTimeCorr.at( key )->AddBinContent( i , -1. * ( hProfile->GetBinContent( i ) + dRunOffset ) / mSignalVelocity.at( key ) );
+                            mDigiTimeCorr.at( key )->AddBinContent( eTofConst::nStrips + i , ( hProfile->GetBinContent( i ) + dRunOffset ) / mSignalVelocity.at( key ) );
                         }
                     }
                     else{
@@ -697,17 +754,24 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                     hname = Form( "calib_Sector%02d_ZPlane%d_Det%d_T0corr", sector, zPlane, counter );
                     hProfile = ( TProfile* ) histFile->Get( hname );
 
+						  dRunOffset = 0;
+						  if (hT0OffsetProfile) {						  
+								int mCounterBin = hT0OffsetProfile->FindBin(  9*(sector -13) + 3 * (zPlane - 1) + counter );
+			 					dRunOffset = hT0OffsetProfile->GetBinContent( mCounterBin );
+						  }
+            			LOG_DEBUG  << "setting run time offset to "<< dRunOffset<< " for counter "<< ( 9*(sector -13) + 3 * (zPlane - 1) + counter ) << endm;
+
                     if( hProfile && hProfile->GetNbinsX() == 1 ) {
                         LOG_DEBUG << "T0 histogram with 1 bin: " << key << endm;
                         for( size_t i=1; i<=2 * eTofConst::nStrips; i++ ) {
-                            mDigiTimeCorr.at( key )->AddBinContent( i , hProfile->GetBinContent( 1 ) );
+                            mDigiTimeCorr.at( key )->AddBinContent( i , hProfile->GetBinContent( 1 ) + dRunOffset );
                         }
                     }
                     else if( hProfile && hProfile->GetNbinsX() == eTofConst::nStrips ) {
                         LOG_DEBUG << "T0 histogram with 32 bins: " << key << endm;
                         for( size_t i=1; i<= eTofConst::nStrips; i++ ) {
-                            mDigiTimeCorr.at( key )->AddBinContent( i ,                      hProfile->GetBinContent( i ) );
-                            mDigiTimeCorr.at( key )->AddBinContent( i + eTofConst::nStrips , hProfile->GetBinContent( i ) );
+                            mDigiTimeCorr.at( key )->AddBinContent( i ,                      hProfile->GetBinContent( i ) + dRunOffset );
+                            mDigiTimeCorr.at( key )->AddBinContent( i + eTofConst::nStrips , hProfile->GetBinContent( i ) + dRunOffset );
                         }
                     }
                     else{
@@ -1037,12 +1101,28 @@ StETofCalibMaker::Make()
     LOG_DEBUG << "StETofCalibMaker::Make(): starting ..." << endm;
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
+    //mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
 
     if ( mEvent ) {
         LOG_DEBUG << "Make(): running on StEvent" << endm;
 
+        StETofCollection* etofCollection = mEvent->etofCollection();
+      
+        if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+           LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+           mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+      
+           if( mMuDst ) {
+               LOG_DEBUG << "Make() - running on MuDsts" << endm;
+      
+               processMuDst();
+      
+               return kStOk;
+           }
+        }
+
         processStEvent();
-        
+
         return kStOk;
     }
     else {
@@ -1092,6 +1172,21 @@ StETofCalibMaker::processStEvent()
     StETofHeader*      etofHeader = etofCollection->etofHeader();
     StSPtrVecETofDigi& etofDigis  = etofCollection->etofDigis();
 
+		/*if( mDoQA ){
+			LOG_INFO << "filling missmatch histograms now" << endm;
+			TClass* headerClass = etofHeader->IsA();
+			if( headerClass->GetClassVersion() > 1 ){
+			  LOG_INFO << "getting missmatch vector" << endm;
+			  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec(); //lookup error?
+				int iGet4Id = 0;
+				for( auto iMissMatchFlag : vMissmatchVec ){
+					int iCounter = iGet4Id % 16; //probalby wrong!				
+			  		mHistograms[ "ETOF_QA_daqMissmatches_get4" ]->Fill(iGet4Id, iMissMatchFlag); 
+			  		mHistograms[ "ETOF_QA_daqMissmatches_counter" ]->Fill(iCounter, iMissMatchFlag);
+				}
+			} 
+		}*/
+
     size_t nDigis = etofDigis.size();
     if( mDebug ) {
         LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
@@ -1104,15 +1199,18 @@ StETofCalibMaker::processStEvent()
 
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
+          //  LOG_INFO << "Digi array" << endm;
         StETofDigi* aDigi =  etofDigis[ i ];
 
         if( !aDigi ) {
             LOG_WARN << "No digi found" << endm;
             continue;
         }
+        //    LOG_INFO << "Digi reset" << endm;
         /// reset digi to carry only raw information (needed for afterburner mode)
         resetToRaw( aDigi );
 
+        //    LOG_INFO << "Mapping reset" << endm;
         /// apply hardware mapping from rocId, chipId, channelId to
         /// sector, zplane, counter, strip, side 
         applyMapping( aDigi );
@@ -1123,17 +1221,50 @@ StETofCalibMaker::processStEvent()
         }
     }
 
+           // LOG_INFO << "pulsers" << endm;
     if( mDebug ) {
         LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
     }
     calculatePulserOffsets( pulserCandMap );
-
+   
+    // collect status bit information and fill good event flag for 2020+ data
+	 TClass* headerClass = etofHeader->IsA();
+	 if( headerClass->GetClassVersion() > 2 ){
+	 	mNStatusBitsCounter.clear();			
+	  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
+		int iGet4Id = 0;
+		for( auto iMissMatchFlag : vMissmatchVec ){
+			// From DigiMaker:
+		   // mMissMatchFlagVec.at( 144 * ( sector - 13 ) + 48 * ( zplane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 ) ) = true;
+		   if (iMissMatchFlag == false) continue;			
+			int iCounter = iGet4Id / 16;
+			if( mNStatusBitsCounter.count(iCounter) ){
+				mNStatusBitsCounter[iCounter]++;
+			}else{
+				mNStatusBitsCounter[iCounter] = 1;
+			}	
+		 }
+		
+		std::vector<bool> goodEventFlagVec; 	
+	  	for( int iCounter = 0; iCounter < 108; iCounter++){
+	  		if ( !(mNPulsersCounter.count(iCounter) ) ){
+	  			goodEventFlagVec.push_back(false);
+	  		}else{
+		  		if ( !(mNStatusBitsCounter.count(iCounter)) && mNPulsersCounter[iCounter] == 2){
+		  			goodEventFlagVec.push_back(true); //true when 2 pulser digis and zero status bits are available on this counter
+		  		}else{
+		  			goodEventFlagVec.push_back(false);
+		  		}
+		  	}
+	  	}
+	  	if (goodEventFlagVec.size() == 108){
+	  		etofHeader->setGoodEventFlagVec(goodEventFlagVec);
+	  	}   
+	  }
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
-    int    previousGeomId = -1;
-    double previousTot    = -1.;
-    double previousTime   = -1.;
-
+    StructStuckFwDigi current = { -1, -1., -1. };
+    StructStuckFwDigi prev    = { -1, -1., -1. };
     int nDuplicates = 0;
 
     for( size_t i=0; i<nDigis; i++ ) {
@@ -1144,25 +1275,29 @@ StETofCalibMaker::processStEvent()
             continue;
         }
 
-        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
-        int    currentGeomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
-        double currentTot    = aDigi->rawTot();
-        double currentTime   = aDigi->rawTime();
+        current.geomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
+        current.tot    = aDigi->rawTot();
+        current.time   = aDigi->rawTime();
 
-        if( currentGeomId == previousGeomId &&
-            fabs( currentTime - previousTime ) < 1.e-5 &&
-            fabs( currentTot - previousTot ) < 1.e-5 )
-        {
+        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
+        auto it = std::find( mStuckFwDigi.begin(), mStuckFwDigi.end(), current );
+        if( it != mStuckFwDigi.end() ) {
             if( mDebug ) {
-                LOG_INFO << "digi from stuck firmware --> ignore" << endm;
+                LOG_INFO << "digi from stuck firmware (s" << aDigi->sector() << " m" << aDigi->zPlane() << " c" << aDigi->counter() << ") --> ignore" << endm;
             }
+
+            nDuplicates++;
+            continue;
+        }
+        else if( current == prev ) {
+            mStuckFwDigi.push_back( current );
+            resetToRaw( mMuDst->etofDigi( i-1 ) );
+
             nDuplicates++;
             continue;
         }
         else {
-            previousGeomId = currentGeomId;
-            previousTot    = currentTot;
-            previousTime   = currentTime;
+            prev = current;
         }
 
 
@@ -1171,9 +1306,13 @@ StETofCalibMaker::processStEvent()
         applyCalibration( aDigi, etofHeader );
     }
 
-    if( mDebug && nDuplicates > 0 ) {
+    if( mDoQA && nDuplicates > 0 ) {
         LOG_INFO << "*** # duplicate digis from stuck firmware: " << nDuplicates << endm;
+        for( const auto& v : mStuckFwDigi ) {
+            LOG_INFO << "stuck channel with geomId: " << v.geomId << "  " << v.tot << "  " << v.time << endm;
+        }
     }
+    mStuckFwDigi.clear();
 }
 
 
@@ -1200,19 +1339,35 @@ StETofCalibMaker::processMuDst()
     }
 
     StMuETofHeader* etofHeader = mMuDst->etofHeader();
+    mNPulsersCounter.clear();
 
     //---------------------------------
 
+/*	if( mDoQA ){
+		LOG_INFO << "filling missmatch histograms now" << endm;
+		TClass* headerClass = etofHeader->IsA();
+		if( headerClass->GetClassVersion() > 1 ){
+		  LOG_INFO << "getting missmatch vector" << endm;
+		  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec(); //lookup error?
+			int iGet4Id = 0;
+			for( auto iMissMatchFlag : vMissmatchVec ){
+				int iCounter = iGet4Id % 16; //probalby wrong!				
+		  		mHistograms[ "ETOF_QA_daqMissmatches_get4" ]->Fill(iGet4Id, iMissMatchFlag); 
+		  		mHistograms[ "ETOF_QA_daqMissmatches_counter" ]->Fill(iCounter, iMissMatchFlag);
+			}
+		} 
+	}*/
+
     size_t nDigis = mMuDst->numberOfETofDigi();
-    LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
+    //LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
 
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
     mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );
-
     std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
 
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
+        //LOG_INFO << "accessing etof digis: "<< i <<"/"<< nDigis << endm;
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
 
         if( !aDigi ) {
@@ -1220,29 +1375,65 @@ StETofCalibMaker::processMuDst()
             continue;
         }
         /// reset digi to carry only raw information (needed for afterburner mode)
+        //LOG_INFO << "resetting digi "<< i <<"/"<< nDigis << endm;
         resetToRaw( aDigi );
 
         /// apply hardware mapping from rocId, chipId, channelId to
-        /// sector, zplane, counter, strip, side 
+        /// sector, zplane, counter, strip, side
+        //LOG_INFO << "mapping digi: "<< i <<"/"<< nDigis << endm; 
         applyMapping( aDigi );
 
         /// flag pulser digis
+    //LOG_INFO << "pulser digi flagging: "<< i <<"/"<< nDigis << endm;
         if( mRunYear != 2018 ) {
             flagPulserDigis( aDigi, i, pulserCandMap );
         }
     }
 
-    LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
+    //LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
 
     calculatePulserOffsets( pulserCandMap );
-
+    
+    // collect status bit information and fill good event flag for 2020+ data
+	 TClass* headerClass = etofHeader->IsA();
+	 if( headerClass->GetClassVersion() > 2 ){
+	 	mNStatusBitsCounter.clear();			
+	  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
+		int iGet4Id = 0;
+		for( auto iMissMatchFlag : vMissmatchVec ){
+			// From DigiMaker:
+		   // mMissMatchFlagVec.at( 144 * ( sector - 13 ) + 48 * ( zplane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 ) ) = true;
+		   if (iMissMatchFlag == false) continue;			
+			int iCounter = iGet4Id / 16;
+			if( mNStatusBitsCounter.count(iCounter) ){
+				mNStatusBitsCounter[iCounter]++;
+			}else{
+				mNStatusBitsCounter[iCounter] = 1;
+			}	
+		 }
+		
+		std::vector<bool> goodEventFlagVec; 	
+	  	for( int iCounter = 0; iCounter < 108; iCounter++){
+	  		if ( !(mNPulsersCounter.count(iCounter) ) ){
+	  			goodEventFlagVec.push_back(false);
+	  		}else{
+		  		if ( !(mNStatusBitsCounter.count(iCounter)) && mNPulsersCounter[iCounter] == 2){
+		  			goodEventFlagVec.push_back(true); //true when 2 pulser digis and zero status bits are available on this counter
+		  		}else{
+		  			goodEventFlagVec.push_back(false);
+		  		}
+		  	}
+	  	}
+	  	if (goodEventFlagVec.size() == 108){
+	  		etofHeader->setGoodEventFlagVec(goodEventFlagVec);
+	  	}   
+	  }
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
-    int    previousGeomId = -1;
-    double previousTot    = -1.;
-    double previousTime   = -1.;
-
+    StructStuckFwDigi current = { -1, -1., -1. };
+    StructStuckFwDigi prev    = { -1, -1., -1. };
     int nDuplicates = 0;
+
     for( size_t i=0; i<nDigis; i++ ) {
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
 
@@ -1251,25 +1442,29 @@ StETofCalibMaker::processMuDst()
             continue;
         }
 
-        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
-        int    currentGeomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
-        double currentTot    = aDigi->rawTot();
-        double currentTime   = aDigi->rawTime();
+        current.geomId = aDigi->sector() * 100000 + aDigi->zPlane() * 10000 + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
+        current.tot    = aDigi->rawTot();
+        current.time   = aDigi->rawTime();
 
-        if( currentGeomId == previousGeomId &&
-            fabs( currentTime - previousTime ) < 1.e-5 &&
-            fabs( currentTot - previousTot ) < 1.e-5 )
-        {
+        // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
+        auto it = std::find( mStuckFwDigi.begin(), mStuckFwDigi.end(), current );
+        if( it != mStuckFwDigi.end() ) {
             if( mDebug ) {
-                LOG_INFO << "digi from stuck firmware --> ignore" << endm;
+                LOG_INFO << "digi from stuck firmware (s" << aDigi->sector() << " m" << aDigi->zPlane() << " c" << aDigi->counter() << ") --> ignore" << endm;
             }
+
+            nDuplicates++;
+            continue;
+        }
+        else if( current == prev ) {
+            mStuckFwDigi.push_back( current );
+            resetToRaw( mMuDst->etofDigi( i-1 ) );
+
             nDuplicates++;
             continue;
         }
         else {
-            previousGeomId = currentGeomId;
-            previousTot    = currentTot;
-            previousTime   = currentTime;
+            prev = current;
         }
 
 
@@ -1278,9 +1473,13 @@ StETofCalibMaker::processMuDst()
         applyCalibration( aDigi, etofHeader );
     }
 
-    if( mDebug && nDuplicates > 0 ) {
+    if( mDoQA && nDuplicates > 0 ) {
         LOG_INFO << "*** # duplicate digis from stuck firmware: " << nDuplicates << endm;
+        for( const auto& v : mStuckFwDigi ) {
+            LOG_INFO << "stuck channel with geomId: " << v.geomId << "  " << v.tot << "  " << v.time << endm;
+        }
     }
+    mStuckFwDigi.clear();
 }
 //_____________________________________________________________
 
@@ -1301,6 +1500,8 @@ StETofCalibMaker::isFileExisting( const std::string fileName )
 void
 StETofCalibMaker::resetToRaw( StETofDigi* aDigi )
 {
+    if( !aDigi ) return;
+
     aDigi->setGeoAddress( 0, 0, 0, 0, 0 );
     aDigi->setCalibTime( 0. );
     aDigi->setCalibTot( -1. );
@@ -1369,9 +1570,10 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
     if( ( aDigi->strip() == 1 && aDigi->side() == 1 ) || ( aDigi->strip() == 32 && aDigi->side() == 2 ) ) {
         float timeToTrigger = aDigi->rawTime() - mTriggerTime;
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
+        float totToHalfPeak = aDigi->rawTot()  - mPulserPeakTot.at( key ) * 0.5;
 
         if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
-            if( fabs( totToPeak ) < 25 ) {
+            if( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) {
                 isPulserCand = true;
             }
         }
@@ -1409,8 +1611,9 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
     }
 
-
     std::map< int, double > pulserTimes;
+    mNPulsersCounter.clear();
+	 mPulserPresent.clear(); //clear map of present pulsers in each event
 
     // loop over all candidates to find real pulser, save time in pulserTimes map
     for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
@@ -1425,15 +1628,13 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         for( size_t j=0; j<it->second.size(); j++ ) {
             double pulserTime = 0.;
             double pulserTot  = 0.;
-            if( mEvent ) {
+            if( mMuDst ) {
+                pulserTime = mMuDst->etofDigi( it->second.at( j ) )->rawTime();
+                pulserTot  = mMuDst->etofDigi( it->second.at( j ) )->rawTot();
+            } else if( mEvent ) {
                 pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTime();
                 pulserTot  = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTot();
             }
-            else if( mMuDst ) {
-                pulserTime = mMuDst->etofDigi( it->second.at( j ) )->rawTime();
-                pulserTot  = mMuDst->etofDigi( it->second.at( j ) )->rawTot();
-            }
-
             double timeToTrigger = pulserTime - mTriggerTime;
             double totToPeak     = pulserTot  - mPulserPeakTot.at( sideIndex );
 
@@ -1442,7 +1643,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             }
             
             // find "best fitting digi", remove other digis (likely misidentified noise)
-            double currentDiff = fabs( timeToTrigger - mPulserPeakTime ) * 0.1 + fabs( totToPeak );
+            double currentDiff = fabs( timeToTrigger - mPulserPeakTime ) * 0.1 + fabs( totToPeak );   // might need better criterion? Normalisation to widths? PW
             if( currentDiff < bestDiff ) {
                 bestDiff = currentDiff;
                 candIndex = j;
@@ -1454,32 +1655,42 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         }
 
         double pulserTime = 0.;
-        if( mEvent ) {
+
+        if( mMuDst ) {
+            pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
+
+            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
+            mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
+        } else if( mEvent ) {
             pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( candIndex ) ]->rawTime();
 
             // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
             mEvent->etofCollection()->etofDigis() [ it->second.at( candIndex ) ]->setCalibTot( -999. );
         }
-        else if( mMuDst ) {
-            pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
-
-            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
-            mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
-        }
 
         pulserTimes[ sideIndex ] = pulserTime;
+        
+        int sector = sideIndex / 1000;
+        int plane  = ( sideIndex % 1000) / 100;
+        int counter  = ( sideIndex % 100) / 10;
+        int key = 9 * ( sector - 13 ) + 3 * ( plane - 1 ) + ( counter - 1 ); 
+        if( mNPulsersCounter.count( key ) ){
+        		mNPulsersCounter[key]++;        
+        }else{
+            mNPulsersCounter[key] = 1;        
+        }
+
+		  mPulserPresent[ sideIndex ] = true;
     }
-
-
 
     double referenceTime = 0.;
 
     // update reference time (for QA)
+  if( pulserTimes.count( mReferencePulserIndex ) ) {
+    referenceTime = pulserTimes.at( mReferencePulserIndex ); //only updated for QA?? needed to remove smeared pulsers
     if( mDoQA ) {
-        if( pulserTimes.count( mReferencePulserIndex ) ) {
-            referenceTime = pulserTimes.at( mReferencePulserIndex );
             if( mDebug ) {
-                LOG_INFO << "time of reference pulser updated" << endm;
+                LOG_INFO << "preliminary reference time:" << referenceTime << endm;
             }
         }
     }
@@ -1503,7 +1714,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                 int key = partialKey + 10 * counter;
 
                 if( pulserTimes.count( key ) ) {
-                    if( mDoQA ) {
+                    if( mDoQA ) {// fill if all relevant pulsers are available.
                         if( pulserTimes.count( partialKey + 10 ) ) {
                             mHistograms.at( "pulserDigiTimeToCounter1" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( partialKey + 10 ) - pulserTimes.at( key ) );
                         }
@@ -1515,26 +1726,54 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                         }
                     }
 
-                    times.at( counter - 1 ) = pulserTimes.at( key ) + mPulserTimeDiffGbtx.at( key );
+                    times.at( counter - 1 ) = pulserTimes.at( key ) + mPulserTimeDiffGbtx.at( key ); //substract pulser time difference from database table
 
-                    average += times.at( counter - 1 );
-                    nAv++;
+                    bool isNonSmearedPulser = false;
+                    if( referenceTime != 0 ) { 
+                        double dist    = times.at( counter - 1 ) - referenceTime; //distance to reference pulser
+                        double redDist = mHistograms.at( "pulserDigiTimeDiff_GbtxCorrProfMod" )->GetBinContent( gbtxId * eTofConst::nCounters + counter ); // average distance to next clock edge for this pulser
+                        
+                        double modDist = fmod( dist - redDist, eTofConst::coarseClockCycle ); //Distance to "normal" offset. full clock cycle distances are thrown out? Why? 
+                        modDist = modDist - eTofConst::coarseClockCycle * round( modDist / eTofConst::coarseClockCycle ); //substract a clock cycle if modDist > 0.5 coarseClockCycle 
+                        //=> -0.5*coarseClockCycle < modDist < 0.5*coarseClockCycle => Distance to closest clock cycle
+                        
+                        if( redDist == 0 || fabs( modDist ) > 0.5 ) { //> 0.5ns + n*ClockCycle away from reference pulser. Hard cut? If the first pulser is off, all following will be neglected!
+                            if( redDist != 0 ) LOG_INFO << "too far away --> smeared pulser: " << key << "(" << gbtxId << "-" << counter << ")" << endm;
+                            redDist = dist; //empty in the beginning, Example distance to reference pulser
+                        }
+                        else {
+                            redDist += modDist; //adds always up?
+                            isNonSmearedPulser = true;
+                        }
+          
+                        mHistograms.at( "pulserDigiTimeDiff_GbtxCorrProf"    )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, dist    );
+                        mHistograms.at( "pulserDigiTimeDiff_GbtxCorrProfMod" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, redDist ); // TProfile! => Average!
 
-                    if( mDoQA && referenceTime != 0 ) {
-                        mHistograms.at( "pulserDigiTimeDiff"          )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( key )   - referenceTime );
-                        mHistograms.at( "pulserDigiTimeDiff_GbtxCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, times.at( counter - 1 ) - referenceTime );
+                        if( mDoQA ) {
+                            mHistograms.at( "pulserDigiTimeDiff_GbtxCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, dist ); //Pulser offset on GBTX from database substracted
+                            mHistograms.at( "pulserDigiTimeDiff"          )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, pulserTimes.at( key ) - referenceTime ); //Pulser offset on GBTX not substracted
+                        }
                     }
+
+                    // only use non-smeared pulsers for the 
+                    if( isNonSmearedPulser ) {
+                        average += times.at( counter - 1 );
+                        nAv++;
+                    }
+                    else {
+                        times.at( counter - 1 ) = 0.;
+                    }
+
                 }
             }
 
 
-
-            if( nAv == eTofConst::nCounters ) {
+            if( nAv == eTofConst::nCounters ) { //all pulser present, check for single pulser jumps by comparing to average of the other two.
                 double diff12 = fabs( times.at( 0 ) - times.at( 1 ) );
                 double diff13 = fabs( times.at( 0 ) - times.at( 2 ) );
                 double diff23 = fabs( times.at( 1 ) - times.at( 2 ) );
 
-                if( diff12 > 1 && diff13 > 1 && diff23 < 1 ) {
+                if( diff12 > 0.2 && diff13 > 0.2 && diff23 < 0.2 ) {
                     average -= times.at( 0 );
                     nAv--;
 
@@ -1557,7 +1796,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                         mHistograms.at( "1_off" )->Fill( gbtxId * eTofConst::nCounters + 1.5, times.at( 0 ) - ( average / nAv ) );
                     }
                 }
-                else if( diff12 > 1 && diff13 < 1 && diff23 > 1 ) {
+                else if( diff12 > 0.2 && diff13 < 0.2 && diff23 > 0.2 ) {
                     average -= times.at( 1 );
                     nAv--;
 
@@ -1580,7 +1819,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                         mHistograms.at( "2_off" )->Fill( gbtxId * eTofConst::nCounters + 1.5, times.at( 1 ) - ( average / nAv ) );
                     }
                 }
-                else if( diff12 < 1 && diff13 > 1 && diff23 > 1 ) {
+                else if( diff12 < 0.2 && diff13 > 0.2 && diff23 > 0.2 ) {
                     average -= times.at( 2 );
                     nAv--;
 
@@ -1604,55 +1843,173 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                     }
                 }
             }
-            else if( nAv == eTofConst::nCounters - 1 ) {
-                if( times.at( 0 ) > 0 && fabs( fabs( times.at( 0 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
+
+            if( nAv == eTofConst::nCounters - 1 ) {
+                // if there are two pulsers, restore missing pulser from average of the other two 
+                if( times.at( 0 ) > 0 && times.at( 1 ) > 0 && fabs( fabs( times.at( 0 ) - times.at( 1 ) ) - eTofConst::coarseClockCycle ) < 0.2 ) {
                     if( mJumpingPulsers.count( partialKey + 10 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 1 (1) ### " << endm;
                         times.at( 0 ) += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
                         average       += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
-                    }
-                }
-                if( times.at( 1 ) > 0 && fabs( fabs( times.at( 1 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
-                    if( mJumpingPulsers.count( partialKey + 20 ) ) {
+                    } 
+                    else if( mJumpingPulsers.count( partialKey + 20 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 1 (2) ### " << endm;
                         times.at( 1 ) += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
                         average       += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
                     }
+                    else {
+                        //LOG_INFO << gbtxId << " ### case 1 (3) ### " << endm;
+                        if( times.at( 0 ) < times.at( 1 ) ) {
+                            times.at( 0 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
+                        else {
+                            times.at( 1 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
+                    }
                 }
-                if( times.at( 2 ) > 0 && fabs( fabs( times.at( 2 ) - ( average / nAv ) ) - eTofConst::coarseClockCycle * 0.5 ) < 0.2 ) {
-                    if( mJumpingPulsers.count( partialKey + 30 ) ) {
+                else if( times.at( 0 ) && times.at( 2 ) > 0 && fabs( fabs( times.at( 0 ) - times.at( 2 ) ) - eTofConst::coarseClockCycle ) < 0.2 ) {
+                    if( mJumpingPulsers.count( partialKey + 10 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 2 (1) ### " << endm;
+                        times.at( 0 ) += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 10 ) * eTofConst::coarseClockCycle;
+                    } 
+                    else if( mJumpingPulsers.count( partialKey + 30 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 2 (2) ### " << endm;
                         times.at( 2 ) += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
                         average       += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
+                    }
+                    else {
+                        //LOG_INFO << gbtxId << " ### case 2 (3) ### " << endm;
+                        if( times.at( 0 ) < times.at( 2 ) ) {
+                            times.at( 0 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
+                        else {
+                            times.at( 2 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
+                    }
+                }
+                else if( times.at( 1 ) > 0 && times.at( 2 ) > 0 && fabs( fabs( times.at( 1 ) - times.at( 2 ) ) - eTofConst::coarseClockCycle ) < 0.2 ) {
+                    if( mJumpingPulsers.count( partialKey + 20 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 3 (1) ### " << endm;
+                        times.at( 1 ) += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 20 ) * eTofConst::coarseClockCycle;
+                    } 
+                    else if( mJumpingPulsers.count( partialKey + 30 ) ) {
+                        //LOG_INFO << gbtxId << " ### case 3 (2) ### " << endm;
+                        times.at( 2 ) += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
+                        average       += mJumpingPulsers.at( partialKey + 30 ) * eTofConst::coarseClockCycle;
+                    }
+                    else {
+                        //LOG_INFO << gbtxId << " ### case 3 (3) ### " << endm;
+                        if( times.at( 1 ) < times.at( 2 ) ) {
+                            times.at( 1 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
+                        else {
+                            times.at( 2 ) += eTofConst::coarseClockCycle;
+                            average       += eTofConst::coarseClockCycle;
+                        }
                     }
                 }
             }
 
-            if( nAv > 0 ) average /= nAv;
+
+            if( nAv >= 2 ) {
+                average /= nAv;
+            }
 
             if( mDoQA && referenceTime != 0 ) {
                 mHistograms.at( "pulserDigiTimeDiff_perGbtx" )->Fill( gbtxId * eTofConst::nCounters + 1.5, average - referenceTime );
             }
 
-            for( int counter=1; counter<=3; counter++ ) {
-                if( mDoQA && times.at( counter - 1 ) != 0. ) {
-                    mHistograms.at( "pulserDigiTimeDiff_toAverage" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, times.at( counter - 1 ) - average );
+            for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+                double diffToAv = 0.;
+
+                if( times.at( counter - eTofConst::counterStart ) != 0. ) {
+                    diffToAv = times.at( counter - eTofConst::counterStart ) - average;
+
+                    if( fabs( diffToAv ) > 0.2 ) diffToAv = 0.; //removing didn't work
+
+                    if( mDoQA ) {
+                        mHistograms.at( "pulserDigiTimeDiff_toAverage" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, diffToAv );
+                    }
                 }
 
-                pulserTimes[ partialKey + 10 * counter ] = average - mPulserTimeDiffGbtx.at( partialKey + 10 * counter );          
+                if( average != 0. ) {//only allow counter pulsers that are now close to average
+                     //times.at( counter - 1 ) = pulserTimes.at( key ) + mPulserTimeDiffGbtx.at( key )
+                    pulserTimes[ partialKey + 10 * counter ] = average + diffToAv - mPulserTimeDiffGbtx.at( partialKey + 10 * counter ); //restores original pulser times INCLUDING GBTX offset ?!?!
+							 //pulserTimes[ partialKey + 10 * counter ] = average;
+                }
+                else {
+                    if( pulserTimes.count( partialKey + 10 * counter ) ) {
+                        pulserTimes.erase( partialKey + 10 * counter );
+                    }
+                }
             }
         }
     }
 
 
     // calculate difference to the reference
+    referenceTime = 0.;
     if( pulserTimes.count( mReferencePulserIndex ) ) {
-        referenceTime = pulserTimes.at( mReferencePulserIndex );
-        if( mDebug ) {
-            LOG_INFO << "time of reference pulser updated" << endm;
-        }
+		  if( mPulserTimeDiff.count( mReferencePulserIndex ) ){
+           referenceTime = pulserTimes.at( mReferencePulserIndex ) - mPulserTimeDiff[ mReferencePulserIndex ];
+           //LOG_INFO << "time of reference pulser updated: " << referenceTime << " with reference correction "<< mPulserTimeDiff[ mReferencePulserIndex ] << endm;
+		  }else{
+			  referenceTime = pulserTimes.at( mReferencePulserIndex );
+			  //LOG_INFO << "time of reference pulser updated: " << referenceTime << endm;
+		  }
     }  
 
+
+
     if( referenceTime != 0 ) {
+        int iLockThreshold = 0;
+	     mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->Reset("ICESM");
+
         for( auto& kv : pulserTimes ) {
-            mPulserTimeDiff[ kv.first ] = kv.second - referenceTime;
+            // check if new pulser time difference seems reasonable ( only allow jumps in multiple of the coarse clock tick ) to avoid smeared pulsers
+            if( mPulserTimeDiff.count( kv.first ) ) {//pulser time difference default available previous events
+                //double modDist = fmod( mPulserTimeDiff.at( kv.first ) - ( kv.second - referenceTime ), eTofConst::coarseClockCycle );
+                //modDist = modDist - eTofConst::coarseClockCycle * round( modDist / eTofConst::coarseClockCycle );
+
+					 double modDist = mPulserTimeDiff.at( kv.first ) - ( kv.second - referenceTime ); //test PW
+                //modDist = modDist - eTofConst::coarseClockCycle * round( modDist / eTofConst::coarseClockCycle );
+
+
+                if( fabs( modDist ) > 0.2 ) {
+                    mUnlockPulserState[ kv.first ]++;
+
+                   // LOG_INFO << " pulser time " << kv.first << " seems unreasonable (" << kv.second - referenceTime << ")";
+                   // LOG_INFO << " compared to previous stored value (" << mPulserTimeDiff.at( kv.first ) << ")" << endm;
+                        
+                    // only unlock pulser state if 10 consecutive events have a modDist larger then the threshold
+                    if( mUnlockPulserState.at( kv.first ) < iLockThreshold ) {
+                       // LOG_INFO << " --> ignore for now and move on" << endm;
+                        continue; //move on, don't update pulser times!
+                    }
+                    else{ 
+                       // LOG_INFO << " --> pulser state has been unlocked" << endm;
+                    }
+
+							//fill 2d Hist here with GBTX and counter number
+							mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->Fill( kv.second - referenceTime );
+
+                }
+                else{
+                    if( mUnlockPulserState.count( kv.first ) ) {
+                        LOG_INFO << " --> new event doesn't have offset for pulser " << kv.first << " --> remove the entry" << endm;
+                        mUnlockPulserState.erase( kv.first );
+                    }
+                }
+            }
+				//pulser time differece was set here!
+
 
             if( mDoQA ) {
                 int sector  = kv.first / 1000;
@@ -1664,9 +2021,52 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
                            + ( zPlane - eTofConst::zPlaneStart ) * eTofConst::nSides
                            + ( side   - eTofConst::sideStart   );
 
-                mHistograms.at( "pulserDigiTimeDiff_fullCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, mPulserTimeDiff.at( kv.first ) );
+                if( mPulserTimeDiff.count( kv.first ) ) {
+                    mHistograms.at( "pulserDigiTimeDiff_fullCorr" )->Fill( gbtxId * eTofConst::nCounters + counter - 0.5, mPulserTimeDiff.at( kv.first ) );
+                } 
+
+					 mHistograms[ "pulserDigiPresence" ]->Fill(gbtxId * eTofConst::nCounters + counter - 0.5);
             }
         }
+
+			//LOG_INFO << "Check  " << referenceTime << endm;
+         if( mDoQA ) {					 
+				mHistograms[ "pulserDigiPresence" ]->Fill( -1 ); //use as event counter
+		   	mHistograms[ "pulserDigiTimeDiff_CorrAgreement"  ]->Fill( mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetMaximum() );
+				mHistograms[ "pulserDigiTimeDiff_CorrCommonJump" ]->Fill( mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetEntries() );
+			}
+			if( ( mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetEntries() > 150 ) && ( mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetMaximum() > 15 ) ){
+
+				//LOG_INFO << "Check: found  " << mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetMaximum() <<" agreeing time shifts. Shifting reference times " << endm;
+				int iMaximumBin        = mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetMaximumBin();
+				double dRefCorrAverage = 0;
+				int iNRefCorrAgree     = 0;
+
+	   		for( auto& kv : pulserTimes ) { //build average of all agreeing pulsers
+					if ( mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->FindBin(kv.second - referenceTime) == iMaximumBin ){
+						dRefCorrAverage += kv.second - referenceTime;
+						iNRefCorrAgree++;
+					}
+				}
+				dRefCorrAverage                          /= iNRefCorrAgree;
+				referenceTime                            -= dRefCorrAverage;
+				//pulserTimes.at( mReferencePulserIndex )  -= dRefCorrAverage;
+				mPulserTimeDiff[ mReferencePulserIndex ] -= dRefCorrAverage;
+
+			}else{
+				//LOG_INFO << "Check: found only " << mHistograms[ "pulserDigiTimeDiff_RefCorr"  ]->GetMaximum() <<" agreeing time shifts. Shifting pulser times " << endm;
+	   		for( auto& kv : pulserTimes ) {
+					if ( ! mPulserTimeDiff[ kv.first ] ) {
+				   		mPulserTimeDiff[ kv.first ] = kv.second - referenceTime;
+							continue;
+					}
+					if( mUnlockPulserState.count( kv.first ) ){
+						if( mUnlockPulserState.at( kv.first ) > iLockThreshold ){// check if pulser is locked
+				   		mPulserTimeDiff[ kv.first ] = kv.second - referenceTime;
+						}
+					}
+				}
+			}
     }
 }
 
@@ -1700,6 +2100,17 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
     if( timeToTrigger > mTimingWindow.at( aDigi->rocId() ).first  &&
         timeToTrigger < mTimingWindow.at( aDigi->rocId() ).second  )
     {
+
+			if( mStrictPulserHandling ){
+         int PulserKey = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->side() + 10 * aDigi->counter();
+				if( !mPulserPresent.count( PulserKey ) ) {
+				  if( mDebug ) {
+						LOG_DEBUG << "no pulser in the same event for this counter --> digi skipped due to strict pulser handling" << endm;
+				  }
+				  return;
+				}
+			}
+
         double calibTot = aDigi->rawTot() * mGet4TotBinWidthNs * calibTotFactor( aDigi );
 
         aDigi->setCalibTot( calibTot );
@@ -1732,6 +2143,8 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 void
 StETofCalibMaker::resetToRaw( StMuETofDigi* aDigi )
 {
+    if( !aDigi ) return;
+
     aDigi->setGeoAddress( 0, 0, 0, 0, 0 );
     aDigi->setCalibTime( 0. );
     aDigi->setCalibTot( -1. );
@@ -1782,7 +2195,7 @@ StETofCalibMaker::calibTotFactor( StETofDigi* aDigi )
             if( mDebug ) {
                 LOG_DEBUG << "calibTotFactor: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
             }
-            return binContent;
+            return (1.0/binContent); //invert here to get to fixed mean value!
         }
         else {
             if( mDebug ) {
@@ -1837,7 +2250,8 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
 
     if( mDigiSlewCorr.count( key ) ) {
 
-        unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->calibTot() );
+        unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->rawTot() ); //adjusted. PW
+mDebug = true;
         if( mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin && totBin < etofSlewing::nTotBins ) {
             if( mDebug ) {
                 LOG_DEBUG << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
@@ -1845,7 +2259,7 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
             return 0.;
         }
 
-        float val = mDigiSlewCorr.at( key )->Interpolate( aDigi->calibTot() );
+        float val = mDigiSlewCorr.at( key )->Interpolate( aDigi->rawTot() ); //adjusted. PW
         if( mDebug ) {
             LOG_DEBUG << "slewingTimeOffset: histogram with key " << key << "  with calib TOT of " << aDigi->calibTot() << " --> interpolated correction: " << val << endm;
         }
@@ -1891,7 +2305,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     std::map< uint64_t, short > countsGdpbTs;
     for( const auto& kv : header->rocGdpbTs() ) {
         if( mDebug ) {
-            LOG_DEBUG << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+            LOG_DEBUG << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm;
         }
         ++countsGdpbTs[ kv.second ];
     }
@@ -1925,7 +2339,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
         }
     }
 
-    if( mostProbableTriggerTs > 0) {
+    if( mostProbableTriggerTs > 0 ) {
         triggerTime = mostProbableTriggerTs * eTofConst::coarseClockCycle;
     }
 
@@ -1945,16 +2359,62 @@ double
 StETofCalibMaker::resetTime( StETofHeader* header )
 {
     // count the occurance of a given reset time stamp in the StarTs map of the eTOF header
-    std::map< uint64_t, short > countsStarTs;
+    std::map< uint64_t, short > countsStarTsRaw;
     for( const auto& kv : header->rocStarTs() ) {
         if( mDebug ) {
-            LOG_DEBUG << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+            LOG_DEBUG << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm;
         }
-        
+
         // in Run18 only one of the AFCKs was giving the correct reset time: 0x18e6
         if( mRunYear == 2018 && kv.first != 0x18e6 ) continue;
 
-        ++countsStarTs[ kv.second ];
+        if( kv.second != 0 ) {
+            ++countsStarTsRaw[ kv.second ];
+        }
+    }
+
+
+    // combine adjacent reset time values with the earlier one
+    std::map< uint64_t, short > countsStarTs;
+    for( auto it = countsStarTsRaw.begin(); it != countsStarTsRaw.end(); it++ ) {
+        auto next = std::next( it, 1 );
+
+        short countTs = it->second;
+
+        if( next != countsStarTsRaw.end() && ( next->first - it->first ) == 1 ) {
+            countTs += next->second;
+        }
+
+        countsStarTs[ it->first ] = countTs;
+    }
+
+
+
+
+    if( mDoQA ) {
+        if( countsStarTs.size() == 0 ) {
+            LOG_INFO << "all AFCKs report a reset time value 0" << endm;
+        }
+
+        for( const auto& kv : countsStarTs ) {
+            LOG_DEBUG << "resetTime cand:" << kv.first  << " (" << kv.second << " times)" << endm;
+            mHistograms.at( "resetTimeCand_times" )->Fill( kv.second );
+        }
+
+        for( const auto& kv : header->rocStarTs() ) {
+            unsigned int sector;
+            mHwMap->mapToSector( kv.first, sector );
+
+            LOG_DEBUG << "resetTime(" << sector << "): " << kv.second << endm;
+
+            std::string histName = "resetTimeDifferenceToSector" + to_string( sector );
+            for( const auto& jv : header->rocStarTs() ) {
+                unsigned int sec;
+                mHwMap->mapToSector( jv.first, sec );
+
+                mHistograms.at( histName )->Fill( sec, ( int64_t ) jv.second - ( int64_t ) kv.second );
+            }
+        }
     }
 
 
@@ -1966,11 +2426,33 @@ StETofCalibMaker::resetTime( StETofHeader* header )
         double resetTime = it->first * eTofConst::coarseClockCycle;
 
 
+        // only update reset time if it is at least two clock ticks away from the old reset time to avoid jitter 
+        if( abs( mResetTs - ( int64_t ) it->first ) < 2 ) {
+            resetTime = mResetTs * eTofConst::coarseClockCycle;
+        }
+        else {
+            LOG_INFO << "change in reset TS: " << mResetTs << " --> " << it->first << endm;
+            mResetTs = it->first;
+        }
+
+
         // Run19: trigger - reset time should be on the order of a few second up to 120 minutes (7.2*10^12 ns), i.e. max. run length
         // Run20: difference can be negative due to eTOF DAQ restarts at the beginning of runs while eTOF is put to "BUSY" in run control
         if( mTriggerTime - resetTime < 7.2e12 ) {
             if( mDebug ) {
-                LOG_INFO << "reset time (ns): " << resetTime << " --> difference to trigger time in seconds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
+                LOG_DEBUG << "reset time (ns): " << resetTime << " --> difference to trigger time in seconds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
+            }
+            LOG_DEBUG << "--> picked reset TS:" << mResetTs << endm;
+
+            if( mDoQA ) {
+                mHistograms.at( "resetTimeCand_picked" )->Fill( it->second );
+
+                auto rawIt = std::max_element( countsStarTsRaw.begin(), countsStarTsRaw.end(),
+                                               []( const pair< uint64_t, short >& p1, const pair< uint64_t, short >& p2 ) {
+                                               return p1.second < p2.second; } );
+
+                mHistograms.at( "resetTimeCand_compare" )->Fill( ( int64_t ) mResetTs - ( int64_t ) rawIt->first );
+                mHistograms.at( "resetTimeCand_value"   )->Fill( mResetTs % ( int ) eTofConst::bTofClockCycle    );
             }
 
             return resetTime;
@@ -2056,26 +2538,42 @@ StETofCalibMaker::setHistFileName()
 void
 StETofCalibMaker::bookHistograms()
 {
-    if( !mDoQA ) {
-        return;
-    }
-
     LOG_INFO << "bookHistograms() ... " << endm;
 
-    mHistograms[ "pulserDigiTimeDiff"           ] = new TH2F( "pulserDigiTimeDiff",           "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "pulserDigiTimeToCounter1"     ] = new TH2F( "pulserDigiTimeToCounter1",     "time difference of pulsers to counter 1;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "pulserDigiTimeToCounter2"     ] = new TH2F( "pulserDigiTimeToCounter2",     "time difference of pulsers to counter 2;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "pulserDigiTimeToCounter3"     ] = new TH2F( "pulserDigiTimeToCounter3",     "time difference of pulsers to counter 3;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    
-    mHistograms[ "pulserDigiTimeDiff_GbtxCorr"  ] = new TH2F( "pulserDigiTimeDiff_GbtxCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "pulserDigiTimeDiff_perGbtx"   ] = new TH2F( "pulserDigiTimeDiff_perGbtx",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "pulserDigiTimeDiff_toAverage" ] = new TH2F( "pulserDigiTimeDiff_toAverage", "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 4*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    
-    mHistograms[ "1_off"   ] = new TH2F( "1_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "2_off"   ] = new TH2F( "2_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    mHistograms[ "3_off"   ] = new TH2F( "3_off",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
-    
+    mHistograms[ "pulserDigiTimeDiff_GbtxCorrProf"    ] = new TProfile( "pulserDigiTimeDiff_GbtxCorrProf",    "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, "s" );
+    mHistograms[ "pulserDigiTimeDiff_GbtxCorrProfMod" ] = new TProfile( "pulserDigiTimeDiff_GbtxCorrProfMod", "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, "s" );
     mHistograms[ "pulserDigiTimeDiff_fullCorr"  ] = new TH2F( "pulserDigiTimeDiff_fullCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeDiff_RefCorr"  ] = new TH1F("pulserDigiTimeDiff_RefCorr",  "time difference of pulsers to reference; #Delta T (ns)", 45, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ));
+
+    if( mDoQA ) {
+        mHistograms[ "pulserDigiTimeDiff"           ] = new TH2F( "pulserDigiTimeDiff",           "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "pulserDigiTimeToCounter1"     ] = new TH2F( "pulserDigiTimeToCounter1",     "time difference of pulsers to counter 1;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "pulserDigiTimeToCounter2"     ] = new TH2F( "pulserDigiTimeToCounter2",     "time difference of pulsers to counter 2;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "pulserDigiTimeToCounter3"     ] = new TH2F( "pulserDigiTimeToCounter3",     "time difference of pulsers to counter 3;pulser channel;#Delta T (ns)", 216, 0, 216, 2*360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+
+        mHistograms[ "pulserDigiTimeDiff_GbtxCorr"  ] = new TH2F( "pulserDigiTimeDiff_GbtxCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "pulserDigiTimeDiff_perGbtx"   ] = new TH2F( "pulserDigiTimeDiff_perGbtx",   "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "pulserDigiTimeDiff_toAverage" ] = new TH2F( "pulserDigiTimeDiff_toAverage", "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 4*360, -359.5 * ( 6.25 / 112 ), 360.5 * ( 6.25 / 112 ) );
+
+        mHistograms[ "1_off" ] = new TH2F( "1_off", "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "2_off" ] = new TH2F( "2_off", "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+        mHistograms[ "3_off" ] = new TH2F( "3_off", "average time difference of pulsers in one Gbtx to reference;pulser channel;#Delta T (ns)", 216/3, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+
+		  mHistograms[ "pulserDigiTimeDiff_CorrAgreement"  ] = new TH1F("pulserDigiTimeDiff_CorrAgreement",  "Number of pulsers agreeing on a common shift between events; #pulsers", 218, -0.5, 217.5);
+		  mHistograms[ "pulserDigiTimeDiff_CorrCommonJump"  ] = new TH1F("pulserDigiTimeDiff_CorrCommonJump",  "Number of pulsers jumping at the same time between events; #pulsers", 218, -0.5, 217.5);
+        mHistograms[ "pulserDigiPresence" ] = new TH1F( "pulserDigiPresence",           "pulser presence (number of events at ( -1 );pulser channel", 218, -1.5, 216.5);
+
+        for( int i=0; i<12; i++ ) {
+            std::string histName = "resetTimeDifferenceToSector" + to_string( i + 13 );
+            mHistograms[ histName ] = new TH2F( Form( "resetTimeDifferenceToSector%d", i + 13 ), Form("reset time difference to sector %d;sector;#DeltaT (clock ticks)", i + 13 ), 12, 12.5, 24.4, 5, -2.5, 2.5 );
+        }
+		  mHistograms[ "ETOF_QA_daqMissmatches_get4" ]    = new TProfile( "ETOF_QA_daqMissmatches_get4", "missmatch percentage for each get4; get4 []; missmatch percentage", 1728, 0.5, 1728.5 );
+		  mHistograms[ "ETOF_QA_daqMissmatches_counter" ] = new TProfile( "ETOF_QA_daqMissmatches_counter", "missmatch percentage for each counter; counter []; missmatch percentage", 108, 0.5, 108.5 );   
+        mHistograms[ "resetTimeCand_times"   ] = new TH1F( "resetTimeCand_times",   "sectors agreeing on reset time candidates;# sectors with common candidate;# events", 12, 0.5, 12.5 );
+        mHistograms[ "resetTimeCand_picked"  ] = new TH1F( "resetTimeCand_picked",  "sectors agreeing on picked reset time;# sectors with picked reset time;# events",    12, 0.5, 12.5 );
+        mHistograms[ "resetTimeCand_compare" ] = new TH1F( "resetTimeCand_compare", "difference between old and new way;#DeltaT (clock ticks);# events",                   5, -2.5, 2.5 );
+        mHistograms[ "resetTimeCand_value"   ] = new TH1F( "resetTimeCand_value",   "picked reset time value;clock ticks;# events", ( int ) eTofConst::bTofClockCycle, 0.5, 0.5 + eTofConst::bTofClockCycle );
+    }
 
     for ( auto& kv : mHistograms ) {
         kv.second->SetDirectory( 0 );
@@ -2091,6 +2589,11 @@ StETofCalibMaker::writeHistograms()
 
         TFile histFile( mHistFileName.c_str(), "RECREATE", "etofCalib" );
         histFile.cd();
+
+        for( int i=0; i<12; i++ ) {
+            std::string histName = "resetTimeDifferenceToSector" + to_string( i + 13 );
+            mHistograms.at( histName )->Scale( 12. / mHistograms.at( histName )->GetEntries() );
+        }
         
         for ( const auto& kv : mHistograms ) {
             if( kv.second->GetEntries() > 0 ) kv.second->Write();

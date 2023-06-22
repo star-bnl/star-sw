@@ -23,7 +23,7 @@ Example code:
 
         daq_tpx *tpx = new daq_tpx() ;     // usual....
 
-        u_char tpx_rowlen[256] ;        // just allocate the absolute
+        uint8_t tpx_rowlen[256] ;        // just allocate the absolute
 maximum of 255 rows...
 
         tpx_rowlen[0] = 0 ;     // Always for the dummy row "0"! Note

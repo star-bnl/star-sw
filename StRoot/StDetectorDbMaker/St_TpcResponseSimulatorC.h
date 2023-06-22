@@ -35,7 +35,9 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t 	SigmaJitterXI(Int_t i = 0) 	const {return Struct(i)->SigmaJitterXI;}
   Float_t 	SigmaJitterXO(Int_t i = 0) 	const {return Struct(i)->SigmaJitterXO;}
   Float_t 	longitudinalDiffusion(Int_t i = 0) 	const {return Struct(i)->longitudinalDiffusion;}
+  Float_t 	longitudinalDiffusionI(Int_t i = 0) 	const {return Struct(i)->longitudinalDiffusionI;}
   Float_t 	transverseDiffusion(Int_t i = 0) 	const {return Struct(i)->transverseDiffusion;}
+  Float_t 	transverseDiffusionI(Int_t i = 0) 	const {return Struct(i)->transverseDiffusionI;}
   Float_t       NoElPerAdc(Int_t i = 0)  const {return Struct(i)->NoElPerAdc;}
   Float_t       NoElPerAdcI(Int_t i = 0) const {return Struct(i)->NoElPerAdcI;}
   Float_t       NoElPerAdcO(Int_t i = 0) const {return Struct(i)->NoElPerAdcO;}
@@ -61,6 +63,9 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t       T0offsetO(Int_t i = 0)      const {return  Struct(i)->T0offsetO;}
   Float_t       FirstRowC(Int_t i = 0)      const {return  Struct(i)->FirstRowC;}
   Float_t       betaStar(Int_t i = 0)       const {return  Struct(i)->betaStar;}  
+  Float_t       tMaxI(Int_t i = 0)          const {return  Struct(i)->tMaxI;}  
+  Float_t       tMaxO(Int_t i = 0)          const {return  Struct(i)->tMaxO;}  
+  Float_t      *tMax(Int_t i = 0)           const {return  &Struct(i)->tMaxI;}  
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}

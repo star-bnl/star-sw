@@ -27,7 +27,7 @@ class fpdBuilder : public JevpBuilder {
  private:
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *h206_fpd_EN_adcsum;
       TH1 *h207_fpd_ES_adcsum;

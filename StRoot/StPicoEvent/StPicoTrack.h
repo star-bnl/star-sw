@@ -112,9 +112,9 @@ class StPicoTrack : public TObject {
   Int_t   nHitsDedx() const              { return (Int_t)mNHitsDedx; }
   /// Return a map of hits in HFT
   UInt_t  hftHitsMap() const             { return topologyMap(0) >> 1 & 0x7F; }
-  /// Return dE/dx (GeV/cm) of the track
+  /// Return dE/dx (in keV/cm) of the track
   Float_t dEdx() const                   { return mDedx; }
-  /// Return dE/dx error of the track
+  /// Return dE/dx error of the track (in GeV/cm)
   Float_t dEdxError() const              { return mDedxError; }
 
 #if defined (__TFG__VERSION__)

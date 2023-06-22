@@ -1,6 +1,6 @@
 #include "evpSupport.h"
 
-int OLDEVP::checkBank(char *m, char *what)
+int OLDEVP::checkBank(char *m, const char *what)
 {
   int i;
   if (m[0]!=what[0]) return -1;

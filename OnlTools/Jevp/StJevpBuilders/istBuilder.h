@@ -95,7 +95,7 @@ class istBuilder : public JevpBuilder {
 
   //*** Histogram Declarations...
   union {
-    TH2 *adcArray[]; //ADC value of each ladder's channels (ADC value vs. channel index)
+    TH2 *adcArray[1]; //ADC value of each ladder's channels (ADC value vs. channel index)
     struct {
       TH2* ADC1;
       TH2* ADC2;
@@ -125,7 +125,7 @@ class istBuilder : public JevpBuilder {
   } hAdcContents;
 
   union {
-    TH1 *multArray[]; //hit multiplicity of each ladder per event
+    TH1 *multArray[1]; //hit multiplicity of each ladder per event
     struct {
       TH1* hitMult1;
       TH1* hitMult2;
@@ -155,7 +155,7 @@ class istBuilder : public JevpBuilder {
   } hMultContents;
 
   union {
-    TH2 *hitMapArray[]; //hit map for each ladder (phi vs. Z --- 64 rows vs. 72 columns)
+    TH2 *hitMapArray[1]; //hit map for each ladder (phi vs. Z --- 64 rows vs. 72 columns)
     struct {
       TH2* hitMap1;
       TH2* hitMap2;
@@ -185,7 +185,7 @@ class istBuilder : public JevpBuilder {
   } hHitMapContents;
 
   union {
-    TH2 *tbVsAdcArray[];  // Time bin vs. ADC value
+    TH2 *tbVsAdcArray[1];  // Time bin vs. ADC value
     struct{
       TH2* tbVsAdc0;
       TH2* tbVsAdc1;
@@ -263,7 +263,7 @@ class istBuilder : public JevpBuilder {
   } hTbVsAdcContents;
 
   union {
-    TH1 *eventSumArray[];
+    TH1 *eventSumArray[1];
     struct {
       TH1* hMeanPed;//mean pedestal of all channels
       TH1* hMeanRMS;//mean rms of all channels
@@ -282,7 +282,7 @@ class istBuilder : public JevpBuilder {
   } hEventSumContents;
   
   union {
-    TH1 *mipArray[]; //MIP signal distribution per section (2 sensors)
+    TH1 *mipArray[1]; //MIP signal distribution per section (2 sensors)
     struct { // 1-72 non-ZS data; 73-144 ZS data
       TH1* hMip1;
       TH1* hMip2;
@@ -432,7 +432,7 @@ class istBuilder : public JevpBuilder {
   } hMipContents;
 
   union {
-    TH1 *maxTimeBinArray[]; //MaxTimeBin per section
+    TH1 *maxTimeBinArray[1]; //MaxTimeBin per section
     struct { 
       TH1* hMaxTB1;
       TH1* hMaxTB2;
@@ -510,7 +510,7 @@ class istBuilder : public JevpBuilder {
   } hMaxTimeBinContents;
 
   union {
-    TH2 *sumArray[];
+    TH2 *sumArray[1];
     struct{
       TH2* hVisibleApv;//visible APVs per section per event
       TH2* hHitMap;       //hit density (phi vs. z -- 64*24 vs. 12*6)

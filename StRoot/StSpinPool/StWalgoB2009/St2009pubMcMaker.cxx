@@ -119,9 +119,9 @@ St2009pubMcMaker::doWefficiency(){
   hA[122]->Fill(zdcRate,wMK->wEve.bx7);
 
   //check reconstructed vs thrown ET
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -151,7 +151,7 @@ St2009pubMcMaker::doWefficiency(){
   if(wMK->wEve.vertex.size()<=0) return; 
   //require geant vert match reco vert (w/in 5 cm)
   bool matchVert=false;
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     //cout<<endl<<"vertex diff "<<fabs(V.z - mVertex.Z())<<endl;
     if(fabs(V.z - mVertex.Z()) < 5.0) matchVert=true;
@@ -188,8 +188,8 @@ St2009pubMcMaker::doWefficiency(){
   int nHitAssoc=0; float hitFracAssoc=0.;
   float rInAssoc=0.; float rOutAssoc=0.;
   //check tracking efficiency before any track cuts
-  for(uint iv=0;iv<wMK->wEve.vertex.size(); iv++) {
-    uint vertID=wMK->wEve.vertex[iv].id;
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size(); iv++) {
+    unsigned int vertID=wMK->wEve.vertex[iv].id;
     wMK->mMuDstMaker->muDst()->setVertexIndex(vertID);
     Int_t nPrimTrAll=wMK->mMuDstMaker->muDst()->GetNPrimaryTrack();
     for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -246,7 +246,7 @@ St2009pubMcMaker::doWefficiency(){
 
   // track efficiency
   bool foundTrack=false; int nTrk=0; float recoPt=0; 
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     if(V.eleTrack.size()>0){ //track with pt > 10
       hA[85]->Fill(mElectronP.Perp(),w);
@@ -257,7 +257,7 @@ St2009pubMcMaker::doWefficiency(){
       foundTrack=true;
       
       //find track 
-      for(uint it=0;it<V.eleTrack.size();it++) {
+      for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	WeveEleTrack &T=V.eleTrack[it];
 	int idTruth=0; //T.prMuTrack->idTruth(); //again need private StMuTrack
 	if( eleTrId==idTruth ) { //reco track matches to electron
@@ -278,9 +278,9 @@ St2009pubMcMaker::doWefficiency(){
   if(wMK->wEve.wTag) hA[140]->Fill(mElectronP.Perp(),w);
 
   //reco efficiency
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
@@ -370,7 +370,7 @@ St2009pubMcMaker::doZefficiency(){
   if(wMK->wEve.vertex.size()<=0) return;
   //fill vertex rank>0 and |z|<100 events
   bool matchVert=false;
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     //cout<<endl<<"vertex diff "<<fabs(V.z - mVertex.Z())<<endl;
     if(fabs(V.z - mZvertex.Z()) < 5.0) matchVert=true;
@@ -381,7 +381,7 @@ St2009pubMcMaker::doZefficiency(){
   
   //track efficiency
   bool gt1track=false;
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     if(V.eleTrack.size()>1){ //fill 2 track with pt > 10 events
       hA[103]->Fill(geantZmass,w);
@@ -394,10 +394,10 @@ St2009pubMcMaker::doZefficiency(){
   if(!gt1track) return;
 
   //reco efficiency
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     if(V.eleTrack.size()<2) continue;
-    for(uint it=0;it<V.eleTrack.size()-1;it++) {//.....select first track:
+    for(unsigned int it=0;it<V.eleTrack.size()-1;it++) {//.....select first track:
 
       WeveEleTrack &T1=V.eleTrack[it];
       if(T1.isMatch2Cl==false) continue;
@@ -408,7 +408,7 @@ St2009pubMcMaker::doZefficiency(){
       float fracET1=T1.cluster.ET /T1.nearTotET;
       if(fracET1<zMK->par_nearTotEtFracZ) continue;
       
-      for (uint it2=it+1;it2<V.eleTrack.size();it2++) { //.....select second track:
+      for (unsigned int it2=it+1;it2<V.eleTrack.size();it2++) { //.....select second track:
 
 	WeveEleTrack &T2=V.eleTrack[it2];
         if(T2.isMatch2Cl==false) continue;
@@ -465,7 +465,7 @@ St2009pubMcMaker::doWMCanalysis(){
   mVertex=TVector3(V->position().x(),V->position().y(),V->position().z());
   
   //find geant tracks for W and decay daughters
-  uint i=1;
+  unsigned int i=1;
   int found=0;
   while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
@@ -610,7 +610,7 @@ St2009pubMcMaker::doZMCanalysis(){
   mZvertex=TVector3(V->position().x(),V->position().y(),V->position().z());
   
   //find geant tracks for Z and e+,e-
-  uint i=1;
+  unsigned int i=1;
   int found=0;
   while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
@@ -662,9 +662,9 @@ St2009pubMcMaker::doWanalysis(){
   //has access to whole W-algo-maker data via pointer 'wMK'
  
   // run through W cuts to fill other histos............
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error

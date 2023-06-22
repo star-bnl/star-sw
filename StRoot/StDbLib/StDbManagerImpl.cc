@@ -448,6 +448,8 @@ addDbDomain(dbEpd,"epd");
 addDbDomain(dbRhicf,"rhicf");
 addDbDomain(dbEtof,"etof");
 addDbDomain(dbFcs,"fcs");
+addDbDomain(dbFst,"fst");
+addDbDomain(dbFtt,"ftt");
 }
 
 ////////////////////////////////////////////////////////////////

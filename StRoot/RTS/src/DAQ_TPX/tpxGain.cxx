@@ -146,6 +146,13 @@ void tpxGain::set_clock_mode(int mode)
 		pulser_stop = TPX_TCU_RHIC_STOP ;
 		pulser_time_0 = TPX_TCU_RHIC_TIME_0 ;
 		break ;
+	case TPX_CLOCK_NEW_TCD :	// new frequency from Oct 2021
+		pulser_ped_stop = TPX_NEW_TCD_PED_STOP ;
+		pulser_start = TPX_NEW_TCD_START ;
+		pulser_stop = TPX_NEW_TCD_STOP ;
+		pulser_time_0 = TPX_NEW_TCD_TIME_0 ;
+		break ;
+
 	}
 
 
@@ -309,6 +316,8 @@ void tpxGain::accum(char *evbuff, int bytes)
 
 			int adc_i = a.adc[i] ;
 			int tb_i = a.tb[i] ;
+
+			//LOG(TERR,"RDO %d: %d %d, tb %d, adc %d",rdo.rdo,a.row,a.pad,tb_i,adc_i) ;
 
 			// sum up the main pulser peak...
 			if((tb_i>=pulser_ped) && (tb_i<=pulser_stop)) {
@@ -513,7 +522,12 @@ void tpxGain::calc()
 				t0 += i * val ;
 			}
 
+			
 			// and fill in the final absolute charge and t0...
+			//LOG(TERR,"RDO %d: %d %d = %f %f",0,r,p,ped,charge) ;
+			//for(int i=pulser_ped;i<=pulser_stop;i++) {
+			//	LOG(TERR,"   %d %d",i,as->adc_store[i-pulser_ped]) ;
+			//}
 
 			get_gains(s,r,p)->g = charge ;		// this might be small or even negative in case the pad is not connected
 
@@ -828,7 +842,7 @@ void tpxGain::do_default(int sec)
 	return ;
 }
 
-int tpxGain::from_file(char *fname, int sec)
+int tpxGain::from_file(const char *fname, int sec)
 {
 	FILE *f ;
 	int s, r, p ;
@@ -999,7 +1013,7 @@ int tpxGain::from_file(char *fname, int sec)
 }
 
 
-int tpxGain::to_file(char *fname) 
+int tpxGain::to_file(const char *fname) 
 {
 
 	FILE *f ;
@@ -1040,7 +1054,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.35 2018/10/10 11:25:01 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.37 2022/09/23 19:55:47 jml Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1357,7 +1371,7 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 						}
 					}
 
-					if((t0<-0.30) || (t0>0.30)) {
+					if((t0<-0.40) || (t0>0.40)) {
 						bad_t0 = 1 ;
 
 

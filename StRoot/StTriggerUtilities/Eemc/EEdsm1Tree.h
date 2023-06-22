@@ -32,7 +32,7 @@ class EEdsm1Tree  {  // DSM0 tree emulators
   int  getNboards() const { return Nee1;}
 
   //...... Input
-  void setInp16bit(int brd, int ch, ushort val); // words
+  void setInp16bit(int brd, int ch, unsigned short val); // words
   int  getInpTPsum(int ch /*ch=0...11*/) const;// halfPatches, for both DSM1 boards
   int  getInpHT2bit(int ch ) const;
   int  getInpTP2bit(int ch ) const;

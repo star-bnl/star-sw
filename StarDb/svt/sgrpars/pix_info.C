@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sgrpars/pix_info Allocated rows: 4  Used rows: 4  Row size: 28 bytes
 //  Table: sgr_pixmap_st[0]--> sgr_pixmap_st[3]
@@ -45,5 +45,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.ZMax	 =         20; // Maximum Zscaled values in pixmap. ;
 tableSet->AddAt(&row,3);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

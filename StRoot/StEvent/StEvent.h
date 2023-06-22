@@ -199,6 +199,7 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFcsCollection;
+class StFttCollection;
 class StFmsCollection;
 class StRHICfCollection;
 class StRichCollection;
@@ -224,6 +225,9 @@ class StHltEvent;
 class StFgtCollection;
 class StPxlHitCollection;
 class StIstHitCollection;
+class StFstEvtCollection;
+class StFstHitCollection;
+class StFwdTrackCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -262,6 +266,8 @@ public:
     const StEmcCollection*              emcCollection() const;
     StFcsCollection*                    fcsCollection();
     const StFcsCollection*              fcsCollection() const;
+    StFttCollection*                    fttCollection();
+    const StFttCollection*              fttCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
     StRHICfCollection*                  rhicfCollection();
@@ -294,6 +300,10 @@ public:
     const StPxlHitCollection*           pxlHitCollection() const;
     StIstHitCollection*                 istHitCollection();
     const StIstHitCollection*           istHitCollection() const;
+    StFstEvtCollection*                 fstEvtCollection();
+    const StFstEvtCollection*           fstEvtCollection() const;
+    StFstHitCollection*                 fstHitCollection();
+    const StFstHitCollection*           fstHitCollection() const;
     StEpdCollection*                    epdCollection();
     const StEpdCollection*              epdCollection() const;
     StL0Trigger*                        l0Trigger();
@@ -329,6 +339,9 @@ public:
     const StSPtrVecXiVertex&            xiVertices() const;
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
+
+    StFwdTrackCollection*               fwdTrackCollection();
+    const StFwdTrackCollection*         fwdTrackCollection() const;
 
     StDetectorState*                    detectorState(StDetectorId);
     const StDetectorState*              detectorState(StDetectorId) const;
@@ -367,9 +380,12 @@ public:
     void setSstHitCollection(StSstHitCollection*);
     void setPxlHitCollection(StPxlHitCollection*);
     void setIstHitCollection(StIstHitCollection*);
+    void setFstEvtCollection(StFstEvtCollection*);
+    void setFstHitCollection(StFstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
     void setFcsCollection(StFcsCollection*);
+    void setFttCollection(StFttCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);
@@ -388,6 +404,7 @@ public:
     void setL3Trigger(StL3Trigger*);
     void setHltEvent(StHltEvent*);
     void setFgtCollection(StFgtCollection*);
+    void setFwdTrackCollection(StFwdTrackCollection*);
     void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);

@@ -7,7 +7,6 @@
 #include <map>
 #include <vector>
 
-//#include "AgParameterList.h"
 #include <StarVMC/StarAgmlUtil/AgParameterList.h>
 class AgMaterial;
 class AgBlock;
@@ -23,16 +22,8 @@ class AgMaterial : public TNamed, public AgParameterList<double>
 
   enum { kUnknown=0, kMaterial, kMixture, kCompound };
 
-
   /// Returns a reference to the named parameter.
   Double_t &par( const Char_t *name );
-
-#if 0 // lifted
-  /// Tests whether the named parameter is set for this shape
-  Bool_t isSet( const Char_t *par ) const;  
-  /// Tests whether the named parameter is valid for this shape
-  Bool_t hasPar( const Char_t *par ) const;
-#endif
 
   /// Tests wether the mixture has the named component.  Returns false
   /// if this is a material.
@@ -75,7 +66,6 @@ class AgMaterial : public TNamed, public AgParameterList<double>
 
   /// Returns (by reference) the name, A, Z and Weight of each component
   void Component( Int_t ic, TString &name, Double_t &a, Double_t &z, Double_t &weight );
-
   
   Bool_t locked(){ return mLock; }
 
@@ -85,6 +75,13 @@ class AgMaterial : public TNamed, public AgParameterList<double>
   void   lock(){ mLock=true; }
 
   Double_t sumWeights();
+
+  struct MyComponent {
+	  Double_t a;
+	  Double_t z;
+	  Double_t w;
+  };
+
  
  private:
  protected:
@@ -97,12 +94,6 @@ class AgMaterial : public TNamed, public AgParameterList<double>
   // Components
   std::vector< TString >  mC;
   std::vector< Double_t > mA, mZ, mW;
-
-  struct MyComponent {
-	  Double_t a;
-	  Double_t z;
-	  Double_t w;
-  };
 
   std::map< TString, MyComponent > mComponentTable; // Table storing already defined components
 

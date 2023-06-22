@@ -186,7 +186,7 @@
         "inpfile": "st_physics_8352025_raw_1030011.daq", 
         "inppath": "/star/rcf/test/daq/2007/352", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2008/production_dAu2008", 
-        "nevents": "400"
+        "nevents": "40"
     }, 
     {
         "jobid": "21", 
@@ -204,7 +204,7 @@
         "inpfile": "st_physics_7129023_raw_1020003.daq", 
         "inppath": "/star/rcf/test/daq/2006/129/7129023", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2006/ppProdTrans", 
-        "nevents": "1000"
+        "nevents": "100"
     }, 
     {
         "jobid": "23", 
@@ -213,7 +213,7 @@
         "inpfile": "st_physics_6171062_raw_2040010.daq", 
         "inppath": "/star/rcf/test/daq/2005/171", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2005/ppProduction", 
-        "nevents": "500"
+        "nevents": "50"
     }, 
     {
         "jobid": "24", 
@@ -222,7 +222,7 @@
         "inpfile": "st_physics_6048025_raw_1020002.daq", 
         "inppath": "/star/rcf/test/daq/2005/048", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2005/CuCu200_MinBias", 
-        "nevents": "200"
+        "nevents": "20"
     }, 
     {
         "jobid": "25", 
@@ -267,7 +267,7 @@
         "inpfile": "rcf12002_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012/UU200_minbias", 
-        "nevents": "100"
+        "nevents": "1"
     }, 
     {
         "jobid": "30", 
@@ -276,7 +276,7 @@
         "inpfile": "rcf12002_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012.AgML/UU200_minbias", 
-        "nevents": "100"
+        "nevents": "10"
     }, 
     {
         "jobid": "31", 
@@ -285,7 +285,7 @@
         "inpfile": "rcf12001_1_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012/pp500_minbias", 
-        "nevents": "200"
+        "nevents": "100"
     }, 
     {
         "jobid": "32", 
@@ -294,7 +294,7 @@
         "inpfile": "rcf12001_1_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012.AgML/pp500_minbias", 
-        "nevents": "200"
+        "nevents": "100"
     }, 
     {
         "jobid": "33", 
@@ -303,7 +303,7 @@
         "inpfile": "rcf12000_1_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012/pp200_minbias", 
-        "nevents": "500"
+        "nevents": "100"
     }, 
     {
         "jobid": "34", 
@@ -312,7 +312,7 @@
         "inpfile": "rcf12000_1_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2012.AgML/pp200_minbias", 
-        "nevents": "500"
+        "nevents": "100"
     }, 
     {
         "jobid": "35", 
@@ -339,7 +339,7 @@
         "inpfile": "rcf10100_90_4000evts_minb.fzd", 
         "inppath": "/star/rcf/simu/pp500/pythia/pileup", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2011/pp500_minbias", 
-        "nevents": "200"
+        "nevents": "100"
     }, 
     {
         "jobid": "38", 
@@ -348,7 +348,7 @@
         "inpfile": "rcf11023_2060_25evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2011/auau200_central", 
-        "nevents": "25"
+        "nevents": "1"
     }, 
     {
         "jobid": "39", 
@@ -357,7 +357,7 @@
         "inpfile": "rcf9068_305_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2010/auau200_minbias", 
-        "nevents": "10"
+        "nevents": "5"
     }, 
     {
         "jobid": "40", 
@@ -375,7 +375,7 @@
         "inpfile": "rcf10031_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2010/auau11_minbias", 
-        "nevents": "100"
+        "nevents": "40"
     }, 
     {
         "jobid": "42", 
@@ -384,7 +384,7 @@
         "inpfile": "rcf10030_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2010/auau7_minbias", 
-        "nevents": "100"
+        "nevents": "25"
     }, 
     {
         "jobid": "43", 
@@ -393,7 +393,7 @@
         "inpfile": "rcf10033_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2010/auau62_minbias", 
-        "nevents": "100"
+        "nevents": "50"
     }, 
     {
         "jobid": "44", 
@@ -402,7 +402,7 @@
         "inpfile": "rcf9994_01_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2009/pp500_minbias", 
-        "nevents": "1000"
+        "nevents": "50"
     }, 
     {
         "jobid": "45", 
@@ -411,7 +411,7 @@
         "inpfile": "rcf9993_01_1000evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2009/pp200_minbias", 
-        "nevents": "1000"
+        "nevents": "100"
     }, 
     {
         "jobid": "46", 
@@ -438,7 +438,7 @@
         "inpfile": "rcf1296_02_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2007/auau200_central", 
-        "nevents": "50"
+        "nevents": "40"
     }, 
     {
         "jobid": "49", 
@@ -537,7 +537,7 @@
         "inpfile": "rcf15000_1_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2014/auau200_minbias", 
-        "nevents": "50"
+        "nevents": "30"
     }, 
     {
         "jobid": "60", 
@@ -546,7 +546,7 @@
         "inpfile": "rcf15001_0_100evts.fzd", 
         "inppath": "/star/rcf/simu", 
         "outpath": "/star/rcf/test/dev/trs_sl302.ittf/${thisday}/year_2015/pp200_minbias", 
-        "nevents": "100"
+        "nevents": "50"
     }, 
     {
         "jobid": "61", 
@@ -708,7 +708,7 @@
         "inpfile": "st_physics_18069061_raw_2000021.daq", 
         "inppath": "/star/rcf/test/daq/2017/069", 
         "outpath": "/star/rcf/test/dev/daq_sl302.stihr/${thisday}/year_2017/pp500_production_2017", 
-        "nevents": "500"
+        "nevents": "300"
     }, 
     {
         "jobid": "79", 
@@ -1087,5 +1087,41 @@
         "inppath": "/star/rcf/test/daq/2021/134", 
         "outpath": "/star/rcf/test/dev/daq_sl302.stica/${thisday}/year_2021/production_OO_200GeV_2021", 
         "nevents": "1000"
+    },
+    {
+        "jobid": "122",
+        "descr": "2022 dataset",
+        "chopts": "pp2022,StiCA,BEmcChkStat,epdhit",
+        "inpfile": "st_physics_23010027_raw_1000015.daq",
+        "inppath": "/star/rcf/test/daq/2022/010/23010027",
+        "outpath": "/star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2022/production_pp500_2022_64bit",
+        "nevents": "1000"
+    },
+    {
+        "jobid": "123",
+        "descr": "Test for StSpinPool/StFcsPi0FinderForEcal (PR #412)",
+        "chopts": "pp2022,StiCA,BEmcChkStat,ftt,-picowrite,-hitfilt,-evout",
+        "inpfile": "st_fwd_23040001_raw_0000003.daq",
+        "inppath": "/star/rcf/test/daq/2022/040/23040001",
+        "outpath": "",
+        "nevents": "50"
+    },
+    {
+        "jobid": "124",
+        "descr": "2017 RHICf raw data to StEvent conversion",
+        "chopts": "in,Event,l0,trgd,ZDCvtx,EvOut,CMuDst,eemcDb,emcDY2,rhicfdat,pp2pp,tpcDb",
+        "inpfile": "st_rhicf_18178002_raw_1000004.daq",
+        "inppath": "/star/rcf/test/daq/2017/178/18178002",
+        "outpath": "",
+        "nevents": "100"
+    },
+    {
+        "jobid": "125",
+        "descr": "2023 dataset",
+        "chopts": "pp2022,StiCA,BEmcChkStat,epdhit,FwdTrack",
+        "inpfile": "st_physics_23072022_raw_4000001.daq",
+        "inppath": "/star/rcf/test/daq/2023/072/23072022/",
+        "outpath": "",
+        "nevents": "200"
     }
 ]

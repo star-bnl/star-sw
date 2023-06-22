@@ -50,6 +50,7 @@ extern "C" {
 #define RTS_LOG_PORT_EMAIL	8013
 #define RTS_LOG_PORT_DCS	8014
 #define RTS_LOG_PORT_ITPC	8015
+#define RTS_LOG_PORT_FWD	8016
 
 #define RTS_LOG_PORT	RTS_LOG_PORT_TEST	/* default, test.log, port */
 
@@ -218,8 +219,8 @@ INLINE_HACK void rtsLogLevel(const char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-			logMsg("" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
-			sbLOG("" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
+		    logMsg((char *)"" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ; \
+		    sbLOG((char *)"" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ; \
 		} \
 	} while(0) \
 

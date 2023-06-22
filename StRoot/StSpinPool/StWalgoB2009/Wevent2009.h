@@ -7,9 +7,6 @@
 //----------------------------
 #ifndef W_EVENT_2009_HH
 #define W_EVENT_2009_HH
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 
 #include <TVector3.h>
 //get L2
@@ -109,7 +106,7 @@ class WeveVertex { // info about vertex
   
   void print( int flag=0){
     printf(" Vertex ID=%d Z=%.1f cm  nTrack=%d\n",id,z, eleTrack.size());
-    for(uint i=0;i< eleTrack.size();i++) 
+    for(unsigned int i=0;i< eleTrack.size();i++) 
       eleTrack[i].print();
   }
   
@@ -218,7 +215,7 @@ class Wevent2009 {
   void print( int flag=0, int isMC=0) {
     printf("\nmy W2009event ID=%d  L2Wbits: ET=%d rnd=%d;  bx7=%d bx48=%d nVert=%d\n",id,l2bitET,l2bitRnd,bx7,bx48, vertex.size());
     if(!isMC)L2wResult2009_print(l2algo);
-    for(uint i=0;i< vertex.size();i++) vertex[i].print(flag);
+    for(unsigned int i=0;i< vertex.size();i++) vertex[i].print(flag);
     bemc.print(flag);
     
   }// end of PRINT

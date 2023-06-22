@@ -70,7 +70,7 @@ void EEdsm1Tree :: clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm1Tree::setInp16bit(int brd, int ch, ushort val){
+EEdsm1Tree::setInp16bit(int brd, int ch, unsigned short val){
   assert(brd>0 && brd<=Nee1);
   ee1[brd-1].setWord(ch,val);
   //  printf("addX %d %d %d\n",brd,ch,val);

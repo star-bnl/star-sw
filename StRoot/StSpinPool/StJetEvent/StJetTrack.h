@@ -37,6 +37,8 @@ public:
     , mNSigmaTofKaon(0)
     , mNSigmaTofProton(0)
     , mNSigmaTofElectron(0)
+    , mIdTruth(0)
+    , mQaTruth(0)
   {
   }
 
@@ -67,6 +69,8 @@ public:
   float nSigmaKaon()           const { return mNSigmaKaon; }
   float nSigmaProton()         const { return mNSigmaProton; }
   float nSigmaElectron()       const { return mNSigmaElectron; }
+  int   idTruth()              const { return mIdTruth; }
+  int   qaTruth()              const { return mQaTruth; }
   float m()                    const { return (beta() > 0 && beta() < 1) ? momentum().Mag()*TMath::Sqrt(1/(beta()*beta())-1) : -999; }
 
   int btofTrayId()             const { return mBTofTrayId; }
@@ -104,7 +108,10 @@ private:
   double   mNSigmaTofProton;
   double   mNSigmaTofElectron;
 
-  ClassDef(StJetTrack,6); 
+  int      mIdTruth;
+  int      mQaTruth;
+
+  ClassDef(StJetTrack, 7);
 };
 
 #endif // ST_JET_TRACK_H

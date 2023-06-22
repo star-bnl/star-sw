@@ -100,7 +100,7 @@ unsigned int num_rows;
 //unsigned int num_struct;
 
 //const int MAXBUF=1024;
-ostrstream Query;
+std::ostringstream Query;
 char temps[128];
 
 char validFrom[20];
@@ -176,7 +176,7 @@ uint num_latest;
 int latestDirDate;
 int latestDirTime;
 
-if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
+if (mysql_real_query(&mysql, Query.str().c_str(), int(Query.tellp())-1))
   {
     LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
     mysql_close(&mysql);
@@ -252,7 +252,7 @@ int latestStrID=99999;
 uint sizeOfDbStruct=99999;
 uint nDbVar=99999;
 
-if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
+if (mysql_real_query(&mysql, Query.str().c_str(), int(Query.tellp())-1))
   {
     LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);
@@ -338,7 +338,7 @@ Query<<"SELECT name, type, offset, nDims, firstDim FROM headers WHERE strID="
      << latestStrID << " ORDER BY offset" << std::ends;
   //cout << "database query: " << Query.str() << endl;
 
-if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
+if (mysql_real_query(&mysql, Query.str().c_str(), int(Query.tellp())-1))
   {
     LOG_ERROR << "Failed to query: Error: " << mysql_error(&mysql) << endm;
     mysql_close(&mysql);
@@ -480,7 +480,7 @@ Query << "SELECT bytes FROM bytes WHERE instanceID="<<latestDirID<< std::ends;
  
 // cout << "database query: " << Query.str() << endl;
 
-if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
+if (mysql_real_query(&mysql, Query.str().c_str(), int(Query.tellp())-1))
   {
     LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
     LOG_ERROR << "database query: " << Query.str() << endm;
@@ -662,7 +662,7 @@ uint num_next;
 int nextDirDate;
 int nextDirTime;
 
-if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
+if (mysql_real_query(&mysql, Query.str().c_str(), int(Query.tellp())-1))
   {
     LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);

@@ -156,9 +156,9 @@ St2009pubSpinMaker::bXingSort(){
   
   
   // search for  Ws ............
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id==0) continue;
 

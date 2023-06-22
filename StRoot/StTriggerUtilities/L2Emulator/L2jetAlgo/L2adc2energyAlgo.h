@@ -85,9 +85,9 @@ class L2adc2energyAlgo : public  L2VirtualAlgo {
   // utility methods
   void createHisto();
   void clearEvent();
-  int  projectAdc( ushort *rawAdc, int nRdo,
-		  ushort *thr, ushort *ped, ushort *gainCorr,
-		  ushort *phiBin, ushort *patchBin,
+  int  projectAdc( unsigned short *rawAdc, int nRdo,
+		  unsigned short *thr, unsigned short *ped, unsigned short *gainCorr,
+		  unsigned short *phiBin, unsigned short *patchBin,
 		  L2Histo *hHot	 );
 
  
@@ -100,8 +100,8 @@ class L2adc2energyAlgo : public  L2VirtualAlgo {
   // ~L2adc2energyAlgo(){}; // memory leak NOT taken care of
   int   initRun( int runNo, int *rc_ints, float *rc_floats);
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
-	      int bemcIn, ushort *bemcData,
-	      int eemcIn, ushort *eemcData);
+	      int bemcIn, unsigned short *bemcData,
+	      int eemcIn, unsigned short *eemcData);
   void  finishRun();// at the end of each run
 };
 

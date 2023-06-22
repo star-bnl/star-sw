@@ -1,110 +1,65 @@
-//------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.6 2021/05/17 09:07:05 tnonaka Exp $
-// $Log: StRefMultCorr.h,v $
-// Revision 1.6  2021/05/17 09:07:05  tnonaka
-// Refmult centrality definition for isobaric data
-//
-// Revision 1.5  2020/01/16 23:53:31  tnonaka
-// gRefmult for Run14 and Run16 added
-//
-// Revision 1.4  2019/10/03 15:44:21  tnonaka
-// Some functions for pile-up rejection and trigger inefficiency corrections are added
-//
-// Revision 1.3  2019/07/11 03:31:49  tnonaka
-// Some functions are added/replaced to read header files and to implement Vz dependent centrality definitions for 54.4 GeV RefMult.
-//
-//
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// StRefMultCor package has been moved to StRoot/StRefMultCorr 2019/02
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-//
-// Revision 1.9  2015/05/22 06:52:07  hmasui
-// Add grefmult for Run14 Au+Au 200 GeV
-//
-// Revision 1.8  2013/05/10 18:33:33  hmasui
-// Add TOF tray mult, preliminary update for Run12 U+U
-//
-// Revision 1.7  2012/05/08 03:19:51  hmasui
-// Move parameters to Centrality_def_refmult.txt
-//
-// Revision 1.6  2012/04/23 21:29:33  hmasui
-// Added isBadRun() function for outlier rejection, getBeginRun() and getEndRun() to obtain the run range for a given (energy,year)
-//
-// Revision 1.5  2011/11/08 19:11:03  hmasui
-// Add luminosity corrections for 200 GeV
-//
-// Revision 1.4  2011/10/11 19:35:18  hmasui
-// Fix typo. Add z-vertex check in getWeight() function
-//
-// Revision 1.3  2011/10/10 21:30:34  hmasui
-// Replaced hard coded parameters for z-vertex and weight corrections by input parameters from text file
-//
-// Revision 1.2  2011/08/12 20:28:04  hmasui
-// Avoid varying corrected refmult in the same event by random number
-//
-// Revision 1.1  2011/08/11 18:38:36  hmasui
-// First version of Refmult correction class
-//
-//------------------------------------------------------------------------------
-//  StRefMultCorr class
-//   - Provide centrality bins based on multiplicity (refmult, refmult2, tof tray mulitplicity etc)
-//     * 5% increment centrality bins (16 bins)
-//     * 5% increment in 0-10%, and 10% increment in 10-80% (9 bins)
-//   - Provide corrected multiplicity (z-vertex dependence)
-//   - Provide "re-weighting" correction, only relevant to the peripheral bins
-//
-//  Centrality binning:
-//     Bin       Centrality (16)   Centrality (9)
-//     0            75-80%            70-80%
-//     1            70-75%            60-70%
-//     2            65-70%            50-60%
-//     3            60-65%            40-50%
-//     4            55-60%            30-40%
-//     5            50-55%            20-30%
-//     6            45-50%            10-20%
-//     7            40-45%             5-10%
-//     8            35-40%             0- 5%
-//     9            30-35%
-//    10            25-30%
-//    11            20-25%
-//    12            15-20%
-//    13            10-15%
-//    14             5-10%
-//    15             0- 5%
-//
-//  See how to use this class in StRefMultCorr/macros/getCentralityBins.C
-//
-//  authors: Alexander Schmah, Hiroshi Masui
-//------------------------------------------------------------------------------
+/// \class StRefMultCorr
+///
+///   - Provide centrality bins based on multiplicity (refmult, refmult2, tof tray mulitplicity etc)
+///     * 5% increment centrality bins (16 bins)
+///     * 5% increment in 0-10%, and 10% increment in 10-80% (9 bins)
+///   - Provide corrected multiplicity (z-vertex dependence)
+///   - Provide "re-weighting" correction, only relevant to the peripheral bins
+///
+///  Centrality binning:
+///     Bin       Centrality (16)   Centrality (9)
+///     0            75-80%            70-80%
+///     1            70-75%            60-70%
+///     2            65-70%            50-60%
+///     3            60-65%            40-50%
+///     4            55-60%            30-40%
+///     5            50-55%            20-30%
+///     6            45-50%            10-20%
+///     7            40-45%             5-10%
+///     8            35-40%             0- 5%
+///     9            30-35%
+///    10            25-30%
+///    11            20-25%
+///    12            15-20%
+///    13            10-15%
+///    14             5-10%
+///    15             0- 5%
+///  
+///  Original authors: Alexander Schmah, Hiroshi Masui
 
 #ifndef __StRefMultCorr_h__
 #define __StRefMultCorr_h__
 
+// C++ headers
 #include <vector>
 #include <map>
-#include "TString.h"
 
+// ROOT headers
+#include "Rtypes.h"
+#include "TString.h"
 #include "BadRun.h"
 
-//______________________________________________________________________________
+//_________________
 // Class to correct z-vertex dependence, luminosity dependence of multiplicity
 class StRefMultCorr {
  public:
-  // Specify the type of multiplicity (default is refmult)
-  // "refmult"   - reference multiplicity defined in |eta|<0.5
-  // "refmult2"  - reference multiplicity defined in 0.5<|eta|<1.0
-  // "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
-  // "toftray"   - TOF tray multiplicity
-  // "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
-  // Specify the type of data sets (in case there are multiple prameters/definitions in the same runs)
-  // "Def"
-  // "VpdMB5"
-  // "VpdMB30"
-  // "VpdMBnoVtx"
+  /// Default constructor
+  /// Specify the type of multiplicity (default is refmult)
+  /// "refmult"   - reference multiplicity defined in |eta|<0.5
+  /// "refmult2"  - reference multiplicity defined in 0.5<|eta|<1.0
+  /// "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
+  /// "toftray"   - TOF tray multiplicity
+  /// "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
+  /// Specify the type of data sets (in case there are multiple prameters/definitions in the same runs)
+  /// "Def"
+  /// "VpdMB5"
+  /// "VpdMB30"
+  /// "VpdMBnoVtx"
   StRefMultCorr(const TString name="refmult", const TString subname="Def", const TString libname="Def");
-  virtual ~StRefMultCorr(); /// Default destructor
+  /// Destructor
+  virtual ~StRefMultCorr(); 
   
-  // Bad run rejection
+  /// Check if run is bad
   Bool_t isBadRun(const Int_t RunId) ;
 
   // Event-by-event initialization. Call this function event-by-event
@@ -112,52 +67,78 @@ class StRefMultCorr {
   // --> i.e. no correction will be applied unless users set the values for 200 GeV
   void initEvent(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate=0.0) ; // Set multiplicity, vz and zdc coincidence rate
 
-  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch); //remove the pile up event 
+  /// Check if pile-up event
+  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const {
+    return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
+  }
+  /// Check if NOT pile-up event
+  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const; 
 
   /// Get corrected multiplicity, correction as a function of primary z-vertex
   Double_t getRefMultCorr() const;
   // Corrected multiplity, flag=0:  Luminosity only, flag=1:  z-vertex only, flag=2:  full correction (default)
-  Double_t getRefMultCorr(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate, const UInt_t flag=2) const ;
+  Double_t getRefMultCorr(const UShort_t RefMult, const Double_t z,
+                          const Double_t zdcCoincidenceRate, const UInt_t flag = 2) const;
+
+  /// Luminosity correction factor
+  Double_t luminosityCorrection(Double_t zdcCoincidenceRate) const;
+  /// Vz correction factor
+  Double_t vzCorrection(Double_t z) const;
+  /// Sample refMult -> convert integer to double
+  Double_t sampleRefMult(Int_t refMult) const;
+  /// Shape reweighting of refmult: ratio of refMult in each Vz bin to that in the center (|Vz|<10cm)
+  Double_t getShapeWeight_SubVz2Center() const;
+  /// Trigger efficiency: fit of the Glauber/Data
+  Double_t triggerWeight() const;
+
+  /// Total weighting factor: incorporates shape and trigger efficiency weights
+  Double_t getWeight() const;
 
   /// Get 16 centrality bins (5% increment, 0-5, 5-10, ..., 75-80)
   Int_t getCentralityBin16() const;
-
   /// Get 9 centrality bins (10% increment except for 0-5 and 5-10)
   Int_t getCentralityBin9() const;
-		
-  /// Re-weighting correction, correction is only applied up to mNormalize_step (energy dependent)
-  //Double_t getWeight() const;
-  Double_t getWeight();
 
-  // Initialization of centrality bins etc
+  /// Initialization of centrality bins etc
   void init(const Int_t RunId);
 
   // Read scale factor from text file
   void setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max) ;
   void readScaleForWeight(const Char_t* input) ;
 
-  // Return begin/end run from energy and year
-  Int_t getBeginRun(const Double_t energy, const Int_t year) ;
-  Int_t getEndRun(  const Double_t energy, const Int_t year) ;
+  /// Return the first runId from energy and year
+  Int_t getBeginRun(const Double_t energy, const Int_t year);
+  /// Return the last runId from energy and year
+  Int_t getEndRun(  const Double_t energy, const Int_t year);
 
-  // Print all parameters
+  /// Print all parameters
   void print(const Option_t* option="") const ;
 
  private:
-  const TString mName ; // refmult, refmult2, refmult3 or toftray (case insensitive)
-  const TString mSubName ; // specify triggers, in case there are multiple parameters/definitions in the same runs 
-  const TString mLibName ; // specify library, in case the centrality definition depends on productions 
+  /// refmult, refmult2, refmult3 or toftray (case insensitive)
+  const TString mName;
+  /// Specify triggers, in case there are multiple parameters/definitions in the same runs 
+  const TString mSubName;
+  /// Specify library, in case the centrality definition depends on productions  
+  const TString mLibName;
 
   // Functions
-  void clear() ; /// Clear all arrays
-  Bool_t isIndexOk() const ; /// 0 <= mParameterIndex < maxArraySize
-  Bool_t isZvertexOk() const ; /// mStart_zvertex < z < mStop_zvertex
-  Bool_t isRefMultOk() const ; /// 0-80%, (corrected multiplicity) > mCentrality_bins[0]
-  Bool_t isCentralityOk(const Int_t icent) const ; /// centrality bin check
-  Int_t setParameterIndex(const Int_t RunId) ; /// Parameter index from run id (return mParameterIndex)
-  // For isobar
-  Bool_t IsZr;
-  Bool_t IsRu;
+
+  /// Clear all arrays
+  void clear();
+  /// 0 <= mParameterIndex < maxArraySize
+  Bool_t isIndexOk() const; 
+  /// mStart_zvertex < z < mStop_zvertex
+  Bool_t isZvertexOk() const;
+  /// 0-80%, (corrected multiplicity) > mCentrality_bins[0]
+  Bool_t isRefMultOk() const;
+  /// Centrality bin check
+  Bool_t isCentralityOk(const Int_t icent) const;
+  /// Parameter index from run id (return mParameterIndex)
+  Int_t setParameterIndex(const Int_t RunId);
+  /// For isobar
+  Bool_t mIsZr;
+  Bool_t mIsRu;
 
   // Special scale factor for Run14 to take into account the weight
   // between different triggers
@@ -165,11 +146,15 @@ class StRefMultCorr {
   Double_t getScaleForWeight() const ;
 
   // Data members
-  enum 
+  enum
   {
-    mNCentrality   = 16, /// 16 centrality bins, starting from 75-80% with 5% bin width
+    /// 16 centrality bins starting from 75-80% with 5% bin width
+    mNCentrality = 16,
+    /// Number of z vertex correction parameters
     mNPar_z_vertex = 8,
-    mNPar_weight   = 8,
+    /// Number of z vertex correction parameters
+    mNPar_weight = 8,
+    /// Number of luminosity correction parameters
     mNPar_luminosity = 2
   };
 
@@ -210,15 +195,20 @@ class StRefMultCorr {
   Int_t getVzWindowForVzDepCentDef() const;
   Int_t getCentralityBin9VzDep() const;
   Int_t getCentralityBin16VzDep() const;
-  std::vector<std::string> StringSplit( const std::string str, const char sep );
+  std::vector<std::string> StringSplit( const std::string str, const char sep ) const;
 
-  //---------------------------------------------------------
-  //weight refmult shape in each Vz bin to what in the center (|Vz|<10cm), add by Zaochen
-  Double_t getShapeWeight_SubVz2Center() ;
-  //---------------------------------------------------------
-  //
   // Read scale factor from header file
-  void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight) ;
+  void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight);
+
+  /// Calculate maximal or minimal refMult value for pile-up 
+  /// rejection (b parameters for refMultMax, c parameters for refMultMin)
+  Double_t calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Double_t x1, 
+                             Double_t x2, Double_t x3, Double_t x4) const;
+  /// Check if refMult is between refMultLow and refMultHi values (for pile-up rejection)
+  Bool_t isInPileUpRefMultLimits(Double_t refMult, Double_t low, Double_t hi) const 
+  { return ( low < refMult && refMult < hi); }
+
+
 
   ClassDef(StRefMultCorr, 0)
 };

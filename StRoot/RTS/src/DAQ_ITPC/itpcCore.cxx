@@ -65,7 +65,7 @@ void itpc_rowpad_to_rdo(int row, int pad, int &rdo)
 	}
 	else return ifee_to_irdo_map[fee_id] ;
 }
-#endif ;
+#endif 
 
 void itpc_rowpad_to_ifee(int row, int pad, int &fee_id, int &fee_ch)
 {

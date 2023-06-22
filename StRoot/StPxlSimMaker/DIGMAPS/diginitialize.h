@@ -35,7 +35,7 @@ class DIGMAPS;
 class DIGInitialize : public TNamed {
  public:
   DIGInitialize();
-  DIGInitialize(char *name,char *title, TString aCP, TString aCFN, TString action);
+  DIGInitialize(const char *name, const char *title, TString aCP, TString aCFN, TString action);
   virtual ~DIGInitialize();
   void         SetConfigPath(TString aCP) ;
   void         SetConfigFileName(TString aCFN) ;

@@ -16,11 +16,17 @@
 #define DAQ_SEND_CONFIG                0x24 
 #define RTS_SEND_CONFIG                DAQ_SEND_CONFIG
 
+#define DAQ_SEND_RECONFIG              0x26
+#define RTS_SEND_RECONFIG              DAQ_SEND_RECONFIG
+
 #define DAQ_FLUSH_TOKENS               0x27
 #define RTS_FLUSH_TOKENS               DAQ_FLUSH_TOKENS
 
 #define DAQ_QUERY_TOKENS               0x28
 #define RTS_QUERY_TOKENS               DAQ_QUERY_TOKENS
+
+#define DAQ_SEND_RECONFIG              0x26
+#define RTS_SEND_RECONFIG              DAQ_SEND_RECONFIG
 
 #define RTS_FORCE_STOP		       0x46 
 #define RTS_RECONNECT                  0x48

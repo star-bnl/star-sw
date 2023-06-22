@@ -60,7 +60,7 @@ itpc_fcf_c::itpc_fcf_c()
 
         version = VERSION ;
 	sector_id = 0 ;		// 0 is ALL sectors
-	offline = 0 ;		// not Offline!
+	offline = 1 ;		// new: offline is default
 
 
 	det_type = 1 ;		// ITPC
@@ -216,6 +216,20 @@ float itpc_fcf_c::get_gain(int sec1, int row1, int pad1)
 
 }
 
+float itpc_fcf_c::get_t0(int sec1, int row1, int pad1)
+{
+	if(row1==0 || pad1==0) return 0.0 ;
+
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return 0.0 ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	return gain_p[row1][pad1].t0 ;
+
+}
+
 void itpc_fcf_c::set_gain(int sec1, int row1, int pad1, float gain)
 {
 //	if(row1==0 || pad1==0) return 0.0 ;
@@ -293,7 +307,9 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
 	int max_pad_all = max_x + 1 ;
 
-	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
+// HACK
+	if(offline) s1_data_length = (1 + max_y) * 2 ;	// need more for track_id
+//	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
 	else s1_data_length = 1 + max_y ;
 
 	if(row_pad_store==0) {	// initialize on first use...
@@ -738,14 +754,15 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_start = tb_buff[i++] ;
 		int t_stop = t_start + t_cou - 1 ;
 
+		// happens too often, get rid of ERR
 		if(t_start <= t_stop_last) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
+			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
+			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
@@ -763,6 +780,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 		for(int t=t_start;t<=t_stop;t++) {
 			// initial cuts, where I blow of data
+// Test: was 0
 #if 0
 			// cut timebin due to gating grid pickup
 			if(t>425) {
@@ -882,7 +900,13 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 				t_start = i ;
 				seq_cou++ ;
 			}
-			*s1_data++ = tb_buff[i] ;
+			//NEW in 11Jun2023
+			if(tb_buff[i]==0xFFFF) {	// this is how I skip zeros
+				*s1_data++ = 0 ;
+			}
+			else {
+				*s1_data++ = tb_buff[i] ;	// ADC data
+			}
 			*s1_data++ = track_id[i] ;
 			t_cou++ ;
 		}
@@ -984,7 +1008,11 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 			out_store = row_store ;	// rewind 
 		}
 
-		if((out_store-store_start)>(max_out_bytes/4-1000)) {
+		int ints_used = out_store - store_start ;
+		//int ints_needed = (max_out_bytes/4)-1000 ;
+		int ints_needed = (max_out_bytes/4)-400 ;
+
+		if(ints_used && (ints_used>ints_needed)) {
 			LOG(ERR,"not enough ints %d vs %d",out_store-store_start,max_out_bytes/4) ;
 			break ;
 		}		
@@ -1004,6 +1032,12 @@ void itpc_fcf_c::run_start()
 	LOG(NOTE,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
+
+	for(int r=0;r<=max_slice;r++) {
+	for(int p=0;p<=max_x;p++) {
+		get_row_pad(r,p)->s1_len = 0 ;
+	}
+	}
 
 
 }
@@ -1201,7 +1235,10 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 	for(int p=1;p<=rl;p++) {
 		rp_t *rp = get_row_pad(row,p) ;
 
-		if(rp->s1_len==0) continue ;
+		if(rp->s1_len==0) {
+			//LOG(WARN,"row:pad %d:%d is void",row,p) ;
+			continue ;
+		}
 
 		u_short *d = rp->s1_data ;
 
@@ -1210,8 +1247,13 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 			int ix = *d++ ;
 
+
 			int b_ix = blob_ix[ix] ;
 
+			LOG(TERR,"  using bix %d %d",ix,b_ix) ;
+			if(b_ix != ix) {
+				LOG(WARN,"Can't be: %d %d, RP %d:%d",b_ix,ix,row,p) ;
+			}
 
 			if(b_ix==0) {
 				LOG(ERR,"Can't be: %d %d, RP %d:%d",b_ix,ix,row,p) ;
@@ -1272,6 +1314,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			//LOG(WARN,"%d: 1pad %d %d: %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
+			//blob[i].p1 *= 1000 ;
 			continue ;
 		}
 
@@ -1281,6 +1324,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			//LOG(WARN,"%d: 3tb %d %d %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
+			blob[i].p1 *= 2000 ;
 			continue ;
 		}
 
@@ -1293,6 +1337,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 //			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;
+			blob[i].p1 *= 3000 ;
 			continue ;
 		}
 
@@ -1302,11 +1347,11 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 
 
-#if 0
-	LOG(TERR,"Blobs OK %d/%d",blob_ok,blob_cou) ;
+#if 1
+	LOG(TERR,"Blobs OK %d/%d in row %d",blob_ok,blob_cou,row) ;
 
 	for(int i=0;i<blob_cou;i++) {
-		if(blob[i].seq_cou==0) continue ;
+		//if(blob[i].seq_cou==0) continue ;
 
 		LOG(TERR,"Blob %d: seq %d: flags 0x%X: pad %d:%d, tb %d:%d",i,blob[i].seq_cou,blob[i].flags,
 		    blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
@@ -1358,7 +1403,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 
 #ifdef DO_DBG1
-		printf("...bytes %d vs %d\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
+		printf("...bytes %lu vs %lu\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
 #endif
 		memset(smooth_dta,0,dt_2*(dp+2)*sizeof(short)*2) ;	// clear both storages which is why there's a 2
 
@@ -1694,22 +1739,24 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
 
 			if(flags & 3) tmp_fl |= 0x8000 ;	// ROW_EDGE
+			// NEW 11-Jan-2022
+			else {
 
+				*obuff++ = (time_c << 16) | pad_c ;
+				*obuff++ = (cha << 16) | tmp_fl ;
 
-			*obuff++ = (time_c << 16) | pad_c ;
-			*obuff++ = (cha << 16) | tmp_fl ;
-
-			if(words_per_cluster>2) {
-				*obuff++ = (quality<<16)|track_id ;
-			}
-			if(words_per_cluster>3) {
-				*obuff++ = (pixels<<16)|adc_max ;
-			}
+				if(words_per_cluster>2) {
+					*obuff++ = (quality<<16)|track_id ;
+				}
+				if(words_per_cluster>3) {
+					*obuff++ = (pixels<<16)|adc_max ;
+				}
 
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
 #endif
-			clusters_cou++ ;
+				clusters_cou++ ;
+			}
 		}
 		else {	// multiple peak hauristics
 			int ip1, ip2 ;
@@ -1827,24 +1874,26 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// add flags here
 				pad_c |= 0x8000 ;					// merged flag
 				if(flags & 3) tmp_fl |= 0x8000 ;			// ROW_EDGE
+				// NEW 11-Jan-2022
+				else {
 
 
+					*obuff++ = (time_c << 16) | pad_c ;
+					*obuff++ = (cha << 16) | tmp_fl ;
 
-				*obuff++ = (time_c << 16) | pad_c ;
-				*obuff++ = (cha << 16) | tmp_fl ;
-
-				if(words_per_cluster > 2) {
-					*obuff++ = (quality<<16)|track_id ;
-				}
-				if(words_per_cluster > 3) {
-					*obuff++ = (pixels<<16)|adc_max ;
-				}
+					if(words_per_cluster > 2) {
+						*obuff++ = (quality<<16)|track_id ;
+					}
+					if(words_per_cluster > 3) {
+						*obuff++ = (pixels<<16)|adc_max ;
+					}
 				
 #ifdef DO_DBG1
 //				LOG(TERR,"0x%X 0x%X 0x%X 0x%X - 0x%X 0x%X",pad_c,time_c,cha,tmp_fl, (time_c<16)|pad_c,(cha<<16)|tmp_fl) ;
 //				LOG(TERR,"**** D %d: %f %f %f",clusters_cou,f_p_ave,f_t_ave,f_charge) ;
 #endif				
-				clusters_cou++ ;
+					clusters_cou++ ;
+				}
 			}
 		}
 

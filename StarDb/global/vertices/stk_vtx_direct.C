@@ -1,4 +1,4 @@
-St_DataSet *CreateTable() { 
+TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/vertices/stk_vtx_direct Allocated rows: 1  Used rows: 1  Row size: 16 bytes
 //  Table: stk_vtx_direct_st[0]--> stk_vtx_direct_st[0]
@@ -15,5 +15,5 @@ memset(&row,0,tableSet->GetRowSize());
     row.sx[2]	 =     0.0005;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
- return (St_DataSet *)tableSet;
+ return (TDataSet *)tableSet;
 }

@@ -79,8 +79,8 @@ private:
   Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
   Bool_t mOuterTrackGeometry; //! select outer track geometry (true)
 
-  Bool_t validAdc(float const);
-  Bool_t validTdc(float const);
+  Bool_t validAdc(float);
+  Bool_t validTdc(float);
 
   // various cut-offs and ranges
   Float_t mMinValidTdc; //!
@@ -116,7 +116,7 @@ inline void StTofpNtupleMaker::setOuterTrackGeometry(){mOuterTrackGeometry=true;
 inline void StTofpNtupleMaker::setStandardTrackGeometry(){mOuterTrackGeometry=false;}
 inline void StTofpNtupleMaker::SetNtupleFileName(Char_t* filename){mTupleFileName=filename;}
 
-inline Bool_t StTofpNtupleMaker::validAdc(const float adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
-inline Bool_t StTofpNtupleMaker::validTdc(const float tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
+inline Bool_t StTofpNtupleMaker::validAdc(float adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
+inline Bool_t StTofpNtupleMaker::validTdc(float tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
 
 #endif

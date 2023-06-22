@@ -49,8 +49,8 @@ class L2pedAlgo12 : public  L2VirtualAlgo2012 {
   void computeUser(int token); // booby trap
   
   bool  doPedestals(int inpEveId, int* L2Result,  // for every event
-	      int bemcIn, ushort *bemcData,
-	      int eemcIn, ushort *eemcData);
+	      int bemcIn, unsigned short *bemcData,
+	      int eemcIn, unsigned short *eemcData);
 
 };
 

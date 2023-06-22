@@ -49,36 +49,35 @@ void baseBuilder::stoprun(daqReader *rdr) {
 }
 
 void baseBuilder::event(daqReader *rdr) {
-  LOG(DBG, "event #%d",rdr->seq);
-  char tmp[20];
+    LOG(DBG, "event #%d",rdr->seq);
+    char tmp[20];
 
-  if(first_event == 0) {
-    first_event = 1;
+    if(first_event == 0) {
+	first_event = 1;
 
-    // Set tags for detectors in run...
-    int mask = rdr->detsinrun;
-    //LOG("JEFF", "Detector mask = 0x%x",mask);
-    for(int i=0;i<32;i++) {
-      if(mask & 1<<i) {
-	char *det = (char *)rts2name(i);
-	if(!det) det = (char *)"xxx";
-
-	strcpy(tmp, det);
-	det = tmp;
-	while(*det) {
-	  *det = tolower(*det);
-	  det++;
+	// Set tags for detectors in run...
+	uint64_t mask = rdr->detsinrun64;
+	//LOG("JEFF", "Detector mask = 0x%x",mask);
+	for(int i=0;i<64;i++) {
+	    if(mask & 1ll<<i) {
+		char *det = (char *)rts2name(i);
+		if(!det) det = (char *)"xxx";
+	    
+		strcpy(tmp, det);
+		det = tmp;
+		while(*det) {
+		    *det = tolower(*det);
+		    det++;
+		}
+	    
+		char tmp2[20];
+		sprintf(tmp2, "|%s|",tmp);
+		addServerTags(tmp2);
+	    
+		LOG("JEFF", "adding server tag: det[%d] = %s",i, tmp2);
+	    }
 	}
-       
-	char tmp2[20];
-	sprintf(tmp2, "|%s|",tmp);
-	addServerTags(tmp2);
-    
-	LOG("JEFF", "adding server tag: det[%d] = %s",i, tmp2);
-      }
     }
-  }
-
 }
 
 void baseBuilder::main(int argc, char *argv[])

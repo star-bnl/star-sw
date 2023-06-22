@@ -3,12 +3,11 @@
 /**************************************************************
  * $Id: EEdsm2.h,v 1.1 2009/10/12 18:04:26 pibero Exp $
  **************************************************************/
-typedef unsigned short ushort;
 
 class EEdsm2  {
   static const int nc=2; // # of used channels to DSM
   static const int njp=6; // # of EEMC JP
-  ushort data[nc];
+  unsigned short data[nc];
   int mYear;// unpacking changed in 2006
 
  private:
@@ -18,14 +17,14 @@ class EEdsm2  {
   virtual ~EEdsm2();
   void  print(int k=0) const;
   void  clear();
-  void setWord(int ch, ushort val); 
+  void setWord(int ch, unsigned short val); 
   void setYear(int y) { mYear=y;}
   int getNc() const {return nc;}
-  ushort get3JPsum(int i3p) const; // i3p #[0,1], less bits in 2006+
-  ushort get3JPHTthr(int i3p) const; // i3p #[0,1] 
-  ushort getJPthr(int jp) const; // JP # Falk[0-5], out in 2006+
-  ushort getHTTPthr(int i3p) const;// i3p #[0,1], year2006+, selected HT x TP threshold passed?Y/N
-  ushort getTPthr(int i3p) const;  // i3p #[0,1], year2006+, selected TP threshold passed?Y or N
+  unsigned short get3JPsum(int i3p) const; // i3p #[0,1], less bits in 2006+
+  unsigned short get3JPHTthr(int i3p) const; // i3p #[0,1] 
+  unsigned short getJPthr(int jp) const; // JP # Falk[0-5], out in 2006+
+  unsigned short getHTTPthr(int i3p) const;// i3p #[0,1], year2006+, selected HT x TP threshold passed?Y/N
+  unsigned short getTPthr(int i3p) const;  // i3p #[0,1], year2006+, selected TP threshold passed?Y or N
 
 };
 #endif

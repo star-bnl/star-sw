@@ -449,7 +449,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   while (strncmp(DATAP,"LRHD", 4) == 0) {
     // copy the logical record into local struct lr
-    if (memcpy(&lr,DATAP,sizeof(lr))<0) {
+    if (!memcpy(&lr,DATAP,sizeof(lr))) {
        LOG_ERROR<< strerror(errno)<<": error in memcpy"<<endm;
     }
     // check the CRC
@@ -856,7 +856,7 @@ void EventReader::setVerbose(int v)
   verbose = v;
 }
 
-char * EventReader::findBank(char *bankid)
+char * EventReader::findBank(const char *bankid)
 {
   // Fix up DATAP
   Bank_DATAP *pBankDATAP = (Bank_DATAP *)getDATAP();
@@ -921,7 +921,7 @@ char * EventReader::findBank(char *bankid)
   
 }
 
-void EventReader::fprintError(int err, char *file, int line, char *userstring)
+void EventReader::fprintError(int err, const char *file, int line, const char *userstring)
 {
   if (logfd==NULL) return; //no file designated
   if (err<0 || err>MX_MESSAGE) return; //protect against bad error code

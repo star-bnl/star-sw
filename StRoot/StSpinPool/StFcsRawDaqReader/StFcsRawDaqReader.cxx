@@ -212,7 +212,7 @@ Int_t StFcsRawDaqReader::Make() {
     //printf("trg/raw not found\n");
   }else{
     while(dd->iterate()) {
-      u_char *trg_raw = dd->Byte;
+      uint8_t *trg_raw = dd->Byte;
       struct simple_desc {
         short len ;
         char evt_desc ;
@@ -272,8 +272,8 @@ Int_t StFcsRawDaqReader::Make() {
       //printf("DEPIO EHP=%1d NS=%1d DEP=%02d CH=%02d N=%d\n",
       //     ehp,ns,dep,ch,dd->ncontent);
       if(ehp==3 && ns==0 && dep==0 && (ch==4 || ch==5)){	
-	u_int n=dd->ncontent;
-	u_short *d16 = (u_short *)dd->Void;
+	uint32_t n=dd->ncontent;
+	uint16_t *d16 = (uint16_t *)dd->Void;
 	if(ch==4) mFcsDepOut += (d16[96] & 0xFF);
 	if(ch==5) mFcsDepOut += (d16[96] & 0xFF) << 8;
 	//for(int i=0; i<n; i++) printf("  tb=%3d  d16=0x%04x\n",i,d16[i]);
@@ -299,12 +299,12 @@ Int_t StFcsRawDaqReader::Make() {
       int ns  = (dd->sec >> 5) & 1;
       int dep = dd->row ;
       int ch = dd->pad ;
-      u_int n=dd->ncontent;      
+      uint32_t n=dd->ncontent;      
       int detid,id,crt,sub;
       mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
       //printf("EHP=%1d NS=%1d DEP=%02d CH=%02d DET=%1d id=%4d\n",ehp,ns,dep,ch,detid,id);
       //if(ch>=32) continue;
-      u_short *d16 = (u_short *)dd->Void;
+      uint16_t *d16 = (uint16_t *)dd->Void;
       StFcsHit* hit=0;
       unsigned short tmp[1024];
       if(mReadMode==0){
@@ -312,9 +312,9 @@ Int_t StFcsRawDaqReader::Make() {
       }else{
 	/*
 	if(startrg==0 && fcstrg==1){
-	  for(u_int i=0; i<n; i++) {
-	    u_int tb   = dd->adc[i].tb;
-	    u_int data = dd->adc[i].adc;
+	  for(uint32_t i=0; i<n; i++) {
+	    uint32_t tb   = dd->adc[i].tb;
+	    uint32_t data = dd->adc[i].adc;
 	    tmp[i*2  ]=data;
 	    tmp[i*2+1]=tb + 8;	    
 	    //printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
@@ -353,7 +353,7 @@ Int_t StFcsRawDaqReader::Make() {
     dd = mRdr->det("stgc")->get("altro",r) ;
     while(dd && dd->iterate()) {    //per xing and per RDO    
       if(mDebug) printf("STGC ALTRO: stgc%02d(sec) RDO=%1d ALTRO=%03d(row) Ch=%02d(pad)\n",dd->sec,r,dd->row,dd->pad);
-      for(u_int i=0; i<dd->ncontent; i++) {
+      for(uint32_t i=0; i<dd->ncontent; i++) {
 	if(mDebug) printf(" TB=%3d ADC=%4d",dd->adc[i].tb,dd->adc[i].adc) ;
 	ndata++;
       }

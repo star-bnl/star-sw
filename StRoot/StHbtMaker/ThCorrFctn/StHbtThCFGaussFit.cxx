@@ -85,7 +85,7 @@ void StHbtThCFGaussFit::Finish() {
 }
 
 StHbtString StHbtThCFGaussFit::Report() {
-  ostrstream tStr; 
+  std::ostringstream tStr; 
   tStr << "Correlation - Gaussian Fit Manager Report" << endl;
   tStr << mPair.Report() ;
 

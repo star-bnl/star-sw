@@ -5,9 +5,6 @@ Mikhail Kopytine </a> on Aug 20, 2002.
 Here are
 <A HREF="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/St_TLA_Maker/README"> Victor Perevoztchikov's instructions on how to write an St***Maker </A>
  */
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
 #include "TDataSetIter.h"
@@ -29,10 +26,10 @@ Proposal </a>.					*/
 
 
 
-const u_short NPMTsmall1 = 16;
-const u_short NPMTlarge1 = 8;
-const u_short NPMT1 = NPMTsmall1+NPMTlarge1;//# of PMTs on one side (East/West)
-const u_short NPMT2 = 2*NPMT1; // ditto on both sides
+const uint16_t NPMTsmall1 = 16;
+const uint16_t NPMTlarge1 = 8;
+const uint16_t NPMT1 = NPMTsmall1+NPMTlarge1;//# of PMTs on one side (East/West)
+const uint16_t NPMT2 = 2*NPMT1; // ditto on both sides
 const float dE1MIPper_gcm2 = 1.95E-3;  // in GeV/(g/cm**2), for polystyrene
 const float PolystereneDensity = 1.032;   // in g/cm**3
 const float TyleThickness = 1.; // in cm
@@ -78,14 +75,14 @@ private:
 public: 
   BbcTOF():Times(vector<float>(NPMT2)){};  // NPMT1 !
   ~BbcTOF(){};
-  void AddTOF(u_short ipmt, float time)
+  void AddTOF(uint16_t ipmt, float time)
   {
     /*! for the TOF, take the smallest one among the PMT's tiles; 
       add resolution error 
      */
     if (Times[ipmt]==0 || Times[ipmt]>time) {Times[ipmt]=time;}
   }
-  float GetTOF(u_short ipmt)  
+  float GetTOF(uint16_t ipmt)  
   {
     /// returns TOF in s
 
@@ -93,7 +90,7 @@ public:
     if (Times[ipmt]!=0.){ tof = Times[ipmt]+BbcRndm.Gaus(0.,BbcTimingRMS); }
     return tof;
   }
-  short GetTDC(u_short ipmt)
+  short GetTDC(uint16_t ipmt)
   { 
     /// returns digitized (TAC) TOF
     float T = this->GetTOF(ipmt);
@@ -119,12 +116,12 @@ private:
 public:
   BbcDE():dE(vector<float>(NPMT2)){};
   ~BbcDE(){};
-  void AddDE(u_short ipmt, float de)
+  void AddDE(uint16_t ipmt, float de)
   {
     if (!IsSmall(ipmt)) {de *= OuterFactor;}
     dE[ipmt] += de;
   }
-  float GetDE(u_short ipmt)
+  float GetDE(uint16_t ipmt)
   {
     /// returns DE in pC of PMT signal
 
@@ -135,7 +132,7 @@ public:
        NPhotoelectrons;
     return Q;
   }
-  short GetADC(u_short ipmt)
+  short GetADC(uint16_t ipmt)
   {
     /// returns digitized (ADC) amplitude
     float A = this->GetDE(ipmt);
@@ -358,7 +355,7 @@ Int_t StBbcSimulationMaker::Make()
      StBbcTriggerDetector& myBbc = myTrig->bbc();
 
 
-     for (u_short iPMT = 0; iPMT<NPMT2; iPMT++)
+     for (uint16_t iPMT = 0; iPMT<NPMT2; iPMT++)
        {	  
 	  short ADC = DEdata.GetADC(iPMT);
 #ifdef BbcSimQa

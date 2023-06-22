@@ -11,6 +11,8 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StFcsDbMaker/StFcsDb.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
+#include "StMuDSTMaker/COMMON/StMuFcsUtil.h"
 
 StFcsRawHitMaker::StFcsRawHitMaker( const char* name) :
     StRTSBaseMaker("fcs",name){
@@ -37,6 +39,9 @@ int StFcsRawHitMaker::Make() {
       AddData(mEvent);
       LOG_INFO <<"Added StEvent"<<endm;
     }
+
+    if(mReadMuDst>0) return readMuDst();
+
     mFcsCollectionPtr=mEvent->fcsCollection();
     if(!mFcsCollectionPtr) {
       mFcsCollectionPtr=new StFcsCollection();
@@ -46,6 +51,7 @@ int StFcsRawHitMaker::Make() {
       mFcsCollectionPtr=mEvent->fcsCollection();
       LOG_DEBUG <<"Found StFcsCollection"<<endm;
     }
+
 
     StRtsTable* dd=0;
     int nData=0, nValidData=0;
@@ -60,10 +66,10 @@ int StFcsRawHitMaker::Make() {
 	int ns  = (s >> 5) & 1;            // 0=north/1=south  
 	int dep = dd->Row() ;              // DEP Board# (0-23)
 	int ch = dd->Pad() ;               // Channel (0-31)
-	u_int n=dd->GetNRows();   
+	uint32_t n=dd->GetNRows();   
 	int detid,id,crt,sub;
 	mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
-	u_short *d16 = (u_short *)dd->GetTable();
+	uint16_t *d16 = (uint16_t *)dd->GetTable();
 	StFcsHit* hit=0;
 	if(mReadMode==0){
 	    hit = new StFcsHit(0,detid,id,ns,ehp,dep,ch,n,d16);
@@ -90,6 +96,16 @@ int StFcsRawHitMaker::Make() {
     if(nData>0 && GetDebug()) mFcsCollectionPtr->print(3);
     return kStOK;
 };
+
+int StFcsRawHitMaker::readMuDst() {
+    StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+    if(!mudst){LOG_ERROR<<"StFcsRawHitMaker::readMuDst() found no MuDst"<<endm; return kStErr;}
+    StMuFcsCollection* mufcsColl= mudst->muFcsCollection();
+    if(!mufcsColl){LOG_ERROR<<"StFcsRawHitMaker::readMuDst found no MuFcsCollection"<<endm; return kStErr;}
+    StMuFcsUtil util;    
+    mFcsCollectionPtr = util.getFcs(mufcsColl);
+    mEvent->setFcsCollection(mFcsCollectionPtr);
+}
 
 void StFcsRawHitMaker::Clear( Option_t *opts ){};
 

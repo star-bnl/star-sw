@@ -38,6 +38,7 @@
 #pragma link C++ class StTriggerData2017-;
 #pragma link C++ class StTriggerData2018-;
 #pragma link C++ class StTriggerData2019-;
+#pragma link C++ class StTriggerData2022-;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
@@ -212,6 +213,21 @@
 #pragma link C++ class FMSBlock2019+;
 #pragma link C++ class TrgOfflen2019+;
 
+//IncFile=StDaqLib/TRG/trgStructures2022.h
+#pragma link C++ class TriggerDataBlk2022+;
+#pragma link C++ class EvtDescData2022+;
+#pragma link C++ class TrgSumData2022+;
+#pragma link C++ class L1_DSM_Data2022+;
+#pragma link C++ class DataBlock2022+;
+#pragma link C++ class BBCBlock2022+;
+#pragma link C++ class MIXBlock2022+;
+#pragma link C++ class QTBlock2022+;
+#pragma link C++ class BEastBlock2022+;
+#pragma link C++ class BWestBlock2022+;
+#pragma link C++ class BELayerBlock2022+;
+#pragma link C++ class FMSBlock2022+;
+#pragma link C++ class TrgOfflen2022+;
+
 #pragma link C++ function operator<<(ostream&, const StPxlHit&);        
 #pragma link C++ function operator<<(ostream&, const StIstHit&); 
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
@@ -222,5 +238,8 @@
 #pragma link C++ function operator<<(ostream&, const StFmsHit&);        
 
 #pragma link C++ class vector<StFmsPointPair*>+;
+#pragma link C++ class pair<unsigned int,float>+;
+#pragma link C++ class vector<pair<unsigned int,float>>+;
+
 #endif
 

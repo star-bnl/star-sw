@@ -164,6 +164,10 @@ print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
 foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   print "---> looking for include in $dir\n" if ($param::debug);
   next if ! -r $dir;
+
+  # Do not export StRoot/Table headers if ROOT_VERSION < 6
+  next if ($dir =~ /StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
   closedir DIR;
@@ -256,9 +260,15 @@ if ($STAR_SYS =~ /x86_darwin/) {
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
-if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
+
+if ( defined($SKIP_DIRS) ) {
+  $items = join("|", split(" ", $SKIP_DIRS));
+} else {
+  $items = "StShadowMaker|PWGTools";
+}
+
 if ( $#items > -1){
-  if (! $item) {$items  =       join("|",@items);}
+  if (!$items) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
   print "SKIP_DIRS is now: $#items $items\n";
 }
@@ -275,6 +285,10 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
     next if ( $sub_dir =~ $excludeDirList);
     my $sub_Dir = $dir . "/" . $sub_dir; 
     next if !-d $sub_Dir and !-l $sub_Dir;
+
+    # Do not build StRoot/Table if ROOT_VERSION < 6
+    next if ($sub_Dir =~ m/StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
 #    print "$sub_dir => $items\n";
 #      if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $items\n"; next;}
@@ -334,6 +348,22 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
   }
 }
 print "subdirs = @subdirs\n" if $param::debug;
+
+if ( index($env->{EXTRA_CXXFLAGS}, "-Werror") != -1 ) {
+  # Read regex expressions from the file into an array. The patterns are matched against the names
+  # of source directories in order to disable compiler warnings
+  open(warnoff_dirs_file, "mgr/warnoff_dirs.txt") or print "Warning: Can't open mgr/warnoff_dirs.txt\n";
+  chomp(@warnoff_dirs = <warnoff_dirs_file>);
+  close(warnoff_dirs_file);
+
+  if (@warnoff_dirs) {
+    print "Compiler warnings will be inhibited for directories matching the following patterns:\n";
+    foreach $dir (@warnoff_dirs) {
+      print "\t$dir\n";
+    }
+  }
+}
+
 my @Targets = ();
 
 # List of targets
@@ -369,12 +399,15 @@ if ($STAR_SYS !~ /x86_darwin/) {
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
+@skip_dirs = split(/\|/, $items);
+
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir or -l $dir ) {
 #	next if $param::include && $dir !~ /$param::include/o;
 #	next if $param::exclude && $dir =~ /$param::exclude/o;
         print "Add dir : $dir\n" if $param::debug;
         #push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        next if grep($dir =~ m/$_/, @skip_dirs);
         push @packages, $dir;
     }
 }
@@ -394,7 +427,9 @@ if ($param::debug){
     print "Packages $#packages : @packages\n";
     print "Targets $#Targets   : @Targets\n" ;
 }
-Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
+
+$warnoff_dirs = \@warnoff_dirs;
+Export qw( env CWD INCLUDE LIB BIN BUILD OBJ warnoff_dirs);
 Default qw (   .  );
 
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";

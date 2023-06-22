@@ -8,13 +8,13 @@ class daqReader;
 
 #include <math.h>
 
-class LaserReader;
+//class LaserReader;
 
 class tpcBuilder : public JevpBuilder {
  public:
   int run;
   int nlasers;
-  double drift_vel;
+  //double drift_vel;
 
   int tpcDataInThisRun;
 
@@ -39,7 +39,7 @@ class tpcBuilder : public JevpBuilder {
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *itpc_pix_occ_physics;
       TH1 *itpc_pix_occ_laser;
@@ -175,7 +175,7 @@ class tpcBuilder : public JevpBuilder {
       TH1 *h_tpx_chargeStep_s23;
       TH1 *h_tpx_chargeStep_s24;
 
-      TH1 *h_tpc_drift_vel;
+	//TH1 *h_tpc_drift_vel;
 
       TH1 *h_tpx_phi_charge;
       TH1 *h_tpx_sector_charge;
@@ -196,7 +196,7 @@ class tpcBuilder : public JevpBuilder {
  
   // These are the cluster based versions of above...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *itpc_clpix_occ_physics;
       TH1 *itpc_clpix_occ_laser;
@@ -269,7 +269,7 @@ class tpcBuilder : public JevpBuilder {
     
   void  setPhiAngleMap();
   float mPhiAngleMap[24][72][144];
-  LaserReader *laserReader;
+  //LaserReader *laserReader;
 
   ClassDef(tpcBuilder, 1);
 };

@@ -1,0 +1,16 @@
+/* etofAlign.idl
+*
+* table: etofAlign
+*
+* description: detector alignment parameters (local X,local Y,local Z)
+*              of each etof counter
+*
+* author: Yannick Söhngen (Universität Heidelberg)
+*
+*/
+
+struct etofAlign {
+	float  detectorAlignX[108];  /* detector alignment in local X (cm)  */
+	float  detectorAlignY[108];  /* detector alignment in local Y (cm)  */
+	float  detectorAlignZ[108];  /* detector alignment in local Z (cm)  */
+};

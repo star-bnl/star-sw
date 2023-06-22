@@ -4,10 +4,15 @@
 
 
 
-void detectorId(int *ids=0,const char** cds=0)
+void detectorId(int *ids=0, char** cds=0)
 {
- int         myIds[100];
- const char *myCds[100];
+
+  std::cout << "------------------------------" << std::endl;
+  std::cout << "detectorId has been deprecated" << std::endl;
+  std::cout << "------------------------------" << std::endl;
+
+ int   myIds[100];
+ char *myCds[100];
  if (!ids) { ids = myIds; cds = myCds; }
 
 

@@ -467,7 +467,7 @@ extern MSG_Q_ID *pMsgQArray;
 inline void pSetupMsgQArray(MSG_Q_ID *qarray) {
   pMsgQArray = qarray;
 
-  LOG(DBG, "pMsgQArray = 0x%x",pMsgQArray,0,0,0,0);
+  LOG(DBG, "pMsgQArray = 0x%x",pMsgQArray,0,0,0,0); 
 }
 #endif
 

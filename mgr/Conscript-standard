@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
+Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ warnoff_dirs);
 ( my $build = $OBJ ) =~ s/\#//g;
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
@@ -12,7 +12,6 @@ my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VE
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
 @Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
-
 
 print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
 print "+-+-+- cwd=".$CWD."\n"                  if $param::debug;
@@ -60,7 +59,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
 	    # normal case, use subdir name
 	    $pkg =~ s/.*StarGenerator\///;
 	}
-	#print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
+	# print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
     } else {
 	$pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
 	$pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
@@ -91,6 +90,7 @@ my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
+my $EXTRA_CXXFLAGS = $env1->{EXTRA_CXXFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
 my $ROOTCINT_CPPFLAGS = "";
@@ -245,6 +245,13 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
     #}
 }
 
+# Disable all compiler warnings if $Dir matches any value from @$warnoff_dirs
+if ( index($EXTRA_CXXFLAGS, "-Werror") != -1 ) {
+  if ( grep($Dir =~ m/^$_$/, @$warnoff_dirs) ) {
+    $EXTRA_CXXFLAGS =~ s/-Werror//;
+  }
+}
+
 #+
 # Now we treat anything which is neither sim nor gen
 # This will include all makers
@@ -261,8 +268,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$i = 0;
 	foreach my $s(@h_filesL) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
-
-
 
     #+
     # Generate geometries first - this will be hit on any $Dir
@@ -288,17 +293,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $trgt = "";
 	    $hfl  = "";
 	    if ( $Dir =~ m/xgeometry/ ){
-		$fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".age";
-		$fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
+		$trgt = "$OBJ/$Dir/$agM.age";
 	    } else {
 		# Compat contains redundant defs only needed for the age
 		# .h also needed for Dictionary building
 		if ( $xml !~ m/Compat/ ){
-		    $fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".cxx";
-		    $fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
-
-		    $fcheck = $hfl   = $OBJ."/".$Dir."/".$agM.".h";
-		    $fcheck =~ s/\#//; $hfl = "" if ( -e $fcheck);
+		    $trgt = "$OBJ/$Dir/$agM.cxx";
+		    $hfl  = "$OBJ/$Dir/$agM.h";
 		}
 	    }
 	    # push but only if not present - if present, cons will find
@@ -307,6 +308,15 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    push(@inc, $hfl)   if ($hfl  ne "" );
 	}
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
+
+        if ($Dir =~ m#StarVMC/StarGeometry#) {
+            my($cpppath) = $env->_subst($env->{CPPPATH});
+            my($cscanner) = find scan::cpp($env->{_cwd}, $cpppath);
+            $env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
+            Command $env ["$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx", "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.h"],
+                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %_IFLAGS %1 %2);
+            push(@srcL, "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx");
+        }
 
 	#print "-=-=-=-=- LALALA -=-=-=-\n";
 	# 2018/01 issue after updating to AgML 2.0
@@ -358,8 +368,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		foreach (@ODIR){ if ( ! -d $ODIR[0] ){  mkdir($ODIR[0],0755);}}
 
 		# local or global install
-		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
-		} else {			$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";}
+		if ( -e "mgr/agmlParser.py"){	$agml_root = "mgr";
+		} else {			$agml_root = $env->{ENV}->{STAR}."/mgr";}
+		$agml_cmd = "$agml_root/agmlParser.py";
 
 		foreach $xml (@xmlGeo){
 		    if ( $xml =~ /StarVMC\/Geometry\// ){
@@ -375,34 +386,30 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			# generally enable all warnings for now
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 
+			# cons doesn't come with a scanner for python dependencies
+			use File::Find;
+			my @agml_deps;
+			find(sub { return unless -f; return unless /\.py$/; push @agml_deps, "#$File::Find::name"; }, "$agml_root/Dyson");
+			push @agml_deps, "#$xml";
+			push @agml_deps, "#$agml_cmd";
+
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["#".$agE], ("#$xml", "#$agml_cmd");
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Depends $env ["$OBJ/$agE"], @agml_deps;
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
+			    Depends $env ["$OBJ/$agX", "$OBJ/$agH", "$OBJ/$agE"], @agml_deps;
 			    # Depends $env --> some rule to build extra dict on the fly
 
-			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Command $env ["$OBJ/$agX", "$OBJ/$agH"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
-			    # Install local file (#) as global
-			    # The .h file can be installed as-is
-			    $trgt = $OBJ."/".$agH;
-			    InstallAs  $env $trgt, "#".$agH;
-
-			    # The recently generated .cxx will create an extra source dependency
-			    $trgt = $OBJ."/".$agX;
-			    InstallAs  $env $trgt, "#".$agX;
+			    $trgt = $INCLUDE."/".$agH;
+			    InstallAs  $env $trgt, "$OBJ/$agH";
 
 			    # Add source dependency but only cxx
 			    #>>push(@srcL, $trgt);
 			}
-
-			# Install the "#" i.e. local file as global file - ageF created in both cases
-			# BEWARE that the agE (.age) file is created in xgeometry
-			$trgt = $OBJ."/".$agE;
-			InstallAs  $env $trgt, "#".$agE;
 
 			# Create source dependencies based on installed age, not the original
 			#>>push(@srcL, $trgt );
@@ -557,6 +564,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 
+    } elsif ( $pkg =~ m/^StarGeneratorFilt/ and $Dir =~ m/StarGenerator/ ){
+	# Package FILT is transformed to StarGeneratorFilt by StarGenerator directory rules
+	# We cannot narrow down futher..., so all filters will be built with the
+	# following dependencies...
+        $CPPPATH = $env1->{Packages}->{FASTJET}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
+
     } elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
 	# Append pythia 8 include path and define version
 	#print "***** DEBUG ****\n";
@@ -692,11 +705,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
 
-        if ( defined($ENV{GSL_DIR}) ) {
-          $CPPPATH = $ENV{GSL_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        }
+        $CPPPATH = $env1->{Packages}->{GSL}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
 
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	# According to description, all client requirering this
@@ -753,11 +762,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
 
-        if ( defined($ENV{FASTJET_DIR}) ) {
-          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        }
+        $CPPPATH = $env1->{Packages}->{FASTJET}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
@@ -973,6 +978,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #print "DEBUG Passing $ROOTCINT_CPPFLAGS\n";
     $env2 = $env1->clone('Package'  => $pkg,
 			 'EXTRA_CPPFLAGS'    => $EXTRA_CPPFLAGS,
+			 'EXTRA_CXXFLAGS'    => $EXTRA_CXXFLAGS,
 			 'CPPPATH'  => $CPPPATH,
 			 'CFLAGS'   => $CFLAGS,
 			 'CXXFLAGS' => $CXXFLAGS,
@@ -1002,6 +1008,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
 			    'CPPPATH'  => $Cint_CPPPATH,
 			    'CPPFLAGS' => $CPPFLAGS,
+			    'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 			    'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
 
     print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
@@ -1133,7 +1140,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
 
-    if ( $#Defs > -1 ){  # && ! $OnlinePackage ) {
+    if ( $#Defs > -1 && $pkg !~ m/Geometry/ ) {
 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
 
         if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {

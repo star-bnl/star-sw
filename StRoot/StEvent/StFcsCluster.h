@@ -22,10 +22,11 @@
 
 #include "StObject.h"
 
-#include "StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
-#include "StEnumerations.h"
+#include "StEvent/StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
+#include "StEvent/StEnumerations.h"
 
 class StFcsPoint;
+class StFwdTrack;
 
 class StFcsCluster : public StObject {
 public:
@@ -48,7 +49,7 @@ public:
     float chi2Ndf2Photon() const; // chi^2/ndf for 2-photon fit to the cluster.
     const StLorentzVectorD& fourMomentum() const; // Cluster four-momentum (px, py, pz, E)
 
-    void setId(float cluid);
+    void setId(int cluid);
     void setDetectorId(unsigned short detector);
     void setCategory(int catag);
     void setNTowers(int numbTower);
@@ -61,15 +62,24 @@ public:
     void setChi2Ndf1Photon(float chi2ndfph1);
     void setChi2Ndf2Photon(float chi2ndfph2);
     void setFourMomentum(StLorentzVectorD p4);
+    // Hits
     StPtrVecFcsHit& hits();
     const StPtrVecFcsHit& hits() const;
+    // Neighbors
     void addNeighbor(StFcsCluster* neighbor);
     StPtrVecFcsCluster& neighbor();
     const StPtrVecFcsCluster& neighbor() const;    
+    // Points
     StPtrVecFcsPoint& points();
     const StPtrVecFcsPoint& points() const;
     void addPoint(StFcsPoint* p);
     void addPoint(StFcsPoint* p1, StFcsPoint* p2);
+     //Tracks
+    StPtrVecFwdTrack& tracks();
+    const StPtrVecFwdTrack& tracks() const;
+    void addTrack(StFwdTrack* p);
+    void sortTrackByPT();
+
     void print(Option_t *option="") const;
 
 private:
@@ -89,8 +99,9 @@ private:
     StPtrVecFcsHit mHits;            // Tower hits of the current cluster
     StPtrVecFcsCluster mNeighbor;    // Neighbor clusters
     StPtrVecFcsPoint mPoints;        // Fitted points (photons) in the cluster
+    StPtrVecFwdTrack mTracks;        // Associated Tracks
 
-    ClassDef(StFcsCluster, 2)
+    ClassDef(StFcsCluster, 3)
 };
 
 
@@ -120,11 +131,15 @@ inline void StFcsCluster::setSigmaMax(float sigmaMax) { mSigmaMax = sigmaMax; }
 inline void StFcsCluster::setTheta(float theta) { mTheta = theta; }
 inline void StFcsCluster::setChi2Ndf1Photon(float chi2ndfph1) { mChi2Ndf1Photon = chi2ndfph1; }
 inline void StFcsCluster::setChi2Ndf2Photon(float chi2ndfph2) { mChi2Ndf2Photon = chi2ndfph2; }
-inline void StFcsCluster::setId(float cluid) { mId = cluid; }
+inline void StFcsCluster::setId(int cluid) { mId = cluid; }
 inline void StFcsCluster::setFourMomentum(StLorentzVectorD p4) { mFourMomentum = p4; }
 inline StPtrVecFcsHit& StFcsCluster::hits() { return mHits; }
 inline const StPtrVecFcsHit& StFcsCluster::hits() const { return mHits; }
+inline StPtrVecFcsCluster& StFcsCluster::neighbor() { return mNeighbor; }
+inline const StPtrVecFcsCluster& StFcsCluster::neighbor() const { return mNeighbor; }
 inline StPtrVecFcsPoint& StFcsCluster::points() { return mPoints; }
 inline const StPtrVecFcsPoint& StFcsCluster::points() const { return mPoints; }
+inline StPtrVecFwdTrack& StFcsCluster::tracks() { return mTracks; }
+inline const StPtrVecFwdTrack& StFcsCluster::tracks() const { return mTracks; }
 
 #endif  // STFCSCLUSTER_H

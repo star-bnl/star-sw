@@ -1,8 +1,8 @@
-#include <stdio.h>
 #include <cmath>
 #include "math_constants.h"
 
 #include <St_base/StMessMgr.h>
+#include <TString.h>
 
 #include "StGenericVertexMaker/StiPPVertex/VertexData.h"
 //==========================================================

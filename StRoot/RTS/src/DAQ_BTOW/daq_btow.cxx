@@ -136,7 +136,7 @@ daq_dta *daq_btow::handle_raw()
 	char *from, *st ;
 	int bytes ;
 	char str[256] ;	
-	char *full_name = "?" ;	// just a dummy...
+	const char *full_name = "?" ;	// just a dummy...
 
 	from = 0 ;
 	full_name = "?" ;
@@ -168,7 +168,7 @@ daq_dta *daq_btow::handle_raw()
 	st = (char *) raw->request(bytes) ;
 
 	if(present & DET_PRESENT_SFS) {	// from SFS...
-		int ret = caller->sfs->read(full_name, st, bytes) ;
+	        int ret = caller->sfs->read(full_name, st, bytes) ;
 		if(ret != bytes) {
 			LOG(ERR,"ret is %d") ;
 		}

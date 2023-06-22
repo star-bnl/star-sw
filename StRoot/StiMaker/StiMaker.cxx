@@ -105,6 +105,8 @@ More detailed: 				<br>
 #include "TCanvas.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
+#include "TString.h"
+#include "TObjString.h"
 
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 // #include "StiRnD/Ist/StiIstDetectorGroup.h"

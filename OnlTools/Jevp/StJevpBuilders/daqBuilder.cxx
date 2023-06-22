@@ -123,12 +123,14 @@ void daqBuilder::event(daqReader *rdr)
 {
     // Fill Histograms...
   
+    PCP;
 #ifdef PROVOKE_ERROR
     if(rdr->seq > 500) {
 	int *xxx = NULL;
 	*xxx = 10;
     }
 #endif
+    PCP;
 
     int tpx_size = rdr->getDetectorSize("tpx");
     int itpc_size = rdr->getDetectorSize("itpc");

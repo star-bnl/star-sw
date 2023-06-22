@@ -48,8 +48,8 @@ Int_t StFcsMIPMaker::Init(){
       printf("StFcsMIPMaker::Init - Opening %s\n",mFilename);
       mFile=new TFile(mFilename,"RECREATE");
       
-      char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
-      char* nameNS[kFcsNorthSouth] = {"N","S"};
+      const char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
+      const char* nameNS[kFcsNorthSouth] = {"N","S"};
       char f[100], t[100]; //histogram file names
       char adcsum_name[100];//1D hist names
       char adcsum_title[100]; //1D hist titles

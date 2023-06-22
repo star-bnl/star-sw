@@ -155,6 +155,12 @@
       CALL KGETAR  (CHARGS)         ! pawint does not know the length
       if (ILOG==0) CALL AFNAME (PAWLOGF,'.logon.kumac')
       CALL PAWINT2 (0,'+?',AgPAWE,IWTYP)  ! type of PAW, HBOOK, command
+
+* PAWINT2 calls KUINIT which unconditionally enables a useless signal handler
+* that may deadlock. This disables it back, but does not however restore
+* Root.ErrorHandlers
+      CALL KUEXEC('/KUIP/SET_SHOW/BREAK OFF')
+
       CALL FMLOGL  (-3)
       IF (LENOCC(FATCAT)>0) CALL FMSTRT(62,63,%L(FATCAT),Irc)
 

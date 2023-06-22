@@ -13,11 +13,6 @@
 static std::ostream& myout(std::cout);
 static std::ostream& myerr(std::cerr);
 
-// 64 character string
-static const char* ch64 =
-"1234567 10 234567 20 234567 30 234567 40 234567 50 234567 60 234";
-static const char* ch6a = ch64; // avoids "unused" warning
-
 #endif
 
 // $Id: StMessageStream.h,v 1.3 2012/06/11 15:05:34 fisyak Exp $

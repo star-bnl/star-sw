@@ -1,9 +1,9 @@
 <Document  file="StarVMC/Geometry/FstmGeo/FstmConfig.xml">
  
-  <Detector name="FSTM" comment="Beam Beam Counter configurations"> 
+  <Detector name="FSTM" comment="Forward Silicon Tracker"> 
  
 
-    <Modules>FstmGeo</Modules>
+    <Modules>FstmGeo, FstmGeoS, FstmGeoM, FstmGeoSM</Modules>
     
     <Setup  name  = "FSTMof" comment="No FSTM" module="FstmGeo" onoff="off" />
 
@@ -26,6 +26,32 @@
 
     </Setup>
 
+    <Setup  name   = "FSTMv1s"
+	    comment= "Simplified configuration for the Forward Silicon Tracker"
+	    module = "FstmGeoS" 
+	    onoff  = "on"
+            simu   = "2"
+	    >     
+
+    </Setup>
+ 
+    <Setup  name   = "FSTMv1m"
+            comment= "Misaligned configuration for the Forward Silicon Tracker"
+            module = "FstmGeoM" 
+            onoff  = "on"
+            simu   = "2"
+            >
+
+    </Setup>
+
+    <Setup  name   = "FSTMv1sm"
+            comment= "Misaligned Simplified configuration for the Forward Silicon Tracker"
+            module = "FstmGeoSM" 
+            onoff  = "on"
+            simu   = "2"
+            >
+
+    </Setup>
 
 
   </Detector> 

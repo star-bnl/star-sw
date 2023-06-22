@@ -51,7 +51,7 @@ having (@t4:=sum(dt.numberOfEvents*ts.numberOfEvents/ds.numberOfEvents))>60
 and (@t3:=mod(avg(dt.filesequence+(10*dt.fileStream)),(@t2:=floor(sum(ts.numberOfEvents)/10000.0)+1)))=0
 ;
 <<EOF
-    > cat query.txt | mysql -h onldb.starp.bnl.gov --port=3501 -C RunLog > output.txt
+    > cat query.txt | mysql -h heston.star.bnl.gov --port=3501 -C RunLog > output.txt
     > root -b -q 'TrimBeamLineFiles.C("output.txt","out.list",2000,0.75)'
 
 

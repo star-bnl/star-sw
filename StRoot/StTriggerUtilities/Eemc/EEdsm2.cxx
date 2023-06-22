@@ -44,21 +44,21 @@ EEdsm2::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm2::setWord(int ch, ushort val){
+EEdsm2::setWord(int ch, unsigned short val){
   assert(ch>=0 && ch<nc);
   data[ch]=val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-ushort  
+unsigned short  
 EEdsm2::getJPthr(int jp) const { //used for adjacent jet patch
   assert(jp>=0 && jp<6);
   assert(mYear<2006);
   int ch= jp/3;
   int i=jp%3;
   assert(ch>=0 && ch<nc);
-  ushort val=data[ch]>>8;
+  unsigned short val=data[ch]>>8;
   val=val>>(2*i);
   val=val & 3;
   return val;
@@ -66,45 +66,45 @@ EEdsm2::getJPthr(int jp) const { //used for adjacent jet patch
 
 //--------------------------------------------------
 //--------------------------------------------------
-ushort 
+unsigned short 
 EEdsm2::get3JPHTthr(int i3p) const { // ??2006
   int ch=i3p;
   assert(ch>=0 && ch<nc);
-  ushort val=data[ch]>>14;
+  unsigned short val=data[ch]>>14;
   val=val & 3;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-ushort 
+unsigned short 
 EEdsm2::getHTTPthr(int i3p) const { //selected HT x TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
-  ushort val=data[ch] >>7;
+  unsigned short val=data[ch] >>7;
   return val&1;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-ushort 
+unsigned short 
 EEdsm2::getTPthr(int i3p) const { //selected TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
-  ushort val=data[ch] >>9;
+  unsigned short val=data[ch] >>9;
   return val&1;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-ushort 
+unsigned short 
 EEdsm2::get3JPsum(int i3p) const {// Etot out of each layer 1 DSM 
 
   int ch= i3p;
   assert(ch>=0 && ch<nc);
-  ushort val=data[ch]&0xff;
+  unsigned short val=data[ch]&0xff;
   if(mYear>=2006) val=val &0x1f; //is now reduced to 5 bits, 0-4,
   return val;
 }

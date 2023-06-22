@@ -476,7 +476,7 @@ so we keep it here for source compatibility
 #define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | ((HFT_SYSTEM)<<7) | (x))
 
 
-extern inline char *rts2name(int rts_id)
+extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
 	case TPC_SYSTEM :

@@ -36,7 +36,7 @@ StPicoEvent::StPicoEvent(): TObject(),
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
   mBbcAdcEast{}, mBbcAdcWest{}, mHighTowerThreshold{}, mJetPatchThreshold{},
-  mETofHitMultiplicity(0), mETofDigiMultiplicity(0), mNumberOfPrimaryTracks(0), mZdcUnAttenuated{} {
+  mETofHitMultiplicity(0), mETofDigiMultiplicity(0), mETofGoodEventFlag{}, mNumberOfPrimaryTracks(0), mZdcUnAttenuated{} {
 
   // Default constructor
   if( !mTriggerIds.empty() ) {
@@ -145,6 +145,10 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
   for(int iIter=0; iIter<4; iIter++) {
     mHighTowerThreshold[iIter] = event.mHighTowerThreshold[iIter];
     mJetPatchThreshold[iIter] = event.mJetPatchThreshold[iIter];
+  }
+  
+  for(int iIter=0; iIter<108; iIter++) {
+    mETofGoodEventFlag[iIter] = event.mETofGoodEventFlag[iIter];
   }
 }
 
@@ -328,8 +332,34 @@ void StPicoEvent::setBunchId(Int_t id) {
     LOG_INFO << "StPicoEvent::setBunchID() - negative bunch ID = " << id << endm;
   }
   else {
-    mBunchCrossId = ( ( id > std::numeric_limits<unsigned short>::max() ) ?
-		      std::numeric_limits<unsigned short>::max() :
+    mBunchCrossId = ( ( id > std::numeric_limits<decltype(mBunchCrossId)>::max() ) ?
+		      std::numeric_limits<decltype(mBunchCrossId)>::max() :
 		      (UChar_t)id );
   }
+}
+
+//_________________
+bool StPicoEvent::eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort_t iCounter ) const {
+	if( iSector < 13 || iSector > 24 ){
+		    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing sector id " << iSector <<"  -> return false"<< endm;
+		    return false;
+	}
+	if( iModule < 1 || iModule > 3 ){
+		    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing module id " << iModule <<"  -> return false"<< endm;
+		    return false;
+	}
+	if( iCounter < 1 || iCounter > 3 ){
+	    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing counter id " << iCounter <<"  -> return false"<< endm;
+	    return false;
+	}
+
+	return (bool) mETofGoodEventFlag[ 9*(iSector-13) + 3*(iModule-1) + (iCounter-1) ];
+}
+//_________________
+void StPicoEvent::setETofGoodEventFlag( std::vector<bool> flagVec ) {
+	if( flagVec.size() != 108 ){
+	    LOG_INFO << "StPicoEvent::setETofGoodEventFlag() - eTof flag vector wrong size " << flagVec.size() <<" / 108"<< endm;
+	}else{
+	    std::copy(flagVec.begin(), flagVec.end(), mETofGoodEventFlag);
+	}
 }
