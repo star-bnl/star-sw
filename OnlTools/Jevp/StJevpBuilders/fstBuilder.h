@@ -91,7 +91,7 @@ class fstBuilder : public JevpBuilder {
   static const int ApvRoPerPort = 12;    // APV RO number same as IST
   static const int ApvRoPerArm  = 24;    // APV RO number same as IST
 
-  static const int numTimeBin   = 3;     // to be decided
+  static const int numTimeBin   = 9;     // to be decided
   static const int goodChCut    = 64;    // to be decided
   static const int minPedVal    = 200;   // to be decided
   static const int maxPedVal    = 3000;  // to be decided
