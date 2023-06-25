@@ -106,6 +106,7 @@
 #include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
@@ -282,17 +283,17 @@ public:
   const g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
   const g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
 
-  StThreeVectorD projectTrackToEcal(const g2t_track_st* g2ttrk) const;
-  StThreeVectorD projectTrackToHcal(const g2t_track_st* g2ttrk) const;
-  StThreeVectorD projectTrackToEcalSMax(const g2t_track_st* g2ttrk) const; //!< SMax = Shower Max Z
-  StThreeVectorD projectTrackToHcalSMax(const g2t_track_st* g2ttrk) const; //!< SMax = Shower Max Z
-  StThreeVectorD projectToDet(int det,double azimuth, double polar, double xvertex=0, double yvertex=0, double zvertex=0) const;
-  StThreeVectorD projectToShowerMax(int det,double azimuth, double polar, double xvertex=0, double yvertex=0, double zvertex=0) const;
+  StThreeVectorD projectTrackToEcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const;
+  StThreeVectorD projectTrackToHcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const;
+  StThreeVectorD projectTrackToEcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const; //!< SMax = Shower Max Z
+  StThreeVectorD projectTrackToHcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const; //!< SMax = Shower Max Z
+  StThreeVectorD projectTrack(int det, const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert, double showermaxz=-1) const;
+  StThreeVectorD projectLine(int det, StThreeVectorD &linedirection, StThreeVectorD &lineorigin, double showermaxz=-1) const;
   /**@brief XYZ of a projected line to the FCS detector plane
-
+     
      Get the STAR XYZ that corresponds to the intersection of the FCS plane and a line given by the direction of some azimuthal angle and polar angle. You can also specify the origin of the line in the global STAR XYZ coordinates.
-
-   Note: if you choose the wrong detector for a given polar angle you will get the wrong projection so please use #projectTrackToEcal(), #projectTrackToHcal(), #projectTrackToEcalSMax(), or #projectTrackToHcalSMax() to take into account which polar angle goes to which detector.
+     
+     Note: if you choose the wrong detector for a given polar angle you will get the wrong projection so please use #projectTrackToEcal(), #projectTrackToHcal(), #projectTrackToEcalSMax(), or #projectTrackToHcalSMax() to take into account which polar angle goes to which detector.
      
      @param det detector id to project to (needed for correct angle).
      @param azimuth azimuthal angle (angle from positive z-axis) of the line in radians
@@ -301,9 +302,9 @@ public:
      @param xvertex STAR global x coordinate of the origin of the line
      @param yvertex STAR global y coordinate of the origin of the line
      @param zvertex STAR global z coordinate of the origin of the line
-     */
-  StThreeVectorD projectLine(int det, double azimuth, double polar, double zshowermax=-1, double xvertex=0, double yvertex=0, double zvertex=0) const;
-
+  */
+  StThreeVectorD projectLine(int det, double* linedirection, double* lineorigin, double showermaxz=-1) const;
+  
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#
