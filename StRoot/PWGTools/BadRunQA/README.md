@@ -40,8 +40,9 @@ If you are using "conda" or any other virtual environment, you can replace all "
 To use the software, follow these steps:
 
 1.      Prepare a ROOT file with one or more TProfiles in it. 
-2.      (Optional, skip if you use all TProfiles in the ROOT file) Prepare a text file with names of TProfiles you want to use. Use line breaks to separate the names.
-3.      Run the following command `python3 QA.py -i <ROOT filename> -v <Text file> -o badrun.list`
+2.      Prepare a text file with names of TProfiles you want to use. Use line breaks to separate the names.
+3.      (New 6/26/2023) Prepare a text file with names of TProfile to which global rejection is performed. You can reuse txt file from step 2.
+4.      Run the following command `python3 QA.py -i <ROOT filename> -v <Text file step 2> -o badrun.list -g <SD global rejection range> -gv <Text file step 3>`
 
 QA plots will appear for review. Close all the windows and it will generate `badrun.list`. It shows outlier runs and the reasons for their rejections.
 

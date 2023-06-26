@@ -4,6 +4,7 @@ from outlierDetector import outlierDetector
 from plotRejection import plotOutlier, appendRunInfo
 import plotRejection as pr
 
+import sys
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
@@ -114,7 +115,7 @@ def printBanner():
     print(pyfiglet.figlet_format('RUN BY RUN QA'))
     print(u'\u2500' * 100)
     print('Run-by-Run QA script for STAR data analysis')
-    print('Version 3.0')
+    print('Version 3.1.1')
     print('Contact: <ctsang@bnl.gov>, <yuhu@bnl.gov>, <ptribedy@bnl.gov>')
     print(u'\u2500' * 100)
 
@@ -131,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', required=True, help='ROOT files that contains all the QA TProfile')
     parser.add_argument('-o', '--output', required=True, help='Filename for the output text file with all the bad runs')
     parser.add_argument('-bo', '--breakptOutput', default='breakpt.txt', help='Filename for the output text file with the break points.')
-    parser.add_argument('-v', '--varNames', help='Txt files with all the variable names for QA. If it is not set, it will read ALL TProfiles in the ROOT file.')
+    parser.add_argument('-v', '--varNames', required=True, help='Txt files with all the variable names for QA. If it is not set, it will read ALL TProfiles in the ROOT file.')
     parser.add_argument('-e', '--element', default='??+??', help='Element of your reaction')
     parser.add_argument('-s', '--sNN', default='??', help='Beam energy')
     parser.add_argument('-rr', '--rejectionRange', type=float, default=5, help='The factor of SD range beyon which a run is rejected (default: %(default)s)')
@@ -155,13 +156,24 @@ if __name__ == '__main__':
     parser.add_argument('-ei', '--excludeInvalid', action='store_true', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
     parser.add_argument('-rn', '--reCalculateNormal', action='store_false', help='mean and standard deviation of data set is re-calculated in each iteration. (default: %(default)s)')
     parser.add_argument('-mi', '--mergeID', action='store_true', help='Merge nearby segments if their means are too close to each other, like within 5 SDs.')
-    parser.add_argument('-g', '--globalRejection', type=int, default=10, help='Run outliner rejection once before segmentation iteration. (default: %(default)s)')
+    parser.add_argument('-g', '--globalRejection', type=float, help='SD factor for global rejection range.')
     parser.add_argument('-gv', '--globalRejectionVariable', help='Filename of txt file that contains observable that needs global rejection. Without it, global rejection is done on all observable.')
     parser.add_argument('-q', '--quadRange', action='store_false', help='Reject runs by adding uncertainty in quaduature instead of absolute value. (default: %(default)s)')
     parser.add_argument('-lg', '--legacy', action='store_true', help='Use legacy mode to emulate run-by-run v2')
 
-
     args = parser.parse_args()
+    if args.globalRejection is None or args.globalRejectionVariable is None:
+        errMessage = """
+Update 6/26/2023: You are seeing this error because some optional arguments are now mandatory.
+You are now REQUIRED to manally provide names of observables where global rejection is performed and the range of global rejection.
+
+Try: python QA.py ...<old arguments>... -g <SD Range> -gv <Txt file of observable names>
+
+Generally speaking, <Txt file of observable names> should containt name of TProfile for refmult.
+It is recommended to perform global rejection ONLY on refmult.
+Abort! 
+"""
+        raise TypeError(errMessage)
     if args.JMLR:
         print('Using JMLR to determine segmentation penality. Only use 1 core')
         args.cores = 1
