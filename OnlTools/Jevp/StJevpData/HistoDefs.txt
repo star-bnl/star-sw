@@ -165,7 +165,7 @@
             </histogram>
             <histogram>bbc_h204_bbc_tac_difference_e-w
             </histogram>
-            <histogram>tof_upvpd_eastT_vs_westT
+            <histogram>h1_VpdVz_BBQ 
             </histogram>
             <histogram>trg_h146_zdc_Vertex_cm
             </histogram>
