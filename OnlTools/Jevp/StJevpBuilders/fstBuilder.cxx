@@ -1401,6 +1401,11 @@ void fstBuilder::event(daqReader *rdr)
       }
     }   
   }
+  //set plotting range for time bin distributions
+  hEventSumContents.hMaxTimeBin_ZS->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
+  hEventSumContents.hMaxTimeBin->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
+  for(int index = 0; index < mTbVsAdcHist; index++) hTbVsAdcContents.tbVsAdcArray[index]->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
+  for(int glbElecApvIdx = 0 ; glbElecApvIdx < totAPV ; glbElecApvIdx++) hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high); 
 
   PCP;
 
@@ -2060,10 +2065,11 @@ void fstBuilder::stoprun(daqReader *rdr)
       }
     }
 
-    double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
-    if(hMaxTimeBinContents.maxTimeBinArray[j]->GetEntries()>0) {
-      entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(2, numTb-1);
-      entriesTB_all = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb);
+    double entriesTB_123=0, entriesTB_all=0, fraction = 0.;
+    entriesTB_all = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb);
+    //if(hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb)>0) {
+    if(entriesTB_all>0.) {
+      entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral((numTb%2==1)?(numTb/2+1):(numTb/2), (numTb%2==1)?(numTb/2+1):(numTb/2+1))/((numTb%2==1)?1:2);
       fraction = entriesTB_123/entriesTB_all;
       if(fraction<maxTbFracOK) {
 	//LOG(U_FST,"maxTimeBinFraction::section RDO%d_ARM%d_GROUP%d with fraction %f!", rdoIdx, armIdx, portIdx, fraction);
@@ -2123,13 +2129,14 @@ void fstBuilder::stoprun(daqReader *rdr)
     for(int armIdx=0; armIdx<ArmPerRdo; armIdx++){
       for(int refApvIdx=0; refApvIdx<ApvPerArm; refApvIdx++){
         int glbElecApvIdx = refApvIdx + armIdx*ApvPerArm + (rdoIdx-1)*ApvPerRdo;        // 0-287
-        double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
-        if(hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetEntries()>0){
-          entriesTB_123 = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(2, numTb-1);
-          entriesTB_all = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(1, numTb);
+        double entriesTB_123=0, entriesTB_all=0, fraction = 0.;
+        entriesTB_all = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(1, numTb);
+        //if(hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetEntries()>0){
+        if(entriesTB_all>0.){
+          entriesTB_123 = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral((numTb%2==1)?(numTb/2+1):(numTb/2), (numTb%2==1)?(numTb/2+1):(numTb/2+1))/((numTb%2==1)?1:2);
           fraction = entriesTB_123/entriesTB_all;
 	}
-        hEventSumContents.hMaxTBfractionVsAPV_ZS->SetBinContent(glbElecApvIdx, fraction);
+        hEventSumContents.hMaxTBfractionVsAPV_ZS->SetBinContent(glbElecApvIdx+1, fraction);
       }
     }
   }
