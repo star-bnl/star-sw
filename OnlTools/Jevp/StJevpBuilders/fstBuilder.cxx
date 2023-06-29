@@ -1325,6 +1325,7 @@ void fstBuilder::startrun(daqReader *rdr)
 // ---------------------------------------
 void fstBuilder::event(daqReader *rdr) 
 {
+    PCP;
   //if(trgd) delete trgd;
   // arrays to calculate dynamical common mode noise contribution to this chip in current event
   float sumAdcPerEvent[totAPV][4];
@@ -1336,7 +1337,7 @@ void fstBuilder::event(daqReader *rdr)
 
   int HitCount[totMod]; // for each module per event
   int HitCount_zs[totMod]; // for each module per event
-
+  PCP;
   for ( int i=0; i<totCh; i++ )
   {
     maxAdc[i] = 0; maxAdc_zs[i] = 0;  
@@ -1355,18 +1356,25 @@ void fstBuilder::event(daqReader *rdr)
     }
   }
 
+  PCP;
   numTb = numTimeBin;        		//default: 9 timebins
+
+  //LOG("JEFF", "numbTB=%d", numTimeBin);
+
   memset( chCntDaq,  0, sizeof(chCntDaq) );
   memset( apvCntDaq, 0, sizeof(apvCntDaq) );
 
   if( !(evtCt %1000) )     LOG(DBG, "Looking at evt %d",evtCt);
 
   size_t evtSize = 0;
+  PCP;
 
   // ZS data stream
   daq_dta *ddZS = rdr->det("fst")->get("zs");
   if ( ddZS && ddZS->meta ) {
     apv_meta_t *meta = (apv_meta_t *) ddZS->meta;
+
+    PCP;
 
     for ( int r=1; r<=totRdo; r++ ) {                  //1--6 ARCs (ARM Readout Controllers)
       if ( meta->arc[r].present == 0 ) continue ;
@@ -1375,16 +1383,26 @@ void fstBuilder::event(daqReader *rdr)
 	for ( int apv=0; apv<ApvRoPerArm; apv++ ) {         //0--7 & 12--19 APV chips per ARM
 	  if ( meta->arc[r].arm[arm].apv[apv].present == 0 ) continue ;
 
+	  PCP;
+
 	  int Tb = meta->arc[r].arm[arm].apv[apv].ntim;
+
+	  //LOG("JEFF", "Tb = %d",Tb);
+	  PCP;
+
 	  if( numTb != 0 && Tb != 0 && numTb != Tb ) {
 	    //printf("Different number of timebins in different APV!!! Taking real one!!!\n");
 	    numTb = Tb;
 	  }
+	  PCP;
 	  hEventSumContents.hSumTB->Fill(numTb);
 	}
+	PCP;
       }
     }   
   }
+
+  PCP;
 
   while( ddZS && ddZS->iterate() ) {
     fgt_adc_t *f_zs = (fgt_adc_t *) ddZS->Void ;
@@ -1441,6 +1459,8 @@ void fstBuilder::event(daqReader *rdr)
     }
   }//end all RDO, ARM, APV loops
 
+  PCP;
+  
   if(ddZS) {
     hEventSumContents.hEventSize->Fill(short(evtSize/1024));
     evtSize = 0;
@@ -1528,6 +1548,7 @@ void fstBuilder::event(daqReader *rdr)
     evtCt_ZS++;
   }
 
+  PCP;
 
   // non-ZS data stream
   daq_dta *dd = rdr->det("fst")->get("adc");    
@@ -1648,6 +1669,8 @@ void fstBuilder::event(daqReader *rdr)
       }
     } //end current APV chip loops
 
+    PCP;
+
     //calculate dynamical common mode noise for current event
     for(int iRstrip = 0; iRstrip < 4; ++iRstrip)
     {
@@ -1727,6 +1750,8 @@ void fstBuilder::event(daqReader *rdr)
       }
     } //end current APV chip loops
 
+    PCP;
+    
     // zero out hits less than 2 TBs
     for(int i=0;i<ChPerApv;i++){
       if(cou[i]<2){

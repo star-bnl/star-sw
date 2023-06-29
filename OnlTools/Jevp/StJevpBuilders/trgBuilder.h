@@ -181,12 +181,17 @@ public:
 	  TH1* eq3_board_occ_h;
 	  TH1* eq3_readout_time_h;
 
-
+	  TH1* BlueByTrigger_h;
+	  TH1* YellowByTrigger_h;
       };
   } contents;
   
   int mNumberOfHotTowers;
   int mHotTowerChanges;
-      
+  
+  int nBlueByTrigger[64];
+  int nYellowByTrigger[64];
+  int nTrigger[64];
+
   ClassDef(trgBuilder, 1);
 };
