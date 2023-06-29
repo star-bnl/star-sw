@@ -4,6 +4,7 @@ from outlierDetector import outlierDetector
 from plotRejection import plotOutlier, appendRunInfo
 import plotRejection as pr
 
+import sys
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
@@ -14,7 +15,9 @@ import pyfiglet
 
 def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, maxIter=100, 
                      useJMLR=False, useMAD=False, weights=None, segmentOnce=False, 
-                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=False, **kwargs):
+                     merge=False, reCalculateNormal=False, legacy=False, globalRejection=None, 
+                     quadRange=False, grVarID=None, **kwargs):
+
     if useJMLR:
         print('Execution with JMLR')
     else:
@@ -28,9 +31,20 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
 
     edgeRuns = []
     i = 0
-    runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=stdRange, 
-                                                 useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False)
-    if globalRejection and runRj.shape[0] > 0:
+
+       
+    if globalRejection is None:
+        globalRejection = np.inf
+
+    if grVarID is not None:
+        grStdRange=np.full(x_copy.shape[1], np.inf, dtype=float)
+        grStdRange[grVarID] = globalRejection
+    else:
+        grStdRange=np.full(x_copy.shape[1], globalRejection, dtype=float)
+
+    runRj, reasonRj, mean, std = outlierDetector(runs_copy, x_copy, xerr_copy, edgeRuns, stdRange=grStdRange, 
+                                                 useMAD=useMAD, weights=weights, legacy=legacy, seqRej=False, quadRange=quadRange)
+    if globalRejection is not None and runRj.shape[0] > 0:
         runsRejected.append(runRj)
         reasonsRejected.append(reasonRj)
 
@@ -58,7 +72,7 @@ def segmentAndReject(runs, x, xerr, pen=1, min_size=10, gamma=None, stdRange=5, 
             edgeRunsCand = runs_copy[idValid][result]
             result = np.searchsorted(runs_copy, edgeRunsCand).tolist()
         runRj, reasonRj, meanCand, stdCand = outlierDetector(runs_copy, x_copy, xerr_copy, result, stdRange=stdRange, 
-                                                              useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0))
+                                                              useMAD=useMAD, weights=weights, legacy=legacy, seqRej=(legacy and i > 0), quadRange=quadRange)
 
         if runRj.shape[0] == 0:
             break
@@ -101,7 +115,7 @@ def printBanner():
     print(pyfiglet.figlet_format('RUN BY RUN QA'))
     print(u'\u2500' * 100)
     print('Run-by-Run QA script for STAR data analysis')
-    print('Version 3.0')
+    print('Version 3.1.1')
     print('Contact: <ctsang@bnl.gov>, <yuhu@bnl.gov>, <ptribedy@bnl.gov>')
     print(u'\u2500' * 100)
 
@@ -118,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', required=True, help='ROOT files that contains all the QA TProfile')
     parser.add_argument('-o', '--output', required=True, help='Filename for the output text file with all the bad runs')
     parser.add_argument('-bo', '--breakptOutput', default='breakpt.txt', help='Filename for the output text file with the break points.')
-    parser.add_argument('-v', '--varNames', help='Txt files with all the variable names for QA. If it is not set, it will read ALL TProfiles in the ROOT file.')
+    parser.add_argument('-v', '--varNames', required=True, help='Txt files with all the variable names for QA. If it is not set, it will read ALL TProfiles in the ROOT file.')
     parser.add_argument('-e', '--element', default='??+??', help='Element of your reaction')
     parser.add_argument('-s', '--sNN', default='??', help='Beam energy')
     parser.add_argument('-rr', '--rejectionRange', type=float, default=5, help='The factor of SD range beyon which a run is rejected (default: %(default)s)')
@@ -139,14 +153,27 @@ if __name__ == '__main__':
     parser.add_argument('-pg', '--plotGood', action='store_true', help='Plot QA plots again, but only with good runs')
     parser.add_argument('-m', '--mapping', help='If x-axis of TProfile does not corresponds to STAR run ID, you can supply a file that translate bin low edge to STAR ID')
     parser.add_argument('-so', '--segmentOnce', action='store_true', help='Only run segmentation algorithm once. You can still iterate, but the segment edges will remain unchanged in each iteration')
-    parser.add_argument('-ei', '--excludeInvalid', action='store_false', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
-    parser.add_argument('-rn', '--reCalculateNormal', action='store_true', help='mean and standard deviation of data set is re-calculated in each iteration.')
+    parser.add_argument('-ei', '--excludeInvalid', action='store_true', help='Do not load any runs where uncertainty of any observables is zero from the get go, don\'t even count towards total number of runs.')
+    parser.add_argument('-rn', '--reCalculateNormal', action='store_false', help='mean and standard deviation of data set is re-calculated in each iteration. (default: %(default)s)')
     parser.add_argument('-mi', '--mergeID', action='store_true', help='Merge nearby segments if their means are too close to each other, like within 5 SDs.')
-    parser.add_argument('-g', '--globalRejection', action='store_true', help='Run outliner rejection once before segmentation iteration.')
+    parser.add_argument('-g', '--globalRejection', type=float, help='SD factor for global rejection range.')
+    parser.add_argument('-gv', '--globalRejectionVariable', help='Filename of txt file that contains observable that needs global rejection. Without it, global rejection is done on all observable.')
+    parser.add_argument('-q', '--quadRange', action='store_false', help='Reject runs by adding uncertainty in quaduature instead of absolute value. (default: %(default)s)')
     parser.add_argument('-lg', '--legacy', action='store_true', help='Use legacy mode to emulate run-by-run v2')
 
-
     args = parser.parse_args()
+    if args.globalRejection is None or args.globalRejectionVariable is None:
+        errMessage = """
+Update 6/26/2023: You are seeing this error because some optional arguments are now mandatory.
+You are now REQUIRED to manally provide names of observables where global rejection is performed and the range of global rejection.
+
+Try: python QA.py ...<old arguments>... -g <SD Range> -gv <Txt file of observable names>
+
+Generally speaking, <Txt file of observable names> should containt name of TProfile for refmult.
+It is recommended to perform global rejection ONLY on refmult.
+Abort! 
+"""
+        raise TypeError(errMessage)
     if args.JMLR:
         print('Using JMLR to determine segmentation penality. Only use 1 core')
         args.cores = 1
@@ -165,7 +192,10 @@ if __name__ == '__main__':
         args.excludeInvalid = False
         args.reCalculateNormal = True
         args.mergeID = True
-        args.globalRejection = False
+
+        args.globalRejection = None
+        args.quadRange = True
+        args.globalRejectionVariable = None
 
     # read data from file
     print('Reading TProfile from %s' % (args.input))
@@ -180,6 +210,17 @@ if __name__ == '__main__':
     else:
         print('Those are the names of TProfiles in %s' % args.varNames)
     print('*'*100)
+
+    print('*'*100)
+    if args.globalRejectionVariable is not None:
+        grVar = getVarNames(args.globalRejectionVariable)
+    else: 
+        grVar = varNames
+    print('Observable used in global rejection:')
+    print('\n'.join(grVar))
+    print('*'*100)
+    grVarID = [i for i, name in enumerate(varNames) if name in grVar]
+
     runs, x, xerr, counts = readFromROOT(args.input, varNames, args.mapping, args.legacy)
     if args.excludeInvalid:
         id = np.all(xerr > 0, axis=1)
@@ -212,8 +253,8 @@ if __name__ == '__main__':
         # run different penalty setting on different cores
         for ruj, rej, me, st, ed, pe, i in pool.imap(partial(segmentAndReject, runs, x, xerr, useJMLR=args.JMLR, useMAD=args.MAD,
                                                               min_size=args.minSize, stdRange=args.rejectionRange, maxIter=args.maxIter,
-                                                              weights=weights, segmentOnce=args.segmentOnce, merge=args.mergeID, 
-                                                              reCalculateNormal=args.reCalculateNormal, legacy=args.legacy, globalRejection=args.globalRejection), 
+                                                              weights=weights, segmentOnce=args.segmentOnce, merge=args.mergeID, grVarID=grVarID,
+                                                              reCalculateNormal=args.reCalculateNormal, legacy=args.legacy, globalRejection=args.globalRejection, quadRange=args.quadRange), 
                                                         args.pen): 
             # choose penalty that rejectes the most number of runs
             print('%d runs rejected when pen = %f' % (len(ruj), pe))

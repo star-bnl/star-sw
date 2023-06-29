@@ -1252,7 +1252,6 @@ StETofHitMaker::matchSides()
 	      clusterSize += 100;
             }
 
-            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 
 	    //Modify individual counters if needed (e.g. flip in local y due to switched cables)
 	    if(mModMatrix.at(detIndex) > 0){
@@ -1260,6 +1259,7 @@ StETofHitMaker::matchSides()
 	      modifyHit(mode, posX , posY , time);
 	    }
 	    
+            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 	    	    
 	    //Check for "same direction double clockjumps" and update FlagMap
 	    if(mDoDoubleClockJumpShift){
