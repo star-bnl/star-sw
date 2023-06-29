@@ -78,6 +78,7 @@ public:
     void setDebug(int v=1)        {SetDebug(v);}
     void setTest(int v);           //!< Set test level. Intended to be used for single files. Output file name can be changed with #writeFile(), see #mTest for meaning of values
     void setEnergySelect(int ecal=10, int hcal=10, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
+    void setEnergySumScale(double ecal=1.0, double hcal=1.0, double pres=1.0) {mEnergySumScale[0]=ecal; mEnergySumScale[1]=hcal; mEnergySumScale[2]=pres;}
     void setCenterTimeBins(int v, int min=0, int max=512) {mCenterTB=v; mMinTB=min; mMaxTB=max;}
     void setAdcSaturation(int v)  {mAdcSaturation=(double)v;}
     void setError(double v)       {mError=v;}
@@ -134,7 +135,10 @@ public:
        - 11 = Figure out pedestal and do a  Gaussian fit, #gausFitWithPed()  
        - 12 = Use #StFcsPulseAna to find peaks and fit to Gaussian except those peaks from #PeakCompare=0, #PulseFit1()  
        - 13 = Use #StFcsPulseAna to find peaks and fit to Gaussian those peaks from #NPeaksPrePost, #PulseFit2()  
-       - 14 = Use #StFcsPulseAna to find peaks and fit all found peaks to Gaussian, #PulseFitAll()  
+       - 14 = Use #StFcsPulseAna to find peaks and fit all found peaks to Gaussian, #PulseFitAll()
+       - 15 = Compute pedestal using #AnaPed() then call #PulseFit2(), #PulseFit2WithPed()
+       - 16 = Compute pedestal using #AnaPed() then call #PulseFitAll(), #PulseFitAllWithPed()
+       - 17 = Find pedestal by making a histogram of ADC values and then doing a Gaussian fit to the histogram and use the mean as the pedestal value, #StFcsPulseAna::AnalyzeForPedestal(), then call #PulseFitAll(), #PedFitPulseFit()
 	      
        @param g TGraphAsymmErrors data to use in the analysis method
        @param res array of determined values from analysis method, max is 8
@@ -359,6 +363,7 @@ public:
     char *mMeasureTime=0;                //!< output file for measuring fitting time
 
     int mEnergySelect[3];                //!< 0=MC (straight from dE), >0 see #analyzeWaveform()
+    double mEnergySumScale[3];           //!< Amount to divide sum8 method sum to match fitted sum for each detector (0=ecal,1=hcal,2=preshower). This may need to be determined year by year by running test level 6 and running the corresponding macro
     bool mAnaWaveform;                   //!< if true (default) call #anlayzeWaveform() to integrate the waveform data, if false read integral from StFcsHit and only recompute energy using gain, and gain correction factors
     int mCenterTB=50;                    //!< center timebin for triggered crossing
     int mMinTB=0;                        //!< center timebin for triggered crossing

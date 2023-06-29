@@ -39,7 +39,7 @@ public:
 
 	int kill_bad(int r0_logical,int row, int pad) ;		// kills this specific pad in ped_store
 
-	void smooth() ;					// from ped_store to ped_store
+	void smooth(int mode=0) ;					// from ped_store to ped_store
 
 	int max_events ;	// max events allowed in the calculation
 
