@@ -26,7 +26,7 @@
 class StFcsCluster;
 
 
-struct StFwdTrackProjection {
+struct StFwdTrackProjection : public StObject {
     StFwdTrackProjection() {}
     StFwdTrackProjection ( const StFwdTrackProjection & other) {
         mXYZ = other.mXYZ;
@@ -70,9 +70,11 @@ struct StFwdTrackProjection {
     float dz(){
         return sqrt( mCov[8] );
     }
+
+    ClassDef(StFwdTrackProjection, 1)
 };
 
-struct StFwdTrackSeedPoint {
+struct StFwdTrackSeedPoint : public StObject {
     StFwdTrackSeedPoint() {}
     StFwdTrackSeedPoint(    StThreeVectorD xyz, 
                             short sec, 
@@ -88,6 +90,8 @@ struct StFwdTrackSeedPoint {
     unsigned short mTrackId;
     short mSector;
     float mCov[9];
+    
+    ClassDef(StFwdTrackSeedPoint, 1)
 };
 
 class StFwdTrack : public StObject {
@@ -169,7 +173,7 @@ protected:
     StPtrVecFcsCluster mEcalClusters;
     StPtrVecFcsCluster mHcalClusters;
     
-    ClassDef(StFwdTrack,1)
+    ClassDef(StFwdTrack,2)
 
 };
 

@@ -102,19 +102,27 @@ def main(input, timeStep, allOutput, badrun, posOutput, negOutput, useAI, thresh
         print('Saving human-readable shiftLog to %s' % allOutput)
         with open(allOutput, 'w') as f:
             f.write(printBriefDict(result))
-    badRuns = None
-    badHistory = None
-    badSummary = None
+    badRuns = []
+    badHistory = []
+    badSummary = []
     if useAI:
-        AIbadRuns, AIbadHistory, AIbadSummary= sentiment(result, useAI, threshold=threshold)
-        badRuns = junkID + AIbadRuns
-        badHistory = junkID + AIbadHistory
-        badSummary = junkID + AIbadSummary
-        intro = 'AI thinks that %d runLog entries out of a total of %d are bad runs.\nBackground color will turn for red for those runs that are considered bad.' % (len(AIbadRuns), len(result))
+        badRuns, badHistory, badSummary= sentiment(result, useAI, threshold=threshold)
+        intro = 'AI thinks that %d runLog entries out of a total of %d are bad runs.\nBackground color will turn for red for those runs that are considered bad.' % (len(badRuns), len(result))
     else:
         intro = 'There are %d runs to go through' % len(result)
     import UI
-    pos, neg = UI.main(result, reasons, badRuns, badHistory, badSummary, intro=intro)
+    pos, neg, memo = UI.main(result, reasons, badRuns + junkID if useAI else None, 
+                                              badHistory + junkID if useAI else None, 
+                                              badSummary + junkID if useAI else None, intro=intro)
+    for run in junkID:
+        memo[run] = 'MarkedJunk ' + memo[run]
+    if useAI:
+        for run in badRuns:
+            memo[run] = 'BadEntry ' + memo[run]
+        for run in badHistory:
+            memo[run] = 'BadHistory ' + memo[run]
+        for run in badSummary:
+            memo[run] = 'BadSummary ' + memo[run]
     for runID, content in neg.items():
         neg[runID] = content
     if posOutput is not None:
@@ -124,7 +132,7 @@ def main(input, timeStep, allOutput, badrun, posOutput, negOutput, useAI, thresh
         with open(negOutput, 'w') as f:
             f.write(printBriefDict(neg))
     with open(badrun, 'w') as f:
-        f.write('\n'.join(neg.keys()))
+        f.write('\n'.join(['%s %s' % (id_, memo[id_]) for id_ in neg.keys()]))
 
 
 def printBanner():
