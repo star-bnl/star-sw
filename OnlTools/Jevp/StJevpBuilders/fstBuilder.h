@@ -129,8 +129,8 @@ class fstBuilder : public JevpBuilder {
   static const float rDelta;
 
   //Time Bin plots plot range
-  const float tb_plot_low  = 3.0;
-  const float tb_plot_high = 6.0;
+  const float tb_plot_low  = 0.;
+  const float tb_plot_high = 3.;
 
   //FST mapping
   int fstGeomMapping[totCh]; //FST channel mapping (electronics ID to geometry ID transform)
