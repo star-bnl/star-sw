@@ -90,7 +90,6 @@ class fstBuilder : public JevpBuilder {
   static const int ApvNumOffset = 12;    // APV RO number same as IST | used for APV number convertion
   static const int ApvRoPerPort = 12;    // APV RO number same as IST
   static const int ApvRoPerArm  = 24;    // APV RO number same as IST
-
   static const int numTimeBin   = 9;     // to be decided
   static const int goodChCut    = 64;    // to be decided
   static const int minPedVal    = 200;   // to be decided
@@ -129,6 +128,10 @@ class fstBuilder : public JevpBuilder {
   static const float rStop[RstripPerMod];
   static const float rDelta;
 
+  //Time Bin plots plot range
+  const float tb_plot_low  = 3.0;
+  const float tb_plot_high = 6.0;
+
   //FST mapping
   int fstGeomMapping[totCh]; //FST channel mapping (electronics ID to geometry ID transform)
   int fstElecMapping[totCh]; //FST channel mapping (geometry ID & electronics ID transform)
@@ -137,7 +140,7 @@ class fstBuilder : public JevpBuilder {
   float fstPedestal[numTimeBin][totCh];
   float fstRmsNoise[numTimeBin][totCh];
   float fstRanNoise[numTimeBin][totCh];
-
+  
   //*** Histogram Declarations...
   union {
     TH2 *adcArray[1]; //ADC value of each module's channels (ADC value vs. channel index)
