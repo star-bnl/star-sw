@@ -1405,6 +1405,7 @@ void fstBuilder::event(daqReader *rdr)
   hEventSumContents.hMaxTimeBin_ZS->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
   hEventSumContents.hMaxTimeBin->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
   for(int index = 0; index < mTbVsAdcHist; index++) hTbVsAdcContents.tbVsAdcArray[index]->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
+  for(int index = 0; index < mMaxTimeBinHist; index++) hMaxTimeBinContents.maxTimeBinArray[index]->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high);
   for(int glbElecApvIdx = 0 ; glbElecApvIdx < totAPV ; glbElecApvIdx++) hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetXaxis()->SetRangeUser(tb_plot_low, tb_plot_high); 
 
   PCP;
