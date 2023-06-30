@@ -1357,7 +1357,7 @@ void fstBuilder::event(daqReader *rdr)
   }
 
   PCP;
-  numTb = numTimeBin;        		//default: 9 timebins
+  numTb = numTb_default;        		//default: 9 timebins
 
   //LOG("JEFF", "numbTB=%d", numTimeBin);
 
@@ -2069,7 +2069,7 @@ void fstBuilder::stoprun(daqReader *rdr)
     entriesTB_all = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb);
     //if(hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb)>0) {
     if(entriesTB_all>0.) {
-      entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral((numTb%2==1)?(numTb/2+1):(numTb/2), (numTb%2==1)?(numTb/2+1):(numTb/2+1))/((numTb%2==1)?1:2);
+      entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(numTb/2+1, numTb/2+1);
       fraction = entriesTB_123/entriesTB_all;
       if(fraction<maxTbFracOK) {
 	//LOG(U_FST,"maxTimeBinFraction::section RDO%d_ARM%d_GROUP%d with fraction %f!", rdoIdx, armIdx, portIdx, fraction);
@@ -2133,7 +2133,7 @@ void fstBuilder::stoprun(daqReader *rdr)
         entriesTB_all = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(1, numTb);
         //if(hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetEntries()>0){
         if(entriesTB_all>0.){
-          entriesTB_123 = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral((numTb%2==1)?(numTb/2+1):(numTb/2), (numTb%2==1)?(numTb/2+1):(numTb/2+1))/((numTb%2==1)?1:2);
+          entriesTB_123 = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(numTb/2+1,numTb/2+1);
           fraction = entriesTB_123/entriesTB_all;
 	}
         hEventSumContents.hMaxTBfractionVsAPV_ZS->SetBinContent(glbElecApvIdx+1, fraction);

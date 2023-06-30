@@ -963,7 +963,7 @@ class fstBuilder : public JevpBuilder {
 
   int sumHistogramsFilled;
   int numTb;
-
+  const int numTb_default = 3;
   JLatex* errorMsg;
 
   ClassDef(fstBuilder, 1);
