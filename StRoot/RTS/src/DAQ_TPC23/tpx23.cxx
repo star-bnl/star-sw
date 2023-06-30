@@ -92,7 +92,7 @@ int tpx23::fee_scan()
 
 	}
 
-	TLOG() ;
+	TLOGX(rdo1) ;
 
 	if(log_level>0) LOG(TERR,"%d: fee_scan",rdo1) ;
 
@@ -113,7 +113,7 @@ int tpx23::fee_scan()
 		int id = (lo&0xFF0) >> 4 ;      // altro id
 		int ch = lo & 0xF ;
 
-		//TLOGX(rdo1) ;
+		TLOGX(id) ;
 
 		for(int i=0;i<tpx_fee_override_cou;i++) {
 			if(sector1 == tpx_fee_override[i].sector) {
@@ -141,7 +141,8 @@ int tpx23::fee_scan()
 		// get row,pad & flags and skip the pad if there are flags
 		int flags = flags_row_pad(id,ch,row,pad) ;
 
-		if(wc>530) {	// garbage in the event... and now what???
+		// max wc in pedestal runs is 437
+		if(wc>437) {	// garbage in the event... and now what???
 			run_errors++ ;
 			if(run_errors<10) {
 				if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d) : wc %d",sector1,rdo1,row,pad,id,ch,wc) ;
@@ -725,6 +726,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 		int st = i ;
 		int err = 0 ;
 
+
 		// check for non-printable chars; should be the same as the
 		// new SRAM check
 		for(int j=st;j<len;j++) {
@@ -733,8 +735,8 @@ int tpx23::log_dump(char *c_addr, int wds)
 			if(!isprint(tmpbuff[j])) {
 				if(tmpbuff[j] == 9) ;	// skip tab
 				else {
-					LOG(WARN,"---> [%d LOG] Unprintable character 0x%02X? -- powercycle",rdo,tmpbuff[j]) ;
-					LOG(WARN,"But ignored for FY22") ;
+					LOG(WARN,"---> [%d LOG] Unprintable character 0x%02X? -- powercycle",rdo,(u_char)tmpbuff[j]) ;
+					//LOG(ERR,"But ignored for FY22") ;
 					err_status |= 1;
 					err = -1 ;
 					tmpbuff[j] = '?' ;
@@ -743,6 +745,32 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 		}
 
+#if 1
+		if(strstr(tmpbuff+st,"RHIC clock: ")) {
+			if(strstr(tmpbuff+st,"EXTERNAL")) {
+				rhic_clock = 1 ;
+			}
+			else {
+				rhic_clock = 0 ;	// internal
+			}
+		}
+
+		if(strstr(tmpbuff+st,"JTAG dev ")) {
+			int ret, dev ;
+			u_int dev_id, user ;
+
+			dev = -1 ;
+
+//			LOG(WARN,"[S%02d:%d LOG]: JTAG:",s_real,r_real,tmpbuff+st) ;
+
+			ret = sscanf(tmpbuff+st,"JTAG dev %d: ID 0x%X, USERcode 0x%X",&dev,&dev_id,&user) ;
+			LOG(WARN,"JTAG:   ret %d, dev %d, dev_id 0x%08X, user 0x%08X",ret, dev, dev_id,user) ;
+
+			if(ret==3 && dev>=0 && dev<5) {
+				fpga_usercode[dev] = user ;
+			}
+		}
+#endif
 
 		if(strstr(tmpbuff+st,"SPECIAL_0 code")) {
 			LOG(ERR,"---> SPECIAL code: RDO %d",rdo) ;
@@ -769,7 +797,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 			
 			if(strstr(tmpbuff+st,"FEE power BAD")) {
 				//err_status |= DET_ERR_OPER_PS ;
-				LOG(WARN,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
+				LOG(ERR,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
 				//err = -1 ;
 			}
 		}
@@ -778,12 +806,12 @@ int tpx23::log_dump(char *c_addr, int wds)
 		if(strstr(tmpbuff+st,"SRAM check failed")) {
 			err = -1 ;	
 			err_status |= 2 ;
-			LOG(WARN,"---> [%d LOG] SRAM check failed -- powercycle",rdo) ;
+			LOG(ERR,"---> [%d LOG] SRAM check failed -- powercycle",rdo) ;
 		}
 
 		if(strstr(tmpbuff+st,"CPLD claims error")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] CPLD claims error -- reconfig 0x300",rdo) ;
+			LOG(ERR,"---> [%d LOG] CPLD claims error -- reconfig 0x300",rdo) ;
 		}
 		
 		if(strstr(tmpbuff+st,"can't configure RDO!")) {
@@ -794,28 +822,28 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 		// mostly run related
 		if(strstr(tmpbuff+st,"lost RHIC")) {
-			LOG(WARN,"---> [%d LOG] \"lost RHIC\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"lost RHIC\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 		if(strstr(tmpbuff+st,"NO RHIC CLOCK")) {
-			LOG(WARN,"---> [%d LOG] \"NO RHIC CLOCK\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"NO RHIC CLOCK\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 
 		if(strstr(tmpbuff+st,"DRIFT")) {
-			LOG(WARN,"---> [%d LOG] \"DRIFT/clock problems\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"DRIFT/clock problems\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 
 
 		if(strstr(tmpbuff+st,"CRIT")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] CRIT string in log -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] CRIT string in log -- restart run",rdo) ;
 		}
 	
 		if(strstr(tmpbuff+st,"altro error")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] altro error -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] altro error -- restart run",rdo) ;
 		}
 	
 
@@ -829,6 +857,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 		
 		if(err<0) {
 			LOG(ERR,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
+			log_is_error = 1 ;
 		}
 		else if(do_log) {
 			LOG(INFO,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
@@ -998,6 +1027,8 @@ tpx23::tpx23()
 
 	hdr_version = 0 ;	// 0:pre FY23
 
+	memset(fpga_usercode,0,sizeof(fpga_usercode)) ;
+
 	tpx_d = 0 ;
 }
 
@@ -1006,6 +1037,11 @@ tpx23::tpx23()
 
 u_char tpx23::flags_row_pad(int asic, int channel, int &row, int &pad)
 {
+	row = 255 ;
+	pad = 255 ;
+
+	if(rdo1<1||rdo1>6) return 0xFF ;
+
 	// I will rewrite this to make it super-fast
 
 	tpx_from_altro(rdo1-1,asic,channel,row,pad) ;	// from tpxCore!
@@ -1017,3 +1053,14 @@ u_char tpx23::flags_row_pad(int asic, int channel, int &row, int &pad)
 	return rp_gain[sector1-1][row][pad].flags ;
 }
 
+#if 0
+int tpx23::run_start() 
+{
+//	LOG(WARN,"TPX23 run_start") ;
+
+	rhic_clock = -1 ;	// unknown
+	log_is_error = 0 ;
+
+	return 0 ;
+}
+#endif

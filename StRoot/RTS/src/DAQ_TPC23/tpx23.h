@@ -50,6 +50,7 @@ public:
 	tpx23() ;
 	~tpx23() { return ; } ;
 
+//	int run_start() ;
 
 	int rdo_scan(char *c_addr, int words) ;
 	int from22to23(char *c_addr, int words) ;
@@ -69,6 +70,10 @@ public:
 	u_int tdbg[10] ;	// debugging counters, etc
 
 	u_char hdr_version ;
+
+	u_int fpga_usercode[5] ;
+	u_char log_is_error ;
+	u_char rhic_clock ;
 
 	class tpx23Data *tpx_d ;
 private:
