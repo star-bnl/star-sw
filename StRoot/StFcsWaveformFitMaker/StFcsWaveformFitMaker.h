@@ -77,7 +77,7 @@ public:
     
     void setDebug(int v=1)        {SetDebug(v);}
     void setTest(int v);           //!< Set test level. Intended to be used for single files. Output file name can be changed with #writeFile(), see #mTest for meaning of values
-    void setEnergySelect(int ecal=10, int hcal=10, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
+    void setEnergySelect(int ecal=13, int hcal=13, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
     void setEnergySumScale(double ecal=1.0, double hcal=1.0, double pres=1.0) {mEnergySumScale[0]=ecal; mEnergySumScale[1]=hcal; mEnergySumScale[2]=pres;}
     void setCenterTimeBins(int v, int min=0, int max=512) {mCenterTB=v; mMinTB=min; mMaxTB=max;}
     void setAdcSaturation(int v)  {mAdcSaturation=(double)v;}
@@ -268,7 +268,7 @@ public:
 
  protected:
     TClonesArray mChWaveData;  //!< Contains all graph data
-    void drawFit(TGraphAsymmErrors* g, TF1* func); //!< Draw a single TGraph
+    void drawFit(TGraphAsymmErrors* gg, TF1* func); //!< Draw a single TGraph
     StFcsPulseAna* mPulseFit;   //!< Pointer to peak finder used by some analysis methods
 
     /**@brief Variable to use when testing #StFcsWaveformFitMaker algorithms

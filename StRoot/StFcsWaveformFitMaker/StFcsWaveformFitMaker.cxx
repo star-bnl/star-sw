@@ -370,7 +370,7 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
 }
 
 int StFcsWaveformFitMaker::Finish(){
-  if(mFilename && mPad>=0){
+  if( mFilename ){
     char file[200];
     sprintf(file,"%s.pdf]",mFilename);
     mCanvas->Print(file);
@@ -1017,9 +1017,8 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
     return res[0];
 }
 
-void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
+void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* gg, TF1* func){
   const int MAXPAD=4*4;
-  TGraphAsymmErrors* gg = getGraph();
   if(gg==0){
     LOG_WARN<<"Found no TGraphAsymmErrors at mHitIdx="<<mHitIdx<<endm;
     return;

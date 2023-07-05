@@ -46,7 +46,7 @@ Painter class for PeakAna
 
 class PeakAna;
 
-class PeakAnaPainter
+class PeakAnaPainter : public TObject
 {
 public:
   PeakAnaPainter();
