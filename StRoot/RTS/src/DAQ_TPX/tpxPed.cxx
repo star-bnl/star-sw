@@ -964,7 +964,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 }
 
 
-void tpxPed::smooth()
+void tpxPed::smooth(int mode)
 {
 	int r, p, t ;
 
@@ -1046,6 +1046,18 @@ void tpxPed::smooth()
 		// finally, we need to round off correctly!
 		for(t=0;t<512;t++) {
 			ped->ped[t] = (double) ((u_short) (smoother[t]+0.5)) ;	
+			if(mode==1) {	// new in May2023, kills GG pickup
+				if(t>=18 && t<=20) {
+					ped->ped[t] = 1023.0 ;
+				}
+			}
+			else if(mode==2) {	// slight increase
+				if(t>=18 && t<=20) {
+					ped->ped[t] += 5.0 ;
+					if(ped->ped[t]>1023.0) ped->ped[t] = 1023.0 ;
+				}
+
+			}
 		}
 
 
@@ -1055,7 +1067,7 @@ void tpxPed::smooth()
 	}
 	}
 
-	LOG(TERR,"Pedestals smoothed: sector %2d",sector) ;
+	LOG(TERR,"Pedestals smoothed: sector %2d, mode %d",sector,mode) ;
 	smoothed = 1 ;
 
 	return ;

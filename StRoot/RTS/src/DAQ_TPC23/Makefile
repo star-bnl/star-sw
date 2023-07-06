@@ -79,7 +79,14 @@ tpx23.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpx23.o: ../DAQ_TPX/tpxPed.h
 tpx23.o: ../DAQ_TPX/tpxCore.h
 tpx23.o: ../DAQ_TPX/tpxGain.h
+tpx23.o: ../DAQ_ITPC/itpcPed.h
 tpx23.o: tpx23.h
+tpx23.o: ../DAQ_READER/daq_dta.h
+tpx23.o: ../../../../StRoot/RTS/include/rts.h
+tpx23.o: ../DAQ_READER/daq_dta_structs.h
 tpx23.o: tpc23_base.h
 itpc23.o: tpc23_base.h
+tpx23.o: ../DAQ_READER/daq_dta.h
+tpx23.o: ../../../../StRoot/RTS/include/rts.h
+tpx23.o: ../DAQ_READER/daq_dta_structs.h
 tpx23.o: tpc23_base.h

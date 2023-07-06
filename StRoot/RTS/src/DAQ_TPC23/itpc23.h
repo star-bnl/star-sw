@@ -30,12 +30,12 @@ public:
 	int fee_evt_type ;
 
 	int prog_fulls ;
-	int fee_errs ;	
+//	int fee_errs ;	
 
 	int rdo_scan(char *c_addr, int words) ;
 	int from22to23(char *dta, int words) ;
 	u_int get_token_s(char *c_addr, int words) ;
-	void set_rdo(int s, int r) ;  
+	u_int set_rdo(int s, int r) ;  
 
 	int init(daq_dta *gain) ;
 
