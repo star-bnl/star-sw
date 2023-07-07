@@ -1037,6 +1037,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         LOG_INFO << "the use of pulser relations inside a Gbtx is turned off" << endm;
     }
 
+    //reset histo keeping track of mod average distance to clock
+    mHistograms.at( "pulserDigiTimeDiff_GbtxCorrProfMod" )->Reset();
+
     // --------------------------------------------------------------------------------------------
 
 
@@ -2283,7 +2286,7 @@ StETofCalibMaker::applyPulserOffset( StETofDigi* aDigi )
 {
     int key = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->counter() * 10 + aDigi->side();
 
-    if( !mPulserTimeDiff.count( key ) ) {
+    if( !mPulserTimeDiff.count( key )) {
         return 0.;
     }
 

@@ -115,6 +115,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mIsSim( false ), 
   mDoQA( false ),
   mDebug( false ),
+  mApCorr(false),
   mHistFileName( "" ),
   mHistograms(),
   mCounterActive()
@@ -1025,7 +1026,7 @@ StETofHitMaker::matchSides()
 			  delete *iterDigi;
 			  digiVec->erase( iterDigi );                           
 			  //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-			  t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); //CHECK IF THAT actually makes things better!!
+			  if(mApCorr) t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); 
 			  if( mDoQA ) {
 			    mHistograms.at( histNameDigisErased )->Fill( 4 );
 			  }
@@ -1130,7 +1131,7 @@ StETofHitMaker::matchSides()
 		  
 		  if( xDigiC->side() == xDigiA->side() ) {
 	                     //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-		    t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		  if(mApCorr)  t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime();
 		    xDigiA = xDigiC;
 		    iterDigi = digiVec->begin();
 		    delete *iterDigi;
@@ -1141,7 +1142,7 @@ StETofHitMaker::matchSides()
 		  }
 		  else {
 		    //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-		    t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		  if(mApCorr)  t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime();
 		    xDigiB = xDigiC;
 		    iterDigi = digiVec->begin() + 1;
 		    delete *iterDigi;
@@ -1171,7 +1172,7 @@ StETofHitMaker::matchSides()
             // the "strip" time is the mean time between each end
             time = 0.5 * ( xDigiA->calibTime() + xDigiB->calibTime() );
             //TODO: Afterpulse handling: correct hit time by the time difference between the first and second digi on the same side
-	    if(!mIsSim){//merge skip corrections for simulation
+	    if(!mIsSim && mApCorr){//merge skip corrections for simulation
 	      time += t_corr_afterpulse;
 	    }
             // weight of merging of hits (later) is the total charge => sum of both ends ToT
@@ -1259,7 +1260,7 @@ StETofHitMaker::matchSides()
 	      modifyHit(mode, posX , posY , time);
 	    }
 	    
-            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
+      StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 	    	    
 	    //Check for "same direction double clockjumps" and update FlagMap
 	    if(mDoDoubleClockJumpShift){
