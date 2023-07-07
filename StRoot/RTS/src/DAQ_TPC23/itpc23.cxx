@@ -34,7 +34,7 @@ static inline u_int sw16(u_int d)
         return d ;
 }
 
-inline void itpc23::set_rdo(int sec, int rdo)
+inline u_int itpc23::set_rdo(int sec, int rdo)
 {
 //	LOG(TERR,"set_rdo %d: S%02d:%d",id,sec,rdo) ;
 
@@ -42,6 +42,8 @@ inline void itpc23::set_rdo(int sec, int rdo)
 	rdo1 = rdo ;
 
 	fee_mask = get_ifee_mask(sector1,rdo1) ;
+
+	return fee_mask ;
 } ;
 
 // Change the data format from the old FY22 version to the new
@@ -51,10 +53,12 @@ int itpc23::from22to23(char *c_dta, int words)
 	int n_words = words ;
 	u_int *data = (u_int *)c_dta ;
 
-	u_int *d_use = (u_int *)malloc(words*4) ;	// allocate sotrage
+	u_int *d_use = (u_int *)malloc(words*4+1024) ;	// allocate sotrage
 
 	u_int *data_end = data + words ;
 	u_int *data_start = data ;
+
+	err = 0 ;	// in class
 
 	// this is wrong! I need to get it from the data!!
 	fee_mask = get_ifee_mask(sector1,rdo1) ;
@@ -89,7 +93,9 @@ int itpc23::from22to23(char *c_dta, int words)
 
 
 	if((data[0]&0xFFFF000F) != 0x98000004) {
-		LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
+		run_errors++ ;
+		if(run_errors<5 && online) LOG(ERR,"start 0 0x98 = 0x%08X",data[0]) ;
+		err |= 0x10000000 ;
 	}
 
 //	LOG(TERR,"wds 0x%08X 0x%08X; data end 0x%08X",data[0],data[1],data_end[0]) ;
@@ -133,7 +139,9 @@ int itpc23::from22to23(char *c_dta, int words)
 	}
 
 	if(!found) {
-		LOG(ERR,"%d: can't find data_end!",rdo1) ;
+		run_errors++ ;
+		err |= 0x20000000 ;
+		if(run_errors<5) LOG(ERR,"%d: can't find data_end!",rdo1) ;
 	}
 
 #endif
@@ -152,7 +160,9 @@ int itpc23::from22to23(char *c_dta, int words)
 	// data_end[0] is 0x9800.... : trigger header
 
 	if(!found) {
-		LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
+		run_errors++ ;
+		err |= 0x20000000 ;
+		if(run_errors<5) LOG(ERR,"%d: data_end 0x98 not found = 0x%08X",rdo1,data_end[0]) ;
 	}
 
 	n_words = data_end - data ;
@@ -184,7 +194,18 @@ int itpc23::from22to23(char *c_dta, int words)
 		d++ ;
 	}
 
-	fee_mask = l_fee_mask ;
+	if(online) {
+		if(l_fee_mask != fee_mask) {
+			err |= 0x40000000 ;
+			run_errors++ ;
+			if(run_errors<5) LOG(ERR,"%d: FEE mask 0x%X, expect 0x%X, words %d/%d",rdo1,l_fee_mask,fee_mask,words,n_words) ;
+			free(d_use) ;
+			return 0 ;
+		}
+	}
+
+
+	fee_mask = l_fee_mask ;	// NOTE the re-write!
 
 //	fee_mask = get_ifee_mask(sector1,rdo1) ;
 
@@ -229,15 +250,38 @@ int itpc23::from22to23(char *c_dta, int words)
 			if(no_cpy==0) {
 				d_fee[ix] = p[0] ;
 				ix++ ;
+
+				if(ix>(n_words)) {
+					run_errors++ ;
+					err |= 0x80000000 ;
+					if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
+					free(d_use) ;
+					return 0 ;
+				}
 			}
+
 			p++ ;
 		}
 		
 		d_fee[ix] = p[0] ;
 		ix++ ;
+
+		if(ix>(n_words)) {
+			run_errors++ ;
+			if(run_errors<5) LOG(ERR,"%d: words %d, ix %d",rdo1,n_words,ix) ;
+			err |= 0x80000000 ;
+			free(d_use) ;
+			return 0 ;
+		}
 	}
 
-
+	if(n_words<12) {
+		run_errors++ ;
+		if(run_errors<5) LOG(ERR,"%d: n_words %d",rdo1,n_words) ;
+		err |= 0x80000000 ;
+		free(d_use) ;
+		return 0 ;
+	}
 
 	// trailer
 	d_use[n_words-1] = 0xDEADC0DE ;
@@ -312,7 +356,7 @@ u_int *itpc23::ch_scan(u_int *start)
 
 	if(unlikely(words10==1023)) {	// channel skipped because of prog-full!
 		prog_fulls++ ;
-		LOG(ERR,"%d: ch_scan %d:%d: SAMPA%d:%d -- prog-full",rdo1,fee_ix,ch_ix,sampa_id,sampa_ch) ;
+		if(online) LOG(ERR,"%d: ch_scan %d:%d: SAMPA%d:%d -- prog-full",rdo1,fee_ix,ch_ix,sampa_id,sampa_ch) ;
 		words10 = 0 ;
 	}
 
@@ -321,7 +365,7 @@ u_int *itpc23::ch_scan(u_int *start)
 	if(unlikely(pkt!=4 || sampa_ch>31 || words10>512)) {
 		err |= 0x1000000 ;
 		fee_errs++ ;
-		LOG(ERR,"%d: ch_scan %d:%d: pkt %d, sampa_ch %2d, words10 %d [0x%08X]",rdo1,fee_ix,ch_ix,
+		if(fee_errs<10) LOG(ERR,"%d: ch_scan %d:%d: pkt %d, sampa_ch %2d, words10 %d [0x%08X]",rdo1,fee_ix,ch_ix,
 		    pkt,sampa_ch,words10,
 		    d[0]) ;
 	}
@@ -396,7 +440,9 @@ u_int *itpc23::ch_scan(u_int *start)
 		// tb_cou, tb_start, adc, adc, adc x tb_cou times
 		// from low tb_start to high
 		if(unlikely(d[i]&0xC0000000)) {
-			LOG(ERR,"ch_scan %d:%d: bad word 0x%08X",fee_ix,ch_ix,d[i]) ;
+			fee_errs++ ;
+			if(fee_errs<10) LOG(ERR,"%d: ch_scan %d:%d: SAMPA %d:%d: bad word 0x%08X",rdo1,fee_ix,ch_ix,
+			    sampa_id,sampa_ch,d[i]) ;
 		}
 
 		if(log_level>=2) LOG(TERR,"FEE %d:%d -- %d = 0x%08X",fee_ix,ch_ix,i,d[i]) ;
@@ -416,7 +462,8 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(log_level>=100) LOG(TERR,"  tb_cou %d",tb_cou) ;
 
 				if(unlikely(tb_cou>500)) {
-					LOG(ERR,"tb_cou %d [0x%08X,%d]",tb_cou,d[i],i) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_cou %d [0x%08X,%d]",rdo1,row,pad,tb_cou,d[i],i) ;
 				}
 				ix = 1 ;
 				break ;
@@ -425,7 +472,7 @@ u_int *itpc23::ch_scan(u_int *start)
 				*dd++ = tb_start ;
 
 				if(seq_ix>=(SEQ_MAX-1)) {
-					LOG(ERR,"too many seqs %d",seq_ix) ;
+					if(online) LOG(ERR,"too many seqs %d",seq_ix) ;
 					goto done_ch ;
 				}
 
@@ -445,14 +492,16 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(log_level>=100)) LOG(TERR,"  tb_start %d",tb_start) ;
 
 				if(unlikely(tb_start<=tb_last)) {
-					LOG(ERR,"tb_start %d, tb_last %d",tb_start,tb_last) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_start %d, tb_last %d",rdo1,row,pad,tb_start,tb_last) ;
 				}
 
 
 
 				tb_last = tb_start + tb_cou ;
 				if(unlikely(tb_last>500)) {
-					LOG(ERR,"tb_last %d [0x%08X,%d]",tb_last,d[i],i) ;
+					fee_errs++ ;
+					if(fee_errs<10) LOG(ERR,"%d: rp %d:%d: tb_last %d [0x%08X,%d]",rdo1,row,pad,tb_last,d[i],i) ;
 				}
 
 
@@ -575,11 +624,11 @@ u_int *itpc23::lane_scan(u_int *start)
 	// should be at start of lane 0xB....
 	if((d[0]&0xF0000000)!=0xB0000000) {	// start of lane
 		err |= 0x100000 ;
-		LOG(ERR,"%d: lane_scan %d:%d: unknown start 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
+		if(online) LOG(ERR,"%d: lane_scan %d:%d: unknown start 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
 	}
 	else if((d[0]>>26)&0x3) {	// SAMPA FIFOs overwritten!
 		err |= 0x200000 ;
-		LOG(ERR,"%d: lane_scan %d:%d: SAMPA FIFO overwritten 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
+		if(online) LOG(ERR,"%d: lane_scan %d:%d: SAMPA FIFO overwritten 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
 	}
 
 	d++ ;	// skip 0xB....
@@ -594,7 +643,7 @@ u_int *itpc23::lane_scan(u_int *start)
 	// should be at end of lane 0x7....
 	if((d[0]&0xF0000000)!=0x70000000) {	// end of lane
 		err |= 0x400000 ;
-		LOG(ERR,"%d: lane_scan %d:%d: unknown end 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
+		if(online) LOG(ERR,"%d: lane_scan %d:%d: unknown end 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
 	}
 
 	d++ ;	// skip 0x7...
@@ -609,7 +658,7 @@ u_int *itpc23::fee_non_trgd(u_int *start)
 	int fee_words = 0 ;
 
 	if(fee_evt_type != 0x02) {	// no clue
-		LOG(ERR,"%d: fee_non_trgd %d: evt_type 0x%02X",rdo1,fee_ix,fee_evt_type) ;
+		if(online) LOG(ERR,"%d: fee_non_trgd %d: evt_type 0x%02X",rdo1,fee_ix,fee_evt_type) ;
 
 
 		while(d<trl) {
@@ -706,7 +755,7 @@ u_int *itpc23::fee_scan(u_int *start)
 	u_int *d_save = start ;
 
 	bx_count = -1 ;
-	fee_errs = 0 ;
+//	fee_errs = 0 ;
 	fee_evt_type = 0 ;
 	fee_pp = 0 ;
 
@@ -715,12 +764,12 @@ u_int *itpc23::fee_scan(u_int *start)
 	// we must be at 0x8....
 	if((d[0]&0xF0000000)!=0x80000000) {	// start of fee
 		err |= 0x10000 ;	// oopsy -- what now!?
-		LOG(ERR,"%d: fee_scan %d: not start-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
+		if(online) LOG(ERR,"%d: fee_scan %d: not start-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
 	}
 	else {
 		if(d[0]&0x00800000) {	// from real FEE
 			err |= 0x20000 ;
-			LOG(ERR,"%d: fee_scan %d: SAMPA overrun 0x%08X",rdo1,fee_ix,d[0]) ;
+			if(online) LOG(ERR,"%d: fee_scan %d: SAMPA overrun 0x%08X",rdo1,fee_ix,d[0]) ;
 		}
 		if(d[0]&0x00400000) {	// from real FEE: xoff was on
 			//LOG(WARN,"fee_scan %d: XOFF on 0x%08X",fee_ix,d[0]) ;
@@ -751,12 +800,12 @@ u_int *itpc23::fee_scan(u_int *start)
 		
 	if((d[0]&0xF0000000)!=0x40000000) {
 		err |= 0x40000 ;	// oopsy -- what now!?
-		LOG(ERR,"%d: fee_scan %d: not end-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
+		if(online) LOG(ERR,"%d: fee_scan %d: not end-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
 	}
 	else {
 		if(d[0]&0x00800000) {
 			err |= 0x80000 ;
-			LOG(ERR,"fee_scan %d: SAMPA overrun 0x%08X",fee_ix,d[0]) ;
+			if(online) LOG(ERR,"fee_scan %d: SAMPA overrun 0x%08X",fee_ix,d[0]) ;
 		}
 		if(d[0]&0x00400000) {
 			//LOG(WARN,"fee_scan %d: XOFF on 0x%08X",fee_ix,d[0]) ;
@@ -778,6 +827,8 @@ u_int *itpc23::fee_scan(u_int *start)
 
 int itpc23::rdo_scan(char *c_addr, int iwords)
 {
+	u_int l_fee_mask ;
+
 	words = iwords ;
 
 	u_int *d = (u_int *)c_addr ;
@@ -788,7 +839,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	d += 4 ;
 	d_start = d ;	// remember
 
-	err = 0 ;
+	err = 0 ;	// clear class error
 	//evt++ ;
 
 	fee_ix = 0 ;
@@ -844,23 +895,41 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	u_int fee_empty = d[6]&0xFFFF ;
 //	u_int sig = d[7] ;
 
+
+	l_fee_mask = 0 ;
+	for(int i=7;i<15;i++) {
+		if((d[i]&0xFFFF0000)==0xF0000000) {
+			l_fee_mask = d[i]&0xFFFF ;
+			break;
+		}
+	}
+
+	if(l_fee_mask==0) {
+		LOG(ERR,"%d: no local FEE mask, expecting 0x%04X",rdo1,fee_mask) ;
+	}
+	else {
+//		LOG(TERR,"%d: local FEE mask 0x%04X, expect 0x%04X",rdo1,l_fee_mask,fee_mask) ;
+//		fee_mask = l_fee_mask ;
+	}
+
 	// I need a special hack here when running in Offline (from a file)
 	// because I might have a FEE masked in online...
 	if(!online) {
-		fee_mask = fee_synced ;
+//		fee_mask = fee_synced ;
+		fee_mask = l_fee_mask ;
 	}
 
 //	LOG(TERR,"fee_mask 0x%X, fee_synced 0x%X, fee_overrun 0x%X, fee_xoff 0x%X, rdo_stuff 0x%X, fee_empty 0x%X, sig 0x%X",
 //	    fee_mask,fee_synced,fee_overrun,fee_xoff,rdo_stuff,fee_empty,sig) ;
 
 	if((fee_synced&fee_mask)!=fee_mask) {
-		LOG(ERR,"%d: evt %d: fee sync error 0x%04X, expect 0x%04X",rdo1,evt,fee_synced,fee_mask) ;
+		if(online) LOG(ERR,"%d: evt %d: fee sync error 0x%04X, expect 0x%04X",rdo1,evt,fee_synced,fee_mask) ;
 		// STOP: auto-recovery
 		err |= 0x10 ;
 	}
 
 	if(fee_overrun&fee_mask) {
-		LOG(ERR,"%d: %d: RDOs fee FIFO overrun 0x%04X",rdo1,evt,fee_overrun&fee_mask) ;
+		if(online) LOG(ERR,"%d: %d: RDOs fee FIFO overrun 0x%04X",rdo1,evt,fee_overrun&fee_mask) ;
 		// STOP: auto-recovery
 		err |= 0x10 ;
 	}
@@ -896,7 +965,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	}
 
 	if(got_it != 3) {
-		LOG(ERR,"%d: %d: no trailer (0x%08X), %d",rdo1,evt,trl[0],got_it) ;
+		if(online) LOG(ERR,"%d: %d: no trailer (0x%08X), %d",rdo1,evt,trl[0],got_it) ;
 		// STOP: auto-recovery
 		err |= 0x2 ;
 //		for(int i=0;i<words;i++) {
@@ -908,6 +977,13 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	u_int evt_status = trl[0] ;
 	u_int mhz_end = trl[1] ;
 
+
+	// happens, why?
+	if(evt_status==0x0EEDC0DE) {
+		for(int i=-8;i<=8;i++) {
+			if(online) LOG(ERR,"%d: %d = 0x%08X",rdo1,i,trl[i]) ;
+		}
+	}
 
 //	LOG(TERR,"trl0 0x%08X, trl1 0x%08X",trl[0],trl[1]) ;
 
@@ -943,7 +1019,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 		if(st != 3) {
 			err |= 0x1000 ;
-			LOG(ERR,"%d: %d: FEE %2d: timeout 0x%X [0x%08X]",rdo1,evt,i,st,evt_status) ;
+			if(online) LOG(ERR,"%d: %d: FEE %2d: timeout 0x%X [0x%08X]",rdo1,evt,i,st,evt_status) ;
 		}
 	}
 
@@ -961,8 +1037,10 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 	if(log_level>=1) LOG(TERR,"%d: evt %d: fee_mask expected 0x%04X",rdo1,evt,fee_mask) ;
 
 	// should be at the FEE start: 0xF000_mmmm	
+	// THIS IS THE CANONICAL MASK AS SET BY THE RDO DURING RUNNING
+	// AND SHOULD BE USED OFFLINE
 	if(((*d>>28)!=0xF)||((*d&0xFFFF)!=fee_mask)) {
-		LOG(ERR,"%d: evt %d: Bad FEE_START 0x%08X",rdo1,evt,*d) ;
+		if(online) LOG(ERR,"%d: evt %d: Bad FEE_START 0x%08X, expect 0x%08X",rdo1,evt,*d,0xF0000000|fee_mask) ;
 		err |= 0x20 ;
 		goto done ;
 	}
@@ -1011,7 +1089,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 
 	if(err||prog_fulls) {
-		LOG(ERR,"%d: evt %d/%d: T %d,%d,%d: error 0x%06X, prog_fulls %d: words %d, %d us",rdo1,evt_trgd,evt,
+		if(online) LOG(ERR,"%d: evt %d/%d: T %d,%d,%d: error 0x%08X, prog_fulls %d: words %d, %d us",rdo1,evt_trgd,evt,
 		    token,trg_cmd,daq_cmd,
 		    err,
 		    prog_fulls,
@@ -1137,7 +1215,7 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 		if(sig==0x98000004) rdo_version = 0 ;
 		else if((sig&0xFF00000F)==0x98000004) rdo_version = (sig>>4)&0xFF ;
 		else {
-			LOG(ERR,"%d: fmt 22: not triggered: ds 0x%08X, words",rdo1,sig,words) ;
+			LOG(WARN,"%d: fmt 22: not triggered: ds 0x%08X, words",rdo1,sig,words) ;
 			t = 4096 ;
 			goto done ;
 		}
@@ -1145,13 +1223,13 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 
 
 
-		if(trg_w==0) {
-			if(rdo_version==1) {
-				if(sub==0x980000FC) {
-					LOG(WARN,"%d: RDO_mon, words %d",rdo1,words) ;
-				}
-			}
-		}
+//		if(trg_w==0) {
+//			if(rdo_version==1) {
+//				if(sub==0x980000FC) {
+//					LOG(WARN,"%d: RDO_mon, words %d",rdo1,words) ;
+//				}
+//			}
+//		}
 
 
 		t = ((trg_w>>8)&0xF)<<8 ;
@@ -1218,6 +1296,7 @@ itpc23::itpc23()
 
 	data_c = 0 ;
 
+	fee_errs = 0 ;	// just in case
 
 	fmt = 0 ;
 
@@ -1299,7 +1378,7 @@ static int itpc_fee_map[24][4][16] = {
 {//S5 checked
 	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
-	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
+	{ 7, 1,17,12,24,19,13, 8,28, 2, 3,20,29,25,21, 0}, // 17May23: moved 16 to 11
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 
 },
@@ -1378,7 +1457,8 @@ static int itpc_fee_map[24][4][16] = {
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    
 },
 {//S17
-	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, 
+//	{49,52,46, 0, 0, 54,0,47, 0,50, 0,55,48, 0,51,53}, // 29Mar03: bad port 3 moved to good port 5
+        {49,52, 0, 0,46, 54,0,47, 0,50, 0,55,48, 0,51,53},
 	{36,32,40,43,37,33, 0,41, 0,44,38,34,42,45,39,35},  
 	{ 7, 1,17,12,24,19,13, 8,28, 2, 0,20,29,25,21, 3}, 
 	{ 9, 4,26,14,15,10,30,22,27, 5,31,23,18,16,11, 6}    

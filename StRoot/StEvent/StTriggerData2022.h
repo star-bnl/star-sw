@@ -47,6 +47,7 @@ public:
     unsigned int   token() const;
     unsigned int   triggerWord() const;
     unsigned int   actionWord() const;      
+    unsigned int   zdcKillerBit() const;
     unsigned short busyStatus() const;
     unsigned short dsmInput() const;
     unsigned short trgToken() const;
