@@ -78,7 +78,7 @@ laserBuilder::~laserBuilder() {
 }
 
 void laserBuilder::initialize(int argc, char *argv[]) {
-    contents.h_tpc_drift_vel = new TH1D("h_tpc_drift_vel", "TPC Drift Velocity (cm/us)",400,5.4,5.8);
+    contents.h_tpc_drift_vel = new TH1D("h_tpc_drift_vel", "TPC Drift Velocity (cm/us)",400,5.0,5.8);
  
     PCP;
     // Add root histograms to Plots
@@ -131,7 +131,7 @@ void laserBuilder::event(daqReader *rdr)
      
 	    LOG("JEFF","Laser Event Processed: run=%d evt=%d vDrift=%lf total_tpc_evts=%d",run, rdr->event_number, vDrift, numberOfEventsRun);
 
-	    if((vDrift > 5.4) && (vDrift < 5.8)) {
+	    if((vDrift > 5.0) && (vDrift < 5.8)) {
 		nlasers++;
 		contents.h_tpc_drift_vel->Fill(vDrift);
 	    }

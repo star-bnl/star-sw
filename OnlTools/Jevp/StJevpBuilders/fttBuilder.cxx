@@ -52,7 +52,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     
 
     // Control draw/visiblity options
-    std::vector<std::string> setLogy   = { "hitsPerTb", "chargePerPlane0", "chargePerPlane1", "chargePerPlane2", "chargePerPlane3", "hitsTbPerPlane0", "hitsTbPerPlane1", "hitsTbPerPlane2", "hitsTbPerPlane3", "hitsPerPlane", "hitsPerQuad", "hitsPerFob", "hitsPerVMM", "hitsVMMPerPlane0", "hitsVMMPerPlane1", "hitsVMMPerPlane2", "hitsVMMPerPlane3", "nStripsFired" };
+    std::vector<std::string> setLogy   = { "hitsPerTb", "chargePerPlane0", "chargePerPlane1", "chargePerPlane2", "chargePerPlane3", "hitsTbPerPlane0", "hitsTbPerPlane1", "hitsTbPerPlane2", "hitsTbPerPlane3", "hitsPerPlane", "hitsPerQuad", "hitsPerFob", "hitsPerVMM", "hitsVMMPerPlane0", "hitsVMMPerPlane1", "hitsVMMPerPlane2", "hitsVMMPerPlane3", "nStripsFired", "nStripsFiredAll", "nStripsFiredOutOfTime" };
     std::vector<std::string> setLogz   = { "hitsPerPlaneQuad", "hitsFobQuadPerPlane0", "hitsFobQuadPerPlane1", "hitsFobQuadPerPlane2", "hitsFobQuadPerPlane3" };
     std::vector<std::string> showStats = { "hitsPerTb400", "hitsPerTb100", "nStripsFired" };
     std::vector<std::string> drawOutline = {};
@@ -62,7 +62,9 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     //////////////////////////////////////////////////////////////////////// 
     // General
     ////////////////////////////////////////////////////////////////////////
-        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 100, 0, 6000 );
+        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired (-40 < tb < 300); counts", 300, 0, 15000 );
+        contents.nStripsFiredAll         = new TH1D( "nStripsFiredAll", "sTGC; nStripsFired (all tb); counts", 300, 0, 15000 );
+        contents.nStripsFiredOutOfTime   = new TH1D( "nStripsFiredOutOfTime", "sTGC; nStripsFiredOutOfTime (tb < -40 | tb > 300); counts", 200, 0, 10000 );
 
     //////////////////////////////////////////////////////////////////////// 
     // hits and adc
@@ -72,7 +74,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
         contents.hitsPerFob               = new TH1D( "hitsPerFob", "sTGC (hits / Fob); Fob; counts (hits)", nFob,0.5, nFob + 0.5 );
         contents.hitsPerVMM               = new TH1D( "hitsPerVMM", "sTGC (hits / VMM); VMM Index (96VMM / Plane); counts (hits)", nVMM,0.5, nVMM + 0.5 );
         contents.hitsPerTb                = new TH1D( "hitsPerTb", "sTGC (hits / Timebin); Tb; counts (hits)", 338, minTb, maxTb );
-        contents.hitsPerTb400             = new TH1D( "hitsPerTb400", "sTGC (hits / Timebin); Tb; counts (hits)", 400, -400, 400 );
+        contents.hitsPerTb400             = new TH1D( "hitsPerTb400", "sTGC (hits / Timebin); Tb; counts (hits)", 400, -200, 600 );
         contents.hitsPerTb100             = new TH1D( "hitsPerTb100", "sTGC (hits / Timebin); Tb; counts (hits)", 150, -100, 50 );
         contents.hitsPerPlaneQuad         = new TH2D( "hitsPerPlaneQuad", "sTGC (hits / Quadrant); Plane; Quadrant", nPlane,0.5, nPlane + 0.5, nQuadPerPlane, 0.5, nQuadPerPlane + 0.5);
         contents.hitsPerVMMPlane          = new TH2D( "hitsPerVMMPlane", "sTGC (hits / VMM / Plane); VMM index; Plane", nVMMPerPlane, 0.5, nVMMPerPlane+0.5, nPlane,0.5, nPlane + 0.5);
@@ -645,9 +647,12 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
     contents.bcidVMM->Fill( iVMMPerFtt+1, rawVMM.bcid );
 
 
-    if ( rawVMM.tb < 30 && rawVMM.tb > -80 ){
+    nStripsFiredAll++;
+    if ( rawVMM.tb < 300 && rawVMM.tb > -40 ){
         // global counter on strips fired
         nStripsFired++;
+    } else {
+        nStripsFiredOutOfTime++;
     }
 
 
@@ -694,6 +699,8 @@ void fttBuilder::processVMM(daqReader *rdr) {
     dd = rdr->det("stgc")->get("vmm");
 
     nStripsFired = 0;
+    nStripsFiredOutOfTime = 0;
+    nStripsFiredAll = 0;
 
     bool vmm_found = false;
     while(dd && dd->iterate()) {    
@@ -711,7 +718,10 @@ void fttBuilder::processVMM(daqReader *rdr) {
     } // iterate dd
 
     // printf( "nStripsFired = %d\n", nStripsFired );
+    // printf( "nStripsFiredAll = %d\n", nStripsFiredAll );
     contents.nStripsFired->Fill( nStripsFired );
+    contents.nStripsFiredAll->Fill( nStripsFiredAll );
+    contents.nStripsFiredOutOfTime->Fill( nStripsFiredOutOfTime );
 } // processVMM
 
 void fttBuilder::event(daqReader *rdr) {

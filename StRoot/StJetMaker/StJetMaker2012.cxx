@@ -21,6 +21,7 @@
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
 #include "StjFMSMuDst.h"
+#include "StjFCSMuDst.h"
 #include "StjMCMuDst.h"
 #include "StjTPCNull.h"
 #include "StjBEMCNull.h"
@@ -36,6 +37,8 @@
 #include "StMuTrackEmu.h"
 #include "StMuTowerEmu.h"
 #include "StMcTrackEmu.h"
+
+#include "StarGenerator/StarGenEventReader/StarGenEventReader.h"
 
 #include "StSpinPool/StUeEvent/StUeOffAxisConesEvent.h"
 #include "StSpinPool/StUeEvent/StUeVertex.h"
@@ -152,11 +155,29 @@ int StJetMaker2012::Make()
 
 	// Get FMS towers                                                                                                 
 	StjTowerEnergyList fmsEnergyList;
-
 	if (jetbranch->anapars->useFms) {
 	  StjFMSMuDst fms;
 	  fmsEnergyList = fms.getEnergyList();
 	}
+
+    // Get FCS Towers
+          
+    StjTowerEnergyList fcsECalEnergyList; //FCS ECAL
+    if(jetbranch->anapars->useFcsECal){
+        StjFCSMuDst fcsECal;
+        fcsECal.useECAL();
+        fcsECalEnergyList = fcsECal.getEnergyList();
+        fcsECalEnergyList = jetbranch->anapars->FCSEcalemcCuts()(fcsECalEnergyList);
+
+    }
+    StjTowerEnergyList fcsHCalEnergyList; //FCS HCAL
+    if(jetbranch->anapars->useFcsHCal){
+        StjFCSMuDst fcsHCal;
+        fcsHCal.useHCAL();
+        fcsHCalEnergyList = fcsHCal.getEnergyList();
+        fcsHCalEnergyList = jetbranch->anapars->FCSHcalhcCuts()(fcsHCalEnergyList);
+
+    }
 
 	// Merge BEMC and EEMC towers
 	StjTowerEnergyList energyList;
@@ -164,19 +185,25 @@ int StJetMaker2012::Make()
 	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
 	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
 	copy(fmsEnergyList.begin(),fmsEnergyList.end(),back_inserter(energyList));
+          
+    // Apply hadronic correction to towers
+    energyList = jetbranch->anapars->correctTowerEnergyForTracks()(energyList,trackList);
+          
+    //Merge FCS towers with general energyList
+    copy(fcsECalEnergyList.begin(),fcsECalEnergyList.end(),back_inserter(energyList));
+    copy(fcsHCalEnergyList.begin(),fcsHCalEnergyList.end(),back_inserter(energyList));
 
-	// Apply hadronic correction to towers
-	energyList = jetbranch->anapars->correctTowerEnergyForTracks()(energyList,trackList);
-
+    // Currently no hadronic corrections to towers for FCS
+    
 	// Convert tracks and towers to Lorentz vectors
 	FourList tpc4pList = StjeTrackListToStMuTrackFourVecList()(trackList);
 	FourList energy4pList = StjeTowerEnergyListToStMuTrackFourVecList()(energyList);
-
+          
 	// Merge tracks and towers
 	StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
 
 	copy(tpc4pList.begin(),tpc4pList.end(),back_inserter(particles));
-	copy(energy4pList.begin(),energy4pList.end(),back_inserter(particles));
+	copy(energy4pList.begin(),energy4pList.end(), back_inserter(particles));
 
 	// Run jet finder
 	StJetFinder::JetList protojets;	// list<StProtoJet>
@@ -243,6 +270,25 @@ int StJetMaker2012::Make()
 	  StjFMSMuDst fms;
 	  fmsEnergyList = fms.getEnergyList();
 	}
+    
+    // Get FCS Towers
+    
+    StjTowerEnergyList fcsECalEnergyList; //FCS ECAL
+    if(jetbranch->anapars->useFcsECal){
+        StjFCSMuDst fcsECal;
+        fcsECal.useECAL();
+        fcsECalEnergyList = fcsECal.getEnergyList();
+        fcsECalEnergyList = jetbranch->anapars->FCSEcalemcCuts()(fcsECalEnergyList);
+
+    }
+    StjTowerEnergyList fcsHCalEnergyList; //FCS HCAL
+    if(jetbranch->anapars->useFcsHCal){
+        StjFCSMuDst fcsHCal;
+        fcsHCal.useHCAL();
+        fcsHCalEnergyList = fcsHCal.getEnergyList();
+        fcsHCalEnergyList = jetbranch->anapars->FCSHcalhcCuts()(fcsHCalEnergyList);
+
+    }
 
 	// Merge BEMC and EEMC towers
 	StjTowerEnergyList energyList;
@@ -250,11 +296,13 @@ int StJetMaker2012::Make()
 	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
 	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
 	copy(fmsEnergyList.begin(),fmsEnergyList.end(),back_inserter(energyList));
+    copy(fcsECalEnergyList.begin(),fcsECalEnergyList.end(),back_inserter(energyList));
+    copy(fcsHCalEnergyList.begin(),fcsHCalEnergyList.end(),back_inserter(energyList));
 
 	// Convert towers to Lorentz vectors
 	FourList energy4pList = StjeTowerEnergyListToStMuTrackFourVecList()(energyList);
 
-	// Merge tracks and towers
+    // Merge tracks and towers
 	StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
 
 	copy(energy4pList.begin(),energy4pList.end(),back_inserter(particles));
@@ -283,13 +331,22 @@ int StJetMaker2012::Make()
       tpc.setVertexIndex(savedVertexIndex);
 
     } // End useTpc
-
+      
+      
     if (jetbranch->anapars->useMonteCarlo) {
-      StjMCMuDst mc(this);
-      StjPrimaryVertex mcvertex = mc.getMCVertex();
-      StjMCParticleList mcparticles = jetbranch->anapars->mcCuts()(mc.getMCParticleList());
-      StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
-      transform(mcparticles.begin(),mcparticles.end(),back_inserter(particles),StjMCParticleToStMuTrackFourVec());
+    
+        StjMCMuDst mc(this);
+        
+        if(GetMaker("genEvent")){ // To be used with .genevent.root for MC particle from StarGenEventReader
+            eventreader = (StarGenEventReader*)GetMaker("genEvent");
+            sEvent = eventreader->Event();
+            mc.setGenEvent(sEvent); // In case no geant on chain
+        }
+        
+        StjPrimaryVertex mcvertex = mc.getMCVertex();
+        StjMCParticleList mcparticles = jetbranch->anapars->mcCuts()(mc.getMCParticleList());
+        StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
+        transform(mcparticles.begin(),mcparticles.end(),back_inserter(particles),StjMCParticleToStMuTrackFourVec());
 
       // Run jet finder
       StJetFinder::JetList protojets;	// list<StProtoJet>
