@@ -38,7 +38,6 @@ StFttClusterMaker::StFttClusterMaker( const char* name )
   mDebug( false ),       /// print out of all full messages for debugging
   mFttDb( nullptr )
 {
-    LOG_INFO << "StFttClusterMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -51,8 +50,6 @@ StFttClusterMaker::~StFttClusterMaker()
 Int_t
 StFttClusterMaker::Init()
 {
-    LOG_INFO << "StFttClusterMaker::Init" << endm;
-
     return kStOk;
 }
 
@@ -62,7 +59,7 @@ StFttClusterMaker::InitRun( Int_t runnumber )
 { 
     mRunYear = ( runnumber + 727000 ) / 1000000 + 1999;
 
-    LOG_INFO << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
+    LOG_DEBUG << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
 
     return kStOk;
 }
@@ -101,7 +98,7 @@ StFttClusterMaker::Make()
     mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb"));
     assert( mFttDb );
 
-    LOG_INFO << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
+    LOG_DEBUG << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
     ApplyHardwareMap();
 
     // InjectTestData();
@@ -143,7 +140,7 @@ StFttClusterMaker::Make()
     } // loop on hit
 
     size_t nClusters = 0;
-    LOG_INFO << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
+    LOG_DEBUG << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
 
@@ -173,7 +170,7 @@ StFttClusterMaker::Make()
             }
         } // loop on iRob
     } // nStripsHit
-    LOG_INFO << "Found " << nClusters << " clusters this event" << endm;
+    LOG_DEBUG << "Found " << nClusters << " clusters this event" << endm;
 
     return kStOk;
 } // Make
@@ -208,8 +205,8 @@ void StFttClusterMaker::InjectTestData(){
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    int time_cut0 = -50;
-    int time_cut1 =  50;
+    int time_cut0 = -40;
+    int time_cut1 =  150;
     int time_cutm = 1;
     //  in principle it could vary VMM to VMM;
     // mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
@@ -427,6 +424,5 @@ void StFttClusterMaker::ApplyHardwareMap(){
     for ( StFttRawHit* rawHit : mFttCollection->rawHits() ) {
         mFttDb->hardwareMap( rawHit );
     }
-
 }
 

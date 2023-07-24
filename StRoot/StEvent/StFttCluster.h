@@ -82,7 +82,7 @@ private:
     StPtrVecFttCluster mNeighbors;    // Neighbor clusters
     StPtrVecFttPoint mPoints;        // Fitted points (photons) in the cluster
 
-    ClassDef(StFttCluster, 2)
+    ClassDef(StFttCluster, 3)
 };
 
 std::ostream& operator << ( std::ostream&, const StFttCluster& clu ); // Printing operator

@@ -56,7 +56,7 @@ private:
     StFttCluster *mClusters[4];
     StThreeVectorD  mXYZ;    // Photon position in STAR coordinate
 
-    ClassDef(StFttPoint, 1)
+    ClassDef(StFttPoint, 2)
 };
 
 inline UChar_t StFttPoint::plane() const { return mPlane; }
