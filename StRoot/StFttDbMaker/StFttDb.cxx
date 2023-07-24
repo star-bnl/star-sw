@@ -503,7 +503,7 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
     // shifts
     dx = 0.0;
-    dy = 6.0;
+    dy = 59.0;
     dz = 0.0;
 
     if ( plane < 4 )
@@ -520,11 +520,17 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
         dx = 0.0;
 
     // these are the reflections of a pentagon into the symmetric shape for quadrants A, B, C, D
-    if ( quad == 1 )
+    if ( quad == 1 ){
         sy = -1.0;
+        // this is so that we get everything shifted up
+        dy = dy * sy; // flip it now so it does not get flipped later by scale factor;
+    }
     else if ( quad == 2 ){
         sx = -1.0;
         sy = -1.0;
+        // this is so that we get everything shifted up
+        dy = dy * sy; // flip it now so it does not get flipped later by scale factor;
+
     } else if ( quad == 3 )
         sx = -1.0;
 

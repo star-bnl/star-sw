@@ -177,16 +177,18 @@ bool StFttPointMaker::GhostHitRejection_StripGroup( int row_x, int row_y, double
 {
     // check all the strip groups to reject the ghost
     bool is_ghosthit = kFALSE;
-    if ( is_Group1(row_x,row_y,x,y) || is_Group2(row_x,row_y,x,y) || is_Group3(row_x,row_y,x,y) || is_Group4(row_x,row_y,x,y) || is_Group5(row_x,row_y,x,y) || is_Group6(row_x,row_y,x,y) || is_Group6(row_x,row_y,x,y) || is_Group7(row_x,row_y,x,y) || is_Group8(row_x,row_y,x,y) ) 
-    is_ghosthit = kTRUE;
-    // is_ghosthit = is_Group1(x,y);
-    // is_ghosthit = is_Group2(x,y);
-    // is_ghosthit = is_Group3(x,y);
-    // is_ghosthit = is_Group4(x,y);
-    // is_ghosthit = is_Group5(x,y);
-    // is_ghosthit = is_Group6(x,y);
-    // is_ghosthit = is_Group7(x,y);
-    // is_ghosthit = is_Group8(x,y);
+    if ( 
+        is_Group1(row_x,row_y,x,y) || 
+        is_Group2(row_x,row_y,x,y) || 
+        is_Group3(row_x,row_y,x,y) || 
+        is_Group4(row_x,row_y,x,y) || 
+        is_Group5(row_x,row_y,x,y) || 
+        is_Group6(row_x,row_y,x,y) || 
+        is_Group6(row_x,row_y,x,y) || 
+        is_Group7(row_x,row_y,x,y) || 
+        is_Group8(row_x,row_y,x,y) 
+    ) 
+        is_ghosthit = kTRUE;
 
     return is_ghosthit;
 }
@@ -211,24 +213,6 @@ bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &
         double LEdge = clu_dx->maxStripLeftEdge()*sqrt(2);
         double REdge = clu_dx->maxStripRightEdge()*sqrt(2);
 
-        //for loose cluster cut and check performance, this number now select by hand
-        // LEdge = LEdge-1.6*sqrt(2);
-        // REdge = REdge+1.6*sqrt(2);
-
-        // LOG_INFO << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endm;
-        // LOG_INFO << "cluster x = " << clu_dx->x()*sqrt(2) << endm;
-
-        // if(intercept >= LEdge && intercept <= REdge) 
-        // {
-            // is_pair = kTRUE;
-            // distance = abs(intercept-clu_dx->x()*sqrt(2));
-            // if (distance < distance_prev)
-            // {
-                // distance_prev = distance;
-                // i_cluster = iClu_DH;
-            // }
-        // }
-        // LOG_INFO << "i_cluster = " << i_cluster << endm;
         if(clu_dx->x()*sqrt(2)+1.60*3 > intercept && clu_dx->x()*sqrt(2)-1.60*3 < intercept)
         {
             is_pair = kTRUE;
@@ -239,17 +223,16 @@ bool StFttPointMaker::GhostHitRejection_DiagH(double x, double y, int Rob, int &
                 i_cluster = iClu_DH;
             }
         }
-        // LOG_INFO << "i_cluster = " << i_cluster << endm;
+        LOG_DEBUG << "i_cluster = " << i_cluster << endm;
     }
-    // LOG_INFO << "is pair = " << (int)is_pair << endm;
+    LOG_DEBUG << "is pair = " << (int)is_pair << endm;
     return is_pair;
 }
 
 //using diagnoal vertical strip to reject method, 
 bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &i_cluster)
 {
-    // LOG_INFO << "starting do GhostHitRejection_DiagV " << endm;
-    // TODO: how to confirm i_cluster
+    LOG_DEBUG << "starting do GhostHitRejection_DiagV " << endm;
     bool is_pair = kFALSE;
     i_cluster = -999;
     //loop the diagonal cluster find a cluster can include this cluster
@@ -265,25 +248,6 @@ bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &
         double LEdge = clu_dx->maxStripLeftEdge()*sqrt(2);
         double REdge = clu_dx->maxStripRightEdge()*sqrt(2);
  
-        //for loose cluster cut and check performance, this number now select by hand
-                //  LEdge = LEdge-1.6*sqrt(2);
-                //  REdge = REdge+1.6*sqrt(2);
-          
-
-        // LOG_INFO << "intercept = " << intercept << " LEdge = " << LEdge << " REdge = " << REdge << endm;
-        // LOG_INFO << "cluster x = " << clu_dx->x()*sqrt(2) << endm;
-
-        // if(intercept >= LEdge && intercept <= REdge) 
-        // {
-            // is_pair = kTRUE;
-            // distance = abs(intercept-clu_dx->x()*sqrt(2));
-            // if (distance < distance_prev)
-            // {
-                // distance_prev = distance;
-                // i_cluster = iClu_DV;
-            // }
-        // }
-        // LOG_INFO << "i_cluster = " << i_cluster << endm;
         if(clu_dx->x()*sqrt(2) < intercept+1.60*3 && clu_dx->x()*sqrt(2) > intercept-1.60*3)
         {
             is_pair = kTRUE;
@@ -294,9 +258,9 @@ bool StFttPointMaker::GhostHitRejection_DiagV(double x, double y, int Rob, int &
                 i_cluster = iClu_DV;
             }
         }
-        // LOG_INFO << "i_cluster = " << i_cluster << endm;
+        LOG_DEBUG << "i_cluster = " << i_cluster << endm;
     }
-    // LOG_INFO << "is pair = " << (int)is_pair << endm;
+    LOG_DEBUG << "is pair = " << (int)is_pair << endm;
     return is_pair;
 }
 
@@ -324,7 +288,6 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
     
     for ( size_t iClu_X = 0; iClu_X < nClusters_X; iClu_X++ )
     {
-        // point = new StFttPoint();
         auto clu_x = clustersPerRob[(UChar_t)Rob][kFttVertical][iClu_X];
         x = clu_x->x();
         int Row_x = clu_x->row();
@@ -365,61 +328,42 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                 }
                 if( GhostHitRejection_DiagV(x,y,Rob,i_cluster) ) 
                 {
-                    // LOG_INFO << "debug Diag V1" << endm;
                     point->setX(x);
                     point->setY(y);
-                    LOG_INFO << "Point (X,Y) = " << x << ", " << y << endm;
                     point->setPlane(clu_x->plane());
                     point->setQuadrant(clu_x->quadrant());
                     point->addCluster(clu_x,kFttVertical);
                     point->addCluster(clu_y,kFttHorizontal);
                     auto clu_dv =  clustersPerRob[(UChar_t)Rob][kFttDiagonalV][i_cluster];
-                    // if( ((x+y) - clu_dv->x()*sqrt(2)) < 10 && ((x+y) - clu_dv->x()*sqrt(2)) > 6 )
-                    // {
-                        // // LOG_INFO << "x = " << x << " y = " << y <<"cluster center = " << clu_dv->x() <<" cluster x * sqrt(2) = " << clu_dv->x()*sqrt(2) << " MaxADC strip center = " << clu_dv->SC_MaxStrip() << endm;
-                    // }
-                    // LOG_INFO << "match diagonal cluster is " << i_cluster << " DV cluster" << endm;
-                    clu_dv->print();
                     point->addCluster(clu_dv,kFttDiagonalV);
                     point->setD1(clu_dv->x());
                     is_pair = kTRUE;
-                    // LOG_INFO << "debug Diag V2" << endm;
+                    
                     if ( GhostHitRejection_DiagH(x,y,Rob,i_cluster) )
                     {
                         auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
                         point->setD2(clu_dh->x());
-                        // LOG_INFO << "debug Diag H1" << endm;
                         point->addCluster(clu_dh,kFttDiagonalH);
                     }
                     
                 } else if ( GhostHitRejection_DiagH(x,y,Rob,i_cluster) )
                 {
-
-                    // LOG_INFO << "debug Diag H2" << endm;
                     is_pair = kTRUE;
-                    LOG_INFO << "Point (X,Y) = " << x << ", " << y << endm;
                     point->setX(x);
                     point->setY(y);
                     point->setPlane(clu_x->plane());
                     point->setQuadrant(clu_x->quadrant());
-                    // LOG_INFO << "debug Diag H3" << endm;
                     point->addCluster(clu_x,kFttVertical);
-                    // LOG_INFO << "debug Diag H4" << endm;
                     point->addCluster(clu_y,kFttHorizontal);
-                    LOG_INFO << "match diagonal cluster is " << i_cluster << " DH cluster" << endm;
                     auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
-                    clu_dh->print();
                     point->setD1(clu_dh->x());
                     point->addCluster(clu_dh,kFttDiagonalH);
                 }
                 else 
                     continue;
 
-                // LOG_INFO << "is pair = " << is_pair << endm;
                 if(is_pair)
                 {
-                    point->print();
-                    LOG_INFO << "PAIR Point (X,Y) = " << point->x() << ", " << point->y() << endm;
                     mFttPoint.push_back(point);
                     mFttCollection->addPoint(point);
                 }
@@ -442,12 +386,6 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                     point->addCluster(clu_x,kFttVertical);
                     point->addCluster(clu_y,kFttHorizontal);
                     auto clu_dh =  clustersPerRob[(UChar_t)Rob][kFttDiagonalH][i_cluster];
-                    // if( ((x+y) - clu_dh->x()*sqrt(2)) < 10 && ((x+y) - clu_dh->x()*sqrt(2)) > 6 )
-                    // {
-                        // // LOG_INFO << "x = " << x << " y = " << y << "cluster center = " << clu_dh->x() << " cluster x * sqrt(2) = " << clu_dh->x()*sqrt(2) << " MaxADC strip center = " << clu_dh->SC_MaxStrip() << endm;
-                    // }
-                    // LOG_INFO << "match diagonal cluster is " << i_cluster << " DH cluster" << endm;
-                    clu_dh->print();
                     point->setD1(clu_dh->x());
                     point->addCluster(clu_dh,kFttDiagonalH);
                     if (GhostHitRejection_DiagV(x,y,Rob,i_cluster))
@@ -465,29 +403,24 @@ void StFttPointMaker::MakeLocalPoints(UChar_t Rob)
                     point->setQuadrant(clu_x->quadrant());
                     point->addCluster(clu_x,kFttVertical);
                     point->addCluster(clu_y,kFttHorizontal);
-                    LOG_INFO << "match diagonal cluster is " << i_cluster << " DV cluster" << endm;
+                    // LOG_INFO << "match diagonal cluster is " << i_cluster << " DV cluster" << endm;
                     auto clu_dv =  clustersPerRob[(UChar_t)Rob][kFttDiagonalV][i_cluster];
-                    clu_dv->print();
+                    // clu_dv->print();
                     point->setD1(clu_dv->x());
                     point->addCluster(clu_dv,kFttDiagonalV);
                 } else continue;
 
-                // LOG_INFO << "is pair = " << is_pair << endm;nn
                 if(is_pair)
                 {
-                    LOG_INFO << "PAIR Point (X,Y) = " << point->x() << ", " << point->y() << endm;
-                    point->print();
                     mFttPoint.push_back(point);
                     mFttCollection->addPoint(point);
                 }
             }
             if (!point)
             {
-                LOG_INFO << "empty point !!!!!!" << endm;
+                LOG_DEBUG << "empty point !!!!!!" << endm;
                 continue;
             }
-            // point->print();
-            // delete point;
         }
     }
     
