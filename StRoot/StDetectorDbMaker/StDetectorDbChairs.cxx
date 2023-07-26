@@ -1363,7 +1363,7 @@ St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
   }
   if (needReorder) {
     LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has to be reordered" << endm;
-    tpcRDOMasks_st rows[12];
+    tpcRDOMasks_st rows[12] = {0};
     Int_t OldRun = -1;
     for (UInt_t i = 0; i < N; i++) {
       if ((row+i)->sector == 2*i + 1) {
@@ -1404,6 +1404,10 @@ St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
     table->Print(0,12);
   }
   fgInstance = new St_tpcRDOMasksC(table);				
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tpcRDOMasksC");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
   return fgInstance;							
 }
 //________________________________________________________________________________
@@ -1500,6 +1504,10 @@ St_tpcPadGainT0C *St_tpcPadGainT0C::instance() {
     assert(table);
   }
   fgInstance = new St_tpcPadGainT0C(table); 
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tpcPadGainT0C");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
   // Apply additional correction for gain tables
   Int_t run = StMaker::GetChain()->GetRunNumber();
   St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
@@ -1817,6 +1825,10 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     assert(table);
   }
   fgInstance = new St_itpcPadGainT0C(table); 
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("itpcPadGainT0C");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
   // Apply additional correction for gain tables
   Int_t run = StMaker::GetChain()->GetRunNumber();
   St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
@@ -2999,7 +3011,51 @@ MakeChairInstance(tofTrgWindow,Calibrations/tof/tofTrgWindow);
 #include "St_tofTzeroC.h"
 MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
 #include "St_tofSimResParamsC.h"
-MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
+//MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
+St_tofSimResParamsC *St_tofSimResParamsC::fgInstance = 0;
+Double_t St_tofSimResParamsC::params[120][192] = {0};
+Double_t St_tofSimResParamsC::mAverageTimeResTof = 0;
+
+St_tofSimResParamsC *St_tofSimResParamsC::instance() {
+  if (fgInstance) return fgInstance;					
+  St_tofSimResParams *table = (St_tofSimResParams *) StMaker::GetChain()->GetDataBase("Calibrations/tof/tofSimResParams");
+  if (! table) {							
+    LOG_WARN << "St_tofSimResParamsC::instance Calibrations/tof/tofSimResParams was not found" << endm;
+    assert(table);							
+  }									
+  DEBUGTABLE(tofSimResParams);							
+  fgInstance = new St_tofSimResParamsC(table);				
+  mAverageTimeResTof=0;
+  for ( int i = 0; i < 120; i++ ){ //  nTrays
+    for ( int j = 0; j < 192; j++ ){
+      size_t index = i * 120 + j;
+      params[i][j] = St_tofSimResParamsC::instance()->resolution()[index];
+      mAverageTimeResTof+=params[i][j];
+      LOG_DEBUG << "tray:" << i << ", mod cell:" << j << " = " << St_tofSimResParamsC::instance()->resolution()[index] << " == " << params[i][j] << endm;
+    }
+  }
+  mAverageTimeResTof=mAverageTimeResTof/(120*192);
+  LOG_INFO << "Loaded tofSimResParams. Average = " << mAverageTimeResTof << endm;
+  
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tofSimResParamsC");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
+  return fgInstance;
+}
+//________________________________________________________________________________
+Double_t St_tofSimResParamsC::timeres_tof(UInt_t itray, UInt_t imodule, UInt_t icell) {
+  /*
+   * Calculates the average resolution across all 38 tubes (discounts inactive tubes)
+   * then returns a single vertex resolution (in ps) for use in embedding w/ vpdStart
+   */
+  Double_t result = 8.5e-11;
+  if ( itray > 120 || imodule > 32 || icell > 6 )
+    return result;
+  
+  return params[ itray ][ imodule * 6 + icell ];
+  
+}
 #include "St_vpdDelayC.h"
 MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 #include "St_vpdTotCorrC.h"

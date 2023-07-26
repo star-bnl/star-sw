@@ -3,7 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_itpcPadGainT0_Table.h"
-
+class TBrowser;
 struct rowpadFEEmap_t {// FEE & RDO map for iTPC
     Int_t row, padMin, padMax, fee, rdo;
 };
@@ -26,6 +26,7 @@ class St_itpcPadGainT0C : public TChair {
     for (Int_t pad=1; pad<=120; pad++) if (Gain(sector,row,pad)>0) return kTRUE;
     return kFALSE;
   }
+  void        Browse(TBrowser *b) {}
   static rowpadFEEmap_t rowpadFEE[];
   static Int_t NCrowpadFEE;
  protected:

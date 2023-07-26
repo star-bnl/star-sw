@@ -28,6 +28,8 @@ public:
     , useBemc(false)
     , useEemc(false)
     , useFms(false)
+    , useFcsECal(false) //Currently no track List Cuts
+    , useFcsHCal(false)
     , useMonteCarlo(false)
     , randomSelectorProb(1.0)
     , randomSelectorAt(false)
@@ -74,6 +76,8 @@ public:
   void addTpcCut(StjTrackCut* c) { mTpcCuts.addCut(c); }
   void addBemcCut(StjTowerEnergyCut* c) { mBemcCuts.addCut(c); }
   void addEemcCut(StjTowerEnergyCut* c) { mEemcCuts.addCut(c); }
+  void addFCSEcalemcCut(StjTowerEnergyCut* c) { mFCSECalemcCuts.addCut(c); }
+  void addFCSHcalhcCut(StjTowerEnergyCut* c) { mFCSHcalhcCuts.addCut(c); }
   void addMcCut(StjMCParticleCut* c) { mMcCuts.addCut(c); }
   void addJetCut(StProtoJetCut* c) { mJetCuts.addCut(c); }
 
@@ -82,10 +86,12 @@ public:
 //  StjAbstractTower& changeTowers() { return *mChangeTowers; }
   StjAbstractTrackRegion& trackRegion() { return *mtrackRegion; }
   StjAbstractTowerRegion& towerRegion() { return *mtowerRegion; }
-  StjAbstractMCParticleRegion& particleRegion(){ return *mparticleRegion; }
+  StjAbstractMCParticleRegion& particleRegion() { return *mparticleRegion; }
   StjTrackListCut& tpcCuts() { return mTpcCuts; }
   StjTowerEnergyListCut& bemcCuts() { return mBemcCuts; }
   StjTowerEnergyListCut& eemcCuts() { return mEemcCuts; }
+  StjTowerEnergyListCut& FCSEcalemcCuts() { return mFCSECalemcCuts; }
+  StjTowerEnergyListCut& FCSHcalhcCuts() { return mFCSHcalhcCuts; }
   StjMCParticleListCut& mcCuts() { return mMcCuts; }
   StProtoJetListCut& jetCuts() { return mJetCuts; }
 
@@ -99,6 +105,8 @@ private:
   StjTrackListCut mTpcCuts;
   StjTowerEnergyListCut mBemcCuts;
   StjTowerEnergyListCut mEemcCuts;
+  StjTowerEnergyListCut mFCSECalemcCuts;
+  StjTowerEnergyListCut mFCSHcalhcCuts;
   StjMCParticleListCut mMcCuts;
   StProtoJetListCut mJetCuts;
 
@@ -107,6 +115,8 @@ public:
   bool useBemc;
   bool useEemc;
   bool useFms;
+  bool useFcsECal;
+  bool useFcsHCal;
   bool useMonteCarlo;
   double randomSelectorProb;
   double randomSelectorAt;
