@@ -4,6 +4,7 @@
 #include "TChair.h"
 #include "tables/St_tpcPadGainT0_Table.h"
 #include "St_tpcPadConfigC.h"
+class TBrowser;
 class St_tpcPadGainT0C : public TChair {
  public:
   static St_tpcPadGainT0C* 	instance();
@@ -28,6 +29,7 @@ class St_tpcPadGainT0C : public TChair {
     for (Int_t pad=1; pad<=182; pad++) if (Gain(sector,row,pad)>0) return kTRUE;
     return kFALSE;
   }
+  void        Browse(TBrowser *b) {}
  protected:
   St_tpcPadGainT0C(St_tpcPadGainT0 *table=0) : TChair(table) {}
   virtual ~St_tpcPadGainT0C() {fgInstance = 0;}
