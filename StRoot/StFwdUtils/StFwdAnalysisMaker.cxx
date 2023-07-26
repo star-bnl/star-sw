@@ -1,15 +1,11 @@
 #include "StFwdUtils/StFwdAnalysisMaker.h"
 #include "StFwdTrackMaker/Common.h"
 
-#include "TMath.h"
-
 #include <limits>
 #include <map>
 #include <string>
 #include <string>
 #include <vector>
-
-#include "StBFChain/StBFChain.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StGlobalTrack.h"
@@ -53,8 +49,6 @@
 #include "StarClassLibrary/SystemOfUnits.h"
 
 
-#include "TROOT.h"
-#include "TLorentzVector.h"
 #include "StEvent/StFwdTrack.h"
 
 //________________________________________________________________________
