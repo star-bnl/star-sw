@@ -27,9 +27,6 @@ class StFwdAnalysisMaker : public StMaker {
     void Clear(const Option_t *opts = "");
     void ProcessFwdTracks();
     void ProcessFwdMuTracks();
-
-  private:
-  protected:
 };
 
 #endif

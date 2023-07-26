@@ -18,9 +18,6 @@ public:
     void               fillMuFwdTrack(StMuFwdTrackCollection*,StFwdTrackCollection*, StMuFcsUtil*);
     void               fillFwdTrack(StFwdTrackCollection*,StMuFwdTrackCollection*);
 
-
-private:
-
     ClassDef(StMuFwdTrackUtil,1)
 };
 

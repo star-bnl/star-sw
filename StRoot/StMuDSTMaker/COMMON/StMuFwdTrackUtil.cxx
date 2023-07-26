@@ -26,9 +26,11 @@ StMuFwdTrackCollection* StMuFwdTrackUtil::getMuFwdTrack(StFwdTrackCollection* ev
     StMuFwdTrackCollection *muc = new StMuFwdTrackCollection();
     return muc;
 }
+
 StFwdTrackCollection*   StMuFwdTrackUtil::getFwdTrack(StMuFwdTrackCollection*){
     return new StFwdTrackCollection();
 }
+
 void StMuFwdTrackUtil::fillMuFwdTrack(StMuFwdTrackCollection* muc,StFwdTrackCollection* evc, StMuFcsUtil *fcsu){
     
     if ( evc == nullptr ){
@@ -80,8 +82,5 @@ void StMuFwdTrackUtil::fillMuFwdTrack(StMuFwdTrackCollection* muc,StFwdTrackColl
         }
     }
 
-    return;
-}
-void StMuFwdTrackUtil::fillFwdTrack(StFwdTrackCollection*,StMuFwdTrackCollection*){
     return;
 }

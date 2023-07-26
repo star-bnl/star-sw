@@ -14,7 +14,6 @@
 
 #include "St_base/StMessMgr.h"
 
-ClassImp(StMuFwdTrackCollection)
 
 StMuFwdTrackCollection::StMuFwdTrackCollection() { mFwdTracks = 0;  }
 
@@ -40,6 +39,6 @@ unsigned int StMuFwdTrackCollection::numberOfFwdTracks() const{
 }
 
 StMuFwdTrack*  StMuFwdTrackCollection::getFwdTrack(int index){
-    if(!mFwdTracks) return NULL;
+    if (!mFwdTracks) return nullptr;
     return (StMuFwdTrack*) mFwdTracks->At(index);
 }

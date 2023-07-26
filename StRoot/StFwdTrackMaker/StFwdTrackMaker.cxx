@@ -404,7 +404,6 @@ int StFwdTrackMaker::Init() {
                 }
             }
 
-
             // Three hit criteria
             path = "TrackFinder.Iteration[0].ThreeHitSegments";
             paths = mFwdConfig.childrenOf(path);
@@ -1096,7 +1095,6 @@ int StFwdTrackMaker::Make() {
     mFcsClusters.clear();
     mFwdTracks.clear();
     
-
     // default event vertex
     mForwardTracker->setEventVertex( TVector3( 0, 0, 0 ) );
 
@@ -1219,13 +1217,11 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     fwdTrack->setNDF( fitStatus->getNdf() );
     fwdTrack->setPval( fitStatus->getPVal() );
 
-
     auto cr = track->getCardinalRep();
     // charge at first point
     fwdTrack->setCharge( gtr.charge );
 
     TVector3 p = cr->getMom( track->getFittedState( 0, cr ));
-    // fwdTrack->setPrimaryMomentum( StThreeVectorD( p.X(), p.Y(), p.Z() ) );
     fwdTrack->setPrimaryMomentum( StThreeVectorD( gtr.momentum.X(), gtr.momentum.Y(), gtr.momentum.Z() ) );
     LOG_DEBUG << "Making StFwdTrack with " << TString::Format( "p=(%f, %f, %f)",  fwdTrack->momentum().x(), fwdTrack->momentum().y(), fwdTrack->momentum().z() ) << endm;
 
