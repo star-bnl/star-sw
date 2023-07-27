@@ -62,6 +62,10 @@ struct FwdTreeData {
     vector<float> fstX, fstY, fstZ;
     vector<int> fstTrackId;
 
+    int fcsN;
+    vector<float> fcsX, fcsY, fcsZ;
+    vector<int> fcsDet;
+
     // RC tracks
     int rcN;
     vector<float> rcPt, rcEta, rcPhi, rcQuality;
@@ -89,6 +93,7 @@ struct FwdTreeData {
     int thdN;
     vector<float> thdX, thdY, thaX, thaY, thaZ;
 
+    bool saveCrit = false;
     std::map<string, std::vector<float>> Crits;
     std::map<string, std::vector<int>> CritTrackIds;
 
