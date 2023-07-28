@@ -41,10 +41,10 @@ if __name__ == "__main__":
         if job.jobid != args.jobid: continue
         if args.description: print("{descr}".format(**job._asdict())) 
         if args.command:
-            if job.inpfile=="":
-                print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\")\'".format(**job._asdict()))
+            if job.inpfile:
+                print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\", \"{inppath}/{inpfile}\")\'".format(**job._asdict()))
             else:
-                print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\", \"{inppath}/{inpfile}\")\'".format(**job._asdict()))                
+                print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\")\'".format(**job._asdict()))
         if args.attribute:
             if args.attribute == 'fullpath':
                 print("{}/{}".format(job.inppath, job.inpfile))
