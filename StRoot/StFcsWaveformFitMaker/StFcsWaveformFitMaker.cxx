@@ -510,8 +510,8 @@ int StFcsWaveformFitMaker::Make() {
 	  float gain = mDb->getGain(hits[i]);
 	  float gaincorr = mDb->getGainCorrection(hits[i]);
 	  hits[i]->setEnergy(integral*gain*gaincorr);
-	  if(GetDebug()>0) printf("det=%1d id=%3d integ=%10.2f peak=%8.2f, sig=%8.4f chi2=%8.2f npeak=%2d\n",
-				  det,hits[i]->id(),integral,res[2],res[3],res[4],int(res[5]));
+	  if(GetDebug()>0){ printf("det=%1d id=%3d integ=%10.2f peak=%8.2f, sig=%8.4f chi2=%8.2f npeak=%2d ped=%8.2f pedrms=%4.2f\n",
+				   det,hits[i]->id(),integral,res[2],res[3],res[4],int(res[5]),res[6],res[7]); }
 	  if(mMeasureTime){
 	    auto stop=std::chrono::high_resolution_clock::now();
 	    long long usec = chrono::duration_cast<chrono::microseconds>(stop-start).count();
@@ -780,6 +780,7 @@ float StFcsWaveformFitMaker::sum8(TGraphAsymmErrors* g, float* res){
 	}
     }
     //res[0]/=1.226; //Compensate for fitting sum in ECal. Only turn on for testing comparisons
+    //if( res[5]>0.0001 ){ sum -= res[5]*8; }//pedestal subtraction for sum8
     res[0]=sum;
     if(sum>0) res[2]=tsum/sum;
     return sum;
@@ -1050,10 +1051,10 @@ void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* gg, TF1* func){
       char post[50];
       sprintf(post,"_D%dC%d",det,ch);
       StFcsPulseAna* ana = (StFcsPulseAna*)mPulseFit->DrawCopy("LP;A",post,gg);//Sets 'kCanDelete' so canvas will delete the copy
-      ana->GetData()->SetLineColor(kBlue);
-      ana->GetData()->SetMarkerStyle(kBlue);
-      ana->GetData()->SetMarkerStyle(4);
-      ana->GetData()->SetMarkerSize(0.5);
+      ana->SetLineColor(kBlue);
+      ana->SetMarkerColor(kBlue);
+      ana->SetMarkerStyle(4);
+      ana->SetMarkerSize(0.5);
     }
     
     if(mPad==MAXPAD){
@@ -1085,7 +1086,7 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
       if( id>=0 && id==static_cast<int>(ch) ){
 	ggdraw->Draw("APL");
 	ggdraw->SetLineColor(kBlack);
-	ggdraw->SetMarkerStyle(kBlack);
+	ggdraw->SetMarkerColor(kBlack);
 	ggdraw->SetMarkerStyle(4);
 	ggdraw->SetMarkerSize(0.5);
 	ggdraw->GetXaxis()->SetTitle("timebin");
@@ -1098,7 +1099,7 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
 	  sprintf(post,"_D%dC%d",det,ch);
 	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
-	  ana->GetData()->SetMarkerStyle(kBlue);
+	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
 	  ana->GetData()->SetMarkerSize(0.5);
 	  //ana->ResetPeak();
@@ -1125,7 +1126,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	ggdraw->SetTitle(post);
 	ggdraw->Draw("APL");
 	ggdraw->SetLineColor(kBlack);
-	ggdraw->SetMarkerStyle(kBlack);
+	ggdraw->SetMarkerColor(kBlack);
 	ggdraw->SetMarkerStyle(4);
 	ggdraw->SetMarkerSize(0.5);
 	ggdraw->GetXaxis()->SetTitle("timebin");
@@ -1133,7 +1134,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	if( mPulseFit!=0 ){
 	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
-	  ana->GetData()->SetMarkerStyle(kBlue);
+	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
 	  ana->GetData()->SetMarkerSize(0.5);
 	  Int_t compidx = ana->FoundPeakIndex();
@@ -1298,6 +1299,30 @@ void StFcsWaveformFitMaker::printArray() const{
     TGraphAsymmErrors* gTemp = (TGraphAsymmErrors*)mChWaveData.At(iCh);
     std::cout << "|Index:"<<iCh<<"|Name:"<<gTemp->GetName()<<"|Size:"<<gTemp->GetN() << std::endl;
   }
+}
+
+void StFcsWaveformFitMaker::printSetup() const{
+  std::cout << "StFcsWaveformFitMaker Internal State" << std::endl
+	    << " - mMeasureTime:"    << mMeasureTime << std::endl
+	    << " - mEnergySelect[ecal,hcal,pres]:" << "["<<mEnergySelect[0] << "," << mEnergySelect[1] << "," << mEnergySelect[2] << "]" << std::endl
+	    << " - mEnergySumScale[ecal,hcal,pres]:" << "["<<mEnergySumScale[0] << "," << mEnergySumScale[1] << "," << mEnergySumScale[2] << "]" << std::endl
+	    << " - mCenterTB:"       << mCenterTB << std::endl
+	    << " - mMinTB:"          << mMinTB << std::endl
+	    << " - mMaxTB:"          << mMaxTB << std::endl
+	    << " - mError:"          << mError << std::endl
+	    << " - mErrorSaturated:" << mErrorSaturated << std::endl
+	    << " - mAdcSaturation:"  << mAdcSaturation << std::endl
+	    << " - mPedMin:"         << mPedMin << std::endl
+	    << " - mPedMax:"         << mPedMax << std::endl
+	    << " - mMinAdc:"         << mMinAdc << std::endl
+	    << " - mTail:"           << mTail << std::endl
+	    << " - mMaxPeak:"        << mMaxPeak << std::endl
+	    << " - mMaxPage:"        << mMaxPage << std::endl
+	    << " - mSkip:"           << mSkip << std::endl
+	    << " - mFilename:"       << mFilename << std::endl
+    //<< " - mFilter:"         << (mFilter==0?0:mFilter) << std::endl
+	    << " - mFitDrawOn:"      << mFitDrawOn << std::endl
+	    << std::endl;
 }
 
 float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*& func, float ped)
