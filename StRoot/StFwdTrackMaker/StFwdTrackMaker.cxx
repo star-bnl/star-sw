@@ -258,7 +258,7 @@ int StFwdTrackMaker::Finish() {
 
     mForwardTracker->finish();
 
-    gDirectory = prevDir;
+    prevDir->cd();
 
     if (mGenTree) {
         mTreeFile->cd();
