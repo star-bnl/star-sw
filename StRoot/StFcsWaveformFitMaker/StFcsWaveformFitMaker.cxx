@@ -780,7 +780,7 @@ float StFcsWaveformFitMaker::sum8(TGraphAsymmErrors* g, float* res){
 	}
     }
     //res[0]/=1.226; //Compensate for fitting sum in ECal. Only turn on for testing comparisons
-    //if( res[5]>0.0001 ){ sum -= res[5]*8; }//pedestal subtraction for sum8
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*8; }//pedestal subtraction for sum8. 8 timebi sum, so pedestal*8 is integrated sum of pedestal.
     res[0]=sum;
     if(sum>0) res[2]=tsum/sum;
     return sum;
@@ -801,6 +801,7 @@ float StFcsWaveformFitMaker::sum16(TGraphAsymmErrors* g, float* res){
 	  tsum += a[i] * tb;
 	}
     }
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*16; }//pedestal subtraction for sum16. 16 timebin sum, so pedestal*16 is integrated sum of pedestal.
     res[0]=sum;
     if(sum>0) res[2]=tsum/sum;
     return sum;
@@ -830,7 +831,8 @@ float StFcsWaveformFitMaker::highest(TGraphAsymmErrors* g, float* res){
     res[2]=maxtb;          //this is peak position [timebin]   
     //res[3]=0.0;          //no width from this method	       
     //res[4]=0.0;          //no chi2 from this		       
-    //res[5]=0.0;          //no # of peaks		       
+    //res[5]=0.0;          //no # of peaks
+    if( fabs(res[7]) > 0.000001 ){ res[0] -= res[6]; }//pedestal subtraction for highest.
     return maxadc;         //this is the highest               
 }
 
@@ -866,6 +868,7 @@ float StFcsWaveformFitMaker::highest3(TGraphAsymmErrors* g, float* res){
     //res[3]= 0.0;	  //no sigma from this	       
     //res[4]= 0.0;	  //no chi2 from this		       
     //res[5]= 0.0;        //no # of peak
+    if( fabs(res[7]) > 0.000001 ){ res[0] -= res[6]*3; }//pedestal subtraction for highest3. Since 3 timebin sum pedestal*3 is integrated pedestal
     return sum;		  //this is the 3 timebin sum
 }
 
@@ -928,14 +931,15 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
         }
     }
 
-    //For comparing with pulse fit analysis class
-    if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(g); SetupDavidFitterMay2022(); }//Setup only needs to be called once as those values will not get reset when data changes.
-    else{ mPulseFit->SetData(g); }
-    Int_t compidx = mPulseFit->FoundPeakIndex();
+    Int_t compidx = -1;
     int myNpeaks = -1;
     int npeakidx = -1;
     int mypeakidx = -1;
     if( mTest==2 || mTest==8 ){
+      //For comparing with pulse fit analysis class
+      if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(g); SetupDavidFitterMay2022(); }//Setup only needs to be called once as those values will not get reset when data changes.
+      else{ mPulseFit->SetData(g); }
+      compidx = mPulseFit->FoundPeakIndex();
       mH1_NPeaksAkio->Fill(npeak);
       if( trgx>=0 ){ mH1_NPeaksFilteredAkio->Fill(npeak); }//peaks inside triggered crossing
       if( mTest==2 ){
