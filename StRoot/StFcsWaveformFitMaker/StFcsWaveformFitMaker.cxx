@@ -1195,7 +1195,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 }
 
 float StFcsWaveformFitMaker::gausFitWithPed(TGraphAsymmErrors* g, float* res, TF1*& func){
-  AnaPed( g, res[6], res[7] );
+  if( fabs(res[7]) < 0.000001 ){AnaPed( g, res[6], res[7] ); } //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   LOG_DEBUG << "Pedestal ("<<mPedMax<<"-"<<mPedMin<<"+1)=" << res[6]<<" +- "<<res[7] << endm;
   return gausFit(g, res, func, res[6]);
 }
@@ -1674,13 +1674,13 @@ float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1
 
 float StFcsWaveformFitMaker::PulseFit2WithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
 {
-  AnaPed(gae,res[6],res[7]);
+  if( fabs(res[7]) < 0.000001 ){AnaPed( gae, res[6], res[7] ); }  //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   return PulseFit2(gae,res,func,res[6]);
 }
 
 float StFcsWaveformFitMaker::PulseFitAllWithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
 {
-  AnaPed(gae,res[6],res[7]);
+  if( fabs(res[7]) < 0.000001 ){AnaPed( gae, res[6], res[7] ); }  //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   return PulseFitAll(gae,res,func,res[6]);
 }
 
