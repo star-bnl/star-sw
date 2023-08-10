@@ -1132,23 +1132,5 @@
         "inppath": "",
         "outpath": "",
         "nevents": "50"
-    },
-    {
-        "jobid": "127",
-        "descr": "2023 pythia simulation",
-        "chopts": "sdt20230214 pythia",
-        "inpfile": "",
-        "inppath": "",
-        "outpath": "",
-        "nevents": "50"
-    },
-    {
-        "jobid": "128",
-        "descr": "2023 hijing simulation",
-        "chopts": "sdt20230214 hijing",
-        "inpfile": "",
-        "inppath": "",
-        "outpath": "",
-        "nevents": "50"
     }
 ]
