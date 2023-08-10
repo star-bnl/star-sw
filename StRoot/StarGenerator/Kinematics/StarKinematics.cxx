@@ -46,6 +46,7 @@ StarKinematics::StarKinematics( const Char_t *name ) : StarGenerator(name)
 { 
   mEvent = new StarGenEvent("kine"); gEvent = mEvent;
   mUser  = new StarGenEvent("user"); gUser  = mUser;
+  SetAttr( "kine:ntrack", int(0) );
 }
 // ----------------------------------------------------------------------------
 Int_t StarKinematics::PreGenerate()
@@ -55,6 +56,19 @@ Int_t StarKinematics::PreGenerate()
 // ----------------------------------------------------------------------------
 Int_t StarKinematics::Generate()
 {
+
+  int ntrack=IAttr("kine:ntrack");
+  if ( ntrack>0 ) 
+    {
+      TString type=SAttr("kine:type");
+      double ptmin=DAttr("kine:ptmin");
+      double ptmax=DAttr("kine:ptmax");
+      double etamin=DAttr("kine:etamin");
+      double etamax=DAttr("line:etamax");
+      Kine( ntrack, type, ptmin, ptmax, etamin, etamax );
+      LOG_INFO << "Adding ntrack=" << ntrack << " type="<< type.Data() << endm;
+      mUser->Print();
+    }  
   
   // Copy user event into mEvent
   for ( Int_t i=0;i<mUser->GetNumberOfParticles(); i++ )

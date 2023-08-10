@@ -1403,6 +1403,7 @@ Bfc_st BFC[] = { // standard chains
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+  {"genmuons"    ,"","","",        "StarPrimaryMaker", "",                      "Setup test for StarGenerator ala gstar", false },
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},

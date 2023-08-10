@@ -1132,5 +1132,14 @@
         "inppath": "",
         "outpath": "",
         "nevents": "50"
+    },
+    {
+        "jobid": "127",
+        "descr": "2023 simple simulation 80 muons using StarGenerator",
+        "chopts": "sdt20230202 stargen kinematics genmuons geant",
+        "inpfile": "",
+        "inppath": "",
+        "outpath": "",
+        "nevents": "50"
     }
 ]
