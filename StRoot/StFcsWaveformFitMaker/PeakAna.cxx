@@ -487,12 +487,14 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
       }
     }
     ynew[ipoint] = sumvalues/sumweights;
+    if( GetDebug()>2 ){ std::cout << " - |i:"<<ipoint<<"|ynew:"<<ynew[ipoint] << std::endl; }
   }
 
   if( copy ){
     TGraph* filtered = new TGraph(npoints,xdata,ynew);
     PeakAna* ana = new PeakAna(*this,filtered);
     ana->ForceInternal();
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Copied PeakAna" << std::endl; }
     return ana;
   }
   if( mInternalSignal ){
@@ -501,11 +503,13 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
     //[July 3, 2022]>Taken from TGraph CtorAllocate(). Setting minimum and maximum to -1111 effectivley resets the  minimum and maximum.
     GetData()->SetMinimum(-1111);
     GetData()->SetMaximum(-1111);
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Internal Graph Modified" << std::endl; }
   }
   else{ 
     TGraph* graph = new TGraph(npoints,xdata,ynew );
     SetData(graph);
     ForceInternal();
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Created New Internal Graph" << std::endl; }
   }
   ResetPeak();
   return this;
@@ -578,6 +582,7 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
       else{ sumweights += 2; }
     }
     ynew[ipoint] = sumvalues/sumweights;
+    if( GetDebug()>2 ){ std::cout << " - |i:"<<ipoint<<"|ynew:"<<ynew[ipoint] << std::endl; }
   }
 
 
@@ -585,6 +590,7 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
     TGraph* filtered = new TGraph(npoints,xdata,ynew);
     PeakAna* ana = new PeakAna(*this,filtered);
     ana->ForceInternal();
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Copied PeakAna" << std::endl; }
     return ana;
   }
   if( mInternalSignal ){
@@ -593,11 +599,13 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
     //[July 3, 2022]>Taken from TGraph CtorAllocate(). Setting minimum and maximum to -1111 effectivley resets the  minimum and maximum.
     GetData()->SetMinimum(-1111);
     GetData()->SetMaximum(-1111);
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Internal Graph Modified" << std::endl; }
   }
   else{
     TGraph* graph = new TGraph(npoints,xdata,ynew );
     SetData(graph);
     ForceInternal();
+    if( GetDebug()>1 ){ std::cout << "PeakAna::MeanFilter:Created New Internal Graph" << std::endl; }
   }
   ResetPeak();
   return this;
@@ -673,12 +681,14 @@ void PeakAna::GetPossiblePeaks()
     //Check above will skip bad values
     if( peak.mStartX<mXRangeMin  ){//No start time yet
       if( GetDebug()>1 ){LOG_DEBUG << "    + No StartTime" << endm;}
-      if( LY>baseline+slopecutoff && Slope>0 ){
-	//Needs to be checked sequentially since we need to reject any points below the baseline+cutoff that may have a large slope
-	if( GetDebug()>1 ){LOG_DEBUG << "    + Passed Slope and baselineCutoff setting as start time" << endm;}
-	peak.mStartX=LX;//Set start x-value
-	peak.mStartY=LY;//Set start y-value
-	LocalMax=LX;//Start checking local maximums
+      if( Slope>0){
+        if( LY>baseline+slopecutoff || RY>baseline+slopecutoff ){
+	  //Needs to be checked sequentially since we need to reject any points below the baseline+cutoff that may have a large slope
+	  if( GetDebug()>1 ){LOG_DEBUG << "    + Passed Slope and baselineCutoff setting as start time" << endm;}
+	  peak.mStartX=LX;//Set start x-value
+	  peak.mStartY=LY;//Set start y-value
+	  LocalMax=LX;//Start checking local maximums
+	}
       }
       //If didn't pass thresholds for start time then continue to next point
     }

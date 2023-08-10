@@ -1097,7 +1097,7 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
 	  StFcsDb::getFromName(ggdraw->GetName(),det,ch);
 	  char post[50];
 	  sprintf(post,"_D%dC%d",det,ch);
-	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
+	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;E",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
 	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
@@ -1132,7 +1132,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	ggdraw->GetXaxis()->SetTitle("timebin");
 	ggdraw->GetYaxis()->SetTitle("ADC");
 	if( mPulseFit!=0 ){
-	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
+	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;E",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
 	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
