@@ -706,48 +706,6 @@ double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, doub
     return sqrt(dX*dX + dY*dY);
 };
 
-StThreeVectorD StFcsDb::projectTrackToEcal(const g2t_track_st* g2ttrk) const
-{
-  double phi = atan2(g2ttrk->p[1],g2ttrk->p[0]);
-  double theta = 2.0*atan(exp(-1.0*g2ttrk->eta));
-  if( g2ttrk->p[0]<0 ){ return projectToDet(0,theta,phi); }  // North side for negative px
-  else{ return projectToDet(1,theta,phi); }                  // South side for positive px, since px==0 does not hit detector choose south side for that case
-}
-
-StThreeVectorD StFcsDb::projectTrackToHcal(const g2t_track_st* g2ttrk) const
-{
-  double phi = atan2(g2ttrk->p[1],g2ttrk->p[0]);
-  double theta = 2.0*atan(exp(-1.0*g2ttrk->eta));
-  if( g2ttrk->p[0]<0 ){ return projectToDet(2,theta,phi); }  // North side for negative px
-  else{ return projectToDet(3,theta,phi); }                  // South side for positive px, since px==0 does not hit detector choose south side for that case
-}
-
-StThreeVectorD StFcsDb::projectTrackToEcalSMax(const g2t_track_st* g2ttrk) const
-{
-  double phi = atan2(g2ttrk->p[1],g2ttrk->p[0]);
-  double theta = 2.0*atan(exp(-1.0*g2ttrk->eta));
-  if( g2ttrk->p[0]<0 ){ return projectToShowerMax(0,theta,phi); }  // North side for negative px
-  else{ return projectToShowerMax(1,theta,phi); }                  // South side for positive px, since px==0 does not hit detector choose south side for that case
-}
-
-StThreeVectorD StFcsDb::projectTrackToHcalSMax(const g2t_track_st* g2ttrk) const
-{
-  double phi = atan2(g2ttrk->p[1],g2ttrk->p[0]);
-  double theta = 2.0*atan(exp(-1.0*g2ttrk->eta));
-  if( g2ttrk->p[0]<0 ){ return projectToShowerMax(2,theta,phi); }  // North side for negative px
-  else{ return projectToShowerMax(3,theta,phi); }                  // South side for positive px, since px==0 does not hit detector choose south side for that case
-}
-
-StThreeVectorD StFcsDb::projectToDet(int det, double azimuth, double polar, double xvertex, double yvertex, double zvertex) const
-{
-  return projectLine(det,azimuth,polar,0,xvertex,yvertex,zvertex);
-}
-
-StThreeVectorD StFcsDb::projectToShowerMax(int det, double azimuth, double polar, double xvertex, double yvertex, double zvertex) const
-{
-  return projectLine(det,azimuth,polar,-1,xvertex,yvertex,zvertex);
-}
-
 StThreeVectorD StFcsDb::getNormal(int det) const
 {
   double detangle = getDetectorAngle(det)*M_PI/180.0;
@@ -756,20 +714,85 @@ StThreeVectorD StFcsDb::getNormal(int det) const
   double planenormal[3] = {sin(detangle),0,cos(detangle)};
 }
 
-StThreeVectorD StFcsDb::projectLine(int det, double azimuth, double polar, double showermaxz, double xvertex, double yvertex, double zvertex) const
+StThreeVectorD StFcsDb::projectTrackToEcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det=0;   // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=1; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=1; }
+  return projectTrack(det,g2ttrk,g2tvert,0);
+}
+
+StThreeVectorD StFcsDb::projectTrackToHcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det = 2;  // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=3; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=3; }
+  return projectTrack(det,g2ttrk,g2tvert,0);
+}
+
+StThreeVectorD StFcsDb::projectTrackToEcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det=0;   // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=1; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=1; }
+  return projectTrack(det,g2ttrk,g2tvert,-1);
+}
+
+StThreeVectorD StFcsDb::projectTrackToHcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det = 2;  // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=3; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=3; }
+  return projectTrack(det,g2ttrk,g2tvert,-1);
+}
+
+StThreeVectorD StFcsDb::projectTrack(int det, const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert, double showermaxz) const
+{
+  double linedir[3] = {g2ttrk->p[0],g2ttrk->p[1],g2ttrk->p[2]};
+  if( g2tvert!=0 ){
+    int vertind = g2ttrk->start_vertex_p - 1; //To correct for offset by one between fortran array and c array. 0 start index means it was generated at the starting vertex
+    std::cout << "+++++ DEBUG: vertind = " << vertind << " +++++" << std::endl;
+    double linestart[3] = {g2tvert[vertind].ge_x[0],g2tvert[vertind].ge_x[1],g2tvert[vertind].ge_x[2]};
+    if( vertind >= 0 ){//Since start index==0 means no start then vertind<0 will default to using origin
+      return projectLine(det, linedir, linestart, showermaxz);
+    }
+  }
+  double zero[3] = {0,0,0};
+  return projectLine(det,linedir,zero,showermaxz);
+}
+
+StThreeVectorD StFcsDb::projectLine(int det, StThreeVectorD &linedirection, StThreeVectorD &lineorigin, double showermaxz) const
+{
+  double linedir[3] = {linedirection.x(),linedirection.y(),linedirection.z()};
+  double linestart[3] = {lineorigin.x(),lineorigin.y(),lineorigin.z()};
+  return projectLine(det,linedir,linestart,showermaxz);
+}
+
+StThreeVectorD StFcsDb::projectLine(int det, double* linedirection, double* lineorigin, double showermaxz) const
 {
   if( showermaxz<0 ){ showermaxz =  getShowerMaxZ(det); }  //when negative use default showermax
+  if( det%2==0 ){  //North side is negative x-axis
+    if( linedirection[2]>=0 && linedirection[0]>=0 ){ LOG_WARN << "Incorrect Det" << endm; }
+    if( linedirection[2]<0  && linedirection[0]<=0 ){ LOG_WARN << "Incorrect Det" << endm; }
+  }
+  else{  //South side is positive x-axis
+    if( linedirection[2]>=0 && linedirection[0]<0  ){ LOG_WARN << "Incorrect Det" << endm; }
+    if( linedirection[2]<0  && linedirection[0]>=0 ){ LOG_WARN << "Incorrect Det" << endm; } //(If x and z direction are both negative then also projects to south side which is positive x-axis
+  }
   double detangle = getDetectorAngle(det)*M_PI/180.0;
   if( det%2==0 ){ detangle *= -1.0; } //North side use negative angle
   StThreeVectorD xyzoff = getDetectorOffset(det,showermaxz);
   StThreeVectorD planenormal = getNormal(det);
-  double linedir[3] = {cos(polar)*sin(azimuth),sin(polar)*sin(azimuth),cos(azimuth)};//This is the direction of a line formed for a given azimuth and polar angle in xyx coordinates where line starts at origin
-  //Solution of intersection of line and plane where line starts at origin and plane has some normal and has a point at the detector offset, "t" is the free parameter in the parametric equation of the line.
+  //Solution of intersection of line and plane where line has direction {xdir,ydir,zdir}*t and starts at {xorigin,yorigin,zorigin} and a plane that has some normal with a point on the plane as the detector offset; "t" is the free parameter in the parametric equation of the line.
   double tintersection =
-    (planenormal.x()*(xyzoff.x()-xvertex)+planenormal.y()*(xyzoff.y()-yvertex)+planenormal.z()*(xyzoff.z()-zvertex)) /
-    (planenormal.x()*linedir[0]+planenormal.y()*linedir[1]+planenormal.z()*linedir[2]);
-    
-    return StThreeVectorD(linedir[0]*tintersection,linedir[1]*tintersection,linedir[2]*tintersection);
+    (planenormal.x()*(xyzoff.x()-lineorigin[0])+planenormal.y()*(xyzoff.y()-lineorigin[1])+planenormal.z()*(xyzoff.z()-lineorigin[2])) /
+    (planenormal.x()*linedirection[0]+planenormal.y()*linedirection[1]+planenormal.z()*linedirection[2]);
+  
+  return StThreeVectorD( linedirection[0]*tintersection+lineorigin[0], linedirection[1]*tintersection+lineorigin[1], linedirection[2]*tintersection+lineorigin[2] );
 }
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
