@@ -9,12 +9,13 @@
 
 // StRefMultCorr headers
 #include "StRefMultCorr.h"
-#include "Param.h"
+#include "StBadRunChecker.h"
 
-// ROOT headers
 #include "TError.h"
 #include "TRandom.h"
 #include "TMath.h"
+
+#include "Param.h"
 
 ClassImp(StRefMultCorr)
 
@@ -48,7 +49,54 @@ StRefMultCorr::~StRefMultCorr() {
   /* empty */
 }
 
-//_________________
+
+//check bad runs based on sub-systems 
+void StRefMultCorr::initBadRunChecker(TString Run,TString CollisionMode,TString RunEnergy,TString Species){
+  mBadRunChecker = new StBadRunChecker(Run,CollisionMode,RunEnergy,Species);
+}
+
+Bool_t StRefMultCorr::isBadRunSubSys(const Int_t RunId,TString mSys){
+  return mBadRunChecker->isBadRunSubSys(RunId,mSys);
+}
+Bool_t StRefMultCorr::isInjection(const Int_t RunId){
+  return mBadRunChecker->isInjection(RunId);
+}
+Bool_t StRefMultCorr::isBadRunTPC(const Int_t RunId){
+  return mBadRunChecker->isBadRunTPC(RunId);
+}
+Bool_t StRefMultCorr::isBadRunbTOFStatus(const Int_t RunId){
+  return mBadRunChecker->isBadRunbTOFStatus(RunId);
+}
+Bool_t StRefMultCorr::isBadRunbTOFPID(const Int_t RunId){
+  return mBadRunChecker->isBadRunbTOFPID(RunId);
+}
+Bool_t StRefMultCorr::isBadRuneTOF(const Int_t RunId){
+  return mBadRunChecker->isBadRuneTOF(RunId);
+}
+Bool_t StRefMultCorr::isBadRunEPD(const Int_t RunId){
+  return mBadRunChecker->isBadRunEPD(RunId);
+}
+Bool_t StRefMultCorr::isBadRunVPD(const Int_t RunId){
+  return mBadRunChecker->isBadRunVPD(RunId);
+}
+Bool_t StRefMultCorr::isBadRunBEMCStatus(const Int_t RunId){
+  return mBadRunChecker->isBadRunBEMCStatus(RunId);
+}
+Bool_t StRefMultCorr::isBadRunBEMCPID(const Int_t RunId){
+  return mBadRunChecker->isBadRunBEMCPID(RunId);
+}
+Bool_t StRefMultCorr::isBadRunBEMCTrigger(const Int_t RunId){
+  return mBadRunChecker->isBadRunBEMCTrigger(RunId);
+}
+Bool_t StRefMultCorr::isBadRunMTD(const Int_t RunId){
+  return mBadRunChecker->isBadRunMTD(RunId);
+}
+Bool_t StRefMultCorr::isBadRunAnalysis(const Int_t RunId){
+  return mBadRunChecker->isBadRunAnalysis(RunId);
+}
+
+//______________________________________________________________________________
+
 Int_t StRefMultCorr::getBeginRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 

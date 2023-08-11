@@ -30,7 +30,8 @@
 #ifndef __StRefMultCorr_h__
 #define __StRefMultCorr_h__
 
-// C++ headers
+class StBadRunChecker;
+
 #include <vector>
 #include <map>
 
@@ -56,10 +57,27 @@ class StRefMultCorr {
   /// "VpdMB30"
   /// "VpdMBnoVtx"
   StRefMultCorr(const TString name="refmult", const TString subname="Def", const TString libname="Def");
-  /// Destructor
-  virtual ~StRefMultCorr(); 
-  
-  /// Check if run is bad
+
+  virtual ~StRefMultCorr(); /// Default destructor
+
+  //Bad run rejection based on sub-systems for BESII
+  //void initBadRunChecker(TString Run="run19",TString CollisionMode="col" ,TString RunEnergy="19.6",TString Species="auau");
+  void initBadRunChecker(TString Run,TString CollisionMode ,TString RunEnergy,TString Species);
+  Bool_t isBadRunSubSys(const Int_t RunId,TString mSys) ;
+  Bool_t isInjection(const Int_t RunId) ;
+  Bool_t isBadRunTPC(const Int_t RunId) ;
+  Bool_t isBadRunbTOFStatus(const Int_t RunId) ;
+  Bool_t isBadRunbTOFPID(const Int_t RunId) ;
+  Bool_t isBadRuneTOF(const Int_t RunId) ;
+  Bool_t isBadRunEPD(const Int_t RunId) ;
+  Bool_t isBadRunVPD(const Int_t RunId) ;
+  Bool_t isBadRunBEMCStatus(const Int_t RunId) ;
+  Bool_t isBadRunBEMCPID(const Int_t RunId) ;
+  Bool_t isBadRunBEMCTrigger(const Int_t RunId) ;
+  Bool_t isBadRunMTD(const Int_t RunId) ;
+  Bool_t isBadRunAnalysis(const Int_t RunId) ; 
+
+  // Bad run rejection
   Bool_t isBadRun(const Int_t RunId) ;
 
   // Event-by-event initialization. Call this function event-by-event
@@ -115,12 +133,12 @@ class StRefMultCorr {
   void print(const Option_t* option="") const ;
 
  private:
-  /// refmult, refmult2, refmult3 or toftray (case insensitive)
-  const TString mName;
-  /// Specify triggers, in case there are multiple parameters/definitions in the same runs 
-  const TString mSubName;
-  /// Specify library, in case the centrality definition depends on productions  
-  const TString mLibName;
+
+  StBadRunChecker* mBadRunChecker;
+
+  const TString mName ; // refmult, refmult2, refmult3 or toftray (case insensitive)
+  const TString mSubName ; // specify triggers, in case there are multiple parameters/definitions in the same runs 
+  const TString mLibName ; // specify library, in case the centrality definition depends on productions 
 
   // Functions
 
