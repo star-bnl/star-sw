@@ -101,11 +101,9 @@ static int myGraph=0;
 static StTGeoProxy* tgp = StTGeoProxy::Inst();
        tgp->SetHitLoadActor(mHitLoadActor);
 
-StvDraw *myDraw=0;
-StvHits *myHits=0;
 if (myGraph) { //create canvas
-  myDraw = new StvDraw();
-  myHits = new StvHits;
+  StvDraw *myDraw = new StvDraw();
+  StvHits *myHits = new StvHits;
   if (myHits) {/*noopt*/}
 }
   mHitIter->Reset(stev);

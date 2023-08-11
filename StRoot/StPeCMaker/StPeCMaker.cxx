@@ -192,7 +192,6 @@ Int_t StPeCMaker::Init() {
    if(!pevent) LOG_INFO << "StPeCMaker Init: unable to make instance of StPeCEvent ---------- " << endm;
    trigger = new StPeCTrigger();
    trigger->setInfoLevel(infoLevel);
-   char test[] = "ZDC_monitor";
 
    geant = new StPeCGeant();
     LOG_INFO << "StPeCMaker Init: before branch add ---------- " << endm;
@@ -298,11 +297,8 @@ Int_t StPeCMaker::Make()
    // Int_t flag = kStOk;
       LOG_INFO << "StPeCMaker make: just in ---------- "  << endm;
 
-   Int_t NTracks = 0 ;
-   int tw        = 0 ;
    int ok = 0 ;
    int returnValue = 0;
-   int gReturn = 0;
    //
    // 26-APR 2012 RD we comment the whole muDst part NEEDS TO BE FIXED
    // 12-JULY2012 RD this is still in need of a fix, I return to StMuDst for triggerEfficiency studies
@@ -312,10 +308,8 @@ Int_t StPeCMaker::Make()
 
 
 //       LOG_INFO << "StPeCMaker make: trigger selected ---------- "  << triggerChoice<< endm;
-      NTracks = muDst->globalTracks()->GetEntries();
        
       StL0Trigger &trig = muDst->event()->l0Trigger();
-      tw = trig.triggerWord();
 
       returnValue = trigger->process(muDst, triggerChoice);
 //       LOG_INFO << "StPeCMaker make: trigger return ---------- "  <<returnValue<< endm;
@@ -340,9 +334,7 @@ Int_t StPeCMaker::Make()
      returnValue = trigger->process(event, triggerChoice);
 
      StSPtrVecTrackNode& tempn = event->trackNodes();
-     NTracks = tempn.size();
 
-     tw = event->l0Trigger()->triggerWord();                  // end of StEvent 18-NOV
      pevent->setTOFgeometry(mBTofGeom);
      ok = pevent->fill(event);
 
@@ -356,10 +348,8 @@ Int_t StPeCMaker::Make()
 	 return kStOK; 
        }
       LOG_INFO << "StPeCMaker make: using both StMuDst and StEvent ---------- "  << endm;
-      NTracks = muDst->globalTracks()->GetEntries();
        
       StL0Trigger &trig = muDst->event()->l0Trigger();
-      tw = trig.triggerWord();
 
       returnValue = trigger->process(muDst, triggerChoice);
       pevent->setTOFgeometry(mBTofGeom);

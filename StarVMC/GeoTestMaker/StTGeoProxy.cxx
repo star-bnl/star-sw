@@ -295,7 +295,8 @@ int StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
   if (af) af->SetDetId(did);
-  int n = SetActive(modu,akt,af); 
+  //int n = SetActive(modu,akt,af);
+  SetActive(modu,akt,af);
 //???  if (n) return 0;
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }

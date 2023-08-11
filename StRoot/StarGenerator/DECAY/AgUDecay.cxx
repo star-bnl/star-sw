@@ -51,12 +51,10 @@ Int_t AgUDecay::operator()()
 {
    
   Gctrak_t& gctrak = *(geant3->Gctrak()); // kinematics of current track
-  Gcking_t& gcking = *(geant3->Gcking()); // kinematics of decay products
-  Gckin3_t& gckin3 = *(geant3->Gckin3()); // vertex of decay products
 
-  float x = gctrak.vect[0];
-  float y = gctrak.vect[1];
-  float z = gctrak.vect[2];
+  //float x = gctrak.vect[0];
+  //float y = gctrak.vect[1];
+  //float z = gctrak.vect[2];
 
   //  LOG_INFO << Form(">>> decay() called x=%f y=%f z=%f <<<",x,y,z) << endm;
   if (0==mDecayer) return 0; // no decayer registerd
@@ -182,10 +180,7 @@ Int_t AgUDecay::operator()()
 bool AgUDecay::MayTransport( const TParticle* particle )
 {
 
-      int           first       = particle->GetFirstDaughter();
-      int           last        = particle->GetLastDaughter();
       int           pdgid       = particle->GetPdgCode();
-      int           status      = particle->GetStatusCode();
       TParticlePDG *particlePDG = pdb.GetParticle(pdgid); 
       int           g3id        = particlePDG->TrackingCode();
 

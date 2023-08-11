@@ -121,11 +121,8 @@ Int_t StFcsEpdQaMaker::Make(){
     StSPtrVecFcsHit& hits = mFcsCollection->hits(det); 
     for (int i=0; i<nhit; i++){
       int id  = hits[i]->id();
-      int ehp = hits[i]->ehp();
-      int ns  = hits[i]->ns();
       int dep = hits[i]->dep();
       int ch  = hits[i]->channel();
-      int ntb = hits[i]->nTimeBin();
       int pp,tt;
       mFcsDb->getEPDfromId(det,id,pp,tt);
       if(pp==11) pp=10; //HACK for run21 map

@@ -59,7 +59,7 @@ void StXTrakTestMaker::Clear(const char*)
 //_____________________________________________________________________________
 Int_t StXTrakTestMaker::Finish()
 {
-  int n = 0;
+  //int n = 0;
   for (auto it = mMap.begin(); it!=mMap.end(); ++it) {
     TH1* h= (*it).second;
 

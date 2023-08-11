@@ -1437,7 +1437,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
        Warning("StDraw3D::Tower", "The illegal negative value for dphi = %f", dphi);
        dphi = -dphi;
    }
-   float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
+   float zNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, x1Far,x2Far, y1Far, y2Far;
    // redefine size 
    siz = siz *TMath::Cos(lambda);
    
@@ -1454,17 +1454,14 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    y1Near = zNear*TMath::Tan(lambda1);
    y2Near = zNear*TMath::Tan(lambda2);
    
-   xNear  = 0;
    x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dphi/2);
    x2Near = TMath::Sqrt(y2Near*y2Near + zNear*zNear) * TMath::Tan(dphi/2); 
 
    zFar  = radius+siz;
    
-   yFar  = zFar*TMath::Tan(lambda);
    y1Far = zFar*TMath::Tan(lambda1);
    y2Far = zFar*TMath::Tan(lambda2);
    
-   xFar  = 0;
    x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dphi/2);
    x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
 

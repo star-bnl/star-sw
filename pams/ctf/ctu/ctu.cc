@@ -67,14 +67,14 @@ long type_of_call ctu_(
 //
 //    Loop over slats to get raw data
 //
-  long index ;
+//  long index ;
   long n_eta = geo->n_counter_eta * geo->n_tray_eta ;
 //
   for ( int i_slat = 0 ; i_slat < raw_h->nok ; i_slat++ ) {
 //
 //    Get index
 //
-     index = ctg_index ( raw[i_slat].i_phi, raw[i_slat].i_eta, n_eta  ) ;
+//     index = ctg_index ( raw[i_slat].i_phi, raw[i_slat].i_eta, n_eta  ) ;
 //
      cor[i_slat].i_phi = raw[i_slat].i_phi ;
      cor[i_slat].i_eta = raw[i_slat].i_eta ;

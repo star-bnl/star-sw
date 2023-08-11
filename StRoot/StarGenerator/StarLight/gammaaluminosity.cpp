@@ -192,7 +192,7 @@ void photonNucleusLuminosity::pttablegen()
   double dY=0.,Yp=0.,Egamma1=0.,Egamma2=0.,Wgp=0.,cs=0.,cvma=0.,Av=0.,tmin=0.,tmax=0.,ax=0.,bx=0.;
   double csgA=0.,t=0.,sig_ga_1=0.,sig_ga_2=0.,bmax=0.,bmin=0.,db=0.,pt=0.,sum1=0.,b=0.,A1=0.,A2=0.;
   double sumg=0.,theta=0.,amp_i_2=0.,sumint=0.;
-  int NGAUSS=0,NBIN=0,NThetaBIN=0;
+  int NGAUSS=0,NBIN=0;
   
   double xg[16]={.0483076656877383162E0,.144471961582796493E0,
 		 .239287362252137075E0, .331868602282127650E0,
@@ -321,7 +321,6 @@ void photonNucleusLuminosity::pttablegen()
       bmin=0.95*bmin;
     //  set number of bins to a reasonable number to start
     NBIN = 2000;
-    NThetaBIN = 1000;
     db   = (bmax-bmin)/float(NBIN);
     // loop over pt
     for(int i=1;i<=NPT;i++){

@@ -35,11 +35,9 @@ Int_t StFgtGenPlotter::Make()
   cout <<"general make " <<endl;
   StFgtGeneralBase::Make();
   cout <<" making cluster plotter " <<endl;
-  Int_t realEvtNr=0;
 
   Float_t x;
   Float_t y;
-  Int_t prvGeoId=-1;
   for(int iDx=0;iDx<kFgtNumDiscs;iDx++)
     {
       
@@ -160,9 +158,6 @@ Int_t StFgtGenPlotter::Make()
 
 	  Int_t numStrips=hitIter->clusterSize;
 	  ///check if at least one of the strips has a valid seed)
-	  Short_t quad, disc, strip;
-	  Char_t layer; 
-	  Bool_t containsSeed=true; // just take all clusters
 	       
 	  if(hitIter->layer=='R')
 	    {

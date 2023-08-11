@@ -351,8 +351,6 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	if (pFlowSelect->Select(pFlowTrack)) {
-	  // Get detID
-	  StDetectorId detId;
 	  Bool_t kTpcFarEast  = kFALSE;
 	  Bool_t kTpcEast     = kFALSE;
 	  Bool_t kTpcWest     = kFALSE;
@@ -363,7 +361,6 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
 	  Bool_t kFtpcFarWest = kFALSE;
 	  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
 	    // Tpc track, or TopologyMap not available
-	    detId = kTpcId;
 	    // Set TpcEast and West
 	    if (pFlowEvent->FirstLastPoints()) {
 	      if (zFirstPoint > 0. && zLastPoint > 0.) {
@@ -387,21 +384,17 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
 	      }
 	    }
 	  } else if (map.trackFtpcEast()) {
-	    detId = kFtpcEastId;  // eta < 0.
 	    if (vertexZ > 0.) {
 	      kFtpcEast = kTRUE;
 	    } else { // vertexZ < 0.
 	      kFtpcFarEast = kTRUE;
 	    }
 	  } else if (map.trackFtpcWest()) {
-	    detId = kFtpcWestId; // eta > 0.
 	    if (vertexZ > 0.) {
 	      kFtpcFarWest = kTRUE;
 	    } else { // vertexZ < 0.
 	      kFtpcWest = kTRUE;
 	    }
-	  } else {
-	    detId = kUnknownId;
 	  }
 
 	  // Calculate weights for filling histograms

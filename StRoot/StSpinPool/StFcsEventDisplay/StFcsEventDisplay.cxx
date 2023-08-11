@@ -177,8 +177,6 @@ int StFcsEventDisplay::Make(){
 	float ymax=220;
 	float yoff[kFcsNDet]={100.0,100.0,-100.0,-100.0,100.0,100.0};
 	float xoff[kFcsNDet]={  0.0,  0.0,   0.0,   0.0,  0.0,  0.0};
-	float stgcOffX=0.0;
-	float stgcOffY=0.0;
 	float cTxSize=0.01;
 	float eTxSize=0.007;
 	TH2F* frame;	
@@ -220,10 +218,8 @@ int StFcsEventDisplay::Make(){
 	for(int det=0; det<kFcsNDet; det++){
 	    StSPtrVecFcsHit& hits = mFcsColl->hits(det);
 	    StSPtrVecFcsCluster& clusters = mFcsColl->clusters(det);
-	    StSPtrVecFcsPoint& points = mFcsColl->points(det); 
 	    int nh=mFcsColl->numberOfHits(det);
 	    int nc=mFcsColl->numberOfClusters(det);
-	    int np=mFcsColl->numberOfPoints(det);
 	    if(mDebug>0) LOG_INFO << Form("StFcsEventDisplay Det=%1d nhit=%4d nclu=%3d",det,nh,nc) << endm;
 
 	    //first all towers
@@ -268,7 +264,7 @@ int StFcsEventDisplay::Make(){
 		    double zepd=375.0;
 		    double zfcs=710.0+13.90+15.0;
 		    double zr=zfcs/zepd;
-		    int pp,tt,id,n;
+		    int pp,tt,n;
 		    double x[5],y[5];
 		    mFcsDb->getEPDfromId(det,hit->id(),pp,tt);
 		    mEpdgeo->GetCorners(100*pp+tt,&n,x,y);
@@ -335,6 +331,8 @@ int StFcsEventDisplay::Make(){
 	}
 
 #ifdef ___USESTGC___
+	float stgcOffX=0.0;
+	float stgcOffY=0.0;
 	//STGC
 	if(mStgcColl){
 	    for(int det=0; det<kStgcNDet; det++){

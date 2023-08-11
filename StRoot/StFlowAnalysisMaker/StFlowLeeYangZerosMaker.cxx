@@ -330,7 +330,6 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       } // theta
 
       // V
-      TString *histTitleVtheta;
       histTitle = new TString("FlowProLYZ_Vtheta_Sel");
       *histTitle += k+1;
       *histTitle += "_Har";
@@ -339,7 +338,6 @@ Int_t StFlowLeeYangZerosMaker::Init() {
         histTitle->Data(), Flow::nTheta, -0.5, Flow::nTheta-0.5, -1000., 1000.);
       histFull[k].histFullHar[j].mHistPro_Vtheta->SetXTitle("#theta");
       histFull[k].histFullHar[j].mHistPro_Vtheta->SetYTitle("V_{n}^{#theta}");
-      histTitleVtheta = new TString(histTitle->Data());
       delete histTitle;
 
       // Re(Denom)

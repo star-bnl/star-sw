@@ -299,7 +299,6 @@ const double Zmax = virtApp->TrackingZmax();
   TString ts,modName;
   fKount++;
 
-double prevLen = fPrevLength;
   Case();
 
 static const char *myDebug = gSystem->Getenv("StvDEBUG");

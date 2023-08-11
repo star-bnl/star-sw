@@ -228,10 +228,6 @@ Int_t StVpdAnalysisMaker::Make()
 
   resetVpdPars();
 
-  Int_t iret = kStOK;
-  if(mYear8) {
-    iret = processEventYear8();
-  }
   return kStOK;
 }
 

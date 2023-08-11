@@ -118,7 +118,6 @@ St2011WMaker::accessETOW(){
   } 
   
   wEve->etow.etowIn=1; //tag usable ETOW data
-  const char *maxIdName=0;
   double maxADC=0,adcSum=0;
   int maxSec=-1,maxSub=-1,maxEta=-1;
 
@@ -151,7 +150,7 @@ St2011WMaker::accessETOW(){
     wEve->etow.ene[isec*mxEtowSub+isub][ieta]=ene;
     wEve->etow.stat[isec*mxEtowSub+isub][ieta]=0;
 
-    if(maxADC<adc) { maxIdName=x->name; maxADC=adc; maxSec=isec; maxSub=isub; maxEta=ieta;}
+    if(maxADC<adc) { maxADC=adc; maxSec=isec; maxSub=isub; maxEta=ieta;}
     adcSum+=adc;
   
   }

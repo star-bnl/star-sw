@@ -360,7 +360,7 @@ void Gammagammaleptonpair::twoBodyDecay(starlightConstants::particleTypeEnum &ip
     // double ytest=0.,dndtheta;
     double phi,theta = 999.0,xtest,Ecm;
     double betax,betay,betaz;
-    double hirestheta,hirestest,hiresw;  //added from JN->needed precision
+    double hirestheta,hiresw;  //added from JN->needed precision
 
     //    set the mass of the daughter particles
 
@@ -401,7 +401,6 @@ void Gammagammaleptonpair::twoBodyDecay(starlightConstants::particleTypeEnum &ip
 
 	hirestheta = 0.;
 	xtest = _randy.Rndom();//random()/(RAND_MAX+1.0);
-	hirestest = xtest;
 	for(int i =1;i<=20000;i++)
 	{
 	    if(xtest > (anglelep[i]/anglelep[20000]))

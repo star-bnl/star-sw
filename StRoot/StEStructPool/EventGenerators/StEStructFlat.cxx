@@ -99,16 +99,14 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
 
     mnumTracks = 0;
     StEStructTrack* eTrack = new StEStructTrack();
-    int pid, sign;
+    int pid;
 
 //    int    numCharge = int( -5*log(drand48()) );
     int    numCharge, numInEta = 850;
     double v2      = 0.05, pi = 3.1415926;
     double eta, quadEta = 0.2, etaMax = 2;
-    double phi, phiOff, sectorWidth;
-    int    numSector = 12;
+    double phi, phiOff;
 
-    sectorWidth = 360 / numSector;
     phiOff = 360*drand48();
 
     float p[3], pt, pz, v[3];
@@ -119,10 +117,8 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
 
         eTrack->SetInComplete();
         if (i < numCharge/2) {
-            sign = +1;
             pid = 211;
         } else {
-            sign = -1;
             pid = -211;
         }
         double etaAmp = 0, randAmp = 1;

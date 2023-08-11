@@ -328,14 +328,13 @@ photonNucleusCrossSection::photonFlux(const double Egamma)
   
 	double lEgamma,Emin,Emax;
 	static double lnEmax, lnEmin, dlnE;
-	double stepmult,energy,rZ,rA;
+	double stepmult,energy,rZ;
 	int nbstep,nrstep,nphistep,nstep;
 	double bmin,bmax,bmult,biter,bold,integratedflux;
 	double fluxelement,deltar,riter;
 	double deltaphi,phiiter,dist;
 	static double dide[401];
 	double lnElt;
-	double rA2, rZ2; //Added sergey
 	double flux_r; //Returns the flux.
 	double Xvar;
 	int Ilt;
@@ -405,9 +404,6 @@ photonNucleusCrossSection::photonFlux(const double Egamma)
 	if(Icheck > 1) goto L1000f;
   
 	rZ=double(_bbs.beam1().Z());
-	rA=double(_bbs.beam1().A());
-	rZ2=double(_bbs.beam2().Z());  //Sergey--dAu
-	rA2=double(_bbs.beam2().A());  //Sergey
   
 	//  Nuclear breakup is done by PofB
 	//  collect number of integration steps here, in one place

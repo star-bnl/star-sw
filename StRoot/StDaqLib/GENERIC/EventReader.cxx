@@ -379,8 +379,6 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 {//InitER
 #define MX_MAP_SIZE 0x20000000
 
-  off_t FileLength;
-
   if (verbose) {
     LOG_INFO<< "Initializing EventReader with a MAPPED file" << endm;
   }
@@ -406,7 +404,6 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
    LOG_ERROR << "DaqOpenTag"<< strerror(errno) <<endm;
    ERROR(ERR_FILE);
   }
-  FileLength = buf.st_size;
 
   next_event_offset = 0;
   Logical_Record lr;

@@ -1075,7 +1075,6 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   StEStructTrackIterator Iter2;
 
   int iyt1,iyt2,idyt,isyt;
-  int ipt1,ipt2;
   int ieta1,ieta2,ideta,iseta;
   int iphi1,iphi2,idphi;
   int isavgt, isavgz, isentt, isentz;
@@ -1152,11 +1151,11 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           pt2   = mPair.Track2()->Pt();
 
           iyt1  = b->iyt(mPair.Track1()->Yt(mass1));
-          ipt1  = b->ipt(pt1);
+          b->ipt(pt1);
           ieta1 = b->ieta(mPair.Track1()->Eta(mass1));
           iphi1 = b->iphi(mPair.Track1()->Phi());
           iyt2  = b->iyt(mPair.Track2()->Yt(mass2));
-          ipt2  = b->ipt(pt2);
+          b->ipt(pt2);
           ieta2 = b->ieta(mPair.Track2()->Eta(mass2));
           iphi2 = b->iphi(mPair.Track2()->Phi());
 

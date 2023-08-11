@@ -77,30 +77,6 @@ void StEStructRQMD::fillTracks(StEStructEvent* estructEvent) {
                   1857, 2015, 2065, 2101, 2147, 2158, 2344, 2448};
     int nSkip = 26;
 
-    const int kKMinus         = 12;
-    const int kKPlus          = 11;
-    const int kLambda         = 18;
-    const int kLambdaBar      = 26;
-    const int kProton         = 14;
-    const int kPbar           = 15;
-    const int kPhi            = 51;
-    const int kPiMinus        =  9;
-    const int kPiPlus         =  8;
-    const int kPi0            =  7;
-    const int kXi0            = 22;  
-    const int kXiMinus        = 23;  
-    const int kAntiXi0        = 30;  
-    const int kAntiXiPlus     = 31;  
-    const int kOmega          = 24;  
-    const int kOmegaBar       = 32;  
-    const int kSigmaPlus      = 19;
-    const int kSigma0         = 20;
-    const int kSigmaMinus     = 21;
-    const int kAntiSigmaPlus  = 27;
-    const int kAntiSigma0     = 28;
-    const int kAntiSigmaMinus = 29;
-
-
     mnumTracks=0;
     StEStructTrack* eTrack = new StEStructTrack();
 
@@ -170,7 +146,6 @@ void StEStructRQMD::fillTracks(StEStructEvent* estructEvent) {
      
     while (mNFreezeOutPart) {
         eTrack->SetInComplete();
-        int gPID = 0;
         *mFile >> tPid1 >> tPid2 >> tt >> tx >> ty >> tz 
                   >> tE >> tPx >> tPy >> tPz >> tM 
                   >> tDecay >> tNClnt >> tlastcl ; mLine++;
@@ -182,91 +157,69 @@ void StEStructRQMD::fillTracks(StEStructEvent* estructEvent) {
         
         tCharge = 0;
         if (tPid1 == 14 && tPid2 == -2) { // K-
-            gPID = kKMinus;
             tCharge = -1;
         }
         if (tPid1 == 14 && tPid2 == 2) { // K+
-            gPID = kKPlus;
             tCharge = +1;
         }
         if (tPid1 == 13 && tPid2 == 0) { // Lambda
-            gPID = kLambda;
             tCharge = 0;
         }
         if (tPid1 == 99 && tPid2 == -57) { // Lambdabar
-            gPID = kLambdaBar;
             tCharge = 0;
         }
         if (tPid1 == 2 && tPid2 == 0) { // proton
-            gPID = kProton;
             tCharge = +1;
         }
         if (tPid1 == 15 && tPid2 == 1) { // SigmaPlus
-            gPID = kSigmaPlus;
             tCharge = +1;
         }
         if (tPid1 == 15 && tPid2 == 0) { // Sigma0
-            gPID = kSigma0;
             tCharge = 0;
         }
         if (tPid1 == 15 && tPid2 == -1) { // SigmaMinus
-            gPID = kSigmaMinus;
             tCharge = -1;
         }
         if (tPid1 == 99 && tPid2 == -43) { // AntiSigmaPlus
-            gPID = kAntiSigmaPlus;
             tCharge = -1;
         }
         if (tPid1 == 99 && tPid2 == -44) { // AntiSigma0
-            gPID = kAntiSigma0;
             tCharge = 0;
         }
         if (tPid1 == 99 && tPid2 == -45) { // AntiSigmaMinus
-            gPID = kAntiSigmaMinus;
             tCharge = +1;
         }
         if (tPid1 == 99 && tPid2 == -41) { // pbar
-            gPID = kPbar;
             tCharge = -1;
         }
         if (tPid1 == 99 && tPid2 == 35) { // phi
-            gPID = kPhi;
             tCharge = 0;
         }
         if (tPid1 == 7 && tPid2 == 0) { // pi-
-            gPID = kPiMinus;
             tCharge = -1;
         }
         if (tPid1 == 9 && tPid2 == 0) { // pi+
-            gPID = kPiPlus;
             tCharge = +1;
         }
         if (tPid1 == 8 && tPid2 == 0) { // pi0
-            gPID = kPi0;
             tCharge = 0;
         }
         if (tPid1 == 99 && tPid2 == 46) { // Xi0
-            gPID = kXi0;
             tCharge = 0;
         }
         if (tPid1 == 99 && tPid2 == 47) { // XiMinus
-            gPID = kXiMinus;
             tCharge = -1;
         }
         if (tPid1 == 99 && tPid2 == -46) { // Anti-Xi0
-            gPID = kAntiXi0;
             tCharge = 0;
         }
         if (tPid1 == 99 && tPid2 == -47) { // Anti-XiPlus
-            gPID = kAntiXiPlus;
             tCharge = +1;
         }
         if (tPid1 == 99 && tPid2 == 70) { // Omega
-            gPID = kOmega;
             tCharge = -1;
         }
         if (tPid1 == 99 && tPid2 == -70) { // Anti-Omega
-            gPID = kOmegaBar;
             tCharge = +1;
         }
         if (0 == tCharge) {

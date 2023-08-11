@@ -125,6 +125,8 @@ if ($pkg eq "RTS") {
   else {
     $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE';
   }
+    # Turn off compiler warnings for StRoot/RTS
+    $CXXFLAGS .= " -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-unused-value -Wno-unused-label -Wno-unused-function -Wno-write-strings -Wno-ignored-qualifiers -Wno-empty-body -Wno-maybe-uninitialized";
     $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
 	      .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
     $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
@@ -198,6 +200,8 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
     $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+    # Turn off compiler warnings for OnlTools/Jevp
+    $CXXFLAGS .= " -Wno-aggressive-loop-optimizations -Wno-array-bounds -Wno-format -Wno-format-zero-length -Wno-maybe-uninitialized -Wno-return-type -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-write-strings"
 }
 
 #$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";

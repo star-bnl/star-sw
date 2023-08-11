@@ -105,13 +105,6 @@ void StEStructEvent::FillChargeCollections(){
   int num=Ntrack();
   if(num<=0) return;
 
-  int id = mRunID;
-  int time = mEventTime;
-  double vx = mVx;
-  double vy = mVy;
-  double vz = mVz;
-  double b = mBField;
-
   for(int i=0;i<num;i++){
     StEStructTrack* aTrack=(StEStructTrack*)Tracks()->UncheckedAt(i);
     if(!aTrack->isComplete()){

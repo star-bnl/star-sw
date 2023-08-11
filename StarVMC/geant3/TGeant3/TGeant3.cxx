@@ -4170,8 +4170,6 @@ void  TGeant3::Gspos(const char *name, Int_t nr, const char *mother,
 
   TString only = konly;
   only.ToLower();
-  Bool_t isOnly = kFALSE;
-  if (only.Contains("only")) isOnly = kTRUE;
   char vname[5];
   Vname(name,vname);
   char vmother[5];
@@ -4196,8 +4194,6 @@ void  TGeant3::G3Gsposp(const char *name, Int_t nr, const char *mother,
   //
   TString only = konly;
   only.ToLower();
-  Bool_t isOnly = kFALSE;
-  if (only.Contains("only")) isOnly = kTRUE;
   char vname[5];
   Vname(name,vname);
   char vmother[5];

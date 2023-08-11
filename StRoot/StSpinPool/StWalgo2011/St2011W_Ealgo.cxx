@@ -329,7 +329,7 @@ St2011WMaker::analyzeESMD(){
       assert(T.cluster.nTower>0); // internal logical error
           
       //id of strips pointed by prim and glob tracks in each plane
-      int hitStrip[2]={-1,-1}; int hitStripGlob[2]={-1,-1};
+      int hitStrip[2]={-1,-1};
 
       int isec=T.pointTower.iPhi/mxEtowSub;
       int layer[2]={((isec+2)%3) +1, (isec%3) +1};
@@ -364,7 +364,7 @@ St2011WMaker::analyzeESMD(){
         T.hitSector=sectorId;
         T.esmdGlobStrip[iuv]=stripPtrGlob->stripStructId.stripId-stripId;
         T.esmdDca[iuv]=dca; T.esmdDcaGlob[iuv]=dcaGlob;
-        hitStrip[iuv]=stripId; hitStripGlob[iuv]=stripPtrGlob->stripStructId.stripId;
+        hitStrip[iuv]=stripId;
 	
 	// set integration range for smd energy
         int str1=stripId - parE_nSmdStrip; if(str1<1) str1=1;
