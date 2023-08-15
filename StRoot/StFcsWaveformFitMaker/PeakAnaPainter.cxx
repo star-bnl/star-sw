@@ -168,6 +168,22 @@ void PeakAnaPainter::PaintBaselines()
   mTheHitLine->Paint();
 }
 
+void PeakAnaPainter::PaintFoundPeakRange()
+{
+  if( !ValidGraph() ){return;}
+  Int_t computedindex =  mPA->FoundPeakIndex();
+  if( computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
+  if( computedindex == mPA->NPeaks() ){return;}//If no peak found then computed index is equal to number of peaks in peak vector
+
+  TLine* sl = mPA->GetPeak(computedindex).GetStartLine(mPA->MinY(),mPA->MaxY());
+  sl->SetLineColor(kRed);
+  sl->Paint();
+  TLine* el = mPA->GetPeak(computedindex).GetEndLine(mPA->MinY(),mPA->MaxY());
+  el->SetLineColor(kOrange);
+  el->Paint();
+}
+
+
 void PeakAnaPainter::PaintPeakRanges( )
 {
   if( !ValidGraph() ){return;}
