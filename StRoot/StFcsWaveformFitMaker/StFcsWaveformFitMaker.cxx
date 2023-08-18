@@ -826,13 +826,14 @@ float StFcsWaveformFitMaker::highest(TGraphAsymmErrors* g, float* res){
 	}
     }
     //! https://www.star.bnl.gov/protected/spin/akio/fcs/pulse/waveformRes.png
+    if( fabs(res[7]) > 0.000001 ){ maxadc -= res[6]; }//pedestal subtraction for highest.
     res[0]=maxadc / 0.2;   //this is estimated "full integral" 
     res[1]=maxadc;         //this is peak height	       
     res[2]=maxtb;          //this is peak position [timebin]   
     //res[3]=0.0;          //no width from this method	       
     //res[4]=0.0;          //no chi2 from this		       
     //res[5]=0.0;          //no # of peaks
-    if( fabs(res[7]) > 0.000001 ){ res[0] -= res[6]; }//pedestal subtraction for highest.
+
     return maxadc;         //this is the highest               
 }
 
@@ -862,13 +863,13 @@ float StFcsWaveformFitMaker::highest3(TGraphAsymmErrors* g, float* res){
 	}
     }    
     //! https://www.star.bnl.gov/protected/spin/akio/fcs/pulse/waveformRes.png
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*3; }//pedestal subtraction for highest3. Since 3 timebin sum pedestal*3 is integrated pedestal
     res[0]= sum / 0.555;  //this is estimated "full integral" 
     res[1]= maxadc;	  //this is peak height	       
     if(sum>0) res[2]= tsum/sum; //this is averaged peak position [timebin]   
     //res[3]= 0.0;	  //no sigma from this	       
     //res[4]= 0.0;	  //no chi2 from this		       
     //res[5]= 0.0;        //no # of peak
-    if( fabs(res[7]) > 0.000001 ){ res[0] -= res[6]*3; }//pedestal subtraction for highest3. Since 3 timebin sum pedestal*3 is integrated pedestal
     return sum;		  //this is the 3 timebin sum
 }
 
