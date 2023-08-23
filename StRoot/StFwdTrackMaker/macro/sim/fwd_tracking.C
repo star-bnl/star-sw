@@ -129,18 +129,6 @@ chain_loop:
         chain->Clear();
         if (kStOK != chain->Make())
             break;
-
-
-        // StMuDst * mds = muDstMaker->muDst();
-        // StMuFwdTrackCollection * ftc = mds->muFwdTrackCollection();
-        // cout << "Number of StMuFwdTracks: " << ftc->numberOfFwdTracks() << endl;
-        // for ( size_t iTrack = 0; iTrack < ftc->numberOfFwdTracks(); iTrack++ ){
-        //     StMuFwdTrack * muFwdTrack = ftc->getFwdTrack( iTrack );
-        //     cout << "muFwdTrack->mPt = " << muFwdTrack->momentum().Pt() << endl;
-
-        // }
-
-        cout << "<---------- END EVENT" << endl;
     }
 
 }

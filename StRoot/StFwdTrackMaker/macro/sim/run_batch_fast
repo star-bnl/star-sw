@@ -58,5 +58,3 @@ if [ -f "fcstrk.root" ]; then
 else 
     echo "No fcstrk.root output found, double check if FCS is included"
 fi
-
-

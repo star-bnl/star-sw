@@ -110,7 +110,6 @@ public:
     }
 
     void setFst( Seed_t &seedFst, genfit::Track *track ){
-        LOG_DEBUG << "GenfitTrackResult::setFSt" << endm;
         nFST = seedFst.size();
         fstSeed = seedFst;
 
@@ -659,7 +658,6 @@ class ForwardTrackMaker {
                     mHist["FitStatus"]->Fill("BadFit", 1);
                 }
             }
-
 
             genTrack = new genfit::Track(*mTrackFitter->getTrack());
             genTrack->setMcTrackId(idt);

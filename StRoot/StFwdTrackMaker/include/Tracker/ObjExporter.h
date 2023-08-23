@@ -382,7 +382,6 @@ public:
             for ( auto t : tracks ) {
                 size_t vStart = numVertices;
     
-                
                 TVector3 lpoint;
                 for ( float z = startPos.Z(); z < 875; z += zStep ){
                     TVector3 point = trackPosition( t, z );

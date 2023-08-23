@@ -423,8 +423,6 @@ int StFwdTrackMaker::Init() {
     /// Instantiate and cache the geometry 
     GetDataBase("VmcGeometry");
 
-
-
     TString geoCache = GetChainOpt()->GetFileOut();  
     if ( geoCache=="" ) 
         geoCache = GetChainOpt()->GetFileIn();
@@ -1298,7 +1296,6 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     int detIndex = 0;
     for ( float z : zPlanes ){
         detIndex = detMap[ zIndex];
-        // LOG_DEBUG << "Calculating Projection for detId=" << detIndex << " @ z=" << z << endm;
         TVector3 mom(0, 0, 0);
         float cov[9];
 
@@ -1438,9 +1435,6 @@ void StFwdTrackMaker::FillTTree(){
             mTreeData.vrcY.push_back( vert->getPos().Y() );
             mTreeData.vrcZ.push_back( vert->getPos().Z() );
         }
-
-
-
 
         if (mForwardTracker->getSaveCriteriaValues() && mTreeData.saveCrit ) {
             for (auto crit : mForwardTracker->getTwoHitCriteria()) {
@@ -1589,7 +1583,7 @@ void StFwdTrackMaker::FillTTree(){
             mTreeData.rcNumFTT.push_back( fittedTracks[i].nFTT );
             mTreeData.rcNumFST.push_back( fittedTracks[i].nFST );
 
-            mTreeData.rcN ++;
+            mTreeData.rcN++;
         }
         LOG_INFO << "Filling TTree" << endm;
         mTree->Fill();

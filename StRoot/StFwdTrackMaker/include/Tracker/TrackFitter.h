@@ -968,7 +968,6 @@ class TrackFitter {
     const int mPdgMuon = 13;
     const int mPdgAntiMuon = -13;
 
-
     // det z locations loaded from geom or config
     vector<double> mFSTZLocations, mFTTZLocations;
 
