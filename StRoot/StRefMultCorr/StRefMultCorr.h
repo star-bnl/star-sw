@@ -48,6 +48,7 @@ class StRefMultCorr {
   /// "refmult"   - reference multiplicity defined in |eta|<0.5
   /// "refmult2"  - reference multiplicity defined in 0.5<|eta|<1.0
   /// "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
+  /// "fxtmult"   - reference multiplicity for fixed-target program defined as number of primary tracks (without cuts!)
   /// "toftray"   - TOF tray multiplicity
   /// "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
   /// Specify the type of data sets (in case there are multiple prameters/definitions in the same runs)

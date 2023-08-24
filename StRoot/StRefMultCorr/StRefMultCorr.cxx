@@ -305,6 +305,90 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
+  else if ( mParameterIndex==40 ) { // Au+Au 200 GeV 2019
+
+    b0=18.0459;
+    b1=1.32913;
+    b2=-0.000929385;
+    b3=1.53176e-06;
+    b4=-9.911e-10;
+    c0=-18.7481;
+    c1=0.785467;
+    c2=2.12757e-05;
+    c3=3.4805e-07;
+    c4=-3.80776e-100;
+
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+  }
+  else if ( mParameterIndex==41 ) { // Au+Au 7.7 GeV 2020
+
+    if ( -145. <= vz && vz < -87. ) {
+      b0=39.578630496797;
+      b1=1.46561577132993;
+      b2=0.006515367058115;
+      b3=-4.06391982010589e-05;
+      b4=5.51203917383809e-08;
+      c0=-14.8817460248614;
+      c1=0.764539480062978;
+      c2=0.00368901349656326;
+      c3=-1.27602217700865e-05;
+      c4=8.02618485000158e-10;
+    }
+    else if ( -87. <= vz && vz < -29. ) {
+      b0=26.1841414192908;
+      b1=1.73354655107464;
+      b2=-0.00280668326418846;
+      b3=1.22370803379957e-05;
+      b4=-3.15068617200212e-08;
+      c0=-13.1831127837376;
+      c1=0.760227210117286;
+      c2=0.00195873375843822;
+      c3=-2.69378951644624e-06;
+      c4=-1.05344843941749e-08;
+    }
+    else if ( -29. <= vz && vz < 29. ) {
+      b0=23.3635904884101;
+      b1=1.58179764458174;
+      b2=-0.00100184372825271;
+      b3=7.76378744751984e-07;
+      b4=-6.46469867000365e-09;
+      c0=-11.4340781454132;
+      c1=0.72398407747444;
+      c2=0.00121092416745035;
+      c3=1.17875404059176e-07;
+      c4=-9.81658682040738e-09;
+    }
+    else if ( 29. <= vz && vz < 87. ) {
+      b0=29.4343991835005;
+      b1=1.48353715105631;
+      b2=0.00106271734149745;
+      b3=-9.07835076338586e-06;
+      b4=6.7722581625238e-09;
+      c0=-9.97159163811459;
+      c1=0.591000613390771;
+      c2=0.00449768928484714;
+      c3=-1.71667412152202e-05;
+      c4=1.6467383813372e-08;
+    }
+    else if ( 87. <= vz && vz <= 145. ) {
+      b0=37.0772875081557;
+      b1=1.53484162926915;
+      b2=0.00471873506675937;
+      b3=-2.94958548877277e-05;
+      b4=3.60887574265838e-08;
+      c0=-13.3927733032856;
+      c1=0.704319390196747;
+      c2=0.00485360248820988;
+      c3=-2.10416804123978e-05;
+      c4=1.92342533435503e-08;
+    }
+
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+  }
   else {
     notPileUp = kTRUE;
   }
@@ -596,7 +680,11 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
   }
   else if ( mParameterIndex == 40 ) {  // Au+Au 200 GeV Run 19
     // New Vz correction. All vz bins bins are normalize to that at the center
-    vzCorr = auau14_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+    vzCorr = auau200_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
+  else if ( mParameterIndex == 41 ) {  // Au+Au 7.7 GeV Run 20
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau7_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
 
   return vzCorr;
@@ -606,7 +694,7 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
 Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
 
   Double_t refMult_d = -9999.;
-  if( mParameterIndex>=30 && mParameterIndex<=40 ) {
+  if( mParameterIndex>=30 && mParameterIndex<=41 ) {
     refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
   }
   else {
@@ -879,6 +967,16 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
+  else if (mParameterIndex == 41) { // Au+Au 7.7 GeV 2020
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau200_run19_nVzBins) return 1.0;
+
+    weight = auau7_run20_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
   else {
     weight = 1.0;
   }
@@ -1070,6 +1168,14 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau200_run19_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 40 )
+  else if ( mParameterIndex == 41 ) {  // Au+Au 7.7 GeV 2020
+    for ( Int_t iVz=0; iVz<auau7_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
+      if ( auau7_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau7_run20_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau7_run20_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 41 )
   else {
     iBinVz = -1;
   }
@@ -1121,7 +1227,8 @@ const Int_t StRefMultCorr::getRefX() const {
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return 1; 
   else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) return 2; 
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return 3; 
-  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4; 
+  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4;
+  else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return 5;
   else return 9999;
 }
 
@@ -1131,7 +1238,8 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return nID_ref1; 
   else if ( mName.CompareTo("refmult2", TString::kIgnoreCase) == 0 ) return nID_ref2; 
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return nID_ref3; 
-  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4; 
+  else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4;
+  else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return nID_ref5; 
   else return 9999;
 }
 
@@ -1225,7 +1333,7 @@ void StRefMultCorr::readHeaderFile() {
   }
 
   std::cout << "StRefMultCorr::readHeaderFile  [" << mName 
-       << "] Correction parameters and centrality definitions have been successfully read."
+       << "] Correction parameters and centrality definitions have been successfully read for refX=" << refX
        << std::endl;
 }
 
