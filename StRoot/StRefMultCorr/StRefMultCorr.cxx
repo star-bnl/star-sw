@@ -813,9 +813,9 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau200_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
-  else if ( mParameterIndex == 41 ) {  // Au+Au 7.7 GeV Run 20
+  else if ( mParameterIndex == 41 ) {  // Au+Au 7.7 GeV Run 21
     // New Vz correction. All vz bins bins are normalize to that at the center
-    vzCorr = auau7_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
+    vzCorr = auau7_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
 
   if (mVerbose) {
@@ -945,11 +945,9 @@ void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *
 
   std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..." << std::flush;
 	
-
   for(Int_t i=0; i<nRefmultbin*mnVzBinForWeight; i++) {
     mgRefMultTriggerCorrDiffVzScaleRatio.push_back(weight[i]);
   }
-
 
   std::cout << " [OK]" << std::endl;
 }
@@ -977,7 +975,7 @@ void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const D
   // Debug
   for(Int_t i=0; i<mnVzBinForWeight; i++) {
     std::cout << i << " " << step << " " << mVzEdgeForWeight[i]
-	 << ", " << mVzEdgeForWeight[i+1] << std::endl;
+	            << ", " << mVzEdgeForWeight[i+1] << std::endl;
   }
 }
 
@@ -1128,7 +1126,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
 
     if (iVzBinIndex < 0 || iVzBinIndex > auau200_run19_nVzBins) return 1.0;
 
-    weight = auau7_run20_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    weight = auau7_run21_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
     // Handle bad weight
     if (weight == 0 || TMath::IsNaN(weight)) {
       weight = 1.;
@@ -1164,6 +1162,18 @@ Double_t StRefMultCorr::triggerWeight() const {
   const Double_t par6 =   mPar_weight[6][mParameterIndex];
   const Double_t par7 =   mPar_weight[7][mParameterIndex];
 
+  if (mVerbose) {
+    std::cout << "Trigger efficiency parameters: "
+              << " [0]: " << par0
+              << " [1]: " << par1
+              << " [2]: " << par2
+              << " [3]: " << par3 
+              << " [4]: " << par4
+              << "  A: "  << A 
+              << " [6]: " << par6
+              << " [7]: " << par7 << std::endl;
+  }
+
   // Additional z-vetex dependent correction
   //const Double_t A = ((1.27/1.21))/(30.0*30.0); // Don't ask...
   //const Double_t A = (0.05/0.21)/(30.0*30.0); // Don't ask...
@@ -1177,8 +1187,8 @@ Double_t StRefMultCorr::triggerWeight() const {
     weight = (par0 +
               par1 / (par2 * mRefMult_corr + par3) +
               par4 * (par2 * mRefMult_corr + par3) +
-              par6 / TMath::Power(par2 * mRefMult_corr + par3, 2) +
-              par7 * TMath::Power(par2 * mRefMult_corr + par3, 2));
+              par6 / ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) +
+              par7 * ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) );
     /*
     std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
               << " par3: " << par3 << " par4: " << par4 << " A: " << A
@@ -1356,12 +1366,12 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
     } // for ( Int_t iVz=0; iVz<auau200_run19_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 40 )
   else if ( mParameterIndex == 41 ) {  // Au+Au 7.7 GeV 2020
-    for ( Int_t iVz=0; iVz<auau7_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
-      if ( auau7_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau7_run20_vzRangeLimits[iVz][1] ) {
+    for ( Int_t iVz=0; iVz<auau7_run21_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
+      if ( auau7_run21_vzRangeLimits[iVz][0] <= mVz && mVz < auau7_run21_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }
-    } // for ( Int_t iVz=0; iVz<auau7_run20_nVzBins; iVz++ )
+    } // for ( Int_t iVz=0; iVz<auau7_run21_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 41 )
   else {
     iBinVz = -1;
