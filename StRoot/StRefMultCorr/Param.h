@@ -448,7 +448,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   {
     "2019:19.6:20056032,20093036:-145,145",    // Year, energy, run start end, Vz range
     "6,9,13,18,24,32,43,55,70,88,110,135,165,201,243,296", // Centrality definition 
-    "50",   // Normalization start 
+    "164",   // Normalization start 
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00", // Vz correction parameters
     "1.04433,-1.13957e-01,4.54889e-01,-3.43209e-01,-1.55692e-03,0,4.00872e+00,1.03440e-05",  // Trigger efficiency
     "0,0" // Luminosity correction
@@ -458,7 +458,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   {
     "2019:14.6:20094048,20154013:-145,145",                     // Year, energy, run start end, Vz range
     "6,9,13,18,24,32,41,53,67,84,103,127,154,185,223,270",      // Centrality definition
-    "20",    // Normalization start
+    "154",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.05956,-1.25292,5.51106e-01,1.65283,-1.48792e-3,0,1.31733e+01,8.15878e-06",  // Trigger efficiency
     "0,0" // Luminosity correction
@@ -468,7 +468,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   {
     "2019:200:20190042,20193026:-100,100",                     // Year, energy, run start end, Vz range
     "12,18,25,36,49,66,88,113,144,180,223,274,334,404,486,588",      // Centrality definition
-    "100",    // Normalization start
+    "250",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.13418,-1.68334e-2,1.68995e-3,1.03279e-2,-4.42083e-1,0,1.47591e-3,4.36703e-1",  // Trigger efficiency
     "2.14803e+02,-4.58703e-4" // Luminosity correction
@@ -478,7 +478,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   {
     "2019:200:20190042,20193026:-100,100",                     // Year, energy, run start end, Vz range
     "4,6,8,12,16,21,28,37,47,59,74,91,112,135,164,201",      // Centrality definition
-    "30",    // Normalization start
+    "112",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.48905,-9610.65,622.081,4102.52,-1.06441e-05,0,7.24623e-11,7.59456e+07",  // Trigger efficiency
     "0,0" // Luminosity correction
@@ -509,7 +509,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   {
     "2019:4.59:20179040,20183025:198,202",         // Year, energy, run start end, Vz range
     "5,7,11,15,20,26,33,43,53,66,81,98,118,141,166,197",  // Multiplicity values for the centrality classes
-    "30",                        // Normalization start (of Glauber to the data)
+    "118",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.2680,-0.13,0.0593,0.0179,-0.0879,0,0.120,0.00714",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
@@ -520,7 +520,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   {
     "2020:5.75:20355020,21045011:198,202",         // Year, energy, run start end, Vz range
     "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
-    "50",                        // Normalization start (of Glauber to the data)
+    "107",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.22,-0.37,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
@@ -531,7 +531,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   {
     "2019:7.3:20107029,20169055:198,202",         // Year, energy, run start end, Vz range
     "7,9,13,18,24,32,41,52,65,81,98,119,141,168,198,235",  // Multiplicity values for the centrality classes
-    "100",                        // Normalization start (of Glauber to the data)
+    "141",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.278,-0.1635,0.0547,0.217,-0.0734,0,0.222,0.00481",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
@@ -542,7 +542,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   {
     "2020:7.3:21035003,21036013:198,202",         // Year, energy, run start end, Vz range
     "6,9,13,17,23,31,40,51,64,80,97,118,141,167,198,236",  // Multiplicity values for the centrality classes
-    "30",                        // Normalization start (of Glauber to the data)
+    "141",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.017,0.0609,0.0744,-0.106,-0.003,0,0.0824,-3.91e-4",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
@@ -553,7 +553,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   {
     "2020:7.3:21035003,21036013:198,202",         // Year, energy, run start end, Vz range
     "10,15,21,28,38,49,63,79,98,119,142,169,200,233,271,315",  // Multiplicity values for the centrality classes
-    "30",                        // Normalization start (of Glauber to the data)
+    "160",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,0,4.50613e-02,-1.14802e-03",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
