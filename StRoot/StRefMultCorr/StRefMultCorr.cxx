@@ -1577,7 +1577,7 @@ void StRefMultCorr::readBadRunsFromHeaderFile() {
   for (Int_t i = 0; i < nBadRun_refmult_2021; i++) {
     mBadRun.push_back(badrun_refmult_2021[i]);
   }
-  std::cout << "read in nBadRun_refmult_2021: " << nBadRun_refmult_2020 << std::endl;
+  std::cout << "read in nBadRun_refmult_2021: " << nBadRun_refmult_2021 << std::endl;
 
   //// notification only one
   if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) {
