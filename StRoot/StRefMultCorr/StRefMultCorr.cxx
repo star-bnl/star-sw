@@ -1574,6 +1574,11 @@ void StRefMultCorr::readBadRunsFromHeaderFile() {
   }
   std::cout << "read in nBadRun_refmult_2020: " << nBadRun_refmult_2020 << std::endl;
 
+  for (Int_t i = 0; i < nBadRun_refmult_2021; i++) {
+    mBadRun.push_back(badrun_refmult_2021[i]);
+  }
+  std::cout << "read in nBadRun_refmult_2021: " << nBadRun_refmult_2020 << std::endl;
+
   //// notification only one
   if ( mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) {
     std::cout << "StRefMultCorr::readBadRunsFromHeaderFile  Bad runs for year 2010, 2011, 2017, 2018 and 2019 have been read." << std::endl;

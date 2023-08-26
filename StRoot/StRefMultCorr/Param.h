@@ -474,9 +474,9 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "2.14803e+02,-4.58703e-4" // Luminosity correction
   },
   //mParameterIndex = 41
-  //Run19 Au+Au 7.7 GeV, TrigerID = 810010,810020,810030,810040
+  //Run21 Au+Au 7.7 GeV, TrigerID = 810010,810020,810030,810040
   {
-    "2019:200:20190042,20193026:-100,100",                     // Year, energy, run start end, Vz range
+    "2021:200:20190042,20193026:-100,100",                     // Year, energy, run start end, Vz range
     "4,6,8,12,16,21,28,37,47,59,74,91,112,135,164,201",      // Centrality definition
     "112",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
@@ -558,7 +558,6 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
     "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,0,4.50613e-02,-1.14802e-03",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   }
-
 };
 
 
