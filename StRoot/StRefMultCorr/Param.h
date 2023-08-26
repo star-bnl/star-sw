@@ -470,7 +470,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "12,18,25,36,49,66,88,113,144,180,223,274,334,404,486,588",      // Centrality definition
     "100",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.13418,-1.68334e-2,1.68995e-3,1.03279e-2,-4.42083e-1,1.47591e-3,4.36703e-1",  // Trigger efficiency
+    "1.13418,-1.68334e-2,1.68995e-3,1.03279e-2,-4.42083e-1,0,1.47591e-3,4.36703e-1",  // Trigger efficiency
     "2.14803e+02,-4.58703e-4" // Luminosity correction
   },
   //mParameterIndex = 41
@@ -480,7 +480,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "4,6,8,12,16,21,28,37,47,59,74,91,112,135,164,201",      // Centrality definition
     "30",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.48905,-9610.65,622.081,4102.52,-1.06441e-05,7.24623e-11,7.59456e+07",  // Trigger efficiency
+    "1.48905,-9610.65,622.081,4102.52,-1.06441e-05,0,7.24623e-11,7.59456e+07",  // Trigger efficiency
     "0,0" // Luminosity correction
   }
 };
@@ -491,8 +491,8 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
 // FXT section
 //=======================================================================================
 const int nID_ref5  = 6;//after add N more new group of parameters, need to update nID_ref1 += N
-const int nSet_ref1 = 6;
-const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
+const int nSet_ref5 = 6;
+const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // mParameterIndex = 0
   // Run 18 Au+Au 3.85 GeV (sqrt(s_NN)=3 GeV), Trigger ID = 620052
   {
@@ -511,7 +511,7 @@ const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
     "5,7,11,15,20,26,33,43,53,66,81,98,118,141,166,197",  // Multiplicity values for the centrality classes
     "30",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.2680,-0.13,0.0593,0.0179,-0.0879,0.120,0.00714",   // Trigger efficiency
+    "1.2680,-0.13,0.0593,0.0179,-0.0879,0,0.120,0.00714",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -522,7 +522,7 @@ const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
     "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
     "50",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.22,-0.37,0.0532,0.00845,-0.0690,0.1,0.00546",   // Trigger efficiency
+    "1.22,-0.37,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -533,7 +533,7 @@ const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
     "7,9,13,18,24,32,41,52,65,81,98,119,141,168,198,235",  // Multiplicity values for the centrality classes
     "100",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.278,-0.1635,0.0547,0.217,-0.0734,0.222,0.00481",   // Trigger efficiency
+    "1.278,-0.1635,0.0547,0.217,-0.0734,0,0.222,0.00481",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -544,7 +544,7 @@ const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
     "6,9,13,17,23,31,40,51,64,80,97,118,141,167,198,236",  // Multiplicity values for the centrality classes
     "30",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.017,0.0609,0.0744,-0.106,-0.003,0.0824,-3.91e-4",   // Trigger efficiency
+    "1.017,0.0609,0.0744,-0.106,-0.003,0,0.0824,-3.91e-4",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -555,7 +555,7 @@ const string mParamStr_ref1[nID_ref5][nSet_ref1] = {
     "10,15,21,28,38,49,63,79,98,119,142,169,200,233,271,315",  // Multiplicity values for the centrality classes
     "30",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,4.50613e-02,-1.14802e-03",   // Trigger efficiency
+    "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,0,4.50613e-02,-1.14802e-03",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   }
 
