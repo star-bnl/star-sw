@@ -476,7 +476,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   //mParameterIndex = 41
   //Run21 Au+Au 7.7 GeV, TrigerID = 810010,810020,810030,810040
   {
-    "2021:200:20190042,20193026:-100,100",                     // Year, energy, run start end, Vz range
+    "2021:7.7:22031042,22121018:-145,145",                     // Year, energy, run start end, Vz range
     "4,6,8,12,16,21,28,37,47,59,74,91,112,135,164,201",      // Centrality definition
     "112",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
