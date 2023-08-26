@@ -478,7 +478,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   {
     "2021:7.7:22031042,22121018:-145,145",                     // Year, energy, run start end, Vz range
     "4,6,8,12,16,21,28,37,47,59,74,91,112,135,164,201",      // Centrality definition
-    "112",    // Normalization start
+    "110",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.48905,-9610.65,622.081,4102.52,-1.06441e-05,0,7.24623e-11,7.59456e+07",  // Trigger efficiency
     "0,0" // Luminosity correction
