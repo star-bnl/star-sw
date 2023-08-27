@@ -522,7 +522,7 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
     "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
     "107",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.22,-0.37,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
+    "1.22,-0.137,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -543,20 +543,20 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
     "2020:7.3:21035003,21036013:198,202",         // Year, energy, run start end, Vz range
     "6,9,13,17,23,31,40,51,64,80,97,118,141,167,198,236",  // Multiplicity values for the centrality classes
     "141",                        // Normalization start (of Glauber to the data)
-    "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
+    "0.,0.,0.,0.,0.,0.,0.,0.",    // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.017,0.0609,0.0744,-0.106,-0.003,0,0.0824,-3.91e-4",   // Trigger efficiency
-    "0.,0."                      // Luminosity correction
+    "0.,0."                       // Luminosity correction
   },
 
   // mParameterIndex = 5
   // Run 20 Au+Au 31.2 GeV (sqrt(s_NN)=7.7 GeV), Trigger ID = 770000
   {
-    "2020:7.3:21035003,21036013:198,202",         // Year, energy, run start end, Vz range
+    "2020:7.3:21028011,21029036:198,202",         // Year, energy, run start end, Vz range
     "10,15,21,28,38,49,63,79,98,119,142,169,200,233,271,315",  // Multiplicity values for the centrality classes
     "160",                        // Normalization start (of Glauber to the data)
-    "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
+    "0.,0.,0.,0.,0.,0.,0.,0.",    // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,0,4.50613e-02,-1.14802e-03",   // Trigger efficiency
-    "0.,0."                      // Luminosity correction
+    "0.,0."                       // Luminosity correction
   }
 };
 
