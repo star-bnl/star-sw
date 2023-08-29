@@ -471,7 +471,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "150",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "1.13418,-1.68334e-2,1.68995e-3,1.03279e-2,-4.42083e-1,0,1.47591e-3,4.36703e-1",  // Trigger efficiency
-    "2.14803e+02,-4.58703e-4" // Luminosity correction
+    "2.14803e+02,-4.58703e-4"  // Luminosity correction
   },
   //mParameterIndex = 41
   //Run21 Au+Au 7.7 GeV, TrigerID = 810010,810020,810030,810040
