@@ -1184,11 +1184,11 @@ Double_t StRefMultCorr::triggerWeight() const {
        && mRefMult_corr != -(par3/par2)  ) { // avoid denominator = 0 
 
     // Parametrization of MC/data RefMult ratio
-    weight = (par0 +
-              par1 / (par2 * mRefMult_corr + par3) +
-              par4 * (par2 * mRefMult_corr + par3) +
-              par6 / ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) +
-              par7 * ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) );
+    weight = ( par0 +
+               par1 / (par2 * mRefMult_corr + par3) +
+               par4 * (par2 * mRefMult_corr + par3) +
+               par6 / ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) +
+               par7 * ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) );
     /*
     std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
               << " par3: " << par3 << " par4: " << par4 << " A: " << A
@@ -1196,7 +1196,7 @@ Double_t StRefMultCorr::triggerWeight() const {
               << "refMultCorr: " << mRefMult_corr << " weight: " << weight << std::endl;
               */
 
-    weight = weight + (weight-1.0)*(A*mVz*mVz); // z-dependent weight correction
+    weight = weight + (weight - 1.0) * (A * mVz * mVz); // z-dependent weight correction
   }
   if (mVerbose) {
     std::cout << "\tTrigger weight: " << weight << std::endl;
