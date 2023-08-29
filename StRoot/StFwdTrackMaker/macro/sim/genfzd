@@ -1,0 +1,4 @@
+#!/bin/tcsh
+
+set strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+starsim -w 0 -b sim/testg.kumac seed=${strongrandom} nevents=1000 ntrack=3 etamn=2.0 etamx=4.5 ptmn=0.2 ptmx=1.0 ofn=three.fzd

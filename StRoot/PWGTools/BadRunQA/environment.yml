@@ -1,0 +1,19 @@
+name: QA
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=23.0.1
+  - matplotlib=3.7.1
+  - matplotlib-base=3.7.1
+  - ruptures=1.1.7
+  - pandas=2.0.1
+  - numpy=1.24.3
+  - scipy=1.10.1
+  - uproot=5.0.7
+  - uproot-base=5.0.7
+  - scikit-learn=1.2.2
+  - pip:
+      - pyfiglet==0.8.post1
+prefix: /star/u/ctsang/miniconda3/envs/QA
+

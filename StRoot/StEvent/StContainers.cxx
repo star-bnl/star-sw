@@ -149,6 +149,7 @@
 #include "StRHICfPoint.h"
 #include "StFpsSlat.h"
 #include "StFtpcHit.h"
+#include "StFwdTrack.h"
 #include "StHltBEmcTowerHit.h"
 #include "StHltBTofHit.h"
 #include "StHltDiElectron.h"
@@ -224,6 +225,7 @@ StCollectionImp(RHICfHit)
 StCollectionImp(RHICfPoint)
 StCollectionImp(FpsSlat)
 StCollectionImp(FtpcHit)
+StCollectionImp(FwdTrack)
 StCollectionImp(Hit)
 StCollectionImp(HltBEmcTowerHit)
 StCollectionImp(HltBTofHit)

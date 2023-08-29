@@ -39,17 +39,23 @@ public:
 
 	int kill_bad(int r0_logical,int row, int pad) ;		// kills this specific pad in ped_store
 
-	void smooth() ;					// from ped_store to ped_store
+	void smooth(int mode=0) ;					// from ped_store to ped_store
 
 	int max_events ;	// max events allowed in the calculation
 
+	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
 
+	u_int evts[6] ;		// logical r0: RDOs count from 0 here!
+	u_int valid_evts[6] ;	// logical r0
+
+	int sector ;		// logical (1..36) 
+	int smoothed ;	// boolean
 private:
 
-	int sector ;		// logical (1..36)!
+
 	int rb_mask ;	// logical mask
 
-	int smoothed ;	// boolean
+
 
 
 	struct peds {
@@ -70,11 +76,8 @@ private:
 	} ped_rdo_store[6] ;	// indexed by logical r0
 
 
-	u_int evts[6] ;		// logical r0: RDOs count from 0 here!
-	u_int valid_evts[6] ;	// logical r0
 
 
-	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
 
 	struct peds *get(int r0_logical, int row, int pad) {		// returns pointer to ped_store
 		if(rb_mask & (1<<r0_logical)) ;

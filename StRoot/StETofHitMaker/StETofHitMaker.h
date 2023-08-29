@@ -88,6 +88,7 @@ public:
     void setIsSim( const bool isSim ); // for simulated digis
     void setDoQA( const bool doQA );
     void setDebug( const bool debug );
+    void setDoAfterPulseCorr( const bool apcorr );
 
     void updateClockJumpMap( const std::map< int, int >& clockJumpDir );
 
@@ -170,6 +171,7 @@ private:
     Bool_t                    mIsSim;
     Bool_t                    mDoQA;
     Bool_t                    mDebug;
+    Bool_t                    mApCorr;
 
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
@@ -193,8 +195,9 @@ inline void StETofHitMaker::setSoftwareDeadTime( const double& deadTime )       
 inline void StETofHitMaker::setDoClockJumpShift( const bool    doShift  )         { mDoClockJumpShift       = doShift;  }
 inline void StETofHitMaker::setDoDoubleClockJumpShift( const bool doDoubleShift ) { mDoDoubleClockJumpShift       = doDoubleShift;  }
 
-inline void StETofHitMaker::setIsSim( const bool isSim ) { mIsSim = isSim; }
-inline void StETofHitMaker::setDoQA(  const bool doQA )  { mDoQA  = doQA;  }
-inline void StETofHitMaker::setDebug( const bool debug ) { mDebug = debug; }
+inline void StETofHitMaker::setIsSim( const bool isSim )                          { mIsSim = isSim; }
+inline void StETofHitMaker::setDoQA(  const bool doQA )                           { mDoQA  = doQA;  }
+inline void StETofHitMaker::setDebug( const bool debug )                          { mDebug = debug; }
+inline void StETofHitMaker::setDoAfterPulseCorr( const bool apcorr )              { mApCorr = apcorr; }
 
 #endif

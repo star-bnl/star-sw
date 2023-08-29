@@ -44,28 +44,14 @@ class StRHICfFunction
     StRHICfFunction();
     virtual ~StRHICfFunction();
 
-  void initChecker();
-
     void setRunType(int type){mRunType = type;}
     int getRunType(){return mRunType;}
     int checkRunTypeForRHICf2017(int runNum);
     int checkGSOBarSize(int tower); // 0 = small, 1 = large
-
     float rescaleEnergyFactor(int tower, int layer);
-    
-    bool checkGSOBarEnergy(float val);
-    bool checkGSOBarTable(float val);
-    bool checkPlateEnergy(float val);
-    bool checkRecoValue(string opt, float val);
-    bool checkLeakageTable(string opt, bool val);
 
   private:
     int mRunType;
-    int mGSOBarNum;
-    int mGSOBarTableNum;
-    int mPlateNum;
-    int mValueForRecoNum[5]; // in StRHICfRecoEnergy, check setting parameter[ResultHitPos, ResultHitNum, MultiHitPos, MultiPeakHeight, Overlap]
-    int mLeakageNum[3];
 };
 
 #endif
