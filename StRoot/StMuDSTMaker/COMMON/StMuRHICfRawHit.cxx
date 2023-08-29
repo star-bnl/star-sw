@@ -13,15 +13,12 @@ StMuRHICfRawHit::~StMuRHICfRawHit()
 
 void StMuRHICfRawHit::clear()
 {	
-  mRHICfRunNumber = 0;
-  mRHICfEventNumber = 0;
-  mRunType = 999;
   mBunchNumber = 0;
   mRHICfTrigger = 0;
   mRunTime[0] = 0;
   mRunTime[1] = 0;
   mRunTRGM = 0;
-
+  mRunType = 999;
 
   memset(mPlateADC, 0, sizeof(mPlateADC));
   memset(mPlateADCDelay, 0, sizeof(mPlateADCDelay));
@@ -33,10 +30,8 @@ void StMuRHICfRawHit::clear()
   memset(mGPI1, 0, sizeof(mGPI1));
 }
 
-void StMuRHICfRawHit::setRHICfRunNumber(UInt_t run){mRHICfRunNumber = run;}
-void StMuRHICfRawHit::setRHICfEventNumber(UInt_t event){mRHICfEventNumber = event;}
-void StMuRHICfRawHit::setRunType(UInt_t type){mRunType = type;}
 void StMuRHICfRawHit::setBunchNumber(UInt_t bunch){mBunchNumber = bunch;}
+void StMuRHICfRawHit::setRunType(UInt_t type){mRunType = type;}
 void StMuRHICfRawHit::setTriggerNumber(UInt_t trigger){mRHICfTrigger = trigger;}
 void StMuRHICfRawHit::setRunTime(Int_t idx, UInt_t time){mRunTime[idx] = time;}
 void StMuRHICfRawHit::setRunTRGM(UInt_t trgm){mRunTRGM = trgm;}
@@ -54,10 +49,8 @@ void StMuRHICfRawHit::setCAD0(Int_t idx, UInt_t val){mCAD0[idx] = val;}
 void StMuRHICfRawHit::setGPI0(Int_t idx, UInt_t val){mGPI0[idx] = val;}
 void StMuRHICfRawHit::setGPI1(Int_t idx, UInt_t val){mGPI1[idx] = val;}
 
-UInt_t StMuRHICfRawHit::getRHICfRunNumber(){return mRHICfRunNumber;}
-UInt_t StMuRHICfRawHit::getRHICfEventNumber(){return mRHICfEventNumber;}
-UInt_t StMuRHICfRawHit::getRunType(){return mRunType;}
 UInt_t StMuRHICfRawHit::getBunchNumber(){return mBunchNumber;}
+UInt_t StMuRHICfRawHit::getRunType(){return mRunType;}
 UInt_t StMuRHICfRawHit::getTriggerNumber(){return mRHICfTrigger;}
 UInt_t StMuRHICfRawHit::getRunTime(Int_t idx){return mRunTime[idx];}
 UInt_t StMuRHICfRawHit::getRunTRGM(){return mRunTRGM;}

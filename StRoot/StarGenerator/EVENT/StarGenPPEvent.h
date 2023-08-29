@@ -37,17 +37,14 @@ class StarGenPPEvent : public StarGenEvent
   Bool_t   valence2;  ///< True if yellow beam parton is in valence
   
   Double_t sHat,tHat,uHat; ///< Mandelstam variables
-
-  Int_t mstu72;       ///<  Line number of an event record, ("======")
-  Int_t mstu73;       ///<  Line number of an event record, ("======")
-    
+  
   Double_t ptHat;     ///< pT of the recoiling particles
   Double_t thetaHat;  ///< theta of the recoiling particles 
   Double_t phiHat;    ///< phi of the recoiling particles
 
   Double_t weight;    ///< Weight of the event 
 
-  ClassDef(StarGenPPEvent,2);
+  ClassDef(StarGenPPEvent,1);
 
 };
  

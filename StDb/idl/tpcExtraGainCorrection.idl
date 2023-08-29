@@ -5,15 +5,15 @@
 *       description: list of pad with bad pulser data
 */ 
 struct tpcExtraGainCorrection { 
-  short   idx; // active line number >= 1
-  short   nrows;// total no. of active rows;
+  octet   idx; // active line number >= 1
+  octet   nrows;// total no. of active rows;
   long    runMin;
   long    runMax;
-  short   sector;
-  short   row;
+  octet   sector;
+  octet   row;
   short   padMin;
   short   padMax;
-  short   RDO;
-  short   FEE; // if positive reactivate intire FEE else if negative use row and [padMin,padMax] range
-  short   status; // 0 => dead, 1 => Alive
+  octet   RDO;
+  octet   FEE; // if positive reactivate intire FEE else if negative use row and [padMin,padMax] range
+  octet   status; // 0 => dead, 1 => Alive
  };  

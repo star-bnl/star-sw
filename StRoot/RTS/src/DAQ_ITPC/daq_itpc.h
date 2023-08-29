@@ -3,7 +3,7 @@
 
 #include <DAQ_READER/daq_det.h>
 
-class itpc23 ;
+
 
 class itpcInterpreter ;
 class itpc_fcf_c ;
@@ -36,7 +36,6 @@ private:
 
 	// main data interpreter, unpackeer and checker
 	itpcInterpreter *it ;
-	itpc23 *it23 ;
 
 	// for Offline cluster finder and gain loaded...
 	itpc_fcf_c *fcf[25] ;	// one per sector
@@ -72,9 +71,6 @@ public:
 	}
 
 	static int no_sw16 ;
-
-	int online ;
-	int rdo_fmt ;
 } ;
 
 

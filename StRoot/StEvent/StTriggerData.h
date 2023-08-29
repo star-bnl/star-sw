@@ -212,7 +212,6 @@ public:
     virtual unsigned int token() const = 0;
     virtual unsigned int triggerWord() const = 0;
     virtual unsigned int actionWord() const = 0;  
-    virtual unsigned int zdcKillerBit() const;
     virtual unsigned short busyStatus() const;
     virtual unsigned short dsmInput() const;
     virtual unsigned short trgToken() const;

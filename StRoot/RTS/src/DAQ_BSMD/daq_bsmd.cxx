@@ -755,16 +755,11 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 
-
-
 	// compare to what?
 	LOG(DBG,"RDO %d: in data %d",rdo,rdo_id) ;
 
 
 	int format_code = (d32[2] >> 8) & 0xFF ;
-
-//	LOG(TERR,"%d: sig 0x%08X, dead 0x%08X, 3 0x%08X, 2 0x%08X: format code 0x%X",rdo,d32[1],d32[9],d32[3],d32[2],format_code) ;
-
 	if(format_code == 0x02) {	// null event
 		LOG(NOTE,"RDO %d: null event",rdo) ;
 
@@ -805,12 +800,9 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 		if(crc != crc_in_data) {
 			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
-			//bad |= 1 ;
+			bad |= 1 ;
 		}
 	}	
-	else {
-//		LOG(WARN,"RDO %d: no CRC in data",rdo) ;
-	}
 
 	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
 #endif
@@ -826,8 +818,8 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	t_cou++ ;
 
 
-//	LOG(TERR,"RDO %d: token %d, trg %d, daq %d: rhic %u; words %d",rdo, 
-//		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic,words) ;
+	LOG(NOTE,"RDO %d: token %d, trg %d, daq %d: rhic %u",rdo, 
+		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic) ;
 
 
 	// check token and trg_cmd sanity...
@@ -955,14 +947,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 	
 	if(bad & 1) {	// critical errors
-		//return 0 ;	// no trigger!
-
-		trg[0].t = 4097 ;
-		trg[0].trg = 0 ;
-		trg[0].daq = 0 ;
-		trg[0].rhic = 0 ;
-
-		return 1 ;
+		return 0 ;	// no trigger!
 	}
 	else {
 

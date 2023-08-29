@@ -176,12 +176,9 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
             nline =  (d & 0x000000ff);
             oldch = -1;
 	    if (addr > 15 || (oldcrt!=-1 && crate!=oldcrt)){
-		static Int_t err = 0; 
-		err++; 
-		if (err <10)
 		    printf("i=%3d d=%08x crt=%3d adr=%08x nline=%3d oldcrt=%3d QTBd header bad crt or addr\n",
 			   i,d,crate,addr+0x10,nline,oldcrt);
-		return;
+		    return;
 	    }
             // else {
 		//printf("i=%3d d=%08x crt=%3d adr=0x%02x nline=%3d\n",i,d,crate,addr+0x10,nline);
@@ -236,7 +233,6 @@ unsigned short StTriggerData::mAddBits() const {return 0;}
 unsigned short StTriggerData::bcData(int address) const {return 0;}
 unsigned short StTriggerData::getTrgDetMask() const {return 0;}
 unsigned int   StTriggerData::getTrgCrateMask() const {return 0;}
-unsigned int StTriggerData::zdcKillerBit() const {return 0;}
 unsigned short StTriggerData::busyStatus() const {return 0;}
 unsigned int StTriggerData::tcuCounter() const {return 0;}
 unsigned int StTriggerData::rccCounter(int crate) const {return 0;}

@@ -10,14 +10,7 @@
 #endif
 St_trigDetSums* St_trigDetSumsC::fgTableCopy = 0;
 Int_t StDetectorDbMaker::_debug = 0;
-StDetectorDbMaker *StDetectorDbMaker::fgStDetectorDbMaker = 0;
 ClassImp(StDetectorDbMaker)
-//_____________________________________________________________________________
-//_____________________________________________________________________________
-Int_t StDetectorDbMaker::InitRun  (Int_t runumber) {
-  if (m_ConstSet) m_ConstSet->Delete(); // Clear Chair Instances 
-  return 0;
-}   
 //_____________________________________________________________________________
 Int_t StDetectorDbMaker::Make(){
 #if 0 /* Move to St_trigDetSumsC to unify reading daq and StEvent files */

@@ -134,7 +134,6 @@ void itpcPed::accum(int sector, int rdo, int port,int fee_id, int ch, int tb, in
 	if(evts[sector][rdo]<250) {
 		evts[sector][rdo]++ ;
 	}
-//printf("accum %d %d %d %d\n",sector,rdo,port,ch) ;
 
 	pt->ped[tb] += adc_val ;
 	pt->rms[tb] += adc_val*adc_val ;
@@ -153,16 +152,12 @@ void itpcPed::calc()
 	for(int r=0;r<4;r++) {
 		if(ped_p[s][r][0][0]==0) continue ;
 
-//printf("calc S%d:%d fee_mask 0x%08X\n",s,r,fee_mask[s][r]) ;
-
 		for(int p=0;p<16;p++) {
 			if(fee_mask[s][r] & (1<<p)) ;
 			else continue ;
 
 			for(int c=0;c<64;c++) {
 				ped_t *pt = ped_p[s][r][p][c] ;
-
-//printf("    port %d, channel %d: cou %d\n",p,c,pt->c_cou) ;
 
 				if(pt->c_cou==0) {	// problem!!!
 					pt->c_ped = 1023.0 ;
@@ -430,7 +425,7 @@ int itpcPed::to_cache(const char *fname, int sec1, int rdo1)
 		char fn[256] ;
 
 		if(evts[sec1-1][rdo1-1]<100) {
-			LOG(ERR,"S%02d:%d -- not enough ped events %d",sec1,rdo1,evts[sec1-1][rdo1-1]) ;
+			LOG(ERR,"S%02:%d -- not enough ped events %d",sec1,rdo1,evts[sec1-1][rdo1-1]) ;
 			return -1 ;
 		}
 

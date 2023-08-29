@@ -231,11 +231,6 @@ unsigned int StTriggerData2022::actionWord() const
     (                  EvtDesc->actionWdDetectorBitMask & 0x00ff   );
 }
 
-
-unsigned int  StTriggerData2022::zdcKillerBit() const{
-    return (EvtDesc->addBits>>4) & 0x1;
-}
-
 unsigned int StTriggerData2022::numberOfPreXing() const
 {
     return EvtDesc->npre & 0xf;

@@ -312,7 +312,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	tpx36_to_real(sector,rb+1,s_real,r_real) ;
 
-	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
+//	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
@@ -464,8 +464,6 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		}
 
 		*addr = (aid << 24) | (ch << 16) | tcou ;
-
-//		LOG(TERR,"to_altro: sector %d, rb %d: ALTRO %3d:%02d tcou %d",sector,rb,aid,ch,tcou) ;
 
 		rbuff += 2 * tcou ;	// skip stored...
 	}
@@ -964,7 +962,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 }
 
 
-void tpxPed::smooth(int mode)
+void tpxPed::smooth()
 {
 	int r, p, t ;
 
@@ -1046,18 +1044,6 @@ void tpxPed::smooth(int mode)
 		// finally, we need to round off correctly!
 		for(t=0;t<512;t++) {
 			ped->ped[t] = (double) ((u_short) (smoother[t]+0.5)) ;	
-			if(mode==1) {	// new in May2023, kills GG pickup
-				if(t>=18 && t<=20) {
-					ped->ped[t] = 1023.0 ;
-				}
-			}
-			else if(mode==2) {	// slight increase
-				if(t>=18 && t<=20) {
-					ped->ped[t] += 5.0 ;
-					if(ped->ped[t]>1023.0) ped->ped[t] = 1023.0 ;
-				}
-
-			}
 		}
 
 
@@ -1067,7 +1053,7 @@ void tpxPed::smooth(int mode)
 	}
 	}
 
-	LOG(TERR,"Pedestals smoothed: sector %2d, mode %d",sector,mode) ;
+	LOG(TERR,"Pedestals smoothed: sector %2d",sector) ;
 	smoothed = 1 ;
 
 	return ;

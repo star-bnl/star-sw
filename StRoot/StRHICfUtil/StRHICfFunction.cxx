@@ -13,7 +13,15 @@
 
 StRHICfFunction::StRHICfFunction()
 {
+  initChecker();
+}
+
+void StRHICfFunction::initChecker()
+{
   mRunType = 999;
+  mGSOBarNum = 0;
+std::fill(mLeakageNum, mLeakageNum+3, 0);
+std::fill(mValueForRecoNum, mValueForRecoNum+5, 0);
 }
 
 StRHICfFunction::~StRHICfFunction()
@@ -109,4 +117,87 @@ float StRHICfFunction::rescaleEnergyFactor(int tower, int layer)
     if(layer > 8){rescaleFactor = factorByTowerTOP[tower];}
 	}
   return rescaleFactor;
+}
+
+bool StRHICfFunction::checkGSOBarEnergy(float val)
+{
+  if(val > -900.){mGSOBarNum += 1;}
+  if(mGSOBarNum == kRHICfNtower*kRHICfNlayer*kRHICfNxy*kRHICfNbarLarge-kRHICfNlayer*kRHICfNxy*kRHICfNbarSmall){
+    return kRHICfOk;
+  }
+  else{return kRHICfFatal;}
+}
+
+bool StRHICfFunction::checkGSOBarTable(float val)
+{
+  if(val > -900.){mGSOBarTableNum += 1;}
+  if(mGSOBarTableNum == kRHICfNtower*kRHICfNlayer*kRHICfNxy*kRHICfNbarLarge-kRHICfNlayer*kRHICfNxy*kRHICfNbarSmall){
+    return kRHICfOk;
+  }
+  else{return kRHICfFatal;}
+}
+
+bool StRHICfFunction::checkPlateEnergy(float val)
+{
+  if(val > -900.){mPlateNum += 1;}
+  if(mPlateNum == kRHICfNtower*kRHICfNplate){
+    return kRHICfOk;
+  }
+  else{return kRHICfFatal;}
+}
+
+bool StRHICfFunction::checkRecoValue(string opt, float val)
+{
+  transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
+  if(opt=="resulthitpos"){
+    if(val > -900.){mValueForRecoNum[0] += 1;}
+    if(mValueForRecoNum[0] == kRHICfNtower*kRHICfNxy){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="resulthitnum"){
+    if(val > -900.){mValueForRecoNum[1] += 1;}
+    if(mValueForRecoNum[1] == kRHICfNtower){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="multihitpos"){
+    if(val > -900.){mValueForRecoNum[2] += 1;}
+    if(mValueForRecoNum[2] == kRHICfNtower*2*kRHICfNxy*2){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="multipeakheight"){
+    if(val > -900.){mValueForRecoNum[3] += 1;}
+    if(mValueForRecoNum[3] == kRHICfNtower*2*kRHICfNxy*2){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="overlap"){
+    if(val > -900.){mValueForRecoNum[4] += 1;}
+    if(mValueForRecoNum[4] == kRHICfNtower*kRHICfNxy){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="runtype"){
+    if(val < 3){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  return kRHICfFatal;
+}
+
+bool StRHICfFunction::checkLeakageTable(string opt, bool val)
+{
+  transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
+  if(opt=="photonin"){
+    if(val == true){mLeakageNum[0] += 1;}
+    if(mLeakageNum[0] == kRHICfNtower*kRHICfNplate){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="photonout"){
+    if(val == true){mLeakageNum[1] += 1;}
+    if(mLeakageNum[1] == kRHICfNtower*kRHICfNplate){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  else if(opt=="neutronout"){
+    if(val == true){mLeakageNum[2] += 1;}
+    if(mLeakageNum[2] == kRHICfNtower){return kRHICfOk;}
+    else{return kRHICfFatal;}
+  }
+  return kRHICfFatal;
 }

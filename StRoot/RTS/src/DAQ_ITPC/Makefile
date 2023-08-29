@@ -63,8 +63,6 @@ daq_itpc.o: ../../../../StRoot/RTS/include/I386/atomic.h
 daq_itpc.o: itpcPed.h
 daq_itpc.o: itpcFCF.h
 daq_itpc.o: ../DAQ_ITPC/itpcPed.h
-daq_itpc.o: ../DAQ_TPC23/itpc23.h
-daq_itpc.o: ../DAQ_TPC23/tpc23_base.h
 itpcCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 itpcCore.o: itpc_maps.h
 itpcCore.o: itpc_rowlen.h

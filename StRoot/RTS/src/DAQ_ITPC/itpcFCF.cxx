@@ -1235,10 +1235,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 	for(int p=1;p<=rl;p++) {
 		rp_t *rp = get_row_pad(row,p) ;
 
-		if(rp->s1_len==0) {
-			//LOG(WARN,"row:pad %d:%d is void",row,p) ;
-			continue ;
-		}
+		if(rp->s1_len==0) continue ;
 
 		u_short *d = rp->s1_data ;
 
@@ -1247,13 +1244,8 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 			int ix = *d++ ;
 
-
 			int b_ix = blob_ix[ix] ;
 
-			LOG(TERR,"  using bix %d %d",ix,b_ix) ;
-			if(b_ix != ix) {
-				LOG(WARN,"Can't be: %d %d, RP %d:%d",b_ix,ix,row,p) ;
-			}
 
 			if(b_ix==0) {
 				LOG(ERR,"Can't be: %d %d, RP %d:%d",b_ix,ix,row,p) ;
@@ -1314,7 +1306,6 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			//LOG(WARN,"%d: 1pad %d %d: %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
-			//blob[i].p1 *= 1000 ;
 			continue ;
 		}
 
@@ -1324,7 +1315,6 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			//LOG(WARN,"%d: 3tb %d %d %d",i,dp,dt,blob[i].seq_cou) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;	// kill it
-			blob[i].p1 *= 2000 ;
 			continue ;
 		}
 
@@ -1337,7 +1327,6 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 //			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
 			//LOG(WARN,"%d %d %d %d",blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
 			blob[i].seq_cou = 0 ;
-			blob[i].p1 *= 3000 ;
 			continue ;
 		}
 
@@ -1347,11 +1336,11 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 
 
-#if 1
-	LOG(TERR,"Blobs OK %d/%d in row %d",blob_ok,blob_cou,row) ;
+#if 0
+	LOG(TERR,"Blobs OK %d/%d",blob_ok,blob_cou) ;
 
 	for(int i=0;i<blob_cou;i++) {
-		//if(blob[i].seq_cou==0) continue ;
+		if(blob[i].seq_cou==0) continue ;
 
 		LOG(TERR,"Blob %d: seq %d: flags 0x%X: pad %d:%d, tb %d:%d",i,blob[i].seq_cou,blob[i].flags,
 		    blob[i].p1,blob[i].p2,blob[i].t1,blob[i].t2) ;
@@ -1403,7 +1392,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 
 #ifdef DO_DBG1
-		printf("...bytes %lu vs %lu\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
+		printf("...bytes %d vs %d\n",dt_2*(dp+2)*sizeof(short)*2,sizeof(smooth_dta)) ;
 #endif
 		memset(smooth_dta,0,dt_2*(dp+2)*sizeof(short)*2) ;	// clear both storages which is why there's a 2
 

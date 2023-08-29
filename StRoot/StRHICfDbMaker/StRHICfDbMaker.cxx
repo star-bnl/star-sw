@@ -262,8 +262,6 @@ Int_t StRHICfDbMaker::InitRun(Int_t runNumber)
 }
 
 //=========== Address ===========//
-unsigned int StRHICfDbMaker::getRHICfRunNumberAddress() const {return 0;}
-unsigned int StRHICfDbMaker::getRHICfEventNumberAddress() const {return 1;}
 unsigned int StRHICfDbMaker::getRunTRGMAddress() const {return 4;}
 unsigned int StRHICfDbMaker::getTriggerAddress() const {return 623;}
 unsigned int StRHICfDbMaker::getBunchNumberAddress() const {return 649;}

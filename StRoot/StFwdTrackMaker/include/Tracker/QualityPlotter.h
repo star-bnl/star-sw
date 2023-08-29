@@ -95,31 +95,31 @@ class QualityPlotter {
         {
             size_t track_len = 4;
             // only Q > 0.9
-            string n = TString::Format("McPtFound%lu", track_len).Data();
+            string n = TString::Format("McPtFound%u", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";p_{T}^{MC} (GeV/c)", 100, 0, 10);
-            n = TString::Format("McEtaFound%lu", track_len).Data();
+            n = TString::Format("McEtaFound%u", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";#eta^{MC} (GeV/c)", 100, 2, 5);
-            n = TString::Format("McPhiFound%lu", track_len).Data();
+            n = TString::Format("McPhiFound%u", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";#phi^{MC} (GeV/c)", 128, -3.2, 3.2);
 
-            n = TString::Format("McPtPhiFound%lu", track_len).Data();
+            n = TString::Format("McPtPhiFound%u", track_len).Data();
             hist[n] = new TH2F(n.c_str(), "; p_{T}^{MC} (GeV/c);#phi^{MC} (GeV/c)", 20, 0, 10, 64, -3.2, 3.2);
 
-            n = TString::Format("McPtEtaPhiFound%lu", track_len).Data();
+            n = TString::Format("McPtEtaPhiFound%u", track_len).Data();
             hist[n] = new TH3F(n.c_str(), "; p_{T}^{MC} (GeV/c); #eta; #phi^{MC} (GeV/c)", 50, 0, 5, 30, 2, 5, 64, -3.2, 3.2);
 
             // all Q versions
-            n = TString::Format("McPtFound%luAllQ", track_len).Data();
+            n = TString::Format("McPtFound%uAllQ", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";p_{T}^{MC} (GeV/c)", 100, 0, 10);
-            n = TString::Format("McEtaFound%luAllQ", track_len).Data();
+            n = TString::Format("McEtaFound%uAllQ", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";#eta^{MC} (GeV/c)", 100, 2, 5);
-            n = TString::Format("McPhiFound%luAllQ", track_len).Data();
+            n = TString::Format("McPhiFound%uAllQ", track_len).Data();
             hist[n] = new TH1F(n.c_str(), ";#phi^{MC} (GeV/c)", 128, -3.2, 3.2);
 
-            n = TString::Format("McPtPhiFound%luAllQ", track_len).Data();
+            n = TString::Format("McPtPhiFound%uAllQ", track_len).Data();
             hist[n] = new TH2F(n.c_str(), "; p_{T}^{MC} (GeV/c);#phi^{MC} (GeV/c)", 20, 0, 10, 64, -3.2, 3.2);
 
-            n = TString::Format("McPtEtaPhiFound%luAllQ", track_len).Data();
+            n = TString::Format("McPtEtaPhiFound%uAllQ", track_len).Data();
             hist[n] = new TH3F(n.c_str(), "; p_{T}^{MC} (GeV/c); #eta; #phi^{MC} (GeV/c)", 50, 0, 5, 30, 2, 5, 64, -3.2, 3.2);
         }
 
@@ -297,11 +297,11 @@ class QualityPlotter {
                 {
                     size_t min_track_len = 4;
                     if (t.size() >= min_track_len) {
-                        this->get(TString::Format("McPtPhiFound%luAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mPhi);
-                        ((TH3 *)this->get(TString::Format("McPtEtaPhiFound%luAllQ", min_track_len).Data()))->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mEta, mcTrackMap[mctid]->mPhi);
-                        this->get(TString::Format("McPtFound%luAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt);
-                        this->get(TString::Format("McEtaFound%luAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mEta);
-                        this->get(TString::Format("McPhiFound%luAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPhi);
+                        this->get(TString::Format("McPtPhiFound%uAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mPhi);
+                        ((TH3 *)this->get(TString::Format("McPtEtaPhiFound%uAllQ", min_track_len).Data()))->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mEta, mcTrackMap[mctid]->mPhi);
+                        this->get(TString::Format("McPtFound%uAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt);
+                        this->get(TString::Format("McEtaFound%uAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mEta);
+                        this->get(TString::Format("McPhiFound%uAllQ", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPhi);
                     }
                 }
 
@@ -313,11 +313,11 @@ class QualityPlotter {
                 {
                     size_t min_track_len = 4;
                     if (t.size() >= min_track_len) {
-                        this->get(TString::Format("McPtPhiFound%lu", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mPhi);
-                        ((TH3 *)this->get(TString::Format("McPtEtaPhiFound%lu", min_track_len).Data()))->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mEta, mcTrackMap[mctid]->mPhi);
-                        this->get(TString::Format("McPtFound%lu", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt);
-                        this->get(TString::Format("McEtaFound%lu", min_track_len).Data())->Fill(mcTrackMap[mctid]->mEta);
-                        this->get(TString::Format("McPhiFound%lu", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPhi);
+                        this->get(TString::Format("McPtPhiFound%u", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mPhi);
+                        ((TH3 *)this->get(TString::Format("McPtEtaPhiFound%u", min_track_len).Data()))->Fill(mcTrackMap[mctid]->mPt, mcTrackMap[mctid]->mEta, mcTrackMap[mctid]->mPhi);
+                        this->get(TString::Format("McPtFound%u", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPt);
+                        this->get(TString::Format("McEtaFound%u", min_track_len).Data())->Fill(mcTrackMap[mctid]->mEta);
+                        this->get(TString::Format("McPhiFound%u", min_track_len).Data())->Fill(mcTrackMap[mctid]->mPhi);
                     }
                 }
 
@@ -422,39 +422,39 @@ class QualityPlotter {
         // for ( size_t i : { 4 } ) {
         {
             size_t i = 4;
-            string n = TString::Format("McPt_%luhits", i).Data();
-            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtFound%lu", i).Data())->Clone(("EffVs" + n).c_str());
+            string n = TString::Format("McPt_%uhits", i).Data();
+            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtFound%u", i).Data())->Clone(("EffVs" + n).c_str());
             this->get("EffVs" + n)->Divide(this->get(n));
 
-            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtFound%luAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
+            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtFound%uAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
             this->get("EffVs" + n + "_AllQ")->Divide(this->get(n));
 
-            n = TString::Format("McEta_%luhits", i).Data();
-            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McEtaFound%lu", i).Data())->Clone(("EffVs" + n).c_str());
+            n = TString::Format("McEta_%uhits", i).Data();
+            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McEtaFound%u", i).Data())->Clone(("EffVs" + n).c_str());
             this->get("EffVs" + n)->Divide(this->get(n));
 
-            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McEtaFound%luAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
+            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McEtaFound%uAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
             this->get("EffVs" + n + "_AllQ")->Divide(this->get(n));
 
-            n = TString::Format("McPhi_%luhits", i).Data();
-            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPhiFound%lu", i).Data())->Clone(("EffVs" + n).c_str());
+            n = TString::Format("McPhi_%uhits", i).Data();
+            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPhiFound%u", i).Data())->Clone(("EffVs" + n).c_str());
             this->get("EffVs" + n)->Divide(this->get(n));
 
-            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPhiFound%luAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
+            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPhiFound%uAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
             this->get("EffVs" + n + "_AllQ")->Divide(this->get(n));
 
-            n = TString::Format("McPtPhi_%luhits", i).Data();
-            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtPhiFound%lu", i).Data())->Clone(("EffVs" + n).c_str());
+            n = TString::Format("McPtPhi_%uhits", i).Data();
+            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtPhiFound%u", i).Data())->Clone(("EffVs" + n).c_str());
             this->get("EffVs" + n)->Divide(this->get(n));
 
-            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtPhiFound%luAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
+            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtPhiFound%uAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
             this->get("EffVs" + n + "_AllQ")->Divide(this->get(n));
 
-            n = TString::Format("McPtEtaPhi_%luhits", i).Data();
-            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtEtaPhiFound%lu", i).Data())->Clone(("EffVs" + n).c_str());
+            n = TString::Format("McPtEtaPhi_%uhits", i).Data();
+            this->hist["EffVs" + n] = (TH1 *)this->get(TString::Format("McPtEtaPhiFound%u", i).Data())->Clone(("EffVs" + n).c_str());
             this->get("EffVs" + n)->Divide(this->get(n));
 
-            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtEtaPhiFound%luAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
+            this->hist["EffVs" + n + "_AllQ"] = (TH1 *)this->get(TString::Format("McPtEtaPhiFound%uAllQ", i).Data())->Clone(("EffVs" + n + "_AllQ").c_str());
             this->get("EffVs" + n + "_AllQ")->Divide(this->get(n));
         }
 

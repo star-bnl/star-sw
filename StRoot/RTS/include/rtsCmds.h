@@ -16,9 +16,6 @@
 #define DAQ_SEND_CONFIG                0x24 
 #define RTS_SEND_CONFIG                DAQ_SEND_CONFIG
 
-#define DAQ_SEND_RECONFIG              0x26
-#define RTS_SEND_RECONFIG              DAQ_SEND_RECONFIG
-
 #define DAQ_FLUSH_TOKENS               0x27
 #define RTS_FLUSH_TOKENS               DAQ_FLUSH_TOKENS
 

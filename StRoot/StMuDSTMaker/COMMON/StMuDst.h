@@ -35,7 +35,6 @@ class StMuRHICfCollection;
 class StMuFcsCollection;
 class StMuFttCollection;
 class StMuFstCollection;
-class StMuFwdTrackCollection;
 class StMuPmdCollection;
 
 class StEvent;
@@ -121,8 +120,7 @@ public:
         TClonesArray** rhicf_ptca=0,
         TClonesArray** fcs_ptca=0, 
         TClonesArray** ftt_ptca=0, 
-        TClonesArray** fst_ptca=0,
-        TClonesArray** fwd_ptca=0, 
+        TClonesArray** fst_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
@@ -138,7 +136,6 @@ public:
         StMuFcsCollection *fcs_col=0, 
         StMuFttCollection *ftt_col=0, 
         StMuFstCollection *fst_col=0, 
-        StMuFwdTrackCollection *fwd_track_col=0, 
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
@@ -200,8 +197,6 @@ public:
   static TClonesArray** fttArrays;
   /// array of TClonesArrays for the stuff inherited from the Fst
   static TClonesArray** fstArrays;
-  /// array of TClonesArrays for the stuff inherited from the FWD Tracks 
-  static TClonesArray** fwdTrackArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -232,8 +227,6 @@ public:
   static StMuFttCollection *mMuFttCollection; 
   /// pointer to FstCollection (manages the FstArrays)
   static StMuFstCollection *mMuFstCollection; 
-  /// pointer to FwdTrackCollection (manages the FwdTrackArrays)
-  static StMuFwdTrackCollection *mMuFwdTrackCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -277,8 +270,6 @@ public:
   static TClonesArray* fttArray(int type) { return fttArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the fst arrays
   static TClonesArray* fstArray(int type) { return fstArrays[type]; }
-  /// returns pointer to the n-th TClonesArray from the rhicf arrays
-  static TClonesArray* fwdTrackArray(int type) { return fwdTrackArrays[type]; }
     /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
@@ -390,23 +381,21 @@ public:
    /// returns pointer to current StMuFmsCollection
   static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
   /// returns pointer to current StMuRHICfCollection
-   static StMuRHICfCollection* muRHICfCollection() { return mMuRHICfCollection; }
+  static StMuRHICfCollection* muRHICfCollection() { return mMuRHICfCollection; }
   /// returns pointer to current StMuFcsCollection
   static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
   /// returns pointer to current StMuFttCollection
   static StMuFttCollection* muFttCollection() { return mMuFttCollection; }
   /// returns pointer to current StMuFstCollection
   static StMuFstCollection* muFstCollection() { return mMuFstCollection; }
-  /// returns pointer to current StMuFwdTrackCollection
-  static StMuFwdTrackCollection* muFwdTrackCollection() { return mMuFwdTrackCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
   /// returns pointer to current StEmcCollection
   static StEmcCollection* emcCollection() {  return mEmcCollection; }
   /// returns pointer to current StFmsCollection
   static StFmsCollection* fmsCollection() {  return mFmsCollection; }
-  /// returns pointer to current StRHICfCollection
-   static StRHICfCollection* rhicfCollection() {  return mRHICfCollection; }
+  /// returns pointer to current StFmsCollection
+  static StRHICfCollection* rhicfCollection() {  return mRHICfCollection; }
 
   /// returns pointer to the i-th muTofHit
   static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }

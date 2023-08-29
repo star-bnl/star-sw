@@ -4,8 +4,7 @@
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
-//#include "StEvent/StTriggerData.h"
-#include "StEvent/StTriggerData.h"
+#include "StEvent/StTriggerData2016.h"
 
 #include <TH1I.h>
 #include <TH2F.h>
@@ -24,9 +23,6 @@
 // It has no plots (currently)
 //
 
-#define VHRBIN2PS 24.4140625  // Very High resolution mode, pico-second per bin
-#include "PhysicalConstants.h"
-#include "phys_constants.h"
 
 ClassImp(vpdBuilder);
 	
@@ -65,7 +61,7 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	contents.cdb[3]->SetYTitle("Low-Th TAC (west)");
 	
 	sprintf(tmp,"vpd_tac_east_vs_tac_west");
-	contents.tac_east_vs_tac_west = new TH2D(tmp,"VPD-vtx BBQ maxTAC East vs. TAC West", 256, -1.5, 4094.5, 256, -1.5, 4094.5);
+	contents.tac_east_vs_tac_west = new TH2D(tmp,"VPD-vtx TAC East vs. TAC West", 256, -1.5, 4094.5, 256, -1.5, 4094.5);
 	contents.tac_east_vs_tac_west->SetXTitle("TAC West");
 	contents.tac_east_vs_tac_west->SetYTitle("TAC East");
 	
@@ -130,8 +126,6 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 
 	// sprintf(tmp,"vtx_TAC_diff");
 	// contents.vtx_TAC_diff = new TH1D( tmp, "TAC Diff; <West> - <East>", 200, -100, 100 );
-	sprintf(tmp,"h1_VpdVz_BBQ");
-	contents.h1_VpdVz_BBQ = new TH1D( tmp, "VpdVz from BBQ maxTAC(East-West) (cm)", 200, -200., 200. );
 
 
 	//sprintf(tmp,"vpd_hi_vertex_vs_l3_vertex");
@@ -172,7 +166,6 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	plots[++n] = new JevpPlot(contents.hi_cdb[3]);
 	plots[++n] = new JevpPlot(contents.hi_tac_east_vs_tac_west);
 	//plots[++n] = new JevpPlot(contents.hi_vertex_vs_l3_vertex);
-	plots[++n] = new JevpPlot(contents.h1_VpdVz_BBQ);
 	plots[++n] = new JevpPlot(contents.hi_earliestTAC_vs_eastchan);
 	plots[++n] = new JevpPlot(contents.hi_earliestTAC_vs_westchan);  
 
@@ -208,25 +201,14 @@ void vpdBuilder::stoprun(daqReader *rdr) {
 void vpdBuilder::event(daqReader *rdr) {
 	LOG(DBG, "event #%d",rdr->seq);
 
-	StTriggerData *trgd = (StTriggerData*)getStTriggerData(rdr);
+	StTriggerData2016 *trgd = (StTriggerData2016*)getStTriggerData(rdr);
 	if(!trgd) {
 		LOG(DBG, "No trigger data");
 		return;
 	}
 
-	//  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
-	//  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
-
-	//Zaochen test
-	//BBQ DATA
-	int maxTacEast_VPD_BBQ = trgd->vpdEarliestTDC((StBeamDirection)east);
-	int maxTacWest_VPD_BBQ = trgd->vpdEarliestTDC((StBeamDirection)west);
-	//MXQ DATA
-	int maxTacEast_VPD_MXQ = trgd->vpdEarliestTDCHighThr((StBeamDirection)east);
-	int maxTacWest_VPD_MXQ = trgd->vpdEarliestTDCHighThr((StBeamDirection)west);
-	
-	const double test_unit_const = VHRBIN2PS/1000.;
-	const double VpdVz_BBQ = test_unit_const*(maxTacEast_VPD_BBQ - maxTacWest_VPD_BBQ)/2.*(C_C_LIGHT/1.e9);
+//  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
+//  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
 
 //  EAST = 0
 //  WEST = 1
@@ -263,7 +245,6 @@ void vpdBuilder::event(daqReader *rdr) {
 				}
 
 			}
-
 			if ( goodHit( adc_lo, tdc_lo ) ){
 				contents.cdb[2*side+0]->Fill(ich, adc_lo);
 				contents.cdb[2*side+1]->Fill(ich, tdc_lo);
@@ -271,9 +252,7 @@ void vpdBuilder::event(daqReader *rdr) {
 		}
 	}
 
-	//Zaochen test
-	contents.tac_east_vs_tac_west->Fill(maxTacWest_VPD_BBQ*1.0, maxTacEast_VPD_BBQ*1.0);
-	//contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
+	contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
 
 	if (maxTAC[0]>200){
 			contents.earliestTAC_vs_eastchan->Fill(earliestChan[0],maxTAC[0]);
@@ -290,13 +269,7 @@ void vpdBuilder::event(daqReader *rdr) {
 	int On_sumTacWest = trgd->bbcVP101( 7 );
 	int On_sumAdcWest = (trgd->bbcVP101( 6 )&0xfff);
 	int On_nHitsWest = (trgd->bbcVP101( 6 )>>12);
-
-	if(maxTacEast_VPD_BBQ>180&&maxTacEast_VPD_BBQ<3000 && maxTacWest_VPD_BBQ>180&&maxTacWest_VPD_BBQ<3000
-	  )
-	{
-		contents.h1_VpdVz_BBQ ->Fill( VpdVz_BBQ ) ;
-	}
-
+	
 	// contents.vtx_TAC_diff->Fill( (sumTAC[1] / (float)nHit[1]) - (sumTAC[0] / (float)nHit[0]) );
 	// if ( On_nHitsWest > 0 && On_nHitsEast > 0 )
 	// 	contents.vtx_TAC_diff->Fill( (On_sumTacWest / On_nHitsWest) - (On_sumTacEast / On_nHitsEast) );
@@ -392,11 +365,7 @@ void vpdBuilder::event(daqReader *rdr) {
 		}
 		}
 	}
-	
-	//Zaochen test
-	//contents.hi_tac_east_vs_tac_west->Fill(maxTacWest_VPD_MXQ, maxTacEast_VPD_MXQ);
 	contents.hi_tac_east_vs_tac_west->Fill(maxTacWestHigh, maxTacEastHigh);
-	
 	if (maxTacEastHigh>200){
 			contents.hi_earliestTAC_vs_eastchan->Fill(earliestchan_east_hi,maxTacEastHigh);
 	}
@@ -551,7 +520,7 @@ void vpdBuilder::ReadConfig(){
 }
 
 
-int vpdBuilder::correctedTAC( StTriggerData * td, int side, int channel  ){
+int vpdBuilder::correctedTAC( StTriggerData2016 * td, int side, int channel  ){
 
 
 

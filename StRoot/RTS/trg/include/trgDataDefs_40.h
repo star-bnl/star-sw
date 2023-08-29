@@ -23,7 +23,6 @@
 #define MAX_TRG_BLK_SIZE          122880      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
-#define ADD_BIT_CONTAMINATION  4
 #define ADD_BIT_FORCE          5              /* Force store of this event */
 #define ADD_BIT_L2_5           6              /* Level 2.5 abort */
 #define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */

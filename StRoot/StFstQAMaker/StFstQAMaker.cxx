@@ -19,11 +19,10 @@
 #include "StRoot/StFstUtil/StFstRawHitCollection.h"
 #include "StEvent/StFstRawHit.h"
 #include "StIOMaker/StIOMaker.h"
-#include "StEvent/StEvent.h"
-#include "StEvent/StTrack.h"
+#include "StEvent.h"
+#include "StTrack.h"
 
-//#include "StEvent/StEventTypes.h"
-#include "StEvent/StPrimaryVertex.h"
+#include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StDcaGeometry.h"
 #if ROOT_VERSION_CODE < 334081

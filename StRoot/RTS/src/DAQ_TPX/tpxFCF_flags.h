@@ -14,7 +14,6 @@
 
 #define FCF_ROW_EDGE            16      // 0x10 touched end of row
 #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine/RDO edges i.e. row8
-					// 2023: also can indicate a smallish blob either short in time or area
 #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad
 #define FCF_IN_DOUBLE           128	// 0x80 one should use the floating point in the union
 

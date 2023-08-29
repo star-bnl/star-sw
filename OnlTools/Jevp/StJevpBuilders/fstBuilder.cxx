@@ -66,7 +66,6 @@ fstBuilder::fstBuilder(JevpServer *parent):JevpBuilder(parent),evtCt(0),evtCt_no
   memset( &hEventSumContents, 	0, sizeof(hEventSumContents) );
   memset( &hMipContents,      	0, sizeof(hMipContents) );
   memset( &hMaxTimeBinContents, 0, sizeof(hMaxTimeBinContents) );
-  memset( &hMaxTimeBinContents_APV, 0, sizeof(hMaxTimeBinContents_APV) );
   memset( &hSumContents,      	0, sizeof(hSumContents) );
   memset( &hCmnTemp,	      	0, sizeof(hCmnTemp) );
 }
@@ -81,7 +80,6 @@ fstBuilder::~fstBuilder()
   int nEventSumHist   = sizeof(hEventSumContents) / sizeof(TH1 *);
   int nMipHist        = sizeof(hMipContents) / sizeof(TH1 *);
   int nMaxTimeBinHist = sizeof(hMaxTimeBinContents) / sizeof(TH1 *);
-  int nMaxTimeBinHist_APV = sizeof(hMaxTimeBinContents_APV) / sizeof(TH1 *);
   int nSumHist        = sizeof(hSumContents) / sizeof(TH2 *);
 
   for ( int i=0; i<nAdcHist; i++ )      {    if(hAdcContents.adcArray[i])          delete hAdcContents.adcArray[i];    		}
@@ -91,7 +89,6 @@ fstBuilder::~fstBuilder()
   for ( int i=0; i<nEventSumHist; i++ ) {    if(hEventSumContents.eventSumArray[i])delete hEventSumContents.eventSumArray[i];   }
   for ( int i=0; i<nMipHist; i++ )      {    if(hMipContents.mipArray[i])          delete hMipContents.mipArray[i];    		}
   for ( int i=0; i<nMaxTimeBinHist; i++){    if(hMaxTimeBinContents.maxTimeBinArray[i])   delete hMaxTimeBinContents.maxTimeBinArray[i];             }
-  for ( int i=0; i<nMaxTimeBinHist_APV; i++){    if(hMaxTimeBinContents_APV.maxTimeBinArray_APV[i])   delete hMaxTimeBinContents_APV.maxTimeBinArray_APV[i];             }
   for ( int i=0; i<nSumHist; i++ )      {    if(hSumContents.sumArray[i])          delete hSumContents.sumArray[i];    		}
   for ( int i=0; i<totAPV; i++ )        
   {    
@@ -189,7 +186,6 @@ void fstBuilder::initialize(int argc, char *argv[])
   mEventSumHist   = sizeof(hEventSumContents) / sizeof(TH1 *);
   mMipHist        = sizeof(hMipContents) / sizeof(TH1 *);
   mMaxTimeBinHist = sizeof(hMaxTimeBinContents) / sizeof(TH1 *);
-  mMaxTimeBinHist_APV = sizeof(hMaxTimeBinContents_APV) / sizeof(TH1 *);
   mSumHist        = sizeof(hSumContents) / sizeof(TH2 *);
 
   char buffer[100];
@@ -391,13 +387,6 @@ void fstBuilder::initialize(int argc, char *argv[])
   hEventSumContents.hMaxTBfractionVsSection_ZS->SetFillColor(kYellow-9);
   hEventSumContents.hMaxTBfractionVsSection_ZS->SetStats(false);
 
-  hEventSumContents.hMaxTBfractionVsAPV_ZS = new TH1F("maxTBfractionVsAPV_ZS", "FST - maxTB fraction vs Global APV Idx (ZS)", totAPV, 0, totAPV); //288 bins
-  hEventSumContents.hMaxTBfractionVsAPV_ZS->GetXaxis()->SetTitle("Global APV Idx");
-  hEventSumContents.hMaxTBfractionVsAPV_ZS->GetYaxis()->SetTitle("N_{0<maxTB<numTB}/N_{0<=maxTB<=numTB}");
-  hEventSumContents.hMaxTBfractionVsAPV_ZS->SetFillColor(kYellow-9);
-  hEventSumContents.hMaxTBfractionVsAPV_ZS->SetStats(false);
-
-
   hEventSumContents.hMaxAdc = new TH1I("MaxAdc_nonZS", "FST - Max ADC (non-ZS)", nBins*2, PedMin, PedMax); //100 bins
   hEventSumContents.hMaxAdc->SetFillColor(kYellow-9);
   hEventSumContents.hMaxAdc->SetStats(true);
@@ -455,28 +444,6 @@ void fstBuilder::initialize(int argc, char *argv[])
     hMaxTimeBinContents.maxTimeBinArray[index]->SetFillColor(kYellow-9);
     hMaxTimeBinContents.maxTimeBinArray[index]->SetStats(true);
   }
-
-  //Max Time Bin, per APV
-  for(int rdoIdx=1; rdoIdx<=totRdo; rdoIdx++){
-    for(int armIdx=0; armIdx<ArmPerRdo; armIdx++){
-      for(int refApvIdx=0; refApvIdx<ApvPerArm; refApvIdx++){
-
-        int glbElecApvIdx = refApvIdx + armIdx*ApvPerArm + (rdoIdx-1)*ApvPerRdo;        // 0-287
-        sprintf( buffer, "maxTB_ZS_APV_%d", glbElecApvIdx );
-  
-        int portIdx   = refApvIdx/ApvPerPort;                                           // 0-1
-        int lclApvIdx = refApvIdx%ApvPerPort;                                           // 0-7
-        sprintf( buffer2,"FST - Max time bin (ZS), RDO%d_ARM%d_PORT%d_APV%d", rdoIdx, armIdx, portIdx, lclApvIdx);
-  
-        hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx] = new TH1S(buffer, buffer2, numTimeBin, 0, numTimeBin); //9 bins
-        hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetXaxis()->SetTitle("Time Bin Index");
-        hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->SetFillColor(kYellow-9);
-        hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->SetStats(true);
-
-      }
-    }
-  }
-
 
   //////////////////
   for(int iDisk = 0; iDisk < totDisk; ++iDisk)
@@ -695,7 +662,7 @@ void fstBuilder::initialize(int argc, char *argv[])
   }
 
   //JEVP plots setting
-  int totPlots = mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+mMaxTimeBinHist_APV+mSumHist;
+  int totPlots = mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+mSumHist;
   plots = new JevpPlot*[totPlots];
 
   JLine* line1 = new JLine(1536, -100, 1536, 4000);
@@ -741,11 +708,8 @@ void fstBuilder::initialize(int argc, char *argv[])
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+12] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection_ZS);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+13] = new JevpPlot(hEventSumContents.hMaxTBfractionVsSection_ZS);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+14] = new JevpPlot(hEventSumContents.hMaxTBfractionVsAPV_ZS);
-
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+15] = new JevpPlot(hEventSumContents.hMaxAdc);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+16] = new JevpPlot(hEventSumContents.hMaxAdc_ZS);
-
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+14] = new JevpPlot(hEventSumContents.hMaxAdc);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+15] = new JevpPlot(hEventSumContents.hMaxAdc_ZS);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->logy=true;
   // plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->setOptStat(10);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+7]->logy=true;
@@ -780,18 +744,13 @@ void fstBuilder::initialize(int argc, char *argv[])
     plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+i] = new JevpPlot(hMaxTimeBinContents.maxTimeBinArray[i]);
   }
 
-  for ( int i=0; i<mMaxTimeBinHist_APV; i++ ) {
-    plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+i] = new JevpPlot(hMaxTimeBinContents_APV.maxTimeBinArray_APV[i]);
-  }
-
-
   // Add Plots to plot set...
   for ( int i=0; i<totPlots-mSumHist ;i++ ) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
 
-  int nPlots = mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+mMaxTimeBinHist_APV;
+  int nPlots = mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist;
   plots[nPlots] = new JevpPlot(hSumContents.hVisibleApv[0]);
   plots[nPlots+1] = new JevpPlot(hSumContents.hVisibleApv[1]);
   plots[nPlots+2] = new JevpPlot(hSumContents.hVisibleApv[2]);
@@ -1325,7 +1284,6 @@ void fstBuilder::startrun(daqReader *rdr)
 // ---------------------------------------
 void fstBuilder::event(daqReader *rdr) 
 {
-    PCP;
   //if(trgd) delete trgd;
   // arrays to calculate dynamical common mode noise contribution to this chip in current event
   float sumAdcPerEvent[totAPV][4];
@@ -1337,7 +1295,7 @@ void fstBuilder::event(daqReader *rdr)
 
   int HitCount[totMod]; // for each module per event
   int HitCount_zs[totMod]; // for each module per event
-  PCP;
+
   for ( int i=0; i<totCh; i++ )
   {
     maxAdc[i] = 0; maxAdc_zs[i] = 0;  
@@ -1356,25 +1314,18 @@ void fstBuilder::event(daqReader *rdr)
     }
   }
 
-  PCP;
   numTb = numTimeBin;        		//default: 9 timebins
-
-  //LOG("JEFF", "numbTB=%d", numTimeBin);
-
   memset( chCntDaq,  0, sizeof(chCntDaq) );
   memset( apvCntDaq, 0, sizeof(apvCntDaq) );
 
   if( !(evtCt %1000) )     LOG(DBG, "Looking at evt %d",evtCt);
 
   size_t evtSize = 0;
-  PCP;
 
   // ZS data stream
   daq_dta *ddZS = rdr->det("fst")->get("zs");
   if ( ddZS && ddZS->meta ) {
     apv_meta_t *meta = (apv_meta_t *) ddZS->meta;
-
-    PCP;
 
     for ( int r=1; r<=totRdo; r++ ) {                  //1--6 ARCs (ARM Readout Controllers)
       if ( meta->arc[r].present == 0 ) continue ;
@@ -1383,26 +1334,16 @@ void fstBuilder::event(daqReader *rdr)
 	for ( int apv=0; apv<ApvRoPerArm; apv++ ) {         //0--7 & 12--19 APV chips per ARM
 	  if ( meta->arc[r].arm[arm].apv[apv].present == 0 ) continue ;
 
-	  PCP;
-
 	  int Tb = meta->arc[r].arm[arm].apv[apv].ntim;
-
-	  //LOG("JEFF", "Tb = %d",Tb);
-	  PCP;
-
 	  if( numTb != 0 && Tb != 0 && numTb != Tb ) {
 	    //printf("Different number of timebins in different APV!!! Taking real one!!!\n");
 	    numTb = Tb;
 	  }
-	  PCP;
 	  hEventSumContents.hSumTB->Fill(numTb);
 	}
-	PCP;
       }
     }   
   }
-
-  PCP;
 
   while( ddZS && ddZS->iterate() ) {
     fgt_adc_t *f_zs = (fgt_adc_t *) ddZS->Void ;
@@ -1459,8 +1400,6 @@ void fstBuilder::event(daqReader *rdr)
     }
   }//end all RDO, ARM, APV loops
 
-  PCP;
-  
   if(ddZS) {
     hEventSumContents.hEventSize->Fill(short(evtSize/1024));
     evtSize = 0;
@@ -1498,7 +1437,6 @@ void fstBuilder::event(daqReader *rdr)
 	      hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx]);
 	      hEventSumContents.hMaxAdc_ZS->Fill(maxAdc_zs[geoIdx]);
 	      hMaxTimeBinContents.maxTimeBinArray[glbSecIdx]->Fill(maxTimeBin_zs[geoIdx]);
-	      hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Fill(maxTimeBin_zs[geoIdx]);
 	      hSumContents.hSignal_zs[diskIdx-1]->Fill(geoIdx-(diskIdx-1)*ChPerDisk, short(maxAdc_zs[geoIdx]+0.5));
 	    }
 	    hSumContents.hHitMapVsAPV_ZS[diskIdx-1]->Fill(moduleIdx, lclApvIdx);
@@ -1548,7 +1486,6 @@ void fstBuilder::event(daqReader *rdr)
     evtCt_ZS++;
   }
 
-  PCP;
 
   // non-ZS data stream
   daq_dta *dd = rdr->det("fst")->get("adc");    
@@ -1669,8 +1606,6 @@ void fstBuilder::event(daqReader *rdr)
       }
     } //end current APV chip loops
 
-    PCP;
-
     //calculate dynamical common mode noise for current event
     for(int iRstrip = 0; iRstrip < 4; ++iRstrip)
     {
@@ -1750,8 +1685,6 @@ void fstBuilder::event(daqReader *rdr)
       }
     } //end current APV chip loops
 
-    PCP;
-    
     // zero out hits less than 2 TBs
     for(int i=0;i<ChPerApv;i++){
       if(cou[i]<2){
@@ -2118,23 +2051,6 @@ void fstBuilder::stoprun(daqReader *rdr)
     hEventSumContents.hMipMPVvsSection_ZS->SetBinContent(j+1, short(mpvMIP_ZS+0.5));
     hEventSumContents.hMipSIGMAvsSection_ZS->SetBinContent(j+1, short(sigmaMIP_ZS+0.5));
   }
-
-  for(int rdoIdx=1; rdoIdx<=totRdo; rdoIdx++){
-    for(int armIdx=0; armIdx<ArmPerRdo; armIdx++){
-      for(int refApvIdx=0; refApvIdx<ApvPerArm; refApvIdx++){
-        int glbElecApvIdx = refApvIdx + armIdx*ApvPerArm + (rdoIdx-1)*ApvPerRdo;        // 0-287
-        double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
-        if(hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->GetEntries()>0){
-          entriesTB_123 = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(2, numTb-1);
-          entriesTB_all = hMaxTimeBinContents_APV.maxTimeBinArray_APV[glbElecApvIdx]->Integral(1, numTb);
-          fraction = entriesTB_123/entriesTB_all;
-	}
-        hEventSumContents.hMaxTBfractionVsAPV_ZS->SetBinContent(glbElecApvIdx, fraction);
-      }
-    }
-  }
-
-
 
   hEventSumContents.hMipMPVvsSection->GetYaxis()->SetRangeUser(0, 800);
   hEventSumContents.hMipSIGMAvsSection->GetYaxis()->SetRangeUser(0, 200);

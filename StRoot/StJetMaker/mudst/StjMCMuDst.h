@@ -7,9 +7,6 @@
 #include <StjMC.h>
 
 class StMaker;
-class StarGenEvent;
-class StarGenEventReader;
-class StarGenParticle;
 
 class StjMCMuDst : public StjMC {
 
@@ -20,14 +17,11 @@ public:
 
   StjPrimaryVertex getMCVertex() const;
   StjMCParticleList getMCParticleList();
-  void setGenEvent(StarGenEvent* ev){genEvent = ev;};
 
 private:
 
   StMaker* _maker;
-  StarGenEvent* genEvent;
+
 };
 
 #endif // STJMCMUDST_H
-
-

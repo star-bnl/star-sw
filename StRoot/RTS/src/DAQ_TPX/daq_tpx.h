@@ -13,8 +13,6 @@ class tpxStat ;
 class daqReader;
 class tpxFCF_2D ;
 
-class tpx23 ;
-
 class daq_tpx : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
@@ -72,12 +70,6 @@ private:
 	static const int MAX_RDO = 6 ;
 
 	static const char *help_string ;
-
-	int cld23 ;
-
-	int rdo_fmt ;
-
-	tpx23 *t23 ;
 
 protected:
 

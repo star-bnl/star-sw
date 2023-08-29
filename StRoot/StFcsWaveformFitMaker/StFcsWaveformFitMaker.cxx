@@ -68,7 +68,7 @@
 ClassImp(StFcsWaveformFitMaker)
 
 #include "StMessMgr.h"
-#include "StEvent/StEventTypes.h"
+#include "StEventTypes.h"
 #include "StEvent/StFcsHit.h"
 #include "StFcsDbMaker/StFcsDb.h"
 #include "StFcsDbMaker/StFcsDbPulse.h"
@@ -97,11 +97,6 @@ StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mEnergySelect[0]=13; //default PulseFit2 for Ecal
     mEnergySelect[1]=13; //default PulseFit2 for Hcal
     mEnergySelect[2]=1;  //default sum8 for Pres
-
-    //Values to divide sum8 method to match the fitted result as determined by looking at data from Run 22
-    mEnergySumScale[0] = 1.226;
-    mEnergySumScale[1] = 1.195;
-    mEnergySumScale[2] = 1.29;
 
     mAnaWaveform = true; //default is to compute integral for the waveform
 
@@ -370,7 +365,7 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
 }
 
 int StFcsWaveformFitMaker::Finish(){
-  if( mFilename ){
+  if(mFilename && mPad>=0){
     char file[200];
     sprintf(file,"%s.pdf]",mFilename);
     mCanvas->Print(file);
@@ -1017,8 +1012,9 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
     return res[0];
 }
 
-void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* gg, TF1* func){
+void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
   const int MAXPAD=4*4;
+  TGraphAsymmErrors* gg = getGraph();
   if(gg==0){
     LOG_WARN<<"Found no TGraphAsymmErrors at mHitIdx="<<mHitIdx<<endm;
     return;
@@ -1350,9 +1346,9 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
     }
     res[0] = sum8(gae,res);
     //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
-    if( det0==0 || det0==1 ){res[0]/=mEnergySumScale[0];}
-    if( det0==2 || det0==3 ){res[0]/=mEnergySumScale[1];}
-    if( det0==4 || det0==5 ){res[0]/=mEnergySumScale[2];}
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
     res[1] = mPulseFit->GetPeak(compidx).mPeakY;
     res[2] = mPulseFit->GetPeak(compidx).mPeakX;
     res[3] = mDbPulse->GSigma();
@@ -1408,9 +1404,9 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
     else{//Don't need to fit as other peaks don't contribute to found peak
       res[0] = sum8(gae,res);
       //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
-      if( det0==0 || det0==1 ){res[0]/=mEnergySumScale[0];}
-      if( det0==2 || det0==3 ){res[0]/=mEnergySumScale[1];}
-      if( det0==4 || det0==5 ){res[0]/=mEnergySumScale[2];}
+      if( det0==0 || det0==1 ){res[0]/=1.226;}
+      if( det0==2 || det0==3 ){res[0]/=1.195;}
+      if( det0==4 || det0==5 ){res[0]/=1.29;}
       res[1] = mPulseFit->GetPeak(compidx).mPeakY;
       res[2] = mPulseFit->GetPeak(compidx).mPeakX;
       res[3] = mDbPulse->GSigma();
@@ -1492,9 +1488,9 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   //else if( npeaks<=1 ){
     res[0] = sum8(gae,res);
     //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
-    if( det0==0 || det0==1 ){res[0]/=mEnergySumScale[0];}
-    if( det0==2 || det0==3 ){res[0]/=mEnergySumScale[1];}
-    if( det0==4 || det0==5 ){res[0]/=mEnergySumScale[2];}
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
     res[1] = mPulseFit->GetPeak(compidx).mPeakY;
     res[2] = mPulseFit->GetPeak(compidx).mPeakX;
     res[3] = mDbPulse->GSigma();
@@ -1533,9 +1529,9 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
     else{//Don't need to fit as other peaks don't contribute to found peak
       res[0] = sum8(gae,res);
       //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
-      if( det0==0 || det0==1 ){res[0]/=mEnergySumScale[0];}
-      if( det0==2 || det0==3 ){res[0]/=mEnergySumScale[1];}
-      if( det0==4 || det0==5 ){res[0]/=mEnergySumScale[2];}
+      if( det0==0 || det0==1 ){res[0]/=1.226;}
+      if( det0==2 || det0==3 ){res[0]/=1.195;}
+      if( det0==4 || det0==5 ){res[0]/=1.29;}
       res[1] = mPulseFit->GetPeak(compidx).mPeakY;
       res[2] = mPulseFit->GetPeak(compidx).mPeakX;
       res[3] = mDbPulse->GSigma();
@@ -1618,9 +1614,9 @@ float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1
   if( compidx==npeaks || npeaks==0 ){
     res[0] = sum8(gae,res);
     //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
-    if( det0==0 || det0==1 ){res[0]/=mEnergySumScale[0];}
-    if( det0==2 || det0==3 ){res[0]/=mEnergySumScale[1];}
-    if( det0==4 || det0==5 ){res[0]/=mEnergySumScale[2];}
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
     res[1] = mPulseFit->Baseline()+mPulseFit->BaselineSigma()*mPulseFit->BaselineSigmaScale();
     res[2] = mCenterTB;
     res[3] = mDbPulse->GSigma();

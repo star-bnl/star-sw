@@ -19,9 +19,6 @@
 
 #include "StSpinPool/StUeEvent/StUeOffAxisConesEvent.h"
 
-class StarGenEvent;
-class StarGenEventReader;
-
 class StOffAxisConesPars : public TObject{
  public:
  StOffAxisConesPars() : mConeR(0.5){
@@ -59,10 +56,6 @@ public:
   StUeOffAxisConesEvent* eventUe(const char* branchname);
 
 protected:
-    
-  StarGenEventReader *eventreader;
-  StarGenEvent *sEvent;
-
   double DeltaR(double etaA, double phiA, double etaB, double phiB);
   double addJetUe(StProtoJet::FourVecList particles, StUeOffAxisConesEvent *ueEvent, const StProtoJet &jet, double radius = 0.5);
 

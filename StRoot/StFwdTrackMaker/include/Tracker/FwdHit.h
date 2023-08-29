@@ -98,7 +98,6 @@ class FwdHit : public KiTrack::IHit {
         return FwdSystem::sInstance;
     }
 
-    int getTrackId() { return _tid;}
     int _tid; // aka ID truth
     int _vid; // volume id
     unsigned int _id; // just a unique id for each hit in this event.

@@ -1147,24 +1147,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2022","" ,"",
    "B2022,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-    "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
-
-  {"B2022a"  ,"","",
-   "ry2022a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-    "","",                                                     "Base chain for run 2022 data (tpc)",kFALSE},
-
-  {"pp2022a","" ,"",
-   "B2022a,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-      "","","Production chain for year 2022 pp data - CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
-
-  // 2023 initial chains
-  {"B2023a" ,"","",
-   "ry2023a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-   "","",                                                      "Base chain for run 2023 data (tpc)",kFALSE},
-
-  {"P2023a","" ,"",
-   "B2023a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2023 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -1758,9 +1741,6 @@ Bfc_st BFC[] = { // standard chains
                                                                              "sTGC Point maker",    kFALSE},
   {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
-  {"FwdTrack","","","","StFwdTrackMaker",
-   "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
-                                                                             "Forward Track Maker", kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},

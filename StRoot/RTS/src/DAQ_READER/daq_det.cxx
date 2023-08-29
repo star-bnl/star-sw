@@ -65,7 +65,6 @@ daq_det *daq_det_factory::make_det(int wh)
 		use_factory = det_factories[wh] ;
 	}
 
-	//LOG(TERR,"make_det: %d %p",wh,use_factory) ;
 
 	if(use_factory == 0) {	// not inserted? need shared lib load...
 #if 0	// this was never completed...

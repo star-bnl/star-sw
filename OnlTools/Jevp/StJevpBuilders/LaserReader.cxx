@@ -81,7 +81,7 @@ float LaserReader::Make(daqReader *rdr)
     if(s == 16) continue;
 
     
-    daq_dta *dd = rdr->det("tpx")->get("cld",s);   // only care about padrow 45!
+    daq_dta *dd = rdr->det("tpx")->get("cld",s,6);   // only care about padrow 45!
     if(!dd) continue;
     
     while(dd->iterate()) {

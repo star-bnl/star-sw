@@ -22,11 +22,10 @@
 
 #include "StObject.h"
 
-#include "StEvent/StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
-#include "StEvent/StEnumerations.h"
+#include "StContainers.h"  // For StPtrVecFcsHit, StPtrVecFcsPoint
+#include "StEnumerations.h"
 
 class StFcsPoint;
-class StFwdTrack;
 
 class StFcsCluster : public StObject {
 public:
@@ -62,24 +61,15 @@ public:
     void setChi2Ndf1Photon(float chi2ndfph1);
     void setChi2Ndf2Photon(float chi2ndfph2);
     void setFourMomentum(StLorentzVectorD p4);
-    // Hits
     StPtrVecFcsHit& hits();
     const StPtrVecFcsHit& hits() const;
-    // Neighbors
     void addNeighbor(StFcsCluster* neighbor);
     StPtrVecFcsCluster& neighbor();
     const StPtrVecFcsCluster& neighbor() const;    
-    // Points
     StPtrVecFcsPoint& points();
     const StPtrVecFcsPoint& points() const;
     void addPoint(StFcsPoint* p);
     void addPoint(StFcsPoint* p1, StFcsPoint* p2);
-     //Tracks
-    StPtrVecFwdTrack& tracks();
-    const StPtrVecFwdTrack& tracks() const;
-    void addTrack(StFwdTrack* p);
-    void sortTrackByPT();
-
     void print(Option_t *option="") const;
 
 private:
@@ -99,9 +89,8 @@ private:
     StPtrVecFcsHit mHits;            // Tower hits of the current cluster
     StPtrVecFcsCluster mNeighbor;    // Neighbor clusters
     StPtrVecFcsPoint mPoints;        // Fitted points (photons) in the cluster
-    StPtrVecFwdTrack mTracks;        // Associated Tracks
 
-    ClassDef(StFcsCluster, 3)
+    ClassDef(StFcsCluster, 2)
 };
 
 
@@ -139,7 +128,5 @@ inline StPtrVecFcsCluster& StFcsCluster::neighbor() { return mNeighbor; }
 inline const StPtrVecFcsCluster& StFcsCluster::neighbor() const { return mNeighbor; }
 inline StPtrVecFcsPoint& StFcsCluster::points() { return mPoints; }
 inline const StPtrVecFcsPoint& StFcsCluster::points() const { return mPoints; }
-inline StPtrVecFwdTrack& StFcsCluster::tracks() { return mTracks; }
-inline const StPtrVecFwdTrack& StFcsCluster::tracks() const { return mTracks; }
 
 #endif  // STFCSCLUSTER_H

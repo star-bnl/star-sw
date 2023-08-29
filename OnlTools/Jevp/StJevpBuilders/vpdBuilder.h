@@ -5,7 +5,7 @@
 class daqReader;
 //#include "RunStatus.h"
 
-class StTriggerData;
+class StTriggerData2016;
 
 #include <TH1I.h>
 #include <TH2F.h>
@@ -55,7 +55,7 @@ class vpdBuilder : public JevpBuilder {
     return true;
   }
 
-  int correctedTAC( StTriggerData * td, int side, int channel );
+  int correctedTAC( StTriggerData2016 * td, int side, int channel );
 
   vector<int> expected_pulser_means_east; //= { 1054, 1328, 1294, 1040 };
   vector<int> expected_pulser_means_west; //= { 1422, 1317, 1233, 1166};
@@ -97,7 +97,6 @@ class vpdBuilder : public JevpBuilder {
       // TH1 *pulser_west[4];
 
       // TH1 *vtx_TAC_diff;
-	  TH1* h1_VpdVz_BBQ;
     };
   } contents;
 

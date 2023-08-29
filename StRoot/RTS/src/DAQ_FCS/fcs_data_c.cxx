@@ -2261,8 +2261,7 @@ int fcs_data_c::load_sc_map(const char *fname)
 
 				// FPRE is special: Akio marked unused channels with non-0
 				if(dd==2) {
-					//if(sipm!=0) {
-					if(sipm>=2) {	// new for FY23 EPD use
+					if(sipm!=0) {
 						//LOG(TERR,"%d %d %d = %d",s,r,c,sipm) ;
 						sipm = 0xFF ;
 					}

@@ -20,8 +20,6 @@ StarGenPPEvent::StarGenPPEvent( const Char_t *name, const Char_t *title )
     sHat(0.),
     tHat(0.),
     uHat(0.),
-    mstu72(0),
-    mstu73(0),
     ptHat(0.),
     thetaHat(0.),
     phiHat(0.),
