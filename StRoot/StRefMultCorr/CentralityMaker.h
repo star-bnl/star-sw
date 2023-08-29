@@ -43,7 +43,7 @@
 #ifndef __CentralityMaker_h__
 #define __CentralityMaker_h__
 
-class StRefMultCorr ;
+class StRefMultCorr;
 #include "Rtypes.h"
 
 //_________________
@@ -57,6 +57,7 @@ class CentralityMaker {
     StRefMultCorr* getRefMult2Corr() ; // For refmult2
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
     StRefMultCorr* getRefMultCorr_Isobar()  ; // For refmult
+    StRefMultCorr* getRefMultCorrFxt(); // For fixed-target data
     // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
     StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id()  ; 
@@ -74,12 +75,13 @@ class CentralityMaker {
     static CentralityMaker* fInstance ; // Static pointer of CentralityMaker
 
     // Centrality correction classes
-    StRefMultCorr* fRefMultCorr  ; // refmult based centrality
-    StRefMultCorr* fRefMult2Corr ; // refmult2 based centrality
-    StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
+    StRefMultCorr* fRefMultCorr  ; // refmult-based centrality
+    StRefMultCorr* fRefMult2Corr ; // refmult2-based centrality
+    StRefMultCorr* fRefMult3Corr ; // refmult3-based centrality
     StRefMultCorr* fRefMultCorr_Isobar  ; // refmult based centrality
-    // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
-    StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
+    StRefMultCorr* fRefMultCorrFxt; // fxtMult-based centrality
+    // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult-based centrality
+    StRefMultCorr* fgRefMultCorr  ; // grefmult-based centrality
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id  ;
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB30_P16id  ;
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMBnoVtx_P16id  ;
