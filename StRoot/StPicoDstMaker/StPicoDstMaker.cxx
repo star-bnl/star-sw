@@ -99,10 +99,10 @@
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
+#include "TSystem.h"
 #if defined (__TFG__VERSION__)
 #include "StarRoot/TDirIter.h"
 #include "StMuDSTMaker/COMMON/StMuProbPidTraits.h"
-#include "TSystem.h"
 #include "TH1.h"
 #include "TH2.h"
 static Int_t _debug = 0;
@@ -302,7 +302,7 @@ Int_t StPicoDstMaker::Init() {
 	mOutputFileName.ReplaceAll(".root", ".picoDst.root");
       }
       else {
-	mInputFileName = mInputFileName(mInputFileName.Index("st_"), mInputFileName.Length());
+	mInputFileName = gSystem->BaseName(mInputFileName);
 	mOutputFileName = mInputFileName;
 	mOutputFileName.ReplaceAll("MuDst.root", "picoDst.root");
 
