@@ -532,7 +532,7 @@ void StFcsDb::getDetIdFromKey(unsigned short key, unsigned short& detid, unsigne
 unsigned short StFcsDb::getDetFromKey(unsigned short key){ return (key >> 12) & 0x0007; }
 unsigned short StFcsDb::getIdFromKey(unsigned short key) { return (key & 0x0fff); }
 
-StThreeVectorD StFcsDb::getDetectorOffset(int det) const{ 
+StThreeVectorD StFcsDb::getDetectorOffset(int det, double zdepth ) const{
   if(mRun19>0){
     const float bOffY=-(17.0*5.81);   //40in=101.6cm and 17*5.81=98.76 so I will leave this unchanged
     if(det==1) return StThreeVectorD( 25.25*2.54, bOffY + getYWidth(det)*nRow(det)/2.0, 710.16);
@@ -547,17 +547,25 @@ StThreeVectorD StFcsDb::getDetectorOffset(int det) const{
     }
     return  StThreeVectorD(0.0, 0.0, 0.0);
   }else{
+    double xoff = 0;
+    double zoff = 0;
+    if( zdepth>0 ){
+      double detangle = getDetectorAngle(det)*M_PI/180.0;
+      if( det%2==0 ){ detangle *= -1.0; } //North side use negative angle
+      xoff  = zdepth*sin(detangle);
+      zoff  = zdepth*cos(detangle);
+    }
     if(mDbAccess==0){ //no DB
-      if(det==0) return StThreeVectorD(-17.399, -5.26, 710.16);
-      if(det==1) return StThreeVectorD( 17.399, -5.26, 710.16);
-      if(det==2) return StThreeVectorD(-21.285, +1.80, 782.63);
-      if(det==3) return StThreeVectorD( 21.285, +1.80, 782.63);
+      if(det==0) return StThreeVectorD(-17.399+xoff, -5.26, 710.16+zoff);
+      if(det==1) return StThreeVectorD( 17.399+xoff, -5.26, 710.16+zoff);
+      if(det==2) return StThreeVectorD(-21.285+xoff, +1.80, 782.63+zoff);
+      if(det==3) return StThreeVectorD( 21.285+xoff, +1.80, 782.63+zoff);
       return StThreeVectorD(0.0, 0.0, 0.0);	  
     }else{ //from DB
       if(det>=0 && det<4) 	  
-	return  StThreeVectorD(mFcsDetectorPosition.xoff[det], 
+	return  StThreeVectorD(mFcsDetectorPosition.xoff[det]+xoff, 
 			       mFcsDetectorPosition.yoff[det],
-			       mFcsDetectorPosition.zoff[det]);	  
+			       mFcsDetectorPosition.zoff[det]+zoff);	  
       return StThreeVectorD(0.0, 0.0, 0.0);
     }
   }
@@ -697,6 +705,95 @@ double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, doub
     double dY = eY-hY;
     return sqrt(dX*dX + dY*dY);
 };
+
+StThreeVectorD StFcsDb::getNormal(int det) const
+{
+  double detangle = getDetectorAngle(det)*M_PI/180.0;
+  if( det%2==0 ){ detangle *= -1.0; } //North side use negative angle
+  return StThreeVectorD( sin(detangle), 0 ,cos(detangle) );
+  double planenormal[3] = {sin(detangle),0,cos(detangle)};
+}
+
+StThreeVectorD StFcsDb::projectTrackToEcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det=0;   // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=1; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=1; }
+  return projectTrack(det,g2ttrk,g2tvert,0);
+}
+
+StThreeVectorD StFcsDb::projectTrackToHcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det = 2;  // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=3; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=3; }
+  return projectTrack(det,g2ttrk,g2tvert,0);
+}
+
+StThreeVectorD StFcsDb::projectTrackToEcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det=0;   // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=1; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=1; }
+  return projectTrack(det,g2ttrk,g2tvert,-1);
+}
+
+StThreeVectorD StFcsDb::projectTrackToHcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert) const
+{
+  int det = 2;  // North side for negative px
+  // South side for positive px, since px==0 does not hit detector choose south side for that case
+  if( g2ttrk->p[2]>=0 && g2ttrk->p[0]>=0 ){ det=3; }
+  if( g2ttrk->p[2]<0  && g2ttrk->p[0]<0  ){ det=3; }
+  return projectTrack(det,g2ttrk,g2tvert,-1);
+}
+
+StThreeVectorD StFcsDb::projectTrack(int det, const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert, double showermaxz) const
+{
+  double linedir[3] = {g2ttrk->p[0],g2ttrk->p[1],g2ttrk->p[2]};
+  if( g2tvert!=0 ){
+    int vertind = g2ttrk->start_vertex_p - 1; //To correct for offset by one between fortran array and c array. 0 start index means it was generated at the starting vertex
+    std::cout << "+++++ DEBUG: vertind = " << vertind << " +++++" << std::endl;
+    double linestart[3] = {g2tvert[vertind].ge_x[0],g2tvert[vertind].ge_x[1],g2tvert[vertind].ge_x[2]};
+    if( vertind >= 0 ){//Since start index==0 means no start then vertind<0 will default to using origin
+      return projectLine(det, linedir, linestart, showermaxz);
+    }
+  }
+  double zero[3] = {0,0,0};
+  return projectLine(det,linedir,zero,showermaxz);
+}
+
+StThreeVectorD StFcsDb::projectLine(int det, StThreeVectorD &linedirection, StThreeVectorD &lineorigin, double showermaxz) const
+{
+  double linedir[3] = {linedirection.x(),linedirection.y(),linedirection.z()};
+  double linestart[3] = {lineorigin.x(),lineorigin.y(),lineorigin.z()};
+  return projectLine(det,linedir,linestart,showermaxz);
+}
+
+StThreeVectorD StFcsDb::projectLine(int det, double* linedirection, double* lineorigin, double showermaxz) const
+{
+  if( showermaxz<0 ){ showermaxz =  getShowerMaxZ(det); }  //when negative use default showermax
+  if( det%2==0 ){  //North side is negative x-axis
+    if( linedirection[2]>=0 && linedirection[0]>=0 ){ LOG_WARN << "Incorrect Det" << endm; }
+    if( linedirection[2]<0  && linedirection[0]<=0 ){ LOG_WARN << "Incorrect Det" << endm; }
+  }
+  else{  //South side is positive x-axis
+    if( linedirection[2]>=0 && linedirection[0]<0  ){ LOG_WARN << "Incorrect Det" << endm; }
+    if( linedirection[2]<0  && linedirection[0]>=0 ){ LOG_WARN << "Incorrect Det" << endm; } //(If x and z direction are both negative then also projects to south side which is positive x-axis
+  }
+  double detangle = getDetectorAngle(det)*M_PI/180.0;
+  if( det%2==0 ){ detangle *= -1.0; } //North side use negative angle
+  StThreeVectorD xyzoff = getDetectorOffset(det,showermaxz);
+  StThreeVectorD planenormal = getNormal(det);
+  //Solution of intersection of line and plane where line has direction {xdir,ydir,zdir}*t and starts at {xorigin,yorigin,zorigin} and a plane that has some normal with a point on the plane as the detector offset; "t" is the free parameter in the parametric equation of the line.
+  double tintersection =
+    (planenormal.x()*(xyzoff.x()-lineorigin[0])+planenormal.y()*(xyzoff.y()-lineorigin[1])+planenormal.z()*(xyzoff.z()-lineorigin[2])) /
+    (planenormal.x()*linedirection[0]+planenormal.y()*linedirection[1]+planenormal.z()*linedirection[2]);
+  
+  return StThreeVectorD( linedirection[0]*tintersection+lineorigin[0], linedirection[1]*tintersection+lineorigin[1], linedirection[2]*tintersection+lineorigin[2] );
+}
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
 StThreeVectorD StFcsDb::getStarXYZ(const StFcsHit* hit, float FcsZ) const{ 

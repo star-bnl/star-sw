@@ -75,6 +75,8 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	it = new itpcInterpreter ;
 
 	it23 = 0 ;	// assume we won't use it
+	online = 0 ;
+
 //	it23 = new itpc23 ;	
 //	it23->no_cld = 1 ;
 //	it23->log_level = 2 ;
@@ -82,6 +84,8 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 	memset(fcf,0,sizeof(fcf)) ;
 	fcf_det_type = 1 ;	// ITPC
 	fcf_det_orient = 1 ;	// normal
+
+
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -527,7 +531,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		if(rdo_fmt>22) {
 			if(it23==0) {
 				it23 = new itpc23 ;
-				it23->online = 0 ;
+				it23->online = online ; // 0 ;
 				it23->run_type = 3 ;	// NO CLUSTER FINDER PLEASE
 				it23->no_cld = 1 ;
 				it23->log_level = 0 ;

@@ -69,17 +69,17 @@ double StEbyET0::getTime(StEvent* event, int mode) {
                 if (info[0] > 0 && info[1] > 0)
                   coordinate = 0.5*(info[0]+info[1]);
                 break;
-      case  5 : // next 4 use east trigger detectors
+      case  4 : // next 4 use east trigger detectors
+      case  5 :
       case  6 :
-      case  7 :
-      case  8 : getTriggerInfo(event,static_cast<trigDetType> (detector-4),info);
+      case  7 : getTriggerInfo(event,static_cast<trigDetType> (detector-4),info);
                 if (info[0] > 0)
                   coordinate = info[0];
                 break;
-      case  9 : // next 4 use west trigger detectors
+      case  8 : // next 4 use west trigger detectors
+      case  9 :
       case 10 :
-      case 11 :
-      case 12 : getTriggerInfo(event,static_cast<trigDetType> (detector-8),info);
+      case 11 : getTriggerInfo(event,static_cast<trigDetType> (detector-8),info);
                 if (info[1] > 0)
                   coordinate = info[1];
                 break;

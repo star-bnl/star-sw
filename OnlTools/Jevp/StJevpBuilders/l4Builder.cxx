@@ -3204,7 +3204,7 @@ void l4Builder::defineFixedTargetPlots()
 	FixedTargetPlots[index]->addHisto(ph);
 
 	index++; //2
-	hFixedTarget_VertexZ = new TH1D("FixedTarget_VertexZ","FixedTarget_VertexZ",400, 190.,210.);
+	hFixedTarget_VertexZ = new TH1D("FixedTarget_VertexZ","FixedTarget_VertexZ",400, -190.,-170.);
 	ph = new PlotHisto();
 	ph->histo = hFixedTarget_VertexZ;
 	FixedTargetPlots[index]->addHisto(ph);
@@ -3223,7 +3223,7 @@ void l4Builder::defineFixedTargetPlots()
 
 	index++; //5
 	hFixedTargetVertexYZ = new TH2D("FixedTarget_VertexYZ", "FixedTarget_VertexYZ;vertex Z [cm];vertex Y [cm]",
-					400, 190, 210, 200, -5, 5);
+					400, -190, -170, 200, -5, 5);
 	ph = new PlotHisto();
 	ph->histo = hFixedTargetVertexYZ;
 	FixedTargetPlots[index]->addHisto(ph);
@@ -3278,7 +3278,7 @@ void l4Builder::defineFixedTargetMonitorPlots()
 
 	index++; //2
 	hFixedTargetMonitor_VertexZ = new TH1D("FixedTargetMonitor_VertexZ","FixedTargetMonitor_VertexZ",
-					       400, 160, 240);
+					       400, -210, -150);
 	ph = new PlotHisto();
 	ph->histo = hFixedTargetMonitor_VertexZ;
 	FixedTargetMonitorPlots[index]->addHisto(ph);
@@ -3300,7 +3300,7 @@ void l4Builder::defineFixedTargetMonitorPlots()
 	index++; //5
 	hFixedTargetMonitorVertexYZ = new TH2D("FixedTargetMonitor_VertexYZ", 
 					       "FixedTargetMonitor_VertexYZ;vertex Z [cm];vertex Y [cm]",
-					       400, 160, 240, 200, -5, 5);
+					       400, -210, -150, 200, -5, 5);
 	ph = new PlotHisto();
 	ph->histo = hFixedTargetMonitorVertexYZ;
 	FixedTargetMonitorPlots[index]->addHisto(ph);
