@@ -99,10 +99,10 @@
 #include "StPicoEvent/StPicoArrays.h"
 #include "StPicoEvent/StPicoDst.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
+#include "TSystem.h"
 #if defined (__TFG__VERSION__)
 #include "StarRoot/TDirIter.h"
 #include "StMuDSTMaker/COMMON/StMuProbPidTraits.h"
-#include "TSystem.h"
 #include "TH1.h"
 #include "TH2.h"
 static Int_t _debug = 0;
@@ -278,20 +278,20 @@ Int_t StPicoDstMaker::Init() {
         
         if (setVtxModeAttr() != kStOK) {
 	  LOG_ERROR << "Pico Vertex Mode is not set ... " << endm;
-	  return kStErr;
+	  return kStFatal;
 	}
       } //if (mVtxMode == PicoVtxMode::NotSet)
 
       // To write or not to write covariance matrices into the branch
       if (setCovMtxModeAttr() != kStOK) {
 	LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
-	return kStErr;
+	return kStFatal;
       }
 
       // To write or not to write BEmc Smd hits into the branch
       if (setBEmcSmdModeAttr() != kStOk) {
 	LOG_ERROR << "Pico BEmc Smd I/O mode is not set ..." << endm;
-	return kStErr;
+	return kStFatal;
       }
 
 #if !defined (__TFG__VERSION__)
@@ -302,13 +302,13 @@ Int_t StPicoDstMaker::Init() {
 	mOutputFileName.ReplaceAll(".root", ".picoDst.root");
       }
       else {
-	mInputFileName = mInputFileName(mInputFileName.Index("st_"), mInputFileName.Length());
+	mInputFileName = gSystem->BaseName(mInputFileName);
 	mOutputFileName = mInputFileName;
 	mOutputFileName.ReplaceAll("MuDst.root", "picoDst.root");
 
 	if (mOutputFileName == mInputFileName) {
 	  LOG_ERROR << "Input file is not a MuDst ... " << endm;
-	  return kStErr;
+	  return kStFatal;
 	}
       }
 #else /* __TFG__VERSION__ */
