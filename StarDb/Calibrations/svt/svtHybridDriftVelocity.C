@@ -1,3 +1,5 @@
+#include "tables/St_svtHybridDriftVelocity_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   const double drift_dist = 29928.; //in microns

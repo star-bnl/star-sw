@@ -1,3 +1,5 @@
+#include "tables/St_srs_srspar_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/srspars/srs_srspar Allocated rows: 1  Used rows: 1  Row size: 84 bytes

@@ -1,3 +1,5 @@
+#include "tables/St_tpcAvCurrent_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcAvCurrent")) return 0;
   tpcAvCurrent_st row;

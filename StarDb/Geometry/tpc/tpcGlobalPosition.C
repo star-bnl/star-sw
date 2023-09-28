@@ -1,3 +1,5 @@
+#include "tables/St_tpcGlobalPosition_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcGlobalPosition")) return 0;
   tpcGlobalPosition_st row;

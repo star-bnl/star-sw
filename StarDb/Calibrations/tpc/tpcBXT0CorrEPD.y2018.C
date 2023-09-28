@@ -1,3 +1,5 @@
+#include "tables/St_tpcBXT0Corr_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/Calibrations/tpc/.tpcPressureB/tpcPressureB Allocated rows: 50  Used rows: 50  Row size: 120 bytes

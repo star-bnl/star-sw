@@ -1,3 +1,5 @@
+#include "tables/St_stk_vtx_direct_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/vertices/stk_vtx_direct Allocated rows: 1  Used rows: 1  Row size: 16 bytes

@@ -1,3 +1,5 @@
+#include "tables/St_HitError_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // someHitError Allocated rows: 1  Used rows: 1  Row size: 48 bytes

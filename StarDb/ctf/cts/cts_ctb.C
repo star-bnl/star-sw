@@ -1,3 +1,5 @@
+#include "tables/St_cts_mpara_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cts/cts_ctb Allocated rows: 1  Used rows: 1  Row size: 1076 bytes

@@ -1,3 +1,5 @@
+#include "tables/St_tpcOmegaTau_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/tpc/.tpcOmegaTau/tpcOmegaTau Allocated rows: 1  Used rows: 1  Row size: 8 bytes

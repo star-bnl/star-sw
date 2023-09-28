@@ -1,3 +1,5 @@
+#include "tables/St_ftpcVoltage_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/ftpc/.ftpcVoltage/ftpcVoltage Allocated rows: 1  Used rows: 1  Row size: 116 bytes

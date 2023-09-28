@@ -1,3 +1,5 @@
+#include "tables/St_svtHybridDriftVelocity_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   svtHybridDriftVelocity_st row[344] = {//Pass126 021M
