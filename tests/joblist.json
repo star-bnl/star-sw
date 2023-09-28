@@ -1123,5 +1123,23 @@
         "inppath": "/star/rcf/test/daq/2023/072/23072022/",
         "outpath": "",
         "nevents": "200"
+    },
+    {
+        "jobid": "126",
+        "descr": "2023 simple simulation 80 muons",
+        "chopts": "sdt20230214 gstar",
+        "inpfile": "",
+        "inppath": "",
+        "outpath": "",
+        "nevents": "50"
+    },
+    {
+        "jobid": "127",
+        "descr": "2023 simple simulation 80 muons using StarGenerator",
+        "chopts": "sdt20230202 stargen kinematics genmuons geant",
+        "inpfile": "",
+        "inppath": "",
+        "outpath": "",
+        "nevents": "50"
     }
 ]

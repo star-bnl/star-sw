@@ -234,6 +234,7 @@ Int_t StBFChain::Instantiate()
 	maker == "StMagFMaker"    ||
 	maker == "StEEmcDbMaker"  ||
 	maker == "St_geant_Maker" ||
+	maker == "StarPrimaryMaker" ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
@@ -409,7 +410,7 @@ Int_t StBFChain::Instantiate()
       Int_t NwGeant = 10; // default geant parameters
       if (!GetOption("fzin")  &&
 	  !GetOption("ntin")  &&
-	  !GetOption("gstar") &&
+	  !GetOption("gstar") && !GetOption("genmuons") &&
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
@@ -420,6 +421,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("fzin")      ||
 	  GetOption("ntin")      ||
 	  GetOption("gstar")     ||
+	  GetOption("genmuons")  ||
 	  GetOption("pythia")    ||
 	  GetOption("hijing")    ||
 	  GetOption("PrepEmbed") ||
@@ -440,6 +442,21 @@ Int_t StBFChain::Instantiate()
       else mk->SetActive(kFALSE);
       //if (! mk) goto Error;
       SetGeantOptions(mk);
+    }
+
+    if (maker == "StarPrimaryMaker") {
+      if ( GetOption("genmuons") ) {
+	LOG_INFO << "Setup StarKinematics for 80 muons per event" << endm;
+	TString cmd = Form( "((StarPrimaryMaker*)%p)->AddGenerator( new StarKinematics );", mk );
+	ProcessLine( cmd );
+	auto* kine=GetMaker("StarKine"); 	assert(kine);
+	kine->SetAttr("kine:ntrack",80);
+	kine->SetAttr("kine:type","mu+,mu-");
+	kine->SetAttr("kine:ptmin",0.1);
+	kine->SetAttr("kine:ptmax",10.0);
+	kine->SetAttr("kine:etamin",-4.0);
+	kine->SetAttr("kine:etamax",+4.0);
+      }
     }
 
     // special maker options
@@ -1707,6 +1724,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	else if (GetOption("hijing")) fFileOut = "hijing.root";
 	else if (GetOption("VMC"))    fFileOut = "VMC.root";
 	else if (GetOption("gstar"))  fFileOut = "gtrack.root";
+	else if (GetOption("genmuons")) fFileOut = "stargen.root";
       }
       if (  fFileOut != "") {
 	fFileOut.ReplaceAll("*","");
@@ -1961,6 +1979,7 @@ void StBFChain::SetTreeOptions()
     if (GetOption("fzin")   ||
 	GetOption("ntin")   ||
 	GetOption("gstar")  ||
+	GetOption("genmuons") ||
 	GetOption("pythia") ||
 	GetOption("VMC")    ||
 	GetOption("PrepEmbed")) {
