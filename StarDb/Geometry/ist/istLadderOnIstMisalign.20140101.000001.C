@@ -1,3 +1,5 @@
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/ist/.istLadderOnIst/istLadderOnIstMisalign Allocated rows: 24  Used rows: 24  Row size: 180 bytes

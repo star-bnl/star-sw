@@ -1,3 +1,5 @@
+#include "tables/St_tpcGridLeak_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/tpc/.tpcGridLeak/tpcGridLeak Allocated rows: 1  Used rows: 1  Row size: 72 bytes
