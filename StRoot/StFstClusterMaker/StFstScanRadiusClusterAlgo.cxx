@@ -66,6 +66,7 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
       while ( !rawHitsVec[sensorIdx][phiIdx].empty() )
       {
 	rawHitTemp = rawHitsVec[sensorIdx][phiIdx].back();
+	delete rawHitsVec[sensorIdx][phiIdx].back();
 	rawHitsVec[sensorIdx][phiIdx].pop_back();
 	rawHitsToMerge.push_back(rawHitTemp);
 	//count number to merge
@@ -77,6 +78,7 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	// put all raw hits in one phi strip to rawHitsToMerge
 	while (rawHitsToMergePtr != rawHitsToMerge.end() && !rawHitsVec[sensorIdx][phiIdx].empty()) {
 	  rawHitTemp = rawHitsVec[sensorIdx][phiIdx].back();
+	  delete rawHitsVec[sensorIdx][phiIdx].back();
 	  rawHitsVec[sensorIdx][phiIdx].pop_back();
 
 	  ++nToMerge;
@@ -137,14 +139,14 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	totCharge    = tempSumCharge;
 	totChargeErr = sqrt(tempSumChargeErrSquare / nToMerge);
 
-	newCluster = new StFstCluster((int)wedge * 10000 + clusterLabel, disk, wedge, sensor, apv, meanRStrip, meanPhiStrip, totCharge, totChargeErr, clusterType);
-	newCluster->setNRawHits(clusterSize);
-	newCluster->setNRawHitsR(clusterSizeR);
-	newCluster->setNRawHitsPhi(clusterSizePhi);
-	newCluster->setMaxTimeBin(maxTb);
-	newCluster->setIdTruth(idTruth);
-
 	if(nToSeedhit>0) {
+	  newCluster = new StFstCluster((int)wedge * 10000 + clusterLabel, disk, wedge, sensor, apv, meanRStrip, meanPhiStrip, totCharge, totChargeErr, clusterType);
+	  newCluster->setNRawHits(clusterSize);
+	  newCluster->setNRawHitsR(clusterSizeR);
+	  newCluster->setNRawHitsPhi(clusterSizePhi);
+	  newCluster->setMaxTimeBin(maxTb);
+	  newCluster->setIdTruth(idTruth);
+
 	  clustersVec[sensorIdx][phiIdx].push_back(newCluster);
 	  clusterLabel++;
 	}
@@ -200,6 +202,7 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	      (*clusterIt2)->setApv(apv);
 
 	      int distance1 = std::distance(clustersVec[sensorIdx][phiIdx1].begin(), clusterIt1);
+          delete *clusterIt1;
 	      clustersVec[sensorIdx][phiIdx1].erase(clusterIt1);
 
 	      if (distance1 == 0)
