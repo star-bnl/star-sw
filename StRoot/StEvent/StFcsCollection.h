@@ -67,7 +67,7 @@ private:
     StSPtrVecFcsPoint   mPoints[kFcsNDet];  
 
     Int_t mFcsReconstructionFlag=0;     // undefined for now
-    int mDataExist=0;
+    Int_t mDataExist=0;                 // if FCS data existed in daq file
 
     ClassDef(StFcsCollection,2)
 };
