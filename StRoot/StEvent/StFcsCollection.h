@@ -53,6 +53,9 @@ public:
     const StSPtrVecFcsPoint& points(unsigned int det) const; // Return the point list
     unsigned int numberOfPoints(unsigned int det) const;     // Return the number of points
 
+    void setDataExist(int v) {mDataExist=v;}
+    int isDataExist() {return mDataExist;}
+
     int fcsReconstructionFlag()      const;
     void setFcsReconstructionFlag(int v);
 
@@ -64,9 +67,9 @@ private:
     StSPtrVecFcsPoint   mPoints[kFcsNDet];  
 
     Int_t mFcsReconstructionFlag=0;     // undefined for now
+    int mDataExist=0;
 
-    ClassDef(StFcsCollection,1)
-
+    ClassDef(StFcsCollection,2)
 };
 
 inline int StFcsCollection::fcsReconstructionFlag()      const {return mFcsReconstructionFlag;}
