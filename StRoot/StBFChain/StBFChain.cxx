@@ -1918,7 +1918,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 			 << "\",\"MagFactor\")" << endm;
       if ( gClassTable->GetID("StarMagField") >= 0) {
 	TString cmd =
-	  Form("if (!StarMagField::Instance()) new StarMagField( 2, %f, kTRUE);",
+	  Form("if (!StarMagField::Instance()) new StarMagField( StarMagField::EBField::kMapped, %f, kTRUE);",
 	       FieldOptions[k].scale);
 	ProcessLine(cmd);
       }
