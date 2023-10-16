@@ -1,5 +1,0 @@
-Fri Oct 27. Tag = StvKutta_1_00
-This version is full but still efficiency significantly les than Tag Stv1_01
-The last was done THelixTrack errs ==> Thelix3d ones fixed and tested
-
-============================================================================ 
