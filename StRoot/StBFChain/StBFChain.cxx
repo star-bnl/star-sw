@@ -467,9 +467,6 @@ Int_t StBFChain::Instantiate()
     //		Sti(ITTF) start
     // ---
     if (maker == "StiMaker" || maker == "StiVMCMaker" || false ) {
-      if ( false &&  STVOPTION) {
-	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
-      }
 
       // When StiCA library is requested CA will be used as seed finder in StiMaker
       if ( GetOption("StiCA") ) {
@@ -545,8 +542,7 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("activeBTof" ,kTRUE);
       }
 
-      if (GetOption("StiPulls") ||
-	  STVOPTION)  mk->SetAttr("makePulls"  ,kTRUE);
+      if (GetOption("StiPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
       if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
       if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
       if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
@@ -559,16 +555,15 @@ Int_t StBFChain::Instantiate()
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
-      if (GetOption("Sti") || GetOption("StiCA") ||
-	  STVOPTION ||
-	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
+      if (GetOption("Sti") || GetOption("StiCA") || GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
       if ((GetOption("VFPPV") && STVOPTION) || GetOption("VFPPVEv") ) {
         gSystem->Load("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , kTRUE);
-      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
+      } 
+      else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
       if (GetOption("VFPPVEvNoBtof")){
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", kTRUE);
@@ -1014,7 +1009,6 @@ Int_t StBFChain::Init() {
     // force load of geometry for VMC and Sti
 
     if (GetOption("Sti") || GetOption("StiCA") ||
-	STVOPTION ||
 	GetOption("StiVMC") ||GetOption("VMC") ||
 	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
@@ -1579,7 +1573,7 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
 	SetOption("StarMiniCern","Default,-TGiant3");
       }
     }
-    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || STVOPTION || GetOption("StiVMC"))) {
+    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA") || GetOption("StiVMC"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");
