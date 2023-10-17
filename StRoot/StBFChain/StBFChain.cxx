@@ -1578,16 +1578,6 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");
     }
-    if (STVOPTION) {
-      SetOption("-TpcIT","Default,Stv");
-      SetOption("-SvtIT","Default,Stv");
-      SetOption("-SsdIT","Default,Stv");
-      SetOption("-HpdIT","Default,Stv");
-      SetOption("-BTofIT","Default,Stv");
-      SetOption("-PxlIT","Default,Stv");
-      SetOption("-IstIT","Default,Stv");
-    }
-
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
