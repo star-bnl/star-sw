@@ -466,8 +466,8 @@ Int_t StBFChain::Instantiate()
     // ---
     //		Sti(ITTF) start
     // ---
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker") {
-      if ( maker == "StvMaker" &&  STVOPTION) {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || false ) {
+      if ( false &&  STVOPTION) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
       }
