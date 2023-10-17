@@ -141,7 +141,7 @@ Int_t StGenericVertexMaker::Init()
     }
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
-           ||(IAttr("VFPPV")   &&  false)        )  { // 2 version of PPV w/ & w/o Btof
+           || (false)        )  { // 2 version of PPV w/ & w/o Btof
       LOG_INFO << "StGenericVertexMaker::Init: uses StvPPVertex finder(StEvent based)"<<  endm;
       LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
