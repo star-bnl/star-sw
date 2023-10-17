@@ -19,7 +19,6 @@
 #include "TTree.h"
 #include "TEnv.h"
 #define STAR_LOGGER 1
-#define STVOPTION false
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
 #if 0
@@ -559,7 +558,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
-      if ((GetOption("VFPPV") && STVOPTION) || GetOption("VFPPVEv") ) {
+      if ( (false) || GetOption("VFPPVEv") ) {
         gSystem->Load("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , kTRUE);
       } 
@@ -1553,7 +1552,7 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if (! (STVOPTION)) {
+      if (! (false)) {
 	if (GetOption("gstar") || GetOption("pythia")) {
 	  SetOption("VMC","Default,-TGiant3,gstar");
 	  SetOption("-gstar","Default,-TGiant3");
@@ -1564,7 +1563,7 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
-      if (! (STVOPTION)) {
+      if (! (false)) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
