@@ -1552,25 +1552,25 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if ( true ) {
-	if (GetOption("gstar") || GetOption("pythia")) {
-	  SetOption("VMC","Default,-TGiant3,gstar");
-	  SetOption("-gstar","Default,-TGiant3");
-	  SetOption("-pythia","Default,-TGiant3");
-	}
+
+      if (GetOption("gstar") || GetOption("pythia")) {
+	SetOption("VMC","Default,-TGiant3,gstar");
+	SetOption("-gstar","Default,-TGiant3");
+	SetOption("-pythia","Default,-TGiant3");
       }
+
       SetOption("-geant","Default,-TGiant3");
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
-      if ( true ) {
-	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
-	  SetOption("VMCPassive","Default,-TGiant3");
-	}
-	SetOption("pgf77","Default,-TGiant3");
-	SetOption("mysql","Default,-TGiant3");
-	SetOption("StarMiniCern","Default,-TGiant3");
+
+      if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
+	SetOption("VMCPassive","Default,-TGiant3");
       }
+      SetOption("pgf77","Default,-TGiant3");
+      SetOption("mysql","Default,-TGiant3");
+      SetOption("StarMiniCern","Default,-TGiant3");
+      
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA") || GetOption("StiVMC"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
