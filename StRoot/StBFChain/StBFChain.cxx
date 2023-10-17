@@ -465,7 +465,7 @@ Int_t StBFChain::Instantiate()
     // ---
     //		Sti(ITTF) start
     // ---
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || false ) {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" ) {
 
       // When StiCA library is requested CA will be used as seed finder in StiMaker
       if ( GetOption("StiCA") ) {
@@ -558,7 +558,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
-      if ( (false) || GetOption("VFPPVEv") ) {
+      if ( GetOption("VFPPVEv") ) {
         gSystem->Load("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , kTRUE);
       } 
