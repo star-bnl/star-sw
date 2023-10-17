@@ -1552,7 +1552,7 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if (! (false)) {
+      if ( true ) {
 	if (GetOption("gstar") || GetOption("pythia")) {
 	  SetOption("VMC","Default,-TGiant3,gstar");
 	  SetOption("-gstar","Default,-TGiant3");
@@ -1563,7 +1563,7 @@ void StBFChain::SetFlags(const Char_t *chainOpts)
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
-      if (! (false)) {
+      if ( true ) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
