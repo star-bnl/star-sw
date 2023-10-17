@@ -954,7 +954,6 @@ Int_t StBFChain::Instantiate()
 
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
-  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
 
   for ( unsigned int n=0 ; n < Gproperty.size() ; n++ ){
