@@ -1401,6 +1401,18 @@ Bfc_st BFC[] = { // standard chains
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+
+
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"GEANT4 Libs ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
+  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  {"g4physics",   "", "", "",                     "", "libG4materials.so,libG4graphics_reps.so,libG4geometry.so,libG4particles.so,libG4track.so,libG4zlib.so,libG4digits_hits.so,libG4processes.so,libG4tracking.so,libG4event.so,libG4run.so,libG4physicslists.so", "Load G4",false},
+  {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
+  {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
+
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1410,7 +1422,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"
+   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"  
    ,                                                      "Load Hijing in starsim, set AuAu200 GeV",kFALSE},
   {"tdaq"        ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"miniDAQ"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
