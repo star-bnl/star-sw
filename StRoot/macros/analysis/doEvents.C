@@ -60,13 +60,54 @@
 //                          for Grid Collector.
 //      
 /////////////////////////////////////////////////////////////////////////////
-#include <iostream>
 
-class     StChain;
+#pragma cling load("StarRoot")
+#pragma cling load("St_base")
+#pragma cling load("StChain")
+#pragma cling load("StUtilities")
+#pragma cling load("StBFChain")
+
+#pragma cling load("St_Tables")
+#pragma cling load("StTreeMaker")
+#pragma cling load("StIOMaker")
+#pragma cling load("StarClassLibrary")
+#pragma cling load("StTriggerDataMaker")
+#pragma cling load("StBichsel")
+#pragma cling load("StEvent")
+#pragma cling load("StTpcDb")
+#pragma cling load("StEventUtilities")
+#pragma cling load("StEmcUtil")
+#pragma cling load("StTofUtil")
+#pragma cling load("StPmdUtil")
+#pragma cling load("StPreEclMaker")
+#pragma cling load("StStrangeMuDstMaker")
+#pragma cling load("StMuDSTMaker")
+#pragma cling load("StarMagField")
+#pragma cling load("StMagF")
+#pragma cling load("StAnalysisMaker")
+#pragma cling load("StMuAnalysisMaker")
+
+#pragma cling load("St_g2t")
+#pragma cling load("geometry")
+#pragma cling load("St_geant_Maker")
+#pragma cling load("StTableUtilities")
+
+#pragma cling load("StDbLib.so")
+#pragma cling load("StDbBroker.so")
+#pragma cling load("libStDb_Tables.so")
+#pragma cling load("St_db_Maker.so")
+#pragma cling load("StTpcDb")
+#pragma cling load("StDetectorDbMaker")
+
+#pragma cling load("libStMagF")
+#pragma cling load("StDetectorDbMaker")
+#pragma cling load("StTpcDb")
+#pragma cling load("StEventMaker")
+
+#pragma cling load("StGridCollector")
+
 StChain  *chain=0;
-class     St_db_Maker;
 St_db_Maker *dbMk =0;
-class StFileI;
 StFileI *setFiles =0;
 TString mainBranch;
 
@@ -177,7 +218,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     mainBranch = line;
     //    printf("fileList[0] %s %s\n",line,mainBranch.Data());
     mainBranch.ReplaceAll(".root","");
-    int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
+    int idot = strrchr((char*)&mainBranch[0],'.') - mainBranch.Data();
     mainBranch.Replace(0,idot+1,"");
     mainBranch += "Branch";
   }
@@ -249,36 +290,11 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     IOMk->SetNotify("OpenFile" ,outMk);
   }
 
-
-  //   		 StEventDisplayMaker
-  if (eventDisplay) {
-    
-    StEventDisplayMaker *displayMk = new StEventDisplayMaker();
-    displayMk->SetEventIdToRender(eventNumber2Display);
-    if (eventNumber2Display) 
-       printf("\n\n\n Display the Event %d only\n", eventNumber2Display);
-    // Set the default to display all StEvent tracks
-    displayMk->AddName("StEvent(Primary Tracks)");
-    // displayMk->AddName("StEvent(Kink Tracks)");
-    // displayMk->AddName("StEvent(V0 Tracks)");
-    // displayMk->AddName("StEvent(Xi Tracks)");
-    //      displayMk->AddName("StEvent(All Tracks)");
-    // Set the default StEvent events filter
-    displayMk->AddFilter(new StFilterDef("MainFilter"));
-    displayMk->AddFilter(new StMuDstFilterHelper("MuL3Filter",kFALSE));
-    displayMk->AddFilter(new StColorFilterHelper("Color schema",kFALSE));
-//  Check whether any Custom filter is present  
-    if (!gSystem->Load("StCustomFilter")) { 
-      displayMk->AddFilter(new StCustomFilter("Custom filter",kFALSE));
-    }
-    
-  }
-
   // Initialize chain
   cout << "----------------------------------------------------------" << endl;
   cout << " doEvents - Initializing and Printing chain information   " << endl;
   Int_t iInit = chain->Init();
-  if (iInit) chain->Fatal(iInit,"on init");
+  if (iInit) chain->Fatal((char*)&iInit,"on init");
   chain->PrintInfo();
   cout << "----------------------------------------------------------" << endl << endl;
 
@@ -306,6 +322,7 @@ void doEvents(Int_t startEvent, Int_t nEvents, const char *file, const char *qaf
 //____________________________________________________________________________
 void doEvents(Int_t nEvents, const char *file, const char *qaflag)
 {
+  loadLibs("");
   if (!qaflag) qaflag="";
   cout << "Calling (1,nEvents,file,qaflag)" << endl;
   doEvents(1,nEvents,file,qaflag);
@@ -337,6 +354,7 @@ void doEvents(Int_t nEvents, const char **fileList, const char *qaflag)
 //____________________________________________________________________________
 void loadLibs(const char *opt) 
 {
+    cout << "Loading libs" << endl;
 // Dynamically link needed shared libs
 
   if (!opt[0]) { //Default set
@@ -368,24 +386,25 @@ void loadLibs(const char *opt)
     gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
     gSystem->Load("StMuAnalysisMaker");
-    cout << " loading of shared libraries done" << endl;
-    return;
-  }
-  if (strstr(opt,"dbon")) {// DB stuff
+
+    gSystem->Load("St_g2t");
+    gSystem->Load("geometry");
+    gSystem->Load("St_geant_Maker");
+    gSystem->Load("StTableUtilities");
+
     gSystem->Load("StDbLib.so");
     gSystem->Load("StDbBroker.so");
     gSystem->Load("libStDb_Tables.so");
     gSystem->Load("St_db_Maker.so");
     gSystem->Load("StTpcDb");
     gSystem->Load("StDetectorDbMaker");
+    cout << " loading of shared libraries done" << endl;
+    return;
+  }
+  if (strstr(opt,"dbon")) {// DB stuff
   }
 
   if (strstr(opt,"disp")) {// EventDisplay stuff
-    gSystem->Load("St_g2t");  // is a part od St_Tables
-    gSystem->Load("geometry");
-    gSystem->Load("St_geant_Maker");
-    gSystem->Load("StTableUtilities");
-    gSystem->Load("StEventDisplayMaker");
   }
 }
 //____________________________________________________________________________
@@ -397,7 +416,7 @@ int gcReadCommands(const char *file, TString& cmds)
     FILE *inp = 0;
     inp = fopen(file, "r");
     if (!inp) { // File not found
-      printf("doEvents: ERROR.  File Not Found // %s\n",req+1);
+      printf("doEvents: ERROR.  File Not Found // %s\n",file);
       return -1;
     }
 
