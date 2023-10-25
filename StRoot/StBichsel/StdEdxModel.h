@@ -10,6 +10,7 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TF1.h"
+#include "TSpline.h"
 class StdEdxParamerization {
 };
 class StdEdxModel {
@@ -20,14 +21,18 @@ class StdEdxModel {
   enum EValType  {kProb, kdProbdX, kdProbdY};
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
-  TH1D                *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
   static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
   static Double_t      ggausD(Double_t *x, Double_t *p, Double_t *der = 0);  // versus mu, sigm, alpha wth derivatives
   static Double_t      gausexp(Double_t *x, Double_t *p); // versus mu, sigma, k 
   static Double_t      gausexpD(Double_t *x, Double_t *p, Double_t *der = 0); // versus mu, sigma, k 
-  Double_t             dNdx(Double_t poverm, Double_t charge = 1.0);								      
-  Double_t     	       dNdxEff(Double_t poverm, Double_t charge = 1.0);							      
+  Double_t             dNdx(Double_t poverm, Double_t charge = 1.0);
+  TF1                 *dNdxL10F();
+  static Double_t      dNdxL10func(Double_t *x, Double_t *p);
+  Double_t     	       dNdxEff(Double_t poverm, Double_t charge = 1.0, Double_t mass = 0.13956995);
+  static Double_t      dNdxEffL10func(Double_t *x, Double_t *p);
+  TF1                 *dNdxEffL10F();
+  Double_t             dNdE();
   static Double_t      saturationFunc(Double_t *x, Double_t *p); // nP saturation versus beta*gamma from TpcRS (nP/dX - dN/dx_model) 
   TF1          	      *GGaus() {return fGGaus;}										      
   TF1          	      *GausExp() {return fGausExp;}										      
@@ -63,8 +68,8 @@ class StdEdxModel {
   Double_t 	       ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der = 0); // probability for give log(dE(GeV)) versus Np			       
   void     	       SetScale(Double_t scale = 1.0) {fScale = scale;}								       
   Double_t 	       dNdxScale() {return fScale;}											       
-  static Double_t      zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge 
-  TF1     	      *ZMP(Double_t log2dx = 1);                                                                                           
+  static Double_t      zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx, p[1] =  charge, and p[2] = mass
+  TF1     	      *ZMP(Double_t log2dx = 1, Double_t charge = 1, Double_t mass = 0.1395699);                                                                                           
   // from 100 keV Tcut (GEXNor.C)
   void InitPar();
   Double_t tmaxL10eV(Double_t betagamma); // eV
@@ -75,16 +80,23 @@ class StdEdxModel {
   StdEdxModel();
   static StdEdxModel  *fgStdEdxModel; //! last instance          
   static Int_t  _debug;
-  TH1D         *mdNdx;       // dN/dx versus beta*gamma
   Double_t      fScale;
   Double_t      fTmaxL10eV;
-  TF1          *fGGaus;        
-  TF1          *fGausExp;        
-  TF1          *fpol2F;
-  TF1          *fpol5F;
-  TF1          *fpol6F;
-  TF1          *fpol7F;
+  Char_t        beg[1];                    //!
   Double_t      fLogkeVperElectron;
+  TH1D         *mdNdx;                     //!
+  TH1D         *mdNdxL10;                  //!
+  TH1D         *mLndNdxL10;                //!
+  TH1D         *mLndNdxL10Smooth;          //!
+  TSpline5     *mLndNdxL10Spline5;         //!
+  TH1D         *mdNdEL10;                  //!
+  TF1          *fGGaus;                    //!
+  TF1          *fGausExp;        	   //!
+  TF1          *fpol2F;			   //!
+  TF1          *fpol5F;			   //!
+  TF1          *fpol6F;			   //!
+  TF1          *fpol7F;			   //!
+  Char_t        end[1];                    //!
   ClassDef(StdEdxModel,0)
 };
 #endif
