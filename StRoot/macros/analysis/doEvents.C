@@ -60,7 +60,7 @@
 //                          for Grid Collector.
 //      
 /////////////////////////////////////////////////////////////////////////////
-#include "iostream.h"
+#include <iostream>
 
 class     StChain;
 StChain  *chain=0;
