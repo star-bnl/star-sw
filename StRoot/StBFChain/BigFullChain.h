@@ -1422,7 +1422,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"  
+   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"
    ,                                                      "Load Hijing in starsim, set AuAu200 GeV",kFALSE},
   {"tdaq"        ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"miniDAQ"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
