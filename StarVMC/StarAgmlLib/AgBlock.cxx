@@ -11,6 +11,7 @@ ClassImp(AgBlock);
 
 #include "StarAgmlStacker.h"
 #include "StMessMgr.h"                                                                                                                  
+#include <iostream>
 
 // Setup static members
 AgBlock                      *AgBlock::mCurrent=0;
