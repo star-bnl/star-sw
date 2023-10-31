@@ -4,6 +4,11 @@
 #include "TObjectSet.h"
 #include "TGenericTable.h"
 
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "AgMLExtension.h"
+#include "StMessMgr.h"
+
 ClassImp(AgModule);
 
 TDataSet *AgModule::mGeomSet = 0;
@@ -86,7 +91,21 @@ AgModule::~AgModule()
 {
   _module = NULL;
 }
-
+//______________________________________________________________________________________________
+void AgModule::AddHitScoring( TString name, AgMLScoring* sc ) {
+  TString key (name(0,4));
+  //  LOG_INFO << "Add hit scoring " << key.Data() << endm;
+  mHitScoring[name] = sc;
+  auto* volume = gGeoManager->FindVolumeFast(key);
+  if (0==volume) {
+    LOG_WARN << "Volume " << key.Data() << " has not been created yet, no user hits defined " << name.Data() << endm;
+  }
+  else {
+    auto* ext = AgMLExtension::get( volume );
+    ext->AddHitScoring(sc);
+  }
+}
+//______________________________________________________________________________________________
 
 
 

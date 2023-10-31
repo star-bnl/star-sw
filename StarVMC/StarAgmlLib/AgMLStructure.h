@@ -222,7 +222,7 @@ public:
   AgMLStructure( const char *_name ) : AgMLStructureBase(), name(_name) { };
  ~AgMLStructure() {   
    for ( auto t : table ) { // cleanup the table
-     delete (t);
+     if (t) delete (t);
    }
  };
   

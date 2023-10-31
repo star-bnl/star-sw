@@ -1284,12 +1284,14 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+
+  {"fastjet"     ,"","",""       , "", "libfastjet.so",          "Load fast jet reconstruction algo", false},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1300,6 +1302,9 @@ Bfc_st BFC[] = { // standard chains
   {"g4physics",   "", "", "",                     "", "libG4materials.so,libG4graphics_reps.so,libG4geometry.so,libG4particles.so,libG4track.so,libG4zlib.so,libG4digits_hits.so,libG4processes.so,libG4tracking.so,libG4event.so,libG4run.so,libG4physicslists.so", "Load G4",false},
   {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
   {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
+
+  {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
+  {"geant4mk",    "","", "stargen,geant4vmc",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
