@@ -2,6 +2,8 @@
 #define __AgmlExtension_h__
 
 #include <TGeoExtension.h>
+#include <TGeoVolume.h>
+
 #include <TString.h>
 #include <TMath.h>
 #include <vector>
@@ -24,7 +26,7 @@ class AgMLExtension : public TGeoRCExtension {
 public:
 
   AgMLExtension();
-  virtual ~AgMLExtension() { delete mVolumeId; mVolumeId = nullptr; }
+  virtual ~AgMLExtension(){ /* nada */ };
 
   void SetModuleName( const char* name ){ mModuleName = name; }
   void SetFamilyName( const char* name ){ mFamilyName = name; }
@@ -41,7 +43,7 @@ public:
 
   void SetBranchings( int b ) { mBranchings=b; }  
 
-  void SetVolumeIdentifier( AgMLVolumeId* identifier ){ delete mVolumeId; mVolumeId = identifier; }
+  void SetVolumeIdentifier( AgMLVolumeId* identifier ){ mVolumeId = identifier; }
   void AddHitScoring( AgMLScoring* sc ){ mHitScoring.push_back( sc ); }
 
 
@@ -49,7 +51,7 @@ public:
   TString GetFamilyName(){ return mFamilyName; }
   TString GetVolumeName(){ return mVolumeName; }
 
-  int GetVolumeId( int* numbv ){ return mVolumeId ? mVolumeId->id( numbv ) : 0; }
+  int GetVolumeId( int* numbv ){ return mVolumeId->id( numbv ); }
 
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
@@ -59,7 +61,20 @@ public:
 
   void AddCut( TString cut, double value );
   std::map<TString,double>& GetCuts() { return mGstpar; }
+
+  const static int Geant3 = 0;
+  const static int Geant4 = 1;
+
+  int GetEngine(){ return mEngine; }
+  void   SetEngine( int e ){ mEngine = e; }
   
+  void Print( Option_t* opts="" ) const;
+ 
+  void extends( TGeoVolume* volume ){ mExtensionMap[volume->GetName()] = this; }
+  static AgMLExtension* get( TGeoVolume* volume ){ return mExtensionMap[volume->GetName()]; }
+  static AgMLExtension* get( TString     volume ){ return mExtensionMap[volume]; }
+
+  static const std::map< TString, AgMLExtension* >& GetMap() { return mExtensionMap; }
  
 private:
 protected:
@@ -77,8 +92,15 @@ protected:
   std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
   std::map<TString, double> mGstpar;     // GSTPAR tracking cuts for this volume
 
+  int mEngine;
+
+  static std::map< TString, AgMLExtension* > mExtensionMap;
+
   ClassDef(AgMLExtension,0);
 
 };
+
+// Global map to agml extensions
+
 
 #endif

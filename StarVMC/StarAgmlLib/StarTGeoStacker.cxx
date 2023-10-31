@@ -638,15 +638,10 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       // AgML extented volume information
       AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-      if ( !agmlExt ) { 
+      if ( 0==agmlExt ) { 
 	// Create new agml extension
 	gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
-	// Add user hits to the extension
-	for ( auto kv : module->GetHitScoring() ) {
-	  TString key          = kv.first;
-	  AgMLScoring* scoring = kv.second;
-	  agmlExt -> AddHitScoring( scoring );
-	}
+        // NOTE: user hits have not been defined at this point, add to extension at point of definition
       }
       agmlExt->SetVolumeName( nn );
       agmlExt->SetFamilyName( block->GetName() );
@@ -658,8 +653,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	agmlExt->AddCut( kv.first, kv.second );
       }
 
-      volume->SetUserExtension( agmlExt );
-
+      agmlExt->extends(volume);
 
       if ( mDebugOptions[block_name].Contains("shape") )
 	{
@@ -732,7 +726,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  // AgML extented volume information
 
 	  AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-	  if ( !agmlExt ) { 
+	  if ( 0==agmlExt ) { 
 	    // Create new agml extension
 	    gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
 	    // Add user hits to the extension
@@ -752,7 +746,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	    agmlExt->AddCut( kv.first, kv.second );
 	  }
 
-	  volume->SetUserExtension( agmlExt );
+	  agmlExt->extends(volume);
 
 
 	}
@@ -870,9 +864,8 @@ Bool_t sanityCheck( TGeoVolume *volume )
     result = true;
   } 
   else { 
-
-  TGeoShape *shape = volume->GetShape();
-     if ( 0==shape ) { 
+    TGeoShape *shape = volume->GetShape();
+    if ( 0==shape ) { 
       result = false;
     }
     else { 
@@ -882,11 +875,9 @@ Bool_t sanityCheck( TGeoVolume *volume )
       else {
 	result = false;
       }
-    }
-  }
 
-  if ( result == false ) {
-    LOG_WARN << "Invalid shape for volume " << volume->GetName() << endm;
+    }
+
   }
 
   return result;
