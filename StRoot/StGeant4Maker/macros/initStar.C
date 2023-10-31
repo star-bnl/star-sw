@@ -28,7 +28,7 @@ void initStar() {
   // Preload a few libraries
   Load("libGeom.so");
 
-  //  Load("libPhysics.so");
+  Load("libPhysics.so");
   Load("libTable.so");
 
   Load("StarRoot.so"); 
@@ -41,4 +41,3 @@ void initStar() {
   Load("StBFChain.so"); 
   
 };
-

@@ -546,10 +546,11 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("SYNC", 1, "Synchrotron radiation");
 
   // Application defaults to single engine mode with Geant4
-  AddOption("application:engine","multi","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
+  AddOption("application:engine","G4","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
 
   AddOption("all:engine",  "G3", "In multi-engine mode, selects the default engine for all subsystems" ); // default engine in multi-engine mode is G3
-  //AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
+  //  AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
+
   AddOption("wcal:engine", "G4", "Default engine for all volumes defined in WcalGeo" ); // Forward EMC defaults to G4
   AddOption("hcal:engine", "G4", "Default engine for all volumes defined in HcalGeo" ); // Forward hcal defaults to G4
 
@@ -918,7 +919,6 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     TGeoVolume* volume = (TGeoVolume *)volumes->At(i);
     AgMLExtension* ae = getExtension(volume);
-
     if ( 0==ae ) {
       LOG_INFO << "No agml extension on volume = " << volume->GetName() << endm;
       continue; // shouldn't happen
@@ -931,10 +931,10 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     ae->SetEngine( engineFromModule( mname.Data() ) );
 
-    //    if ( 0==ae->GetSensitive() ) {
-    //      LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
-    //      continue; 
-    //    }
+    if ( 0==ae->GetSensitive() ) {
+      LOG_DEBUG << "Not sensitive = " << volume->GetName() << endm;
+      continue; 
+    }
 
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
@@ -1166,7 +1166,8 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_epd_hit>( "EPDH", {"EPDT"}, "g2t_epd_hit", sd2table_epd  );
   AddHits<St_g2t_fts_hit>( "FSTH", {"FTUS"}, "g2t_fsi_hit", sd2table_fst  );
-  AddHits<St_g2t_fts_hit>( "STGH", {"STGP","STGL","STGS"}, "g2t_stg_hit", sd2table_stgc );
+  //  AddHits<St_g2t_fts_hit>( "STGH", {"STGP","STGL","STGS"}, "g2t_stg_hit", sd2table_stgc );
+  AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
   AddHits<St_g2t_hca_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_hca  ); // HCA should have its own copier
@@ -1364,11 +1365,6 @@ void StGeant4Maker::Stepping(){
 
   };
 
-  if ( IAttr("Stepping:verbose") > 0 ) {
-    //    truth->Print();
-    current->Print();
-  }
-
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit && !trackingRegion() ) {
     
@@ -1399,9 +1395,6 @@ void StGeant4Maker::Stepping(){
 
     mc->StopTrack();
     stopped = true;
-
-    if ( IAttr("Stepping:verbose") > 0 ) { std::cout << "Track is stopped" << std::endl; }
-    
   }
 
   // Score interaction vertices on entrance / exit of a tracking region
@@ -1460,7 +1453,7 @@ void StGeant4Maker::Stepping(){
 
   }
 
-  if ( stopped || IAttr("Stepping:verbose") ) {
+  if ( stopped ) {
     LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
