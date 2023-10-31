@@ -10,6 +10,8 @@ ClassImp(AgStarReader);
 #include <map>
 using namespace std;
 
+#include <cassert>
+
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/BASE/StarParticleStack.h"
 
