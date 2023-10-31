@@ -167,6 +167,8 @@ class StarPrimaryMaker : public StMaker
 
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }
+  /// Return a pointer to the stack 
+  StarParticleStack *stack(){ return mStack; }
 
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.8 2015/06/15 13:23:00 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}

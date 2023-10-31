@@ -74,8 +74,11 @@ public:
   enum { kUnknown, kRot3, kRot6, kRotO };
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
+  //#ifndef __CINT__
   Translation             mTranslation;
+#if  !defined(__CLING__)
   std::vector< Rotation > mRotation;
+#endif
   std::vector< int      > mType;
   double                  mRotationMatrix[9];
 

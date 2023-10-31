@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+
+import re
+import sys
+import argparse
+import subprocess
+
+ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+TEST_REPORT = re.compile( '.*\[(.*)\].*-(.*)-' )
+
+TEST_PASS  = {}
+TEST_FAIL  = {}
+TEST_TOTAL = {}
+TEST_KEYS  = []
+
+count = 0
+
+p = argparse.ArgumentParser()
+p.add_argument('input', nargs='?',
+                 type=argparse.FileType(), default=sys.stdin)
+args = p.parse_args()
+
+# Number of test lines with passes and failures
+npass_line  = 0
+nfail_line  = 0
+
+# Number of test lines which completely pass / fail
+npass_complete = 0
+nfail_complete = 0
+
+for line in args.input.readlines():
+    line = line.replace(' | ','')
+    line = ansi_escape.sub('',line)
+    m = TEST_REPORT.match(line)
+    if m:
+        group1 = m.group(1)
+        group2 = m.group(2)
+
+        count = count + 1
+
+        try:
+            TEST_TOTAL[group1] = TEST_TOTAL[group1] + 1
+        except KeyError:
+            TEST_TOTAL[group1] = 1
+            TEST_PASS[group1] = 0
+            TEST_FAIL[group1] = 0
+            TEST_KEYS.append(group1)
+                
+                       
+        if 'passed' == group2:
+            TEST_PASS[group1] = TEST_PASS[group1] + 1
+            
+        if 'failed' == group2:
+            TEST_FAIL[group1] = TEST_FAIL[group1] + 1
+ 
+
+print ""
+print "Summary of tests"
+print "----------------------------------------------------------------------"
+print "pass | fail | total  | test"
+print "----------------------------------------------------------------------"
+
+for key in TEST_KEYS:
+
+    npass = TEST_PASS[key]
+    nfail = TEST_FAIL[key]
+    count = TEST_TOTAL[key]
+
+    if ( npass == count ):
+        npass_complete = npass_complete + 1
+    if ( nfail == count ):
+        nfail_complete = nfail_complete + 1
+    if ( npass != 0 ):
+        npass_line = npass_line + 1
+    if ( nfail != 0 ):
+        nfail_line = nfail_line + 1
+        
+    
+    if ( nfail == 0 ):
+        print "%4i | %4i | %4i     %s"%(npass,nfail,count,key)
+    else:
+        print "%4i | %4i | %4i [!] %s"%(npass,nfail,count,key)
+
+print "----------------------------------------------------------------------"
+print "N tests w/ passes            = " + str(npass_line)
+print "N tests w/ failures          = " + str(nfail_line)
+print "N tests w/ complete passes   = " + str(npass_complete)
+print "N tests w/ complete failures = " + str(nfail_complete)
+            
+
+
+
