@@ -51,6 +51,8 @@
 #include "StDetectorDbMaker/St_TpcPadPedRMSC.h"
 #include "StEventUtilities/StEbyET0.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
+#include "StDetectorDbMaker/St_GatingGridBC.h"
+#include "StDetectorDbMaker/St_starTriggerDelayC.h"
 #if 0
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
@@ -58,6 +60,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "StdEdxY2Maker/StTpcdEdxCorrection.h"
 // g2t tables
 #include "tables/St_g2t_track_Table.h"
@@ -104,14 +107,16 @@ static Double_t fgTriggerT0 = 0;             //! TPC trigger T0 (seconds) is sup
 static Double_t timeBinMin = -0.5;
 static Double_t timeBinMax = 44.5;
 //________________________________________________________________________________
-static const Int_t nx[2] = {200,500};
-static const Double_t xmin[2] =  {-10., -6};
-static const Double_t xmax[2] =  { 10., 44};
+static const Int_t nx[4] = {200,500, 145, 401};
+static const Double_t xmin[4] =  {-10., -6, -0.5,  -0.5};
+static const Double_t xmax[4] =  { 10., 44,144.5, 400.5};
 static const Int_t nz = 42;
 static const Double_t zmin = -210;
 static const Double_t zmax = -zmin;
 //                     io pt
-static TProfile2D *hist[5][3] = {0};
+static TProfile2D *hist[4][2] = {0};
+static TProfile2D *PixelHist[2] = {0};
+static TProfile2D *GainHist[2] = {0};
 static const Int_t nChecks = 22;
 static TH1  *checkList[2][22] = {0};
 static TString TpcMedium("TPCE_SENSITIVE_GAS");
@@ -146,9 +151,6 @@ StTpcRSMaker::~StTpcRSMaker() {
 Int_t StTpcRSMaker::Finish() {
   //  SafeDelete(fTree);
   if (m_SignalSum) {free(m_SignalSum); m_SignalSum = 0;}
-  SafeDelete(mdNdx);
-  SafeDelete(mdNdxL10);
-  SafeDelete(mdNdEL10);
   for (Int_t io = 0; io < 2; io++) {// Inner/Outer
     for (Int_t sec = 0; sec < NoOfSectors; sec++) {
       if (mShaperResponses[io][sec]     && !mShaperResponses[io][sec]->TestBit(kNotDeleted))     {SafeDelete(mShaperResponses[io][sec]);}
@@ -180,45 +182,28 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_ERROR << "StTpcRSMaker::InitRun: mCutEle has not been found in GEANT3 for \"" << TpcMedium.Data() << "\" parameters." 
 	      << "Probably due to missing  Set it to default " << mCutEle << endm;
   }
-  LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
-  if (! mdNdEL10 || ! mdNdx) {
-    const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
-      ":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
-    const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
-    for (Int_t i = 0; i < 2; i++) { // Inner/Outer
-      Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
-      if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
-      else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
-      TFile       *pFile = new TFile(file);
-      if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
-      if (i == 1) {mdNdx = (TH1D *) pFile->Get("dNdx"); assert(mdNdx);   mdNdx->SetDirectory(0);}
-      delete pFile;
-      delete [] file;
-    }
-    assert(mdNdEL10 && mdNdx);
-  }
   // Distortions
   if (TESTBIT(m_Mode,kdEdxCorr)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
     Long_t Mask = -1; // 64 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionC);
+    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection4MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection5MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection6MDF);
-    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     CLRBIT(Mask,StTpcdEdxCorrection::kEtaCorrection);
-#if 0
-    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::knTbk);
     CLRBIT(Mask,StTpcdEdxCorrection::kzCorrectionC);
     CLRBIT(Mask,StTpcdEdxCorrection::kzCorrection);
+#if 0
+    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kTpcPadTBins);
     CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcI);
     CLRBIT(Mask,StTpcdEdxCorrection::knPad);
-    CLRBIT(Mask,StTpcdEdxCorrection::knTbk);
     CLRBIT(Mask,StTpcdEdxCorrection::kdZdY);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXdY);
 #endif
@@ -568,8 +553,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     } // sector
   } // io
   if (Debug()) Print();
-  memset (hist, 0, sizeof(hist));
-  memset (checkList, 0, sizeof(checkList));
   if (ClusterProfile  && GetTFile()) GetTFile()->cd();
 #if 0
   StMagUtilities::SetDoDistortionT(gFile);
@@ -590,29 +573,35 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       {"I","Inner"},
       {"O","Outer"}
     };
-    const Name_t PadTime[3] = {
-      {"Pad","Pad"},
-      {"Time","Time"},
-      {"Row","Row"},
+    const Name_t PadTime[4] = {
+      {"Pad","Pad - <PadMC> ; Z"},
+      {"Time","Time - <TimeMC> ; Z"},
+      {"PixelPad","Pad ; row ; pad"},
+      {"PixelTime","Time ; row ; time "},
     };
     for (Int_t io = 2; io < 4; io++) {
       for (Int_t pt = 0; pt < 2; pt++) {
 	TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
-	TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
+	TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += " Mc";
 	hist[io][pt] = (TProfile2D *) gDirectory->Get(Name);
 	if (! hist[io][pt]) {
-	  hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
-	  hist[io][pt]->SetMarkerStyle(20);
-	  hist[io][pt]->SetMarkerColor(color++);
+	    hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
+	    hist[io][pt]->SetMarkerStyle(20);
+	    hist[io][pt]->SetMarkerColor(color++);
 	}
       }
     }
-    hist[4][0] = new TProfile2D("dEdxCorSecRow","dEdx correction versus sector and row",
-				NoOfSectors,0.5,NoOfSectors+0.5,
-				St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
-    hist[4][1] = new TProfile2D("GainSecRow","Overall gain versus sector and row",
-				NoOfSectors,0.5,NoOfSectors+0.5,
-				St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
+    GainHist[0] = new TProfile2D("dEdxCorSecRow","dEdx correction ; sector ; row",
+				 NoOfSectors,0.5,NoOfSectors+0.5,
+				 St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
+    GainHist[1] = new TProfile2D("GainSecRow","Overall gain ; sector ; row",
+				 NoOfSectors,0.5,NoOfSectors+0.5,
+				 St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
+    for (Int_t pt = 0; pt < 2; pt++) { 
+      TString Name(PadTime[pt+2].Name);
+      TString Title(PadTime[pt+2].Title); Title += " Mc";
+      PixelHist[pt] = new TProfile2D(Name,Title, 72, 0.5, 72.5, nx[pt+2],xmin[pt+2],xmax[pt+2],""); 
+    }
     const Name_t Checks[22] = {
       {"dEGeant","dE in Geant"}, // 0
       {"dSGeant","ds in Geant"}, // 1
@@ -633,9 +622,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       {"dS","dS"}, // 16
       {"adc","adc"},// 17
       {"NE","Total no. of generated electors"}, // 18
-      {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
-      {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus log(no. primary electrons)"}, // 20 
-      {"bgVsbg","log10(bg_from_gkin) versus log10(bg_from_mom"} // 21
+      {"dECl","Total log(signal/Nt) in a cluster ; Wire Index"}, // 19
+      {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) ; log(no. primary electrons)"}, // 20 
+      {"bgVsbg","log10(bg_from_gkin) ; log10(bg_from_mom"} // 21
     };
     const Int_t Npbins  = 151;
     const Int_t NpbinsL =  10;
@@ -817,9 +806,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  continue;
 	}
       } // special treatment for electron/positron 
-      Int_t qcharge  = charge;
-      if (ipart == 2) qcharge =  101;
-      if (ipart == 3) qcharge = -101;
       // Track segment to propagate
       enum {NoMaxTrackSegmentHits = 100};
       static HitPoint_t TrackSegmentHits[NoMaxTrackSegmentHits];
@@ -927,18 +913,22 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  checkList[io][3]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
 	}
 	// dE/dx correction
-	Double_t dEdxCor = dEdxCorrection(TrackSegmentHits[iSegHits]);
+	Double_t dEdxCor = 1.0;
+	if (TrackSegmentHits[iSegHits].coorLS.position().z() < -0.6) {// prompt hist
+	  dEdxCor = 1.0;
+	} else {
+	  dEdxCor = dEdxCorrection(TrackSegmentHits[iSegHits]);
+	}
 #ifdef __DEBUG__
 	if (TMath::IsNaN(dEdxCor)) {
 	  iBreak++;
 	}
 #endif
-	if (dEdxCor <= 0.) continue;
+	if (dEdxCor < minSignal) continue;
 	if (ClusterProfile) {
 	  checkList[io][4]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),dEdxCor);
-	  hist[4][0]->Fill(TrackSegmentHits[iSegHits].Pad.sector(),TrackSegmentHits[iSegHits].Pad.row(),dEdxCor);
+	  GainHist[0]->Fill(TrackSegmentHits[iSegHits].Pad.sector(),TrackSegmentHits[iSegHits].Pad.row(),dEdxCor);
 	}
-	if (dEdxCor < minSignal) continue;
 	// Initialize propagation
 	Float_t BField[3] = {(Float_t ) TrackSegmentHits[iSegHits].BLS.position().x(), 
 			     (Float_t ) TrackSegmentHits[iSegHits].BLS.position().y(), 
@@ -1001,9 +991,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t tbkH = TrackSegmentHits[iSegHits].Pad.timeBucket(); 
 	tpc_hitC->pad = padH;
 	tpc_hitC->timebucket = tbkH;
-        pad0 = TMath::Nint(padH + xmin[0]);
-	tbk0 = TMath::Nint(tbkH + xmin[1]);
-	Double_t OmegaTau =St_TpcResponseSimulatorC::instance()->OmegaTau()*
+        pad0 = TMath::Max(1,TMath::Nint(padH + xmin[0]));
+	tbk0 = TMath::Max(0,TMath::Nint(tbkH + xmin[1]));
+	Double_t OmegaTau = St_TpcResponseSimulatorC::instance()->OmegaTau()*
 	  TrackSegmentHits[iSegHits].BLS.position().z()/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
 	Double_t NP = TMath::Abs(tpc_hitC->de)/(St_TpcResponseSimulatorC::instance()->W()*eV*
 						St_TpcResponseSimulatorC::instance()->Cluster()); // from GEANT
@@ -1038,14 +1028,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	mGainLocal = Gain/dEdxCor/NoElPerAdc; // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
-	if (mdNdx || mdNdxL10) {
-	  NP = GetNoPrimaryClusters(betaGamma,qcharge); // per cm
-#ifdef __DEBUG__
-	  if (NP <= 0.0) {
-	    iBreak++; continue;
-	  }
-#endif
-	}
+	NP = StdEdxModel::instance()->dNdx(betaGamma,charge); // per cm
 	if (ClusterProfile) {
 	  checkList[io][7]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
 	}
@@ -1057,12 +1040,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Float_t dS = 0;
 	  Float_t dE = 0;
 	  NP = tpc_hitC->dNdx;
-	  static Double_t cLog10 = TMath::Log(10.);
 	  if (charge) {
 	    dS = zIntDr/NP;
-	    if (mdNdEL10) dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
-	    else          dE = St_TpcResponseSimulatorC::instance()->W()*
-			      gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
+	    dE = StdEdxModel::instance()->dNdE();
 	  } else { // charge == 0 geantino
 	    // for Laserino assume dE/dx = 25 keV/cm;
 	    dE = 10; // eV
@@ -1121,8 +1101,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  TotalSignalInCluster = 0;
 	  Int_t WireIndex = 0;
 	  for (Int_t ie = 0; ie < Nt; ie++) {
-	    tpc_hitC->ne++;
-	    QAv = mPolya[io]->GetRandom();
 	    // transport to wire
 	    gRandom->Rannor(rX,rY);
 	    StTpcLocalSectorCoordinate xyzE(xyzC.x()+rX*sigmaT,
@@ -1141,6 +1119,19 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	      TCL::vadd(xyzE.position().xyz(),xyzR.GetArray(),xyzE.position().xyz(),3);
 	    }
+	    // Check Gatting Grid 
+	    Double_t zGG  = xyzE.position().z();
+	    Double_t GGTransperency = 1.0;
+	    if (zGG > -0.6) { // non Prompt hits before  Cathode wire plane 
+	      Double_t driftTime = 1e6*zGG/driftVelocity; // usec
+	      driftTime -= St_starTriggerDelayC::instance()->TrigT0GG(io); // trigger delay + Gating Grid cables
+	      Double_t lGGTransperency = St_GatingGridBC::instance()->CalcCorrection(0,driftTime);
+	      if (lGGTransperency < -9) continue;
+	      GGTransperency = TMath::Exp(lGGTransperency);
+	      if (GGTransperency < minSignal) continue;
+	    }
+	    tpc_hitC->ne++;
+	    QAv = GGTransperency*mPolya[io]->GetRandom();
 	    Double_t y = xyzE.position().y();
 	    Double_t alphaVariation = InnerAlphaVariation[sector-1];
 	    // Transport to wire
@@ -1219,12 +1210,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (ClusterProfile) {
 	    if (TotalSignal > 0) {
 	      if (hist[ioH][0]) {
-		for (Int_t p = 0; p < kPadMax; p++) 
+		for (Int_t p = 0; p < kPadMax; p++) {
 		  hist[ioH][0]->Fill((p+pad0)-padH,TrackSegmentHits[iSegHits].xyzG.position().z(),padsdE[p]/TotalSignal);
+		  PixelHist[0]->Fill(row, p+pad0,padsdE[p]/TotalSignal);
+		}
 	      }
 	      if (hist[ioH][1]) {						                          
-		for (Int_t t = 0; t < kTimeBacketMax; t++) 
+		for (Int_t t = 0; t < kTimeBacketMax; t++) {
 		  hist[ioH][1]->Fill((t+tbk0+0.5)-tbkH,TrackSegmentHits[iSegHits].xyzG.position().z(),tbksdE[t]/TotalSignal);
+		  PixelHist[1]->Fill(row, (t+tbk0+0.5),tbksdE[t]/TotalSignal);
+		}
 	      }
 	    }
 	    checkList[io][15]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),tpc_hitC->de);
@@ -1275,37 +1270,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     }
   }
   return kStOK;
-}
-//________________________________________________________________________________
-Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
-  Double_t beta = betaGamma/TMath::Sqrt(1.0 + betaGamma*betaGamma);
-#if defined(Old_dNdx_Table) 
-  Double_t dNdx = 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
-#else
-#if defined(ElectronHack) 
-  Int_t elepos = charge/100;
-  Double_t dNdx = 0;
-  if      (mdNdx   ) dNdx = mdNdx->Interpolate(betaGamma);
-  else if (mdNdxL10) dNdx = mdNdxL10->Interpolate(TMath::Log10(betaGamma));
-  if (elepos) {
-    dNdx += 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
-    dNdx /= 2;
-  }  
-#else /* new H.Bichsel dNdx table 09/12/11 */
-  Double_t dNdx = 0;
-  if      (mdNdx   ) dNdx = mdNdx->Interpolate(betaGamma);
-  else if (mdNdxL10) dNdx = mdNdxL10->Interpolate(TMath::Log10(betaGamma));
-#endif /* Old_dNdx_Table || ElectronHack */
-#endif
-  Double_t Q_eff = TMath::Abs(charge%100);
-  if (Q_eff > 1)   {
-    // Effective charge from GEANT gthion.F
-    Double_t w1 = 1.034 - 0.1777*TMath::Exp(-0.08114*Q_eff);
-    Double_t w2 = beta*TMath::Power(Q_eff,-2./3.);
-    Double_t w3 = 121.4139*w2 + 0.0378*TMath::Sin(190.7165*w2);
-    Q_eff      *= 1. -w1*TMath::Exp(-w3);
-  }
-  return Q_eff*Q_eff*dNdx;
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::ShaperFunc(Double_t *x, Double_t *par) {
@@ -2059,7 +2023,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
       }
       if (ClusterProfile) {
 	checkList[io][12]->Fill(TrackSegmentHits.xyzG.position().z(),gain);
-	hist[4][1]->Fill(sector,row,gain);
+	GainHist[1]->Fill(sector,row,gain);
       }
       //		Double_t localXDirectionCoupling = localXDirectionCouplings[pad-padMin];
       Double_t localXDirectionCoupling = gain*XDirectionCouplings[pad-padMin];
@@ -2181,324 +2145,3 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 }
 //________________________________________________________________________________
 #undef PrPP
-//________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $
-// $Log: StTpcRSMaker.cxx,v $
-// Revision 1.92  2020/05/22 20:49:19  fisyak
-// Wrong alarm, take it back
-//
-// Revision 1.91  2020/05/22 20:15:15  fisyak
-// Fix bug in fgTriggerT0 (seconds <=> microseconds)
-//
-// Revision 1.90  2020/05/17 15:43:49  fisyak
-// Acount StTpcBXT0CorrEPDC correction
-//
-// Revision 1.89  2019/05/22 21:30:58  fisyak
-// Fix bug3390 (thanks to Irakli), add St_TpcAdcCorrectionMDF
-//
-// Revision 1.88  2019/04/29 20:11:21  fisyak
-// Fix for TrackDirection, add extra correction for the 1st pad row
-//
-// Revision 1.87  2019/04/18 14:02:23  fisyak
-// Keep hits with bad dE/dx information, revisit handling of pedRMS for Tpx and iTPC
-//
-// Revision 1.86  2018/12/16 14:26:30  fisyak
-// Switch off DEBUG, use local position for phi correction
-//
-// Revision 1.85  2018/12/09 23:22:59  fisyak
-// Reshape
-//
-// Revision 1.84  2018/11/29 22:19:49  fisyak
-// Restore __STOPPED_ELECTRONS__, split for Inner and Outer sectors, adjusted gain for Run XVIII
-//
-// Revision 1.83  2018/11/20 19:51:15  fisyak
-// Temporarely disable __STOPPED_ELECTRONS__ to check effect of this on no. of primary tracks for 2010 AuAu200 sample
-//
-// Revision 1.82  2018/11/05 01:05:19  fisyak
-// Replace assert to error message
-//
-// Revision 1.81  2018/11/01 13:27:20  fisyak
-// Synchronize mCutEle with GEANT3 tracking media setting for TPCE_SENSITIVE_GAS, bug#3369
-//
-// Revision 1.80  2018/10/17 20:45:28  fisyak
-// Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
-//
-// Revision 1.77  2018/02/18 21:08:54  perev
-// Move back DSmirnov correction
-//
-// Revision 1.75  2017/02/14 23:40:35  fisyak
-// Add new Table to correct dE/dx pad dependence, 2017 dAu20-62 calibration
-//
-// Revision 1.74  2016/12/29 16:30:56  fisyak
-// make switch to account __STOPPED_ELECTRONS__
-//
-// Revision 1.73  2016/12/19 15:22:39  fisyak
-// Fix typo
-//
-// Revision 1.72  2016/12/19 15:20:20  fisyak
-// Fix bug 3268: add missing correction for TpcAvgPowerSupply, add treatment for stopping electrons and gammas
-//
-// Revision 1.71  2016/09/18 22:45:25  fisyak
-// Clean up, add Heed model, adjust for new StTpcdEdxCorrections
-//
-// Revision 1.71  2015/10/08 13:58:45  fisyak
-// Add requirement for Check Plots for TTree file
-//
-// Revision 1.70  2015/07/19 22:14:07  fisyak
-// Clean up __PAD_BLOCK__, recalculate no. of real hits in g2t_track n_tpc_hitC (excluding pseudo pad row), add current and accumulated charge in dE/dx correction
-//
-// Revision 1.69  2014/10/21 15:33:48  fisyak
-// Clean up, fix bug found by gcc482
-//
-// Revision 1.68  2014/07/27 13:26:26  fisyak
-// Add cast for c++11 option
-//
-// Revision 1.67  2013/02/01 15:54:09  fisyak
-// Add handle for separate Inner and Outer sector time off set
-//
-// Revision 1.66  2012/11/13 20:46:16  fisyak
-// Add wider Voltage range for accepted clusteds (-500V) than for dEdx calculation
-//
-// Revision 1.65  2012/10/23 20:08:57  fisyak
-// Add corrections for iTpx upgrade
-//
-// Revision 1.64  2012/09/27 19:17:02  fisyak
-// Fix missing declaration
-//
-// Revision 1.63  2012/09/27 16:14:43  fisyak
-// Change debug print out scheme
-//
-// Revision 1.62  2012/09/13 21:54:43  fisyak
-// replace elsif by else and if
-//
-// Revision 1.61  2012/09/13 21:02:52  fisyak
-// Corrections for iTpx
-//
-// Revision 1.60  2012/06/04 15:14:18  fisyak
-// restore old hack for dN/dx table to fix bug #2347
-//
-// Revision 1.59  2012/05/07 15:36:22  fisyak
-// Remove hardcoded TPC parameters
-//
-// Revision 1.58  2012/04/03 14:05:18  fisyak
-// Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
-//
-// Revision 1.57  2011/12/23 16:38:25  fisyak
-// Remove __DEBUG__ and __ClusterProfile__ from default, reduce arrays and add check for bounds
-//
-// Revision 1.55  2011/12/20 21:09:56  fisyak
-// change defaults: shark measurements: old default => 46.6%, wire histograms => 38.9%, wire map => 12.5 + 10.2, pad block => 15%
-//
-// Revision 1.54  2011/12/13 17:23:22  fisyak
-// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
-//
-// Revision 1.53  2011/10/14 23:27:51  fisyak
-// Back to standard version
-//
-// Revision 1.51  2011/09/21 15:34:31  fisyak
-// Restore K3IP parameter
-//
-// Revision 1.50  2011/09/18 22:39:48  fisyak
-// Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
-//
-// Revision 1.49  2011/04/05 20:55:02  fisyak
-// Fix betaMin calculations (thanx VP)
-//
-// Revision 1.48  2011/03/17 14:29:31  fisyak
-// Add extrapolation in region beta*gamma < 0.3
-//
-// Revision 1.47  2011/03/13 15:46:44  fisyak
-// Replace step function by interpolation for dN/dx versus beta*gamma
-//
-// Revision 1.46  2011/02/23 20:14:31  perev
-// Hack to avoid sqrt(-)
-//
-// Revision 1.45  2010/12/16 15:36:07  fisyak
-// cut hits outside time buckets range
-//
-// Revision 1.44  2010/12/01 20:59:46  fisyak
-// Remove special treatment for delta-electrons, this will cause that IdTruth for cluster will be degradated because charge from delta-electrons will be accounted with delta-electons track Id but not with original particle Id as was before
-//
-// Revision 1.43  2010/10/28 23:42:34  fisyak
-// extra t0 off set for Altro chip
-//
-// Revision 1.42  2010/10/22 18:13:33  fisyak
-// Add fix from Lokesh AuAu7 2010 embdedding
-//
-// Revision 1.41  2010/09/01 23:12:01  fisyak
-// take out __ClusterProfile__
-//
-// Revision 1.40  2010/06/14 23:34:26  fisyak
-// Freeze at Version V
-//
-// Revision 1.39  2010/05/24 16:11:03  fisyak
-// Return back to time simulation for each pad, organize parameters into TpcResponseSimulator table
-//
-// Revision 1.38  2010/04/24 19:58:54  fisyak
-// swap shift sign
-//
-// Revision 1.37  2010/04/24 15:56:32  fisyak
-// Jan found shift in z by one time bucket
-//
-// Revision 1.36  2010/04/20 13:56:24  fisyak
-// Switch off __ClusterProfile__
-//
-// Revision 1.35  2010/04/16 19:29:35  fisyak
-// W is in eV now
-//
-// Revision 1.34  2010/04/01 22:17:06  fisyak
-// Add checking for TPC is switched off at all and stop if so
-//
-// Revision 1.33  2010/03/22 23:45:05  fisyak
-// Freeze version with new parameters table
-//
-// Revision 1.32  2010/03/16 19:41:46  fisyak
-// Move diffusion and sec/row correction in DB, clean up
-//
-// Revision 1.31  2010/03/02 21:10:27  fisyak
-// Make aware about TpcRDOMasks
-//
-// Revision 1.30  2010/02/26 18:53:33  fisyak
-// Take longitudinal Diffusion from Laser track fit, add Gating Grid
-//
-// Revision 1.29  2010/02/16 00:21:23  fisyak
-// Speed up by a factor 3.5 by ignoring individual pad T0
-//
-// Revision 1.28  2010/01/26 19:47:25  fisyak
-// Include dE/dx calibration and distortions in the simulation
-//
-// Revision 1.27  2009/11/25 21:32:52  fisyak
-// Comment out cluster profile histograms
-//
-// Revision 1.26  2009/11/03 22:38:53  fisyak
-// Freeze version rcf9108.J
-//
-// Revision 1.25  2009/10/30 21:12:00  fisyak
-// Freeze version rcf9108.F, Clean up
-//
-// Revision 1.24  2009/10/26 18:50:58  fisyak
-// Clean up from Bichel's stuff
-//
-// Revision 1.23  2009/10/12 23:54:12  fisyak
-// Restore T0Jitter, remove differential in Tpx signal
-//
-// Revision 1.22  2009/10/03 21:29:09  fisyak
-// Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
-//
-// Revision 1.21  2009/10/01 14:53:06  fisyak
-// Add T0Jitter
-//
-// Revision 1.20  2009/09/27 01:30:48  fisyak
-// Restate T0Jitter
-//
-// Revision 1.19  2009/09/27 01:24:58  fisyak
-// Restate T0Jitter
-//
-// Revision 1.18  2009/09/21 13:20:39  fisyak
-// Variant O4, no mSigmaJitter, 100 keV
-//
-// Revision 1.17  2009/09/01 15:06:44  fisyak
-// Version N
-//
-// Revision 1.16  2009/08/25 20:39:40  fisyak
-// Variant K
-//
-// Revision 1.15  2009/08/25 15:45:58  fisyak
-// Version J
-//
-// Revision 1.14  2009/08/24 20:16:41  fisyak
-// Freeze with new Altro parameters
-//
-// Revision 1.13  2008/12/29 15:24:54  fisyak
-// Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
-//
-// Revision 1.12  2008/12/18 23:06:37  fisyak
-// Take care about references to TGiant
-//
-// Revision 1.11  2008/12/12 21:41:41  fisyak
-// Freeze
-//
-// Revision 1.10  2008/10/06 19:10:23  fisyak
-// BichlePPMIP3
-//
-// Revision 1.9  2008/10/03 20:25:29  fisyak
-// Version BichselMIP2
-//
-// Revision 1.8  2008/08/19 16:01:15  fisyak
-// Version 21
-//
-// Revision 1.7  2008/08/18 15:54:25  fisyak
-// Version 20
-//
-// Revision 1.6  2008/07/30 23:53:19  fisyak
-// Freeze
-//
-// Revision 1.5  2008/07/18 16:22:50  fisyak
-// put a factor 2.5 for tauIntegration
-//
-// Revision 1.3  2008/06/25 20:02:32  fisyak
-// The first set of parametrs for Altro, Remove gains for the moment
-//
-// Revision 1.2  2008/06/19 22:45:43  fisyak
-// Freeze problem with TPX parameterization
-//
-// Revision 1.1.1.1  2008/04/28 14:39:47  fisyak
-// Start new Tpc Response Simulator
-//
-// Revision 1.20  2008/04/24 10:42:03  fisyak
-// Fix binning issues
-//
-// Revision 1.19  2008/04/04 15:00:11  fisyak
-// Freeze before shaper modifications
-//
-// Revision 1.18  2005/02/07 21:40:31  fisyak
-// rename antique TGeant3 to TGiant3
-//
-// Revision 1.17  2005/01/26 23:28:38  fisyak
-// Check boundary for sorted tpc_hit array
-//
-// Revision 1.16  2005/01/26 21:45:31  fisyak
-// Freeze correction made in June
-//
-// Revision 1.14  2004/06/04 17:09:02  fisyak
-// Change tau in Chaper and OmegaTau for gas
-//
-// Revision 1.13  2004/05/29 21:16:27  fisyak
-// Fix pad direction, add sorting for ADC/cluster nonlinearity, replace product by sum of logs
-//
-// Revision 1.12  2004/05/17 19:45:08  fisyak
-// Clean up, add pseudo padrows
-//
-// Revision 1.11  2004/05/05 17:41:52  fisyak
-// Take K3 from E.Mathieson book
-//
-// Revision 1.10  2004/05/04 13:39:06  fisyak
-// Add TF1
-//
-// Revision 1.9  2004/05/02 20:54:18  fisyak
-// fix t0 offset
-//
-// Revision 1.8  2004/04/22 01:05:03  fisyak
-// Freeze the version before modification parametrization for K3
-//
-// Revision 1.7  2004/04/12 14:30:07  fisyak
-// Propagate cluster as a whole
-//
-// Revision 1.6  2004/04/06 01:50:13  fisyak
-// Switch from Double_t to Float_t for sum
-//
-// Revision 1.5  2004/03/30 19:30:04  fisyak
-// Add Laser
-//
-// Revision 1.4  2004/03/21 19:00:43  fisyak
-// switch to GEANT step length
-//
-// Revision 1.3  2004/03/20 17:57:15  fisyak
-// Freeze the version of PAI model
-//
-// Revision 1.2  2004/03/17 20:47:43  fisyak
-// Add version with TrsCluster TTree
-//
-// Revision 1.1.1.1  2004/03/05 20:51:25  fisyak
-// replacement for Trs
-//
