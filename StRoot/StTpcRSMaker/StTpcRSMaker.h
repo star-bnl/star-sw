@@ -58,7 +58,6 @@ class StTpcRSMaker : public StMaker {
   TF1  *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1  *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
   TF1  *GetHeed()                    {return mHeed;}
-  Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   StTpcDigitalSector *DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
@@ -100,9 +99,6 @@ class StTpcRSMaker : public StMaker {
   Char_t   beg[1];                    //!
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!
-  TH1D*    mdNdx;                     //!
-  TH1D*    mdNdxL10;                  //!
-  TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!

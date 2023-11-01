@@ -1,0 +1,26 @@
+//:Description: Drift Distance depended correction
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  pidCorrection.time:
+struct pidCorrection {
+  long   idx;      // row index > 0 if it is real
+  long   nrows;    // total no. of real rows in the table; For Db interface (where nrows = 50)
+  long   type;     // type = 0 polymonical fit,                                        use only [min,max]
+  long   var;      // fit variable:  0 => pmomL10, 1 => bgL10,
+  long   particle; // from StEvent/StPidParticleDefinition.h : kUndef = -1, kPidElectron = 0, Proton = 1, Kaon = 2, Pion = 3, Muon = 4, Deuteron = 5, Triton = 6, 
+                   // He3 = 7, Alpha = 8, He6 = 9, Li5 = 10, Li6,= 11, Li7 = 12, Be7 = 13, Be9 = 14, Be10 = 15, B11 = 16
+  long   charge;   // +/-1, 0 does not matter
+  long   pull;     // != 0 calculated pull correction, == 0 to value
+  long   det;      // from StdEdxY2Maker/StTrackPiD.h : kUndef = 0, kI70 = 1, kI70U = 2, kFit = 3, kFitU = 4, kdNdx = 5, kdNdxU = 6, kBTof -7 , kETof = 8, kMtd = 9, kBEmc = 10
+  long   npar;     // npar < 0, X = exp(x) paramterization; abs(npar) >= 100 cut on range [min.max]
+  double OffSet;   // for future use
+  double min;      // fit range
+  double max;      // 
+  double a[10];    // a[npar]
+  char   comment[32];
+};
