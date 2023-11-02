@@ -13,3 +13,5 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 {
   Grab();
 }
+
+void AgMLExtension::AddCut( TString cut, double value ){ mGstpar[cut] = value; }
