@@ -126,6 +126,11 @@ int StFcsTriggerSimMaker::Init(){
 	mTrgSim->stage_version[1]=1;
 	mTrgSim->stage_version[2]=7;
 	mTrgSim->stage_version[3]=7;
+    }else if(mTrgSelect==202209){
+	mTrgSim->stage_version[0]=3;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=7;
+	mTrgSim->stage_version[3]=7;
     }
 
     //Thresholds
@@ -282,7 +287,7 @@ int StFcsTriggerSimMaker::Make(){
 	    StFcsHit* hit=hits[i];
 	    unsigned short dep = hit->dep();
 	    unsigned short ch  = hit->channel();
-	    //printf("ns=%1d ehp=%1d dep=%2d ch=%2d adc=%4d\n",ns,ehp,dep,ch,hit->adc());
+	    //printf("ns=%1d ehp=%1d dep=%2d ch=%2d adc=%4d sim=\n",ns,ehp,dep,ch,hit->adc(0),mSimMode);
 	    if(ehp<0 || ch>=32) continue;
 	    fcs_trg_sim_adc[ns][ehp][dep][ch] = hit->adc(0);
 	    if(mSimMode==0){
@@ -296,7 +301,8 @@ int StFcsTriggerSimMaker::Make(){
 	      }
 	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
 	    }else{
-	      data[3] = hit->adc(0);
+	      data[1] = hit->adc(0)-1;  //removing 1 to add at tb6
+	      data[6] = 1;              //add this so tb6>tb7
 	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
 	    }
 	    if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
