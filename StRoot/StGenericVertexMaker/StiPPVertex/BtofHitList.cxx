@@ -46,6 +46,7 @@ BtofHitList::initRun(St_db_Maker* db_maker) {
 
   // Initialize BTOF geometry
   TObjectSet *geom = (TObjectSet *) db_maker->GetDataSet("btofGeometry");
+  geometry = 0;
   if (geom)   geometry = (StBTofGeometry *) geom->GetObject();
   if (geometry) {
     LOG_INFO << " Found btofGeometry ... " << endm;
