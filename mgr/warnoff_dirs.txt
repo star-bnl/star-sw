@@ -120,10 +120,6 @@ StRoot/StiCA
 StRoot/StiMaker
 StRoot/StiTpc
 StRoot/StiUtilities
-StRoot/Stv
-StRoot/StvMaker
-StRoot/StvSeed
-StRoot/StvUtil
 StarVMC/GeoTestMaker
 StarVMC/StarAgmlLib
 StarVMC/StarBASE
