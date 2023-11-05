@@ -333,7 +333,7 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       c1=0.785467;
       c2=2.12757e-05;
       c3=3.4805e-07;
-      c4=-3.80776e-100;
+      c4=-3.80776e-10;
 
       refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
