@@ -305,12 +305,11 @@ static Int_t _debug = 0;
 static  const Char_t *Names[StTpcHitMaker::kAll] = {"undef",
 						    "tpc_hits","tpx_hits","itpc_hits",
 						    "TpcPulser","TpxPulser","iTPCPulser",
-						    "TpcDumpPxls2Nt","TpxDumpPxls2Nt",
 						    "TpcRaw","TpxRaw","iTPCRaw",
-						    "TpcAvLaser","TpxAvLaser"};
+						    "TpcAvLaser","TpxAvLaser","tpc_hitsO"};
 //_____________________________________________________________
 StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMode(kUndefined),
-						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0) {
+						 kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0), fSectCounts(0), fThr(0), fSeq(0) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
@@ -318,8 +317,8 @@ StTpcHitMaker::StTpcHitMaker(const char *name) : StRTSBaseMaker("tpc",name), kMo
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
- LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
-   TString MkName(GetName());
+  LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
+  TString MkName(GetName());
   for (Int_t k = 1; k < kAll; k++) {
     if (MkName.CompareTo(Names[k],TString::kIgnoreCase) == 0) {kMode = (EMode) k; break;}
   }
@@ -497,6 +496,7 @@ Int_t StTpcHitMaker::Make() {
 	      switch (kMode) {
 	      case kTpc: 
 	      case kiTPC: 
+	      case kTpxO:
 	      case kTpx:            hitsAdded += UpdateHitCollection(sector); break;
 	      case kTpcPulser:       
 	      case kTpxPulser:      if (fTpc) DoPulser(sector);               break;
@@ -506,13 +506,11 @@ Int_t StTpcHitMaker::Make() {
 		else 	          TpxAvLaser(sector);
 		fSectCounts->Fill(sector);
 		break;
-	      case kTpcDumpPxls2Nt:  
-	      case kTpxDumpPxls2Nt: if (fTpc) DumpPixels2Ntuple(sector);     break;
 	      case kTpcRaw: 
 	      case kTpxRaw: 
 	      case kiTPCRaw: 
 		if ( fTpc) RawTpcData(sector);
-		else 	 RawTpxData(sector);          
+		else 	   RawTpxData(sector);          
 		break;
 	      default:
 		break;
@@ -534,14 +532,69 @@ Int_t StTpcHitMaker::Make() {
                 << ") starting at time bin 0. Skipping event." << endm;
       return kStSkip;
   }
-  if (kMode == kTpc || kMode == kTpx) { // || kMode == kiTPC) { --> no after burner for iTpc
+  if (kMode == kTpc || kMode == kTpx || kMode == kTpxO) { // || kMode == kiTPC) { --> no after burner for iTpc
     StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
     if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
     if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
     StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
     if (hitCollection && ! IAttr("NoTpxAfterBurner")) AfterBurner(hitCollection);
   }
+  if (IAttr("CheckThrSeq") && (kMode == kTpcRaw || kMode == kTpxRaw || kMode == kiTPCRaw)) {
+    CheckThrSeq();
+  }
   return kStOK;
+}
+//_____________________________________________________________
+void  StTpcHitMaker::CheckThrSeq() {
+  if (! fThr || !fSeq) {
+    fThr = new TH2C("Thr","ADC Thresold value versus sector and row",24,0.5,24.5,72,0.5,72.5); fThr->SetDirectory(0);
+    fSeq = new TH2C("Seq","ADC sequnce value versus sector and row",24,0.5,24.5,72,0.5,72.5);  fSeq->SetDirectory(0);
+    for (Int_t s = 1; s <= 24; s++) 
+      for (Int_t r = 1; r <= 72; r++) {
+	fThr->SetBinContent(s,r,127);
+	fSeq->SetBinContent(s,r,127);
+      }
+  }
+  for (Int_t s = 1; s <= 24; s++){
+    StTpcDigitalSector *digitalSector = GetDigitalSector(s);
+    if (! digitalSector) continue;
+    Int_t Nrows = digitalSector->numberOfRows();
+    for (Int_t r = 1; r <= Nrows; r++) {
+      Int_t Npads = digitalSector->numberOfPadsInRow(r);
+      for (Int_t p = 1; p <= Npads; p++) {
+	Int_t ntb = digitalSector->numberOfTimeBins(r,p);
+	if (! ntb) continue;
+	digitalSector->getTimeAdc(r,p,ADCs,IDTs);
+	Int_t adcMin = 127;
+	Int_t seq    = 127;
+	Int_t tbF = -1, tbL = -1;
+	for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+	  if (! ADCs[tb]) {
+	    if (tbF > -1 && tbL >= tbF) {
+	      if (seq > tbL - tbF + 1) seq = tbL - tbF + 1;
+	    }
+	    tbF = tbL = -1;
+	    continue;
+	  }
+	  if (ADCs[tb] < adcMin) {
+	    adcMin = TMath::Max(ADCs[tb-2],TMath::Max(ADCs[tb-1],TMath::Max(ADCs[tb],TMath::Max(ADCs[tb+1],ADCs[tb+1]))));
+	  }
+	  if (tbF < 0) tbF = tb;
+	  tbL = tb;
+	}
+	if (adcMin < 127 && seq < 127) {
+	  if (seq == 1 && adcMin == 1) {
+	    static Int_t ibreak = 0;
+	    ibreak++;
+	  }
+	  Char_t th = fThr->GetBinContent(s,r);
+	  if (th > adcMin) fThr->SetBinContent(s,r, adcMin);
+	  Char_t sq = fSeq->GetBinContent(s,r);
+	  if (sq > seq) fSeq->SetBinContent(s,r, seq);
+	}
+      } 
+    }  
+  }
 }
 //_____________________________________________________________
 Int_t  StTpcHitMaker::Finish() {
@@ -558,6 +611,38 @@ Int_t  StTpcHitMaker::Finish() {
     }
   }
 #endif /* __USE__THnSparse__ */
+  if (fThr && fSeq) {
+    Int_t adcMinFL = 127;
+    Int_t seqFL    = 127;
+    Int_t s1 = -1, s2 = -1, r1 = -1, r2 = -1;
+    for (Int_t s = 1; s <= 24; s++){
+      for (Int_t r = 1; r <= 72; r++) {
+	Int_t adcMin = fThr->GetBinContent(s,r);
+	Int_t seq    = fSeq->GetBinContent(s,r);
+	if (adcMin == 127 || seq == 127) continue;
+	if (adcMinFL == 127 && seqFL == 127) {
+	  adcMinFL = adcMin;
+	  seqFL    = seq;
+	  s1 = s2 = s;
+	  r1 = r2 = r;
+	} else {
+	  if (adcMinFL == adcMin && seqFL == seq) {
+	    r2 = r;
+            s2 = s;
+	  } else {
+	    LOG_INFO << "StTpcHitMaker::Finish CheckThrSeq in sectors [" << s1 << "," << s2 << "] and rows[" << r1 << "," << r2 << "] Threshold = " << adcMinFL << " and sequence = " << seqFL << endm; 
+	    adcMinFL = adcMin;
+	    seqFL    = seq;
+	    s1 = s2 = s;
+	    r1 = r2 = r;
+	  }
+	}
+      }
+    }
+    LOG_INFO << "StTpcHitMaker::Finish CheckThrSeq in sectors [" << s1 << "," << s2 << "] and rows[" << r1 << "," << r2 << "] Threshold = " << adcMinFL << " and sequence = " << seqFL << endm; 
+  }
+  SafeDelete(fThr);
+  SafeDelete(fSeq);
   return StMaker::Finish();
 }
 //_____________________________________________________________
@@ -588,6 +673,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  if (! c || ! c->charge) continue;
 	  if (c->flags &&
 	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
+	  if (kMode == kTpxO) c->flags |= 256; // mark cluster if it is coming from extra online maker
 	  Int_t row = padrow + 1;
 	  Float_t pad  = c->p;
 	  Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
@@ -624,6 +710,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       if (cld->t2 <  0 || cld->t2 >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
+      if (kMode == kTpxO) cld->flags |= 256; // mark cluster if it is coming from extra online maker
       Float_t pad  = cld->pad;
       Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
       if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
@@ -661,7 +748,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
 #endif
   Double_t q = 0; //cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
 			       , (Int_t)    0  // idTruth=0
@@ -674,7 +760,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 			       , pad
 			       , time 
 			       , cluster.charge
-			       , cluster.flags);
+			       ,cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
   if (Debug()) {
     LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt tpc_cl\t" <<*hit << endm;
@@ -694,10 +780,14 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 #else /* used in TFG till 07/31/20 */
   Double_t q = 0; 
 #endif
-
-  // Correct for slewing (needs corrected q, and time in microsec)
-  Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
-  time = freq * St_tpcSlewingC::instance()->correctedT(sector,row,q,time/freq);
+  // Check that slewing is active
+  static St_tpcSlewingC *tpcSlewing = St_tpcSlewingC::instance();
+  if (tpcSlewing && tpcSlewing->type() != 1001) tpcSlewing = 0;
+  if (tpcSlewing) {
+    // Correct for slewing (needs corrected q, and time in microsec)
+    Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
+    time = freq * tpcSlewing->correctedT(sector,row,q,time/freq);
+  }
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
@@ -709,6 +799,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
+  UShort_t flag = cluster.flags;
+  if (kMode == kTpxO) flag |= 256; // mark cluster if it is coming from extra online maker
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
@@ -722,7 +814,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 			       , pad
 			       , time 
 			       , cluster.charge
-			       , cluster.flags);
+			       , flag);
   if (hit->minTmbk() == 0) bin0Hits++;
   if (Debug()) {
     LOG_INFO << "StTpcHitMaker::CreateTpcHit fromt daq_cld\t" <<*hit << endm;
@@ -888,75 +980,28 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
   }
 }
 //________________________________________________________________________________
-void StTpcHitMaker::DumpPixels2Ntuple(Int_t sector) {
+void StTpcHitMaker::DumpPixels2Ntuple(Int_t sector, Int_t row, Int_t pad) {
   struct BPoint_t {
-    Float_t sector, row, pad, tb, adc, ped, t0, peak;
+    Float_t event, sector, row, pad, tb, adc, idt;
   };
-  static const Char_t *BName = "sector:row:pad:tb:adc:ped:t0:peak";
+  static const Char_t *BName = "event:sector:row:pad:tb:adc:idt";
   static TNtuple *adcP = 0;
-  if (! adcP) {
-    assert(GetTFile());
+  if (! adcP && GetTFile() ) {
     GetTFile()->cd();
     adcP = new TNtuple("adcP","Pulser ADC",BName);
   }
+  if (! adcP) return;
   static BPoint_t P;
-  if (! fTpc) return;
-  Int_t r, p, tb, tbmax;
-  //  if (! fTpc->channels_sector) return;
-  for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
-    r = row - 1;
-    for (Int_t pad = 1; pad <= 182; pad++) {
-      p = pad - 1;
-      Int_t ncounts = fTpc->counts[r][p];
-      if (! ncounts) continue;
-      static UShort_t adc[512];
-      memset (adc, 0, sizeof(adc));
-      tbmax = 513;
-      UShort_t adcmax = 0;
-      for (Int_t i = 0; i < ncounts; i++) {
-	tb = fTpc->timebin[r][p][i];
-	adc[tb] = log8to10_table[fTpc->adc[r][p][i]]; 
-	if (adc[tb] > adcmax) {
-	  tbmax = tb;
-	  adcmax = adc[tb];
-	}
-      }
-      if (tbmax < 2 || tbmax > 504) continue;
-      Int_t npeak = 0, nped = 0;
-      Int_t i1s = TMath::Max(  0, tbmax - 2);
-      Int_t i2s = TMath::Min(511, tbmax + 7);
-      Int_t i1  = TMath::Max(0  ,i1s - 20);
-      Int_t i2  = TMath::Min(511,i2s + 20);
-      Double_t peak = 0;
-      Double_t ped = 0;
-      Double_t t0 = 0;
-      for (Int_t i = i1; i <= i2; i++) {
-	if (i >= i1s && i <= i2s) continue;
-	nped++;
-	ped += adc[i];
-      }
-      if (nped) ped /= nped;
-      for (Int_t i = i1s; i <= i2s; i++) {
-	npeak++;
-	peak += adc[i] - ped;
-	t0   += i*(adc[i] - ped);
-      }
-      if (peak <= 0) continue;
-      t0    /= peak;
-      i1 = (Int_t) TMath::Max(0.,t0 - 20);
-      i2 = (Int_t) TMath::Min(511., t0 + 80);
-      for (Int_t i = i1; i <= i2; i++) {
-	P.sector = sector;
-	P.row    = row;
-	P.pad    = pad;
-	P.tb     = i - t0;
-	P.adc    = adc[i];
-	P.ped    = ped;
-	P.t0     = t0;
-	P.peak   = peak;
-	adcP->Fill(&P.sector);
-      }
-    }
+  P.event = GetEventNumber();
+  P.sector = sector;
+  P.row    = row;
+  P.pad    = pad;
+  for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
+    if (! ADCs[i]) continue;
+    P.tb = i;
+    P.adc = ADCs[i];
+    P.idt = IDTs[i];
+    adcP->Fill(&P.event);
   }
 }
 //________________________________________________________________________________
@@ -1067,6 +1112,9 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
 	}
       }
       digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
+      if (IAttr("TpxDumpPxls2Nt")) {
+	DumpPixels2Ntuple(sector,r_old+1,p_old+1);
+      }
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
     }
@@ -1131,6 +1179,9 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
 #endif
          }
          digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+	 if (IAttr("TpxDumpPxls2Nt")) {
+	   DumpPixels2Ntuple(sector,row,pad);
+	 }
       }
     }									
     if (Total_data) {

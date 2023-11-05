@@ -6,7 +6,6 @@
  ***************************************************************************
  *
  * Description:  Make clusters from StTpcRawData and fill the StEvent      */
-//#define __USE_GAIN_FROM_FILE__
 #include <assert.h>
 #include <stdio.h>
 #include "StTpcHitMaker.h"
@@ -29,10 +28,9 @@
 #include "StDetectorDbMaker/St_itpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcStatusC.h"
-#ifdef __USE_GAIN_FROM_FILE__
 #include "StDetectorDbMaker/StPath2tpxGain.h"
 #include "StDetectorDbMaker/StPath2itpcGain.h"
-#endif /* __USE_GAIN_FROM_FILE__ */
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StMessMgr.h" 
 #include "StDAQMaker/StDAQReader.h"
 #include "StRtsTable.h"
@@ -49,11 +47,14 @@
 #include "RTS/src/DAQ_TPX/tpxFCF.h"
 #include "RTS/src/DAQ_TPX/tpxStat.h"
 #include "RTS/src/DAQ_ITPC/itpcFCF.h"
-#ifdef __TFG__VERSION__
-#include "TPC23/tpx23.h"
-#include "TPC23/itpc23.h"
-#endif /*  __TFG__VERSION__ */
+#include "RTS/src/DAQ_TPC23/tpc23_base.h"
+#include "RTS/src/DAQ_TPC23/tpx23.h"
+#include "RTS/src/DAQ_TPC23/itpc23.h"
 #include "TBenchmark.h"
+#include "TH2.h"
+#include "TFile.h"
+#include "TPolyMarker.h"
+#include "TBox.h"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -61,14 +62,13 @@ ClassImp(StTpcRTSHitMaker);
 #else
 #define PrPP(A,B)
 #endif
+StTpcRTSHitMaker *StTpcRTSHitMaker::fgStTpcRTSHitMaker = 0;
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
   SafeDelete(fiTpc);
-#ifdef __TFG__VERSION__
   SafeDelete(fTpx23);
   SafeDelete(fiTpc23);
-#endif /*  __TFG__VERSION__ */
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -77,7 +77,6 @@ Int_t StTpcRTSHitMaker::Init() {
   bin0Hits = 0;
   return StMaker::Init();
 }
-#ifdef __USE_GAIN_FROM_FILE__
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::from_file(daq_dta *gain_dta, const Char_t *fname) {
   // example of gains; will use file for that
@@ -127,7 +126,27 @@ Int_t StTpcRTSHitMaker::from_file(daq_dta *gain_dta, const Char_t *fname) {
   }
   return 1;
 }
-#endif /* __USE_GAIN_FROM_FILE__ */
+//________________________________________________________________________________
+Int_t StTpcRTSHitMaker::FixGains(tpc23_base *tpc23, Int_t sec, Int_t row, Int_t Npads) {
+  //  from tpc23_base::gains_from_cache, fix dead pads and edges
+  Int_t ok = 0;
+  tpc23_base::row_pad_t (*rp_gain)[tpc23_base::ROW_MAX+1][tpc23_base::PAD_MAX+1]  = tpc23->rp_gain;
+  for (Int_t pad = 1; pad <= Npads; pad++) {
+    Float_t g = rp_gain[sec-1][row][pad].gain;
+    if(g<0.01) {
+      int p1 = pad - 1 ;
+      int p2 = pad + 1 ;
+      if(p1<1) p1 = 1 ;
+      if(p2>Npads) p2 = Npads ;
+      rp_gain[sec-1][row][pad].flags |= FCF_DEAD_EDGE ;
+      rp_gain[sec-1][row][p1].flags  |= FCF_DEAD_EDGE ;
+      rp_gain[sec-1][row][p2].flags  |= FCF_DEAD_EDGE ;
+    }
+  }
+  rp_gain[sec-1][row][1].flags     |= FCF_ROW_EDGE ;	// row edge
+  rp_gain[sec-1][row][Npads].flags |= FCF_ROW_EDGE ;	// row edge
+  return ok;
+}
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
@@ -137,31 +156,45 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   SafeDelete(fTpx);
   SafeDelete(fiTpc);
-#ifdef __TFG__VERSION__
   SafeDelete(fTpx23);
   SafeDelete(fiTpc23);
-#endif /*  __TFG__VERSION__ */
-#ifdef __USE_GAIN_FROM_FILE__
-    const Char_t *fname  = StPath2tpxGain::instance()->GetPath();
-    const Char_t *fnameITPC  = StPath2itpcGain::instance()->GetPath();
-#else
-    const Char_t *fname  = "none";
-    const Char_t *fnameITPC  = "none";
-#endif /* __USE_GAIN_FROM_FILE__ */
-#ifdef __TFG__VERSION__
+  TString fnameTPX("none");
+  TString fnameITPC("none");
+  if (IAttr("USE_GAIN_FROM_FILE")) {
+    fnameTPX  = StPath2tpxGain::instance()->GetPath();  
+    LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameTPX.Data() << " for TPX" << endm;
+    fnameITPC = StPath2itpcGain::instance()->GetPath(); 
+    LOG_INFO << "StTpcRTSHitMaker::InitRun: use " << fnameITPC.Data() << " for iTPC" << endm;
+  }
   if ( IAttr("TPC23")) { // TPC23
+    LOG_INFO << "StTpcRTSHitMaker::InitRun:: use TPC23 mode" << endm;
     Int_t log_level = 0 ;
+    //    Int_t fmt_version = 0 ; 
+    Int_t run_type = 3; 
+    Int_t online    = 0 ; //   NOTE setting for Offline mode!
     fTpx23  = new tpx23;
-    fTpx23->log_level = log_level;
-    if (fTpx23->gains_from_cache(fname) < 0) {	// REQUIRED even if no gain correction
+    fTpx23->online = online ;
+    fTpx23->run_type = run_type ;
+    fTpx23->log_level = log_level ;
+    if (fTpx23->gains_from_cache(fnameTPX) < 0 || fnameTPX == "none") {	// REQUIRED even if no gain correction
       // Tpx Load gains from Db
+      Int_t NoPadsWithLoadedGain = 0;
       for(Int_t sector=1;sector<=24;sector++) {
 	Int_t rowMin = 1;
 	if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14; 
-	for(Int_t rowO = 1; rowO <= 45; rowO++) {
+	for(Int_t rowO = 1; rowO < rowMin; rowO++) {	
+	  Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
+	  for(Int_t pad = 0; pad <= Npads; pad++) {
+	    fTpx23->rp_gain[sector-1][rowO][pad].gain  =    0.; // be sure that dead pads are killed
+	    fTpx23->rp_gain[sector-1][rowO][pad].t0    = -9.99;
+	    fTpx23->rp_gain[sector-1][rowO][pad].flags =    64;
+	  }
+	}
+	for(Int_t rowO = rowMin; rowO <= 45; rowO++) {
 	  Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
 	  Int_t padMin = 1;
 	  Int_t padMax = Npads;
+	  Int_t NoPadsWithLoadedGainPerRow = 0;
 	  for(Int_t pad = 0; pad <= Npads; pad++) {
 	    fTpx23->rp_gain[sector-1][rowO][pad].gain = 0.; // be sure that dead pads are killed
 	    fTpx23->rp_gain[sector-1][rowO][pad].t0   = 0.;
@@ -169,20 +202,44 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	      if (St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad) <= 0) continue;
 	      fTpx23->rp_gain[sector-1][rowO][pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad);
 	      fTpx23->rp_gain[sector-1][rowO][pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
+	      NoPadsWithLoadedGainPerRow++;
 	    }
+	  }
+	  if (NoPadsWithLoadedGainPerRow > 0) {
+	    NoPadsWithLoadedGain += NoPadsWithLoadedGainPerRow;
+	    FixGains(fTpx23, sector, rowO, Npads);
 	  }
 	}
       }
+      LOG_INFO << "StTpcRTSHitMaker::InitRun:: loaded gains for " << NoPadsWithLoadedGain << " pads in TPX23" << endm;
+      
     }
+    //#define __DEBUG_GAIN__
+#ifdef   __DEBUG_GAIN__
+    LOG_INFO << "StTpcRTSHitMaker::InitRun:: Print  gains for Tpx23" << endm;
+    for(Int_t sector=1;sector<=24;sector++) {
+      for(Int_t rowO = 1; rowO <= 45; rowO++) {
+	Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
+	for(Int_t pad = 1; pad <= Npads; pad++) {
+	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.3f %7.3f %i",sector,rowO,pad,fTpx23->rp_gain[sector-1][rowO][pad].gain,fTpx23->rp_gain[sector-1][rowO][pad].t0,fTpx23->rp_gain[sector-1][rowO][pad].flags) << endl;
+	}
+      }
+    }
+#endif /* __DEBUG_GAIN__ */
     fTpx23->run_start() ;
     // iTPC23
     fiTpc23 = new itpc23 ;
-    fiTpc23->log_level = log_level;
-    if (fiTpc23->gains_from_cache(fnameITPC) < 0) {	// REQUIRED even if no gain correction
+    fiTpc23->online = online ;
+    fiTpc23->run_type = run_type ;
+    fiTpc23->log_level = log_level ;
+    Int_t ok = fiTpc23->gains_from_cache(fnameITPC);
+    if (ok < 0 || fnameITPC == "none") {	// REQUIRED even if no gain correction
+      Int_t NoPadsWithLoadedGain = 0;
       for(Int_t sector=1;sector<=24;sector++) {
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
 	for(Int_t row = 1; row <= 40; row++) {
 	  Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+	  Int_t NoPadsWithLoadedGainPerRow = 0;
 	  for(Int_t pad = 0; pad <= Npads; pad++) {
 	    fiTpc23->rp_gain[sector-1][row][pad].gain = 0.; // be sure that dead pads are killed
 	    fiTpc23->rp_gain[sector-1][row][pad].t0   = 0.;
@@ -191,16 +248,29 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	    fiTpc23->rp_gain[sector-1][row][pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
 	    fiTpc23->rp_gain[sector-1][row][pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
 	    //#define __DEBUG_GAIN__
-#ifdef __DEBUG_GAIN__
-	    cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,fiTpc23->rp_gain[sector-1][row][pad].gain,fiTpc23->rp_gain[sector-1][row][pad].t0) << endl;
-#endif /* __DEBUG_GAIN__ */
+	    NoPadsWithLoadedGainPerRow++;
+	  }
+	  if (NoPadsWithLoadedGainPerRow > 0) {
+	    NoPadsWithLoadedGain += NoPadsWithLoadedGainPerRow;
+	    FixGains(fiTpc23, sector, row, Npads);
 	  }
 	}
       }
+      LOG_INFO << "StTpcRTSHitMaker::InitRun:: loaded gains for " << NoPadsWithLoadedGain << " pads in iTPC23" << endm;
     }
+#ifdef __DEBUG_GAIN__
+    LOG_INFO << "StTpcRTSHitMaker::InitRun:: Print  gains for iTpc23" << endm;
+    for(Int_t sector=1;sector<=24;sector++) {
+      for(Int_t row = 1; row <= 40; row++) {
+	Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+	for(Int_t pad = 1; pad <= Npads; pad++) {
+	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.3f %7.3f %i",sector,row,pad,fiTpc23->rp_gain[sector-1][row][pad].gain,fiTpc23->rp_gain[sector-1][row][pad].t0,fiTpc23->rp_gain[sector-1][row][pad].flags) << endl;
+	}
+      }
+    }
+#endif /* __DEBUG_GAIN__ */
     fiTpc23->run_start() ;
   } else {
-#endif /*  __TFG__VERSION__ */
     fTpx = new daq_tpx() ; 
     if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
     if (GetDate() >= 20191215) fTpx->fcf_run_compatibility = 22 ;
@@ -212,7 +282,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     //    daq_dta *dta_Tpx  = fTpx->put("gain"); 
     tpxGain *gain = fTpx->gain_algo;
     // gain->do_default(sector) ;	// zap to all 1...
-    if (gain->from_file(fname, 0) < 0) {
+    Int_t ok = gain->from_file(fnameTPX, 0);
+    if (ok < 0 &&fnameTPX == "none") {
       for(Int_t sector=1;sector<=24;sector++) {
 	// Tpx
 	Int_t rowMin = 1;
@@ -252,9 +323,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     // iTpc
     if (fiTpc) {
       daq_dta * dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
-#ifdef __USE_GAIN_FROM_FILE__
-      if (from_file(dta_iTpc, fname) < 0) {
-#endif /* __USE_GAIN_FROM_FILE__ */
+      Int_t ok = from_file(dta_iTpc, fnameITPC);
+      if (ok < 0 || fnameITPC == "none") {
 	for(Int_t sector=1;sector<=24;sector++) {
 	  if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
 	  for(Int_t row = 1; row <= 40; row++) {
@@ -277,13 +347,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  }
 	  //      ((daq_itpc *) dta_iTpc)->InitRun(runnumber);
 	}
-#ifdef __USE_GAIN_FROM_FILE__
       }
-#endif /* __USE_GAIN_FROM_FILE__ */
     } // 
-#ifdef __TFG__VERSION__
   }
-#endif /*  __TFG__VERSION__ */
   PrintAttr();
 
   //////////////////////////////////////
@@ -408,9 +474,7 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
   }
-#ifdef __TFG__VERSION__
   if (IAttr("TPC23")) return Make23();
-#endif /*  __TFG__VERSION__ */
   static Short_t ADCs[__MaxNumberOfTimeBins__];
 #ifdef __TFG__VERSION__
   static Int_t IDTs[__MaxNumberOfTimeBins__];
@@ -662,7 +726,6 @@ Int_t StTpcRTSHitMaker::Make() {
 #endif
   return kStOK;
 }
-#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make23() {
   if (! fTpx23 && ! fiTpc23) return kStErr;
@@ -676,7 +739,11 @@ Int_t StTpcRTSHitMaker::Make23() {
     return kStOK;
   }
   static Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
   static Int_t IDTs[__MaxNumberOfTimeBins__];
+#else
+  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+#endif
   static StTpcCoordinateTransform transform;
   static StThreeVectorF hard_coded_errors;
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
@@ -735,6 +802,10 @@ Int_t StTpcRTSHitMaker::Make23() {
 	tpc23 = fTpx23;
       }
       if (! tpc23) continue;
+#ifndef __TFG__VERSION__
+      Double_t ADC2GeV = 0;
+      Int_t rowOld = -1;
+#endif /* ! __TFG__VERSION__ */
       for (Int_t row = row1; row <= row2; row++) {
 	if (! St_tpcPadGainT0BC::instance()->livePadrow(sector,row)) continue;
 	tpc23->sim_evt_start(sector) ;	// prepare start of event
@@ -755,14 +826,21 @@ Int_t StTpcRTSHitMaker::Make23() {
 	  // add adc data for this specific sector:row:pad
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  UInt_t l = 0;
+	  static UShort_t adcs[__MaxNumberOfTimeBins__];
+	  memset(adcs, 0, sizeof(adcs));
+	  static Int_t idts[__MaxNumberOfTimeBins__];
+	  memset(idts, 0, sizeof(idts));
 	  for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
 	    if (ADCs[k]) {
+	      adcs[k] = ADCs[k];
+	      idts[k] = IDTs[k];
 	      l++;
 	    }
 	  }
 	  if (l > 0) {
 	    Int_t padrow = rowO;
-	    tpc23->sim_do_pad(padrow,pad,ADCs,IDTs) ;
+	    //	    tpc23->sim_do_pad(padrow,pad,ADCs,IDTs) ;
+	    tpc23->do_ch_sim(padrow,pad,adcs,idts) ;
 	    NoAdcs += l;
 	  }
 	} // pad loop
@@ -806,7 +884,7 @@ Int_t StTpcRTSHitMaker::Make23() {
 
 					version = (padrow>>16) ;
 
-					ints_per_cluster = 5 ;	// 5 for sim, 2 for real
+					ints_per_cluster = fTpx23 -> online? 2 : 5;	// 5 for sim, 2 for real, Tommy's fix
 				}
 				else {	
 					padrow = *p_buff++ ;
@@ -887,6 +965,17 @@ Int_t StTpcRTSHitMaker::Make23() {
 	    hw += sector << 4;     // (row/100 << 4);   // sector
 	    hw += row  << 9;       // (row%100 << 9);   // row
 #ifndef __TFG__VERSION__
+	    if (row != rowOld) {
+	      rowOld = row;
+	      Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(sector,row) ? 
+		St_tss_tssparC::instance()->gain_in() : 
+		St_tss_tssparC::instance()->gain_out();
+	      Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(sector,row) ? 
+		St_tss_tssparC::instance()->wire_coupling_in() : 
+		St_tss_tssparC::instance()->wire_coupling_out();
+	      ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
+			 (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+	    }
 	    Double_t q = ADC2GeV*dc.cld.charge;
 #else /* used in TFG till 07/31/20 */
 	    Double_t q = 0; 
@@ -938,4 +1027,87 @@ Int_t StTpcRTSHitMaker::Make23() {
 #endif
   return kStOK;
 }
-#endif /*  __TFG__VERSION__ */
+//________________________________________________________________________________
+TH2F *StTpcRTSHitMaker::PlotSecRow(Int_t sec, Int_t row, Int_t flags) {
+  /* 
+     Usage: 
+     root.exe ' bfc.C(1,"P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault,TpxRaw,TPC23,TpxRaw,TPC23,USE_GAIN_FROM_FILE,tpxO,NoTpxAfterBurner","/RTS/TONKO/data/st_physics_adc_20192001_raw_5500002.daq","","Plot.root")'
+     TH2F *plot = StTpcRTSHitMaker::instance()->PlotSecRow(2,43,-1);
+   */
+  TH2F *plot = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return plot;}
+  StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+  if (! TpcHitCollection) { cout << "No TPC Hit Collection" << endl; return plot;}
+  StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(sec-1);
+  if (! sectorCollection) { cout << "No TPC Hit Collection for sector " << sec << endl; return plot;}
+  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(row-1);
+  if (! rowCollection) { cout << "No TPC Hit Collection for sector " << sec << " and row " << row << endl; return plot;}
+  TFile *f = StMaker::GetChain()->GetTFile();
+  if (! f) {cout << "No TFile is opened" << endl; return plot;}
+  f->cd();
+  TString PlotName(Form("s%02ir%03i",sec,row));
+  plot = (TH2F *) f->Get(PlotName);
+  if (plot) {
+    plot->Reset(); 
+    plot->SetTitle(Form("ADC versus  pad and time buckets for sec = %i and row = %i in event %i",sec,row, pEvent->id()));
+  } else {
+    Int_t npad = St_tpcPadConfigC::instance()->padsPerRow(sec,row);
+    plot = new TH2F(PlotName,Form("ADC versus  pad and time buckets for sec = %i and row = %i in event %i",sec,row, pEvent->id()), 360,-0.5,359.5,npad,0.5,npad+0.5);
+    plot->SetStats(1);
+  }
+  TDataSet*  tpcRawEvent = StMaker::GetChain()->GetInputDS("Event");
+  if (! tpcRawEvent) {
+    LOG_WARN << "There is not Tpc Raw Event" << endm;
+  } else {
+    StTpcRawData *tpcRawData = (StTpcRawData *) tpcRawEvent->GetObject();
+    if (! tpcRawData) {
+      LOG_WARN << "There is not Tpc Raw Data" << endm;
+    } else {
+      StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
+      if (! digitalSector) {
+	LOG_WARN << "There is not digital sector" << sec << endm;
+      } else {
+	Int_t Npads = digitalSector->numberOfPadsInRow(row);
+	for(Int_t pad = 1; pad <= Npads; pad++) {
+	  static Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
+	  static Int_t IDTs[__MaxNumberOfTimeBins__];
+#else
+	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+#endif
+	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	  for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
+	    if (ADCs[k]) plot->Fill(k,pad,ADCs[k]);
+	  }
+	}
+      }
+    }
+  }
+  StSPtrVecTpcHit &hits = rowCollection->hits();
+  Long_t NoHits = hits.size();
+  for (Long64_t k = 0; k < NoHits; k++) {
+    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
+    Int_t color = 1;
+    Int_t style = 43;
+    Double_t offset = 0.0;
+    Int_t flag = tpcHit->flag();
+    if (flag & 256) {color = 2; style = 29; offset = 0.1; flag &= ~0x100;} // online kTpxO
+    if (flags > -1 && flag < flags) continue;
+    Double_t tb = tpcHit->timeBucket();
+    Double_t pad = tpcHit->pad();
+    TPolyMarker *pm = new TPolyMarker(1,&tb, &pad);
+    pm->SetMarkerStyle(style);
+    pm->SetMarkerColor(color);
+    pm->SetMarkerSize(2);
+    plot->GetListOfFunctions()->Add(pm);
+    TBox *box = new TBox(tpcHit->minTmbk()-0.5 + offset,tpcHit->minPad()-0.5 + offset, tpcHit->maxTmbk()+0.5 + offset,tpcHit->maxPad()+0.5 + offset); 
+    box->SetLineWidth(4);
+    box->SetLineColor(color);
+    box->SetFillStyle(0);
+    box->SetFillColor(0);
+    plot->GetListOfFunctions()->Add(box);
+  }
+  plot->Draw("colz");
+  return plot;
+}

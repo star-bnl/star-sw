@@ -1425,6 +1425,7 @@ Bfc_st BFC[] = { // standard chains
   {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx,TpxClu"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
+  {"TPC23"       ,"","","TpxClu","","",                    "RTS(online, daq5k) tpc23-cluster maker",kFALSE},
   {"TpxClu2D"    ,"","","TpxClu","","",                              "RTS(online) 2D-cluster maker",kFALSE},
   {"TpcAvCluster","TpcAvCluster","tpcChain","rts,detDb","StTpcAvClusterMaker","StTpcHitMaker"
    ,                       "TPC+TPX averaging laser events into Sparse histogram on cluster level", kFALSE},
