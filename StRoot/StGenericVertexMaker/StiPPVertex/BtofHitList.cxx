@@ -19,7 +19,7 @@
 
 //==========================================================
 //==========================================================
-BtofHitList::BtofHitList() :
+BtofHitList::BtofHitList() : geometry(0), 
   // phi, 60 bins
   // eta, 32*2 bins not with the same width, so eta0,deta are really not used
   ScintHitList(0.,M_PI/60,60, -0.9,0.028125,64,"Btof",4,0.75)
@@ -46,7 +46,6 @@ BtofHitList::initRun(St_db_Maker* db_maker) {
 
   // Initialize BTOF geometry
   TObjectSet *geom = (TObjectSet *) db_maker->GetDataSet("btofGeometry");
-  geometry = 0;
   if (geom)   geometry = (StBTofGeometry *) geom->GetObject();
   if (geometry) {
     LOG_INFO << " Found btofGeometry ... " << endm;
