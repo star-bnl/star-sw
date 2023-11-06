@@ -492,6 +492,22 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
     }
+    else if (mParameterIndex == 6) { // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV)
+      b0=23.28;
+      b1=5.247;
+      b2=0.04037;
+      b3=-1.206e-3;
+      b4=5.792e-6;
+      c0=-14.82;
+      c1=1.583;
+      c2=0.02684;
+      c3=4.605e-5;
+      c4=-2.410e-6;
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
+    }
     else {
       notPileUp = kTRUE;
     }
