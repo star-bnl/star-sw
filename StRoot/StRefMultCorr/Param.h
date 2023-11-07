@@ -508,10 +508,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 19 Au+Au 4.59 GeV (sqrt(s_NN)=3.2 GeV), Trigger ID = 680001
   {
     "2019:4.59:20179040,20183025:198,202",         // Year, energy, run start end, Vz range
-    "5,7,11,15,20,26,33,43,53,66,81,98,118,141,166,197",  // Multiplicity values for the centrality classes
+    "6,9,13,17,23,30,38,48,59,72,87,104,122,144,169,200",  // Multiplicity values for the centrality classes
     "118",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.2680,-0.13,0.0593,0.0179,-0.0879,0,0.120,0.00714",   // Trigger efficiency
+    "1.078,0.0143,0.0615,-0.0531,-0.0298,0,0.0516,0.00214",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -519,10 +519,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV), Trigger ID = 720000, first RunID range
   {
     "2020:5.75:20355020,20355021:198,202",         // Year, energy, run start end, Vz range
-    "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
+    "6,8,12,16,22,28,37,47,59,73,89,108,128,152,181,217",  // Multiplicity values for the centrality classes
     "107",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.22,-0.137,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
+    "1.175,-0.0760,0.0547,-0.0129,-0.0565,0,0.0802,0.00470",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -530,10 +530,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 19 Au+Au 7.3 GeV (sqrt(s_NN)=3.9 GeV), Trigger ID = 1
   {
     "2019:7.3:20107029,20169055:198,202",         // Year, energy, run start end, Vz range
-    "7,9,13,18,24,32,41,52,65,81,98,119,141,168,198,235",  // Multiplicity values for the centrality classes
+    "7,10,14,19,26,33,43,55,68,83,101,122,144,170,200,238",  // Multiplicity values for the centrality classes
     "141",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.278,-0.1635,0.0547,0.217,-0.0734,0,0.222,0.00481",   // Trigger efficiency
+    "1.146,0.0652,0.0587,-0.172,-0.0444,0,0.0111,0.00287",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   },
 
@@ -541,10 +541,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 20 Au+Au 7.3 GeV (sqrt(s_NN)=3.9 GeV), Trigger ID = 730000
   {
     "2020:7.3:21035003,21036013:198,202",         // Year, energy, run start end, Vz range
-    "6,9,13,17,23,31,40,51,64,80,97,118,141,167,198,236",  // Multiplicity values for the centrality classes
+    "6,9,13,17,23,31,40,51,64,79,97,117,139,166,197,236",  // Multiplicity values for the centrality classes
     "141",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",    // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.017,0.0609,0.0744,-0.106,-0.003,0,0.0824,-3.91e-4",   // Trigger efficiency
+    "1.170,-0.109,0.0439,-0.00154,-0.0508,0,0.0799,0.00391",   // Trigger efficiency
     "0.,0."                       // Luminosity correction
   },
 
@@ -563,10 +563,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV), Trigger ID = 720000, second RunID range
   {
     "2020:5.75:21044023,21045011:198,202",         // Year, energy, run start end, Vz range
-    "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
+    "6,8,12,16,22,28,37,47,59,73,89,108,128,152,181,217",  // Multiplicity values for the centrality classes
     "107",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.22,-0.137,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
+    "1.175,-0.0760,0.0547,-0.0129,-0.0565,0,0.0802,0.00470",   // Trigger efficiency
     "0.,0."                      // Luminosity correction
   }
 };
