@@ -1080,7 +1080,8 @@ public:
 private:
   Int_t ConvertVolumePathString(const TString &volumeName,Int_t **lnam,
                                 Int_t **lnum);
-
+  virtual void ProcessEvent(Int_t);
+  virtual void ProcessEvent(Int_t, Bool_t);
 
 
 protected:
