@@ -490,7 +490,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
 //the order of them is important!!!!!!!!!!!!!
 // FXT section
 //=======================================================================================
-const int nID_ref5  = 6;//after add N more new group of parameters, need to update nID_ref1 += N
+const int nID_ref5  = 7;//after add N more new group of parameters, need to update nID_ref1 += N
 const int nSet_ref5 = 6;
 const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // mParameterIndex = 0
@@ -516,9 +516,9 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   },
 
   // mParameterIndex = 2
-  // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV), Trigger ID = 720000
+  // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV), Trigger ID = 720000, first RunID range
   {
-    "2020:5.75:20355020,21045011:198,202",         // Year, energy, run start end, Vz range
+    "2020:5.75:20355020,20355021:198,202",         // Year, energy, run start end, Vz range
     "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
     "107",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
@@ -551,12 +551,23 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // mParameterIndex = 5
   // Run 20 Au+Au 31.2 GeV (sqrt(s_NN)=7.7 GeV), Trigger ID = 770000
   {
-    "2020:7.3:21028011,21029036:198,202",         // Year, energy, run start end, Vz range
+    "2020:31.2:21028011,21029036:198,202",         // Year, energy, run start end, Vz range
     "10,15,21,28,38,49,63,79,98,119,142,169,200,233,271,315",  // Multiplicity values for the centrality classes
     "160",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",    // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
     "9.63078e-1,6.54124e-02,4.68589e-02,-2.43086e-02,8.15939e-03,0,4.50613e-02,-1.14802e-03",   // Trigger efficiency
     "0.,0."                       // Luminosity correction
+  },
+
+  // mParameterIndex = 6
+  // Run 20 Au+Au 5.75 GeV (sqrt(s_NN)=3.5 GeV), Trigger ID = 720000, second RunID range
+  {
+    "2020:5.75:21044023,21045011:198,202",         // Year, energy, run start end, Vz range
+    "6,8,12,16,21,28,37,47,59,73,89,108,128,153,181,216",  // Multiplicity values for the centrality classes
+    "107",                        // Normalization start (of Glauber to the data)
+    "0.,0.,0.,0.,0.,0.,0.,0.",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
+    "1.22,-0.137,0.0532,0.00845,-0.0690,0,0.1,0.00546",   // Trigger efficiency
+    "0.,0."                      // Luminosity correction
   }
 };
 
