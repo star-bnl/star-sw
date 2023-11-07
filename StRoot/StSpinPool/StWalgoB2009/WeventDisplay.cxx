@@ -10,6 +10,7 @@
 #include <TStyle.h>
 #include <TFile.h>
 #include <TText.h>
+#include <TLine.h>
 #include <TList.h>
 #include <TBox.h>
 #include <TPaveText.h>
