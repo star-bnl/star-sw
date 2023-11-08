@@ -105,7 +105,6 @@ StRoot/StTreeMaker
 StRoot/StTriggerUtilities
 StRoot/StTrsMaker
 StRoot/StUtilities
-StRoot/StXTrakMaker
 StRoot/St_QA_Maker
 StRoot/St_base
 StRoot/St_ctf_Maker
@@ -120,11 +119,6 @@ StRoot/StiCA
 StRoot/StiMaker
 StRoot/StiTpc
 StRoot/StiUtilities
-StRoot/Stv
-StRoot/StvMaker
-StRoot/StvSeed
-StRoot/StvUtil
-StarVMC/GeoTestMaker
 StarVMC/StarAgmlLib
 StarVMC/StarBASE
 StarVMC/StarGeometry
