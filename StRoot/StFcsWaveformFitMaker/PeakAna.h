@@ -1,5 +1,8 @@
 /*
 Author: David Kapukchyan
+@[October 20, 2022]
+> Added doxygen style comments
+
 @[September 29, 2022]
 > Got rid of the virtual painter as it is no longer needed
 
@@ -86,7 +89,6 @@ There is a helper data class #PeakWindow which holds the found peak data.
 
 //Custom Headers
 #include "PeakWindow.h"
-//#include "PeakAnaVirtualPainter.h"
 class PeakAnaPainter;
 
 class PeakAna : public TObject
@@ -192,13 +194,16 @@ public:
      peak qa drawing options(case insensitive):\n 
        - "R" for range\n 
        - "B" for baselines\n 
-       - "F" found peak qa\n 
-       - "P" for full peak qa\n 
-       - "A" for all, which combines "P" and "B"\n 
-     stats drawing options(case insensitive):\n
+       - "F" found peak window\n 
+       - "P" for all peak windows\n 
+       - "M" for found peak marker\n 
+       - "W" for all peak markers (upside down M)\n 
+       - "E" combines "P" and "W"\n 
+       - "A" for all, which combines "B", "P", and "W"\n 
+     stats drawing options(case insensitive):\n 
        - "S" is to show just the found peak\n 
        - "A" is to show for all peaks\n 
-       - "D" is whether to show detailed printout or not (works with option "S" or "A")
+       - "D" is whether to show detailed printout or not (works with option "S" or "A")\n 
 
        Example1: "APL;FB;S" means draw graph using option "APL", draw only found peak qa and baselines, and create a stats box showing only basic information about the found peak.
        Example2: ";A;AD" means don't draw graph but draw all peaks and put detailed information of all peaks in a stats box

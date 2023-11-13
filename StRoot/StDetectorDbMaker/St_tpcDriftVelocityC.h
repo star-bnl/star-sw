@@ -13,6 +13,7 @@ class St_tpcDriftVelocityC : public TChair {
   Float_t 	laserDriftVelocityWest(Int_t i = 0) 	{return Struct(i)->laserDriftVelocityWest;}
   Float_t 	cathodeDriftVelocityEast(Int_t i = 0) 	{return Struct(i)->cathodeDriftVelocityEast;}
   Float_t 	cathodeDriftVelocityWest(Int_t i = 0) 	{return Struct(i)->cathodeDriftVelocityWest;}
+  Float_t       timeBucketPitch(Int_t i = 0);   // cm 
 #if 0
   Float_t 	scaleY(Int_t i = 0) 	                {return Struct(i)->scaleY;}
 #endif

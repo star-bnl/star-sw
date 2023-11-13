@@ -1,3 +1,5 @@
+#include "tables/St_TpcResponseSimulator_Table.h"
+
 // $Id: TpcResponseSimulator.20141220.000000.C,v 1.1 2017/05/25 15:32:05 fisyak Exp $
 // $Log: TpcResponseSimulator.20141220.000000.C,v $
 // Revision 1.1  2017/05/25 15:32:05  fisyak

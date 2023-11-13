@@ -1,3 +1,5 @@
+#include "tables/St_ctg_slat_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // params/ctf/ctg/tof_slat Allocated rows: 5400  Used rows: 5400  Row size: 32 bytes

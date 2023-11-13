@@ -11,6 +11,7 @@
 #include "StdEdxModel.h"
 #include "Bichsel.h"
 #include "TCallf77.h"
+#include "St_spline3C.h"
 #ifndef WIN32
 #define ggderiv ggderiv_
 #else
@@ -30,46 +31,62 @@ StdEdxModel* StdEdxModel::instance() {
   return fgStdEdxModel;
 }
 //________________________________________________________________________________
-StdEdxModel::StdEdxModel() : mdNdx(0), fScale(1)
+StdEdxModel::StdEdxModel() : fScale(1)
 			   , fTmaxL10eV(5) // Tcut = 100 keV
-			   , fGGaus(0), fGausExp(0)
-			   , fpol2F(0), fpol5F(0), fpol6F(0), fpol7F(0)
-			   , fLogkeVperElectron(0)
 {
   //  LOG_INFO << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endm;
   cout << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endl;
-  if (! fgStdEdxModel) {
-    TDirectory *dir = gDirectory;
-    fgStdEdxModel = this;
-    const Char_t *path  = ".:./StarDb/dEdxModel:$STAR/StarDb/dEdxModel";
-    const Char_t *Files[1] = {"dNdx_Bichsel.root"};
-    for (Int_t i = 0; i < 1; i++) { // files
-      Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
-      if (! file) Fatal("StdEdxModel","File %s has not been found in path %s",Files[i],path);
-      else        Warning("StdEdxModel","File %s has been found as %s",Files[i],file);
-      TFile       *pFile = new TFile(file);
-      mdNdx    = (TH1D *)         pFile->Get("dNdx");     if (mdNdx)    mdNdx->SetDirectory(0);
-      assert(mdNdx);
-      delete pFile;
-      delete [] file;
+  memset(beg, 0, end-beg+1);
+  TDirectory *dir = gDirectory;
+  fgStdEdxModel = this;
+  Int_t NFiles = 2; // old
+  if ( ! Stspline3LndNdxL10::instance())              NFiles = 1;
+  if (   Stspline3LndNdxL10::instance()->IsValid())   NFiles = 1;
+
+  const Char_t *path  = ".:./StarDb/dEdxModel:$STAR/StarDb/dEdxModel";
+#ifndef __HEED__
+  const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
+#else
+  const Char_t *Files[2] = {"dNdx_Heed.root","dNdx_Heed.root"};
+#endif
+#define __Warn_Hist__(__HIST__) {m ## __HIST__ = (TH1D *)     pFile->Get(#__HIST__); \
+    if (m ## __HIST__)     {Warning("StdEdxModel","Histogram %s/%s has been found",m ## __HIST__->GetName(),m ## __HIST__->GetTitle()); m ## __HIST__->SetDirectory(0);}}
+  for (Int_t i = 0; i < NFiles; i++) { // files
+    Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
+    if (! file) Fatal("StdEdxModel","File %s has not been found in path %s",Files[i],path);
+    else        Warning("StdEdxModel","File %s has been found as %s",Files[i],file);
+    TFile       *pFile = new TFile(file);
+    if (i == 1) {
+      __Warn_Hist__(dNdx);
+      __Warn_Hist__(dNdxL10);
+      __Warn_Hist__(LndNdxL10);
+      __Warn_Hist__(LndNdxL10Smooth);
+      mLndNdxL10Spline5 = (TSpline5 *) pFile->Get("LndNdxL10Spline5"); if (mLndNdxL10Spline5) {Warning("StdEdxModel","TSpline5 %s has been found",mLndNdxL10Smooth->GetName());}
+      assert(mdNdx || mdNdxL10);
+    } else {
+      mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10); Warning("StdEdxModel","Histogram %s/%s has been found",mdNdEL10->GetName(),mdNdEL10->GetTitle()); mdNdEL10->SetDirectory(0);  
     }
-    dir->cd();
+    delete pFile;
+    delete [] file;
   }
+#undef __Warn_Hist__
+  dir->cd();
   fGGaus = new TF1("GGaus",ggaus, -1., 5., 5);
   fGGaus->SetParNames("NormL","mu","sigma","alpha","k");
   fGGaus->SetParameters(0,0,0.3,0.1,0);
   fGGaus->FixParameter(4,0.0);
-
+  
   fGausExp = new TF1("GausExp",gausexp, -5., 5., 5);
   fGausExp->SetParNames("NormL","mu","sigma","k","l");
   fGausExp->SetParameters(0,0,0.3,5.,0);
   fGausExp->FixParameter(4,0.0);
   InitPar();
   // Set normalization point the same as for I70 (increase energy per conduction electron from 20 eB to 52 eV)
-  Double_t dEdxMIPLog = TMath::Log(2.62463815285237434); //TMath::Log(2.39761562607903311); // [keV/cm] for dX = 2 cm
+  //  Double_t dEdxMIPLog = TMath::Log(2.62463815285237434) + 0.0174824 + 3.57110e-03; ; //TMath::Log(2.39761562607903311); // [keV/cm] for dX = 2 cm
+  Double_t dEdxMIPLog = TMath::Log(2.62463815285237434); ; //TMath::Log(2.39761562607903311); // [keV/cm] for dX = 2 cm
   Double_t MIPBetaGamma10 = TMath::Log10(4.);
-  //                  log2dx, charge
-  Double_t pars[3] = {   1.0,    1.0};
+  //                  log2dx,  charge        mass
+  Double_t pars[3] = {   1.0,     1.0, 0.13956995};
   Double_t dEdxLog = zMP(&MIPBetaGamma10, pars);
   fLogkeVperElectron = dEdxMIPLog - dEdxLog;
   cout << "StdEdxModel:: set scale = " << Form("%5.1f",1e3*keVperElectron()) << " eV/electron" << endl;
@@ -78,7 +95,16 @@ StdEdxModel::StdEdxModel() : mdNdx(0), fScale(1)
 StdEdxModel::~StdEdxModel() {
   fgStdEdxModel = 0;
   SafeDelete(mdNdx);
+  SafeDelete(mdNdxL10);
+  SafeDelete(mLndNdxL10);
+  SafeDelete(mLndNdxL10Smooth);
+  SafeDelete(mLndNdxL10Spline5);
   SafeDelete(fGGaus);
+  SafeDelete(fGausExp);
+  SafeDelete(fpol2F);
+  SafeDelete(fpol5F);
+  SafeDelete(fpol6F);
+  SafeDelete(fpol7F);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::dNdx(Double_t poverm, Double_t charge) {
@@ -93,8 +119,40 @@ Double_t StdEdxModel::dNdx(Double_t poverm, Double_t charge) {
     Double_t w3 = 121.4139*w2 + 0.0378*TMath::Sin(190.7165*w2);
     Q_eff      *= 1. -w1*TMath::Exp(-w3);
   }
-  if (mdNdx)    return fScale*Q_eff*Q_eff*mdNdx->Interpolate(poverm);
-  return 0;
+  Double_t dNdx = 0;
+  if ( Stspline3LndNdxL10::instance() && Stspline3LndNdxL10::instance()->IsValid()) {
+    dNdx = TMath::Exp(Stspline3LndNdxL10::instance()->Func()->Eval(TMath::Log10(poverm)));
+  } else {// old
+    if (mLndNdxL10Spline5) {
+      dNdx = TMath::Exp(mLndNdxL10Spline5->Eval(TMath::Log10(poverm)));
+    } else if (mLndNdxL10Smooth) {
+      dNdx = TMath::Exp(mLndNdxL10Smooth->Interpolate(TMath::Log10(poverm)));
+    } else if (mLndNdxL10) {
+      dNdx = TMath::Exp(mLndNdxL10->Interpolate(TMath::Log10(poverm)));
+    } else if (mdNdxL10) {
+      dNdx = mdNdxL10->Interpolate(TMath::Log10(poverm));
+    } else if (mdNdx) {
+      dNdx = mdNdx->Interpolate(poverm);
+    }
+  }
+  return fScale*Q_eff*Q_eff*dNdx;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::dNdxL10func(Double_t *x, Double_t *p) {
+  Double_t bgL10 = x[0];
+  Double_t bg    = TMath::Power(10., bgL10);
+  return instance()->dNdx(bg, 1.);
+}							     
+//________________________________________________________________________________
+TF1 *StdEdxModel::dNdxL10F() {
+  TF1 *f = new TF1("dNdxL10F",dNdxL10func,-2,5,0);
+  return f;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::dNdE() {
+  static Double_t cLog10 = TMath::Log(10.);
+  Double_t dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
+  return dE;
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::gausw(Double_t *x, Double_t *p) {
@@ -189,7 +247,7 @@ Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
     ksi = mu - w*m_0;
     //    Double_t mean = ksi + w * muz;
   }
-  Double_t par[4] = {NormL, ksi, w, alpha};
+  Double_t par[5] = {NormL, ksi, w, alpha, 0};
   Double_t V = gausw(x, par);
   if (der) {
 #if 0 /* Derivatives */
@@ -398,7 +456,7 @@ TF1 *StdEdxModel::FParam(Int_t l) {
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) { // GG: ggaus
-  Double_t params[4] = {0};
+  Double_t params[5] = {0};
   Double_t V = 0;
   if (! der) {
     Parameters(Np, &params[1]);
@@ -473,7 +531,7 @@ TF1 *StdEdxModel::FProbDer() {
 #if 0
 //________________________________________________________________________________
 Double_t StdEdxModel::ProbEx(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) { // GEX : gausexp
-  Double_t params[4] = {0};
+  Double_t params[5] = {0};
   Double_t V = 0;
   if (! der) {
     Parameters(Np, &params[1]);
@@ -496,12 +554,14 @@ Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) { // log(keV/cm)
-  Double_t log10bg = x[0];
-  Double_t pOverMRC  = TMath::Power(10., log10bg);
+  Double_t bgL10 = x[0];
+  Double_t pOverMRC  = TMath::Power(10., bgL10);
+  //  Double_t bgL10 = TMath::Log10(pOverM);
   Double_t log2dx  = p[0];
   Double_t charge  = p[1];
+  Double_t mass    = p[2];
   Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdxEff(pOverMRC, charge); // */dNdxVsBgC*.root [-1.5,5]
+  Double_t dNdx = StdEdxModel::instance()->dNdxEff(pOverMRC, charge, mass); // */dNdxVsBgC*.root [-1.5,5]
   Double_t Np = dNdx*dx;
   //  Double_t NpLog = TMath::Log(Np);
   //  Double_t mu    = instance()->Parameter(Np, 0);
@@ -510,19 +570,70 @@ Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) { // log(keV/cm)
   //  Double_t dEkeVLog = NpLog + mu -3.13746587897608142e+00 +1.78334647296254700e-01;// + 7.02725079814016507e+00;// - 3.13746587897608142e+00;// 43.4 eV/conducting electron 
   Double_t dEkeVLog = instance()->MukeV(Np); // Parameter(Np, 0); 
   Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
+  Double_t dEdxCor = 0;
+#if 0
+  StElectonsDEV_dEdx *EL = StElectonsDEV_dEdx::instance();
+  if ( EL && EL->IsValid() && EL->InRange(bgL10)) {
+    dEdxCor = StElectonsDEV_dEdx::instance()->Func()->Eval(bgL10);
+    static TF1 *elCor1 = 0;
+    if (! elCor1) {
+      Double_t pars1[4] = {-0.2100929,  0.1500455, -0.02743834, 0.001894849};  //electrons [2.1,3.3]
+      Double_t pars2[4] = {-0.04352509, 0.03437069, -0.002851349, -0.0003568138}; //electornsD
+      Double_t pars[4] = {0};
+      for (Int_t i = 0; i < 4; i++) pars[i] = pars1[i] + pars2[i];
+      elCor1 = new TF1("dEdxElCor1","pol3",2.0,3.5); elCor1->SetParameters(pars);
+    }
+    dEdxCor += elCor1->Eval(bgL10);
+    dEdxCor += -7.63891e-03 - 3.57110e-03 ;
+  } else { // pions and protons 
+    static Double_t pionM   = 0.13956995;
+    static Double_t protonM = 0.9382723;
+    static Double_t mPionL10   = TMath::Log10(pionM);
+    static Double_t mProtonL10 = TMath::Log10(protonM);
+    static Double_t dML10      = mProtonL10 - mPionL10;
+    Double_t dEdxCorPion = 0;
+    Double_t dEdxCorProton = 0;
+    StPionDEV_dEdx *PI =  StPionDEV_dEdx::instance();
+    if ( PI && PI->IsValid() && PI->InRange(bgL10)) {
+      dEdxCorPion = PI->Func()->Eval(bgL10);
+      static TF1 *piCor1 = 0;
+      if (! piCor1) {
+	Double_t pars[4] = {0.008567411, 0.01817216, -0.004932309, -0.001434306}; //pionD
+	piCor1 = new TF1("dEdxPiCor1","pol3",-0.2,1.6); piCor1->SetParameters(pars);
+      }
+      dEdxCorPion += piCor1->Eval(bgL10);
+    }
+    StProtonDEV_dEdx *P = StProtonDEV_dEdx::instance();
+    if (P &&P->IsValid() &&P->InRange(bgL10)) {
+      dEdxCorProton = P->Func()->Eval(bgL10);
+      static TF1 *protonCor1 = 0;
+      if (! protonCor1) {
+	Double_t pars[6] = {0.01745018 + 0.005654033 - 3.57110e-03 , 0.005726225  -0.00228347, 0.004416636, -0.02814983,  0.1824491, -0.2114645}; //protonD
+	//	Double_t pars2[2] = {0.005654033, -0.00228347}; //proton dEdxG
+	protonCor1 = new TF1("dEdxProtonCor1","pol5",-0.5,0.8); protonCor1->SetParameters(pars);
+      }
+      dEdxCorProton += protonCor1->Eval(bgL10);
+    }
+    Double_t mL10 = TMath::Log10(mass);
+    dEdxCor += dEdxCorPion + (dEdxCorProton - dEdxCorPion)*(mL10 - mPionL10)/dML10;
+  }
+  //  dEdxCor =  1.66944e-02;
+  //  dEdxCor += 0.0174824;
+#endif
+  return   dEdxLog + dEdxCor;
 }
 //________________________________________________________________________________
-TF1 *StdEdxModel::ZMP(Double_t log2dx) {
+TF1 *StdEdxModel::ZMP(Double_t log2dx, Double_t charge, Double_t mass) {
   TString fName(Form("New%i",(int)(2*(log2dx+2))));
   TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
   if (! f) {
-    f = new TF1(fName,zMP,-2,5,2);
-    f->SetParName(0,"log2dx");
+    f = new TF1(fName,zMP,-2,5,3);
     f->SetLineStyle(4);
+    f->SetParNames("log2dx","charge","mass");
     f->SetParameter(0,log2dx);
-    f->SetParameter(1, 1.0); // charge
-    cout << "Create ZMPNew with name " << f->GetName() << " for log2dx = " << log2dx << endl;
+    f->SetParameter(1, charge); 
+    f->SetParameter(2, mass); 
+    cout << "Create ZMPNew with name " << f->GetName() << " for log2dx = " << log2dx << " and mass = " << mass << endl;
   }
   return f;
 }
@@ -628,135 +739,57 @@ TH1D *StdEdxModel::protonEff() {
 //========= Macro generated from object: Func/
 //========= by ROOT version5.34/39
    
-   TH1D *Func__1 = new TH1D("protonEff","",100,-2.0,0.0);
-   Func__1->SetBinContent(1,0.829974);
-   Func__1->SetBinContent(2,0.833488);
-   Func__1->SetBinContent(3,0.836679);
-   Func__1->SetBinContent(4,0.839568);
-   Func__1->SetBinContent(5,0.842227);
-   Func__1->SetBinContent(6,0.844577);
-   Func__1->SetBinContent(7,0.846659);
-   Func__1->SetBinContent(8,0.848506);
-   Func__1->SetBinContent(9,0.850145);
-   Func__1->SetBinContent(10,0.851604);
-   Func__1->SetBinContent(11,0.857514);
-   Func__1->SetBinContent(12,0.863548);
-   Func__1->SetBinContent(13,0.869116);
-   Func__1->SetBinContent(14,0.874097);
-   Func__1->SetBinContent(15,0.878448);
-   Func__1->SetBinContent(16,0.88217);
-   Func__1->SetBinContent(17,0.885305);
-   Func__1->SetBinContent(18,0.887923);
-   Func__1->SetBinContent(19,0.890128);
-   Func__1->SetBinContent(20,0.891974);
-   Func__1->SetBinContent(21,0.893513);
-   Func__1->SetBinContent(22,0.894796);
-   Func__1->SetBinContent(23,0.895866);
-   Func__1->SetBinContent(24,0.896761);
-   Func__1->SetBinContent(25,0.897513);
-   Func__1->SetBinContent(26,0.898147);
-   Func__1->SetBinContent(27,0.898683);
-   Func__1->SetBinContent(28,0.899139);
-   Func__1->SetBinContent(29,0.899531);
-   Func__1->SetBinContent(30,0.899868);
-   Func__1->SetBinContent(31,0.90016);
-   Func__1->SetBinContent(32,0.900415);
-   Func__1->SetBinContent(33,0.900639);
-   Func__1->SetBinContent(34,0.900836);
-   Func__1->SetBinContent(35,0.90101);
-   Func__1->SetBinContent(36,0.901165);
-   Func__1->SetBinContent(37,0.901304);
-   Func__1->SetBinContent(38,0.901431);
-   Func__1->SetBinContent(39,0.90164);
-   Func__1->SetBinContent(40,0.901817);
-   Func__1->SetBinContent(41,0.901969);
-   Func__1->SetBinContent(42,0.902099);
-   Func__1->SetBinContent(43,0.902212);
-   Func__1->SetBinContent(44,0.902309);
-   Func__1->SetBinContent(45,0.902392);
-   Func__1->SetBinContent(46,0.902469);
-   Func__1->SetBinContent(47,0.902536);
-   Func__1->SetBinContent(48,0.902595);
-   Func__1->SetBinContent(49,0.902646);
-   Func__1->SetBinContent(50,0.902692);
-   Func__1->SetBinContent(51,0.902733);
-   Func__1->SetBinContent(52,0.902769);
-   Func__1->SetBinContent(53,0.902801);
-   Func__1->SetBinContent(54,0.90283);
-   Func__1->SetBinContent(55,0.902857);
-   Func__1->SetBinContent(56,0.902881);
-   Func__1->SetBinContent(57,0.902902);
-   Func__1->SetBinContent(58,0.902922);
-   Func__1->SetBinContent(59,0.90294);
-   Func__1->SetBinContent(60,0.902956);
-   Func__1->SetBinContent(61,0.90297);
-   Func__1->SetBinContent(62,0.902984);
-   Func__1->SetBinContent(63,0.902996);
-   Func__1->SetBinContent(64,0.903007);
-   Func__1->SetBinContent(65,0.903017);
-   Func__1->SetBinContent(66,0.903026);
-   Func__1->SetBinContent(67,0.903034);
-   Func__1->SetBinContent(68,0.903042);
-   Func__1->SetBinContent(69,0.903049);
-   Func__1->SetBinContent(70,0.903055);
-   Func__1->SetBinContent(71,0.903061);
-   Func__1->SetBinContent(72,0.903066);
-   Func__1->SetBinContent(73,0.903071);
-   Func__1->SetBinContent(74,0.903075);
-   Func__1->SetBinContent(75,0.903079);
-   Func__1->SetBinContent(76,0.90308);
-   Func__1->SetBinContent(77,0.90308);
-   Func__1->SetBinContent(78,0.90308);
-   Func__1->SetBinContent(79,0.90308);
-   Func__1->SetBinContent(80,0.90308);
-   Func__1->SetBinContent(81,0.90308);
-   Func__1->SetBinContent(82,0.90308);
-   Func__1->SetBinContent(83,0.90308);
-   Func__1->SetBinContent(84,0.90308);
-   Func__1->SetBinContent(85,0.90308);
-   Func__1->SetBinContent(86,0.90308);
-   Func__1->SetBinContent(87,0.90308);
-   Func__1->SetBinContent(88,0.90308);
-   Func__1->SetBinContent(89,0.90308);
-   Func__1->SetBinContent(90,0.90308);
-   Func__1->SetBinContent(91,0.90308);
-   Func__1->SetBinContent(92,0.90308);
-   Func__1->SetBinContent(93,0.90308);
-   Func__1->SetBinContent(94,0.90308);
-   Func__1->SetBinContent(95,0.90308);
-   Func__1->SetBinContent(96,0.90308);
-   Func__1->SetBinContent(97,0.90308);
-   Func__1->SetBinContent(98,0.90308);
-   Func__1->SetBinContent(99,0.90308);
-   Func__1->SetBinContent(100,0.90308);
-   Func__1->SetEntries(700);
-   Func__1->SetDirectory(0);
-   Func__1->SetStats(0);
-   Func__1->SetFillColor(19);
-   Func__1->SetFillStyle(0);
-   Func__1->SetLineColor(9);
-   Func__1->SetLineWidth(3);
-   Func__1->SetMarkerStyle(20);
-   Func__1->GetXaxis()->SetTitleOffset(1.2);
-   //   Func__1->Draw("");
-   return Func__1;
+   TH1D *eff = new TH1D("protonEff","",100,-2.0,0.0);
+   Double_t corr[102] = { 0, 
+			  0.8300, 0.8335, 0.8367, 0.8396, 0.8422, 0.8446, 0.8467, 0.8485, 0.8501, 0.8516, 
+			  0.8575, 0.8635, 0.8691, 0.8741, 0.8784, 0.8822, 0.8853, 0.8879, 0.8901, 0.8920, 
+			  0.8935, 0.8948, 0.8959, 0.8968, 0.8975, 0.8981, 0.8987, 0.8991, 0.8995, 0.8999, 
+			  0.9002, 0.9004, 0.9006, 0.9008, 0.9010, 0.9012, 0.9013, 0.9014, 0.9016, 0.9018, 
+			  0.9020, 0.9021, 0.9022, 0.9023, 0.9024, 0.9025, 0.9025, 0.9026, 0.9026, 0.9027, 
+			  0.9027, 0.9028, 0.9028, 0.9028, 0.9029, 0.9029, 0.9029, 0.9029, 0.9029, 0.9030, 
+			  0.9030, 0.9030, 0.9030, 0.9030, 0.9030, 0.9030, 0.9030, 0.9030, 0.9030, 0.9031, 
+			  0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 
+			  0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 
+			  0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031, 0.9031,
+			  0};
+   eff->Set(102, corr);
+   eff->SetDirectory(0);
+   eff->SetStats(0);
+   eff->SetFillColor(19);
+   eff->SetFillStyle(0);
+   eff->SetLineColor(9);
+   eff->SetLineWidth(3);
+   eff->SetMarkerStyle(20);
+   eff->GetXaxis()->SetTitleOffset(1.2);
+   //   eff->Draw("");
+   return eff;
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::NpCorrection(Double_t betagamma) {
   Double_t bgL10 = TMath::Log10(betagamma);
-  bgL10 = TMath::Max(-2.0, TMath::Min(1.0,bgL10));
+  bgL10 = TMath::Max(-2.0, TMath::Min(-1e-3,bgL10));
   static TH1D *eff = 0;
   if (! eff) eff = protonEff();
   //  return 1.03*eff->Interpolate(bgL10);
   return eff->Interpolate(bgL10);
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::dNdxEff(Double_t poverm, Double_t charge) {
+Double_t StdEdxModel::dNdxEff(Double_t poverm, Double_t charge, Double_t mass) {
   if (!fgStdEdxModel) instance();
   Double_t bgMC = bgCorrected(poverm); 
   Double_t dNdxMC = dNdx(bgMC, charge);
   Double_t dNdx = dNdxMC*NpCorrection(poverm); 
   return dNdx;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::dNdxEffL10func(Double_t *x, Double_t *p) {
+  Double_t bg = TMath::Power(10., x[0]);
+  return instance()->dNdxEff(bg, 1.,  0.13956995);
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::dNdxEffL10F() {
+  TF1 *f = new TF1("dNdxEffL10F",dNdxEffL10func,-2,5,0);
+  return f;
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::extremevalueG(Double_t *x, Double_t *p) {

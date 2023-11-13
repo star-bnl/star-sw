@@ -1,3 +1,5 @@
+#include "tables/St_emc_adcslope_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_slp_bsmdp Allocated rows: 18000  Used rows: 18000  Row size: 4 bytes

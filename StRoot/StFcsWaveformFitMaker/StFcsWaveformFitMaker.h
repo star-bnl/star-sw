@@ -265,6 +265,7 @@ public:
     void drawDualFit(UInt_t detid, UInt_t ch);
 
     void printArray() const;                 //!< Print contents of #mChWaveData, excluding timebin and adc information
+    void printSetup() const;                 //!< Print contents of internal variables
 
  protected:
     TClonesArray mChWaveData;  //!< Contains all graph data

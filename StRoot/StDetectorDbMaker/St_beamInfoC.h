@@ -42,12 +42,12 @@ class St_beamInfoC : public TChair {
   Float_t       getYellowBunchIntensity(Int_t i=0){return yellowBunchIntensity(i);}
   Float_t       getYellowFillNumber(Int_t i=0)    {return yellowFillNumber(i);}
   Bool_t        IsFixedTarget();
-  Float_t       Gamma();         
+  Float_t       GammaCMS();         
   Float_t       GammaYellow();         
   Float_t       GammaBlue();         
   Float_t       BetaYellow();         
   Float_t       BetaBlue();         
-  Float_t       Beta();         
+  Float_t       BetaCMS();         
   Float_t       Frequency();
   Float_t       SqrtS();
   Float_t       Ycms();

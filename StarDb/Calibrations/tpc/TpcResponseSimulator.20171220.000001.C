@@ -1,3 +1,5 @@
+#include "tables/St_TpcResponseSimulator_Table.h"
+
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/Calibrations/tpc/.TpcResponseSimulator/TpcResponseSimulator Allocated rows: 1  Used rows: 1  Row size: 124 bytes

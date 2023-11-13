@@ -15,6 +15,7 @@ class St_trgTimeOffsetC : public TChair {
   Float_t       triggerTimeOffset(Int_t i = 0)     {return 1e-6*(mLaser ? laserOffset(i)  : offset(i));} // usec
   Float_t       triggerTimeOffsetWest(Int_t i = 0) {return 1e-6*(mLaser ? laserOffsetW(i) :         0);} // usec
   void          SetLaser(Bool_t k = kTRUE)         {mLaser = k;}
+  Int_t         IsLaser()                          { return mLaser;}
  protected:
   St_trgTimeOffsetC(St_trgTimeOffset *table=0) : TChair(table), mLaser(kFALSE) {}
   virtual ~St_trgTimeOffsetC() {fgInstance = 0;}
