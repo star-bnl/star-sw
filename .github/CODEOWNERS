@@ -3,7 +3,7 @@
 /OnlTools                                          @plexoos           @jml985
 /StDb                                              @dmarkh
 /StDb/idl                                          @akioogawa         @dmarkh      @fgeurts     @iraklic     @fisyak      @R-Witt
-/StRoot/PWGTools				   @nigmatkulov	      @zsweger	   @marrbnl
+/StRoot/PWGTools				                   @nigmatkulov	      @zsweger	   @marrbnl     @lbavinh
 /StRoot/RTS                                        @akioogawa         @jml985      @tonko-lj
 /StRoot/StAnalysisMaker                            @fisyak      @R-Witt        @iraklic
 /StRoot/StAnalysisUtilities/StHistUtil*            @genevb
@@ -81,6 +81,7 @@
 /StRoot/StPass0CalibMaker                          @genevb            @iraklic
 /StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
 /StRoot/StPxl*                                     @starsdong         @GuannanXie
+/StRoot/StRefMultCorr                              @nigmatkulov       @zsweger     @lbavinh
 /StRoot/StRHICf*				   @ggfdsa10
 /StRoot/StRTSClient                                @jml985            @tonko-lj
 /StRoot/StShadowMaker                              @genevb
