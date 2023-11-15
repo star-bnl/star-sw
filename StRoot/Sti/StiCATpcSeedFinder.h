@@ -42,12 +42,4 @@ class StiCATpcSeedFinder: public StiTrackFinder
   std::vector<Seed_t> *mSeeds;
 };
 
-class StiCALoader {
-public:
-static StiCATpcSeedFinder* New();
-#if 0
-ClassDef(StiCALoader,0)
-#endif
-};
-
 #endif
