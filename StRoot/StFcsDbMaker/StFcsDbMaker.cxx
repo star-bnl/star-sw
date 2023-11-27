@@ -250,9 +250,8 @@ int StFcsDbMaker::InitRun(int runNumber) {
     }else{
       mFcsDb->setFcsPresValley((fcsPresValley_st*) dbFcsPresValley->GetTable());
     }
-
-    mFcsDb->InitRun(runNumber);  
   }
 
+  mFcsDb->InitRun(runNumber);  
   return kStOK;
 }
