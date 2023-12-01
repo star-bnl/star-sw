@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE note [
+<!ENTITY NPIONS     "1">
+<!ENTITY WORKINGDIR "/star/u/jwebb/work/G4star/">
+<!ENTITY LOGDIR     "/star/simu/simu/jwebb/log/">
+<!ENTITY OUTDIR     "/star/simu/simu/jwebb/out/">
+<!ENTITY JOBDIR     "/star/simu/simu/jwebb/job/">
+<!ENTITY NEVENT     "1">
+<!ENTITY NTRACK     "1">
+<!ENTITY NJOBS      "5000">
+]>
+
+<job name="HIJINGsim" nProcesses="&NJOBS;" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+
+  <command>
+
+  setup 64b
+  stardev 
+  source /star/simu/simu/root6.16.00/bin/thisroot.csh
+  source /star/simu/simu/geant4.10.3.3/bin/geant4.csh /star/simu/simu/geant4.10.3.3/bin/
+
+  which root
+  which root.exe 
+
+  setenv ASAN_OPTIONS abort_on_error=true
+
+  cp    &WORKINGDIR;/geant4star .
+  cp -R &WORKINGDIR;/macros .
+  cp -R &WORKINGDIR;/macros .
+  cp -R &WORKINGDIR;/StRoot .
+  cp -R &WORKINGDIR;/StarVMC .
+  cp -R &WORKINGDIR;/StDb . 
+  cp -R &WORKINGDIR;/mgr . 
+  cp -R &WORKINGDIR;/.$STAR_HOST_SYS .
+  cp    &WORKINGDIR;/fini.C . 
+  ls -la 
+
+  geant4star -q -b --stepping:punchout:stop=2 --seed=${JOBINDEX} macros/test_stress_acceptance.C\(&NEVENT;,&NTRACK;\)  &gt;&amp; stress-&NEVENT;-&NTRACK;.${JOBINDEX}.log
+  mv *.log &OUTDIR; 
+
+  </command>
+
+
+  <stdout URL="file:&LOGDIR;/$JOBID.log"/>
+  <stderr URL="file:&LOGDIR;/$JOBID.err"/>
+
+  <Generator><Location>&JOBDIR;</Location></Generator>
+
+</job>

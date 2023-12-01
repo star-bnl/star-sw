@@ -720,6 +720,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 
+    } elsif ( $pkg =~ m/StGeant4Maker$/ ) {
+
+	# Add G4 to include path
+	my $g4prefix = `geant4-config --prefix`;
+	chomp($g4prefix);
+	$CPPPATH .= $main::PATH_SEPARATOR . $g4prefix . "/include/Geant4/";
+
+	# Add G4 vmc to include path  (presumes that spack has added this to ROOT_INCLUDE_PATH ...)
+	my @paths = split ":", $ENV{ROOT_INCLUDE_PATH};
+	foreach my $p (@paths) {
+	    if ($p =~ /geant4-vmc/) {
+		print $p, "\n";		
+		$CPPPATH .= $main::PATH_SEPARATOR . $p . "/geant4vmc";
+	    }	    
+	}
+
 	# This block can be used for ANY Maker or Pool having a 2 level
 	# directory structure using auto-globbing for include purposes
     } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
