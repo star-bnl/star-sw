@@ -9,6 +9,25 @@ std::stringstream FwdTrackerConfig::sstr;
 // template specializations
 ////
 
+template <>
+void FwdTrackerConfig::set( std::string path, std::string v ) {
+
+    FwdTrackerConfig::canonize( path );
+    // convrt from string to type T and return
+    mNodes[ path ] = v;
+}
+
+template <>
+void FwdTrackerConfig::set( std::string path, bool bv ) {
+
+    FwdTrackerConfig::canonize( path );
+    // convrt from string to type T and return
+    std::string v = "false";
+    if (bv)
+        v = "true";
+    mNodes[ path ] = v;
+}
+
 // Specialization for string to avoid extra conversions
 template <>
 std::string FwdTrackerConfig::get( std::string path, std::string dv ) const {

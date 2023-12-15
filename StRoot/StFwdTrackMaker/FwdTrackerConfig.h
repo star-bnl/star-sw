@@ -130,7 +130,15 @@ public:
         return rv;
     }
 
-    
+    // generic conversion to type T To std::string
+    // override this for special conversions
+    template <typename T>
+    std::string convertTo( T v ) const {
+        FwdTrackerConfig::sstr.str("");
+        FwdTrackerConfig::sstr.clear();
+        FwdTrackerConfig::sstr << v;
+        return FwdTrackerConfig::sstr.str();
+    }
 
 
     // template function for getting any type that can be converted from string via stringstream
@@ -146,6 +154,12 @@ public:
         return convert<T>( mNodes.at( path ) );
     }
 
+    template <typename T>
+    void set( std::string path, T v ) {
+        FwdTrackerConfig::canonize( path );
+        // convrt from string to type T and return
+        mNodes[ path ] = convertTo<T>( v );
+    }
     
 
     template <typename T>
@@ -214,7 +228,7 @@ public:
 
     // Main setup routine.
     // Loads the given XML file and maps it
-    void load( std::string filename ) {
+    void load( std::string filename, bool asString = false ) {
         using namespace std;
 
         // empty the map of mNodes
@@ -224,7 +238,12 @@ public:
         TXMLEngine xml;
 
         // Now try to parse xml file
-        XMLDocPointer_t xmldoc = xml.ParseFile(filename.c_str());
+        XMLDocPointer_t xmldoc;
+        if (asString)
+            xmldoc = xml.ParseString(filename.c_str());
+        else
+            xmldoc = xml.ParseFile(filename.c_str());
+
         if (!xmldoc) { // parse failed, TODO inform of error
             mErrorParsing = true;
             return;

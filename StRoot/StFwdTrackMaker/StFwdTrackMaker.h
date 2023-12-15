@@ -117,7 +117,9 @@ class StFwdTrackMaker : public StMaker {
 
     void SetConfigFile(std::string n) {
         mConfigFile = n;
+        LoadConfiguration();
     }
+    void LoadConfiguration();
     void SetGenerateHistograms( bool _genHisto ){ mGenHistograms = _genHisto; }
     void SetGenerateTree(bool _genTree) { mGenTree = _genTree; }
     void SetVisualize( bool _viz ) { mVisualize = _viz; }
@@ -182,6 +184,54 @@ class StFwdTrackMaker : public StMaker {
     void FillTTree(); // if debugging ttree is turned on (mGenTree)
     void FitVertex();
 
+    static std::string defaultConfigSim;
+    static std::string defaultConfigData;
+    std::string defaultConfig;
+    bool configLoaded = false;
+
+    // Helper functions for modifying configuration
+    // NOTE: to override configuration, call individual functions after setConfigForXXX
+    void setConfigForData() { defaultConfig = defaultConfigData; LoadConfiguration(); }
+    void setConfigForSim()  { defaultConfig = defaultConfigSim; LoadConfiguration();  }
+    
+    // General / hit and uncertainty
+    void setOutputFilename( std::string fn ) { mFwdConfig.set( "Output:url", fn ); }
+    void setFttHitSource( std::string source ) { mFwdConfig.set( "Source:ftt", source ); }
+    void setFstRasterR( double r = 3.0 /*cm*/ ){ mFwdConfig.set<double>( "SiRasterizer:r", r ); }
+    void setFstRasterPhi( double phi = 0.00409 /*2*pi/(12*128)*/ ){ mFwdConfig.set<double>( "SiRasterizer:phi", phi ); }
+
+    //Track Finding
+    void setSeedFindingWithFtt() { mFwdConfig.set( "TrackFinder:source", "ftt" ); }
+    void setSeedFindingWithFst() { mFwdConfig.set( "TrackFinder:source", "fst" ); }
+    void setSeedFindingNumInterations( int n = 1 ) { mFwdConfig.set<int>("TrackFinder:nIterations", n); }
+    void setSeedFindingNumPhiSlices( int n = 8 ) { mFwdConfig.set<int>("TrackFinder.Iteration:nPhiSlices", n); }
+    void setSeedFindingConnectorDistance( int d = 1 ) { mFwdConfig.set<int>( "TrackFinder.Connector:distance", d ); }
+    void setSeedFindingUseSubsetNN( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder.SubsetNN:active", use ); }
+    void setSeedFindingMinHitsOnTrack( int n = 3 ) { mFwdConfig.set<int>( "TrackFinder.SubsetNN:min-hits-on-track", n ); }
+    void setSeedFindingUseHitRemover( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder.HitRemover:active", use ); }
+    void setUseTruthSeedFinding( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder:active", !use ); }
+
+    // Track Fitting
+    void setTrackFittingOff() { mFwdConfig.set( "TrackFitter:active", "false" ); }
+    void setFittingMaterialEffects( bool mat = true) { mFwdConfig.set<bool>( "TrackFitter:materialEffects", mat ); }
+    void setPrimaryVertexSigmaXY( double sXY ) { mFwdConfig.set<double>( "TrackFitter.Vertex:sigmaXY", sXY ); }
+    void setPrimaryVertexSigmaZ(  double sZ ) { mFwdConfig.set<double>( "TrackFitter.Vertex:sigmaZ", sZ ); }
+    void setIncludePrimaryVertexInFit( bool pvf = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:includeInFit", pvf ); }
+    void setZeroB( bool zeroB = true ) { mFwdConfig.set<bool>( "TrackFitter:zeroB", zeroB ); }
+    void setConstB( bool constB = true ) { mFwdConfig.set<bool>( "TrackFitter:constB", constB ); }
+    void setUseMcSeedForFit( bool mcSeed = true ) { mFwdConfig.set<bool>( "TrackFitter:mcSeed", mcSeed ); }
+
+    void setRefitWithFst() { mFwdConfig.set( "TrackFitter:refitSi", "true" ); mFwdConfig.set( "TrackFitter:refitFtt", "false" ); }
+    void setRefitWithFtt() { mFwdConfig.set( "TrackFitter:refitSi", "false" ); mFwdConfig.set( "TrackFitter:refitFtt", "true" ); }
+
+    void setMaxFailedHitsInFit( int n = -1 /*no lim*/ ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MaxFailedHits", n);}
+    void setFitDebugLvl( int level = 0 /*0=no output*/ ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:DebugLvl", level); }
+    void setFitMaxIterations( int n=4 ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MaxIterations", n); }
+    void setFitMinIterations( int n = 1) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MinIterations", n); }
+
+    // for MC
+    void setSmearMcPrimaryVertex( bool pvs = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:smearMcVertex", pvs ); }
+  
 };
 
 #endif
