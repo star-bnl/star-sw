@@ -1702,41 +1702,14 @@ void StFwdTrackMaker::ProcessFwdTracks(  ){
 }
 
 
-std::string StFwdTrackMaker::defaultConfigSim = R"(
+std::string StFwdTrackMaker::defaultConfigIdealSim = R"(
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <Output url="fwdTrackMaker_sim.root" />
+    <Output url="fwdTrackMaker_ideal_sim.root" />
     <Source ftt="GEANT"  />
-    
-    <TrackFinder nIterations="1">
-        <Iteration nPhiSlices="8"> <!-- Options for first iteration -->
-            <SegmentBuilder>
-                <Criteria name="Crit2_RZRatio" min="0.0" max="10.0" />
-                <Criteria name="Crit2_DeltaPhi" min="0" max="180" />    
-                <Criteria name="Crit2_DeltaRho" min="-100" max="100"/>
-                <Criteria name="Crit2_StraightTrackRatio" min="0.9" max="1.1"/>
-            </SegmentBuilder>
 
-            <ThreeHitSegments>
-                <Criteria name="Crit3_3DAngle" min="0" max="90" />
-                <Criteria name="Crit3_PT" min="0" max="10000" />
-                <Criteria name="Crit3_ChangeRZRatio" min="0" max="100" />
-                <Criteria name="Crit3_2DAngle" min="0" max="100" />
-            </ThreeHitSegments>
-        </Iteration>
-
-        <Connector distance="1"/>
-
-        <SubsetNN active="false" min-hits-on-track="4" >
-            <Omega>0.99</Omega>
-            <StableThreshold>0.001</StableThreshold>
-        </SubsetNN> 
-
-        <HitRemover active="true" />
-    </TrackFinder>
-    
-	<TrackFitter refitSi="true" mcSeed="false" MaterialEffects="false" >
-        <Vertex sigmaXY="1" sigmaZ="70.0" includeInFit="true" smearMcVertex="true" />
+	<TrackFitter refitSi="true" mcSeed="true" >
+        <Vertex sigmaXY="0.001" sigmaZ="0.01" includeInFit="true" smearMcVertex="true" />
     </TrackFitter>
 </config>
 )";
@@ -1746,11 +1719,10 @@ std::string StFwdTrackMaker::defaultConfigSim = R"(
 std::string StFwdTrackMaker::defaultConfigData = R"(
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <Output url="daq.root" />
+    <Output url="stfwdtrackmaker_data.root" />
     <Source ftt="DATA" />
 
-    <SiRasterizer r="3.0" phi="0.04" />
-
+    <SiRasterizer r="3.0" phi="0.004" />
 
     <TrackFinder nIterations="1">
         <Iteration nPhiSlices="32" > <!-- Options for first iteration -->
@@ -1781,8 +1753,8 @@ std::string StFwdTrackMaker::defaultConfigData = R"(
         <HitRemover active="false" />
     </TrackFinder>
     
-	<TrackFitter refitSi="true" mcSeed="false" zeroB="true"  >
-        <Vertex sigmaXY="3" sigmaZ="100.0" includeInFit="true" smearMcVertex="false" />
+	<TrackFitter refitSi="true" mcSeed="false" zeroB="true">
+        <Vertex sigmaXY="0.01" sigmaZ="0.01" includeInFit="true" smearMcVertex="false" />
     </TrackFitter>
 </config>
 )";
