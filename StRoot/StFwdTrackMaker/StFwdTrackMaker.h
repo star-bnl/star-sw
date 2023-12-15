@@ -191,7 +191,7 @@ class StFwdTrackMaker : public StMaker {
 
     // Helper functions for modifying configuration
     // NOTE: to override configuration, call individual functions after setConfigForXXX
-    
+    public:
     /**@brief Setup the StFwdTrackMaker for running on Data
      * Load the default configuration for Data. 
      * Note: Apply any overrides after calling this
