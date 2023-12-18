@@ -26,9 +26,13 @@ protected:
     std::map<std::string, std::string> mNodes;
     static std::stringstream sstr; // reused for string to numeric conversion
 
-    // assumes bare path and adds [i] until DNE
-    // reports lowest non-existant index
-    // starts at 1 since 0 is checked on existance
+    /**
+     * @brief get lowest non-existing path index
+     * assumes bare path and adds [i] until DNE
+     * starts at 1 since 0 is checked on existance
+     * @param path base path to check
+     * @return size_t index, starts at 1
+     */
     size_t pathCount( const std::string path ){
         size_t index = 1;
         std::string p = path + TString::Format( "[%zu]", index ).Data();
@@ -39,6 +43,14 @@ protected:
         return index;
     }
 
+    /**
+     * @brief Reads an xml document and writes it into map
+     * 
+     * @param xml xml document to map
+     * @param node starting node - allows recursive mapping
+     * @param level the integer index of the level of current parsing
+     * @param path the path for the current node
+     */
     void mapFile(TXMLEngine &xml, XMLNodePointer_t node, Int_t level, std::string path = "") {
         using namespace std;
         // add the path delimeter above top level
@@ -83,7 +95,11 @@ protected:
     } // mapFile
 public:
 
-    // sanitizes a path to its canonical form 
+    /**
+     * @brief Returns a path in its cannonical form
+     * 
+     * @param path Path to cannoize, returned in place by reference
+     */
     static void canonize( std::string &path ) {
         // remove whitespace
         path.erase(std::remove_if(path.begin(), path.end(), static_cast<int(*) (int)>(std::isspace)), path.end());
@@ -98,7 +114,11 @@ public:
         return;
     }
 
-    // dump config to a basic string representation - mostly for debugging
+    /**
+     * @brief dump config to a basic string representation - mostly for debugging
+     * 
+     * @return std::string 
+     */
     std::string dump() const {
         using namespace std;
         FwdTrackerConfig::sstr.str("");
@@ -109,8 +129,14 @@ public:
         return FwdTrackerConfig::sstr.str();
     }
 
-    // Does a path exist
-    // Either node or attribute - used to determine if default value is used
+    /**
+     * @brief returns whether or not a path exist
+     * Either node or attribute - used to determine if default value is used
+     * 
+     * @param path - the path to check
+     * @return true : path exists
+     * @return false : path DNE
+     */
     bool exists( std::string path ) const {
         FwdTrackerConfig::canonize( path );
         if ( 0 == mNodes.count( path ) )
@@ -118,8 +144,14 @@ public:
         return true;
     }
 
-    // generic conversion to type T from std::string
-    // override this for special conversions
+    /**
+     * @brief Generic conversion of type T from string
+     * override this for special conversions
+     * 
+     * @tparam T : Type to convert to and return
+     * @param s : input string to use for conversion
+     * @return T converted value of type T
+     */
     template <typename T>
     T convert( std::string s ) const {
         T rv;
@@ -130,8 +162,13 @@ public:
         return rv;
     }
 
-    // generic conversion to type T To std::string
-    // override this for special conversions
+    /**
+     * @brief Generic conversion of type T to a string
+     * 
+     * @tparam T : type to convert
+     * @param v : value of type T
+     * @return std::string output string with representation of T
+     */
     template <typename T>
     std::string convertTo( T v ) const {
         FwdTrackerConfig::sstr.str("");
@@ -141,7 +178,14 @@ public:
     }
 
 
-    // template function for getting any type that can be converted from string via stringstream
+    /**
+     * @brief template function for getting any type that can be converted from string via stringstream
+     * 
+     * @tparam T type to return 
+     * @param path path to lookup
+     * @param dv default value to return if the node DNE
+     * @return T return value of type T
+     */
     template <typename T>
     T get( std::string path, T dv ) const {
     
@@ -154,6 +198,13 @@ public:
         return convert<T>( mNodes.at( path ) );
     }
 
+    /**
+     * @brief Writes a value of type T to the map
+     * Uses convertTo<T> to convert type T to a string rep 
+     * @tparam T type of value to write
+     * @param path path to write to
+     * @param v value of type T
+     */
     template <typename T>
     void set( std::string path, T v ) {
         FwdTrackerConfig::canonize( path );
@@ -161,7 +212,14 @@ public:
         mNodes[ path ] = convertTo<T>( v );
     }
     
-
+    /**
+     * @brief Get a Vector object from config
+     * 
+     * @tparam T type of value for the vector object
+     * @param path path to lookup
+     * @param dv default value, can use initializer list
+     * @return std::vector<T> vector of type T returned
+     */
     template <typename T>
     std::vector<T> getVector( std::string path, std::vector<T> dv ) const {
         if ( !exists( path ) )
@@ -190,7 +248,12 @@ public:
         return result;
     }
 
-    // list the paths of children nodes for a given node
+    /**
+     * @brief list the paths of children nodes for a given node
+     * 
+     * @param path path to search for children
+     * @return std::vector<std::string> list of full paths to the children nodes
+     */
     std::vector<std::string> childrenOf( std::string path ) const {
         using namespace std;
         vector<string> result;
@@ -218,16 +281,27 @@ public:
         return result;
     }
 
-    // Constructor is noop, use load(...)
+    /**
+     * @brief Constructor is noop, use load(...)
+     * 
+     */
     FwdTrackerConfig() {}
 
-    // constructor that immediately loads an xml file
+    /**
+     * @brief Construct a new Fwd Tracker Config object and load a file
+     * 
+     * @param filename 
+     */
     FwdTrackerConfig(std::string filename) {
         load( filename );
     }
 
-    // Main setup routine.
-    // Loads the given XML file and maps it
+    /**
+     * @brief Main setup routine
+     * Loads the given XML file (or string) and maps it
+     * @param filename filename (or xml string) to load. If file the content is loaded as an xml doc
+     * @param asString false: filename is loaded and contents treated as xml doc, true: treat the string `filename` directly as an xml doc
+     */
     void load( std::string filename, bool asString = false ) {
         using namespace std;
 
@@ -268,5 +342,9 @@ template <>
 TString FwdTrackerConfig::convert(std::string str) const;
 template <>
 std::string FwdTrackerConfig::get( std::string path, std::string dv ) const;
+template <>
+void FwdTrackerConfig::set( std::string path, std::string v );
+template <>
+void FwdTrackerConfig::set( std::string path, bool bv );
 
 #endif
