@@ -55,14 +55,26 @@ class TrackFitter {
 
 
   public:
-    // ctor 
-    // provide the main configuration object
+    
+    /**
+     * @brief Construct a new Track Fitter object
+     * 
+     * @param _mConfig : Config object
+     * @param geoCache : Geometry cache filename
+     */
     TrackFitter(FwdTrackerConfig _mConfig, TString geoCache) : mConfig(_mConfig), mGeoCache(geoCache) {
         mTrackRep = 0;
         mFitTrack = 0;
     }
 
-
+    /**
+     * @brief Setup the tracker object
+     * Load geometry
+     * Setup Material Effects
+     * Setup the magnetic field
+     * Setup the fitter
+     * Setup the fit planes
+     */
     void setup() {
 
         // the geometry manager that GenFit will use
@@ -223,6 +235,10 @@ class TrackFitter {
             makeHistograms();
     }
 
+    /**
+     * @brief Prepare QA histograms
+     * 
+     */
     void makeHistograms() {
         std::string n = "";
         mHist["ECalProjPosXY"] = new TH2F("ECalProjPosXY", ";X;Y", 1000, -500, 500, 1000, -500, 500);
@@ -278,7 +294,10 @@ class TrackFitter {
         mHist[n] = new TH1F(n.c_str(), "; Duraton (ms)", 500, 0, 50000);
     }
 
-    // writes mHistograms stored in map only if mGenHistograms is true
+    /**
+     * @brief writes histograms stored in map only if mGenHistograms is true
+     * 
+     */
     void writeHistograms() {
         if ( !mGenHistograms )
             return;
@@ -288,9 +307,12 @@ class TrackFitter {
         }
     }
 
-    /* Convert the 3x3 covmat to 2x2 by dropping z
-    *
-    */
+    /**
+     * @brief Convert the 3x3 covmat to 2x2 by dropping z
+     * 
+     * @param h : hit with cov matrix
+     * @return TMatrixDSym : cov matrix 2x2
+     */
     TMatrixDSym CovMatPlane(KiTrack::IHit *h){
         TMatrixDSym cm(2);
         cm(0, 0) = static_cast<FwdHit*>(h)->_covmat(0, 0);
@@ -300,12 +322,16 @@ class TrackFitter {
     }
 
 
-    /* FitSimpleCircle
-     * Used to determine a seed transverse momentum based on space points
-     * Takes a list of space points KiTrack::IHit *
-     * Takes three indecise used to lookup three of the possible hits within the list
-     */ 
-    float fitSimpleCircle(Seed_t trackCand, size_t i0, size_t i1, size_t i2) {
+    /**
+     * @brief Fit points to a simple circle
+     * 
+     * @param trackSeed : seed points to fit
+     * @param i0 : index of the first hit
+     * @param i1 : index of the second hit
+     * @param i2 : index of the third hit
+     * @return float : curvature
+     */
+    float fitSimpleCircle(Seed_t trackSeed, size_t i0, size_t i1, size_t i2) {
         float curv = 0;
 
         // ensure that no index is outside of range for FST or FTT volumes
@@ -313,61 +339,80 @@ class TrackFitter {
             return 0;
 
         try {
-            KiTrack::SimpleCircle sc(trackCand[i0]->getX(), trackCand[i0]->getY(), trackCand[i1]->getX(), trackCand[i1]->getY(), trackCand[i2]->getX(), trackCand[i2]->getY());
+            KiTrack::SimpleCircle sc(trackSeed[i0]->getX(), trackSeed[i0]->getY(), trackSeed[i1]->getX(), trackSeed[i1]->getY(), trackSeed[i2]->getX(), trackSeed[i2]->getY());
             curv = sc.getRadius();
         } catch (KiTrack::InvalidParameter &e) {
             // if we got here we failed to get  a valid seed. We will still try to move forward but the fit will probably fail
+            LOG_WARN << "Circle fit failed, FWD track fit will likely faile" << endm;
         }
 
         //  make sure the curv is valid
-        if (isinf(curv))
+        if (isinf(curv)){
             curv = 999999.9;
+        }
 
         return curv;
-    }
-
-    /* seedState
-     * Determines the seed position and momentum for a list of space points
+    } // fitSimpleCircle
+    
+    /**
+     * @brief Determines the seed state to start the fit
+     * 
+     * @param trackSeed : seed points
+     * @param seedPos : position seed (return)
+     * @param seedMom : momenum seed (return)
+     * @return float : curvature
      */
-    float seedState(Seed_t trackCand, TVector3 &seedPos, TVector3 &seedMom) {
-        // we require at least 4 hits,  so this should be gauranteed
-        if(trackCand.size() < 3){
+    float seedState(Seed_t trackSeed, TVector3 &seedPos, TVector3 &seedMom) {
+        // we require at least 3 hits, so this should be gauranteed
+        if(trackSeed.size() < 3){
             // failure
             return 0.0;
         }
-            
 
         // we want to use the LAST 3 hits, since silicon doesnt have R information
         TVector3 p0, p1, p2;
         // use the closest hit to the interaction point for the seed pos
-        FwdHit *hit_closest_to_IP = static_cast<FwdHit *>(trackCand[0]);
+        FwdHit *hit_closest_to_IP = static_cast<FwdHit *>(trackSeed[0]);
 
-        // maps from <key=vol_id> to <value=index in trackCand>
-        std::map<size_t, size_t> vol_map; 
+        // maps from <key=vol_id> to <value=index in trackSeed>
+        std::map<size_t, int> vol_map; 
 
         // init the map
         for (size_t i = 0; i < 13; i++)
             vol_map[i] = -1;
 
-        for (size_t i = 0; i < trackCand.size(); i++) {
-            auto fwdHit = static_cast<FwdHit *>(trackCand[i]);
-            vol_map[abs(fwdHit->_vid)] = i;
+        vector<size_t> idx;
+        for (size_t i = 0; i < trackSeed.size(); i++) {
+            auto fwdHit = static_cast<FwdHit *>(trackSeed[i]);
+            if (vol_map[ abs(fwdHit->_vid) ] == -1)
+                idx.push_back(fwdHit->_vid);
+            vol_map[abs(fwdHit->_vid)] = (int)i;
+            
             // find the hit closest to IP for the initial position seed
             if (hit_closest_to_IP->getZ() > fwdHit->getZ())
                 hit_closest_to_IP = fwdHit;
         }
 
         // now get an estimate of the pT from several overlapping simple circle fits
-        // enumerate the available partitions
+        // enumerate the available partitions (example for FTT)
         // 12 11 10
         // 12 11 9
         // 12 10 9
         // 11 10 9
         vector<float> curvs;
-        curvs.push_back(fitSimpleCircle(trackCand, vol_map[12], vol_map[11], vol_map[10]));
-        curvs.push_back(fitSimpleCircle(trackCand, vol_map[12], vol_map[11], vol_map[9]));
-        curvs.push_back(fitSimpleCircle(trackCand, vol_map[12], vol_map[10], vol_map[9]));
-        curvs.push_back(fitSimpleCircle(trackCand, vol_map[11], vol_map[10], vol_map[9]));
+
+        if (idx.size() < 3){
+            return 0.0;
+        }
+
+        if ( idx.size() == 3 ){
+            curvs.push_back(fitSimpleCircle(trackSeed, vol_map[idx[0]], vol_map[idx[1]], vol_map[idx[2]]));
+        } else if ( idx.size() >= 4 ){
+            curvs.push_back(fitSimpleCircle(trackSeed, vol_map[idx[0]], vol_map[idx[1]], vol_map[idx[2]]));
+            curvs.push_back(fitSimpleCircle(trackSeed, vol_map[idx[0]], vol_map[idx[1]], vol_map[idx[3]]));
+            curvs.push_back(fitSimpleCircle(trackSeed, vol_map[idx[0]], vol_map[idx[2]], vol_map[idx[3]]));
+            curvs.push_back(fitSimpleCircle(trackSeed, vol_map[idx[1]], vol_map[idx[2]], vol_map[idx[3]]));   
+        }
 
         // average them and exclude failed fits
         float mcurv = 0;
@@ -375,7 +420,7 @@ class TrackFitter {
 
         for (size_t i = 0; i < curvs.size(); i++) {
             if (mGenHistograms)
-                this->mHist["seed_curv"]->Fill(curvs[i]);
+                mHist["seed_curv"]->Fill(curvs[i]);
             if (curvs[i] > 10) {
                 mcurv += curvs[i];
                 nmeas += 1.0;
@@ -385,15 +430,16 @@ class TrackFitter {
         if (nmeas >= 1)
             mcurv = mcurv / nmeas;
         else
-            mcurv = 10;
+            mcurv = 100;
 
         // Now lets get eta information
-        // simpler, use farthest points from IP
-        if (vol_map[9] < 13)
-            p0.SetXYZ(trackCand[vol_map[9]]->getX(), trackCand[vol_map[9]]->getY(), trackCand[vol_map[9]]->getZ());
+        p0.SetXYZ(trackSeed[vol_map[idx[0]]]->getX(), trackSeed[vol_map[idx[0]]]->getY(), trackSeed[vol_map[idx[0]]]->getZ());
+        p1.SetXYZ(trackSeed[vol_map[idx[1]]]->getX(), trackSeed[vol_map[idx[1]]]->getY(), trackSeed[vol_map[idx[1]]]->getZ());
+        if ( abs(p0.X() - p1.X()) < 1e-6 ){
+            p1.SetXYZ(trackSeed[vol_map[idx[2]]]->getX(), trackSeed[vol_map[idx[2]]]->getY(), trackSeed[vol_map[idx[2]]]->getZ());
+        }
 
-        if (vol_map[10] < 13)
-            p1.SetXYZ(trackCand[vol_map[10]]->getX(), trackCand[vol_map[10]]->getY(), trackCand[vol_map[10]]->getZ());
+        LOG_DEBUG << TString::Format( "Fwd SeedState: p0 (%f, %f, %f), p1 (%f, %f, %f)", p0.X(), p0.Y(), p0.Z(), p1.X(), p1.Y(), p1.Z() ) << endm;
 
         const double K = 0.00029979; //K depends on the units used for Bfield
         double pt = mcurv * K * 5; // pT from average measured curv
@@ -403,8 +449,15 @@ class TrackFitter {
         double phi = TMath::ATan2(dy, dx);
         double Rxy = sqrt(dx * dx + dy * dy);
         double theta = TMath::ATan2(Rxy, dz);
+        if (abs(dx) < 1e-6 || abs(dy) < 1e-6){
+            phi = TMath::ATan2( p1.Y(), p1.X() );
+        }
+        Rxy = sqrt( p0.X()*p0.X() + p0.Y()*p0.Y() );
+        theta = TMath::ATan2(Rxy, p0.Z());
+        
+        LOG_DEBUG << TString::Format( "pt=%f, dx=%f, dy=%f, dz=%f, phi=%f, theta=%f", pt, dx, dy, dz, phi, theta ) << endm;
         // double eta = -log( tantheta / 2.0 );
-        // these starting conditions can probably be improvd, good study for student
+        // these starting conditions can probably be improvd, good study for students
 
         seedMom.SetPtThetaPhi(pt, theta, phi);
         seedPos.SetXYZ(hit_closest_to_IP->getX(), hit_closest_to_IP->getY(), hit_closest_to_IP->getZ());
@@ -415,34 +468,57 @@ class TrackFitter {
         }
 
         return mcurv;
-    }
+    }//seedState
 
 
-    genfit::MeasuredStateOnPlane projectToFst(size_t si_plane, genfit::Track *fitTrack) {
-        if (si_plane > 2) {
+    /**
+     * @brief Get projection to given FST plane
+     * 
+     * @param fstPlane : plane index
+     * @param fitTrack : track to project
+     * @return genfit::MeasuredStateOnPlane 
+     */
+    genfit::MeasuredStateOnPlane projectToFst(size_t fstPlane, genfit::Track *fitTrack) {
+        if (fstPlane > 2) {
             genfit::MeasuredStateOnPlane nil;
             return nil;
         }
 
-        auto detSi = mFSTPlanes[si_plane];
-        genfit::MeasuredStateOnPlane tst = fitTrack->getFittedState(1);
-        auto TCM = fitTrack->getCardinalRep()->get6DCov(tst);
-        
-        // this returns the track length if needed
-        fitTrack->getCardinalRep()->extrapolateToPlane(tst, detSi);
-
-        TCM = fitTrack->getCardinalRep()->get6DCov(tst);
-
-        // can get the projected positions if needed
-        float x = tst.getPos().X();
-        float y = tst.getPos().Y();
-        float z = tst.getPos().Z();
-        // and the uncertainties
-        LOG_DEBUG << "Track Uncertainty at FST (plane=" << si_plane << ") @ x= " << x << ", y= " << y << ", z= " << z << " : " << sqrt(TCM(0, 0)) << ", " << sqrt(TCM(1, 1)) << endm;
+        auto detFst = mFSTPlanes[fstPlane];
+        // TODO: Why use 1 here?
+        genfit::MeasuredStateOnPlane tst = fitTrack->getFittedState(1);        
+        // NOTE: this returns the track length if needed
+        fitTrack->getCardinalRep()->extrapolateToPlane(tst, detFst);
 
         return tst;
     }
 
+    /**
+     * @brief Get projection to given FTT plane
+     * 
+     * @param fttPlane : plane index
+     * @param fitTrack : track to project
+     * @return genfit::MeasuredStateOnPlane 
+     */
+    genfit::MeasuredStateOnPlane projectToFtt(size_t iFttPlane, genfit::Track *fitTrack) {
+        if (iFttPlane > 3) {
+            genfit::MeasuredStateOnPlane nil;
+            return nil;
+        }
+        auto fttPlane = mFTTPlanes[iFttPlane];
+        // TODO: why use 1 here?
+        genfit::MeasuredStateOnPlane tst = fitTrack->getFittedState(1);
+        // NOTE: this returns the track length if needed
+        fitTrack->getCardinalRep()->extrapolateToPlane(tst, fttPlane);
+        return tst;
+    }
+
+    /**
+     * @brief Get the Fst Plane object for a given hit
+     * 
+     * @param h : hit
+     * @return genfit::SharedPlanePtr 
+     */
     genfit::SharedPlanePtr getFstPlane( FwdHit * h ){
 
         size_t planeId = h->getSector();
@@ -467,18 +543,18 @@ class TrackFitter {
         }
 
         return planeCorr;
+    } // GetFST PLANE
 
-    }
-
-    /* RefitTracksWithSiHits
-     * Takes a previously fit track re-fits it with the newly added silicon hits 
+    /**
+     * @brief Refit a track with additional FST hits
      * 
+     * Takes a previously fit track re-fits it with the newly added silicon hits 
+     * @param originalTrack : original fit track
+     * @param fstHits : new FST hits to add
+     * @return TVector3 : momentum
      */
-    TVector3 refitTrackWithSiHits(genfit::Track *originalTrack, Seed_t si_hits) {
-        // mem leak, global track is overwritten without delete.
+    TVector3 refitTrackWithFstHits(genfit::Track *originalTrack, Seed_t fstHits) {
         TVector3 pOrig = originalTrack->getCardinalRep()->getMom(originalTrack->getFittedState(1, originalTrack->getCardinalRep()));
-        
-        // auto cardinalStatus = originalTrack->getFitStatus(originalTrack->getCardinalRep());
 
         if (originalTrack->getFitStatus(originalTrack->getCardinalRep())->isFitConverged() == false) {
             // in this case the original track did not converge so we should not refit. 
@@ -528,7 +604,7 @@ class TrackFitter {
         int hitId(5);
 
         // add the hits to the track
-        for (auto h : si_hits) {
+        for (auto h : fstHits) {
             if ( nullptr == h ) continue; // if no Si hit in this plane, skip
 
             hitCoords[0] = h->getX();
@@ -542,7 +618,6 @@ class TrackFitter {
                 return pOrig;
             }
 
-            // auto plane = mFSTPlanes[planeId];
             auto plane = getFstPlane( static_cast<FwdHit*>(h) );
 
             measurement->setPlane(plane, planeId);
@@ -566,7 +641,6 @@ class TrackFitter {
             double cdz = (h->getZ() - planeCorr->getO().Z());
 
             if (mGenHistograms){
-                
                 ((TH2*)mHist[ "FstDiffZVsR" ])->Fill( r, dz );
 
                 if ( r < 16 ) {// inner
@@ -577,10 +651,8 @@ class TrackFitter {
                     mHist["CorrFstDiffZVsPhiSliceOuter"]->Fill( phi_slice, cdz );
                     mHist["FstDiffZVsPhiOuter"]->Fill( phi, dz );
                 }
-            }
-            // mHist[ "FstDiffZVsPhiSliceInner" ]->Fill( sqrt( pow(hitXYZ.x(), 2), pow(hitXYZ.y(), 2) ), dz );
-
-        }
+            } // gen histograms 
+        } // for fstHits
         // start at 0 if PV not included, 1 otherwise 
         for (size_t i = firstFTTIndex; i < trackPoints.size(); i++) {
             // clone the track points into this track
@@ -700,10 +772,13 @@ class TrackFitter {
     } //refitwith GBL
 
 
-
-    /* Generic method for fitting space points with GenFit
-     *
+    /**
+     * @brief Generic method for fitting space points with GenFit
      * 
+     * @param spoints : spacepoints
+     * @param seedPos : seed position
+     * @param seedMom : seed momentum
+     * @return TVector3 : momentum from fit
      */
     TVector3 fitSpacePoints( vector<genfit::SpacepointMeasurement*> spoints, TVector3 &seedPos, TVector3 &seedMom ){
         
@@ -745,11 +820,15 @@ class TrackFitter {
         return TVector3(0, 0, 0);
     }
 
-    /* Fit a track 
-     *
+    /**
+     * @brief Primary track fitting routine
      * 
+     * @param trackSeed :
+     * @param Vertex : Primary Vertex
+     * @param seedMomentum : seed momentum (can be from MC)
+     * @return TVector3 : fit momentum
      */
-    TVector3 fitTrack(Seed_t trackCand, double *Vertex = 0, TVector3 *McSeedMom = 0) {
+    TVector3 fitTrack(Seed_t trackSeed, double *Vertex = 0, TVector3 *seedMomentum = 0) {
         long long itStart = FwdTrackerUtils::nowNanoSecond();
         if (mGenHistograms) this->mHist["FitStatus"]->Fill("Total", 1);
 
@@ -770,10 +849,10 @@ class TrackFitter {
         // get the seed info from our hits
         TVector3 seedMom, seedPos;
         // returns track curvature if needed
-        seedState(trackCand, seedPos, seedMom);
+        seedState(trackSeed, seedPos, seedMom);
 
-        if (McSeedMom != nullptr) {
-            seedMom = *McSeedMom;
+        if (seedMomentum != nullptr) {
+            seedMom = *seedMomentum;
         }
 
         // If we use the PV, use that as the start pos for the track
@@ -828,8 +907,9 @@ class TrackFitter {
         /******************************************************************************************************************
 		 * loop over the hits, add them to the track
 		 ******************************************************************************************************************/
-        for (auto h : trackCand) {
-
+        for (auto h : trackSeed) {
+            
+            const bool isFTT = h->getZ() > 200;
             hitCoords[0] = h->getX();
             hitCoords[1] = h->getY();
             
@@ -837,19 +917,24 @@ class TrackFitter {
 
             planeId = h->getSector();
 
-            if (mFTTPlanes.size() <= planeId) {
-                LOG_WARN << "invalid VolumId -> out of bounds DetPlane, vid = " << planeId << endm;
+            genfit::SharedPlanePtr plane;
+            if (isFTT && mFTTPlanes.size() <= planeId) {
+                LOG_ERROR << "invalid VolumId -> out of bounds DetPlane, vid = " << planeId << endm;
                 return TVector3(0, 0, 0);
             }
 
-            auto plane = mFTTPlanes[planeId];
+            if (isFTT)
+                plane = mFTTPlanes[planeId];
+            else 
+                plane = getFstPlane( static_cast<FwdHit*>(h) );
+
             measurement->setPlane(plane, planeId);
             fitTrack.insertPoint(new genfit::TrackPoint(measurement, &fitTrack));
 
             if (abs(h->getZ() - plane->getO().Z()) > 0.05) {
                 LOG_WARN << "Z Mismatch h->z = " << h->getZ() << ", plane->z = "<< plane->getO().Z() <<", diff = " << abs(h->getZ() - plane->getO().Z()) << endm;
             }
-        } // loop on trackCand
+        } // loop on trackSeed
 
 
         /******************************************************************************************************************

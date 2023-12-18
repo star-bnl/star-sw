@@ -49,50 +49,54 @@ class GenfitTrackResult;
 const size_t MAX_TREE_ELEMENTS = 4000;
 struct FwdTreeData {
   
-    // hits;
+    /**@brief Ftt hit related info*/
     int fttN;
     vector<float> fttX, fttY, fttZ;
     vector<int> fttVolumeId;
-    // Only avalaible for hits if MC
+    // Note: Below are only avalaible for hits if MC
     vector<float> fttPt;
     vector<int> fttTrackId, fttVertexId;
 
-    // hits;
+    /**@brief Fst hit related info*/
     int fstN;
     vector<float> fstX, fstY, fstZ;
     vector<int> fstTrackId;
 
+    /**@brief Fcs hit related info*/
     int fcsN;
-    vector<float> fcsX, fcsY, fcsZ;
+    vector<float> fcsX, fcsY, fcsZ, fcsE;
     vector<int> fcsDet;
 
-    // RC tracks
+    /**@brief RC track related info*/
     int rcN;
     vector<float> rcPt, rcEta, rcPhi, rcQuality;
     vector<int> rcTrackId, rcNumFST, rcCharge, rcNumFTT, rcNumPV;
 
-    // MC Tracks
+    /**@brief MC Track related info*/
     int mcN;
     vector<float> mcPt, mcEta, mcPhi;
     vector<int> mcVertexId, mcCharge;
+    vector<int> mcNumFtt, mcNumFst;
 
-    // MC Level vertex info
-    // maybe use also for TPC vertex if available in data
+    /**@brief MC Vertex related info*/
     int vmcN;
     vector<float> vmcX, vmcY, vmcZ;
 
+    /**@brief Track Projection related info*/
     int tprojN;
     vector<float> tprojX, tprojY, tprojZ;
     vector<float> tprojPx, tprojPy, tprojPz;
     vector<int> tprojIdD, tprojIdT;
 
-    // RAVE reco vertices
+    /**@brief RAVE RC Vertex related info*/
     int vrcN;
     vector<float> vrcX, vrcY, vrcZ;
 
+    /**@brief Track-to-hit delta related info*/
     int thdN;
-    vector<float> thdX, thdY, thaX, thaY, thaZ;
+    vector<float> thdX, thdY, thdP, thdR, thaX, thaY, thaZ;
 
+    /**@brief Seed finding Criteria related info*/
     bool saveCrit = false;
     std::map<string, std::vector<float>> Crits;
     std::map<string, std::vector<int>> CritTrackIds;
@@ -132,8 +136,8 @@ class StFwdTrackMaker : public StMaker {
 
     
     // for Wavefront OBJ export
-    size_t eventIndex = 0;
-    
+    size_t eventIndex = 0; // counts up for processed events
+    size_t mEventNum = 0; // global event num (index)
 
     bool mGenHistograms = false;
     bool mGenTree = false;
