@@ -241,6 +241,7 @@ int StFwdTrackMaker::Finish() {
         
         // output file name
         string name = mFwdConfig.get<string>("Output:url", "fwdTrackerOutput.root");
+        LOG_INFO << "Saving StFwdTrackMaker Histograms to ROOT file: " << name << endm;
         TFile *fOutput = new TFile(name.c_str(), "RECREATE");
         fOutput->cd();
 
@@ -266,15 +267,7 @@ int StFwdTrackMaker::Finish() {
 }
 
 void StFwdTrackMaker::LoadConfiguration() {
-    // Initialize configuration file
-    std::string configFile = SAttr("config");
-    if (mConfigFile.length() > 4) {
-        configFile = mConfigFile;
-    }
-
-    bool loadDefaultConfig = false;
-    if (configFile.length() < 5){
-        loadDefaultConfig = true;
+    if (mConfigFile.length() < 5){    
         LOG_INFO << "Forward Tracker is using default config for ";
         if ( defaultConfig == defaultConfigData ){
             LOG_INFO << " DATA" << endm;
@@ -284,7 +277,7 @@ void StFwdTrackMaker::LoadConfiguration() {
         mFwdConfig.load( defaultConfig, true );
     } else {
         LOG_INFO << "Forward Tracker is using config from file : " <<  mConfigFile << endm;
-        mFwdConfig.load( configFile );
+        mFwdConfig.load( mConfigFile );
     }
     configLoaded = true;
 }
@@ -1708,7 +1701,7 @@ std::string StFwdTrackMaker::defaultConfigIdealSim = R"(
     <Output url="fwdTrackMaker_ideal_sim.root" />
     <Source ftt="GEANT"  />
 
-	<TrackFitter refitSi="true" mcSeed="true" >
+	<TrackFitter refit="true" mcSeed="true" >
         <Vertex sigmaXY="0.001" sigmaZ="0.01" includeInFit="true" smearMcVertex="true" />
     </TrackFitter>
 </config>

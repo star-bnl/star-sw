@@ -323,17 +323,13 @@ class StFwdTrackMaker : public StMaker {
     */
     void setUseMcSeedForFit( bool mcSeed = true ) { mFwdConfig.set<bool>( "TrackFitter:mcSeed", mcSeed ); }
 
-
-    /**@brief Sets the tracking to refit with Fst hits
-     * Note: This only makes sense if seed finding is done with FTT hits
-     * So calling this option sets SeedFinding with Ftt hits
+    /**@brief Sets the tracking to refit 
+     * This adds compatible hits from whichever detector was NOT used in seed finding
+     * if FTT seeding -> project to and add FST hits
+     * if FST seeding -> project to and add FTT hits
+     * @param refit : true, perform refit, false do not
     */
-    void setRefitWithFst() { setSeedFindingWithFtt(); mFwdConfig.set( "TrackFitter:refitSi", "true" ); mFwdConfig.set( "TrackFitter:refitFtt", "false" ); }
-    /**@brief Sets the tracking to refit with Ftt hits
-     * Note: This only makes sense if seed finding is done with FST hits
-     * So calling this option sets SeedFinding with Fst hits
-    */
-    void setRefitWithFtt() { setSeedFindingWithFst(); mFwdConfig.set( "TrackFitter:refitSi", "false" ); mFwdConfig.set( "TrackFitter:refitFtt", "true" ); }
+    void setTrackRefit( bool refit = true) { mFwdConfig.set<bool>( "TrackFitter:refit", refit ); }
 
     /**@brief Sets the maximum number of hits that can be considered failed before the entire track fit fails
      * @param n : number of failed hits allowed, -1 = no limit
