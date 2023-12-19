@@ -364,6 +364,7 @@ class TrackFitter {
      */
     float seedState(Seed_t trackSeed, TVector3 &seedPos, TVector3 &seedMom) {
         // we require at least 3 hits, so this should be gauranteed
+        LOG_DEBUG << "Seed state with " << trackSeed.size() << " seed points " << endm;
         if(trackSeed.size() < 3){
             // failure
             return 0.0;
@@ -384,12 +385,13 @@ class TrackFitter {
         vector<size_t> idx;
         for (size_t i = 0; i < trackSeed.size(); i++) {
             auto fwdHit = static_cast<FwdHit *>(trackSeed[i]);
+            if ( !fwdHit ) continue;
             if (vol_map[ abs(fwdHit->_vid) ] == -1)
                 idx.push_back(fwdHit->_vid);
             vol_map[abs(fwdHit->_vid)] = (int)i;
             
             // find the hit closest to IP for the initial position seed
-            if (hit_closest_to_IP->getZ() > fwdHit->getZ())
+            if (hit_closest_to_IP == nullptr || hit_closest_to_IP->getZ() > fwdHit->getZ())
                 hit_closest_to_IP = fwdHit;
         }
 
@@ -836,6 +838,7 @@ class TrackFitter {
         TVectorD pv(3);
 
         StarRandom rand = StarRandom::Instance();
+        LOG_DEBUG << "Setting up the vertex info" << endm;
         if (0 == Vertex) { // randomized from simulation
             pv[0] = mVertexPos[0] + rand.gauss(mVertexSigmaXY);
             pv[1] = mVertexPos[1] + rand.gauss(mVertexSigmaXY);
@@ -848,6 +851,7 @@ class TrackFitter {
 
         // get the seed info from our hits
         TVector3 seedMom, seedPos;
+        LOG_DEBUG << "Getting seed state" << endm;
         // returns track curvature if needed
         seedState(trackSeed, seedPos, seedMom);
 
@@ -868,17 +872,18 @@ class TrackFitter {
         // create the track representations
         auto trackRepPos = new genfit::RKTrackRep(mPdgMuon);
         auto trackRepNeg = new genfit::RKTrackRep(mPdgAntiMuon);
-
+        
         // Create the track
         mFitTrack = new genfit::Track(trackRepPos, seedPos, seedMom);
         mFitTrack->addTrackRep(trackRepNeg);
 
-
-        LOG_DEBUG
-            << "seedPos : (" << seedPos.X() << ", " << seedPos.Y() << ", " << seedPos.Z() << " )"
-            << ", seedMom : (" << seedMom.X() << ", " << seedMom.Y() << ", " << seedMom.Z() << " )"
-            << ", seedMom : (" << seedMom.Pt() << ", " << seedMom.Eta() << ", " << seedMom.Phi() << " )"
-            << endm;
+        // TODO: TVector3 can fault on Eta() if Pt=0... Find a better fallback in this case for the seed 
+        if ( fabs(seedMom.Z() / seedMom.Y()) > 1e10 ){
+            seedMom.SetXYZ( 0.1, 0.1, -1 );
+        }
+        LOG_DEBUG << "seedPos : (" << seedPos.X() << ", " << seedPos.Y() << ", " << seedPos.Z() << " )" << endm;
+        LOG_DEBUG << ", seedMom : (" << seedMom.X() << ", " << seedMom.Y() << ", " << seedMom.Z() << " )" << endm;
+        LOG_DEBUG << ", seedMom : (" << seedMom.Pt() << ", " << seedMom.Eta() << ", " << seedMom.Phi() << " )" << endm;
 
         genfit::Track &fitTrack = *mFitTrack;
 
