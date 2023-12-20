@@ -244,15 +244,6 @@ StFcsDb::StFcsDb(const char *name) : TDataSet(name) {};
 StFcsDb::~StFcsDb() {}
 
 int StFcsDb::Init(){
-  if(mRun19>0){
-    makeMap2019();
-  }else{
-    makeMap();
-    printEtGain();
-  }
-  if(mDebug>0) {
-    printMap();
-  }
   return kStOK;
 }
 
@@ -299,6 +290,16 @@ void StFcsDb::setFcsPresValley(fcsPresValley_st* t){
 int StFcsDb::InitRun(int runNumber) {
     LOG_INFO << "StFcsDb::InitRun - run = " << runNumber << endm;
     mRun=runNumber;
+
+    if(mRun19>0){
+	makeMap2019();
+    }else{
+	makeMap();
+	printEtGain();
+    }
+    if(mDebug>0) {
+	printMap();
+    }
 
     //storing in DEP sorted table
     if(mGainMode==GAINMODE::DB){

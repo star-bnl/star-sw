@@ -5,8 +5,10 @@ TString input_chain = "sdt20211025.120000,fzin,geant,FieldOn,logger,MakeEvent,fc
 
 class StFmsSimulatorMaker;
 
-void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="jet", int TrgVersion=202207,
-		int debug=0, int e=0, float pt=1.5, float vz=0.0,
+void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="jet", 
+		int e=0, float pt=1.5, float vz=0.0,
+		int TrgVersion=202209,
+		int debug=3, 
 		char* epdmask="0.0100",
 		int leakyHcal=0, 
 		int eventDisplay=0,
@@ -82,7 +84,7 @@ void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="jet", int TrgV
   fcsTrgSim->setSimMode(1);
   fcsTrgSim->setTrigger(TrgVersion);
   fcsTrgSim->setDebug(debug);
-  fcsTrgSim->setEtGain(1.0); //ET match
+  fcsTrgSim->setEtGain(1.0);   //ET match
   //fcsTrgSim->setEtGain(0.5); //halfway
   //fcsTrgSim->setEtGain(0.0); //E match
   //fcsTrgSim->setReadPresMask(Form("mask/fcs_ecal_epd_mask.ele.pt0.6.vz0.thr%s.txt",epdmask));
