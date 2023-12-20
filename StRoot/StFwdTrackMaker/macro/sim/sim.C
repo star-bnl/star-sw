@@ -133,10 +133,6 @@ void sim( int n = 5, // nEvents to run
         fwdAna->SetDebug();
         chain->AddAfter("FcsTrkMatch", fwdAna);
 
-        StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
-        fwdJPsi->SetDebug();
-        chain->AddAfter("FcsTrkMatch", fwdJPsi);
-
         // Produce MuDst output
         chain->AddAfter( "FcsTrkMatch", muDstMaker );
     } else {
