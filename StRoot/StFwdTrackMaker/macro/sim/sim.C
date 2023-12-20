@@ -7,15 +7,16 @@
 
 TFile *output = 0;
 
-void ideal_sim( int n = 5, // nEvents to run
+void sim( int n = 5, // nEvents to run
                 string outputName = "stFwdTrackMaker_ideal_sim.root",
                 bool useFstForSeedFinding = false, // use FTT (default) or FST for track finding
-                bool enableTrackRefit = true // Enable track refit (default off)
+                bool enableTrackRefit = true, // Enable track refit (default off)
+                bool realisticSim = false, // enables data-like mode, real track finding and fitting without MC seed
+                char *inFile =  "sim.fzd"
             ) {
-    cout << "Running Ideal Sim on " << n << " events" << endl;
+    cout << "Running " << n << " events from " << inFile << endl;
     const char *geom = "y2023";
     TString _geom = geom;
-    const char *inFile =  "sim.fzd";
 
     // Switches for common options 
     bool SiIneff = false;
@@ -62,6 +63,13 @@ void ideal_sim( int n = 5, // nEvents to run
         fcsclu->setDebug(1);
     }
 
+    // {
+        gSystem->Load("StFwdUtils.so");
+    //     StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+    //     fwdJPsi->SetDebug();
+    //     chain->AddMaker(fwdJPsi);
+    //     goto chain_loop;
+    // }
     
 
     // Configure FST FastSim
@@ -82,15 +90,29 @@ void ideal_sim( int n = 5, // nEvents to run
         StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
         
         // config file set here for ideal simulation
-        fwdTrack->setConfigForIdealSim( );
-        fwdTrack->setSeedFindingWithFst( useFstForSeedFinding );
+        if (!realisticSim){
+            cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
+            fwdTrack->setConfigForIdealSim( );
+        } else {
+            cout << "Configured for realistic simulation" << endl;
+            fwdTrack->setConfigForRealisticSim( );
+            cout << "Configured for realistic simulation DONE" << endl;
+        }
+
+        if (useFstForSeedFinding)
+            fwdTrack->setSeedFindingWithFst();
+        else
+            fwdTrack->setSeedFindingWithFtt();
+
         fwdTrack->setTrackRefit( enableTrackRefit );
         fwdTrack->setOutputFilename( outputName );
         fwdTrack->SetGenerateTree( true );
         fwdTrack->SetGenerateHistograms( true );
         fwdTrack->SetDebug();
 
-        gSystem->Load("StFwdUtils.so");
+        cout << "fwd tracker setup" << endl;
+
+        
         if (!useFCS){
             StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
             fwdAna->SetDebug();
@@ -110,6 +132,10 @@ void ideal_sim( int n = 5, // nEvents to run
         StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
         fwdAna->SetDebug();
         chain->AddAfter("FcsTrkMatch", fwdAna);
+
+        StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+        fwdJPsi->SetDebug();
+        chain->AddAfter("FcsTrkMatch", fwdJPsi);
 
         // Produce MuDst output
         chain->AddAfter( "FcsTrkMatch", muDstMaker );

@@ -490,12 +490,6 @@ class ForwardTrackMaker {
         mRecoTrackQuality.clear();
         mRecoTrackIdTruth.clear();
         
-        // Clear track result pointers from previous event
-        for (auto gtr : mTrackResults){
-            if (gtr.trackRep) delete gtr.trackRep;
-            if (gtr.track) delete gtr.track;
-        }
-
         mTrackResults.clear();
         /************** Cleanup **************************/
 
@@ -538,10 +532,13 @@ class ForwardTrackMaker {
             mHist["Step1Duration"]->Fill( duration );
 
         bool mcTrackFinding = true;
+        if (mConfig.exists("TrackFinder")){
+            mcTrackFinding = false;
+        }
         if (mConfig.exists("TrackFinder") && mConfig.get<bool>( "TrackFinder:mc", false ) == false ){
             mcTrackFinding = false;
         } 
-        if (mConfig.exists("TrackFinder") && mConfig.get<bool>( "TrackFinder:active", false ) == false){
+        if (mConfig.exists("TrackFinder") && mConfig.get<bool>( "TrackFinder:active", true ) == false){
             mcTrackFinding = true;
         }
 
@@ -1146,6 +1143,10 @@ class ForwardTrackMaker {
         for ( auto &t : mTrackResults ){
             if (t.isFitConvergedFully != true) continue;
 
+            if ( mGenHistograms ){
+                mHist["FitStatus"]->Fill("PossibleReFit", 1);
+            }
+
             Seed_t hits_near_plane0;
             Seed_t hits_near_plane1;
             Seed_t hits_near_plane2;
@@ -1186,6 +1187,10 @@ class ForwardTrackMaker {
                 hits_to_add.push_back( hits_near_plane3[0] );
 
             if ( hits_to_add.size() > 0 ){
+
+                if ( mGenHistograms ){
+                    mHist["FitStatus"]->Fill("AttemptReFit", 1);
+                }
                 
                 Seed_t combinedSeed;
                 LOG_DEBUG << "Found " << t.fstSeed.size() << " existing FST seed points" << endm;
@@ -1203,7 +1208,9 @@ class ForwardTrackMaker {
                     LOG_DEBUG << "Track Refit with FTT points converged" << endm;
                     t.addFTT( hits_to_add, mTrackFitter->getTrack() );
                     LOG_DEBUG << "Track Refit with " << t.track->getNumPoints() << " points" << endm;
+                    mHist["FitStatus"]->Fill("GoodReFit", 1);
                 } else {
+                    mHist["FitStatus"]->Fill("BadReFit", 1);
                     LOG_DEBUG << "Track Refit with FTT points FAILED" << endm;
                 }
             }
