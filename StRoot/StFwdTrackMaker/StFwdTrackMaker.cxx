@@ -229,7 +229,7 @@ class ForwardTracker : public ForwardTrackMaker {
 
 
 //________________________________________________________________________
-StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mGenHistograms(false), mGenTree(false), mForwardTracker(nullptr), mForwardData(nullptr){
+StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mGenHistograms(false), mGenTree(false), mForwardTracker(nullptr), mForwardData(nullptr), mGeoCache(""){
     SetAttr("useFtt",1);                 // Default Ftt on 
     SetAttr("useFst",1);                 // Default Fst on
     SetAttr("useFcs",1);                 // Default Fcs on
@@ -419,23 +419,21 @@ int StFwdTrackMaker::Init() {
         mTree->SetAutoFlush(0);
     } // gen tree
 
+    if ( mGeoCache == "" ){
+        /// Instantiate and cache the geometry 
+        GetDataBase("VmcGeometry");
 
-    /// Instantiate and cache the geometry 
-    GetDataBase("VmcGeometry");
+        mGeoCache = GetChainOpt()->GetFileOut();  
+        if ( mGeoCache=="" ) 
+            mGeoCache = GetChainOpt()->GetFileIn();
 
-
-
-    TString geoCache = GetChainOpt()->GetFileOut();  
-    if ( geoCache=="" ) 
-        geoCache = GetChainOpt()->GetFileIn();
-
-    // Strip out @ symbol
-    geoCache = geoCache.ReplaceAll("@",""); 
-    // Strip off the last extention in the geoCache
-    geoCache = geoCache( 0, geoCache.Last('.') );
-    // Append geom.root to the extentionless geoCache
-    geoCache+=".geom.root";
-    
+        // Strip out @ symbol
+        mGeoCache = mGeoCache.ReplaceAll("@",""); 
+        // Strip off the last extention in the mGeoCache
+        mGeoCache = mGeoCache( 0, mGeoCache.Last('.') );
+        // Append geom.root to the extentionless mGeoCache
+        mGeoCache+=".geom.root";
+    }
     // create an SiRasterizer in case we need it 
     mSiRasterizer = std::shared_ptr<SiRasterizer>( new SiRasterizer(mFwdConfig));
     mForwardTracker = std::shared_ptr<ForwardTracker>(new ForwardTracker( ));
@@ -446,7 +444,7 @@ int StFwdTrackMaker::Init() {
 
     mForwardData = std::shared_ptr<FwdDataSource>(new FwdDataSource());
     mForwardTracker->setData(mForwardData);
-    mForwardTracker->initialize( geoCache, mGenHistograms );
+    mForwardTracker->initialize( mGeoCache, mGenHistograms );
 
     if ( mGenHistograms ){
         mHistograms["fwdVertexZ"] = new TH1D("fwdVertexZ", "FWD Vertex (RAVE);z", 1000, -50, 50);
@@ -732,6 +730,10 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
 
 void StFwdTrackMaker::loadFstHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
     StEvent *event = (StEvent *)GetDataSet("StEvent");
+    if (!event) {
+        LOG_ERROR << "No StEvent, cannot load FST hits" << endm;
+        return;
+    }
     StFstHitCollection *fstHitCollection = event->fstHitCollection();
 
     if ( fstHitCollection ){
