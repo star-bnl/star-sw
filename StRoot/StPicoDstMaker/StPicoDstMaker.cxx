@@ -40,6 +40,8 @@
 #include "StEvent/StTriggerData.h"
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StL0Trigger.h"
+#include "StEvent/StFwdTrackCollection.h"
+#include "StEvent/StFwdTrack.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -94,6 +96,7 @@
 #include "StPicoEvent/StPicoBEmcSmdPHit.h"
 #include "StPicoEvent/StPicoETofHit.h"
 #include "StPicoEvent/StPicoETofPidTraits.h"
+#include "StPicoEvent/StPicoFwdTrack.h"
 #include "StPicoEvent/StPicoMcVertex.h"
 #include "StPicoEvent/StPicoMcTrack.h"
 #include "StPicoEvent/StPicoArrays.h"
@@ -245,6 +248,7 @@ void StPicoDstMaker::streamerOff() {
   StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
   StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
+  StPicoFwdTrack::Class()->IgnoreTObjectStreamer();
   StPicoMcVertex::Class()->IgnoreTObjectStreamer();
   StPicoMcTrack::Class()->IgnoreTObjectStreamer();
 }
@@ -893,6 +897,7 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillEpdHits();
   fillBbcHits();
   fillETofHits();
+  fillFwdTracks();
 
   // Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
@@ -2500,6 +2505,32 @@ void StPicoDstMaker::fillMtdHits() {
       hitIndex.erase(hitIndex.begin() + hits[k]);
     } //for (Int_t k = (Int_t)hits.size() - 1; k > -1; k--)
   } //while (triggerPos.size() > 0)
+}
+
+//_________________
+void StPicoDstMaker::fillFwdTracks() {
+
+  StEvent *evt = (StEvent *)GetDataSet("StEvent");
+  if ( evt ){
+    StFwdTrackCollection * evc = evt->fwdTrackCollection();
+    if ( !evc ){
+      LOG_ERROR << "null FwdTrackCollection" << endm;
+      return;
+    }
+    const StSPtrVecFwdTrack& evTracks = evc->tracks();
+    LOG_INFO << "Adding " << evc->numberOfTracks() << " StMuFwdTracks to MuDSt" << endm; 
+    for ( size_t i = 0; i < evc->numberOfTracks(); i++ ){
+      StFwdTrack * evTrack = evTracks[i];
+      StPicoFwdTrack picoFwdTrack;
+      picoFwdTrack.setMomentum( evTrack->momentum().x(), evTrack->momentum().y(), evTrack->momentum().z() );
+      picoFwdTrack.setNumberOfFitPoints( evTrack->numberOfFitPoints() * evTrack->charge() );
+      int counter = mPicoArrays[StPicoArrays::FwdTrack]->GetEntries();
+      picoFwdTrack.setId( counter );
+      new((*(mPicoArrays[StPicoArrays::FwdTrack]))[counter]) StPicoFwdTrack(picoFwdTrack);
+    }
+  } else {
+    LOG_WARN << "Cannot get Fwd Tracks from StEvent" << endm;
+  }
 }
 
 #if !defined (__TFG__VERSION__)
