@@ -34,6 +34,7 @@ class StPicoBEmcSmdPHit;
 class StPicoETofHit;
 class StPicoETofPidTraits;
 class StPicoFwdTrack;
+class StPicoFcsCluster;
 class StPicoMcVertex;
 class StPicoMcTrack;
 
@@ -94,8 +95,10 @@ class StPicoDst {
   static StPicoBEmcSmdPHit* bemcSmdPHit(Int_t i) { return (StPicoBEmcSmdPHit*)picoArrays[StPicoArrays::BEmcSmdPHit]->UncheckedAt(i); }
   /// Return pointer to i-th etof hit
   static StPicoETofHit* etofHit(Int_t i) { return (StPicoETofHit*)picoArrays[StPicoArrays::ETofHit]->UncheckedAt(i); }
-  /// Return pointer to i-th etof hit
+  /// Return pointer to i-th fwd track
   static StPicoFwdTrack* fwdTrack(Int_t i) { return (StPicoFwdTrack*)picoArrays[StPicoArrays::FwdTrack]->UncheckedAt(i); }
+  /// Return pointer to i-th fcs Cluster
+  static StPicoFcsCluster* fcsCluster(Int_t i) { return (StPicoFcsCluster*)picoArrays[StPicoArrays::FwdTrack]->UncheckedAt(i); }
   /// Return pointer to i-th etof pidTraits
   static StPicoETofPidTraits* etofPidTraits(Int_t i) { return (StPicoETofPidTraits*)picoArrays[StPicoArrays::ETofPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th MC vertex
@@ -139,6 +142,8 @@ class StPicoDst {
   static UInt_t numberOfETofPidTraits() { return picoArrays[StPicoArrays::ETofPidTraits]->GetEntriesFast(); }
   /// Return number of Fwd Tracks
   static UInt_t numberOfFwdTracks() { return picoArrays[StPicoArrays::FwdTrack]->GetEntriesFast(); }
+  /// Return number of FcsClusters
+  static UInt_t numberOfFcsClusters() { return picoArrays[StPicoArrays::FcsCluster]->GetEntriesFast(); }
   /// Return number of MC vertices
   static UInt_t numberOfMcVertices() { return picoArrays[StPicoArrays::McVertex]->GetEntriesFast(); }
   /// Return number of MC tracks

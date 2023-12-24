@@ -27,6 +27,7 @@
 #pragma link C++ class StPicoETofHit+;
 #pragma link C++ class StPicoETofPidTraits+;
 #pragma link C++ class StPicoFwdTrack+;
+#pragma link C++ class StPicoFcsCluster+;
 #pragma link C++ class StPicoDst+;
 
 // StarClassLibrary adopted classes

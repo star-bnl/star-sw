@@ -17,7 +17,7 @@ class StPicoArrays {
   StPicoArrays();
 
   /// Should be changed to constexpr once ROOT 6 is available at STAR
-  enum { NAllPicoArrays = 21};
+  enum { NAllPicoArrays = 22};
 
   /// Names of the TBranches in the TTree/File
   static const char* picoArrayNames[NAllPicoArrays];
@@ -33,7 +33,7 @@ class StPicoArrays {
 		   BTowHit, BTofHit, MtdHit, BbcHit, EpdHit, FmsHit,
 		   BEmcPidTraits, BTofPidTraits, MtdPidTraits, TrackCovMatrix,
                    BEmcSmdEHit, BEmcSmdPHit, ETofHit, ETofPidTraits, 
-            FwdTrack,
+            FwdTrack, FcsCluster,
 		   McVertex, McTrack };
 };
 
