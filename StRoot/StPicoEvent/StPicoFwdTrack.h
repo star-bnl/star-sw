@@ -66,6 +66,7 @@ protected:
     // Track quality and convergence
     /// Unique track ID
     UShort_t mId;
+    /// Number of points used in seed
     UChar_t mNumberOfSeedPoints;
     /// Charge * nHitsFit
     Char_t mNumberOfFitPoints;

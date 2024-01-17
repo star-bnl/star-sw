@@ -16,7 +16,6 @@ StPicoFcsCluster::StPicoFcsCluster(const StPicoFcsCluster &clu){
     mDetectorId=clu.mDetectorId;
     mCategory=clu.mCategory;
     mNTowers=clu.mNTowers;
-    mEnergy=clu.mEnergy;
     mX=clu.mX;
     mY=clu.mY;
     mSigmaMin=clu.mSigmaMin;

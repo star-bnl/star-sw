@@ -225,15 +225,12 @@ class StPicoDstMaker : public StMaker {
   void fillBbcHits();
   /// Fill ETOF information
   void fillETofHits();
-<<<<<<< Updated upstream
-=======
   /// Fill Fwd Track information
   void fillFwdTracks();
+  /// Fill FcsHits information
+  void fillFcsHits();
   /// Fill FcsClusters information
   void fillFcsClusters();
->>>>>>> Stashed changes
-  /// Fill MC vertex information
-  void fillFwdTracks();
   /// Fill MC vertex information
   void fillMcVertices();
   /// Fill MC track information

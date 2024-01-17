@@ -26,8 +26,9 @@ const char* StPicoArrays::picoArrayNames [NAllPicoArrays] = { "Event",
                                                               "ETofHit",
                                                               "ETofPidTraits",
                                                               "FwdTracks",
+                                                              "FcsHits",
                                                               "FcsClusters",
-							      "McVertex",
+							                                                "McVertex",
                                                               "McTrack"
 };
 
@@ -52,8 +53,9 @@ const char* StPicoArrays::picoArrayTypes [NAllPicoArrays] = { "StPicoEvent",
                                                               "StPicoETofHit",
                                                               "StPicoETofPidTraits",
                                                               "StPicoFwdTrack",
+                                                              "StPicoFcsHit",
                                                               "StPicoFcsCluster",
-							      "StPicoMcVertex",
+							                                                "StPicoMcVertex",
                                                               "StPicoMcTrack"
 };
 
@@ -80,7 +82,8 @@ int StPicoArrays::picoArraySizes [NAllPicoArrays] = { 1,    // StPicoEvent
                                                       100,  // StPicoBEmcSmdPHit
                                                       100,  // StPicoETofHit
                                                       100,  // StPicoETofPidTraits
-                                                      10,  // StPicoFwdTrack
+                                                      10,   // StPicoFwdTrack
+                                                      200,  // StPicoFcsHit
                                                       100,  // StPicoFcsCluster
 						      10,   // StPicoMcVertex
                                                       1000  // StPicoMcTrack
