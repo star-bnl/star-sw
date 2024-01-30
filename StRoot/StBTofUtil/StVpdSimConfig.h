@@ -46,15 +46,15 @@ public:
 		int total_vpd_hits = 0; //Total number of vpd tubes used.
 		for (int i=0; i<19; i++){
 			if (1 << i & mVPDHitPatternEast) {
-				vpdResSumSqr += 1;
+				vpdResSumSqr += (mSimParams[i].singleTubeRes)*(mSimParams[i].singleTubeRes);
 				total_vpd_hits += 1;
 			}
 			if (1 << i & mVPDHitPatternWest) {
-				vpdResSumSqr += 1;
+				vpdResSumSqr += (mSimParams[i+19].singleTubeRes)*(mSimParams[i+19].singleTubeRes);
 				total_vpd_hits += 1;
 			}
 		}
-		vpdresolution = sqrt(vpdResSumSqr)/total_vpd_hits;
+		vpdresolution = sqrt(vpdResSumSqr/total_vpd_hits);
 		return vpdresolution;
 	}
 
