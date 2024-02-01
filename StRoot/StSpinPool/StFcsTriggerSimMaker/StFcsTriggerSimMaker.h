@@ -8,15 +8,19 @@
 #define STAR_StFcsTriggerSimMaker_HH
 
 #include "StMaker.h"
+#include <stdint.h>
 
 class StFcsDb;
 class StFcsCollection;
+class StMuFcsCollection;
 class TFile;
 class fcs_trg_base;
 class link_t;
 class geom_t;
 class TTree;
 class TH1F;
+class StFcsHit;
+class StMuFcsHit;
 
 class StFcsTriggerSimMaker : public StMaker{
 public: 
@@ -42,6 +46,8 @@ public:
     void setEtGain(float v) {mEtFactor=v;} 
 
     fcs_trg_base* getTriggerEmu() {return mTrgSim;}
+    
+    template<typename T>  void feedADC(T* hit, int ns, int ehp, uint16_t data_array[]);
 
     //this is for just running stage2 from macro
     void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t &geo, link_t output[]);
@@ -49,6 +55,8 @@ public:
 private:
     StFcsDb* mFcsDb=0;
     StFcsCollection* mFcsColl=0;
+    StMuFcsCollection* mMuFcsColl = 0;
+
     int mTrgSelect=0;
     int mDebug=0;
     char* mFilename=0;
