@@ -23,7 +23,14 @@ StPicoFwdTrack::StPicoFwdTrack(const StPicoFwdTrack &fwdTrack){
     mStatus = fwdTrack.mStatus;
     
     mIdTruth = fwdTrack.mIdTruth;
-    mQATruth = fwdTrack.mQATruth;mId;
+    mQATruth = fwdTrack.mQATruth;
+
+    for ( size_t i = 0 ; i < fwdTrack.mEcalMatchIndex.size(); i++ ){
+      addEcalCluster( fwdTrack.mEcalMatchIndex[i] );
+    }
+    for ( size_t i = 0 ; i < fwdTrack.mHcalMatchIndex.size(); i++ ){
+      addHcalCluster( fwdTrack.mHcalMatchIndex[i] );
+    }
 }
 
 StPicoFwdTrack::~StPicoFwdTrack(){

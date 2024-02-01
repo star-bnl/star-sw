@@ -58,8 +58,10 @@ public:
     void setNumberOfSeedPoints( Int_t lNumberOfSeedPoints ) { mNumberOfSeedPoints = (UChar_t)lNumberOfSeedPoints;}
     void setNumberOfFitPoints( Int_t lNumberOfFitPoints ) { mNumberOfFitPoints = (Char_t)lNumberOfFitPoints;}
     void setChi2(Float_t chi2);
+    void addEcalCluster( UChar_t index ) { mEcalMatchIndex.push_back(index); }
+    void addHcalCluster( UChar_t index ) { mHcalMatchIndex.push_back(index); }
     /// Set index of the corresonding MC track
-  void setMcTruth(Int_t index, Int_t qa)   { mIdTruth = (UShort_t)index; mQATruth = (UShort_t)qa; }
+    void setMcTruth(Int_t index, Int_t qa)   { mIdTruth = (UShort_t)index; mQATruth = (UShort_t)qa; }
     
 protected:
 
@@ -81,7 +83,12 @@ protected:
     Float_t mMomentumZ;
     /// convergence (0=no, 1=converge, 2=converge fully)
     UChar_t mStatus;
-    
+
+    /// ecal match index
+    std::vector<UChar_t> mEcalMatchIndex;
+    /// hcal match index
+    std::vector<UChar_t> mHcalMatchIndex;
+
     /// MC track id
     UShort_t mIdTruth;
     /// MC track quality (percentage of hits coming from corresponding MC track)
