@@ -25,7 +25,6 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 {
   if (! gGeoManager) StiVMCToolKit::GetVMC();
 
-  TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
   StMaker *chain=StMaker::GetChain();
 
   LOG_INFO << "We are StiMasterDetectorBuilder::build() and will clone the geometry if exists" << endm;
@@ -35,12 +34,6 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   }
 
 #if 1
-  if ( gGeoManagerSV ){
-    LOG_INFO << "Create a clone of VmcGeometry for reconstruction" << endm;
-    gGeoManagerSV->Clone("CloneGeom");
-  } else {
-    LOG_INFO << "Could not get a pointer to gGeoManager " << endm;
-  }
 #else
   if ( chain ) {
     LOG_INFO << "StiMasterDetectorBuilder::build() : Create clone of VmcGeometry by reinitialization for reconstruction" <<endm;
@@ -84,9 +77,6 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	  row++;
 	}
     }
-  if (gGeoManagerSV) {
-    gGeoManager = gGeoManagerSV;
-  }
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
 }
 
