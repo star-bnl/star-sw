@@ -99,11 +99,7 @@ def arglist( type ):
     try:
         return _shape_arglist[ type ]
     except KeyError:
-        print "=="
-        print "=================================================================="
-        print "Could not find shape with type %s"%type
-        print "=================================================================="
-        print "=="
+        print("ERROR: Could not find shape with type %s"%type)
         raise KeyError
 
 def listOfShapes():

@@ -1205,7 +1205,7 @@ class SimplePrint:
             output += _prepend
             i+=1
         output += line
-        print output
+        print(output)
 
 
 # ====================================================================================================

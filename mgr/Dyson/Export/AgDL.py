@@ -45,7 +45,6 @@ class Operator(Handler):
 
         self.firstKey = firstKey
         self.keylist  = keylist
-#       print firstKey
 
     def startElement(self,tag,attr):
         out = ''
@@ -77,8 +76,6 @@ class Container(Handler):
     def startElement(self,tag,attr):
         global _depth
         out = ''
-#       if ( tag=='Placement' ):
-#           print "PLACEMENT: 1st=%s"%self.firstKey        
         if ( self.firstKey != None ):
             try:
                 firstValue = attr.pop(self.firstKey)
@@ -144,7 +141,7 @@ class SimplePrint:
             output += _prepend
             i+=1
         output += line
-        print output
+        print(output)
 
 
 # ====================================================================================================
