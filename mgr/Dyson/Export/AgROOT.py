@@ -1,4 +1,4 @@
-from   Handler import Handler
+from   Dyson.Export.Handler import Handler
 
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes    import shape_params
@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
+from Dyson.Export.AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
 
 #enable_warnings = os.getenv('AGML_WARNINGS',False)
 #enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
