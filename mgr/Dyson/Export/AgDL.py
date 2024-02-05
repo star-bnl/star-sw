@@ -1,4 +1,4 @@
-from   Handler import Handler
+from   Dyson.Export.Handler import Handler
 import Dyson.Utils.Shapes
 
 export_comments = False
