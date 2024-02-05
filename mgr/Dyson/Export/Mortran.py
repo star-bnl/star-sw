@@ -5,6 +5,8 @@ from   Dyson.Utils.Shapes import shape_params
 
 import os, copy
 
+import pprint
+
 export_comments = True
 
 _agstar_attribute_list = ['seen','colo','ltyp','serial','fill','lsty','lwid'];
@@ -1618,7 +1620,7 @@ class Placement(Handler):
 
         for key in self.attr.keys():
 
-            val = self.attr.pop(key,None)
+            val = self.attr.get(key,None)
             if val:
                 formatter( "%%%s = %s"%( key, tryFloat(val) ) )
         
