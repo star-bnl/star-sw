@@ -2845,7 +2845,7 @@ float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModule
 
     float start_resolution = 0.0;
     if (mUseVpdStart)
-        start_resolution = mVpdResConfig->singleTGubeRes(mVPDHitPatternEast, mVPDHitPatternWest)/1000.;
+        start_resolution = mVpdResConfig->singleTubeRes(mVPDHitPatternEast, mVPDHitPatternWest)/1000.;
     else
         start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero)/1000.;
     resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
