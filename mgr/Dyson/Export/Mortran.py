@@ -851,8 +851,9 @@ class Import( Handler ):
             temp[0] = os.getenv(temp[0][1:])
             file = '/'.join(temp)
 
-        with open(file,'r') as f:
-
+        with open(file,'r',errors='replace') as f:
+            #print( f.readlines() )
+            
             for line in f:
                 if line.strip()=='\n':
                     continue
