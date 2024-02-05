@@ -1,4 +1,4 @@
-from Handler import Handler
+from Dyson.Export.Handler import Handler
 
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes import shape_params
@@ -1653,10 +1653,10 @@ class Placement(Handler):
                     val = rotation.value
                     formatter( "CALL agml_ortho('%s'//char(0))"%val )
 
-		if key == 'matrix':
-		    val = rotation.value
-		    formatter( "agml_rotm = %s"%val );
-		    formatter( "CALL agml_rotation(agml_rotm)")
+        if key == 'matrix':
+            val = rotation.value
+            formatter( "agml_rotm = %s"%val );
+            formatter( "CALL agml_rotation(agml_rotm)")
 		    
 
             #
