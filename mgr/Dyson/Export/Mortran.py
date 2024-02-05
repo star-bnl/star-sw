@@ -121,7 +121,6 @@ class PrettyPrint:
 
         if ( indent and lstrip ):
             line = line.lstrip()    # remove whitespace on left
-        #self.sepline(line)         # print separators
 
         if ( indent ):
             self.decrease(line)         # decrease indentation level
@@ -146,11 +145,9 @@ class PrettyPrint:
         else:        
             self.cprint (myline+line,cchar,debug,breakers)  # print the line
         
-        #self.spcline(line)          # add space behind line
         if ( indent ):
             self.increase(line)
-
-        #self.update(line)
+            
     #
     # ================================================        
     def spcline(self,line):
@@ -1095,7 +1092,7 @@ class ArrayFormatter:
         npad = len(pad)
 
         # And this will be the number of fields per line of output
-        nfields = ( self.limit - npad ) / (myfield+3)
+        nfields = int( ( self.limit - npad ) / (myfield+3) )
 
         # Counter for the number of fields
         ifield  = 0
