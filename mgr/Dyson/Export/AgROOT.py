@@ -212,7 +212,7 @@ def checkAttributes( tag, attr, mylist, skip=[], warning=True ):
     to the expected values provided in mylist.  Keys provided in
     the except list will not be checked.
     """
-    for key,value in attr.iteritems():
+    for key,value in attr.items():
         if key in skip: continue
         if key.lower() in skip: continue
         key = key.lower()
@@ -361,7 +361,7 @@ def replacements( line ):
         # myline = myline.replace(',',')(')
 
         # Loop over all variables in this struct.  
-        for key,value in _struct_dims.iteritems(): # isnt this backward?
+        for key,value in _struct_dims.items(): # isnt this backward?
             
             if ( key not in myline.lower() ): continue # can skip finditer
 
@@ -2984,7 +2984,7 @@ class Create(Handler):
         """
         block = attr.get('block')
         keys=[]
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             keys.append(key)
 
 
@@ -3004,7 +3004,7 @@ class Create(Handler):
         if count:
             document.impl('{ // Paramters passed in via the Create operator', unit=current );            
             document.impl('AgCreate createin("%s");'%block, unit=current )
-            for key,value in shape.iteritems():
+            for key,value in shape.items():
                 document.impl('createin.par("%s")=%s;'%(key,value), unit=current)
             document.impl('_create = createin;', unit=current )                
             document.impl('}', unit=current );
@@ -3012,7 +3012,7 @@ class Create(Handler):
 
         document.impl( '{', unit=current );
         document.impl( 'AgShape myshape; // undefined shape',unit=current )
-        for key,value in shape.iteritems():
+        for key,value in shape.items():
             value=value.lower()
             value=replacements(value)
             document.impl( '/// Set shape par: %s = %s'%(key,value), unit=current )
@@ -3059,7 +3059,7 @@ class Position(Handler):
 
         # Check validity of attributes and issue warning if we are provided
         # an unknown attribute
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if key=='block': continue
             if key=='into' : continue
             key = key.lower()

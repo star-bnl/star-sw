@@ -85,7 +85,7 @@ shape_params = [
 
 #_all_shape_args = []
 #_tmp = {}
-#for shape,args in _shape_arglist.iteritems():
+#for shape,args in _shape_arglist.items():
 #    for a in args:
 #        _tmp[a]=1
 #for a in _tmp:

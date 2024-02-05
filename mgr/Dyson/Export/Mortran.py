@@ -135,7 +135,7 @@ class PrettyPrint:
             print('!' + myline + '^')
 
         # Perform replacement of structure tags
-        for search,replace in _structures.iteritems():            
+        for search,replace in _structures.items():            
             line = line.replace( search.lower(),
                                  replace.upper() )
 
@@ -305,7 +305,7 @@ class Formatter:
                 i+=1
 
         # Perform replacement of structure tags
-        for search,replace in _structures.iteritems():            
+        for search,replace in _structures.items():            
             line = line.replace( search.lower(),
                                  replace.upper() )
         
@@ -488,7 +488,7 @@ class Setup( Handler ):
             # to creating the NEW detector bank for the module, otherwise
             # this flag is reset to default.
             #
-            for flag,value in self.flags.iteritems():
+            for flag,value in self.flags.items():
                 formatter("   CALL Agsflag('%s',%i)"%(flag,value))
 
             #
@@ -1365,7 +1365,7 @@ class Create(Handler):
         """
         block = attr.get('block')
         keys=[]
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             keys.append(key)
         output = 'CREATE %s' %( block )
         for key in keys:

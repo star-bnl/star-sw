@@ -46,7 +46,7 @@ def setExportSyntax ( syn ):
     except KeyError:
         print("%s has not been defined as an export syntax.  Possibilities are:" % syn)
 
-        for key,value in export_table.iteritems():
+        for key,value in export_table.items():
             print("%s --> %s"%( key, value ))
         sys.exit(0)
     

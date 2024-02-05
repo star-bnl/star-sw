@@ -61,7 +61,7 @@ class Operator(Handler):
                 if value != None: out += '%s=%s '%( key, value.strip() )
             except KeyError:
                 pass
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if value != None: out += '%s=%s '%( key, value.strip() )
         out = sanitize(out)
         out = '%s '%( tag.upper() ) + out + ';'
@@ -90,7 +90,7 @@ class Container(Handler):
                 if ( value != None ): out += '%s=%s '%( key, value.strip() )
             except KeyError:
                 pass
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if value != None: out += '%s=%s '%( key, value.strip() )
         out = '%s '%tag.upper() + sanitize(out) + '{'
 
