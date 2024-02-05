@@ -1,5 +1,10 @@
 import os
-from exceptions import Exception
+import sys
+
+if sys.version_info < (3,):
+    from exceptions import Exception
+else:
+    from builtins   import Exception
 
 
 from Dyson.Utils.Shapes  import listOfShapes
