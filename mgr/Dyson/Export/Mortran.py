@@ -3,7 +3,7 @@ from Dyson.Export.Handler import Handler
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes import shape_params
 
-import os, copy
+import os, copy, io
 
 import pprint
 
@@ -851,7 +851,7 @@ class Import( Handler ):
             temp[0] = os.getenv(temp[0][1:])
             file = '/'.join(temp)
 
-        with open(file,'r',errors='replace') as f:
+        with io.open(file,'r',errors='replace') as f:
             #print( f.readlines() )
             
             for line in f:
