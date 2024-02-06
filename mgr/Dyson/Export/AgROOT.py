@@ -1,4 +1,4 @@
-from   Handler import Handler
+from   Dyson.Export.Handler import Handler
 
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes    import shape_params
@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
+from Dyson.Export.AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
 
 #enable_warnings = os.getenv('AGML_WARNINGS',False)
 #enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
@@ -212,7 +212,7 @@ def checkAttributes( tag, attr, mylist, skip=[], warning=True ):
     to the expected values provided in mylist.  Keys provided in
     the except list will not be checked.
     """
-    for key,value in attr.iteritems():
+    for key,value in attr.items():
         if key in skip: continue
         if key.lower() in skip: continue
         key = key.lower()
@@ -353,10 +353,6 @@ def replacements( line ):
 
     for struct in document.structs:
 
-#        if struct in myline:
-#            print "----------------------------------------------------------"                        
-#            print ":in:  %s"%myline
-        
         # Lower case struct to be certain
         struct = struct.lower()        
 
@@ -365,7 +361,7 @@ def replacements( line ):
         # myline = myline.replace(',',')(')
 
         # Loop over all variables in this struct.  
-        for key,value in _struct_dims.iteritems(): # isnt this backward?
+        for key,value in _struct_dims.items(): # isnt this backward?
             
             if ( key not in myline.lower() ): continue # can skip finditer
 
@@ -406,18 +402,7 @@ def replacements( line ):
                 New = Old.replace('(','[int(')
                 New = New.replace(')',')-1]')
 
-                #print match
-                #print New
-
                 myline = myline.replace(Old,New)
-
-
-
-#        if struct in myline:
-#            print ":out: %s"%myline                
-            
-            
-
 
 
 
@@ -614,10 +599,6 @@ class Tag( Handler ):
         for flag in content.split(' '):
             if len(flag.strip()):
                 self.flags.append(flag)
-                ## name = flag[:4]
-                ## print '%s::setup();' % flag
-                ## print '%s::Module *%s = new %s::Module();' % ( flag, name, flag )
-                ## print '%s -> ConstructGeometry();' %name
 
 
     def endElement(self,tag):
@@ -1696,7 +1677,6 @@ class Inline( Handler ):
             if i<len(self.arglist)-1:
                 mydef += ','
         mydef += ') { return %s; }' % self.rvalue
-        #print mydef
 
         # Add this inline function to the implementation file
         document.impl( mydef, unit=self.name )
@@ -1966,13 +1946,13 @@ class Var ( Handler ):
             try:
                 self.parent.addVar(name,type,dim,value,comment)
             except AttributeError:
-                print 'AttributeError: %s does not implement addVar' % self.parent
-                print '              : name    %s'%name
-                print '              : type    %s'%type
-                print '              : dim     %s'%dim
-                print '              : value   %s'%value
-                print '              : comment %s'%comment
-                assert 2+2==5
+                print('AttributeError: %s does not implement addVar' % self.parent)
+                print('              : name    %s'%name)
+                print('              : type    %s'%type)
+                print('              : dim     %s'%dim)
+                print('              : value   %s'%value)
+                print('              : comment %s'%comment)
+                assert(2+2==5)
             
         self.type = type
         
@@ -2568,7 +2548,6 @@ class Filling( Handler ):
             output += '// %s_docum.%s = "%s";\n'%(name,var,com)
 
         output += "%s.fill();\n"%name.upper()
-        #print output
 
         document.impl( output, unit=current )
 
@@ -3005,7 +2984,7 @@ class Create(Handler):
         """
         block = attr.get('block')
         keys=[]
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             keys.append(key)
 
 
@@ -3025,7 +3004,7 @@ class Create(Handler):
         if count:
             document.impl('{ // Paramters passed in via the Create operator', unit=current );            
             document.impl('AgCreate createin("%s");'%block, unit=current )
-            for key,value in shape.iteritems():
+            for key,value in shape.items():
                 document.impl('createin.par("%s")=%s;'%(key,value), unit=current)
             document.impl('_create = createin;', unit=current )                
             document.impl('}', unit=current );
@@ -3033,7 +3012,7 @@ class Create(Handler):
 
         document.impl( '{', unit=current );
         document.impl( 'AgShape myshape; // undefined shape',unit=current )
-        for key,value in shape.iteritems():
+        for key,value in shape.items():
             value=value.lower()
             value=replacements(value)
             document.impl( '/// Set shape par: %s = %s'%(key,value), unit=current )
@@ -3080,7 +3059,7 @@ class Position(Handler):
 
         # Check validity of attributes and issue warning if we are provided
         # an unknown attribute
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if key=='block': continue
             if key=='into' : continue
             key = key.lower()
@@ -3125,7 +3104,6 @@ class Create_and_Position(Position):
             val = attr.get(key,None)
             if ( val != None ):
                 pos = "%s=%s"%(key,val);
-                #print "Add pos=%s" %pos
                 self.pos.append(pos)
 
         # And next the position arguements
@@ -3191,7 +3169,7 @@ class Placement(Handler):
                 parent = parent.parent
 
         if into==None:
-            print 'AgROOT Warning: parent of block %s not in stack WTF?' % block
+            print('AgROOT Warning: parent of block %s not in stack WTF?' % block)
 
         
 
@@ -3918,7 +3896,7 @@ if __name__ == '__main__':
 
 
     if ( 1 ):
-        print ag_variable( 'material::dens*vacuum')
+        print(ag_variable( 'material::dens*vacuum'))
     
 
     if ( 0 ):
