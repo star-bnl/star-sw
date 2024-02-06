@@ -2357,7 +2357,7 @@ class Replace(Handler):
             form( "REPLACE [%s] with [%s];"%( self.match.rstrip(';'),
                                               self.replace[0].rstrip(';') ) );
         else:
-            print ("")
+            print("")
             form( "REPLACE [%s] with [" %self.match.rstrip(';') )
             for rpl in self.replace:
                 rpl = rpl.rstrip(';')
