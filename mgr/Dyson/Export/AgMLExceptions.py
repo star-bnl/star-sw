@@ -1,9 +1,7 @@
 import os
-import sys
-
-if sys.version_info < (3,):
+try:
     from exceptions import Exception
-else:
+except ImportError:
     from builtins   import Exception
 
 
