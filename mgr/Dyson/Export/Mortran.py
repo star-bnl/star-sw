@@ -849,8 +849,6 @@ class Import( Handler ):
             file = '/'.join(temp)
 
         with io.open(file,'r',errors='replace') as f:
-            #print( f.readlines() )
-            
             for line in f:
                 if line.strip()=='\n':
                     continue
