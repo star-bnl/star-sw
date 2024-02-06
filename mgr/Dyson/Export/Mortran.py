@@ -5,7 +5,6 @@ from   Dyson.Utils.Shapes import shape_params
 
 import os, copy, io
 
-import pprint
 
 export_comments = True
 
