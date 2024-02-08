@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	use_stdin = 0 ;
 
 	rtsLogLevel(DBG) ;
-	rtsLogOutput(RTS_LOG_NET) ;
+	//rtsLogOutput(RTS_LOG_NET) ;
 
 	memset(logstr,0,sizeof(logstr)) ;
 
