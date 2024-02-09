@@ -2,6 +2,7 @@
 include ../rtsmakefile.def
 include ../rtsplus.def
 
+
 # zap LDLIBS
 LDLIBS = 
 
@@ -28,7 +29,7 @@ rtsLog.o : rtsLog.C
 
 rtsLog: rtsLog.o rtsLogUnix.o
 	$(CXX) $(CXXFLAGS) rtsLogUnix.o rtsLog.o -o rtsLog
-	
+
 #operDisplay.sh:	
 
 
