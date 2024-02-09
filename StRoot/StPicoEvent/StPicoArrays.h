@@ -33,8 +33,8 @@ class StPicoArrays {
 		   BTowHit, BTofHit, MtdHit, BbcHit, EpdHit, FmsHit,
 		   BEmcPidTraits, BTofPidTraits, MtdPidTraits, TrackCovMatrix,
                  BEmcSmdEHit, BEmcSmdPHit, ETofHit, ETofPidTraits, 
-                 FwdTrack, FcsHit, FcsCluster,
-		   McVertex, McTrack };
+		   McVertex, McTrack,
+           FwdTrack, FcsHit, FcsCluster };
 };
 
 #endif

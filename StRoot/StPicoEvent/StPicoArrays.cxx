@@ -25,11 +25,11 @@ const char* StPicoArrays::picoArrayNames [NAllPicoArrays] = { "Event",
                                                               "BEmcSmdPHit",
                                                               "ETofHit",
                                                               "ETofPidTraits",
+							                                                "McVertex",
+                                                              "McTrack",
                                                               "FwdTracks",
                                                               "FcsHits",
-                                                              "FcsClusters",
-							                                                "McVertex",
-                                                              "McTrack"
+                                                              "FcsClusters"
 };
 
 //   ARRAY TYPES
@@ -52,11 +52,11 @@ const char* StPicoArrays::picoArrayTypes [NAllPicoArrays] = { "StPicoEvent",
                                                               "StPicoBEmcSmdPHit",
                                                               "StPicoETofHit",
                                                               "StPicoETofPidTraits",
+							                                                "StPicoMcVertex",
+                                                              "StPicoMcTrack",
                                                               "StPicoFwdTrack",
                                                               "StPicoFcsHit",
-                                                              "StPicoFcsCluster",
-							                                                "StPicoMcVertex",
-                                                              "StPicoMcTrack"
+                                                              "StPicoFcsCluster"
 };
 
 //              ARRAY SIZES
@@ -82,11 +82,11 @@ int StPicoArrays::picoArraySizes [NAllPicoArrays] = { 1,    // StPicoEvent
                                                       100,  // StPicoBEmcSmdPHit
                                                       100,  // StPicoETofHit
                                                       100,  // StPicoETofPidTraits
+						                                          10,   // StPicoMcVertex
+                                                      1000,  // StPicoMcTrack
                                                       10,   // StPicoFwdTrack
                                                       200,  // StPicoFcsHit
-                                                      100,  // StPicoFcsCluster
-						      10,   // StPicoMcVertex
-                                                      1000  // StPicoMcTrack
+                                                      100  // StPicoFcsCluster
 };
 
 //_________________
