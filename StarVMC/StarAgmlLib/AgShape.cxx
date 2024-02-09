@@ -626,6 +626,8 @@ Bool_t AgShape::morphed()
   return true; // No shapes match
 }
 
+std::vector< TString > &AgShape::parList(){ return mParList[mId]; }
+
 // =============================================================================================================
 Bool_t AgShape::parameterized()
 {
