@@ -687,7 +687,7 @@ class StarGeometry(Handler):
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
         static TDataSet* Construct( const char* name = "%s");
         static bool      List     ( const char* name = "%s");
-        static void      Whitelist( const char* name, int value=1 ){ whitelist[name]=value; }
+        static void      Whitelist( const char* name, int value=1 );
         static void      InitAgML ( const char* stacker="StarTGeoStacker");
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
@@ -718,6 +718,8 @@ class StarGeometry(Handler):
 
         std::map<std::string,int> StarGeometry::whitelist= {{"all",1}};
         
+        void StarGeometry::Whitelist(const char* name, int value){ whitelist[name]=value; }
+
         TDataSet* StarGeometry::Construct( const char* name )
         {
         std::string tag = name;

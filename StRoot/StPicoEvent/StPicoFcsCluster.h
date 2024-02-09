@@ -31,7 +31,7 @@ public:
     unsigned short detectorId() const { return mDetectorId; }
     int category() const { return mCategory; }
     int nTowers() const { return mNTowers; }
-    float energy() const { return mFourMomentumT; }
+    float energy() const { return mFourMomentumT; } // Energy
     float x() const { return mX; }  // Mean x ("center of gravity") in local grid coordinate (1st moment).
     float y() const { return mY; }  // Mean y ("center of gravity") in local grid coordinate (1st moment).
     float sigmaMax() const { return mSigmaMax; } // Maximum 2nd moment (along major axis).
@@ -39,7 +39,7 @@ public:
     float theta() const { return mTheta; }    // Angle in x-y plane that defines the direction of least-2nd-sigma
     float chi2Ndf1Photon() const { return mChi2Ndf1Photon; } // chi^2/ndf for 1-photon fit to the cluster.
     float chi2Ndf2Photon() const { return mChi2Ndf2Photon; } // chi^2/ndf for 2-photon fit to the cluster.
-    const TLorentzVector& fourMomentum() const { return TLorentzVector( mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT ); } // Cluster four-momentum (px, py, pz, E)
+    const TLorentzVector fourMomentum() const { return TLorentzVector( mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT ); } // Cluster four-momentum (px, py, pz, E)
 
     void setId(int cluid) { mId = (UShort_t)cluid; }
     void setDetectorId(unsigned short detector) { mDetectorId=(UShort_t)detector; }
@@ -53,8 +53,8 @@ public:
     void setTheta(float theta) { mTheta = theta; }
     void setChi2Ndf1Photon(float chi2ndfph1) { mChi2Ndf1Photon = chi2ndfph1; }
     void setChi2Ndf2Photon(float chi2ndfph2) { mChi2Ndf2Photon = chi2ndfph2;}
+    void setFourMomentum(float px, float py, float pz, float e) { mFourMomentumX = px; mFourMomentumY = py; mFourMomentumZ = pz; mFourMomentumT = e; }
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
-    
 
 protected:
     UShort_t mId=0;             // Eventwise cluster ID

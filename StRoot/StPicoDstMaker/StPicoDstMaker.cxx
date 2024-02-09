@@ -75,6 +75,7 @@
 #include "StEmcRawMaker/StBemcTables.h"
 
 #include "StFmsDbMaker/StFmsDbMaker.h"
+#include "StFcsDbMaker/StFcsDb.h"
 
 #include "tables/St_mtdModuleToQTmap_Table.h"
 #include "tables/St_mtdQTSlewingCorr_Table.h"
@@ -2546,6 +2547,11 @@ void StPicoDstMaker::fillFwdTracks() {
 
 //_________________
 void StPicoDstMaker::fillFcsClusters() {
+  StFcsDb* fcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+  if( !fcsDb ) {
+      LOG_ERROR << "Cannot get StFcsDb object" << endm;
+      return;
+  }
   StMuFcsCollection * muFcs = mMuDst->muFcsCollection();
   if ( !muFcs ) {
     LOG_ERROR << "Cannot get Fcs Collection from MuDst" << endm;
@@ -2568,13 +2574,22 @@ void StPicoDstMaker::fillFcsClusters() {
     picoFcsCluster.setTheta(muCluster->theta());
     picoFcsCluster.setChi2Ndf1Photon(muCluster->chi2Ndf1Photon());
     picoFcsCluster.setChi2Ndf2Photon(muCluster->chi2Ndf2Photon());
-    picoFcsCluster.setFourMomentum(muCluster->fourMomentum());
+    double zVertex=picoDst()->event()->primaryVertex().z();
+    StThreeVectorD xyz=fcsDb->getStarXYZ(muCluster->detectorId(), muCluster->x(), muCluster->y());    
+    StLorentzVectorD lv = fcsDb->getLorentzVector(xyz, muCluster->energy(), zVertex);
+    picoFcsCluster.setFourMomentum(lv.px(),lv.py(),lv.pz(),lv.e());
     new((*(mPicoArrays[StPicoArrays::FcsCluster]))[counter]) StPicoFcsCluster(picoFcsCluster);
   }
+  LOG_INFO << "StPicoDstMaker::fillFcsClusters filled " << mPicoArrays[StPicoArrays::FcsCluster]->GetEntries() << endm;
 }//fillFcsClusters
 
 //_________________
 void StPicoDstMaker::fillFcsHits() {
+  StFcsDb* fcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+  if( !fcsDb ) {
+      LOG_ERROR << "Cannot get StFcsDb object" << endm;
+      return;
+  }
   StMuFcsCollection * muFcs = mMuDst->muFcsCollection();
   if ( !muFcs ) {
     LOG_ERROR << "Cannot get Fcs Collection from MuDst" << endm;
@@ -2588,10 +2603,13 @@ void StPicoDstMaker::fillFcsHits() {
     picoFcsHit.setIndex(counter);
     picoFcsHit.setDetectorId(muHit->detectorId());
     picoFcsHit.setId(muHit->id());
-    // picoFcsHit.setFourMomentum(muHit->fourMomentum());
-    picoFcsHit.setFourMomentum( TLorentzVector(0, 0, 0, muHit->energy()) );
+    double zVertex=picoDst()->event()->primaryVertex().z();
+    StThreeVectorD xyz = fcsDb->getStarXYZ(muHit->detectorId(), muHit->id());
+    StLorentzVectorD lv = fcsDb->getLorentzVector(xyz, muHit->energy(), zVertex);
+    picoFcsHit.setFourMomentum(lv.px(),lv.py(),lv.pz(),lv.e());
     new((*(mPicoArrays[StPicoArrays::FcsHit]))[counter]) StPicoFcsHit(picoFcsHit);
   }
+  LOG_INFO << "StPicoDstMaker::fillFcsHits filled " << mPicoArrays[StPicoArrays::FcsHit]->GetEntries() << endm;
 }//fillFcsHit
 
 #if !defined (__TFG__VERSION__)

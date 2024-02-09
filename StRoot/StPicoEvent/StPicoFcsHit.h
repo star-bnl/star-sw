@@ -28,12 +28,13 @@ public:
     Int_t index() const { return mId; } // Return unique Index of the hit
     unsigned short detectorId() const { return mDetectorId; } 
     Int_t id() const { return mId; }    // Id of the hit winthin detectorId
-    float energy() const { return mFourMomentumT; }
-    const TLorentzVector& fourMomentum() const { return TLorentzVector( mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT ); } // Hit four-momentum (px, py, pz, E)
+    float energy() const { return mFourMomentumT; } // Energy
+    const TLorentzVector fourMomentum() const { return TLorentzVector( mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT ); } // Hit four-momentum (px, py, pz, E)
 
     void setIndex(int index) { mIndex = (UShort_t)index; }
     void setDetectorId(unsigned short detector) { mDetectorId=(UShort_t)detector; }
     void setId(int id) { mIndex = (UShort_t)id; }
+    void setFourMomentum(float px, float py, float pz, float e) { mFourMomentumX = px; mFourMomentumY = py; mFourMomentumZ = pz; mFourMomentumT = e; }
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
     
 protected:
