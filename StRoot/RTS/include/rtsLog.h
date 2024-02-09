@@ -92,41 +92,14 @@ void rtsLogAddJmlFile (char *fname);
 
 
 
-/*Tonko: not used Special (mis)handling for STAR Offline Code
-#ifdef __ROOT__	
-#define RTS_DISABLE_LOG
-#endif
-*/
 
-#ifdef RTS_DISABLE_LOG
+
+#ifndef RTS_ENABLE_LOG
 
 #define RTS_ASSERT(expr)	assert(expr)
-
-
-	#define LOG(SEV,STRING,ARGS...) \
-        do { \
-                const char *const yada = SEV ; \
-                if((*yada == 'E')) { \
-                        fprintf(stderr,"" ANSI_RED "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-                else if((*yada == 'C')) { \
-                        fprintf(stderr,"" ANSI_RED "" ANSI_REVERSE "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-                else if((*yada == 'I')) { \
-                        fprintf(stderr,"" ANSI_BLUE "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-                else if((*yada == 'T')) { \
-                        fprintf(stderr,"" ANSI_GREEN "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-                else if((*yada == 'W')) { \
-                        fprintf(stderr,"" ANSI_CYAN "" ANSI_BOLD "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-                else if((*yada == 'O')) { \
-                        fprintf(stderr,"" ANSI_BLUE "" ANSI_REVERSE "RTS_" SEV ": " __FILE__ " [line %d]: " STRING "" ANSI_RESET "\n" , __LINE__ , ##ARGS) ;\
-		} \
-	} while(0) \
-
-
+#define LOG(SEV,STRING,ARGS...)
+#define rtsLogUnix_v(str, ...)
+#define rtsLogAddCmd(x)
 
 
 // the following become noops...
@@ -135,7 +108,7 @@ void rtsLogAddJmlFile (char *fname);
 #define rtsLogLevelInt(x)
 #define rtsLogOutput(x)
 
-#else	/* RTS_DISABLE_LOG */
+#else	/* RTS_ENABLE_LOG */
 
 
 #ifdef __GNUC__
@@ -269,12 +242,12 @@ INLINE_HACK void rtsLogLevel(const char *level)
 
 
 
-#endif
+#endif  /* RTS_LOG_COLORED */
 
-#endif
+#endif  /* __vxworks */
 
 
-#endif	/* RTS_DISABLE_LOG */
+#endif	/* RTS_ENABLE_LOG */
 
 #ifdef __cplusplus
 }
