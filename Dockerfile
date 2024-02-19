@@ -5,7 +5,9 @@ ARG starenv=root5
 # Pick one from [gcc485, gcc11]
 ARG compiler=gcc485
 
-FROM ghcr.io/star-bnl/star-spack:v0.1.6-${starenv}-${compiler}
+FROM ghcr.io/star-bnl/star-spack:v0.3.0-${starenv}-${compiler}
+
+ARG compiler
 
 ENV NODEBUG=yes
 ENV STAR=/star-sw
@@ -21,8 +23,11 @@ COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
 
-RUN cons \
- && find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+RUN <<EOF
+	set -e
+	cons
+	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+EOF
 
 COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh
 	#!/bin/bash -l
