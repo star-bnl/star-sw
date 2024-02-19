@@ -9,78 +9,69 @@ on:
       - '*'
 
 jobs:
-  ROOT5:
+  build:
     if: github.repository_owner == 'star-bnl'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        starenv: [root5]
+        compiler: [gcc485]
+    env:
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Get branch name
         id: branch-name
-        uses: tj-actions/branch-names@v4.8
+        uses: tj-actions/branch-names@v6
+
+      - name: Define complete image tag
+        run: |
+          echo "TAG=${{ steps.branch-name.outputs.current_branch || steps.branch-name.outputs.tag }}-${{ env.STARENV }}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rebuild up to base-stage
-        uses: docker/build-push-action@v2
+      - name: Build a release container
+        uses: docker/build-push-action@v3
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
-          file: docker/Dockerfile.root5
-          target: base-stage
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:${{ steps.branch-name.outputs.current_branch }}_latest
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache,mode=max
+          build-args: |
+            starenv=${{ matrix.starenv }}
+            compiler=${{ matrix.compiler }}
+          load: true
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }}
 
-      - name: Build release container
-        if: steps.branch-name.outputs.is_tag == 'true'
-        uses: docker/build-push-action@v2
-        with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
-          file: docker/Dockerfile.root5
-          target: build-stage
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root5-build:${{ steps.branch-name.outputs.tag }}
+      - name: Push container image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }}
 
-  ROOT6:
-    if: github.repository_owner == 'star-bnl'
+      - name: Create latest tag for default branch
+        if: ${{ steps.branch-name.outputs.is_tag == 'false' && steps.branch-name.outputs.is_default == 'true' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:latest
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:latest
+
+      - name: Create latest tag for SL* branches
+        if: ${{ steps.branch-name.outputs.is_tag == 'false' && steps.branch-name.outputs.is_default == 'false' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+
+      - name: Create image tag based on pushed tag
+        if: ${{ steps.branch-name.outputs.is_tag == 'true' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ env.TAG }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.tag }}
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.tag }}
+
+  build-cleanup:
     runs-on: ubuntu-latest
+    needs: build
     steps:
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v4.8
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Rebuild up to base-stage
-        uses: docker/build-push-action@v2
-        with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
-          file: docker/Dockerfile.root6
-          target: base-stage
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:${{ steps.branch-name.outputs.current_branch }}_latest
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache,mode=max
-
-      - name: Build release container
-        if: steps.branch-name.outputs.is_tag == 'true'
-        uses: docker/build-push-action@v2
-        with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
-          file: docker/Dockerfile.root6
-          target: build-stage
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root6-build:${{ steps.branch-name.outputs.tag }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: .github/workflows/delete_untagged.py ${{ secrets.STAR_BNL_STAR_SW_TOKEN }}
