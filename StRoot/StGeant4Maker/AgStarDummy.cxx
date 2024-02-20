@@ -6,5 +6,5 @@ extern "C" {
   void type_of_call agskine_( float *plab,   int *ip, int *nv, float *ubuf, int *nb, int *nt ) { }
   void type_of_call  gsvert_( float *, int &, int &, float *, int &, int &){ }
   void type_of_call  gskine_( float *, int &, int &, float *, int &, int &){ }
-  //   void type_of_call gcomad_(DEFCHARD, int*& DEFCHARL){ }
+  void type_of_call gcomad_(DEFCHARD, int*& DEFCHARL){ }
 };
