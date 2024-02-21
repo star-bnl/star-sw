@@ -5,9 +5,9 @@ StBFChain* chain = 0;
 #include <iostream>
 #include <StMessMgr.h>
 
-extern "C" {
-  void Load( const char* lib );
-}
+//extern "C" {
+//  void Load( const char* lib );
+//}
 
 // Random number generator seed
 int __rngSeed = 12345;
