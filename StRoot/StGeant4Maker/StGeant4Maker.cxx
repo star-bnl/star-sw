@@ -546,10 +546,10 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("SYNC", 1, "Synchrotron radiation");
 
   // Application defaults to single engine mode with Geant4
-  AddOption("application:engine","G4","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
+  AddOption("application:engine","multi","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
 
   AddOption("all:engine",  "G3", "In multi-engine mode, selects the default engine for all subsystems" ); // default engine in multi-engine mode is G3
-  AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
+  //AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
   AddOption("wcal:engine", "G4", "Default engine for all volumes defined in WcalGeo" ); // Forward EMC defaults to G4
   AddOption("hcal:engine", "G4", "Default engine for all volumes defined in HcalGeo" ); // Forward hcal defaults to G4
 
