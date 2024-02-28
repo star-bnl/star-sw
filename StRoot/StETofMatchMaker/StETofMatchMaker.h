@@ -87,7 +87,7 @@ private:
         Double_t        localX;
         Double_t        localY;
         Double_t        tot;
-        Double_t        clusterSize;
+        Int_t           clusterSize;
         Int_t           index2ETofHit;
         StThreeVectorD  globalPos;
         Int_t           trackId;
@@ -99,6 +99,10 @@ private:
         Double_t        beta;
         Double_t        pathLength;
         Double_t        tof;
+        Int_t           IdTruth;    
+	Int_t           IdTruthHit;
+        Double_t        totDiff;
+
     };
 
     typedef std::vector< StructETofHit > eTofHitVec;
@@ -160,6 +164,9 @@ private:
     void    fillPidTraits(         eTofHitVec& finalMatchVec );
     void    calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimaryWithPid );
 
+     void sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec);
+     void sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap );
+
     double  startTimeBTof();
     double  startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& nCand_etofT0 );
 
@@ -204,6 +211,12 @@ private:
     Double_t mMatchDistX;
     Double_t mMatchDistY;
     Double_t mMatchDistT;
+
+    // used for single sided match cases
+    Double_t   dx_3sig;
+    Double_t   dy_3sig;
+    Double_t   dt_3sig;
+    Double_t   dy_max;
 
     std::vector< Double_t >   mT0corrVec;
     Double_t                  mT0corr;
