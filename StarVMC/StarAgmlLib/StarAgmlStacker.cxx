@@ -129,6 +129,12 @@ TString StarAgmlStacker::realname( TString nname )
   return mRealnames[nname];
 }
 
+
+const std::vector<TString> &StarAgmlStacker::nicknames(const Char_t *name)
+{
+  return mNicknames[ TString(name) ];
+}
+
 // ---------------------------------------------------------------------------------------------------
 void StarAgmlStacker::Debug( const Char_t *name, const Char_t *flag )
 {

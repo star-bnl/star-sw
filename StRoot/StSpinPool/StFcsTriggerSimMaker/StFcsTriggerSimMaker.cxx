@@ -50,6 +50,16 @@
 
 #include "StRoot/RTS/src/TRG_FCS/fcs_trg_base.h"
 
+#include "StMaker.h"
+#include "StChain.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
+#include "StMuDSTMaker/COMMON/StMuFcsHit.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
+
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
   uint32_t   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
@@ -184,17 +194,17 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	mTree->Branch("trg",&mTrg,"trg/I");
     }
     if(mQaHistFilename){
-	mQaHistFile=new TFile(mQaHistFilename,"RECREATE");
-	mTrgRate = new TH1F("FcsTrgRate","FcsTrgRate",mNTRG+1,0,mNTRG+1);
+       mQaHistFile=new TFile(mQaHistFilename,"RECREATE");
+       mTrgRate = new TH1F("FcsTrgRate","FcsTrgRate",mNTRG+1,0,mNTRG+1);
     }
 
     //Write Text event file & gainfile
     FILE* gainfile=0;
     FILE* gainfile2=0;
     if(mFilename){
-	mFile = fopen(mFilename,"w");
-	gainfile=fopen("fcs_et_gain.txt","w");
-	gainfile2=fopen("fcs_et_gain2.txt","w");
+      mFile = fopen(mFilename,"w");
+      gainfile=fopen("fcs_et_gain.txt","w");
+      gainfile2=fopen("fcs_et_gain2.txt","w");
     }
     
     //Fill ETgain, GainCorr and Pedestal 
@@ -266,11 +276,27 @@ int StFcsTriggerSimMaker::Finish(){
 }
 
 int StFcsTriggerSimMaker::Make(){
-    StEvent* event = (StEvent*)GetInputDS("StEvent");
-    if(!event) {LOG_ERROR << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm; return kStErr;}
+    StEvent* event = nullptr;
+    event = (StEvent*)GetInputDS("StEvent");
+    if(!event) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm;}
     mFcsColl = event->fcsCollection();
-    if(!mFcsColl) {LOG_ERROR << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm; return kStErr;}
+    if(!mFcsColl) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm;}
     
+    StMuEvent* muevent = nullptr;
+    if((!event)||(!mFcsColl)){
+        
+        LOG_INFO<<"No StEvent info available for StFcsTriggerSimMaker. "<< endm;
+    
+        muevent = StMuDst::event();
+        mMuFcsColl = StMuDst::muFcsCollection();
+        if(muevent && mMuFcsColl){
+            LOG_INFO <<"Proceeding with StMuDst info to be used with StfcsTriggerSimMaker."<< endm;
+        }else{
+            LOG_ERROR << "StFcsTriggerSimMaker::Make did not find StEvent and MuEvent." << endm;
+            return kStErr;
+        }
+    }
+        
     mTrgSim->start_event();
 
     //Feed ADC
@@ -279,35 +305,40 @@ int StFcsTriggerSimMaker::Make(){
     memset(fcs_trg_sim_adc,0,sizeof(fcs_trg_sim_adc));
     int n=0;
     for(int det=0; det<=kFcsNDet; det++){
-	StSPtrVecFcsHit& hits = mFcsColl->hits(det);
-	int ns  = mFcsDb->northSouth(det);
-	int ehp = mFcsDb->ecalHcalPres(det);
-	int nh  = mFcsColl->numberOfHits(det);
-	for(int i=0; i<nh; i++){
-	    StFcsHit* hit=hits[i];
-	    unsigned short dep = hit->dep();
-	    unsigned short ch  = hit->channel();
-	    //printf("ns=%1d ehp=%1d dep=%2d ch=%2d adc=%4d sim=\n",ns,ehp,dep,ch,hit->adc(0),mSimMode);
-	    if(ehp<0 || ch>=32) continue;
-	    fcs_trg_sim_adc[ns][ehp][dep][ch] = hit->adc(0);
-	    if(mSimMode==0){
-	      int ntb=hit->nTimeBin();
-	      for(int t=0; t<ntb; t++){
-		int tb = hit->timebin(t);
-		if(tb>=mTrgTimebin-3 && tb<=mTrgTimebin+4){
-		  data[tb-mTrgTimebin+3] = hit->adc(t);
-		  //printf("tb=%3d i=%2d adc=%4d\n",tb,tb-mTrgTimebin+3,hit->adc(t));
-		}
-	      }
-	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
-	    }else{
-	      data[1] = hit->adc(0)-1;  //removing 1 to add at tb6
-	      data[6] = 1;              //add this so tb6>tb7
-	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
-	    }
-	    if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
-	    n++;
-	}
+        
+        int ns  = mFcsDb->northSouth(det);
+        int ehp = mFcsDb->ecalHcalPres(det);
+                
+        if((event)&&(mFcsColl)){
+            StSPtrVecFcsHit& hits = mFcsColl->hits(det);
+        
+            int nh  = mFcsColl->numberOfHits(det);
+          
+            for(int i=0; i<nh; i++){
+                StFcsHit* hit=hits[i];
+                unsigned short ch  = hit->channel();
+
+                if(ehp<0 || ch>=32) continue;
+                feedADC(hit, ns, ehp, data);
+                n++;
+            }
+            
+        }else if((muevent)&&(mMuFcsColl)){ //Use StMuDst info instead of StEvent for Trigger Reconstruction
+            
+            int nh = mMuFcsColl->numberOfHits(det);
+            int det_hit_index = mMuFcsColl->indexOfFirstHit(det);
+
+            for(int i=0; i<nh; i++){
+                
+                int hit_index = i + det_hit_index;
+                StMuFcsHit* hit = mMuFcsColl->getHit(hit_index);
+                unsigned short ch  = hit->channel();
+
+                if(ehp<0 || ch>=32) continue;
+                feedADC(hit, ns, ehp, data);
+                n++;
+            }
+        }
     }
     if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",-1,0,0,0,0);
     LOG_INFO << Form("StFcsTriggerSimMaker feeded %d hits",n) << endm;;
@@ -315,7 +346,7 @@ int StFcsTriggerSimMaker::Make(){
     //Run Trigger Simulation
     //   uint16_t dsm_out = fcs_trg_run(mTrgSelect, mDebug);
     uint32_t dsm_out = mTrgSim->end_event();
-
+  
     //QA Tree
     mFlt=0;
     StarPrimaryMaker* pmkr= static_cast<StarPrimaryMaker*>(GetMaker("PrimaryMaker"));   
@@ -327,7 +358,7 @@ int StFcsTriggerSimMaker::Make(){
     }
     mTcu=dsm_out;
     if(mQaTreeFile) mTree->Fill();
-
+    
     //Results
     LOG_INFO << Form("Output to TCU = 0x%08x  Filter=0x%08x",mTcu,mFlt)<<endm;
 
@@ -364,17 +395,17 @@ int StFcsTriggerSimMaker::Make(){
 
     if(mTrgRate) mTrgRate->Fill(mNTRG);
     NTRG[mNTRG]++;
-    for(int i=0; i<mNTRG; i++){ 
-	if(trg[i]) {
-	    if(mTrgRate) mTrgRate->Fill(i);
-	    NTRG[i]++;
-	}
+    for(int i=0; i<mNTRG; i++){
+      if(trg[i]) {
+        if(mTrgRate) mTrgRate->Fill(i);
+        NTRG[i]++;
+      }
     }
-    
+  
     LOG_INFO << "Triggers = ";
     for(int i=0; i<mNTRG; i++){ if(trg[i]) LOG_INFO << ctrg[i] << " ";}
     LOG_INFO << endm;
-
+    
     return kStOK;
 }    
 
@@ -655,4 +686,30 @@ void StFcsTriggerSimMaker::readThresholdFile(){
 //read from offline copy of online runlog DB
 void StFcsTriggerSimMaker::readThresholdDb(){
   //to be implemented before run22 online DB moves to offline  
+}
+
+template<typename T> void StFcsTriggerSimMaker::feedADC(T* hit, int ns, int ehp, uint16_t data_array[]){
+    
+    unsigned short dep = hit->dep();
+    unsigned short ch  = hit->channel();
+    
+//    printf("ns=%1d ehp=%1d dep=%2d ch=%2d adc=%4d sim=%d\n",ns,ehp,dep,ch,hit->adc(0),mSimMode);
+    fcs_trg_sim_adc[ns][ehp][dep][ch] = hit->adc(0);
+    if(mSimMode==0){
+      int ntb=hit->nTimeBin();
+      for(int t=0; t<ntb; t++){
+    int tb = hit->timebin(t);
+    if(tb>=mTrgTimebin-3 && tb<=mTrgTimebin+4){
+      data_array[tb-mTrgTimebin+3] = hit->adc(t);
+//    printf("tb=%3d i=%2d adc=%4d\n",tb,tb-mTrgTimebin+3,hit->adc(t));
+    }
+      }
+      mTrgSim->fill_event(ehp,ns,dep,ch,data_array,8) ;
+    }else{
+      data_array[1] = hit->adc(0)-1;  //removing 1 to add at tb6
+      data_array[6] = 1;              //add this so tb6>tb7
+      mTrgSim->fill_event(ehp,ns,dep,ch,data_array,8) ;
+    }
+    if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
+
 }
