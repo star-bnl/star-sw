@@ -626,9 +626,9 @@ protected:
   UShort_t mZdcUnAttenuated[2];
 
 #if defined (__TFG__VERSION__)
-  ClassDef(StPicoEvent, 9)
+  ClassDef(StPicoEvent, 10)
 #else /* ! __TFG__VERSION__ */
-  ClassDef(StPicoEvent, 7)
+  ClassDef(StPicoEvent, 8)
 #endif
 };
 

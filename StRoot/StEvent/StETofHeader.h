@@ -113,7 +113,7 @@ private:
     std::vector< Bool_t > mGoodEventFlagVec; 
     std::vector< Bool_t > mHasPulsersVec; 
 
-    ClassDef( StETofHeader, 3 )
+    ClassDef( StETofHeader, 4 )
 };
 
 #endif // STETOFHEADER_H
