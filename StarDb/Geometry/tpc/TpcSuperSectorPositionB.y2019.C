@@ -1,3 +1,5 @@
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_Survey")) return 0;
   Survey_st row = {

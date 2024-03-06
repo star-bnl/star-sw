@@ -1,3 +1,5 @@
+#include "tables/St_tpcPadrowT0_Table.h"
+
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_tpcPadrowT0")) return 0;
   tpcPadrowT0_st row;

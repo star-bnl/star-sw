@@ -1,3 +1,5 @@
+#include "tables/St_tpcAcCharge_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcAcCharge")) return 0;
   tpcAcCharge_st row =  {0,0};

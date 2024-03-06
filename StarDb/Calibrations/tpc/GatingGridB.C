@@ -1,3 +1,5 @@
+#include "tables/St_tpcCorrection_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcCorrection")) return 0;
 /* 

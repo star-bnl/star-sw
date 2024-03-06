@@ -687,7 +687,8 @@ class StarGeometry(Handler):
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
         static TDataSet* Construct( const char* name = "%s");
         static bool      List     ( const char* name = "%s");
-        static void      Whitelist( const char* name, int value=1 ){ whitelist[name]=value; }
+        static void      Whitelist( const char* name, int value=1 );
+        static void      InitAgML ( const char* stacker="StarTGeoStacker");
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
         private:
@@ -709,7 +710,7 @@ class StarGeometry(Handler):
         document.head(header)
 
         implement1 = """
-#include "StarVMC/StarGeometry/StarGeo.h"
+#include "StarVMC/StarGeometry/StarGeo.h"        
 #include "TObjectSet.h"
 #include "TGeoManager.h"        
 #include <string>
@@ -717,6 +718,8 @@ class StarGeometry(Handler):
 
         std::map<std::string,int> StarGeometry::whitelist= {{"all",1}};
         
+        void StarGeometry::Whitelist(const char* name, int value){ whitelist[name]=value; }
+
         TDataSet* StarGeometry::Construct( const char* name )
         {
         std::string tag = name;
@@ -744,7 +747,19 @@ class StarGeometry(Handler):
             output = '             if (all||tag=="%s") { %s::list(); found = true; }'  %(name,name)         
             document.impl( output, unit='global' )
         document.impl( 'if ( 0==found ) LOG_INFO << tag << " not defined" << endm;', unit='global' )
-        document.impl( 'return true;};',              unit='global' )        
+        document.impl( 'return true;};',              unit='global' )
+
+        implement1 = """
+#include "StarVMC/StarAgmlLib/StarNoStacker.h"
+#include "StarVMC/StarAgmlLib/StarTGeoStacker.h"                
+        void StarGeometry::InitAgML( const char* s ) {
+        std::string sname = s;
+        if      ( sname=="StarNoStacker"   ) AgBlock::SetStacker( new StarNoStacker );
+        else                                 AgBlock::SetStacker( new StarTGeoStacker );
+        };
+        """
+        document.impl( implement1, unit='global' )
+
         
 
         

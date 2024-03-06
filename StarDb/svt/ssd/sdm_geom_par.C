@@ -1,3 +1,5 @@
+#include "tables/St_sdm_geom_par_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // sdm_geom_par Allocated rows: 1  Used rows: 1  Row size: 48 bytes

@@ -1,21 +1,62 @@
-jobId=${1:-0}
-pid=${2:-5}
-### pid : 3=e- 5=mu+ 8=pi+
+#!/usr/bin/bash
 
-echo "jobId=${jobId}, pid=${pid}"
 
-nEvents=10
+# 
+# Setup arguments
+# 
 
-strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
-#echo starsim -w 0 -b sim/testg.kumac g3id=${pid} seed=${strongrandom} nevents=${nEvents} ntrack=1 etamn=3.0 etamx=3.5 ptmn=2.9 ptmx=3.1 ofn=sim.fzd
-# starsim -w 0 -b sim/testg.kumac g3id=${pid} seed=${strongrandom} nevents=${nEvents} ntrack=5 etamn=2.5 etamx=4.5 ptmn=14.5 ptmx=15.0 ofn=sim.fzd
+jobId=${1:-FAST} # default FAST
+nEvents=${2:-10}
+sim=${3:-true}
+pid=${4:-5} # default muon
 
-# FZD_FILE="/gpfs01/star/pwg/youqi/runPythia/out/${jIndex}.fzd"
+
+# 
+# Print job parameters
+# 
+echo "Usage:\n rbfast <jobId> <nEvents> <run_sim> <pid>"
+echo "jobId=${jobId}, nEvents=${nEvents}, run_sim=${sim}, pid=${pid}"
+source env.sh
+
+# 
+# Run simulation if needed
+# 
+if [ "$sim" = true ] ; then
+    strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+    echo "strong random ${strongrandom}"
+    echo root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+    time root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+else
+    echo "Skipping simulation - use existing sim.fzd"
+fi
+
+
+# 
+# Run tracking
+# 
 echo root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/fast_track.xml" )' 
 time root4star -b -q -l 'sim/fwd_tracking.C( '"${nEvents}"', "sim.fzd", "sim/fast_track.xml" )'
 
-# mkdir -p out/fast_track_pid${pid}
-# mv sim.fzd out/fast_track_pid${pid}/${jobId}.fzd
-# mv fast_track.root out/fast_track_pid${pid}/job${jobId}_qa.root
-# mv fwdtree.root out/fast_track_pid${pid}/job${jobId}_fwdtree.root
-# mv fcstrk.root out/fast_track_pid${pid}/job${jobId}_fcstrk.root
+
+# 
+# Copy output files into JOB prefixed names
+# 
+if [ -f "fwdtree.root" ]; then
+    mv fwdtree.root ${jobId}_fwdtree.root
+else 
+    echo "WARNING: no fwdtree.root produced"
+fi 
+
+if [ -f "fast_track.root" ]; then
+    mv fast_track.root ${jobId}_trackingQA.root
+else 
+    echo "WARNING: no fast_track.root produced (tracking QA)"
+fi 
+
+if [ -f "fcstrk.root" ]; then
+    mv fcstrk.root ${jobId}_fcstrk.root
+else 
+    echo "No fcstrk.root output found, double check if FCS is included"
+fi
+
+

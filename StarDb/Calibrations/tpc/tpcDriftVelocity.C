@@ -1,3 +1,5 @@
+#include "tables/St_tpcDriftVelocity_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcDriftVelocity")) return 0;
   tpcDriftVelocity_st row;

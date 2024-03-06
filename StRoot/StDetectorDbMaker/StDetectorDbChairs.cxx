@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include "StDetectorDbMaker.h"
+#include "TROOT.h"
 #include "TEnv.h"
 #include "TF1.h"
 #include "TMath.h"
@@ -12,49 +13,59 @@ using namespace ROOT::Math;
 #include "St_db_Maker/St_db_Maker.h"
 #if 0
 #include "tables/St_tpcCorrection_Table.h"
+#include "tables/St_pidCorrection_Table.h"
 #include "tables/St_tpcSectorT0offset_Table.h"
 #include "tables/St_tofTrayConfig_Table.h"
-#define DEBUGTABLED(STRUCT) PrintTable(#STRUCT,table )
-#define makeString(PATH) # PATH
-#define CHECKTABLED(C_STRUCT) \
-  if (table->InheritsFrom("St_" makeSTRING(C_STRUCT))) {	  \
+#define makeSTRING(PATH) # PATH
+#define CHECKTABLED(C_STRUCT)			  \
+  if (table->InheritsFrom("St_" # C_STRUCT)) {		      \
     St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
-    ## C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;    \
-    ## C_STRUCT ## _st def = {0};				      \
+    C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;     \
+    C_STRUCT ## _st def = {0};				      \
     iprt = kFALSE;					      \
-    Int_t shift = 0; \
-    Int_t NrowSize = t->GetRowSize(); \
-    if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;}\
-    if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def->t0[i] = -22.257;} \
-    if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def->entries = 120; for (Int_t i = 0; i < 120; i++) {def->iTray[i] = i+1; def->nModules[i] = 32;} \
-    for (Int_t i = 0; i < table->GetNRows(); i++, s++) {	      \
-      if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;}   \
-    }								      \
+    Int_t shift = 0;							\
+    Int_t NrowSize = t->GetRowSize();					\
+    if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;} \
+    if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def.t0[i] = -22.257;} \
+    if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def.entries = 120; for (Int_t i = 0; i < 120; i++) {def.iTray[i] = i+1; def.nModules[i] = 32;} \
+      for (Int_t i = 0; i < table->GetNRows(); i++, s++) {		\
+	if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;} \
+      }									\
+    }
+}
+#define  DEBUGTABLE(STRUCT)				\
+  TDatime t[2];						\
+  Bool_t iprt = kTRUE;					\
+  Int_t Nrows = -1;						\
+  if (St_db_Maker::GetValidity(table,t) > 0) {			\
+    if (table->InheritsFrom("St_tpcCorrection") ) {		\
+      St_tpcCorrection *tt = (St_tpcCorrection *) table;	\
+      tpcCorrection_st *s = tt->GetTable(); Nrows = s->nrows;	\
+    } else if (table->InheritsFrom("St_pidCorrection") ) {	\
+      St_pidCorrection *tt = (St_pidCorrection *) table;	\
+      pidCorrection_st *s = tt->GetTable(); Nrows = s->nrows;		\
+    }									\
+    LOG_WARN << "St_" << makeSTRING(STRUCT) << "C::instance found table " << table->GetName() \
+	     << " with NRows = " << Nrows << " in db"			\
+	     << Form("\tValidity:%8i.%06i",t[0].GetDate(),t[0].GetTime()) \
+	     << Form(" - %8i.%06i",t[1].GetDate(),t[1].GetTime()) << endm; \
+    if (Nrows > 10) Nrows = 10;						\
+    CHECKTABLED(tpcCorrection);						\
+    CHECKTABLED(tpcHVPlanes);						\
+    CHECKTABLED(Survey);						\
+    CHECKTABLED(tpcSectorT0offset);					\
+    CHECKTABLED(tofTrayConfig);						\
+    if (iprt) {								\
+      if (table->GetRowSize() < 512) table->Print(0,Nrows);		\
+    } else {								\
+      LOG_WARN << "Default table" << endm;				\
+    }									\
   }
 //___________________Debug Print out  _____________________________________________________________
-void PrintTable(const Char_t *str, TTable *table) {
-  DEBUGTABLE(str);
-  Bool_t iprt = kTRUE;
-  if (St_db_Maker::GetValidity(table,t) > 0) {
-    if (table->InheritsFrom("St_tpcCorrection")) {
-      St_tpcCorrection *tt = (St_tpcCorrection *) table;
-      tpcCorrection_st *s = tt->GetTable(); Nrows = s->nrows;}
-    if (Nrows > 10) Nrows = 10;
-    CHECKTABLE(tpcCorrection);
-    CHECKTABLE(tpcHVPlanes);
-    CHECKTABLE(Survey);
-    CHECKTABLE(tpcSectorT0offset);
-    CHECKTABLE(tofTrayConfig);
-    if (iprt) {
-      if (table->GetRowSize() < 512) table->Print(0,Nrows);
-    } else {
-      LOG_WARN << "Default table" << endm;
-    }
-  }
-}
 #endif
 #include "StarChairDefs.h"
 static Int_t _debug = 0;
+
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
 StDetectorDbFTPCGas* StDetectorDbFTPCGas::fgInstance = 0;
@@ -76,7 +87,11 @@ MakeChairInstance(tpcGridLeak,Calibrations/tpc/tpcGridLeak);
 #include "St_tpcOmegaTauC.h"
 MakeChairInstance(tpcOmegaTau,Calibrations/tpc/tpcOmegaTau);
 #include "St_tpcDriftVelocityC.h"
+#include "St_starClockOnlC.h"
 MakeChairInstance(tpcDriftVelocity,Calibrations/tpc/tpcDriftVelocity);
+Float_t  St_tpcDriftVelocityC::timeBucketPitch(Int_t i) {
+  return laserDriftVelocityEast(i)/St_starClockOnlC::instance()->Frequency()*1e6; // cm
+}
 #include "St_TpcSecRowCorC.h"
 ClassImp(St_TpcSecRowCorC);
 #include "St_TpcSecRowBC.h"
@@ -350,6 +365,126 @@ Int_t St_tpcCorrectionC::IsActiveChair() const {
   }
   return npar;
 }
+#include "St_pidCorrectionC.h"
+MakeChairInstance2(pidCorrection,St_pidCorrectionC,dEdxModel/PiDC/pidCorrection);
+//________________________________________________________________________________
+Double_t St_pidCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
+  pidCorrection_st *cor =  ((St_pidCorrection *) Table())->GetTable() + i;
+  return SumSeries(cor, x, z, NparMax);
+}
+//________________________________________________________________________________
+Double_t St_pidCorrectionC::SumSeries(pidCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  if (NparMax > 0) N = NparMax;
+  Double_t X = x;
+  if (X < cor->min) return Sum;
+  if (X > cor->max) return Sum;
+  Double_t T0, T1, T2;
+  switch (cor->type) {
+  case 1: // Tchebyshev [-1,1]
+    if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = X;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*X*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  case 2: // Shifted TChebyshev [0,1]
+    if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = 2*X - 1;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*(2*X - 1)*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  default: // polynomials
+    Sum = cor->a[N-1];
+    for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+    break;
+  }
+  return Sum;
+}
+//________________________________________________________________________________
+Int_t St_pidCorrectionC::IsActiveChair() const {
+  const St_pidCorrection  *tableC = (const St_pidCorrection  *) Table();
+  Int_t npar = 0;
+  if (! tableC) return npar;
+  pidCorrection_st *cor = tableC->GetTable();
+  Int_t N = tableC->GetNRows();
+  if (! cor || ! N) {
+    return npar;
+  }
+  N = cor->nrows;
+  for (Int_t i = 0; i < N; i++, cor++) {
+    if (cor->nrows == 0 && cor->idx == 0) continue;
+    if (TMath::Abs(cor->npar) > 0       ||
+	TMath::Abs(cor->OffSet) > 1.e-7 ||
+	TMath::Abs(cor->min)    > 1.e-7 ||
+	TMath::Abs(cor->max)    > 1.e-7) {
+      npar++;
+    }
+  }
+  return npar;
+}
+//________________________________________________________________________________
+Double_t St_pidCorrectionC::Correction(Double_t X, Int_t part, Int_t det, Int_t charge, Int_t pull, Int_t varT) {
+  Int_t N = nrows();
+  Double_t Correction = 0;
+  for (Int_t l = 0; l < N; l++) {
+    pidCorrection_st *row = Struct(l);
+    if (part != row->particle) continue;
+    if (det  != row->det) continue;
+    if (pull != row->pull) continue;
+    if (varT != row->var) continue;
+    if (row->charge != 0 && charge != row->charge) continue;
+    if (row->min < row->max && (X < row->min || X > row->max)) continue;
+    //    Correction += CalcCorrection(l, X);
+    Correction += SumSeries(row, X);
+  }
+  return TMath::Exp(Correction);
+}
+//________________________________________________________________________________
+Double_t St_pidCorrectionC::func(Double_t *x, Double_t *p) {
+  Int_t part   = p[0];
+  Int_t det    = p[1];
+  Int_t charge = p[2];
+  Int_t pull   = p[3];
+  Int_t varT   = p[4];
+  return TMath::Log(St_pidCorrectionC::instance()->Correction(x[0],part,det,charge,pull,varT));
+}
+//________________________________________________________________________________
+TF1 *St_pidCorrectionC::Func(Int_t part, Int_t det, Int_t charge, Int_t pull, Int_t varT) {
+  TString fName(Form("pidCor_p%i_d%i_c%i_p%i_v%i",part,det,charge,pull,varT));
+  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+  if (! f) {
+    f = new TF1(fName, St_pidCorrectionC::func, -1.2, 0.9, 5); 
+    if (! varT) 
+      f->GetXaxis()->SetTitle("log_{10} P [GeV/c]");
+    else 
+      f->GetXaxis()->SetTitle("log_{10} P/M");
+    f->FixParameter(0, part);
+    f->FixParameter(1, det);
+    f->FixParameter(2, charge);
+    f->FixParameter(3, pull);
+    f->FixParameter(4, varT);
+  }
+  return f;
+}
 #include "St_TpcRowQC.h"
 MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
 #include "St_TpcDriftDistOxygenC.h"
@@ -428,13 +563,19 @@ Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in m
 MakeChairInstance2(tpcCorrection,St_GatingGridBC,Calibrations/tpc/GatingGridB);
 //________________________________________________________________________________
 Double_t St_GatingGridBC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
-  Double_t value = -10;
-  if (x <= t0(i)) return value;
-  Double_t corD = 1. - TMath::Exp(-(x-t0(i))/(settingTime(i)/4.6));
-  if (corD < 1e-4) return value;
-  return TMath::Log(corD);
+  const tpcCorrection_st *s = Struct(i);
+  Double_t T0 = s->a[0];
+  Double_t SettingTime = s->a[1];
+  //  Double_t tau = (x-t0(i))/(settingTime(i)/4.6);
+  Double_t tau = (x - T0)/(SettingTime/4.6);
+  if (tau >  10) return   0;
+  if (tau >  0) {
+    Double_t corD = 1. - TMath::Exp(-tau);
+    return TMath::Log(corD);
+  } else {
+    return -10;
+  }
 }
-
 #include "St_TpcCurrentCorrectionC.h"
 //MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 ClassImp(St_TpcCurrentCorrectionC);
@@ -1333,8 +1474,237 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
   return v_eff;
 }
 //________________________________________________________________________________
+#include "St_tpcRDOMasksC.h"
+//MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
+ClassImp(St_tpcRDOMasksC);
+St_tpcRDOMasksC *St_tpcRDOMasksC::fgInstance = 0;
+St_tpcRDOMasksC *St_tpcRDOMasksC::instance() {
+  if (fgInstance) return fgInstance;					
+  St_tpcRDOMasks *table = (St_tpcRDOMasks *) StMaker::GetChain()->GetDataBase("RunLog/onl/tpcRDOMasks");
+  if (! table) {							
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks was not found" << endm;
+    assert(table);							
+    assert(table->GetNRows() == 12);
+  }									
+  DEBUGTABLE(tpcRDOMasks);							
+  // Take care about unsorted tpcRDOMaks table
+  Bool_t needReorder = kFALSE;
+  tpcRDOMasks_st *row = table->GetTable();
+  UInt_t Nactive = 0;
+  UInt_t N = table->GetNRows();
+  if (N != 12) {
+    needReorder = kTRUE;
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has NRows = " << N << " =! 12" << endm;
+  } else {
+    for (UInt_t i = 0; i < N; i++) {
+      if ((row+i)->sector == 2*i + 1) continue;
+      needReorder = kTRUE;
+      break;
+    }
+  }
+  if (needReorder) {
+    LOG_WARN << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has to be reordered" << endm;
+    tpcRDOMasks_st rows[12] = {0};
+    Int_t OldRun = -1;
+    for (UInt_t i = 0; i < N; i++) {
+      if ((row+i)->sector == 2*i + 1) {
+	rows[i] = *(row+i);
+	if ((row+i)->runNumber > 0 && OldRun < 0) OldRun = (row+i)->runNumber;
+	Nactive++;
+      } else {
+	if ((row+i)->sector > 0 && (row+i)->sector <= 24) {
+	  if ((row+i)->runNumber > 0 && OldRun < 0) OldRun = (row+i)->runNumber;
+	  Int_t j = ((row+i)->sector-1)/2;
+	  if (rows[j].sector != 0) {
+	    LOG_ERROR << "St_tpcRDOMasksC::instance RunLog/onl/tpcRDOMasks has duplicated rows\t" << i << "\tand " << j <<  endm;
+	  }
+	  rows[j] =  *(row+i);
+	  Nactive++;
+	}
+      }
+    }
+    if (Nactive != 12) { // Add missing rows
+      delete table;
+      table = new St_tpcRDOMasks("tpcRDOMasks", 12);
+      // fill missing rows
+      for (Int_t i = 0; i < 12; i++) {
+	if (rows[i].sector == 0) {
+	  rows[i].sector = 2*i + 1;
+	  rows[i].runNumber = OldRun;
+	  if (St_tpcPadConfigC::instance()->iTpc(rows[i].sector)) {
+	    rows[i].mask = 65535;
+	  } else {
+	    rows[i].mask = 4095;
+	  }
+	}
+      }
+    }
+    for (Int_t i = 0; i < 12; i++) {
+      table->AddAt(&rows[i],i);
+    }
+    table->Print(0,12);
+  }
+  fgInstance = new St_tpcRDOMasksC(table);				
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tpcRDOMasksC");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
+  return fgInstance;							
+}
+//________________________________________________________________________________
+UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
+  static UInt_t Sector = 0;
+  static UInt_t Mask   = 0;
+  if (Sector == sec) {
+    return Mask;
+  }
+  UInt_t MASK = 0x0000; // default is to mask it out
+  //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
+  if(sec < 1 || sec > 24 || getNumRows() == 0){
+    LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
+     << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
+    Sector = 0;
+    return MASK;
+  }
+  //  tpcRDOMasks_st *row = Struct();
+  // Take care about unsorted tpcRDOMaks table
+  tpcRDOMasks_st *row = Struct((sec-1)/2);
+  MASK = row->mask;
+  Int_t run = row->runNumber;
+  if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
+    if (sec == 16 && MASK == 0 && run > 8181000 && run < 9181000) MASK = 4095;
+    if( sec % 2 == 0){ // if its even relevent bits are 6-11
+      MASK = MASK >> 6;
+    }
+    // Otherwise want lower 6 bits
+    MASK &= 0x000003F; // Mask out higher order bits
+  } else   if (run < 20000000 && sec == 20) { // Run XVIII, sector 20 
+    MASK = 255;
+  } else  { // Run XIX and higher
+    if( sec % 2 == 0){ // if its even relevent bits are 8-13
+      MASK = MASK >> 8;
+    }
+    // Otherwise want lower 8 bits
+    MASK &= 255; // Mask out higher order bits
+  }
+  Sector = sec;
+  Mask   = MASK;
+  return Mask;
+}
+//________________________________________________________________________________
+Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
+  static Int_t Sector = -1;
+  static Int_t Rdo    = -1;
+  static Bool_t Mask  = kFALSE;
+  if (Sector == sector && Rdo == rdo) {
+    return Mask;
+  }
+  Mask  = kFALSE;
+  Sector = sector;
+  Rdo = rdo;
+  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8) {
+    getSectorMask(0);
+    return 0;
+  }
+  tpcRDOMasks_st *row = Struct((sector-1)/2);
+  assert(row->sector == (UInt_t) 2*((sector-1)/2) + 1);
+  UInt_t MASK = getSectorMask(sector);
+  MASK = MASK >> (rdo - 1);
+  MASK &= 0x00000001;
+  Mask   = MASK;
+  return Mask;
+}
+//________________________________________________________________________________
+void St_tpcRDOMasksC::setSectorRDOMaskOff(UInt_t sector,Int_t rdo)  {    
+  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return;
+  if (isOn(sector,rdo)) {
+    tpcRDOMasks_st *row = Struct((sector-1)/2);
+    assert(row->sector == 2*((sector-1)/2) + 1);
+    if (! St_tpcPadConfigC::instance()->iTpc(sector)) {// no iTPC
+      row->mask &= ~(1 << (6*((sector-1)%2) + rdo - 1)); 
+    } else {                                           // with iTPC
+      row->mask &= ~(1 << (8*((sector-1)%2) + rdo - 1)); 
+    }
+    isOn(0,rdo); // Reset saved mask 
+    LOG_WARN << "St_tpcRDOMasksC::setSectorRDOMaskOff(" << sector << "," << rdo << ") = " << isOn(sector,rdo) << endm;
+  }
+}
+//________________________________________________________________________________
+#include "St_tpcExtraGainCorrectionC.h"
+MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection);
+//________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
-MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+//MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+St_tpcPadGainT0C *St_tpcPadGainT0C::fgInstance = 0;
+//________________________________________________________________________________
+St_tpcPadGainT0C *St_tpcPadGainT0C::instance() {
+  if (fgInstance) return fgInstance;
+  St_tpcPadGainT0 *table = (St_tpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcPadGainT0");
+  if (! table) {
+    LOG_WARN << "St_tpcPadGainT0C::instance Calibrations/tpc/tpcPadGainT0\twas not found" << endm;
+    assert(table);
+  }
+  fgInstance = new St_tpcPadGainT0C(table); 
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tpcPadGainT0C");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
+  // Apply additional correction for gain tables
+  Int_t run = StMaker::GetChain()->GetRunNumber();
+  St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
+  Int_t nrows = extra->nrows();
+  for (Int_t i = 0; i < nrows; i++) {
+    if (extra->idx(i) <= 0) continue;
+    Int_t runMin = extra->runMin(i);
+    Int_t runMax = extra->runMax(i);
+    if (run < runMin || run > runMax) continue;
+    Int_t sector = extra->sector(i);
+    if (sector < 0 || sector > 24) continue;
+    Int_t row    = extra->row(i);
+    if (row > 72) row = -1;
+    Int_t padMin = extra->padMin(i);
+    Int_t padMax = extra->padMax(i);
+    Int_t RDO    = extra->RDO(i);
+    Int_t FEE    = extra->FEE(i);
+    Int_t status = extra->status(i);
+    if (status) continue;
+    if (padMin < padMax && row > 0) {
+      Int_t r = row;
+      if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+	if (row <= 40) continue;
+	r = row - 40 + 13;
+      }
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, r, padMin, padMax, RDO, FEE, status) << endm;
+      Float_t *gains = St_tpcPadGainT0C::instance()->Gains(sector, r);
+      for (Int_t p = padMin; p <= padMax; p++) {
+	if (gains[p-1] > 0) {
+	  LOG_WARN << "St_tpcPadGainT0C::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	}
+	gains[p-1] = 0;
+      }
+    } else if (FEE > 0) { // iTPC stuff, ignorefor tpx
+    } else if (RDO > 0) {
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
+	       << Form(" reset tpcRDOMasks for sector = %i and RDO = %i to zero with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, RDO, sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,RDO);
+    } else {
+      LOG_WARN << "St_tpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
+		<< Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i => whole sector is marker as DEAD", 
+			sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      Int_t rdoMin = 1;
+      Int_t rdoMax = 6;
+      if (!  St_tpcPadConfigC::instance()->iTPC(sector)) {rdoMin = 5; rdoMax = 8;}
+      for (Int_t rdoD = rdoMin; rdoD <= rdoMax; rdoD++) {
+	St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,rdoD);
+      }
+    }
+  }
+  return fgInstance;
+}
+//________________________________________________________________________________
 #include "St_itpcDeadFEEC.h"
 MakeChairInstance(itpcDeadFEE,Calibrations/tpc/itpcDeadFEE);
 #include "St_itpcPadGainT0C.h"
@@ -1587,6 +1957,7 @@ rowpadFEEmap_t  St_itpcPadGainT0C::rowpadFEE[] = {
     {40, 81,100,  5, 4},
   };
 Int_t St_itpcPadGainT0C::NCrowpadFEE = sizeof(St_itpcPadGainT0C::rowpadFEE)/sizeof(rowpadFEEmap_t);
+//________________________________________________________________________________
 St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
   if (fgInstance) return fgInstance;
   St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
@@ -1594,97 +1965,81 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
     assert(table);
   }
-  St_itpcDeadFEEC *dead = St_itpcDeadFEEC::instance();
-  if (dead) {
-    itpcPadGainT0_st *g = table->GetTable();
-    Int_t N = dead->getNumRows();
-    for (Int_t i = 0; i < N; i++) {
-      Int_t s = dead->sector(i);
-      if (s <= 0) break;
-      Int_t r = dead->row(i);
-      Int_t pmin = dead->padMin(i);
-      Int_t pmax = dead->padMax(i);
-      Int_t fee = dead->FEE(i);
-      //      Int_t rdo = dead->RDO(i);
-      Int_t nFEE = 1;
-      if (fee > 0) {
-	nFEE = NCrowpadFEE;
-      }
-      for (Int_t j = 0; j < nFEE; j++) {
-	if (fee > 0) {
-	  if (rowpadFEE[j].fee != fee) continue;
-	  if (rowpadFEE[j].row != r  ) continue;
-	  r = rowpadFEE[j].row;
-	  pmin = rowpadFEE[j].padMin;
-	  pmax = rowpadFEE[j].padMax;
-	  if (pmin > 0 && pmax >= pmin) {
-	    for (Int_t pad = pmin; pad <= pmax; pad++) {
-	      if (_debug && g->Gain[s-1][r-1][pad-1] > 0) {
-		cout << "Reset gain[" << s - 1 << "][" << r - 1 << "][" << pad -1 << "] = " << g->Gain[s-1][r-1][pad-1] << " to 0" << endl;
-	      }
-	      g->Gain[s-1][r-1][pad-1] = 0;
-	    }
-	  }
+  fgInstance = new St_itpcPadGainT0C(table); 
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("itpcPadGainT0C");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
+  // Apply additional correction for gain tables
+  Int_t run = StMaker::GetChain()->GetRunNumber();
+  St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
+  Int_t nrows = extra->nrows();
+  for (Int_t i = 0; i < nrows; i++) {
+    if (extra->idx(i) <= 0) continue;
+    Int_t runMin = extra->runMin(i);
+    Int_t runMax = extra->runMax(i);
+    if (run < runMin || run > runMax) continue;
+    Int_t sector = extra->sector(i);
+    if (sector < 0 || sector > 24) continue;
+    Int_t row    = extra->row(i);
+    if (row > 40) continue; // iTPC only
+    Int_t padMin = extra->padMin(i);
+    Int_t padMax = extra->padMax(i);
+    Int_t RDO    = extra->RDO(i);
+    Int_t FEE    = extra->FEE(i);
+    Int_t status = extra->status(i);
+    if (status) continue;
+    if (padMin < padMax && row > 0) {
+      Int_t r = row;
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, r, padMin, padMax, RDO, FEE, status) << endm;
+      Float_t *gains = St_itpcPadGainT0C::instance()->Gains(sector, r);
+      for (Int_t p = padMin; p <= padMax; p++) {
+	if (gains[p-1] > 0) {
+	  LOG_WARN << "St_itpcPadGainT0C::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
 	}
+	gains[p-1] = 0;
+      }
+    } else if (FEE > 0) {
+      for (Int_t j = 0; j < St_itpcPadGainT0C::NCrowpadFEE; j++) {
+	if (St_itpcPadGainT0C::rowpadFEE[j].fee != FEE) continue;
+	Int_t r = St_itpcPadGainT0C::rowpadFEE[j].row;
+	padMin = St_itpcPadGainT0C::rowpadFEE[j].padMin;
+	padMax = St_itpcPadGainT0C::rowpadFEE[j].padMax;
+	LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
+		 << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+			 sector, r, padMin, padMax, RDO, FEE, status) << endm;
+	Float_t *gains = St_itpcPadGainT0C::instance()->Gains(sector, r);
+	for (Int_t p = padMin; p <= padMax; p++) {
+	  if (gains[p-1] > 0) {
+	    LOG_WARN << "St_itpcPadGainT0C::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  }
+	  gains[p-1] = 0;
+	}
+      }
+    } else if (RDO > 0) {
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"   
+	       << Form(" reset tpcRDOMasks for sector = %i and RDO = %i to zero with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, RDO, sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,RDO);
+    } else {
+      LOG_WARN << "St_itpcPadGainT0C::instance found extra correction for run = " << run << " in [" << runMin << "," << runMax << "]"  
+		<< Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i => whole sector is marker as DEAD", 
+			sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      for (Int_t rdoD = 1; rdoD <= 4; rdoD++) {
+	St_tpcRDOMasksC::instance()->setSectorRDOMaskOff(sector,rdoD);
       }
     }
   }
-  DEBUGTABLE(STRUCT);
-  fgInstance = new St_itpcPadGainT0C(table);
   return fgInstance;
 }
-//________________________________________________________________________________
-#include "St_tpcExtraGainCorrectionC.h"
-MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection);
 //________________________________________________________________________________
 #include "St_tpcPadGainT0BC.h"
 // tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {
-  if (! fgInstance) {
-    fgInstance = new St_tpcPadGainT0BC(); 
-    // Apply additional correction for gain tables
-    Int_t run = StMaker::GetChain()->GetRunNumber();
-    St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
-    Int_t nrows = extra->nrows();
-    for (Int_t i = 0; i < nrows; i++) {
-      if (extra->idx(i) <= 0) continue;
-      if (run < extra->runMin(i) || run > extra->runMax(i)) continue;
-      Int_t sector = extra->sector(i);
-      if (sector < 0 || sector > 24) continue;
-      Int_t row    = extra->row(i);
-      Int_t padMin = extra->padMin(i);
-      Int_t padMax = extra->padMax(i);
-      Int_t RDO    = extra->RDO(i);
-      Int_t FEE    = extra->FEE(i);
-      Int_t status = extra->status(i);
-#if 0
-      LOG_WARN << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
-	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
-		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
-      if (! status) continue;
-      Int_t rowMin = row;
-      Int_t rowMax = row;
-      if (row <= 0) {rowMin = 1; rowMax = 45;}
-      if (padMin > padMax) {
-	// Calculate padMin/Max from FEE or RDO
-      }
-      for (Int_t r = rowMin; r <= rowMax; r++) {
-	Float_t *gains = St_tpcPadGainT0BC::instance()->Gains(sector, r);
-	for (Int_t p = padMin; p <= padMax; p++) {
-	  if (gains[p-1] > 0) {
-	    LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
-	  }
-	  gains[p-1] = 0;
-	}
-      }
-#else
-      LOG_ERROR << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
-	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i should be moved to tpcRDOMaks", 
-		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
-#endif
-    }
-  }
+  if (! fgInstance) fgInstance = new St_tpcPadGainT0BC();
   return fgInstance;
 }
 //________________________________________________________________________________
@@ -1993,14 +2348,15 @@ double StTpcBXT0CorrEPDC::getCorrection (double epdTAC, double driftVelocity, do
 }
 #include "St_tpcT0BXC.h"
 MakeChairInstance(tpcT0BX,Calibrations/tpc/tpcT0BX);
-Double_t St_tpcT0BXC::getT0(Double_t values[6]) const { // xxxEarliestTDC (W+E)/2 variables for "vpd","bbc","epd","zdc", "TAC", "CAVdt"
+Double_t St_tpcT0BXC::getT0(Double_t values[7]) const { // xxxEarliestTDC (W+E)/2 variables for "vpd","bbc","epd","zdc", "TAC", "CAVdt"
   Double_t T0 = 0;
   Double_t T0W = 0, T0WW = 0;
   static Int_t __debug = 0;
   if (__debug > 0) {
+    if (__debug > 1) Table()->Print(0,10);
     LOG_INFO << "St_tpcT0BXC::getT0:";
   }
-  for (Int_t i = 0; i < 6; i++) {
+  for (Int_t i = 0; i < 7; i++) {
     if (values[i] < xmin(i) || values[i] > xmax(i)) continue;
     if (detId(i) < 0) continue;
     //    if (detId(i) != 6 && (CountPs(i) < 10 || CountPs(i) > 100)) continue;
@@ -2027,6 +2383,18 @@ Double_t St_tpcT0BXC::getT0(Double_t values[6]) const { // xxxEarliestTDC (W+E)/
 }
 #include "St_starTriggerDelayC.h"
 MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tpc/starTriggerDelay);
+//________________________________________________________________________________
+Float_t St_starTriggerDelayC::TrigT0(Int_t i) const {
+  return clocks(i)/(1e-6*St_starClockOnlC::instance()->CurrentFrequency()) + tZero(i);
+}
+//________________________________________________________________________________
+Float_t St_starTriggerDelayC::TrigT0GG(Int_t io, Int_t i)   const {
+  Float_t delay = TrigT0(i); // usec add Gating Grid cable 
+  delay += 0.150; // length 30 m, delay 150ns for both Inner and Outer sectors, measured by A.Lebedev 10/13/2023
+  if (! io) delay += -0.123;
+  else      delay += -0.502;
+  return delay;
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -2138,7 +2506,6 @@ MakeChairInstance2(spaceChargeCor,St_spaceChargeCorR2C,Calibrations/rich/spaceCh
 #include "St_MagFactorC.h"
 MakeChairInstance(MagFactor,RunLog/MagFactor);
 //_________________RunLog/onl_______________________________________________________________
-#include "St_starClockOnlC.h"
 MakeChairInstance(starClockOnl,RunLog/onl/starClockOnl);
 //________________________________________________________________________________
 starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
@@ -2199,8 +2566,13 @@ Float_t        St_beamInfoC::GammaBlue() {
   return gamma;
 }
 //________________________________________________________________________________
-Float_t        St_beamInfoC::Gamma() {
-  return GammaYellow();
+Float_t        St_beamInfoC::GammaCMS() {
+  Double_t eBlue   = kProtonMass*GammaBlue(); 
+  Double_t eYellow = kProtonMass*GammaYellow();
+  Double_t Etot    = eBlue + eYellow;
+  Double_t Ecm     = SqrtS();
+  Double_t gammaCM = Etot/Ecm;
+  return gammaCM;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaBlue() {
@@ -2213,8 +2585,12 @@ Float_t        St_beamInfoC::BetaYellow() {
   return -TMath::Sqrt(1 - 1./(gamma*gamma));
 }
 //________________________________________________________________________________
-Float_t        St_beamInfoC::Beta() {
-  return -BetaBlue();
+Float_t        St_beamInfoC::BetaCMS() {
+  Double_t eBlue   = kProtonMass*GammaBlue(); 
+  Double_t eYellow = kProtonMass*GammaYellow();
+  Double_t Etot    = eBlue + eYellow;
+  Double_t betaCM  = (eBlue*BetaBlue() + eYellow*BetaYellow())/Etot;
+  return betaCM;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::SqrtS() {
@@ -2225,12 +2601,8 @@ Float_t        St_beamInfoC::SqrtS() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Ycms() {
-  Double_t eBlue   = kProtonMass*GammaBlue(); 
-  Double_t eYellow = kProtonMass*GammaYellow();
-  Double_t Etot    = eBlue + eYellow;
-  Double_t Ecm     = SqrtS();
-  Double_t gammaCM = Etot/Ecm;
-  Double_t betaCM  = (eBlue*BetaBlue() + eYellow*BetaYellow())/Etot;
+  Double_t gammaCM = GammaCMS();
+  Double_t betaCM  = BetaCMS();
   Double_t yCM  = TMath::Log(gammaCM*(1 + betaCM));
   return yCM;
 }
@@ -2238,76 +2610,8 @@ Float_t        St_beamInfoC::Ycms() {
 Float_t        St_beamInfoC::Frequency() {
   static Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
   static Double_t NB = 120;      // no. of buches, can be changed
-  Double_t frequency = 1e-6*NB*Beta()*TMath::C()/l;
+  Double_t frequency = 1e-6*NB*BetaYellow()*TMath::C()/l;
   return TMath::Abs(frequency);
-}
-//________________________________________________________________________________
-#include "St_tpcRDOMasksC.h"
-MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
-//________________________________________________________________________________
-UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
-  static UInt_t Sector = 0;
-  static UInt_t Mask   = 0;
-  if (Sector == sec) {
-    return Mask;
-  }
-  UInt_t MASK = 0x0000; // default is to mask it out
-  //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
-  if(sec < 1 || sec > 24 || getNumRows() == 0){
-    LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
-     << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
-    return MASK;
-  }
-  //  tpcRDOMasks_st *row = Struct();
-  // Take care about unsorted tpcRDOMaks table
-  Int_t i = -1;
-  UInt_t j = (sec + 1) / 2 - 1;
-  if (sector(j) == 2*j + 1) {
-    i = j;
-  } else { 
-    for (i = 0; i < 12; i++) {
-      if (sector(i) == 2*j + 1) {break;}
-    }
-  }
-  assert(i >= 0);
-  //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
-  MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
-  if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
-    if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
-    if( sec % 2 == 0){ // if its even relevent bits are 6-11
-      MASK = MASK >> 6;
-    }
-    // Otherwise want lower 6 bits
-    MASK &= 0x000003F; // Mask out higher order bits
-  } else   if (runNumber() < 20000000 && sec == 20) { // Run XVIII, sector 20 
-    MASK = 255;
-  } else  { // Run XIX and higher
-    if( sec % 2 == 0){ // if its even relevent bits are 8-13
-      MASK = MASK >> 8;
-    }
-    // Otherwise want lower 8 bits
-    MASK &= 255; // Mask out higher order bits
-  }
-  Sector = sec;
-  Mask   = MASK;
-  return MASK;
-}
-//________________________________________________________________________________
-Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
-  static Int_t Sector = -1;
-  static Int_t Rdo    = -1;
-  static Bool_t Mask  = kFALSE;
-  if (Sector == sector && Rdo == rdo) {
-    return Mask;
-  }
-  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
-  UInt_t MASK = getSectorMask(sector);
-  MASK = MASK >> (rdo - 1);
-  MASK &= 0x00000001;
-  Sector = sector;
-  Rdo    = rdo;
-  Mask   = MASK;
-  return MASK;
 }
 //________________________________________________________________________________
 #include "St_triggerInfoC.h"
@@ -2865,7 +3169,53 @@ MakeChairInstance(tofTrgWindow,Calibrations/tof/tofTrgWindow);
 #include "St_tofTzeroC.h"
 MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
 #include "St_tofSimResParamsC.h"
-MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
+//MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
+St_tofSimResParamsC *St_tofSimResParamsC::fgInstance = 0;
+Double_t St_tofSimResParamsC::params[120][192] = {0};
+Double_t St_tofSimResParamsC::mAverageTimeResTof = 0;
+
+St_tofSimResParamsC *St_tofSimResParamsC::instance() {
+  if (fgInstance) return fgInstance;					
+  St_tofSimResParams *table = (St_tofSimResParams *) StMaker::GetChain()->GetDataBase("Calibrations/tof/tofSimResParams");
+  if (! table) {							
+    LOG_WARN << "St_tofSimResParamsC::instance Calibrations/tof/tofSimResParams was not found" << endm;
+    assert(table);							
+  }									
+  DEBUGTABLE(tofSimResParams);							
+  fgInstance = new St_tofSimResParamsC(table);				
+  mAverageTimeResTof=0;
+  const tofSimResParams_st *row = fgInstance->Struct(0);
+  for ( Int_t  i = 0; i < 120; i++ ){ //  nTrays
+    for ( Int_t  j = 0; j < 192; j++ ){
+      Int_t index = i * 120 + j;
+      params[i][j] = row->resolution[index];
+      mAverageTimeResTof += params[i][j];
+#if 0
+      if (_debug) {
+	LOG_DEBUG << "tray:" << i << ", mod cell:" << j << " = " << row->resolution[index] << " == " << params[i][j] << endm;
+      }
+#endif
+    }
+  }
+  mAverageTimeResTof=mAverageTimeResTof/(120*192);
+  LOG_INFO << "Loaded tofSimResParams. Average = " << mAverageTimeResTof << endm;
+  
+  if (StDetectorDbMaker::instance()) {
+    fgInstance->SetName("tofSimResParamsC");
+    StDetectorDbMaker::instance()->AddConst(fgInstance);
+  }
+  return fgInstance;
+}
+//________________________________________________________________________________
+Double_t St_tofSimResParamsC::timeres_tof(UInt_t itray, UInt_t imodule, UInt_t icell) {
+  /*
+   * Calculates the average resolution across all 38 tubes (discounts inactive tubes)
+   * then returns a single vertex resolution (in ps) for use in embedding w/ vpdStart
+   */
+  Double_t result = 8.5e-11;
+  if ( itray > 120 || imodule > 32 || icell > 6 )    return result;
+  return params[ itray ][ imodule * 6 + icell ];
+}
 #include "St_vpdDelayC.h"
 MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 #include "St_vpdTotCorrC.h"

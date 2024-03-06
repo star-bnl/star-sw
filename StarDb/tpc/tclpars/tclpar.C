@@ -1,3 +1,5 @@
+#include "tables/St_tcl_tclpar_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tclpars/tclpar Allocated rows: 1  Used rows: 1  Row size: 48 bytes

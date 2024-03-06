@@ -230,6 +230,8 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     }
     LOG_WARN << " dx2L in dE/dx predictions "<< endm;
   }
+  St_tpcPadGainT0C::instance();  // activate extra gain corrections for tpx
+  St_itpcPadGainT0C::instance(); // activate extra gain corrections for iTPC
   return kStOK;
 }
 //_______________________________________________________________________________
@@ -907,7 +909,9 @@ Int_t StdEdxY2Maker::Make(){
 	  for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
 	    Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	    if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-	    AlivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+	    Double_t gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
+	    if (gain <= 0.0) continue;
+	    AlivePads->Fill(sector, row, pad, gain);
 	  }
 	}
       }
@@ -941,8 +945,10 @@ Int_t StdEdxY2Maker::Make(){
 	      }
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
 	      Int_t pad    = tpcHit->pad();
+#if 0
 	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+#endif
 	      ActivePads->Fill(sector, row, pad, adc);
 #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 	    }

@@ -74,8 +74,23 @@ class TrackFitter {
         gMan = gGeoManager;
         // Set up the material interface and set material effects on/off from the config
         genfit::MaterialEffects::getInstance()->init(new genfit::TGeoMaterialInterface());
-        genfit::MaterialEffects::getInstance()->setNoEffects(mConfig.get<bool>("TrackFitter::noMaterialEffects", false)); // false means defaul ON
 
+        // Set Material Stepper debug level
+        genfit::MaterialEffects::getInstance()->setDebugLvl( mConfig.get<int>("TrackFitter.MaterialEffects:DebugLvl", 0) );
+        
+        genfit::MaterialEffects::getInstance()->setEnergyLossBetheBloch( mConfig.get<int>("TrackFitter.MaterialEffects.EnergyLossBetheBloch", true) );
+        genfit::MaterialEffects::getInstance()->setNoiseBetheBloch( mConfig.get<int>("TrackFitter.MaterialEffects.NoiseBetheBloch", true) );
+        genfit::MaterialEffects::getInstance()->setNoiseCoulomb( mConfig.get<int>("TrackFitter.MaterialEffects.NoiseCoulomb", true) );
+        genfit::MaterialEffects::getInstance()->setEnergyLossBrems( mConfig.get<int>("TrackFitter.MaterialEffects.EnergyLossBrems", true) );
+        genfit::MaterialEffects::getInstance()->setNoiseBrems( mConfig.get<int>("TrackFitter.MaterialEffects.NoiseBrems", true) );
+        genfit::MaterialEffects::getInstance()->ignoreBoundariesBetweenEqualMaterials( mConfig.get<int>("TrackFitter.MaterialEffects.ignoreBoundariesBetweenEqualMaterials", true) );
+        
+        // do this last to override
+        genfit::MaterialEffects::getInstance()->setNoEffects( !mConfig.get<bool>("TrackFitter:MaterialEffects", false)); // negated, true means defaul is all effects on (noEffects off)
+        if (!mConfig.get<bool>("TrackFitter:MaterialEffects", false)){
+            LOG_INFO << "Turning OFF GenFit Material Effects in stepper" << endm;
+        }
+    
         // Determine which Magnetic field to use
         // Either constant field or real field from StarFieldAdaptor
         if (mConfig.get<bool>("TrackFitter:constB", false)) {
@@ -171,7 +186,7 @@ class TrackFitter {
         // Now load FTT
         // mConfig.getVector<>(...) requires a default, hence the 
         mFTTZLocations = fwdGeoUtils.fttZ(
-            mConfig.getVector<double>("TrackFitter.Geometry:ftt", {0.0f, 0.0f, 0.0f, 0.0f})
+            mConfig.getVector<double>("TrackFitter.Geometry:ftt", {281.082,304.062,325.058,348.068})
             );
 
         if ( fwdGeoUtils.fttZ( 0 ) < 1.0 ) { // returns 0.0 on failure
@@ -772,8 +787,8 @@ class TrackFitter {
         }
 
         // create the track representations
-        auto trackRepPos = new genfit::RKTrackRep(mPdgPositron);
-        auto trackRepNeg = new genfit::RKTrackRep(mPdgElectron);
+        auto trackRepPos = new genfit::RKTrackRep(mPdgMuon);
+        auto trackRepNeg = new genfit::RKTrackRep(mPdgAntiMuon);
 
         // Create the track
         mFitTrack = new genfit::Track(trackRepPos, seedPos, seedMom);
@@ -950,6 +965,8 @@ class TrackFitter {
     const int mPdgPiMinus = -211;
     const int mPdgPositron = 11;
     const int mPdgElectron = -11;
+    const int mPdgMuon = 13;
+    const int mPdgAntiMuon = -13;
 
 
     // det z locations loaded from geom or config

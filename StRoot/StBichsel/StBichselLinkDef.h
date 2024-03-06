@@ -12,4 +12,7 @@
 #pragma link C++ function StdEdxPull::EvalPred2(Double_t, Double_t, UChar_t, Int_t);
 #pragma link C++ function StdEdxPull::EvalDeV2(Double_t, Double_t, Double_t, UChar_t, Int_t);
 #pragma link C++ function StdEdxPull::Eval2(Double_t, Double_t, Double_t, UChar_t, Int_t);
+
+#pragma link C++ class St_spline3-;     
+#pragma link C++ class spline3_st+;    
 #endif

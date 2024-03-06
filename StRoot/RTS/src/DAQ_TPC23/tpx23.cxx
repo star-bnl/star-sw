@@ -19,6 +19,19 @@
 #include <DAQ_TPX/tpxPed.h>
 #include <DAQ_TPX/tpxGain.h>
 
+#include <DAQ_ITPC/itpcPed.h>	// only for itpcData!
+
+#ifdef THREAD_DBG_USE
+
+#include <MISC_LIBS/thread_dbg.h>
+
+#else
+
+#define TLOG()
+#define TLOGX(x)
+
+#endif
+
 #include "tpx23.h"
 
 
@@ -32,20 +45,26 @@ int tpx23::from22to23(char *c_addr, int words)
 	return words ;
 } 
 
-inline void tpx23::set_rdo(int s, int r)
+inline u_int tpx23::set_rdo(int s, int r)
 {
 
 	sector1 = s ;
 	rdo1 = r ;
+
+	return 0 ;	// should be fee_mask
 }
 
-u_int *tpx23::fee_scan() 
+int tpx23::fee_scan() 
 {
 	u_int *h ;
-	int fee_wds ;
+	err = 0 ;	// in class
 
+//	u_char altro_present[256][16] ;
+
+	
 	get_token((char *)d_start,words) ;
 
+	TLOG() ;
 
 	if(run_type==1 || run_type==5) {
 		int r0_logical = tpx36_from_real(subdet_id,sector1,rdo1) - 1 ;
@@ -67,31 +86,15 @@ u_int *tpx23::fee_scan()
 	h = d_end ;
 
 
+//	memset(altro_present,0,sizeof(altro_present)) ;
 	if(hdr_version) {
-#if 0
-		fee_wds = (d_end+1) - (d_start+2) ;
+		
 
-		LOG(WARN,"Evt %d: S%02d:%d: T %d, trg %d, daq %d: fee words %d vs %d",evt_trgd,
-		    sector1,rdo1,
-		    token,trg_cmd,daq_cmd,
-		    fee_wds,words) ;
-		LOG(WARN,"   first altro words 0x%08X last, 0x%08X before last",h[0],h[-1]) ;
-#if 0
-		u_int *d = (u_int *)d_start ;
-//		printf("first h words: 0x%08X last, 0x%08X before-last\n",h[0],h[-1]) ;
-		for(int i=0;i<words;i++) {
-			printf("%d: 0x%08X\n",i,*d) ;
-			d++ ;
-		}
-#endif
-
-		LOG(ERR,"fmt %d: not yet done",fmt) ;
-#endif
-		//goto done ;
 	}
 
+	TLOGX(rdo1) ;
 
-	
+	if(log_level>0) LOG(TERR,"%d: fee_scan",rdo1) ;
 
 	// NOTE: ALTRO scans from the end!!!
 	while(h>(d_start+2)) {
@@ -100,12 +103,17 @@ u_int *tpx23::fee_scan()
 		lo = *h-- ;
 		hi = *h-- ;
 
+		// for intermediate hdr version
+		lo &= 0xFFFFF ;
+		hi &= 0xFFFFF ;
+
 		int wc = ((hi&0x3F)<<4)|((lo&0xF0000)>>16) ;    // altro's word count
 		if(wc==0) continue ;
 
 		int id = (lo&0xFF0) >> 4 ;      // altro id
 		int ch = lo & 0xF ;
 
+		TLOGX(id) ;
 
 		for(int i=0;i<tpx_fee_override_cou;i++) {
 			if(sector1 == tpx_fee_override[i].sector) {
@@ -126,12 +134,6 @@ u_int *tpx23::fee_scan()
 		}
 					
 
-//		if(fmt>22) {
-//			LOG(TERR,"%d: A%03d:%02d: words %d",rdo1,id,ch,wc) ;
-//		}
-
-		while(wc%4) wc++ ;
-
 		// this now needs to go into the canonical format!
 		int row ;
 		int pad ;
@@ -139,22 +141,60 @@ u_int *tpx23::fee_scan()
 		// get row,pad & flags and skip the pad if there are flags
 		int flags = flags_row_pad(id,ch,row,pad) ;
 
+		// max wc in pedestal runs is 437
+		if(wc>437) {	// garbage in the event... and now what???
+			run_errors++ ;
+			if(run_errors<10) {
+				if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d) : wc %d",sector1,rdo1,row,pad,id,ch,wc) ;
+			}
+			//err |= 0x10000 ;	// signal an error because I am breaking out
+			break ;	
+		}
+
+		while(wc%4) wc++ ;
+
 		// if this is a physics run: skip pads which have flags
 		// hmm... is this right?
 		if(flags && run_type==3) {
+			if(log_level>0) {
+				LOG(TERR,"%d: rp %d:%d, flags 0x%X",rdo1,row,pad,flags) ;
+			}
 			h -= wc/2 ;
 			continue ;
 		}
 
+#if 0
+		// fixing a bug in fee_23a FY23 version!
+		altro_present[id][ch]++ ;
+
+		if(altro_present[id][ch]>1) {
+			run_errors++ ;
+			if(run_errors<20) {
+				if(online) LOG(ERR,"S%02:%d: AID %d:%d already present %d",sector1,rdo1,id,ch,altro_present[id][ch]) ;
+			}
+			h -= wc/2 ;
+			continue ;
+		}
+#endif
+
 		u_short *d = s1_dta + last_ix ;	// this is where the raw data goes...
 		//u_short d[512] ;
 
-//		LOG(TERR,"%d: rp %d:%d; last_ix %d %p",rdo1,row,pad,last_ix,d) ;
+		if(log_level>0) {
+			LOG(TERR,"%d: rp %d:%d; last_ix %d %p",rdo1,row,pad,last_ix,d) ;
+		}
 
 		int ix = 0 ;
+
+		//TLOGX(row) ;
+
+
 		for(int i=0;i<wc;) {	// NOTE: no increment!
 			lo = *h-- ;
 			hi = *h-- ;
+
+			//lo &= 0xFFFFF ;
+			//hi &= 0xFFFFF ;
 
 			if(ix==0) {	// see if I need to skip the first dummies!!!
 				u_short dd[4] ;
@@ -194,6 +234,7 @@ u_int *tpx23::fee_scan()
 		int seq_ix = 0 ;
 		struct seq_t *seq = s1[row][pad].seq ;
 
+		//TLOGX(row) ;
 
 		//LOG(TERR,"Here 1") ;
 		struct sseq_t {
@@ -205,6 +246,7 @@ u_int *tpx23::fee_scan()
 		while(dd<(d+ix)) {
 			u_short t_lo ;
 
+
 			u_short t_len = *dd++ - 2 ;
 			u_short t_hi = *dd++ ;
 
@@ -212,13 +254,31 @@ u_int *tpx23::fee_scan()
 				break ;
 			}
 
+
 			t_lo = t_hi - t_len + 1 ;
+
+			if(t_len>440 || t_hi>440 || t_lo>440) {
+				run_errors++ ;
+				if(run_errors<20) {
+					if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d), t_len %d, t_lo %d, t_hi %d",sector1,rdo1,row,pad,
+					    id,ch,
+					    t_len,t_lo,t_hi) ;
+				}
+				if(t_len>510 || t_hi>510 || t_lo>510) {
+					//err |= 0x20000 ; 
+					break ;
+				}
+
+				//if(t_hi>510) break ;
+				//if(t_lo>510) break ;
+			}
 
 			//printf("rp %d:%d: seq %d: t_len %d, t_lo:hi %d:%d\n",row,pad,seq_ix,t_len,t_lo,t_hi) ;
 
 			sseq[seq_ix].t_lo = t_lo ;
 			sseq[seq_ix].t_hi = t_hi ;
 			//sseq[seq_ix].dta_p = (dd-d) ;	// I'm at the data now
+
 
 			for(int i=0;i<t_len;i++) {
 				short adc = *dd++ ;
@@ -227,10 +287,12 @@ u_int *tpx23::fee_scan()
 			}
 			seq_ix++ ;
 
+
 			//dd += t_len ;	// skip over data...
 
 		}
 
+		//TLOG() ;
 		if(run_type==1 || run_type==5) {
 			tpx_altro_struct a ;
 
@@ -263,8 +325,43 @@ u_int *tpx23::fee_scan()
 			}
 		
 		}
+		else if(tpx_d) {
+			tpx_d->sector = sector1 ;
+			tpx_d->rdo = rdo1 ;
+			tpx_d->row = row ;
+			tpx_d->pad = pad ;
+			tpx_d->altro = id ;
+
+			//LOG(TERR,"%d:%d %d:%d %d:%d",sector1,rdo1,row,pad,id,ch) ;
+
+			tpx_d->ch_start(ch) ;	// sets tpx_d->ch within
+
+			for(int i=(seq_ix-1);i>=0;i--) {
+				int t_len = sseq[i].t_hi - sseq[i].t_lo + 1 ;
+
+				int ii = 0 ;
+				for(int j=(t_len-1);j>=0;j--) {
+					int adc = sseq[i].d[j] ;
+					int tb ;
+
+
+					//a.adc[aix] = adc ;
+
+					tb = sseq[i].t_lo + ii ;
+					//a.tb[aix] = sseq[i].t_lo + ii ;
+					ii++ ;
+					//aix++ ;
+
+					tpx_d->accum(tb,adc) ;
+				}
+
+			}
+
+			tpx_d->ch_done() ;
+		}
 
 		
+
 
 
 		//LOG(TERR,"Here 2") ;
@@ -289,6 +386,8 @@ u_int *tpx23::fee_scan()
 			}
 			s_cou++ ;
 		}
+
+		//TLOG() ;
 
 		ix = dd - d ;
 
@@ -322,13 +421,13 @@ u_int *tpx23::fee_scan()
 		
 	}
 
+
+
 	done:;
 
-//	if(run_type==1 || run_type==5) {
-//		pthread_mutex_unlock(&peds_mutex) ;
-//	}
+	TLOG() ;
 
-	return 0 ;
+	return err ;
 }
 
 /*
@@ -347,6 +446,7 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 	trg = 0 ;
 	daq = 0 ;
 
+	TLOGX(rdo1) ;
 
 	int type = (d[0]>>0)&0xF ;
 	int hdr_type = (d[0]>>24)&0xF ;	 //0: pre-FY23 headers, 1:FY23 headers
@@ -371,6 +471,7 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 //		LOG(TERR,"%2d = 0x%08X",i,d[i]) ;
 //	}
 
+	TLOGX(wds) ;
 
 	d += wds ;
 	d-- ;		// at the last datum
@@ -387,7 +488,7 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 	}
 
 	// here we are with the old, pre-FY23 header format
-
+	TLOGX(rdo1) ;
 
 	d -= 2 ;	// skip 2 words trailer
 
@@ -398,6 +499,8 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 
 
 	trg_d = (struct trg_data *)d ;
+
+	TLOGX(trg_cou) ;
 
 	for(int i=0;i<trg_cou;i++) {
 //		LOG(WARN,"trg_data %d: 0x%X 0x%X 0x%X",i,trg_d[i].rhic_counter, trg_d[i].csr, trg_d[i].data) ;
@@ -415,7 +518,11 @@ u_int tpx23::get_token_s(char *c_addr, int wds)
 		}
 	}
 
+	TLOGX(rdo1) ;
+
 	done:;
+
+	TLOGX(rdo1) ;
 
 	return (trg<<16)|(daq<<12)|t ;
 }
@@ -430,7 +537,7 @@ u_int tpx23::get_token(char *c_addr, int wds)
 
 	d_first = d ;
 
-
+	err = 0 ;
 
 
 //	LOG(TERR,"get_token %u",d[1]) ;
@@ -443,6 +550,8 @@ u_int tpx23::get_token(char *c_addr, int wds)
 
 //	LOG(TERR,"evt %d(hdr %d, wds %d): 0x%08X 0x%08X, 0x%08X 0x%08X 0x%08X 0x%08X",evt,hdr_version,wds,
 //	d_first[0],d_first[1],d[-3],d[-2],d[-1],d[0]) ;
+
+	TLOGX(hdr_version) ;
 
 	// for the new FY23 format!
 	if(hdr_version) {
@@ -461,15 +570,19 @@ u_int tpx23::get_token(char *c_addr, int wds)
 
 		
 		u_int evt_err = d[-1] ;
-		if(evt_err) {
+		if(evt_err & 0xFF000000) {
 			int cou ;
 
 			if(wds>20) cou = 20 ;
 			else cou = wds ;
 
-			LOG(ERR,"evt_err %d:%d: 0x%08X: 0x%08X, wds %u",evt,rdo1,d_first[0],evt_err,wds) ;
-			for(int i=0;i<cou;i++) {
-				LOG(TERR,"  %d: 0x%08X",i,d_first[i]) ;
+			err |= 0x1 ;
+
+			if(online) {
+				LOG(ERR,"evt_err %d:%d: 0x%08X: 0x%08X, wds %u",evt,rdo1,d_first[0],evt_err,wds) ;
+				for(int i=0;i<cou;i++) {
+					LOG(TERR,"  %d: 0x%08X",i,d_first[i]) ;
+				}
 			}
 		}
 		
@@ -490,12 +603,15 @@ u_int tpx23::get_token(char *c_addr, int wds)
 		
 	}
 	
+	TLOGX(rdo1) ;
 
 	d -= 2 ;	// skip 2 words trailer to position myself at "trigger count"
 
 	int trg_cou = *d ;
 
 	d -= trg_cou * (sizeof(struct trg_data)/4) ;	// move back 1
+
+	TLOGX(trg_cou) ;
 
 	struct trg_data *trg = (struct trg_data *)d ;
 	for(int i=0;i<trg_cou;i++) {
@@ -517,7 +633,11 @@ u_int tpx23::get_token(char *c_addr, int wds)
 		}
 	}
 
+	TLOG() ;
+
 	done:;
+
+	TLOG() ;
 
 	d_end = d - 3 ;	// very last ALTRO datum
 
@@ -543,9 +663,12 @@ int tpx23::msc_dump(char *c_addr, int wds)
 	memcpy(&(tpx_rdo[sector1-1][rdo1-1]),c_addr,sizeof(struct tpx_rdo)) ;
 
 	// modify tpx_show_status to have a pointer to the data instead of this thread-unsafe tpx_rdo static!
-	tpx_show_status(sector1,1<<(rdo1-1),0) ;
+	err = tpx_show_status(sector1,1<<(rdo1-1),0) ;
+	if(err) {
+		if(online) LOG(ERR,"S%02d:%d: tpx_show_status %d",sector1,rdo1,err) ;
+	}
 
-	return 0 ;
+	return err ;
 }
 
 int tpx23::log_dump(char *c_addr, int wds)
@@ -603,6 +726,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 		int st = i ;
 		int err = 0 ;
 
+
 		// check for non-printable chars; should be the same as the
 		// new SRAM check
 		for(int j=st;j<len;j++) {
@@ -611,9 +735,9 @@ int tpx23::log_dump(char *c_addr, int wds)
 			if(!isprint(tmpbuff[j])) {
 				if(tmpbuff[j] == 9) ;	// skip tab
 				else {
-					LOG(WARN,"---> [%d LOG] Unprintable character 0x%02X? -- powercycle",rdo,tmpbuff[j]) ;
-					LOG(WARN,"But ignored for FY22") ;
-					//err_status |= DET_ERR_OPER_PS ;
+					LOG(WARN,"---> [%d LOG] Unprintable character 0x%02X? -- powercycle",rdo,(u_char)tmpbuff[j]) ;
+					//LOG(ERR,"But ignored for FY22") ;
+					err_status |= 1;
 					err = -1 ;
 					tmpbuff[j] = '?' ;
 				}
@@ -621,6 +745,32 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 		}
 
+#if 1
+		if(strstr(tmpbuff+st,"RHIC clock: ")) {
+			if(strstr(tmpbuff+st,"EXTERNAL")) {
+				rhic_clock = 1 ;
+			}
+			else {
+				rhic_clock = 0 ;	// internal
+			}
+		}
+
+		if(strstr(tmpbuff+st,"JTAG dev ")) {
+			int ret, dev ;
+			u_int dev_id, user ;
+
+			dev = -1 ;
+
+//			LOG(WARN,"[S%02d:%d LOG]: JTAG:",s_real,r_real,tmpbuff+st) ;
+
+			ret = sscanf(tmpbuff+st,"JTAG dev %d: ID 0x%X, USERcode 0x%X",&dev,&dev_id,&user) ;
+			LOG(WARN,"JTAG:   ret %d, dev %d, dev_id 0x%08X, user 0x%08X",ret, dev, dev_id,user) ;
+
+			if(ret==3 && dev>=0 && dev<5) {
+				fpga_usercode[dev] = user ;
+			}
+		}
+#endif
 
 		if(strstr(tmpbuff+st,"SPECIAL_0 code")) {
 			LOG(ERR,"---> SPECIAL code: RDO %d",rdo) ;
@@ -632,7 +782,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 				LOG(WARN,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
 			}
 			else {
-				err = -1 ;
+				//err = -1 ;
 				//LOG(ERR,"[S%02d:%d LOG]: contains ERR \"%s\"",s_real,r_real,tmpbuff+st) ;
 			}
 		}
@@ -647,20 +797,21 @@ int tpx23::log_dump(char *c_addr, int wds)
 			
 			if(strstr(tmpbuff+st,"FEE power BAD")) {
 				//err_status |= DET_ERR_OPER_PS ;
-				LOG(WARN,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
+				LOG(ERR,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
 				//err = -1 ;
 			}
 		}
 
 
 		if(strstr(tmpbuff+st,"SRAM check failed")) {
-			err = -1 ;
-			LOG(WARN,"---> [%d LOG] SRAM check failed -- powercycle",rdo) ;
+			err = -1 ;	
+			err_status |= 2 ;
+			LOG(ERR,"---> [%d LOG] SRAM check failed -- powercycle",rdo) ;
 		}
 
 		if(strstr(tmpbuff+st,"CPLD claims error")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] CPLD claims error -- reconfig 0x300",rdo) ;
+			LOG(ERR,"---> [%d LOG] CPLD claims error -- reconfig 0x300",rdo) ;
 		}
 		
 		if(strstr(tmpbuff+st,"can't configure RDO!")) {
@@ -671,34 +822,34 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 		// mostly run related
 		if(strstr(tmpbuff+st,"lost RHIC")) {
-			LOG(WARN,"---> [%d LOG] \"lost RHIC\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"lost RHIC\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 		if(strstr(tmpbuff+st,"NO RHIC CLOCK")) {
-			LOG(WARN,"---> [%d LOG] \"NO RHIC CLOCK\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"NO RHIC CLOCK\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 
 		if(strstr(tmpbuff+st,"DRIFT")) {
-			LOG(WARN,"---> [%d LOG] \"DRIFT/clock problems\" -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] \"DRIFT/clock problems\" -- restart run",rdo) ;
 			err = -1 ;
 		}	
 
 
 		if(strstr(tmpbuff+st,"CRIT")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] CRIT string in log -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] CRIT string in log -- restart run",rdo) ;
 		}
 	
 		if(strstr(tmpbuff+st,"altro error")) {
 			err = -1 ;
-			LOG(WARN,"---> [%d LOG] altro error -- restart run",rdo) ;
+			LOG(ERR,"---> [%d LOG] altro error -- restart run",rdo) ;
 		}
 	
 
 		if(strstr(tmpbuff+st,"ERR ALTRO")) {
-			err = -1 ;
-			LOG(WARN,"---> [%d LOG] ERR ALTRO -- CHECK THIS",rdo) ;
+			//err = -1 ;
+			//LOG(WARN,"---> [%d LOG] ERR ALTRO -- CHECK THIS",rdo) ;
 		}
 	
 
@@ -706,6 +857,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 		
 		if(err<0) {
 			LOG(ERR,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
+			log_is_error = 1 ;
 		}
 		else if(do_log) {
 			LOG(INFO,"[S%02d:%d %d]: %s",s_real,r_real,evt,tmpbuff+st) ;
@@ -774,6 +926,8 @@ int tpx23::log_dump(char *c_addr, int wds)
 
 int tpx23::rdo_scan(char *c_addr, int wds)
 {
+	int ret = 0 ;
+
 	u_int *d = (u_int *)c_addr ;
 
 
@@ -808,11 +962,14 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 	}
 
 
+	TLOG() ;
+
 	switch(type) {
 	case DDL_TYPE_LOG :
 
-		err = log_dump(c_addr,wds) ;
-
+		TLOG() ;
+		ret = log_dump(c_addr,wds) ;
+		TLOG() ;
 		break ;
 	case DDL_TYPE_MSC :
 		if(subtype==2) {	// heartbeat; ignore
@@ -821,17 +978,18 @@ int tpx23::rdo_scan(char *c_addr, int wds)
 
 		LOG(WARN,"%d: MSC: event %d: S%02d:%d: type %d:%d, words %d",rdo1,d[1],sec,rdo,type,subtype,words) ;
 
-		msc_dump(c_addr, wds) ;
+		ret = msc_dump(c_addr, wds) ;
 
 		break ;
 	default :	// ALTRO data -- and we're off
 		evt_trgd++ ;
-		fee_scan() ;
-
+		TLOG() ;
+		ret = fee_scan() ;
+		TLOG() ;
 		break ;
 	}
 
-	return 0 ;
+	return ret ;	// should be ret
 
 }
 
@@ -868,7 +1026,10 @@ tpx23::tpx23()
 	for(int row=1;row<=45;row++) rowlen[row] = tpc_rowlen[row] ;
 
 	hdr_version = 0 ;	// 0:pre FY23
-	
+
+	memset(fpga_usercode,0,sizeof(fpga_usercode)) ;
+
+	tpx_d = 0 ;
 }
 
 
@@ -876,6 +1037,11 @@ tpx23::tpx23()
 
 u_char tpx23::flags_row_pad(int asic, int channel, int &row, int &pad)
 {
+	row = 255 ;
+	pad = 255 ;
+
+	if(rdo1<1||rdo1>6) return 0xFF ;
+
 	// I will rewrite this to make it super-fast
 
 	tpx_from_altro(rdo1-1,asic,channel,row,pad) ;	// from tpxCore!
@@ -887,3 +1053,14 @@ u_char tpx23::flags_row_pad(int asic, int channel, int &row, int &pad)
 	return rp_gain[sector1-1][row][pad].flags ;
 }
 
+#if 0
+int tpx23::run_start() 
+{
+//	LOG(WARN,"TPX23 run_start") ;
+
+	rhic_clock = -1 ;	// unknown
+	log_is_error = 0 ;
+
+	return 0 ;
+}
+#endif

@@ -1,3 +1,5 @@
+#include "tables/St_control_toadc_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ems/control_toadc Allocated rows: 1  Used rows: 1  Row size: 224 bytes

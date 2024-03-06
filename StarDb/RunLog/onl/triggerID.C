@@ -1,3 +1,5 @@
+#include "tables/St_triggerID_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/RunLog/onl/.triggerID/triggerID Allocated rows: 1  Used rows: 1  Row size: 32 bytes

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <Output url="full_track.root" />
-	<Geometry>fGeom.root</Geometry>
+	<!-- <Geometry>fGeom.root</Geometry> -->
     <Source ftt="GEANT" fttFilter="true" />
     
     <TrackFinder nIterations="1">
@@ -33,7 +33,7 @@
         <HitRemover active="true" />
     </TrackFinder>
     
-	<TrackFitter refitSi="true" mcSeed="true" >
-        <Vertex sigmaXY="0.002" sigmaZ="1.0" includeInFit="false" smearMcVertex="true" />
+	<TrackFitter refitSi="true" mcSeed="false" MaterialEffects="false" >
+        <Vertex sigmaXY="1" sigmaZ="70.0" includeInFit="true" smearMcVertex="true" />
     </TrackFitter>
 </config>

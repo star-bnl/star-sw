@@ -1,3 +1,5 @@
+#include "tables/St_TpcPadCorrection_Table.h"
+
 // $Id: TpcPadCorrection.C,v 1.1 2010/08/31 21:56:32 fisyak Exp $
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_TpcPadCorrection")) return 0;
