@@ -47,6 +47,7 @@ CentralityMaker::CentralityMaker() {
   fRefMult3Corr = new StRefMultCorr("refmult3") ;
   fRefMultCorr_Isobar  = new StRefMultCorr("refmult","Isobar") ;
   fRefMultCorrFxt = new StRefMultCorr("fxtmult");
+  fRefMult6Corr = new StRefMultCorr("refmult6");
  // fTofTrayMultCorr = new StRefMultCorr("toftray") ;
   fgRefMultCorr  = new StRefMultCorr("grefmult") ;
   fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id = new StRefMultCorr("grefmult","Run14_AuAu200_VpdMB5","P16id") ;
@@ -95,6 +96,11 @@ StRefMultCorr* CentralityMaker::getRefMultCorr_Isobar() {
 //_________________
 StRefMultCorr* CentralityMaker::getRefMultCorrFxt() {
   return fRefMultCorrFxt;
+}
+
+//_________________
+StRefMultCorr* CentralityMaker::getRefMult6Corr() {
+  return fRefMult6Corr;
 }
 
 /*

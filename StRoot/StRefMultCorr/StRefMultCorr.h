@@ -49,6 +49,7 @@ class StRefMultCorr {
   /// "refmult2"  - reference multiplicity defined in 0.5<|eta|<1.0
   /// "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
   /// "fxtmult"   - reference multiplicity for fixed-target program defined as number of primary tracks (without cuts!)
+  /// "refmult6"  - reference multiplicity defined in |eta|<1.5
   /// "toftray"   - TOF tray multiplicity
   /// "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
   /// "fxtmult"   - number of primary tracks for the fixed-target mode of the experiment
@@ -73,8 +74,14 @@ class StRefMultCorr {
   Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const {
     return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
   }
+  /// Check if pile-up event using nTofMatch versus nMip and nTofMatch versus refMult
+  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t mip, Double_t vz) const {
+    return !( passnTofMatchRefmultCut(refmult, ntofmatch, vz) && passnTofMatchnMipCut(mip, ntofmatch, vz) );
+  }
   /// Check if NOT pile-up event
   Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const; 
+  /// Check if NOT pile-up event using nTofMatch versus nMip
+  Bool_t passnTofMatchnMipCut(Double_t mip, Double_t ntofmatch, Double_t vz=0.) const; 
 
   /// Get corrected multiplicity, correction as a function of primary z-vertex
   Double_t getRefMultCorr() const;
@@ -120,7 +127,7 @@ class StRefMultCorr {
   void setVerbose(const Bool_t& verbose) { mVerbose = verbose; }
 
  private:
-  /// grefmult, refmult, refmult2, refmult3 or toftray (case insensitive), fxtmult
+  /// grefmult, refmult, refmult2, refmult3 or toftray (case insensitive), fxtmult, refmult6
   const TString mName;
   /// Specify triggers, in case there are multiple parameters/definitions in the same runs 
   const TString mSubName;
@@ -198,12 +205,13 @@ class StRefMultCorr {
   /// 3 RefMult3
   /// 4 RefMult4
   /// 5 FxtMult
+  /// 6 RefMult6
   Short_t mRefX;
   /// @brief Print debug information (default: kFALSE)
   Bool_t mVerbose;
 
   /// @brief Return reference multiplicity specified by the constructer
-  /// @return 0 - gRefMult, 1 - refMult, 2 - refMult2, 3 - refMult3, 4 - refMult4, 5 - fxtMult
+  /// @return 0 - gRefMult, 1 - refMult, 2 - refMult2, 3 - refMult3, 4 - refMult4, 5 - fxtMult, 6 - refMult6
   const Int_t getRefX() const;  
 
   const Int_t getNumberOfDatasets() const; /// Number of definitions for each X
