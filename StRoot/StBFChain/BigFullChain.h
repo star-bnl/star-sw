@@ -1297,9 +1297,7 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-
-  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",          libVMC ",libgeant321.so", "VMC geant3",kFALSE},
-
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom," libVMC ",libgeant321.so", "VMC geant3",kFALSE},
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
@@ -1362,7 +1360,7 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", libVMC ",libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
@@ -1381,13 +1379,9 @@ Bfc_st BFC[] = { // standard chains
   {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
   {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
 
-<<<<<<< HEAD
   {"geant4vmc",   "","", "geant4", "",                    libVMC ",libgeant4vmc.so", "Load G4 VMC libs", false},
   {"geant4mk",    "","", "stargen,geant4vmc,geant3vmc",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
-=======
-  {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
-  {"geant4mk",    "","", "stargen,geant4vmc",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
->>>>>>> b3285d74da ([g4star] Expose partcile stack for the geant4 application.)
+
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
