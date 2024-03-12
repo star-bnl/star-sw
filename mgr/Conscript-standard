@@ -124,6 +124,7 @@ print "idlL = @idlL\n"   if $param::debug;
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
 
+
 # Initialize F90PATH with current directory for include files
 # Package-specific conditions below may override this
 if ($F90PATH) {
@@ -752,9 +753,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . $g4prefix . "/include/Geant4/";
 
 	# Add G4 vmc to include path  (presumes that spack has added this to ROOT_INCLUDE_PATH ...)
+	# Add vmc package to include path (ditto)
 	my @paths = split ":", $ENV{ROOT_INCLUDE_PATH};
 	foreach my $p (@paths) {
-	    if ($p =~ /geant4-vmc/) {
+	    if ($p =~ /geant4-vmc/ ) {
 		print $p, "\n";		
 		$CPPPATH .= $main::PATH_SEPARATOR . $p . "/geant4vmc";
 	    }	    
