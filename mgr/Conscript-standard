@@ -120,6 +120,8 @@ print "idlL = @idlL\n"   if $param::debug;
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
 
+$CPPPATH .= helpers::vmcPath();
+
 if ($pkg eq "RTS") {
   if ($STAR_SYS =~ /^x86_darwin/) {}
   else {
@@ -729,9 +731,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . $g4prefix . "/include/Geant4/";
 
 	# Add G4 vmc to include path  (presumes that spack has added this to ROOT_INCLUDE_PATH ...)
+	# Add vmc package to include path (ditto)
 	my @paths = split ":", $ENV{ROOT_INCLUDE_PATH};
 	foreach my $p (@paths) {
-	    if ($p =~ /geant4-vmc/) {
+	    if ($p =~ /geant4-vmc/ ) {
 		print $p, "\n";		
 		$CPPPATH .= $main::PATH_SEPARATOR . $p . "/geant4vmc";
 	    }	    
@@ -1471,6 +1474,19 @@ if ( $#src > -1 ) {
       }
     }
   }
+}
+#_________________________________________________________________________________
+sub helpers::vmcPath {
+    # If VMC is supplied separtely from root 
+    my @paths = split ":", $ENV{ROOT_INCLUDE_PATH};
+    my $result = "";
+    foreach my $p (@paths) {
+	if ($p =~ /\/vmc-/ ) {
+	    print $p, "\n";
+	    $result .= $main::PATH_SEPARATOR . $p . "/vmc";
+	}
+    }
+    return $result;
 }
 #_________________________________________________________________________________
 sub script::MakeMoc {
