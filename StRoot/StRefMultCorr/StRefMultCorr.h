@@ -49,7 +49,7 @@ class StRefMultCorr {
   /// "refmult2"  - reference multiplicity defined in 0.5<|eta|<1.0
   /// "refmult3"  - reference multiplicity defined in |eta|<0.5 without protons
   /// "fxtmult"   - reference multiplicity for fixed-target program defined as number of primary tracks (without cuts!)
-  /// "refmult6"  - reference multiplicity defined in |eta|<1.5
+  /// "refmult6"  - reference multiplicity defined
   /// "toftray"   - TOF tray multiplicity
   /// "grefmult"  - global reference multiplicity defined in |eta|<0.5,dca<3,nHitsFit>10
   /// "fxtmult"   - number of primary tracks for the fixed-target mode of the experiment
@@ -74,14 +74,8 @@ class StRefMultCorr {
   Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const {
     return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
   }
-  /// Check if pile-up event using nTofMatch versus nMip and nTofMatch versus refMult
-  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t mip, Double_t vz) const {
-    return !( passnTofMatchRefmultCut(refmult, ntofmatch, vz) && passnTofMatchnMipCut(mip, ntofmatch, vz) );
-  }
   /// Check if NOT pile-up event
-  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const; 
-  /// Check if NOT pile-up event using nTofMatch versus nMip
-  Bool_t passnTofMatchnMipCut(Double_t mip, Double_t ntofmatch, Double_t vz=0.) const; 
+  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const;
 
   /// Get corrected multiplicity, correction as a function of primary z-vertex
   Double_t getRefMultCorr() const;

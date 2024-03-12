@@ -812,6 +812,8 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       notPileUp = kTRUE;
     }
   }
+
+  /*
   else if ( mRefX == 6 ) { // refMult6
     if ( mParameterIndex==0 ) { // d+Au 200 GeV 2021
       b0 =  2.4412914662443033;
@@ -832,60 +834,10 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       notPileUp = kTRUE;
     }  
   }
+  */
 
   if (mVerbose) {
     std::cout << "\t notPileUp: ";
-    if (notPileUp) {
-      std::cout << "TRUE";
-    } 
-    else {
-      std::cout << "FALSE";
-    }
-    std::cout << "\t[DONE]\n";
-  }
-
-  return notPileUp;
-}
-
-//_________________
-Bool_t StRefMultCorr::passnTofMatchnMipCut(Double_t mip, Double_t ntofmatch, 
-                                           Double_t vz /* default = 0*/) const {
-
-
-  if (mVerbose) {
-    std::cout << "Pile up check using nTofMatch vs nMip...";
-  }
-  Double_t b0{}, b1{}, b2{}, b3{}, b4{};
-  Double_t c0{}, c1{}, c2{}, c3{}, c4{};
-  Double_t mipcutmax{};
-  Double_t mipcutmin{};
-
-  Bool_t notPileUp = kFALSE;
-
-  if (mRefX == 6) { // refMult6
-    if ( mParameterIndex==0 ) { // d+Au 200 GeV 2021
-      b0 =  13.854308990154239;
-      b1 =  48.38889240643103;
-      b2 = -1.820427172052759;
-      b3 =  0.0313802142314363;
-      b4 = -0.00018680122215220316;
-      c0 =  7.022386992461804;
-      c1 = -3.747248801082249;
-      c2 =  0.36559511738864753;
-      c3 = -0.00836993562719528;
-      c4 =  7.050862326468557e-05;
-      mipcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
-      mipcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
-      notPileUp = isInPileUpRefMultLimits(mip, mipcutmin, mipcutmax);
-    }
-    else {
-      notPileUp = kTRUE;
-    }
-
-  } // if (mRefX == 6) { // refMult6
-
-  if (mVerbose) {
-    std::cout << "\t notPileUp using nTofMatch vs nMip: ";
     if (notPileUp) {
       std::cout << "TRUE";
     } 
@@ -1170,11 +1122,7 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
 
   }
   Double_t vzCorr = 1.;
-  if ( mRefX == 6 && mParameterIndex == 0 ) {  // d+Au 200 GeV Run 21
-    // New Vz correction. All vz bins bins are normalize to that at the center
-    vzCorr = dau200_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
-  }
-  else if ( mParameterIndex < 38 ) { 
+  if ( mParameterIndex < 38 ) {
     // Old correction based on the 6th-order polynomial fit of the high-end point 
     // fit of refMult for the given Vz range
 
@@ -1244,8 +1192,7 @@ Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
   }
 
   Double_t refMult_d = -9999.;
-  if( ( mParameterIndex>=30 && mParameterIndex<=45 ) ||
-      ( mRefX==6 && mParameterIndex==0 ) ) {
+  if( mParameterIndex>=30 && mParameterIndex<=45 ) {
     refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
   }
   else {
@@ -1584,6 +1531,8 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
+
+  /*
   else if (mRefX == 6 && mParameterIndex == 0) { // d+Au 200 GeV 2021
 
     if (iVzBinIndex < 0 || iVzBinIndex > dau200_run21_nVzBins) return 1.0;
@@ -1594,6 +1543,8 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
+  */
+
   else {
     weight = 1.0;
   }
@@ -1646,17 +1597,7 @@ Double_t StRefMultCorr::triggerWeight() const {
        && mRefMult_corr != -(par3/par2)  ) { // avoid denominator = 0 
 
     // Parametrization of MC/data RefMult ratio
-    if (mRefX == 6 && mParameterIndex == 0) { // d+Au 200 GeV 2021
-      if (mRefMult_corr >= 24. && mRefMult_corr <= 39.) weight = 1.; // handle unphysical weights
-      else {
-        weight = par0 + par1 * mRefMult_corr + par2 * mRefMult_corr * mRefMult_corr +
-                par3 * mRefMult_corr * mRefMult_corr * mRefMult_corr +
-                par4 * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr +
-                par6 * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr +
-                par7 * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr * mRefMult_corr;
-      }
-    } // if (mRefX == 6 && mParameterIndex == 0)
-    else if (mRefX == 5 && mParameterIndex == 0) { // Run 18 Au+Au 3.85 GeV (sqrt(s_NN)=3 GeV)
+    if (mRefX == 5 && mParameterIndex == 0) { // Run 18 Au+Au 3.85 GeV (sqrt(s_NN)=3 GeV)
       // Trigger efficiency correction does not exist. Temporarily set weight to 1
       weight = 1.;
     } // else if (mRefX == 5 && mParameterIndex == 0)
@@ -1875,6 +1816,7 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 45 )
+  /*
   else if ( mRefX == 6 && mParameterIndex == 0 ) {  // d+Au 200 GeV 2021
     for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ ) {
       if ( dau200_run21_vzRangeLimits[iVz][0] <= mVz && mVz < dau200_run21_vzRangeLimits[iVz][1] ) {
@@ -1883,6 +1825,7 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ )
   } // else if ( mRefX == 6 && mParameterIndex == 0 )
+  */
   else {
     iBinVz = -1;
   }
@@ -1936,7 +1879,7 @@ const Int_t StRefMultCorr::getRefX() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return 3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return 5;
-  else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return 6;
+  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return 6;
   else return 9999;
 }
 
@@ -1948,7 +1891,7 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return nID_ref3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return nID_ref5; 
-  else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return nID_ref6;
+  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return nID_ref6;
   else return 9999;
 }
 
