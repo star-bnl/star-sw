@@ -1,3 +1,5 @@
+#include "tables/St_mwc_geo_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/mwcpars/geom Allocated rows: 1  Used rows: 1  Row size: 28 bytes

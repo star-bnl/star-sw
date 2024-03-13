@@ -1,3 +1,5 @@
+#include "tables/St_tpcElectronics_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcElectronics")) return 0;
   tpcElectronics_st row;

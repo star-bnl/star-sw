@@ -1,3 +1,5 @@
+#include "tables/St_KalmanTrackFitterParameters_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.KalmanTrackFitterParameters/KalmanTrackFitterParameters Allocated rows: 1  Used rows: 1  Row size: 8 bytes

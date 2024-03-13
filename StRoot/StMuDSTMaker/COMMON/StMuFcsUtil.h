@@ -23,6 +23,7 @@ public:
   void               fillMuFcs(StMuFcsCollection*,StFcsCollection*);
   void               fillFcs(StFcsCollection*,StMuFcsCollection*);
   
+  std::map< const StFcsCluster*, StMuFcsCluster* > & getClusterMap() {return mMapClusters; }
 
 private:
 
@@ -40,9 +41,9 @@ private:
   void fillFcsHits(StFcsCollection*, StMuFcsCollection*);
 
   /** holds relation between StEvent and StMuDst types (in memory)**/
-  map< const StFcsHit*, StMuFcsHit* > mMapHits;
-  map< const StFcsCluster*, StMuFcsCluster* > mMapClusters;
-  map< const StFcsPoint*, StMuFcsPoint* > mMapPoints;
+  std::map< const StFcsHit*, StMuFcsHit* > mMapHits;
+  std::map< const StFcsCluster*, StMuFcsCluster* > mMapClusters;
+  std::map< const StFcsPoint*, StMuFcsPoint* > mMapPoints;
 
   ClassDef(StMuFcsUtil,1)
 };

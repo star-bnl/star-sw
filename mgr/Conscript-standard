@@ -895,7 +895,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
 	#    print "StarVMC change CPPPATH to $CPPPATH =========\n";
 
-    } elsif ($pkg eq "TPCCATracker" or $pkg eq "StiCA") {
+    } elsif ($pkg eq "TPCCATracker" or $pkg eq "Sti") {
         $CPPPATH .=
 	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
 

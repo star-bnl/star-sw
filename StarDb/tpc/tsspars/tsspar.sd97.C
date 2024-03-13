@@ -1,3 +1,5 @@
+#include "tables/St_tss_tsspar_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tsspars/tsspar Allocated rows: 1  Used rows: 1  Row size: 240 bytes

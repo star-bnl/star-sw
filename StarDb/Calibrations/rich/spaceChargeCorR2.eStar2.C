@@ -1,3 +1,5 @@
+#include "tables/St_spaceChargeCor_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/rich/.spaceChargeCorR2/spaceChargeCorR2 Allocated rows: 1  Used rows: 1  Row size: 60 bytes

@@ -1306,10 +1306,8 @@ StETofHitMaker::matchSides()
 	      int mode = mModMatrix.at(detIndex);
 	      modifyHit(mode, posX , posY , time);
 	    }
-	    
-	    
-            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
-	    
+
+      StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 	    	    
 	    //Check for "same direction double clockjumps" and update FlagMap
 	    if(mDoDoubleClockJumpShift){

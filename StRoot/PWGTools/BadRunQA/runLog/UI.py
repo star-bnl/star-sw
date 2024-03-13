@@ -7,6 +7,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.widgets import Box, Button, Frame, Label, TextArea
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
 from prompt_toolkit.key_binding.bindings.page_navigation import scroll_one_line_up, scroll_one_line_down
+from prompt_toolkit.filters import has_focus
 from enum import Enum
 
 import shiftLogByShift as sl
@@ -25,12 +26,15 @@ HISTORYHIGHLIGHT = None
 SUMMARYHIGHLIGHT = None
 INTROTEXT = "Control with (up, down, left, right), Pg Up, Pg Down and Enter keys. Shortcut: q is good-run, w is bad-run and tab is go back."
 REASONS = None # Reason for each run to be here. Should be list of string
+RUNMEMO = None # text
 
-
-def on_change():
+def on_change(prev_id):
+    global RUNMEMO
     GoBackButton.text = 'Go Back'
     ExitButton.text = 'Exit %d/%d' % (CURRID+1, len(KEYS))
+    RUNMEMO[prev_id] = memo_area.text
     if CURRID < len(KEYS):
+        memo_area.text = RUNMEMO[CURRID]
         text_reason.text = 'Current run = %s for reason %s' % (KEYS[CURRID], REASONS[CURRID])
         if SUMMARYHIGHLIGHT is None:
             summary_sentement_label.text = ''
@@ -78,7 +82,7 @@ def good_clicked():
         left_clicked()
     CURRID = CURRID + 1
     MULTABLE = True
-    on_change()
+    on_change(CURRID - 1)
 
 def bad_clicked():
     global RESULT, IDSTATUS, CURRID, KEYS, MULTABLE
@@ -88,7 +92,7 @@ def bad_clicked():
         IDSTATUS[CURRID] = STATUS.BAD
     CURRID = CURRID + 1
     MULTABLE = True
-    on_change()
+    on_change(CURRID - 1)
 
 
 def back_clicked():
@@ -96,14 +100,14 @@ def back_clicked():
     if ExitButton.text == 'Confirm Exit':
         # abort exit. Go back to previous run
         MULTABLE = True
-        on_change()
+        on_change(CURRID)
         return
     if CURRID < 0:
         return
     if CURRID > 0:
         CURRID = CURRID - 1
         MULTABLE = True
-        on_change()
+        on_change(CURRID + 1)
 
 
 def exit_clicked():
@@ -189,6 +193,9 @@ def get_summary_style() -> str:
             return 'class:indicator-bad'
     return 'class:indicator-good'
 
+memo_area = TextArea(prompt='Run memo>>>', text='Anthing written here will be saved in the selected bad run list.', multiline=True, wrap_lines=True, focusable=True, style='class:input-field')
+
+
 # Combine all the widgets in a UI.
 # The `Box` object ensures that padding will be inserted around the containing
 # widget. It adapts automatically, unless an explicit `padding` amount is given.
@@ -201,7 +208,7 @@ root_container = Box(
                 [
                     Box(
                         body=HSplit([GoodRunButton, BadRunButton, GoBackButton, ExitButton,
-                                     Box(body=TextArea(focusable=False), style='class:left-pane'),
+                                     Frame(memo_area, style='class:input-field'),
                                      Box(body=entry_sentement_label, style=get_entry_style, height=1),
                                      Box(body=history_sentement_label, style=get_history_style, height=1),
                                      Box(body=summary_sentement_label, style=get_summary_style, height=1)], padding=1, width=25),
@@ -227,11 +234,23 @@ kb.add("up")(focus_previous)
 
 @kb.add("left")
 def _(event):
-    left_clicked()
+    if event.app.layout.has_focus(memo_area):
+        #"Move back a character."
+        buff = event.current_buffer
+        buff.cursor_position += buff.document.get_cursor_left_position(count=event.arg)
+    else:
+        left_clicked()
+
 
 @kb.add("right")
 def _(event):
-    right_clicked()
+    if event.app.layout.has_focus(memo_area):
+        #"Move back a character."
+        buff = event.current_buffer
+        buff.cursor_position += buff.document.get_cursor_right_position(count=event.arg)
+    else:
+        right_clicked()
+
 
 @kb.add("pageup")
 def _(event):
@@ -249,18 +268,27 @@ def _(event):
 
 @kb.add("w")
 def _(event):
-    event.app.layout.focus(BadRunButton)
-    bad_clicked()
+    if event.app.layout.has_focus(memo_area):
+        event.app.current_buffer.insert_text("w")
+    else:
+        event.app.layout.focus(BadRunButton)
+        bad_clicked()
 
 @kb.add("q")
 def _(event):
-    event.app.layout.focus(GoodRunButton)
-    good_clicked()
+    if event.app.layout.has_focus(memo_area):
+        event.app.current_buffer.insert_text("q")
+    else:
+        event.app.layout.focus(GoodRunButton)
+        good_clicked()
 
 @kb.add('tab')
 def _(event):
-    event.app.layout.focus(GoBackButton)
-    back_clicked()
+    if event.app.layout.has_focus(memo_area):
+        event.app.current_buffer.insert_text("\t")
+    else:
+        event.app.layout.focus(GoBackButton)
+        back_clicked()
 
 
 
@@ -276,6 +304,7 @@ style = Style(
         ("button focused", "bg:#ff0000"),
         ("text-area focused", "bg:#ff0000"),
         ("label", "bg:#000000"),
+        ("input-field", "bg:#000000 #ffffff")
     ]
 )
 
@@ -285,7 +314,7 @@ application = Application(layout=layout, key_bindings=kb, style=style, full_scre
 
 
 def main(result, reasons, badKeys=None, badHistory=None, badSummary=None, intro=''):
-    global RESULT, IDSTATUS, CURRID, KEYS, TEXTTYPE, HIGHLIGHT, REASONS, SUMMARYHIGHLIGHT, HISTORYHIGHLIGHT
+    global RESULT, IDSTATUS, CURRID, KEYS, TEXTTYPE, HIGHLIGHT, REASONS, SUMMARYHIGHLIGHT, HISTORYHIGHLIGHT, RUNMEMO
     # remove empty entry
     KEYS = []
     RESULT = {}
@@ -300,6 +329,7 @@ def main(result, reasons, badKeys=None, badHistory=None, badSummary=None, intro=
     history_sentement_label.text = ""
     entry_sentement_label.text = ""
     TEXTTYPE = TEXT.HISTORY # the prompt is initialized by an automatic left click, so starts at center for the automatic left-click to be registered
+    RUNMEMO = []
 
     # hash table is more efficient for lookup
     if badKeys is not None:
@@ -314,6 +344,7 @@ def main(result, reasons, badKeys=None, badHistory=None, badSummary=None, intro=
 
     for key, content in result.items():
         KEYS.append(key)
+        RUNMEMO.append('')
         if badKeys is not None:
             if key in badKeys:
                 HIGHLIGHT.append(True)
@@ -344,14 +375,16 @@ def main(result, reasons, badKeys=None, badHistory=None, badSummary=None, intro=
     application.run()
     pos = {}
     neg = {}
-    for status, key in zip(IDSTATUS, KEYS):
+    memo = {}
+    for status, key, m in zip(IDSTATUS, KEYS, RUNMEMO):
+        memo[key] = m
         if status == STATUS.GOOD:
             pos[key] = result[key]
         elif status == STATUS.BAD:
             neg[key] = result[key]
         else:
             raise RuntimeError('Selection incomplete. This should not have happened.')
-    return pos, neg
+    return pos, neg, memo
 
 
 if __name__ == "__main__":

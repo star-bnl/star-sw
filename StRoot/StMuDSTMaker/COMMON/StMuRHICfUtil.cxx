@@ -52,8 +52,10 @@ void StMuRHICfUtil::fillMuRHICf(StMuRHICfCollection* muColl, StRHICfCollection* 
   StMuRHICfRawHit* muRHICfRawHit = muColl -> addRawHit();
   StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
 
-  muRHICfRawHit -> setBunchNumber(coll->getBunchNumber());
+  muRHICfRawHit -> setRHICfRunNumber(coll->getRHICfRunNumber());
+  muRHICfRawHit -> setRHICfEventNumber(coll->getRHICfEventNumber());
   muRHICfRawHit -> setRunType(coll->getRunType());
+  muRHICfRawHit -> setBunchNumber(coll->getBunchNumber());
   muRHICfRawHit -> setTriggerNumber(coll->getTriggerNumber());
   muRHICfRawHit -> setRunTime(0, coll->getRunTime(0));
   muRHICfRawHit -> setRunTime(1, coll->getRunTime(1));
@@ -84,8 +86,11 @@ void StMuRHICfUtil::fillRHICf(StRHICfCollection* coll, StMuRHICfCollection* muCo
 
   StMuRHICfRawHit* muRHICfRawHit = muColl -> getRawHit();
   StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
-  coll -> setBunchNumber(muRHICfRawHit->getBunchNumber());
+
+  coll -> setRHICfRunNumber(muRHICfRawHit->getRHICfRunNumber());
+  coll -> setRHICfEventNumber(muRHICfRawHit->getRHICfEventNumber());
   coll -> setRunType(muRHICfRawHit->getRunType());
+  coll -> setBunchNumber(muRHICfRawHit->getBunchNumber());
   coll -> setTriggerNumber(muRHICfRawHit->getTriggerNumber());
   coll -> setRunTime(0, muRHICfRawHit->getRunTime(0));
   coll -> setRunTime(1, muRHICfRawHit->getRunTime(1));

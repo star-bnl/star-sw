@@ -1,3 +1,5 @@
+#include "tables/St_tkf_tkfpar_Table.h"
+
 TDataSet *CreateTable(){
 // -----------------------------------------------------------------
 // tkfpar Allocated rows: 1  Used rows: 1 Row

@@ -1,5 +1,8 @@
 /*
 Author: David Kapukchyan
+@[July 5, 2023]
+> Modified paint functions to only paint certain things and added options to select what to paint
+
 @[October 20, 2022]
 > Added doxygen style comments
 
@@ -46,21 +49,21 @@ Painter class for PeakAna
 
 class PeakAna;
 
-class PeakAnaPainter
+class PeakAnaPainter : public TObject
 {
 public:
   PeakAnaPainter();
   virtual ~PeakAnaPainter();
   
   virtual void Paint(Option_t *opt="");
-  virtual void PaintRawData();      //!< Raw data with no modifications
-  virtual void PaintFoundPeak();    //!< Raw data inside zoomed in on found signal region
-  virtual void PaintFoundPeakQa();  //!< Draw signal and found signal window
-  virtual void PaintPeakQa();       //!< Show all found signal windows and signal
-  virtual void PaintBaselines();    //!< Just draw the baseline and hitlines
-  virtual void PaintFoundRange();   //!< Just draw the found peak on the current pad
-  virtual void PaintPeakRanges();   //!< Draw all found peaks on the current pad
-  virtual void PaintStats();        //!< Draw Stats box for peak finding
+  virtual void PaintRawData();        //!< Raw data with no modifications
+  virtual void PaintFoundPeak();      //!< Raw data inside zoomed in on found signal region
+  virtual void PaintBaselines();      //!< Just draw the baseline and hitlines
+  virtual void PaintFoundPeakRange(); //!< Just draw the found peak on the current pad
+  virtual void PaintPeakRanges();     //!< Draw all found peaks on the current pad except the found peak
+  virtual void PaintFoundMarker();    //!< Draw the marker indicating the found peak
+  virtual void PaintPeakMarkers();    //!< Draw markers indicating all peaks except the found peak marker
+  virtual void PaintStats();          //!< Draw Stats box for peak finding
   
   virtual void CleanPainter();      //!< Clean up internal objects
   

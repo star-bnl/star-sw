@@ -42,6 +42,7 @@
 #include "Riostream.h"
 #include "TClass.h"
 #include "TGPicture.h"
+#include "TVirtualX.h"
 
 const TGFont *TGTab2::fgDefaultFont = 0;
 const TGGC   *TGTab2::fgDefaultGC = 0;

@@ -33,7 +33,7 @@
 #include "RTS/src/DAQ_STGC/daq_stgc.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StRoot/StEvent/StTriggerData.h"
-#include "StRoot/StEvent/StTriggerData2019.h"
+#include "StRoot/StEvent/StTriggerData2022.h"
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
@@ -87,7 +87,7 @@ Int_t StFcsRawDaqReader::Init(){
    struct tm* local = localtime((const time_t*)&unixtime);
    int date=(local->tm_year+1900)*10000 + (local->tm_mon+1)*100 + local->tm_mday;
    int time=local->tm_hour*10000 + local->tm_min*100 + local->tm_sec;
-   printf("Event Unix Time = %d %0d %06d\n",mRdr->evt_time,date,time);   
+   LOG_INFO << Form("Event Unix Time = %d %0d %06d",mRdr->evt_time,date,time) << endm;
 
    StFcsDbMaker* mFcsDbMkr = static_cast<StFcsDbMaker*>(GetMaker("fcsDbMkr"));
    if(!mFcsDbMkr){
@@ -154,7 +154,7 @@ Int_t StFcsRawDaqReader::Make() {
       if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
 	nskip++;
 	nskiptot++;
-	if(mDebug) printf("trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+	if(mDebug) LOG_INFO << Form("trgcmd=%d skipping nskip=%d nskiptot=%d",trgcmd,nskip,nskiptot)<<endm;
 	continue;
       }
     }
@@ -186,7 +186,7 @@ Int_t StFcsRawDaqReader::Make() {
 
   int trgcmd = mRdr->trgcmd;
   if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
-    printf("This should not happen!!!  trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+    LOG_INFO << Form("This should not happen!!!  trgcmd=%d skipping nskip=%d nskiptot=%d",trgcmd,nskip,nskiptot)<<endm;
     return kStOK;
   }
   if(nskip>0){
@@ -209,10 +209,10 @@ Int_t StFcsRawDaqReader::Make() {
   dd = mRdr->det("trg")->get("raw");
   int startrg=0,fcstrg=0;
   if(!dd){
-    //printf("trg/raw not found\n");
+    LOG_WARN << "trg/raw not found" << endm;
   }else{
     while(dd->iterate()) {
-      uint8_t *trg_raw = dd->Byte;
+      u_char *trg_raw = dd->Byte;
       struct simple_desc {
         short len ;
         char evt_desc ;
@@ -220,16 +220,16 @@ Int_t StFcsRawDaqReader::Make() {
       } *desc ;
       desc = (simple_desc *) trg_raw ;
       //printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver,desc->evt_desc,desc->len);                 
-      if(desc->ver==0x46){
-        TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
-        LOG_DEBUG << "Creating StTriggerData for ver=0x46 (2019) with run="<<mRun<<endm;
-	mEvent->setTriggerData((StTriggerData*)new StTriggerData2019(trgdata2019,mRun,1,mDebug));
+      if(desc->ver==0x47){
+        TriggerDataBlk2022* trgdata2022 = (TriggerDataBlk2022*)dd->Byte;  
+        LOG_INFO << "Creating StTriggerData for ver=0x47 (2022) with run="<<mRun<<endm;
+	mEvent->setTriggerData((StTriggerData*)new StTriggerData2022(trgdata2022,mRun,1,mDebug));
 	LOG_DEBUG << "Added StTriggerData to StEvent"<<endm;
         //AddData(new TObjectSet("StTriggerData",new StTriggerData2019(trgdata2019,mRun,1,mDebug),kTRUE));
         //LOG_DEBUG << "Adding Dataset StTriggerData"<<endm;
-	//	mTrg = (StTriggerData*) (GetData("StTriggerData")->GetObject());
-	//mTrg = mEvent->triggerData();
-        //LOG_DEBUG << "Got back Dataset StTriggerData addr="<<mTrg<<endm;
+	//mTrg = (StTriggerData*) (GetData("StTriggerData")->GetObject());
+	mTrg = mEvent->triggerData();
+        LOG_DEBUG << "Got back Dataset StTriggerData addr="<<mTrg<<endm;
 	
 	mFcsTcuBit = mTrg->lastDSM(5);
 	//unsigned short lastdsm4 = mTrg->lastDSM(4);
@@ -247,9 +247,9 @@ Int_t StFcsRawDaqReader::Make() {
 	LOG_DEBUG << Form("FCS TCU Bits = 0x%04x",mFcsTcuBit)<<endm;
 
 	unsigned long long l2sum=mTrg->l2sum();
-	startrg = (l2sum & 0xFF8000FFFFFFFFFF)?1:0;
-	fcstrg  = (l2sum & 0x007FFF0000000000)?1:0;
-	LOG_DEBUG << Form("L2SUM = 0x%016llx STAR=%1d FCS=%1d",l2sum,startrg,fcstrg) << endm;
+	//startrg = (l2sum & 0xFF8000FFFFFFFFFF)?1:0;
+	//fcstrg  = (l2sum & 0x007FFF0000000000)?1:0;
+	//LOG_DEBUG << Form("L2SUM = 0x%016llx STAR=%1d FCS=%1d",l2sum,startrg,fcstrg) << endm;
 
       }else{
         printf("Unknown StTriggerData version = %x\n",desc->ver);
@@ -272,8 +272,8 @@ Int_t StFcsRawDaqReader::Make() {
       //printf("DEPIO EHP=%1d NS=%1d DEP=%02d CH=%02d N=%d\n",
       //     ehp,ns,dep,ch,dd->ncontent);
       if(ehp==3 && ns==0 && dep==0 && (ch==4 || ch==5)){	
-	uint32_t n=dd->ncontent;
-	uint16_t *d16 = (uint16_t *)dd->Void;
+	u_int n=dd->ncontent;
+	u_short *d16 = (u_short *)dd->Void;
 	if(ch==4) mFcsDepOut += (d16[96] & 0xFF);
 	if(ch==5) mFcsDepOut += (d16[96] & 0xFF) << 8;
 	//for(int i=0; i<n; i++) printf("  tb=%3d  d16=0x%04x\n",i,d16[i]);
@@ -291,7 +291,10 @@ Int_t StFcsRawDaqReader::Make() {
     mReadMode=0;
   }
   dd = mRdr->det("fcs")->get(mode[mReadMode].c_str());  
-  if(dd){
+  if(!dd){
+    mFcsCollectionPtr->setDataExist(0);
+  }else{
+    mFcsCollectionPtr->setDataExist(1);
     while(dd->iterate()) {
       int sec = ((dd->sec >> 11) & 0x1F) + 1;
       int rdo = ((dd->sec >> 8) & 0x7) + 1;
@@ -299,12 +302,12 @@ Int_t StFcsRawDaqReader::Make() {
       int ns  = (dd->sec >> 5) & 1;
       int dep = dd->row ;
       int ch = dd->pad ;
-      uint32_t n=dd->ncontent;      
+      u_int n=dd->ncontent;      
       int detid,id,crt,sub;
       mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
       //printf("EHP=%1d NS=%1d DEP=%02d CH=%02d DET=%1d id=%4d\n",ehp,ns,dep,ch,detid,id);
       //if(ch>=32) continue;
-      uint16_t *d16 = (uint16_t *)dd->Void;
+      u_short *d16 = (u_short *)dd->Void;
       StFcsHit* hit=0;
       unsigned short tmp[1024];
       if(mReadMode==0){
@@ -312,9 +315,9 @@ Int_t StFcsRawDaqReader::Make() {
       }else{
 	/*
 	if(startrg==0 && fcstrg==1){
-	  for(uint32_t i=0; i<n; i++) {
-	    uint32_t tb   = dd->adc[i].tb;
-	    uint32_t data = dd->adc[i].adc;
+	  for(u_int i=0; i<n; i++) {
+	    u_int tb   = dd->adc[i].tb;
+	    u_int data = dd->adc[i].adc;
 	    tmp[i*2  ]=data;
 	    tmp[i*2+1]=tb + 8;	    
 	    //printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
@@ -330,7 +333,7 @@ Int_t StFcsRawDaqReader::Make() {
       if(detid<6) nvaliddata++;      
       
       if(mDebug){
-	printf("FCS %3s : S%d:%d [det %d, ns %d, dep %d ch %d] det=%d id=%3d : size=%d : adc=",
+	printf("FCS %3s : S%2d:%2d [det%1d ns%1d dep%2d ch%2d] det=%d id=%3d size=%3d adc=",
 	       mode[mReadMode].c_str(),sec,rdo,ehp,ns,dep,ch,detid,id,n) ;
 	for(unsigned int tb=0; tb<hit->nTimeBin(); tb++) printf("%4d ", hit->adc(tb));
 	//for(int tb=0; tb<3; tb++) printf("%4d ", hit->adc(tb));
@@ -353,7 +356,7 @@ Int_t StFcsRawDaqReader::Make() {
     dd = mRdr->det("stgc")->get("altro",r) ;
     while(dd && dd->iterate()) {    //per xing and per RDO    
       if(mDebug) printf("STGC ALTRO: stgc%02d(sec) RDO=%1d ALTRO=%03d(row) Ch=%02d(pad)\n",dd->sec,r,dd->row,dd->pad);
-      for(uint32_t i=0; i<dd->ncontent; i++) {
+      for(u_int i=0; i<dd->ncontent; i++) {
 	if(mDebug) printf(" TB=%3d ADC=%4d",dd->adc[i].tb,dd->adc[i].adc) ;
 	ndata++;
       }

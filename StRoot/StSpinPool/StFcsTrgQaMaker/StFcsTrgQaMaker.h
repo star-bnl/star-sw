@@ -30,6 +30,7 @@ public:
     void setPtCh(float v) {mPtCh=v;}
     void setEcalPtThr(float v) {mEcalPtThr=v;}
     void setS3off(int v) {mS3off=v;}
+    void setS2off(int v) {mS2off=v;}
 
 protected:
     
@@ -41,33 +42,47 @@ private:
     int mRun=0;
     float mPtCh=0.0316;
     float mEcalPtThr=1.5;
-    int mS3off=96;
 
-    TH1F* mETot[4];
-    TH1F* mHTot[4];
-    TH1F* mEHT[4];
-    TH1F* mHHT[4];
-    TH1F* mJP[2][4];
+    //marker.adc_start = 7
+    //marker.s1_out_start = marker.adc_start + 11 = 18
+    //marker.s2_in_start = marker.s1_out_start + 2  = 20
+    //marker.s2_to_s3_start = marker.s2_in_start + 15 = 35
+    //marker.s3_in_start = marker.s2_to_s3_start + 8 = 43
+    //marker.dsm_out_start=marker.s3_in_start + 14 = 57
+    //So... DEPIO DSM out is 50 tb later than ADC
+    //center trig tb=50 => tb=47~54 and 47=marker.adc_start(7)+5xing*8tb/xing
+    //Thus.... mS3off=47+50 = 97
+    int mS3off=97; 
+    int mS2off=97; //Tonko says same as S3off
 
-    TH1F* mE4b4[4];
-    TH1F* mH4b4[4];
-    TH1F* mPOR[4];
+    TH2F* mTow[2];
 
-    TH1F* mSum[5][4];
-    TH1F* mEHR[5][4];
-    TH2F* mSumTot[2];
+    TH1F* mETot[2];
+    TH1F* mHTot[2];
 
-    TH2F* mDEm[4];
-    TH2F* mDHad[4];
-    TH2F* mDGam[4];
-    TH2F* mDEle[4];
-    TH2F* mDJP[4];
+    TH1F* mEHT[2];
+    TH2F* mEHTMap;
+    TH1F* mHHT[2];
+    TH2F* mHHTMap;
 
-    TH2F* mEcal[kFcsNorthSouth];
-    TH2F* mHcal[kFcsNorthSouth];
-    TH2F* mPres[kFcsNorthSouth];
-    TH2F* mEPmap[kFcsNorthSouth];
-    TH1F* mEcalNorm[kFcsNorthSouth];
+    TH1F* mJP[2][5];
+    TH1F* mJPMap[3];
+
+    TH1F* mE4x4;
+    TH1F* mEM4x4;
+    TH1F* mELE4x4;
+    TH1F* mERatio;
+    TH1F* mELERatio;
+
+    TH1F* mH4x4;
+    TH1F* mEH4x4;
+    TH1F* mHAD4x4;
+    TH1F* mHRatio;
+    TH1F* mHADRatio;
+
+    TH2F* mE4x4Map[4];
+    TH2F* mELE4x4Map[2];
+    TH2F* mEH4x4Map[3];
 
     TH1F* mDsmOut;
     TH1F* mDepOut;
@@ -75,6 +90,8 @@ private:
     TH1F* mTcuDep;
     TH1F* mSimDep;
     
+    TH2F* mAdc[3];
+
     ClassDef(StFcsTrgQaMaker,1);
 };
 
