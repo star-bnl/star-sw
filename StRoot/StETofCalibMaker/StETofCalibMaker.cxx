@@ -1241,12 +1241,8 @@ StETofCalibMaker::processStEvent()
 		for( int iCounter = 0; iCounter < 108; iCounter++){
 		  if ( !(mNPulsersCounter.count(iCounter) ) ){
 		    hasPulsersVec.push_back(false);
-		  }else{
-		    if(mNPulsersCounter[iCounter] == 2){
-		      hasPulsersVec.push_back(true);
-		    }else{
-		      hasPulsersVec.push_back(false);
-		    }		    
+		  }else{	
+		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
 		  }		  
 		}
 		if (hasPulsersVec.size() == 108){
@@ -1255,16 +1251,13 @@ StETofCalibMaker::processStEvent()
 
 		//fill good event flag into header
 		for( int iGet4 = 0; iGet4 < 1728; iGet4++){	  	
-		  if ( etofHeader->missMatchFlagVec().at(iGet4)){
-		    goodEventFlagVec.push_back(false); 
-		  }else{
-		    goodEventFlagVec.push_back(true);
-		  }
-	  	}
+		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+		}
+				
 	  	if (goodEventFlagVec.size() == 1728){
-	  		etofHeader->setGoodEventFlagVec(goodEventFlagVec);
+		  etofHeader->setGoodEventFlagVec(goodEventFlagVec);
 	  	}   
-	  }
+	 }
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     StructStuckFwDigi current = { -1, -1., -1. };
@@ -1408,37 +1401,31 @@ StETofCalibMaker::processMuDst()
 	 TClass* headerClass = etofHeader->IsA();
 	 if( headerClass->GetClassVersion() > 2 ){
 
-		std::vector<bool> goodEventFlagVec; 
+		std::vector<bool> goodEventFlagVec;
 		std::vector<bool> hasPulsersVec;//
 		
 		//drag along pulser information
 		for( int iCounter = 0; iCounter < 108; iCounter++){
 		  if ( !(mNPulsersCounter.count(iCounter) ) ){
 		    hasPulsersVec.push_back(false);
-		  }else{
-		    if(mNPulsersCounter[iCounter] == 2){
-		      hasPulsersVec.push_back(true);
-		    }else{
-		      hasPulsersVec.push_back(false);
-		    }		    
+		  }else{	
+		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
 		  }		  
 		}
+
 		if (hasPulsersVec.size() == 108){
 		  etofHeader->setHasPulsersVec(hasPulsersVec);
 	  	} 
-
+		
 		//fill good event flag into header
-		for( int iGet4 = 0; iGet4 < 1728; iGet4++){	  	
-		  if ( etofHeader->missMatchFlagVec().at(iGet4)){
-		    goodEventFlagVec.push_back(false); 
-		  }else{
-		    goodEventFlagVec.push_back(true);
-		  }
-	  	}
+		for( int iGet4 = 0; iGet4 < 1728; iGet4++){
+		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+		}		
+		
 	  	if (goodEventFlagVec.size() == 1728){
 		  etofHeader->setGoodEventFlagVec(goodEventFlagVec);
-	  	}//
-	  }
+	  	}
+	 }
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     StructStuckFwDigi current = { -1, -1., -1. };

@@ -987,7 +987,6 @@ StETofHitMaker::matchSides()
         double timeDiff = 0.0;
         double totSum   = 0.0;
         double t_corr_afterpulse   = 0.0;
-	int    IdTruth             =   0; //
 
 
         if( mDoQA && digiVec->size() == 1 ) {
@@ -1007,12 +1006,6 @@ StETofHitMaker::matchSides()
 	  //  TClass* headerClass = etofHeader->IsA();
 	  //  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
 	  // std::vector< bool > goodEventFlagVec = mMuDst->etofHeader()->goodEventFlagVec();
-
-	  int side = xDigiA->side();
-
-	  int Get4Id = 144 * ( sector - 13 ) + 48 * ( plane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 );
-	  int CounterId = Get4Id / 16;
-
 
             // the "strip" time is the mean time between each end
             time = 0.5 * ( xDigiA->calibTime() + xDigiB->calibTime() );
