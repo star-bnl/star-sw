@@ -1,0 +1,10 @@
+/*    fcsPresThreshold.idl
+ *
+ *  Table: fcsPresThreshold
+ *
+ *  description: // FCS Pres Threshold online
+ */ 
+
+struct fcsPresThreshold {   
+  float threshold[384];     /* valley position 2*192 */
+};  
