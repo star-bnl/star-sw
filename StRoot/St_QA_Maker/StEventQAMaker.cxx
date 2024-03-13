@@ -47,7 +47,7 @@
 
 //fcs
 #define SKIPDefImp
-#include "StSpinPool/StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.cxx"
+#include "StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.cxx"
 #undef SKIPDefImp
                                                                             
 #include "StEvent/StTpcRawData.h"
