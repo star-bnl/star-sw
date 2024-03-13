@@ -525,8 +525,7 @@ MODULE gstar_part Is the STAR Particle Database
                              trktyp    = kGtHION
 
 
-  *  requested by JieZhao
-  *  Alpha clusters decay into Alpha
+  *  requested by JieZhao ... Be8 (alpha clusters) decay into 2 alphas
 
   Particle Be8s0  code = 50060  TrkTyp=8, mass = 7.45485, charge=4, tlife=1.1817e-19,
                   pdg=PDG_ION_ID(4,8)  bratio={1,} mode={ 4747,}
