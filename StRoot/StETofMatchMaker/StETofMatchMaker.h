@@ -212,12 +212,6 @@ private:
     Double_t mMatchDistY;
     Double_t mMatchDistT;
 
-    // used for single sided match cases
-    Double_t   dx_3sig;
-    Double_t   dy_3sig;
-    Double_t   dt_3sig;
-    Double_t   dy_max;
-
     std::vector< Double_t >   mT0corrVec;
     Double_t                  mT0corr;
     UInt_t                    mT0switch;
@@ -233,8 +227,16 @@ private:
     std::map< Int_t, Int_t >  mClockJumpDirection;
 
     std::string                    mHistFileName;
+      
     std::map< std::string, TH1* >  mHistograms;
     std::map< std::string, TH2* >  mHistograms2d;
+
+    // used for single sided match cases
+    Double_t   dx_3sig; 
+    Double_t   dy_3sig;
+    Double_t   dt_3sig;
+    Double_t   dy_max;
+    
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 

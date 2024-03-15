@@ -161,11 +161,11 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mLocalYmax(16.),
   mClockJumpCand(),
   mClockJumpDirection(),
-  mHistFileName( "" ),
-  mHistograms(),
+  mHistFileName( "" ),  
+  mHistograms(), 
   mHistograms2d(),
-  dy_3sig(4.0),
   dx_3sig(2.5),
+  dy_3sig(4.0),
   dt_3sig(0.22),
   dy_max(5.0)
 {
@@ -2526,9 +2526,9 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
         int charge;
         float mom;
 
-	int sector  = 0; //
-	int plane   = 0; //
-	int counter = 0; //
+	//	int sector  = 0; //
+	//	int plane   = 0; //
+	//	int counter = 0; //
 
         float dEdx = -999.;
         float nSigmaPion = -999;
@@ -2563,9 +2563,9 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             StMuTrack* pTrack = aHit->primaryTrack();
             if( !pTrack ) continue;
 
-	    sector  = aHit->sector();
-	    plane   = aHit->zPlane();
-	    counter = aHit->counter();
+	    //sector  = aHit->sector();
+	    //plane   = aHit->zPlane();
+	    //counter = aHit->counter();
 
             charge = pTrack->charge();
             mom    = pTrack->momentum().mag();
@@ -3271,7 +3271,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
       int count =0;
       int countwhile = 0;
 	
-      for(int s =0; s < tempMMVec.size(); s++){
+      for(unsigned int s =0; s < tempMMVec.size(); s++){
 	 
 	count++;
 
@@ -3391,7 +3391,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
   
   for(int i =0; i < 108; i++){
     
-    for(int n = 0; n < matchCandVec.size(); n++){
+    for(unsigned int n = 0; n < matchCandVec.size(); n++){
       
       int sector  = matchCandVec.at(n).sector;
       int plane   = matchCandVec.at(n).plane;
@@ -3429,8 +3429,8 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	int nTracks = 1;
 	int nHits   = 1;
 
-	for(int l =0; l< it->second.size(); l++){
-	  	for(int j = l; j< it->second.size(); j++){
+	for(unsigned int l =0; l< it->second.size(); l++){
+	  	for(unsigned int j = l; j< it->second.size(); j++){
 
 		  if( it->second.at(l).trackId !=  it->second.at(j).trackId) nTracks++;
 		  if( it->second.at(l).index2ETofHit != it->second.at(j).index2ETofHit ) nHits++;
@@ -3464,10 +3464,10 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 	  double dr      = 0.0;
 	  double dr_best = 99999.0; // dy for SHs at 27
-	  int ind        = 0;
-	  int ind_best   = 0;	
+	  unsigned int ind        = 0;
+	  unsigned int ind_best   = 0;	
 	    
-	  for(int l =0; l < it->second.size(); l++){
+	  for(unsigned int l =0; l < it->second.size(); l++){
 	    
 	    dr = (it->second.at(l).deltaX * it->second.at(l).deltaX) + (it->second.at(l).deltaY * it->second.at(l).deltaY);
 	    ind = l;
@@ -3501,7 +3501,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	  bool isN = false;
 	  bool isS = false;
 	  
-	  for(int l =0; l < it->second.size(); l++){
+	  for(unsigned int l =0; l < it->second.size(); l++){
 	    
 	    if(it->second.at(l).clusterSize < 999){
 	      isN = true;
@@ -3524,10 +3524,10 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 	     double dr       = 0.0;
 	     double dr_best  = 99999.0; // dy for SHs at 27
-	     int ind         = 0;
-	     int ind_best    = 0;
+	     unsigned int ind         = 0;
+	     unsigned int ind_best    = 0;
 	     
-	     for(int l =0; l < it->second.size(); l++){
+	     for(unsigned int l =0; l < it->second.size(); l++){
 
 	       dr = sqrt((it->second.at(l).deltaX * it->second.at(l).deltaX) + (it->second.at(l).deltaY * it->second.at(l).deltaY));
 	       ind = l;
@@ -3542,7 +3542,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	     
 	     dr_mean = dr_sum / it->second.size();
 
-	     for(int c =0; c < it->second.size(); c++){
+	     for(unsigned int c =0; c < it->second.size(); c++){
 	       
 	       dr = sqrt((it->second.at(c).deltaX * it->second.at(c).deltaX) + (it->second.at(c).deltaY * it->second.at(c).deltaY));
 	       dr_diff += abs(dr - dr_mean);	       
@@ -3580,16 +3580,16 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 	    std::vector< std::vector<int>  > mergeIndVec(it->second.size());
 
-	    for(int l =0; l < it->second.size(); l++){
+	    for(unsigned int l =0; l < it->second.size(); l++){
 	      mergeIndVec.at(l).push_back(0);
 	    }
 	    
 	    double dr       = 0.0;
 	    double dr_best  = 99999.0; // dy for SHs at 27
-	    int ind         = 0;
-	    int ind_best    = 0;
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = 0;
 	    
-	    for(int l =0; l < it->second.size(); l++){
+	    for(unsigned int l =0; l < it->second.size(); l++){
 	      
 	      // localY doesnt contain any ETOF information -> not usefull for merging single sided hits
 	      dr = it->second.at(l).deltaX;
@@ -3613,7 +3613,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	    int    mergedMatchFlag = 0;
 	    int    mergedIdTruth   = it->second.at(ind_best).IdTruth;
 	    	    
-	    for(int j=0; j < hitVec.size(); j++) {
+	    for(unsigned int j=0; j < hitVec.size(); j++) {
 	      
 	      if( j == ind_best) continue;
 	      
@@ -3671,16 +3671,16 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 	    std::vector< std::vector<int>  > mergeIndVec(it->second.size());
 
-	    for(int l =0; l < it->second.size(); l++){
+	    for(unsigned int l =0; l < it->second.size(); l++){
 	      mergeIndVec.at(l).push_back(0);
 	    }
 	    
 	    double dr       = 0.0;
 	    double dr_best  = 99999.0; // dy for SHs at 27
-	    int ind         = 0;
-	    int ind_best    = 0;
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = 0;
 	    
-	    for(int l =0; l < it->second.size(); l++){
+	    for(unsigned int l =0; l < it->second.size(); l++){
 
 	      if(it->second.at(l).clusterSize > 999) continue;
 	      
@@ -3706,7 +3706,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	    int    mergedMatchFlag = 0;
 	    int    mergedIdTruth   = it->second.at(ind_best).IdTruth;	    
 	    
-	    for(int j=0; j < hitVec.size(); j++) {
+	    for(unsigned int j=0; j < hitVec.size(); j++) {
 	      
 	      if( j == ind_best) continue;
 	      
@@ -3773,18 +3773,18 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	  std::map< Int_t, eTofHitVec >  ambigMap;
 	  std::vector<int> indVec;	   
 	    
-	  for(int l =0; l < it->second.size(); l++){
+	  for(unsigned int l =0; l < it->second.size(); l++){
 
 	    double dr       = it->second.at(l).deltaX*it->second.at(l).deltaX + it->second.at(l).deltaY*it->second.at(l).deltaY;
 	    double dr_best  = 99999.0; // dy for SHs at 27
-	    int ind         = 0;
-	    int ind_best    = l;	    
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = l;	    
 	    int trackId = it->second.at(l).trackId;
 	    int vcnt = 0;
 	    
 	    if(std::find(indVec.begin(), indVec.end(), trackId) != indVec.end()) continue; 
 	      
-	    for(int n = 0; n < it->second.size(); n++){
+	    for(unsigned int n = 0; n < it->second.size(); n++){
 		
 	      if(it->second.at(n).trackId != trackId) continue;
 
@@ -3817,7 +3817,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	    std::vector<int> indVecBMtrack;
 	    std::vector<int> indVecBMhit;
 
-	     for(int b =0; b < bestMatchVec.size() ; b++){
+	     for(unsigned int b =0; b < bestMatchVec.size() ; b++){
 	      indVecBMtrack.push_back(bestMatchVec.at(b).trackId);
 	      indVecBMhit.push_back(bestMatchVec.at(b).index2ETofHit);
 	     }
@@ -3832,9 +3832,9 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 	       double dr       = 0.0;
 	       double dr_best  = 99999.0; // dy for SHs at 27
-	       int ind         = 0;
-	       int ind_best    = 0;
-	       for(int b =0; b < MatchVecTemp.size() ; b++){
+	       unsigned int ind         = 0;
+	       unsigned int ind_best    = 0;
+	       for(unsigned int b =0; b < MatchVecTemp.size() ; b++){
 		 
 		 ind = b;
 
@@ -3851,7 +3851,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	       MatchVecTemp.erase(MatchVecTemp.begin() + ind_best);
 
 	       //remove all matches with same hit id
-	        for(int b =0; b < MatchVecTemp.size() ; b++){
+	        for(unsigned int b =0; b < MatchVecTemp.size() ; b++){
 	
 		 if(std::find(indVecUsedHit.begin(), indVecUsedHit.end(), MatchVecTemp.at(b).index2ETofHit) != indVecUsedHit.end()) {
 		   
@@ -3870,9 +3870,9 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 		double dy1       = 0;
 		double dx_best1  = 99999.0;
 		double dy_best1  = 99999.0;
-		int ind1         = 0;
-		int ind_best1    = 0;
-		for(int i = 0; i < mergeCandVec.size();i++){
+		unsigned int ind1         = 0;
+		unsigned int ind_best1    = 0;
+		for(unsigned int i = 0; i < mergeCandVec.size();i++){
 
 		  ind1 = i;
 
@@ -3912,7 +3912,7 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 
 		bestMatchVec = finalbestMatchVec;
 
-		for(int i=0;i< bestMatchVec.size();i++){
+		for(unsigned int i=0;i< bestMatchVec.size();i++){
 		  
 		  if(bestMatchVec.at(i).clusterSize < 999 ){
 		    bestMatchVec.at(i).matchFlag = 410;

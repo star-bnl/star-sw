@@ -1238,7 +1238,7 @@ StETofCalibMaker::processStEvent()
 		std::vector<bool> hasPulsersVec;
 		
 		//drag along pulser information
-		for( int iCounter = 0; iCounter < 108; iCounter++){
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
 		  if ( !(mNPulsersCounter.count(iCounter) ) ){
 		    hasPulsersVec.push_back(false);
 		  }else{	
@@ -1250,7 +1250,7 @@ StETofCalibMaker::processStEvent()
 	  	} 
 
 		//fill good event flag into header
-		for( int iGet4 = 0; iGet4 < 1728; iGet4++){	  	
+		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){	  	
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
 		}
 				
@@ -1258,6 +1258,7 @@ StETofCalibMaker::processStEvent()
 		  etofHeader->setGoodEventFlagVec(goodEventFlagVec);
 	  	}   
 	 }
+
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     StructStuckFwDigi current = { -1, -1., -1. };
@@ -1405,7 +1406,7 @@ StETofCalibMaker::processMuDst()
 		std::vector<bool> hasPulsersVec;//
 		
 		//drag along pulser information
-		for( int iCounter = 0; iCounter < 108; iCounter++){
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
 		  if ( !(mNPulsersCounter.count(iCounter) ) ){
 		    hasPulsersVec.push_back(false);
 		  }else{	
@@ -1418,7 +1419,7 @@ StETofCalibMaker::processMuDst()
 	  	} 
 		
 		//fill good event flag into header
-		for( int iGet4 = 0; iGet4 < 1728; iGet4++){
+		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
 		}		
 		
@@ -1464,7 +1465,6 @@ StETofCalibMaker::processMuDst()
         else {
             prev = current;
         }
-
 
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window

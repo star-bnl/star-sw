@@ -338,7 +338,7 @@ StETofHitMaker::InitRun( Int_t runnumber )
     }
 
     // --------------------------------------------------------------------------------------------
-    for( int i=0; i<eTofConst::nCountersInSystem; i++ ) {
+    for(int i=0; i<eTofConst::nCountersInSystem; i++ ) {
         mCounterActive.push_back( false );
     }
     // --------------------------------------------------------------------------------------------
