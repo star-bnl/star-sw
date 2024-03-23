@@ -41,6 +41,7 @@ public:
     void setTrgTimeBin(int v) {mTrgTimebin=v;} //8 timebin = v-3 to v+4. v=52 for 49~56
     void setThresholdFile(char* file) {mThresholdFile=file;}
     void setThresholdDb(int run) {mThresholdDb=run;}
+    void setOverwriteGain(int v) {mOverwriteGain=v;} // 0=use text Et andelectronics gain file 1=from FscDb(default)
         
     //factor= 1(ET Match), 0(E Match), 0.5(halfway)  
     void setEtGain(float v) {mEtFactor=v;} 
@@ -80,6 +81,7 @@ private:
     float mEtFactor=1.0; 
     char* mThresholdFile=0;
     int mThresholdDb=0;
+    int mOverwriteGain=1;
 
     void print4B4();
     void printJP();

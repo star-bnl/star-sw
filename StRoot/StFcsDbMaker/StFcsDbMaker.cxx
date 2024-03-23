@@ -129,6 +129,9 @@
 #include "tables/St_fcsEcalGainCorr_Table.h"
 #include "tables/St_fcsHcalGainCorr_Table.h"
 #include "tables/St_fcsPresValley_Table.h"
+#include "tables/St_fcsEcalGainOnline_Table.h"
+#include "tables/St_fcsHcalGainOnline_Table.h"
+#include "tables/St_fcsPresThreshold_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 
 ClassImp(StFcsDbMaker)
@@ -196,6 +199,9 @@ int StFcsDbMaker::InitRun(int runNumber) {
     St_fcsEcalGainCorr     *dbFcsEcalGainCorr =0; 
     St_fcsHcalGainCorr     *dbFcsHcalGainCorr =0; 
     St_fcsPresValley       *dbFcsPresValley   =0;	
+    St_fcsEcalGainOnline   *dbFcsEcalGainOnline =0; 
+    St_fcsHcalGainOnline   *dbFcsHcalGainOnline =0; 
+    St_fcsPresThreshold    *dbFcsPresThreshold  =0;	
     DBcalib = GetInputDB("Calibrations/fcs");
     if(!DBcalib){
       LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs"<<endm; 
@@ -206,6 +212,9 @@ int StFcsDbMaker::InitRun(int runNumber) {
       dbFcsEcalGainCorr = (St_fcsEcalGainCorr*)    DBcalib->Find("fcsEcalGainCorr");
       dbFcsHcalGainCorr = (St_fcsHcalGainCorr*)    DBcalib->Find("fcsHcalGainCorr");
       dbFcsPresValley   = (St_fcsPresValley*)      DBcalib->Find("fcsPresValley");
+      dbFcsEcalGainOnline = (St_fcsEcalGainOnline*)DBcalib->Find("fcsEcalGainOnline");
+      dbFcsHcalGainOnline = (St_fcsHcalGainOnline*)DBcalib->Find("fcsHcalGainOnline");
+      dbFcsPresThreshold  = (St_fcsPresThreshold*) DBcalib->Find("fcsPresThreshold");
     }
     
     //Ecal Gain
@@ -249,6 +258,28 @@ int StFcsDbMaker::InitRun(int runNumber) {
       mFcsDb->setFcsPresValley(0);
     }else{
       mFcsDb->setFcsPresValley((fcsPresValley_st*) dbFcsPresValley->GetTable());
+    }
+
+    //Ecal GainOnline
+    if(!dbFcsEcalGainOnline) {
+      LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsEcalGainOnline"<<endm;
+      mFcsDb->setFcsEcalGainOnline(0);
+    }else{
+      mFcsDb->setFcsEcalGainOnline((fcsEcalGainOnline_st*) dbFcsEcalGainOnline->GetTable());
+    }
+    //Hcal GainOnline
+    if(!dbFcsHcalGainOnline) {
+      LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsHcalGainOnline"<<endm;
+      mFcsDb->setFcsHcalGainOnline(0);
+    }else{
+      mFcsDb->setFcsHcalGainOnline((fcsHcalGainOnline_st*) dbFcsHcalGainOnline->GetTable());
+    }
+    //Pres Threshold
+    if(!dbFcsPresThreshold) {
+      LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsPresThreshold"<<endm;
+      mFcsDb->setFcsPresThreshold(0);
+    }else{
+      mFcsDb->setFcsPresThreshold((fcsPresThreshold_st*) dbFcsPresThreshold->GetTable());
     }
   }
 

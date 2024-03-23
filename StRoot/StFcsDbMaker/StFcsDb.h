@@ -104,6 +104,9 @@
 #include "tables/St_fcsEcalGainCorr_Table.h"
 #include "tables/St_fcsHcalGainCorr_Table.h"
 #include "tables/St_fcsPresValley_Table.h"
+#include "tables/St_fcsEcalGainOnline_Table.h"
+#include "tables/St_fcsHcalGainOnline_Table.h"
+#include "tables/St_fcsPresThreshold_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -125,7 +128,8 @@ public:
   void setRun(int run);       //! set run# 
   void setRun19(int v=1);     //! set run19 geometry, otherwise final run21
   void setLeakyHcal(int v=1); //! set leaky Hcal
-
+  void setEtGainMode(int v=0) {mEtGainMode=v;}   //! set Et Gain Setting 0=Auto from run#, 1=Old, 2=New(23027048)
+  
   //! Setting DB table
   void setFcsDetectorPosition(fcsDetectorPosition_st* t); //! set fcsDetectorPosition_st*
   void setFcsEcalGain(fcsEcalGain_st*);                   //! set fcsEcalGain_st*
@@ -134,6 +138,9 @@ public:
   void setFcsEcalGainCorr(fcsEcalGainCorr_st*);           //! set fcsEcalGainCorr_st*
   void setFcsHcalGainCorr(fcsHcalGainCorr_st*);           //! set fcsHcalGainCorr_st*
   void setFcsPresValley(fcsPresValley_st*);               //! set fcsPresValley_st*
+  void setFcsEcalGainOnline(fcsEcalGainOnline_st*);       //! set fcsEcalGainOnline_st*
+  void setFcsHcalGainOnline(fcsHcalGainOnline_st*);       //! set fcsHcalGainOnline_st*
+  void setFcsPresThreshold(fcsPresThreshold_st*);         //! set fcsPresThreshold_st*
 
   //! Utility functions related to FCS ChannelGeometry
   int maxDetectorId() const;              //! 6
@@ -216,6 +223,10 @@ public:
   float getGainCorrection(StFcsHit* hit) const;        //! get the gain correction for the channel    
   float getPresValley(int det, int id) const;      //! get the pres valley position for cut
   float getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
+  float getGainOnline(int det, int id) const;      //! get the gain correction for the channel    
+  float getGainOnline(StFcsHit* hit) const;        //! get the gain correction for the channel    
+  float getPresThreshold(int det, int id) const;   //! get the pres valley position for cut
+  float getPresThreshold(StFcsHit* hit) const;     //! get the pres valley position for cut
 
   enum GAINMODE { FIXED, DB, FORCED, TXT }; //! Gain mode switch
   void forceFixGain()                      {mGainMode=GAINMODE::FIXED;}       //! fixed default gain
@@ -231,6 +242,12 @@ public:
     mForceUniformGainCorrectionEcal=ecal;
     mForceUniformGainCorrectionHcal=hcal;
     mForceUniformGainCorrectionPres=pres;
+  } 
+  void forceUniformGainOnline(float ecal, float hcal=1.0, float pres=0.5){
+    mGainCorrMode=GAINMODE::FORCED; //! force a specified value
+    mForceUniformGainOnlineEcal=ecal;
+    mForceUniformGainOnlineHcal=hcal;
+    mForceUniformGainOnlinePres=pres;
   } 
 
   //! reading gain from text files
@@ -308,6 +325,7 @@ public:
   int   mDebug=0;                        //! >0 dump tables to text files    
   int   mRun19=0;                        //! run19 flag
   int   mLeakyHcal=0;                    //! LeakyHcal has different center positions
+  int   mEtGainMode=0;                   //! ET Gain Setting
 
   GAINMODE mGainMode = GAINMODE::DB;      //! Gain mode selection 
   float mForceUniformGainEcal=-1.0;       //! forcing a value
@@ -322,11 +340,17 @@ public:
   float mForceUniformGainCorrectionPres=-1.0; //! forcing a value
   char  mGainCorrFilename[256];               //! gaincorr filename
   void readGainCorrFromText();
+
+  GAINMODE mGainOnlineMode = GAINMODE::DB;    //! GainOnline mode selection 
+  float mForceUniformGainOnlineEcal=-1.0;     //! forcing a value
+  float mForceUniformGainOnlineHcal=-1.0;     //! forcing a value
+  float mForceUniformGainOnlinePres=-1.0;     //! forcing a value
  
   //DEP sorted ped/gain/corr
   float mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Pedestal   
   float mGain[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Gain
   float mGainCorr[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! GainCorr (Valley value for PRES) 
+  float mGainOnline[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! GainOnline (Threshold value for PRES) 
    
   //Beam line parameters
   double mVx=0.0;      //! beamline x offset
@@ -344,6 +368,9 @@ public:
   fcsEcalGainCorr_st      mFcsEcalGainCorr;
   fcsHcalGainCorr_st      mFcsHcalGainCorr;
   fcsPresValley_st        mFcsPresValley;
+  fcsEcalGainOnline_st    mFcsEcalGainOnline;
+  fcsHcalGainOnline_st    mFcsHcalGainOnline;
+  fcsPresThreshold_st     mFcsPresThreshold;
 
   /// Getting pointer to parent & primary g2t_track from StFcsCluster
   /// mode=0 for parent, and mode=1 for primary
