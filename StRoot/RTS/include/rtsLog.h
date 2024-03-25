@@ -92,25 +92,10 @@ void rtsLogAddJmlFile (char *fname);
 
 
 
-
-
-
 #ifndef RTS_ENABLE_LOG
-
 #define RTS_ASSERT(expr)	assert(expr)
 #define LOG(SEV,STRING,ARGS...)
-#define rtsLogUnix_v(str, ...)
-#define rtsLogAddCmd(x)
-
-
-// the following become noops...
-#define rtsLogLevel(x)
-#define rtsLogAddDest(x,y)
-#define rtsLogLevelInt(x)
-#define rtsLogOutput(x)
-
-#else	/* RTS_ENABLE_LOG */
-
+#endif
 
 #ifdef __GNUC__
 	#define INLINE_HACK extern __inline__
@@ -182,7 +167,7 @@ INLINE_HACK void rtsLogLevel(const char *level)
 		#define sbLOG(args...) 
 	#endif
 
-
+#ifdef RTS_ENABLE_LOG
 	#define LOG(SEV,STRING,A1,A2,A3,A4,A5) \
         do { \
                 const char *const yada = SEV ; \
@@ -195,15 +180,17 @@ INLINE_HACK void rtsLogLevel(const char *level)
 		    logMsg((char *)"" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ; \
 		    sbLOG((char *)"" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ; \
 		} \
-	} while(0) \
+	} while(0) 
 
+#endif // RTS_ENABLE_LOG
 	
 	#define rtsLogOutput(x)
 
 #else /* unix */
 
+#ifdef RTS_ENABLE_LOG
 	#define RTS_ASSERT(expr)        LOG(CRIT,"assert(%s) true -- certain death follows",__STRING(expr))
-
+#endif
 	extern int rtsLogUnix_v(const char *str, ...) ;
 
 	extern int rtsLogOutput(int flag) ;
@@ -212,6 +199,7 @@ INLINE_HACK void rtsLogLevel(const char *level)
 
 	extern int rtsLogAddFile(char *fname) ;
 
+#ifdef RTS_ENABLE_LOG
 #ifdef RTS_LOG_COLORED
 
 	#define LOG(SEV,STRING,ARGS...) \
@@ -242,16 +230,12 @@ INLINE_HACK void rtsLogLevel(const char *level)
 	} while(0) \
 
 
-
 #endif  /* RTS_LOG_COLORED */
-
+#endif  /* ENABLE LOG */
 #endif  /* __vxworks */
-
-
-#endif	/* RTS_ENABLE_LOG */
 
 #ifdef __cplusplus
 }
-#endif
+#endif  /* __cplusplus */
 
 #endif	/* _RTS_LOG_H */
