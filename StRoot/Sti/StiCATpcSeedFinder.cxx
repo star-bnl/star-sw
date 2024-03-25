@@ -192,5 +192,3 @@ StiDebug::Count("Reused_Pct",reUsed, pct);
   }
   mEnded = 3; return 0;
 }
-//________________________________________________________________________________
-StiCATpcSeedFinder* StiCALoader::New() { return new StiCATpcSeedFinder;}

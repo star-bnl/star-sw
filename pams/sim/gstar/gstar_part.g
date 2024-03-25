@@ -524,6 +524,22 @@ MODULE gstar_part Is the STAR Particle Database
                              pdg       = -PDG_ION_ID(2,3) ,
                              trktyp    = kGtHION
 
+
+  *  requested by JieZhao ... Be8 (alpha clusters) decay into 2 alphas
+
+  Particle Be8s0  code = 50060  TrkTyp=8, mass = 7.45485, charge=4, tlife=1.1817e-19,
+                  pdg=PDG_ION_ID(4,8)  bratio={1,} mode={ 4747,}
+  Particle Be8s2  code = 50061  TrkTyp=8, mass = 7.45788, charge=4, tlife=4.3502e-22,
+                  pdg=PDG_ION_ID(4,8)  bratio = {1,}        mode={47 47,}
+  Particle Be8s4  code = 50062  TrkTyp=8, mass = 7.46620, charge=4, tlife=1.8805e-22,
+                  pdg=PDG_ION_ID(4,8)  bratio = {1,}        mode={47 47,}
+  Particle C12hs  code = 50063  TrkTyp=8, mass =11.18251, charge=6, tlife=7.0773e-17,
+                  pdg=PDG_ION_ID(6,6) bratio = {1,}        mode={50060 47,}
+
+  uw = { 0, 50060, 47 }
+  Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+
   PARTICLE Deuteron code      = 51045            , 
                     mass      = 1.876            ,
                     charge    = 1.0             ,
