@@ -29,21 +29,35 @@ public:
     //! structure containing tube parameters
 	struct SingleTubeParams{
         float singleTubeRes;    //!< Resolution of a particular Vpd tube in ps
-        int tubeId;             //!< Tube Id (number) [0,37] with west Vpd [0,18] and east Vpd [19,37]
-        int tubeStatusFlag;     //!< Status flag for whether tube was active (1) or inactive (0)
-        int tubeTriggerFlag;    //!< Status flag for whether tube was triggered on (1) or not (0)
+        int tubeId,             //!< Tube Id (number) [0,37] with west Vpd [0,18] and east Vpd [19,37]
+            tubeStatusFlag,     //!< Status flag for whether tube was active (1) or inactive (0)
+            tubeTriggerFlag;    //!< Status flag for whether tube was triggered on (1) or not (0)
 	};
 
-/// calculate correct resolution based on those tubes that were used
-double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
-	double vpdResSumSqr(0.), vpdresolution(0.);
-	for (int i=0; i<19; i++){
-		if (1 << i && mVPDHitPatternEast) vpdResSumSqr += (mSimParams[i].singleTubeRes)*(mSimParams[i].singleTubeRes);
-		if (1 << i && mVPDHitPatternWest) vpdResSumSqr += (mSimParams[i+19].singleTubeRes)*(mSimParams[i+19].singleTubeRes);
+	/**
+	 * @brief Calculate correct resolution based on those tubes that were used.
+	 * 
+	 * @param mVPDHitPatternEast 9 digit binary number specifying hit pattern of east VPD tubes.
+	 * @param mVPDHitPatternWest 9 digit binary number specifying hit pattern of west VPD tubes.
+	 * @return double vpd resolution.
+	 */
+	double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
+		double vpdResSumSqr(0.),
+			   vpdresolution(0.);
+		int    total_vpd_hits = 0; //Total number of vpd tubes used.
+		for (int i=0; i<19; i++){
+			if (1 << i & mVPDHitPatternEast) {
+				vpdResSumSqr += (mSimParams[i].singleTubeRes)*(mSimParams[i].singleTubeRes);
+				total_vpd_hits += 1;
+			}
+			if (1 << i & mVPDHitPatternWest) {
+				vpdResSumSqr += (mSimParams[i+19].singleTubeRes)*(mSimParams[i+19].singleTubeRes);
+				total_vpd_hits += 1;
+			}
 		}
-  	vpdresolution = sqrt(vpdResSumSqr);
-	return vpdresolution;
-}
+		vpdresolution = sqrt(vpdResSumSqr)/total_vpd_hits;
+		return vpdresolution;
+	}
 
     /**
     * Calculates the average resolution across all 38 tubes (discounts inactive tubes)
