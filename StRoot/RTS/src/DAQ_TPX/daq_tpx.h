@@ -79,6 +79,8 @@ private:
 
 	tpx23 *t23 ;
 
+
+
 protected:
 
 public:
@@ -90,6 +92,8 @@ public:
 	char fcf_afterburner_disable ;
 	char fcf_run_compatibility ;
 	char fcf_do_cuts ;
+
+	u_char mode ;
 
 	// for use by simulation
 	int sim_row_count ;

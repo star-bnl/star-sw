@@ -39,6 +39,7 @@ u_int fcs_data_c::run_type ;
 
 // for ZS
 float fcs_data_c::n_sigma ;
+float fcs_data_c::n_sigma_hcal ;
 float fcs_data_c::n_sigma_epd ;
 short fcs_data_c::n_pre ;
 short fcs_data_c::n_post ;
@@ -267,6 +268,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	float sigma ;
 
 	if(hdr_det==2) sigma = n_sigma_epd ;
+	else if(hdr_det==1) sigma = n_sigma_hcal ;
 	else sigma = n_sigma ;
 
 	// trigger channels are special so figure this out

@@ -1353,7 +1353,7 @@ int tpc23_base::run_start()
 	evt_trgd = 0 ;
 
 	run_errors = 0 ;
-	fee_errs = 0 ;
+//	fee_errs = 0 ;
 
 	return 0 ;
 
@@ -1384,6 +1384,7 @@ tpc23_base::tpc23_base()
 	s2_words = 0 ;
 
 	no_cld = 0 ;
+	mode = 0 ;
 
 //	rp_gain_tpx = 0 ;
 //	rp_gain_itpc = 0 ;

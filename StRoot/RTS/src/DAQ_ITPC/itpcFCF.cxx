@@ -1250,7 +1250,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 			int b_ix = blob_ix[ix] ;
 
-			LOG(TERR,"  using bix %d %d",ix,b_ix) ;
+			//LOG(TERR,"  using bix %d %d",ix,b_ix) ;
 			if(b_ix != ix) {
 				LOG(WARN,"Can't be: %d %d, RP %d:%d",b_ix,ix,row,p) ;
 			}
@@ -1347,7 +1347,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 
 
-#if 1
+#if 0
 	LOG(TERR,"Blobs OK %d/%d in row %d",blob_ok,blob_cou,row) ;
 
 	for(int i=0;i<blob_cou;i++) {
@@ -1975,25 +1975,25 @@ int itpc_fcf_c::do_row_check(int row)
 	}
 	
 	for(int i=1;i<blob_cou;i++) {
-		LOG(TERR,"blob_ix[%d] = %d",i,blob_ix[i]) ;
+	    LOG(DBG,"blob_ix[%d] = %d",i,blob_ix[i]) ;
 
 	}
 
 	for(int i=1;i<blob_cou;i++) {
 		if(blob[i].cou) {
-			LOG(TERR," Blob %d: %d",i,blob[i].cou) ;
+		    LOG(DBG," Blob %d: %d",i,blob[i].cou) ;
 			max_ix++ ;
 		}
 	}
 
 	for(int i=1;i<max_ix;i++) {
 		if(blob[i].merges) {
-			LOG(TERR,"blob %d: merged %d",i,blob[i].merges) ;
+			LOG(DBG,"blob %d: merged %d",i,blob[i].merges) ;
 		}
 	}
 
 
-	LOG(TERR,"Final blob count %d/%d",max_ix,blob_cou) ;
+	LOG(DBG,"Final blob count %d/%d",max_ix,blob_cou) ;
 
 	return 0 ;
 	

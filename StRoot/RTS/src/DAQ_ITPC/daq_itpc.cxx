@@ -76,10 +76,8 @@ daq_itpc::daq_itpc(daqReader *rts_caller)
 
 	it23 = 0 ;	// assume we won't use it
 	online = 0 ;
+	mode = 0 ;
 
-//	it23 = new itpc23 ;	
-//	it23->no_cld = 1 ;
-//	it23->log_level = 2 ;
 
 	memset(fcf,0,sizeof(fcf)) ;
 	fcf_det_type = 1 ;	// ITPC
@@ -535,6 +533,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 				it23->run_type = 3 ;	// NO CLUSTER FINDER PLEASE
 				it23->no_cld = 1 ;
 				it23->log_level = 0 ;
+				it23->mode = mode ;
 			}
 			it23->data_c = &sampa_c ;
 
@@ -559,6 +558,10 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 			//LOG(WARN,"S%02d:%d: rdo_fmt %d -- scan will fail",s,r,rdo_fmt) ;
 			it23->set_rdo(s,r) ;
 			ret = it23->rdo_scan((char *)dta,words) ;
+
+			if((it23->err || ret) && mode) {
+				LOG(ERR,"S%02d:%d: rdo_scan 0x%X, err 0x%X, words %d",s,r,ret,it23->err,words) ;
+			}
 		}
 		else {
 			ret = it->rdo_scan_top(dta,words) ;

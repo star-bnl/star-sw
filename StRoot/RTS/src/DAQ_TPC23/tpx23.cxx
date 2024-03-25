@@ -58,10 +58,11 @@ int tpx23::fee_scan()
 {
 	u_int *h ;
 	err = 0 ;	// in class
+	int id_pre = -1 ;
+	int ch_pre = -1 ;
+	int s_cou ;
+	char retry ;
 
-//	u_char altro_present[256][16] ;
-
-	
 	get_token((char *)d_start,words) ;
 
 	TLOG() ;
@@ -85,16 +86,12 @@ int tpx23::fee_scan()
 	// last valid FEE word is at d_end
 	h = d_end ;
 
-
-//	memset(altro_present,0,sizeof(altro_present)) ;
-	if(hdr_version) {
-		
-
-	}
-
 	TLOGX(rdo1) ;
 
-	if(log_level>0) LOG(TERR,"%d: fee_scan",rdo1) ;
+	if(log_level>0) LOG(TERR,"%d: fee_scan",rdo1) ;	
+
+	u_int *h_to_continue ;
+	retry = 0 ;
 
 	// NOTE: ALTRO scans from the end!!!
 	while(h>(d_start+2)) {
@@ -108,13 +105,85 @@ int tpx23::fee_scan()
 		hi &= 0xFFFFF ;
 
 		int wc = ((hi&0x3F)<<4)|((lo&0xF0000)>>16) ;    // altro's word count
-		if(wc==0) continue ;
+
 
 		int id = (lo&0xFF0) >> 4 ;      // altro id
 		int ch = lo & 0xF ;
 
+		// sanity checks: 0xAAA & 0xA
+		u_int aaa = hi>>6 ;
+		u_int a = (lo>>12)&0xF ;
+
+	
+		if((aaa!= 0x2AAA)||(a!=0xA)||(wc>437)) {
+			run_errors++ ;
+			if(run_errors<20) {
+				if((online || mode) && retry==0) {
+					LOG(ERR,"S%02d:%d: aid %d:%d, %d:%d: aaa 0x%X, a 0x%X, wc %d, %d",
+					    sector1,rdo1,id,ch,id_pre,ch_pre,aaa,a,wc,d_end-h) ;
+				}
+			}
+			if(1) {
+				h++ ;
+				//LOG(ERR,"Retry aaa") ;
+				retry = 1 ;
+				continue ;
+			}
+		}
+
+		if(wc==0) {
+			id_pre = id ;
+			ch_pre = ch ;
+			continue ;
+		}
+
+
 		TLOGX(id) ;
 
+
+//		if(mode & 3) {	// debugging!
+			u_int aa = ((h[1]&0xFFFFF)>>10) ;
+
+			//LOG(TERR,"aid %d:%d: 0x%X 0x%X",id,ch,h[0]&0xFFFFF,h[1]&0xFFFFF) ;
+
+			if(aa != 0x2AA) {
+				run_errors++ ;
+				if(run_errors<20) {
+					if((online || mode) && retry==0) {
+						LOG(ERR,"S%02d:%d: aid %d:%d, %d:%d: aaa 0x%X, a 0x%X, aa 0x%X, wc %d",
+						    sector1,rdo1,id,ch,id_pre,ch_pre,aaa,a,aa,wc) ;
+					}
+				}
+
+				if(1) {
+					h++ ;
+					//LOG(ERR,"Retry aa") ;
+					retry = 1 ;
+					continue ;
+				}
+			}
+			else {
+					//LOG(WARN,"S%02d:%d: aid %d:%d, %d:%d: aaa 0x%X, a 0x%X, aa 0x%X, wc %d",
+					//    sector1,rdo1,id,ch,id_pre,ch_pre,aaa,a,aa,wc) ;
+				
+
+			}
+
+//		}
+	
+		if(retry) {
+			if(online || mode) {
+				if(run_errors<20) {
+				LOG(WARN,"S%02d:%d: aid %d:%d, %d:%d: aaa 0x%X, a 0x%X, wc %d, %d -- OK",
+				    sector1,rdo1,id,ch,id_pre,ch_pre,aaa,a,wc,d_end-h) ;
+				}
+			}
+		}
+
+		retry = 0 ;
+
+		h_to_continue = h ;	// h+1
+	
 		for(int i=0;i<tpx_fee_override_cou;i++) {
 			if(sector1 == tpx_fee_override[i].sector) {
 			if(rdo1==tpx_fee_override[i].rdo) {
@@ -141,15 +210,18 @@ int tpx23::fee_scan()
 		// get row,pad & flags and skip the pad if there are flags
 		int flags = flags_row_pad(id,ch,row,pad) ;
 
+#if 0
 		// max wc in pedestal runs is 437
 		if(wc>437) {	// garbage in the event... and now what???
 			run_errors++ ;
 			if(run_errors<10) {
-				if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d) : wc %d",sector1,rdo1,row,pad,id,ch,wc) ;
+				if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d, %d:%d) : wc %d",sector1,rdo1,row,pad,
+					       id,ch,id_pre,ch_pre, wc) ;
 			}
 			//err |= 0x10000 ;	// signal an error because I am breaking out
 			break ;	
 		}
+#endif
 
 		while(wc%4) wc++ ;
 
@@ -260,12 +332,19 @@ int tpx23::fee_scan()
 			if(t_len>440 || t_hi>440 || t_lo>440) {
 				run_errors++ ;
 				if(run_errors<20) {
-					if(online) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d), t_len %d, t_lo %d, t_hi %d",sector1,rdo1,row,pad,
-					    id,ch,
-					    t_len,t_lo,t_hi) ;
+					if(online||mode) LOG(ERR,"S%02d:%d: rp %d:%d (aid %d:%d, %d:%d), t_len %d, t_lo %d, t_hi %d; wc %d, ix %d, seq %d, %d",
+						       sector1,rdo1,row,pad,
+						       id,ch,id_pre,ch_pre,
+						       t_len,t_lo,t_hi,wc,ix,seq_ix,d_end-h) ;
 				}
-				if(t_len>510 || t_hi>510 || t_lo>510) {
+				if(t_len>440 || t_hi>440 || t_lo>440) {
 					//err |= 0x20000 ; 
+					if(1) {
+						//LOG(ERR,"Retry rp") ;
+						h = h_to_continue ;
+						retry = 1 ;
+						goto end_loop ;
+					}
 					break ;
 				}
 
@@ -365,7 +444,7 @@ int tpx23::fee_scan()
 
 
 		//LOG(TERR,"Here 2") ;
-		int s_cou = 0 ;
+		s_cou = 0 ;
 		dd = d ;
 		seq = s1[row][pad].seq ;
 
@@ -417,8 +496,10 @@ int tpx23::fee_scan()
 		}
 #endif
 
-
+		id_pre = id ;
+		ch_pre = ch ;
 		
+		end_loop:;
 	}
 
 
@@ -797,7 +878,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 			
 			if(strstr(tmpbuff+st,"FEE power BAD")) {
 				//err_status |= DET_ERR_OPER_PS ;
-				LOG(ERR,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
+				//LOG(ERR,"---> [S%d:%d LOG] FEE power BAD -- powercycle (ignored)",s_real,r_real) ;
 				//err = -1 ;
 			}
 		}
@@ -843,6 +924,7 @@ int tpx23::log_dump(char *c_addr, int wds)
 	
 		if(strstr(tmpbuff+st,"altro error")) {
 			err = -1 ;
+			err_status |= 3 ;
 			LOG(ERR,"---> [%d LOG] altro error -- restart run",rdo) ;
 		}
 	
@@ -852,7 +934,9 @@ int tpx23::log_dump(char *c_addr, int wds)
 			//LOG(WARN,"---> [%d LOG] ERR ALTRO -- CHECK THIS",rdo) ;
 		}
 	
-
+		if(strstr(tmpbuff+st,"ERR: expired")) {
+			err = -1 ;
+		}
 		
 		
 		if(err<0) {
