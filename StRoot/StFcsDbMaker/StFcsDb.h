@@ -106,6 +106,7 @@
 #include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
@@ -119,7 +120,6 @@ public:
   int  Init();
   int  InitRun(int runNumber);
  
-  void SetDebug(int v=1) {mDebug=v;}  //! debug level
   void setDebug(int v=1) {mDebug=v;}  //! debug level
   void setDbAccess(int v=1);  //! enable(1) or disable(0) offline DB access
   void setRun(int run);       //! set run# 
@@ -157,7 +157,15 @@ public:
   static unsigned short getIdFromKey(unsigned short key);
 
   //! Utility functions related to DetectorPosition
-  StThreeVectorD getDetectorOffset(int det) const;  //! get the offset of the detector
+  /** @brief  get the offset of the detector.
+
+      Get the inside corner of a given detector in global STAR coordinates. The x coordinate refers to the inside edge (closer to beam pipe). The y coordinate refers to the y-center of the detector. z coordinate is the front face of the detector unless zdepth>0.
+
+      @param det detector id to get for offset
+      @param zdepth depth in z of the detector to get point for. Negative values return z of front face
+   */
+  StThreeVectorD getDetectorOffset(int det, double zdepth=-1) const;
+  StThreeVectorD getNormal(int det) const;                            //! This is the vector normal to the detector plane
   float getDetectorAngle(int det) const;  //! get the angle of the detector
   float getXWidth(int det) const; //! get the X width of the cell
   float getYWidth(int det) const; //! get the Y width of the cell
@@ -275,6 +283,25 @@ public:
   const g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
   const g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
 
+  StThreeVectorD projectTrackToEcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const;//!< project a g2t track to Ecal with a given track and vertex. If no vertex given assume a vertex of (0,0,0)
+  StThreeVectorD projectTrackToHcal(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const;//!< project a g2t track to Hcal with a given track and vertex. If no vertex given assume a vertex of (0,0,0)
+  StThreeVectorD projectTrackToEcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const; //!< SMax = Shower Max Z
+  StThreeVectorD projectTrackToHcalSMax(const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert=0) const; //!< SMax = Shower Max Z
+  StThreeVectorD projectTrack(int det, const g2t_track_st* g2ttrk, const g2t_vertex_st* g2tvert, double showermaxz=-1) const;//!< Generic g2t track projection function but #det and #showermaxz needs to be specified; if #det or #showermaxz not known use corresponding #projectTrackToEcal(), #projectTrackToHcal(), #projectTrackToEcalSMax, #projectTrackToHcalSMax instead
+  StThreeVectorD projectLine(int det, StThreeVectorD &linedirection, StThreeVectorD &lineorigin, double showermaxz=-1) const;//!< Like #projectLine(det, double*, double*, double) except use StThreeVectorD for line direction and origin
+  /**@brief XYZ of a projected line to the FCS detector plane
+     
+     Get the STAR XYZ that corresponds to the intersection of the FCS plane and a line given by the direction of some azimuthal angle and polar angle. You can also specify the origin of the line in the global STAR XYZ coordinates.
+     
+     Note: if you choose the wrong detector for a given polar angle you will get the wrong projection so please use #projectTrackToEcal(), #projectTrackToHcal(), #projectTrackToEcalSMax(), or #projectTrackToHcalSMax() to take into account which polar angle goes to which detector.
+     
+     @param det detector id to project line to (needed for correct angle).
+     @param linedirection size 3 array indicating the direction of the line to project onto #det, first element x-direction, second element y-direction, third element z-direction
+     @param lineorigin size 3 array indication the origin of the line to project onto #det, first element is x-coordinate, second element is y-coordinate, third element is z-coordinate
+     @param zhowermax depth in z of the detector to project the line to. Any negative value will use #getShowerMaxZ()
+  */
+  StThreeVectorD projectLine(int det, double* linedirection, double* lineorigin, double showermaxz=-1) const;
+  
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#

@@ -2542,6 +2542,9 @@ If LL>0
   case y2023 { y2023: y2023 first cut geometry; Geom =        'y2023     '; call geom_y2023;} 
   case y2023a { y2023a: y2023a production tag; Geom =         'y2023a    '; call geom_y2023a;} 
 
+  case y2024 { y2024: y2024 first cut geometry; Geom =        'y2024     '; call geom_y2024;} 
+  case y2024a { y2024a: y2024a production tag; Geom =         'y2024a    '; call geom_y2024a;} 
+
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
   case dev2022 { dev2022:  First cut forward upgrades; Geom =        'dev2022   '; call geom_dev2022;} 
   case dev2022m { dev2022m:  First cut forward upgrades; Geom =        'dev2022m   '; call geom_dev2022m;}

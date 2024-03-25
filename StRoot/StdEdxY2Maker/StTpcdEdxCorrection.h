@@ -25,7 +25,7 @@ struct dE_t {
 };
 //________________________________________________________________________________
 struct dEdxCorrection_t {
-  dEdxCorrection_t(const Char_t *name = "",const  Char_t *title = "", TChair *chair=0, Int_t n=0) : 
+  dEdxCorrection_t(const Char_t *name = "",const  Char_t *title = "", TChair *chair=0) : 
     Name(name), Title(title), Chair(chair) {}
   const Char_t *Name;
   const Char_t *Title;
@@ -62,7 +62,7 @@ class StTpcdEdxCorrection : public TObject {
       kzCorrection           = 22,//Z  					     
       ktpcMethaneIn          = 23,//m  					     
       ktpcGasTemperature     = 24,//T  					     
-      ktpcWaterOut           = 25,//W   				7       	   
+      ktpcWaterOut           = 25,//W   				       	   
       kSpaceCharge           = 26,//C   space charge near the wire	       	   
       kPhiDirection          = 27,//p   correction wrt local interception angle  
       kTanL                  = 28,//p   correction wrt local tan(lambda)  

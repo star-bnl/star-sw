@@ -67,7 +67,7 @@ class AgShape : public TNamed, public AgParameterList<double>
   Bool_t morphed();
 
   /// Return a list of the parameters which define this shape
-  std::vector< TString > &parList(){ return mParList[mId]; }
+  std::vector< TString > &parList();
 
   /// Returns true if the shape's parameters are to be set
   /// when positioned

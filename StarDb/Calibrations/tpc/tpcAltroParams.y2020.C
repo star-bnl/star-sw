@@ -1,3 +1,5 @@
+#include "tables/St_tpcAltroParams_Table.h"
+
 TDataSet *CreateTable()
 	{ 
 	if (!gROOT->GetClass("St_tpcAltroParams")) return 0;

@@ -1,3 +1,5 @@
+#include "tables/St_ftpcInnerCathode_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/ftpc/.ftpcInnerCathode/ftpcInnerCathode Allocated rows: 1  Used rows: 1  Row size: 16 bytes

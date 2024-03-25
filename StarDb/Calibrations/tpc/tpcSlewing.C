@@ -1,3 +1,5 @@
+#include "tables/St_tpcSlewing_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcSlewing")) return 0;
   tpcSlewing_st row;

@@ -1,3 +1,5 @@
+#include "tables/St_ems_cal_control_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/ems_cal_control Allocated rows: 1  Used rows: 1  Row size: 52 bytes

@@ -80,8 +80,10 @@ void PeakAnaPainter::Paint(Option_t* opt)
   bool drawgraph = true;
   bool region = false;
   bool drawbaselines = false;
-  bool drawfoundpeakqa = false;
-  bool drawfullpeakqa = false;
+  bool drawfoundpeakrange = false;
+  bool drawallpeakranges = false;
+  bool drawfoundmarker = false;
+  bool drawallmarkers = false;
 
   std::size_t firstcolon = option.find(";");
   if( firstcolon!=std::string::npos ){
@@ -99,19 +101,22 @@ void PeakAnaPainter::Paint(Option_t* opt)
 
   mPeakOption.ToLower();
   if( mGraphOption.Length()==0 ){ drawgraph=false; }
-  //if( peakopts.Contains("e") ){ drawgraph=false; }
   if( mPeakOption.Contains("r") ){ region=true; }
   if( mPeakOption.Contains("b") ){ drawbaselines=true; }
-  if( mPeakOption.Contains("f") ){ drawfoundpeakqa=true; }
-  if( mPeakOption.Contains("p") ){ drawfullpeakqa=true;  }
-  if( mPeakOption.Contains("a") ){ drawbaselines=true; drawfullpeakqa=true; }
+  if( mPeakOption.Contains("f") ){ drawfoundpeakrange=true; }
+  if( mPeakOption.Contains("p") ){ drawfoundpeakrange=true; drawallpeakranges=true; }
+  if( mPeakOption.Contains("m") ){ drawfoundmarker=true; }
+  if( mPeakOption.Contains("w") ){ drawfoundmarker=true; drawallmarkers=true; }
+  if( mPeakOption.Contains("e") ){ drawfoundpeakrange=true; drawallpeakranges=true; drawfoundmarker=true; drawallmarkers=true; }
+  if( mPeakOption.Contains("a") ){ drawbaselines=true; drawfoundpeakrange=true; drawallpeakranges=true; drawfoundmarker=true; drawallmarkers=true; }
 
-  if( drawfoundpeakqa && drawfullpeakqa ){ drawfoundpeakqa=false; }//Redundant to do both found and all peaks
   if( drawgraph )                { this->PaintRawData(); }
   if( region && drawgraph )      { this->PaintFoundPeak(); } //Doesn't make sense to restrict graph range if graph is not being drawn
   if( drawbaselines )            { this->PaintBaselines(); }
-  if( drawfoundpeakqa )          { this->PaintFoundPeakQa(); }
-  if( drawfullpeakqa )           { this->PaintPeakRanges(); }
+  if( drawfoundpeakrange )       { this->PaintFoundPeakRange(); }
+  if( drawallpeakranges )        { this->PaintPeakRanges(); }
+  if( drawfoundmarker )          { this->PaintFoundMarker(); }
+  if( drawallmarkers )           { this->PaintPeakMarkers(); }
   if( mStatsOption.Length()!=0 ) { this->PaintStats(); }
 }
 
@@ -143,35 +148,9 @@ void PeakAnaPainter::PaintRawData( )
 void PeakAnaPainter::PaintFoundPeak( )
 {
   if( !ValidGraph()){return;}
-
   Double_t Xmin = mPA->PeakStart();
   Double_t Xmax = mPA->PeakEnd();
   if( !(Xmin>mPA->MaxX() || Xmax>mPA->MaxX()) ){mPA->GetData()->GetXaxis()->SetRangeUser(Xmin-5,Xmax+5);}
-}
-
-void PeakAnaPainter::PaintFoundPeakQa()
-{
-  if( !ValidGraph() ){return;}
-
-  Int_t computedindex = mPA->FoundPeakIndex();
-  if( computedindex<0 ){ computedindex = mPA->AnalyzeForPeak(); }
-  this->PaintBaselines();
-  this->PaintFoundRange();
-
-  return;
-}
-
-void PeakAnaPainter::PaintPeakQa( )
-{
-  if( !ValidGraph() ){return;}
-
-  Int_t computedindex = mPA->FoundPeakIndex();
-  if( computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
-
-  this->PaintBaselines();
-  this->PaintPeakRanges();
-
-  return;
 }
 
 void PeakAnaPainter::PaintBaselines()
@@ -189,8 +168,9 @@ void PeakAnaPainter::PaintBaselines()
   mTheHitLine->Paint();
 }
 
-void PeakAnaPainter::PaintFoundRange()
+void PeakAnaPainter::PaintFoundPeakRange()
 {
+  if( !ValidGraph() ){return;}
   Int_t computedindex =  mPA->FoundPeakIndex();
   if( computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
   if( computedindex == mPA->NPeaks() ){return;}//If no peak found then computed index is equal to number of peaks in peak vector
@@ -198,17 +178,15 @@ void PeakAnaPainter::PaintFoundRange()
   TLine* sl = mPA->GetPeak(computedindex).GetStartLine(mPA->MinY(),mPA->MaxY());
   sl->SetLineColor(kRed);
   sl->Paint();
-  TMarker* mp = mPA->GetPeak(computedindex).GetPeakMarker();
-  mp->SetMarkerColor(kViolet);
-  mp->SetMarkerSize(mPA->GetMarkerSize()*2.0);
-  mp->Paint();
   TLine* el = mPA->GetPeak(computedindex).GetEndLine(mPA->MinY(),mPA->MaxY());
   el->SetLineColor(kOrange);
   el->Paint();
 }
 
+
 void PeakAnaPainter::PaintPeakRanges( )
 {
+  if( !ValidGraph() ){return;}
   Int_t computedindex =  mPA->FoundPeakIndex();
   if(computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
 
@@ -226,9 +204,35 @@ void PeakAnaPainter::PaintPeakRanges( )
     mp->Paint();
     mPA->GetPeak(ipeak).GetEndLine( mPA->MinY(), mPA->MaxY() )->Paint();
   }
-  this->PaintFoundRange();
 
   return;
+}
+
+void PeakAnaPainter::PaintFoundMarker()
+{
+  if( !ValidGraph() ){return;}
+  Int_t computedindex =  mPA->FoundPeakIndex();
+  if( computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
+  if( computedindex == mPA->NPeaks() ){return;}//If no peak found then computed index is equal to number of peaks in peak vector
+
+  TMarker* mp = mPA->GetPeak(computedindex).GetPeakMarker();
+  mp->SetMarkerColor(kViolet);
+  mp->SetMarkerSize(mPA->GetMarkerSize()*2.0);
+  mp->Paint();
+}
+
+void PeakAnaPainter::PaintPeakMarkers()
+{
+  if( !ValidGraph() ){return;}
+  Int_t computedindex =  mPA->FoundPeakIndex();
+  if(computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
+
+  for( UShort_t ipeak = 0; ipeak<mPA->NPeaks(); ++ipeak ){
+    if( ipeak==computedindex ){continue;}
+    TMarker* mp = mPA->GetPeak(ipeak).GetPeakMarker();
+    mp->SetMarkerSize(mPA->GetMarkerSize()*2.0);
+    mp->Paint();
+  }
 }
 
 void PeakAnaPainter::PaintStats()

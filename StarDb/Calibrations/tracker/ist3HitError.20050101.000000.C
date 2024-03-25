@@ -1,3 +1,5 @@
+#include "tables/St_HitError_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.ist3HitError/ist3HitError Allocated rows: 1  Used rows: 1  Row size: 48 bytes

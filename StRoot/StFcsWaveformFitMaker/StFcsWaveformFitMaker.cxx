@@ -370,7 +370,7 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
 }
 
 int StFcsWaveformFitMaker::Finish(){
-  if(mFilename && mPad>=0){
+  if( mFilename ){
     char file[200];
     sprintf(file,"%s.pdf]",mFilename);
     mCanvas->Print(file);
@@ -510,8 +510,8 @@ int StFcsWaveformFitMaker::Make() {
 	  float gain = mDb->getGain(hits[i]);
 	  float gaincorr = mDb->getGainCorrection(hits[i]);
 	  hits[i]->setEnergy(integral*gain*gaincorr);
-	  if(GetDebug()>0) printf("det=%1d id=%3d integ=%10.2f peak=%8.2f, sig=%8.4f chi2=%8.2f npeak=%2d\n",
-				  det,hits[i]->id(),integral,res[2],res[3],res[4],int(res[5]));
+	  if(GetDebug()>0){ printf("det=%1d id=%3d integ=%10.2f peak=%8.2f, sig=%8.4f chi2=%8.2f npeak=%2d ped=%8.2f pedrms=%4.2f\n",
+				   det,hits[i]->id(),integral,res[2],res[3],res[4],int(res[5]),res[6],res[7]); }
 	  if(mMeasureTime){
 	    auto stop=std::chrono::high_resolution_clock::now();
 	    long long usec = chrono::duration_cast<chrono::microseconds>(stop-start).count();
@@ -780,6 +780,7 @@ float StFcsWaveformFitMaker::sum8(TGraphAsymmErrors* g, float* res){
 	}
     }
     //res[0]/=1.226; //Compensate for fitting sum in ECal. Only turn on for testing comparisons
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*8; }//pedestal subtraction for sum8. 8 timebi sum, so pedestal*8 is integrated sum of pedestal.
     res[0]=sum;
     if(sum>0) res[2]=tsum/sum;
     return sum;
@@ -800,6 +801,7 @@ float StFcsWaveformFitMaker::sum16(TGraphAsymmErrors* g, float* res){
 	  tsum += a[i] * tb;
 	}
     }
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*16; }//pedestal subtraction for sum16. 16 timebin sum, so pedestal*16 is integrated sum of pedestal.
     res[0]=sum;
     if(sum>0) res[2]=tsum/sum;
     return sum;
@@ -824,12 +826,14 @@ float StFcsWaveformFitMaker::highest(TGraphAsymmErrors* g, float* res){
 	}
     }
     //! https://www.star.bnl.gov/protected/spin/akio/fcs/pulse/waveformRes.png
+    if( fabs(res[7]) > 0.000001 ){ maxadc -= res[6]; }//pedestal subtraction for highest.
     res[0]=maxadc / 0.2;   //this is estimated "full integral" 
     res[1]=maxadc;         //this is peak height	       
     res[2]=maxtb;          //this is peak position [timebin]   
     //res[3]=0.0;          //no width from this method	       
     //res[4]=0.0;          //no chi2 from this		       
-    //res[5]=0.0;          //no # of peaks		       
+    //res[5]=0.0;          //no # of peaks
+
     return maxadc;         //this is the highest               
 }
 
@@ -859,6 +863,7 @@ float StFcsWaveformFitMaker::highest3(TGraphAsymmErrors* g, float* res){
 	}
     }    
     //! https://www.star.bnl.gov/protected/spin/akio/fcs/pulse/waveformRes.png
+    if( fabs(res[7]) > 0.000001 ){ sum -= res[6]*3; }//pedestal subtraction for highest3. Since 3 timebin sum pedestal*3 is integrated pedestal
     res[0]= sum / 0.555;  //this is estimated "full integral" 
     res[1]= maxadc;	  //this is peak height	       
     if(sum>0) res[2]= tsum/sum; //this is averaged peak position [timebin]   
@@ -927,14 +932,15 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
         }
     }
 
-    //For comparing with pulse fit analysis class
-    if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(g); SetupDavidFitterMay2022(); }//Setup only needs to be called once as those values will not get reset when data changes.
-    else{ mPulseFit->SetData(g); }
-    Int_t compidx = mPulseFit->FoundPeakIndex();
+    Int_t compidx = -1;
     int myNpeaks = -1;
     int npeakidx = -1;
     int mypeakidx = -1;
     if( mTest==2 || mTest==8 ){
+      //For comparing with pulse fit analysis class
+      if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(g); SetupDavidFitterMay2022(); }//Setup only needs to be called once as those values will not get reset when data changes.
+      else{ mPulseFit->SetData(g); }
+      compidx = mPulseFit->FoundPeakIndex();
       mH1_NPeaksAkio->Fill(npeak);
       if( trgx>=0 ){ mH1_NPeaksFilteredAkio->Fill(npeak); }//peaks inside triggered crossing
       if( mTest==2 ){
@@ -1017,9 +1023,8 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
     return res[0];
 }
 
-void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
+void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* gg, TF1* func){
   const int MAXPAD=4*4;
-  TGraphAsymmErrors* gg = getGraph();
   if(gg==0){
     LOG_WARN<<"Found no TGraphAsymmErrors at mHitIdx="<<mHitIdx<<endm;
     return;
@@ -1051,10 +1056,10 @@ void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
       char post[50];
       sprintf(post,"_D%dC%d",det,ch);
       StFcsPulseAna* ana = (StFcsPulseAna*)mPulseFit->DrawCopy("LP;A",post,gg);//Sets 'kCanDelete' so canvas will delete the copy
-      ana->GetData()->SetLineColor(kBlue);
-      ana->GetData()->SetMarkerStyle(kBlue);
-      ana->GetData()->SetMarkerStyle(4);
-      ana->GetData()->SetMarkerSize(0.5);
+      ana->SetLineColor(kBlue);
+      ana->SetMarkerColor(kBlue);
+      ana->SetMarkerStyle(4);
+      ana->SetMarkerSize(0.5);
     }
     
     if(mPad==MAXPAD){
@@ -1086,7 +1091,7 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
       if( id>=0 && id==static_cast<int>(ch) ){
 	ggdraw->Draw("APL");
 	ggdraw->SetLineColor(kBlack);
-	ggdraw->SetMarkerStyle(kBlack);
+	ggdraw->SetMarkerColor(kBlack);
 	ggdraw->SetMarkerStyle(4);
 	ggdraw->SetMarkerSize(0.5);
 	ggdraw->GetXaxis()->SetTitle("timebin");
@@ -1097,9 +1102,9 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
 	  StFcsDb::getFromName(ggdraw->GetName(),det,ch);
 	  char post[50];
 	  sprintf(post,"_D%dC%d",det,ch);
-	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
+	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;E",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
-	  ana->GetData()->SetMarkerStyle(kBlue);
+	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
 	  ana->GetData()->SetMarkerSize(0.5);
 	  //ana->ResetPeak();
@@ -1126,15 +1131,15 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 	ggdraw->SetTitle(post);
 	ggdraw->Draw("APL");
 	ggdraw->SetLineColor(kBlack);
-	ggdraw->SetMarkerStyle(kBlack);
+	ggdraw->SetMarkerColor(kBlack);
 	ggdraw->SetMarkerStyle(4);
 	ggdraw->SetMarkerSize(0.5);
 	ggdraw->GetXaxis()->SetTitle("timebin");
 	ggdraw->GetYaxis()->SetTitle("ADC");
 	if( mPulseFit!=0 ){
-	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
+	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;E",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
-	  ana->GetData()->SetMarkerStyle(kBlue);
+	  ana->GetData()->SetMarkerColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
 	  ana->GetData()->SetMarkerSize(0.5);
 	  Int_t compidx = ana->FoundPeakIndex();
@@ -1195,7 +1200,7 @@ void StFcsWaveformFitMaker::drawDualFit(UInt_t detid, UInt_t ch)
 }
 
 float StFcsWaveformFitMaker::gausFitWithPed(TGraphAsymmErrors* g, float* res, TF1*& func){
-  AnaPed( g, res[6], res[7] );
+  if( fabs(res[7]) < 0.000001 ){AnaPed( g, res[6], res[7] ); } //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   LOG_DEBUG << "Pedestal ("<<mPedMax<<"-"<<mPedMin<<"+1)=" << res[6]<<" +- "<<res[7] << endm;
   return gausFit(g, res, func, res[6]);
 }
@@ -1299,6 +1304,30 @@ void StFcsWaveformFitMaker::printArray() const{
     TGraphAsymmErrors* gTemp = (TGraphAsymmErrors*)mChWaveData.At(iCh);
     std::cout << "|Index:"<<iCh<<"|Name:"<<gTemp->GetName()<<"|Size:"<<gTemp->GetN() << std::endl;
   }
+}
+
+void StFcsWaveformFitMaker::printSetup() const{
+  std::cout << "StFcsWaveformFitMaker Internal State" << std::endl
+	    << " - mMeasureTime:"    << mMeasureTime << std::endl
+	    << " - mEnergySelect[ecal,hcal,pres]:" << "["<<mEnergySelect[0] << "," << mEnergySelect[1] << "," << mEnergySelect[2] << "]" << std::endl
+	    << " - mEnergySumScale[ecal,hcal,pres]:" << "["<<mEnergySumScale[0] << "," << mEnergySumScale[1] << "," << mEnergySumScale[2] << "]" << std::endl
+	    << " - mCenterTB:"       << mCenterTB << std::endl
+	    << " - mMinTB:"          << mMinTB << std::endl
+	    << " - mMaxTB:"          << mMaxTB << std::endl
+	    << " - mError:"          << mError << std::endl
+	    << " - mErrorSaturated:" << mErrorSaturated << std::endl
+	    << " - mAdcSaturation:"  << mAdcSaturation << std::endl
+	    << " - mPedMin:"         << mPedMin << std::endl
+	    << " - mPedMax:"         << mPedMax << std::endl
+	    << " - mMinAdc:"         << mMinAdc << std::endl
+	    << " - mTail:"           << mTail << std::endl
+	    << " - mMaxPeak:"        << mMaxPeak << std::endl
+	    << " - mMaxPage:"        << mMaxPage << std::endl
+	    << " - mSkip:"           << mSkip << std::endl
+	    << " - mFilename:"       << mFilename << std::endl
+    //<< " - mFilter:"         << (mFilter==0?0:mFilter) << std::endl
+	    << " - mFitDrawOn:"      << mFitDrawOn << std::endl
+	    << std::endl;
 }
 
 float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*& func, float ped)
@@ -1650,13 +1679,13 @@ float StFcsWaveformFitMaker::PulseFitAll(TGraphAsymmErrors* gae, float* res, TF1
 
 float StFcsWaveformFitMaker::PulseFit2WithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
 {
-  AnaPed(gae,res[6],res[7]);
+  if( fabs(res[7]) < 0.000001 ){AnaPed( gae, res[6], res[7] ); }  //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   return PulseFit2(gae,res,func,res[6]);
 }
 
 float StFcsWaveformFitMaker::PulseFitAllWithPed(TGraphAsymmErrors* gae, float* res, TF1*& func)
 {
-  AnaPed(gae,res[6],res[7]);
+  if( fabs(res[7]) < 0.000001 ){AnaPed( gae, res[6], res[7] ); }  //Only call AnaPed if pedestal hasn't already been calculated and stored in res. res[7] will be nonzero only if AnaPed was already called.
   return PulseFitAll(gae,res,func,res[6]);
 }
 

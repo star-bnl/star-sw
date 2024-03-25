@@ -1,0 +1,10 @@
+/*    fcsHcalGainOnline.idl
+ *
+ *  Table: fcsHcalGainOnline
+ *
+ *       description: // FCS HCal gain online 
+ */ 
+
+struct fcsHcalGainOnline {   
+  float gainOnline[520];     /* gaincorr 2*260 */
+};  

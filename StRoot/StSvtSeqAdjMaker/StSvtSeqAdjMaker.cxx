@@ -221,6 +221,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   // Set up some defaults
 
   mPedFile = NULL;
+  hfile = NULL;
   mPedOffSet = 20;
   m_thresh_lo = 3+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
@@ -237,7 +238,6 @@ StSvtSeqAdjMaker::~StSvtSeqAdjMaker(){
 Int_t StSvtSeqAdjMaker::Init(){
 
 
-  hfile = NULL;
   GetSvtRawData();
   
   SetSvtData();
