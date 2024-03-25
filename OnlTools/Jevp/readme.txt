@@ -14,32 +14,35 @@ readme files:
 * I.  Obtain and compile the code according to rules for the current distro
 ***************************************************************************
 
-1.   Using github clone https://github.com/jml985/star-sw.git
+I now recommend using code directly from the JevpProduction branch as follows.   
+Note that cons will take a long time the first time it is compiled
 
-2.   - To guarentee the most modern codes you need to have a mixed git/cvs directory.   
-     - The production jevp code is in the github under jml985/star-sw.git in the branch JevpProduction
-     - The production RTS code is in cvs under StRoot/RTS
- 
-git init
-git config core.sparseCheckout true
-git remote add origin https://github.com/YOURCLONE/star-sw.git
-echo 'OnlTools/Jevp' > .git/info/sparse-checkout
-echo 'OnlTools/PDFUtil' >> .git/info/sparse-checkout
-git fetch origin
-git checkout origin/JevpProduction -b JevpProduction
-cvs co StRoot/RTS
-source OnlTools/Jevp/level.source
-cons
+1.  To get your repository, use the upstream repo:   jml985/JevpProduction 
+From scratch
+> git init
+> get remote add origin https://github.com/YOURCLONE/star-sw.git
+> git remote add upstream https://github.com/jml985/star-sw.git
+> git fetch upstream
+> git checkout upstream/JevpProduction -b JevpProduction
+> source OnlTools/Jevp/level.source
+> cons
 
-3.   Make a pull request
-    - When you have tested your code, use "git commit" and "git push" to put it into your 
-      local repository.  Then issue a pull request to the main branch of 
-      https://github.com/star-bnl/star-sw.git.   If you use these directions
-      directly you will need to modify the defaults
-    - Tell jml@bnl.gov the pull request #.   This will allow me to incorporate the code
-      in the production server without waiting on the various evaluation procedures.
+2.  To update existing JevpProduction branch
+> git fetch upstream
+> git merge upstream/JevpProduction
+> source OnlTools/Jevp/level.source
+> cons
 
+3.  To make a pull request
+> git add -u
+> git commit -m "your comment"
+> git push origin JevpProduction
 
+Then, use gituhub to make a pull request to the official main branch: 
+      
+      a. pull request from your JevpProduction to https://github.com/star-bnl/star-sw.git / main
+      b. tell jml@bnl.gov the pull request #
+      
 **********************************
 * II.  Code structure
 **********************************
@@ -208,3 +211,33 @@ deep        --   value     // typically these are not neccessary.  The program a
                               a 1 x 10 stack of histograms you can set wide=1 and deep=10
 scaley      --   value     // This forces all histos in the tab to have the same maximum y value
 
+
+
+
+// Old git instructions using merged cvs/github 
+
+// Mixed Distribution...
+1.   Using github clone https://github.com/jml985/star-sw.git
+
+2.   - To guarentee the most modern codes you need to have a mixed git/cvs directory.   
+     - The production jevp code is in the github under jml985/star-sw.git in the branch JevpProduction
+     - The production RTS code is in cvs under StRoot/RTS
+ 
+git init
+git config core.sparseCheckout true
+git remote add origin https://github.com/YOURCLONE/star-sw.git
+echo 'OnlTools/Jevp' > .git/info/sparse-checkout
+echo 'OnlTools/PDFUtil' >> .git/info/sparse-checkout
+git fetch origin
+git checkout origin/JevpProduction -b JevpProduction
+cvs co StRoot/RTS
+source OnlTools/Jevp/level.source
+cons
+
+3.   Make a pull request
+    - When you have tested your code, use "git commit" and "git push" to put it into your 
+      local repository.  Then issue a pull request to the main branch of 
+      https://github.com/star-bnl/star-sw.git.   If you use these directions
+      directly you will need to modify the defaults
+    - Tell jml@bnl.gov the pull request #.   This will allow me to incorporate the code
+      in the production server without waiting on the various evaluation procedures.
