@@ -35,6 +35,8 @@ public:
 
     void setMapping( UChar_t mPlane, UChar_t mQuadrant, UChar_t mRow, UChar_t mStrip, UChar_t mOrientation );
 
+    void setStripEdges( Float_t mStripCenter, Float_t mStripLeftEdge, Float_t mStripRightEdge );
+
     void setTime( Short_t mTime ) { this->mTime = mTime; }
     // consant getters
 
@@ -53,6 +55,9 @@ public:
     UChar_t quadrant() const;
     UChar_t row() const;
     UChar_t strip() const;
+    Float_t stripCenter() const;
+    Float_t stripLeftEdge() const;
+    Float_t stripRightEdge() const;
     UChar_t orientation() const;
 
 protected:
@@ -72,12 +77,15 @@ protected:
     UChar_t mQuadrant;
     UChar_t mRow;
     UChar_t mStrip;
+    Float_t mStripCenter;
+    Float_t mStripLeftEdge;
+    Float_t mStripRightEdge;
     UChar_t mOrientation;
 
     // StFttCluster *mCluster;
     // StFttPoint   *mPoint;
 
-    ClassDef( StFttRawHit, 3 );
+    ClassDef( StFttRawHit, 4 );
 };
 
 ostream& operator << ( ostream&, const StFttRawHit& digi ); // Printing operator
@@ -98,6 +106,9 @@ inline UChar_t  StFttRawHit::quadrant()    const { return mQuadrant;    };
 inline UChar_t  StFttRawHit::row()         const { return mRow;         };
 inline UChar_t  StFttRawHit::strip()       const { return mStrip;       };
 inline UChar_t  StFttRawHit::orientation() const { return mOrientation; };
+inline Float_t  StFttRawHit::stripCenter() const { return mStripCenter;};
+inline Float_t  StFttRawHit::stripLeftEdge() const { return mStripLeftEdge; };
+inline Float_t  StFttRawHit::stripRightEdge() const { return mStripRightEdge; };
 
 
 #endif // STETOFDIGI_H

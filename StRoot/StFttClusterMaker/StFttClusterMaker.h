@@ -24,11 +24,11 @@ public:
     ~StFttClusterMaker();
 
 
-    int  Init();
-    int  InitRun( int );
-    int  FinishRun( int );
-    int  Finish();
-    int  Make();
+    Int_t  Init();
+    Int_t  InitRun( Int_t );
+    Int_t  FinishRun( Int_t );
+    Int_t  Finish();
+    Int_t  Make();
 
 private:
     void ApplyHardwareMap();
@@ -47,12 +47,12 @@ private:
 
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
-    int                  mRunYear;
-    bool                 mDebug;
+    Int_t                mRunYear;
+    Bool_t               mDebug;
     StFttDb*             mFttDb;
 
 
-    ClassDef( StFttClusterMaker, 1 )
+    ClassDef( StFttClusterMaker, 2 )
 };
 
 #endif // STFTTCLUSTERMAKER_H
