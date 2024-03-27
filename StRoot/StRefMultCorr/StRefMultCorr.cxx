@@ -406,7 +406,7 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
     }
-    else if ( mParameterIndex==42 ) { // Au+Au 9.2 GeV 2020 TriggerID = 780010
+    else if ( mParameterIndex==42 ) { // Au+Au 9.2 GeV 2020 TriggerID = 780020
 
       if ( -145. <= vz && vz < -87. ) {
         b0=25.6055790979197;
@@ -473,74 +473,7 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
     }
-    else if ( mParameterIndex==43 ) { // Au+Au 9.2 GeV 2020 TriggerID = 780020
-
-      if ( -145. <= vz && vz < -87. ) {
-        b0=25.6055790979197;
-        b1=2.02528136596901;
-        b2=-0.0058370984051939;
-        b3=2.59602314466234e-05;
-        b4=-5.3014743584261e-08;
-        c0=-17.7059596791057;
-        c1=0.614538168662738;
-        c2=0.00534180935164814;
-        c3=-1.79582873880806e-05;
-        c4=1.01623054170579e-08;
-      }
-      else if ( -87. <= vz && vz < -29. ) {
-        b0=23.0160060308621;
-        b1=1.61885832757588;
-        b2=-0.00275873189631398;
-        b3=1.31262550392554e-05;
-        b4=-2.94368020941846e-08;
-        c0=-17.3591842617911;
-        c1=0.796170989774258;
-        c2=0.000670722514533827;
-        c3=3.26258075150876e-06;
-        c4=-1.60611460182112e-08;
-      }
-      else if ( -29. <= vz && vz < 29. ) {
-        b0=16.4277056306649;
-        b1=1.71652229539398;
-        b2=-0.00406847684302521;
-        b3=1.65203560938885e-05;
-        b4=-2.96250329214512e-08;
-        c0=-15.7887025834219;
-        c1=0.789786364309292;
-        c2=-0.000637115144252616;
-        c3=1.00019972792727e-05;
-        c4=-2.45208851616324e-08;        
-      }
-      else if ( 29. <= vz && vz < 87. ) {
-        b0=21.2024767158778;
-        b1=1.70521848381614;
-        b2=-0.00352260930859763;
-        b3=1.60905730948817e-05;
-        b4=-3.37443468806432e-08;
-        c0=-17.1166088395929;
-        c1=0.814739436616432;
-        c2=0.000227197779215977;
-        c3=6.55397838050604e-06;
-        c4=-2.28812912596058e-08;
-      }
-      else if ( 87. <= vz && vz <= 145. ) {
-        b0=26.0970905882739;
-        b1=1.88889714311734;
-        b2=-0.00195374948885512;
-        b3=-6.14244087431038e-06;
-        b4=1.99930095058841e-08;
-        c0=-15.6624325989392;
-        c1=0.52385751891358;
-        c2=0.00794996911844969;
-        c3=-4.09239155250494e-05;
-        c4=6.40163739983216e-08;
-      }
-
-      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
-      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
-      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
-    }
-    else if ( mParameterIndex==44 ) { // Au+Au 17.3 GeV 2021
+    else if ( mParameterIndex==43 ) { // Au+Au 17.3 GeV 2021
 
       if ( -145. <= vz && vz < -87. ) {
         b0=25.8023785946209;
@@ -607,7 +540,7 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
     }
-    else if ( mParameterIndex==45 ) { // Au+Au 11.5 GeV 2020
+    else if ( mParameterIndex==44 ) { // Au+Au 11.5 GeV 2020
 
       if ( -145. <= vz && vz < -87. ) {
         b0=18.0402708948567;
@@ -1160,19 +1093,15 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau7_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
-  else if ( mParameterIndex == 42 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780010
-    // New Vz correction. All vz bins bins are normalize to that at the center
-    vzCorr = auau9_trig1_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
-  }
-  else if ( mParameterIndex == 43 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780020
+  else if ( mParameterIndex == 42 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780020
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau9_trig2_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
-  else if ( mParameterIndex == 44 ) {  // Au+Au 17.3 GeV Run 21
+  else if ( mParameterIndex == 43 ) {  // Au+Au 17.3 GeV Run 21
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau17_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
-  else if ( mParameterIndex == 45 ) {  // Au+Au 11.5 GeV Run 20
+  else if ( mParameterIndex == 44 ) {  // Au+Au 11.5 GeV Run 20
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau11_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
@@ -1192,7 +1121,7 @@ Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
   }
 
   Double_t refMult_d = -9999.;
-  if( mParameterIndex>=30 && mParameterIndex<=45 ) {
+  if( mParameterIndex>=30 && mParameterIndex<=44 ) {
     refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
   }
   else {
@@ -1491,17 +1420,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
-  else if (mParameterIndex == 42) { // Au+Au 9.2 GeV 2020 TrigerID = 780010
-
-    if (iVzBinIndex < 0 || iVzBinIndex > auau9_run20_nVzBins) return 1.0;
-
-    weight = auau9_trig1_run20_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
-    // Handle bad weight
-    if (weight == 0 || TMath::IsNaN(weight)) {
-      weight = 1.;
-    }
-  }
-  else if (mParameterIndex == 43) { // Au+Au 9.2 GeV 2020 TrigerID = 780020
+  else if (mParameterIndex == 42) { // Au+Au 9.2 GeV 2020 TrigerID = 780020
 
     if (iVzBinIndex < 0 || iVzBinIndex > auau9_run20_nVzBins) return 1.0;
 
@@ -1511,7 +1430,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
-  else if (mParameterIndex == 44) { // Au+Au 17.3 GeV 2021
+  else if (mParameterIndex == 43) { // Au+Au 17.3 GeV 2021
 
     if (iVzBinIndex < 0 || iVzBinIndex > auau17_run21_nVzBins) return 1.0;
 
@@ -1521,7 +1440,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
-  else if (mParameterIndex == 45) { // Au+Au 11.5 GeV 2020
+  else if (mParameterIndex == 44) { // Au+Au 11.5 GeV 2020
 
     if (iVzBinIndex < 0 || iVzBinIndex > auau11_run20_nVzBins) return 1.0;
 
@@ -1792,30 +1711,30 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau7_run21_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 41 )
-  else if ( (mParameterIndex == 42) || (mParameterIndex == 43) ) {  // Au+Au 9.2 GeV 2020
+  else if ( mParameterIndex == 42 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780020
     for ( Int_t iVz=0; iVz<auau9_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
       if ( auau9_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau9_run20_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }
     } // for ( Int_t iVz=0; iVz<auau9_run20_nVzBins; iVz++ )
-  } // else if ( (mParameterIndex == 42) || (mParameterIndex == 43) )
-  else if ( mParameterIndex == 44 ) {  // Au+Au 17.3 GeV 2021
+  } // else if ( mParameterIndex == 42 )
+  else if ( mParameterIndex == 43 ) {  // Au+Au 17.3 GeV 2021
     for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
       if ( auau17_run21_vzRangeLimits[iVz][0] <= mVz && mVz < auau17_run21_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }
     } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
-  } // else if ( mParameterIndex == 44 )
-  else if ( mParameterIndex == 45 ) {  // Au+Au 11.5 GeV 2020
+  } // else if ( mParameterIndex == 43 )
+  else if ( mParameterIndex == 44 ) {  // Au+Au 11.5 GeV 2020
     for ( Int_t iVz=0; iVz<auau11_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
       if ( auau11_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau11_run20_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }
     } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
-  } // else if ( mParameterIndex == 45 )
+  } // else if ( mParameterIndex == 44 )
   /*
   else if ( mRefX == 6 && mParameterIndex == 0 ) {  // d+Au 200 GeV 2021
     for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ ) {
