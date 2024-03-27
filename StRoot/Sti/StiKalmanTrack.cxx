@@ -1657,7 +1657,8 @@ static int nCall=0;nCall++;
 
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
-  int iNode=0, status = 0,isStarted=0,restIsWrong=0;
+  int iNode=0, status = 0;
+  bool isStarted=false,restIsWrong=false;
   sTNH.setDir(1);
   for (source=rbegin();source!=rend();source++) {
     iNode++;
@@ -1669,15 +1670,15 @@ static int nCall=0;nCall++;
       if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
       if (!targetNode->isValid()) 	continue;
     }
-    isStarted++;
+    isStarted = true;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (status) {restIsWrong = true; targetNode->setInvalid();}
     if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
 
-    pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
+    pNode = 0; iNode=0;isStarted=false;restIsWrong=false;
   sTNH.setDir(0);
   for (source=begin();source!=end();source++) {
     iNode++;
@@ -1688,10 +1689,10 @@ static int nCall=0;nCall++;
       if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
       if (!targetNode->isValid()) 	continue;
     }
-    isStarted++;
+    isStarted = true;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (status) {restIsWrong = true; targetNode->setInvalid();}
     if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
