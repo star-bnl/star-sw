@@ -22,6 +22,7 @@ class StFwdAnalysisMaker : public StMaker
     // StEvent analyzed by default
     // call this to analyze the MuDst instead
     void setMuDstInput() { mAnalyzeMuDst = true; }
+    void setLocalOutputFile( TString f ) { mLocalOutputFile = f; }
 
   protected:
 
@@ -30,18 +31,6 @@ class StFwdAnalysisMaker : public StMaker
      * 
      */
     std::map<TString, TH1*> mHists;
-
-    /**
-     * @brief Add a histogram to the map
-     * 
-     * Convenience method to avoid duplicate typing name / possible mismatch
-     * @param h1 TH1* histogram object
-     * @return TH1* return the same object for ease of use
-     */
-    TH1 * addHist( TH1 * h1){
-      mHists[h1->GetName()] = h1;
-      return h1;
-    }
 
     /**
      * @brief Get the Hist object from the map
@@ -61,6 +50,7 @@ class StFwdAnalysisMaker : public StMaker
      * 
      */
     bool mAnalyzeMuDst = false;
+    TString mLocalOutputFile;
 
   ClassDef(StFwdAnalysisMaker, 0);
 };

@@ -61,24 +61,27 @@
 #include "StFcsDbMaker/StFcsDb.h"
 
 //________________________________________________________________________
-StFwdAnalysisMaker::StFwdAnalysisMaker() : StMaker("fwdAna"){};
+StFwdAnalysisMaker::StFwdAnalysisMaker() : StMaker("fwdAna"){
+    setLocalOutputFile( "" ); // default off
+};
 int StFwdAnalysisMaker::Finish() { 
     
-    auto prevDir = gDirectory;
+    if ( mLocalOutputFile != "" ){
+        auto prevDir = gDirectory;
         
-    // output file name
-    string name = "StFwdAnalysisMaker.root";
-    TFile *fOutput = new TFile(name.c_str(), "RECREATE");
-    fOutput->cd();
-    for (auto nh : mHists) {
-        nh.second->SetDirectory(gDirectory);
-        nh.second->Write();
+        // output file name
+        TFile *fOutput = new TFile(mLocalOutputFile, "RECREATE");
+        fOutput->cd();
+        for (auto nh : mHists) {
+            nh.second->SetDirectory(gDirectory);
+            nh.second->Write();
+        }
+
+        // restore previous directory
+        gDirectory = prevDir;
+
+        LOG_INFO << "Done writing StFwdAnalysisMaker output to local file : " << mLocalOutputFile << endm;
     }
-
-    // restore previous directory
-    gDirectory = prevDir;
-
-    LOG_INFO << "Writing StFwdAnalysisMaker output" << endm;
 
     return kStOk; 
 }
@@ -87,64 +90,57 @@ int StFwdAnalysisMaker::Finish() {
 int StFwdAnalysisMaker::Init() { 
     LOG_DEBUG << "StFwdAnalysisMaker::Init" << endm; 
 
-    addHist( new TH1F("fwdMultFailed", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultAll", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultGood", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultFST", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("nHitsFit", ";nHitsFit; counts", 10, 0, 10) );
-    addHist( new TH1F("fwdMultEcalMatch", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultHcalMatch", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultEcalClusters", ";N_{Clu}^{ECAL}; counts", 100, 0, 100) );
-    addHist( new TH1F("fwdMultHcalClusters", ";N_{Clu}^{HCAL}; counts", 100, 0, 100) );
-    addHist( new TH1F("eta", ";#eta; counts", 100, 0, 5) );
-    addHist( new TH1F("phi", ";#phi; counts", 100, -3.1415926, 3.1415926) );
-    addHist( new TH1F("pt", "; pT; counts", 500, 0, 10) );
-    addHist( new TH1F("charge", "; charge; counts", 4, -2, 2) );
-    addHist( new TH1F("ecalMatchPerTrack", ";N_{match} / track; counts", 5, 0, 5) );
-    addHist( new TH1F("hcalMatchPerTrack", ";N_{match} / track; counts", 5, 0, 5) );
-    addHist( new TH1F("matchedEcalEnergy", ";Energy; counts", 100, 0, 15) );
-    addHist( new TH1F("matchedHcalEnergy", ";Energy; counts", 100, 0, 15) );
-    addHist( new TH1F("ecalEnergy", ";Energy; counts", 100, 0, 15) );
-    addHist( new TH1F("hcalEnergy", ";Energy; counts", 100, 0, 15) );
-    addHist( new TH2F( "ecalXY", ";ecalX;ecalY", 200, -200, 200, 200, -200, 200 ) );
-    addHist( new TH2F( "hcalXY", ";hcalX;hcalY", 200, 0, 50, 200, 0, 50 ) );
-    addHist( new TH1F( "ecaldX", ";dx (trk - ecal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "matchedEcaldX", ";dx (trk - ecal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "ecaldY", ";dy (trk - ecal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "matchedEcaldY", ";dy (trk - ecal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "ecaldR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
-    addHist( new TH1F( "ecalMindR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
-    addHist( new TH1F( "matchedEcaldR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
-    addHist( new TH1F( "hcaldX", ";dx (trk - hcal); counts", 400, -200, 200 ) );
-    addHist( new TH2F( "hcaldXdNFit", ";dx (trk - hcal); nFit", 400, -200, 200, 10, 0, 10 ) );
-    addHist( new TH1F( "matchedHcaldX", ";dx (trk - hcal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "hcaldY", ";dy (trk - hcal); counts", 400, -200, 200 ) );
-    addHist( new TH2F( "hcaldYdNFit", ";dy (trk - hcal); nFit", 400, -200, 200, 10, 0, 10 ) );
-    addHist( new TH1F( "matchedHcaldY", ";dy (trk - hcal); counts", 400, -200, 200 ) );
-    addHist( new TH1F( "hcaldR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
-    addHist( new TH1F( "hcalMindR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
-    addHist( new TH1F( "matchedHcaldR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
-    addHist( new TH2F( "trkEcalX", ";trkX;ecalX", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkEcalY", ";trkY;ecalY", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkEcalMinX", ";trkX;ecalX", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkEcalMinY", ";trkY;ecalY", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkHcalX", ";trkX;hcalX", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkHcalY", ";trkY;hcalY", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkHcalMinX", ";trkX;hcalX", 300, -150, 150, 300, -150, 150 ) );
-    addHist( new TH2F( "trkHcalMinY", ";trkY;hcalY", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["fwdMultFailed"] =      new TH1F("fwdMultFailed", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultAll"] =         new TH1F("fwdMultAll", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultGood"] =        new TH1F("fwdMultGood", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultFST"] =         new TH1F("fwdMultFST", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["nHitsFit"] =           new TH1F("nHitsFit", ";nHitsFit; counts", 10, 0, 10) );
+    AddHist( mHists["fwdMultEcalMatch"] =   new TH1F("fwdMultEcalMatch", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultHcalMatch"] =   new TH1F("fwdMultHcalMatch", ";N_{ch}^{FWD}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultEcalClusters"] = new TH1F("fwdMultEcalClusters", ";N_{Clu}^{ECAL}; counts", 100, 0, 100) );
+    AddHist( mHists["fwdMultHcalClusters"] = new TH1F("fwdMultHcalClusters", ";N_{Clu}^{HCAL}; counts", 100, 0, 100) );
+    AddHist( mHists["eta"] =                new TH1F("eta", ";#eta; counts", 100, 0, 5) );
+    AddHist( mHists["phi"] =                new TH1F("phi", ";#phi; counts", 100, -3.1415926, 3.1415926) );
+    AddHist( mHists["pt"] =                 new TH1F("pt", "; pT; counts", 500, 0, 10) );
+    AddHist( mHists["charge"] =             new TH1F("charge", "; charge; counts", 4, -2, 2) );
+    AddHist( mHists["ecalMatchPerTrack"] =  new TH1F("ecalMatchPerTrack", ";N_{match} / track; counts", 5, 0, 5) );
+    AddHist( mHists["hcalMatchPerTrack"] =  new TH1F("hcalMatchPerTrack", ";N_{match} / track; counts", 5, 0, 5) );
+    AddHist( mHists["matchedEcalEnergy"] =  new TH1F("matchedEcalEnergy", ";Energy; counts", 100, 0, 15) );
+    AddHist( mHists["matchedHcalEnergy"] =  new TH1F("matchedHcalEnergy", ";Energy; counts", 100, 0, 15) );
+    AddHist( mHists["ecalEnergy"] =         new TH1F("ecalEnergy", ";Energy; counts", 100, 0, 15) );
+    AddHist( mHists["hcalEnergy"] =         new TH1F("hcalEnergy", ";Energy; counts", 100, 0, 15) );
+    AddHist( mHists["ecalXY"] =             new TH2F( "ecalXY", ";ecalX;ecalY", 200, -200, 200, 200, -200, 200 ) );
+    AddHist( mHists["hcalXY"] =             new TH2F( "hcalXY", ";hcalX;hcalY", 200, 0, 50, 200, 0, 50 ) );
+    AddHist( mHists["ecaldX"] =             new TH1F( "ecaldX", ";dx (trk - ecal); counts", 400, -200, 200 ) );
+    AddHist( mHists["matchedEcaldX"] =      new TH1F( "matchedEcaldX", ";dx (trk - ecal); counts", 400, -200, 200 ) );
+    AddHist( mHists["ecaldY"] =             new TH1F( "ecaldY", ";dy (trk - ecal); counts", 400, -200, 200 ) );
+    AddHist( mHists["matchedEcaldY"] =      new TH1F( "matchedEcaldY", ";dy (trk - ecal); counts", 400, -200, 200 ) );
+    AddHist( mHists["ecaldR"] =             new TH1F( "ecaldR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
+    AddHist( mHists["ecalMindR"] =          new TH1F( "ecalMindR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
+    AddHist( mHists["matchedEcaldR"] =      new TH1F( "matchedEcaldR", ";dr (trk - ecal); counts", 400, 0, 400 ) );
+    AddHist( mHists["hcaldX"] =             new TH1F( "hcaldX", ";dx (trk - hcal); counts", 400, -200, 200 ) );
+    AddHist( mHists["hcaldXdNFit"] =        new TH2F( "hcaldXdNFit", ";dx (trk - hcal); nFit", 400, -200, 200, 10, 0, 10 ) );
+    AddHist( mHists["matchedHcaldX"] =      new TH1F( "matchedHcaldX", ";dx (trk - hcal); counts", 400, -200, 200 ) );
+    AddHist( mHists["hcaldY"] =             new TH1F( "hcaldY", ";dy (trk - hcal); counts", 400, -200, 200 ) );
+    AddHist( mHists["hcaldYdNFit"] =        new TH2F( "hcaldYdNFit", ";dy (trk - hcal); nFit", 400, -200, 200, 10, 0, 10 ) );
+    AddHist( mHists["matchedHcaldY"] =      new TH1F( "matchedHcaldY", ";dy (trk - hcal); counts", 400, -200, 200 ) );
+    AddHist( mHists["hcaldR"] =             new TH1F( "hcaldR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
+    AddHist( mHists["hcalMindR"] =          new TH1F( "hcalMindR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
+    AddHist( mHists["matchedHcaldR"] =      new TH1F( "matchedHcaldR", ";dr (trk - hcal); counts", 400, 0, 400 ) );
+    AddHist( mHists["trkEcalX"] =           new TH2F( "trkEcalX", ";trkX;ecalX", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkEcalY"] =           new TH2F( "trkEcalY", ";trkY;ecalY", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkEcalMinX"] =        new TH2F( "trkEcalMinX", ";trkX;ecalX", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkEcalMinY"] =        new TH2F( "trkEcalMinY", ";trkY;ecalY", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkHcalX"] =           new TH2F( "trkHcalX", ";trkX;hcalX", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkHcalY"] =           new TH2F( "trkHcalY", ";trkY;hcalY", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkHcalMinX"] =        new TH2F( "trkHcalMinX", ";trkX;hcalX", 300, -150, 150, 300, -150, 150 ) );
+    AddHist( mHists["trkHcalMinY"] =        new TH2F( "trkHcalMinY", ";trkY;hcalY", 300, -150, 150, 300, -150, 150 ) );
 
     return kStOK;
 }
 //________________________________________________________________________
 int StFwdAnalysisMaker::Make() {
     LOG_DEBUG << "StFwdAnalysisMaker::Make" << endm;
-    StEvent *event = (StEvent *)GetDataSet("StEvent");
-    if (event){
-        StFttCollection *fttCol = event->fttCollection();
-        if (fttCol){
-            LOG_INFO << "The Ftt Collection has " << fttCol->numberOfPoints() << " points" << endm;
-        }
-    }
     long long itStart = FwdTrackerUtils::nowNanoSecond();
     if (!mAnalyzeMuDst)
         ProcessFwdTracks();
@@ -162,9 +158,18 @@ void StFwdAnalysisMaker::ProcessFwdTracks(  ){
     StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
     if (!stEvent)
         return;
+    
+    if (stEvent){
+        StFttCollection *fttCol = stEvent->fttCollection();
+        if (fttCol){
+            LOG_DEBUG << "The Ftt Collection has " << fttCol->numberOfPoints() << " points" << endm;
+        }
+    }
     StFwdTrackCollection * ftc = stEvent->fwdTrackCollection();
-    if (!ftc)
+    if (!ftc) {
+        LOG_DEBUG << "Forward Track Collection is not present" << endm;
         return;
+    }
 
     LOG_DEBUG << "Checking FcsCollection" << endm;
     StFcsCollection *fcs = stEvent->fcsCollection();
