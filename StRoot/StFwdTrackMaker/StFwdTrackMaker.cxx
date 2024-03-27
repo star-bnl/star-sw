@@ -158,7 +158,7 @@ class SiRasterizer {
     void setup(FwdTrackerConfig &_cfg) {
         cfg = _cfg;
         mRasterR = cfg.get<double>("SiRasterizer:r", 3.0);
-        mRasterPhi = cfg.get<double>("SiRasterizer:phi", 0.1);
+        mRasterPhi = cfg.get<double>("SiRasterizer:phi", 0.004);
     }
 
     bool active() {
@@ -312,6 +312,7 @@ int StFwdTrackMaker::Init() {
         mTree->Branch("fcsX",         &mTreeData. fcsX  );
         mTree->Branch("fcsY",         &mTreeData. fcsY  );
         mTree->Branch("fcsZ",         &mTreeData. fcsZ  );
+        mTree->Branch("fcsE",         &mTreeData. fcsE  );
         mTree->Branch("fcsDet",       &mTreeData. fcsDet  );
 
         // mc tracks
@@ -321,6 +322,8 @@ int StFwdTrackMaker::Init() {
         mTree->Branch("mcPhi",      &mTreeData. mcPhi );
         mTree->Branch("mcCharge",   &mTreeData. mcCharge );
         mTree->Branch("mcVertexId", &mTreeData. mcVertexId );
+        mTree->Branch("mcNumFtt",   &mTreeData. mcNumFtt );
+        mTree->Branch("mcNumFst",   &mTreeData. mcNumFst );
 
         // mcverts
         mTree->Branch("vmcN",       &mTreeData. vmcN, "vmcN/I");
@@ -352,6 +355,8 @@ int StFwdTrackMaker::Init() {
         mTree->Branch("thaX",         &mTreeData. thaX  );
         mTree->Branch("thaY",         &mTreeData. thaY  );
         mTree->Branch("thaZ",         &mTreeData. thaZ  );
+        mTree->Branch("thdP",         &mTreeData. thdP  );
+        mTree->Branch("thdR",         &mTreeData. thdR  );
 
         // track projections
         mTree->Branch("tprojN",       &mTreeData. tprojN,  "tprojN/I");
@@ -727,6 +732,7 @@ void StFwdTrackMaker::loadFttHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
         // Add hit pointer to the track
         if (mcTrackMap[track_id]){
             mcTrackMap[track_id]->addHit(hit);
+            mTreeData.mcNumFtt[track_id-1] ++;
         } else {
             LOG_ERROR << "Cannot find MC track for GEANT hit (FTT), track_id = " << track_id << endm;
         }
@@ -773,9 +779,10 @@ void StFwdTrackMaker::loadFstHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdD
                     LOG_DEBUG << "FST HIT: d = " << d << ", x=" << x0 << ", y=" << y0 << ", z=" << vZ << endm;                
                     mFstHits.push_back( TVector3( x0, y0, vZ)  );
 
-                    FwdHit *hit = new FwdHit(count++, x0, y0, vZ, d, 0, hitCov3, nullptr);
+                    // we use d+4 so that both FTT and FST start at 4
+                    FwdHit *hit = new FwdHit(count++, x0, y0, vZ, d+4, 0, hitCov3, nullptr);
                     // Add the hit to the hit map
-                    hitMap[hit->getSector()].push_back(hit);
+                    hitMap[d+4].push_back(hit);
 
                     mTreeData.fstX.push_back( x0 );
                     mTreeData.fstY.push_back( y0 );
@@ -926,6 +933,16 @@ void StFwdTrackMaker::loadFstHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrack
 
         // Add the hit to the hit map
         hitMap[hit->getSector()].push_back(hit);
+
+        // Add hit pointer to the track
+        if (mcTrackMap[track_id]){
+            mcTrackMap[track_id]->addFstHit(hit);
+            mTreeData.mcNumFst[track_id-1] ++;
+            LOG_DEBUG << TString::Format("Adding FST Hit to McTrack, mcPt=%f", mTreeData.mcPt[track_id-1] ) << endm;
+
+        } else {
+            LOG_ERROR << "Cannot find MC track for GEANT hit (FTT), track_id = " << track_id << endm;
+        }
     }
 } // loadFstHitsFromGEANT
 
@@ -975,6 +992,8 @@ size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
             mTreeData.mcPhi.push_back( phi );
             mTreeData.mcCharge.push_back( q );
             mTreeData.mcVertexId.push_back( track->start_vertex_p );
+            mTreeData.mcNumFtt.push_back(0);
+            mTreeData.mcNumFst.push_back(0);
 
             if (track->is_shower)
                 nShowers++;
@@ -1050,9 +1069,10 @@ void StFwdTrackMaker::loadFcs( ) {
             mTreeData.fcsX.push_back( xyz.x() );
             mTreeData.fcsY.push_back( xyz.y() );
             mTreeData.fcsZ.push_back( xyz.z() - 2 );
+            mTreeData.fcsE.push_back( clu->energy() );
             mTreeData.fcsDet.push_back( idet );
-        }
-    }
+        } // i
+    } // idet
 
     // LOAD PRESHOWER HITS (EPD)
     for ( int det = 4; det < 6; det ++ ) {
@@ -1077,18 +1097,20 @@ void StFwdTrackMaker::loadFcs( ) {
                 mTreeData.fcsX.push_back( x0 );
                 mTreeData.fcsY.push_back( y0 );
                 mTreeData.fcsZ.push_back( zepd );
+                mTreeData.fcsE.push_back( hit->energy() );
                 mTreeData.fcsDet.push_back( det );
 
-            }
-        }
-    }
+            } // if det
+        } // for i
+    } // for det
 } // loadFcs
-
 
 //________________________________________________________________________
 int StFwdTrackMaker::Make() {
     // START time for measuring tracking
     long long itStart = FwdTrackerUtils::nowNanoSecond();
+
+    StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
 
     // Access forward Tracker maps
     FwdDataSource::McTrackMap_t &mcTrackMap = mForwardData->getMcTracks();
@@ -1142,19 +1164,23 @@ int StFwdTrackMaker::Make() {
     LOG_DEBUG << ">>START Event Forward Tracking" << endm;
     mForwardTracker->doEvent();
     LOG_DEBUG << "<<FINISH Event Forward Tracking" << endm;
-    LOG_DEBUG << "<<Made " << mForwardTracker -> getRecoTracks().size() << " GenFit Tracks" << endm;
+    LOG_DEBUG << "<<Made " << mForwardTracker -> getTrackSeeds().size() << " GenFit Tracks" << endm;
 
-
+    // perform vertex finding/fitting with Fwd tracks
     FitVertex();
-    
-    StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
 
     /**********************************************************************/
-    // Run Track finding + fitting
     
-    const auto &genfitTracks = mForwardTracker -> globalTracks();
-    if ( mVisualize /* && genfitTracks.size() > 0 && genfitTracks.size() < 200*/ ) {
-        const auto &seed_tracks = mForwardTracker -> getRecoTracks();
+    /**********************************************************************/
+    // Output track visualization if configured to do so
+    std::vector<genfit::Track *> genfitTracks;
+    for ( auto gtr : mForwardTracker->getTrackResults() ) {
+        if ( gtr.isFitConvergedFully == false ) continue;
+        genfitTracks.push_back( gtr.track );
+    }
+
+    if ( mVisualize && genfitTracks.size() > 0 && genfitTracks.size() < 400 && eventIndex < 50 ) {
+        const auto &seed_tracks = mForwardTracker -> getTrackSeeds();
 
         ObjExporter woe;
         woe.output( 
@@ -1166,16 +1192,17 @@ int StFwdTrackMaker::Make() {
         LOG_DEBUG << "Done Writing OBJ " << endm;
     } else if (mVisualize && genfitTracks.size() == 0) {
         LOG_DEBUG << "Skipping visualization, no FWD tracks" << endm;
-    } else if (mVisualize && genfitTracks.size() >= 20) {
+    } else if (mVisualize && genfitTracks.size() >= 400) {
         LOG_DEBUG << "Skipping visualization, too many FWD tracks" << endm;
     }
 
+    LOG_DEBUG << "FillTrackDeltas" << endm;
     // Fill Track Deltas in ttree for helpful alignment info
     FillTrackDeltas();
 
-    LOG_INFO << "Forward tracking on this event took " << (FwdTrackerUtils::nowNanoSecond() - itStart) * 1e-6 << " ms" << endm;
+    LOG_DEBUG << "Forward tracking on this event took " << (FwdTrackerUtils::nowNanoSecond() - itStart) * 1e-6 << " ms" << endm;
 
-    if ( true && IAttr("fillEvent") ) {
+    if ( IAttr("fillEvent") ) {
 
         if (!stEvent) {
             LOG_WARN << "No StEvent found. Forward tracks will not be saved" << endm;
@@ -1190,51 +1217,42 @@ int StFwdTrackMaker::Make() {
     return kStOK;
 } // Make
 
-
 StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t indexTrack ){
     LOG_DEBUG << "StFwdTrackMaker::makeStFwdTrack()" << endm;
     StFwdTrack *fwdTrack = new StFwdTrack(  );
 
-    auto track = gtr.track;
-    // if FST refit is available save that
-    if ( gtr.nFST > 0 && gtr.fstTrack != nullptr){
-        LOG_DEBUG << "\tSave FST refit track since we have FST points" << endm;
-        track = gtr.fstTrack;
-    } else if (gtr.nFST > 0 && gtr.fstTrack == nullptr) {
-        LOG_WARN << "\tFST refit failed even though we have " << gtr.nFST << " FST points" << endm;
-    }
-
     // Fit failed beyond use
-    if ( track == nullptr  ){
-        LOG_DEBUG << "Track is nullptr, not saving StFwdTrack" << endm;
+    if ( gtr.track == nullptr  ){
+        LOG_DEBUG << "GenfitTrack is nullptr, not making StFwdTrack" << endm;
         return nullptr;
     }
 
-    auto fitStatus = track->getFitStatus();
-    if ( !fitStatus ) 
+    auto fitStatus = gtr.track->getFitStatus();
+    if ( !fitStatus ) {
+        LOG_DEBUG << "GenfitTrack FitStatus nullptr, not making StFwdTrack" << endm;
         return nullptr;
-
+    }
     // Fill charge and quality info
     fwdTrack->setDidFitConverge( fitStatus->isFitConverged() );
     fwdTrack->setDidFitConvergeFully( fitStatus->isFitConvergedFully() );
     fwdTrack->setNumberOfFailedPoints( fitStatus->getNFailedPoints() );
     
-    fwdTrack->setNumberOfFitPoints( track->getNumPoints() );
+    fwdTrack->setNumberOfFitPoints( gtr.track->getNumPoints() );
     fwdTrack->setChi2( fitStatus->getChi2() );
     fwdTrack->setNDF( fitStatus->getNdf() );
     fwdTrack->setPval( fitStatus->getPVal() );
 
-    auto cr = track->getCardinalRep();
+    auto cr = gtr.track->getCardinalRep();
     // charge at first point
     fwdTrack->setCharge( gtr.charge );
 
-    TVector3 p = cr->getMom( track->getFittedState( 0, cr ));
+    TVector3 p = cr->getMom( gtr.track->getFittedState( 0, cr ));
     fwdTrack->setPrimaryMomentum( StThreeVectorD( gtr.momentum.X(), gtr.momentum.Y(), gtr.momentum.Z() ) );
     LOG_DEBUG << "Making StFwdTrack with " << TString::Format( "p=(%f, %f, %f)",  fwdTrack->momentum().x(), fwdTrack->momentum().y(), fwdTrack->momentum().z() ) << endm;
 
     int nSeedPoints = 0;
     // store the seed points from FTT
-    for ( auto s : gtr.trackSeed ){
+    for ( auto s : gtr.fttSeed ){
         FwdHit * fh = static_cast<FwdHit*>( s );
         if (!fh) continue;
         float cov[9];
@@ -1310,11 +1328,11 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
         float cov[9];
 
         TVector3 tv3(0, 0, 0);
-        if ( detIndex != kFcsHcalId ){
-            tv3 = ObjExporter::trackPosition( track, z, cov, mom );
+        if ( detIndex != kFcsHcalId && detIndex != kFcsWcalId ){
+            tv3 = ObjExporter::trackPosition( gtr.track, z, cov, mom );
         } else {
             // use a straight line projection to HCAL since GenFit cannot handle long projections
-            tv3 = ObjExporter::projectAsStraightLine( track, 575.0, 625.0, z, cov, mom );
+            tv3 = ObjExporter::projectAsStraightLine( gtr.track, 575.0, 625.0, z, cov, mom );
         }
         fwdTrack->mProjections.push_back( StFwdTrackProjection( detIndex, StThreeVectorF( tv3.X(), tv3.Y(), tv3.Z() ), StThreeVectorF( mom.X(), mom.Y(), mom.Z() ), cov) );
 
@@ -1361,40 +1379,57 @@ void StFwdTrackMaker::FillEvent() {
 
     mTreeData.tprojN = mTreeData.tprojX.size();
     LOG_DEBUG << "StFwdTrackCollection has " << ftc->numberOfTracks() << " tracks now" << endm;
-    ProcessFwdTracks();
+    // ProcessFwdTracks();
 }
 
 void StFwdTrackMaker::FillTrackDeltas(){
-    LOG_DEBUG << "Filling Track Deltas for Alignment" << endm;
     const auto &fittedTracks = mForwardTracker -> getTrackResults();
 
     for ( size_t i = 0; i < fittedTracks.size(); i++ ){
-        auto st = fittedTracks[i].trackSeed;
         auto gt = fittedTracks[i].track;
+
+        Seed_t combinedSeed;
+        combinedSeed.insert( combinedSeed.begin(), fittedTracks[i].fstSeed.begin(), fittedTracks[i].fstSeed.end() ); // this is goofed but will fix
+        combinedSeed.insert( combinedSeed.end(), fittedTracks[i].fttSeed.begin(), fittedTracks[i].fttSeed.end() );
 
         if (fittedTracks[i].isFitConvergedFully == false){
             LOG_DEBUG << "Skipping track, failed fit" << endm;
             continue;
         }
 
-        for ( KiTrack::IHit * hit : st ){
+        for ( KiTrack::IHit * hit : combinedSeed ){
+            if ( !hit ){
+                LOG_ERROR << "Null hit in unexpected place, check track creation" << endm;
+                continue; // we should never have null hits, but guard 
+            } 
             TVector3 htv3(hit->getX(), hit->getY(), hit->getZ());
-
+            TLorentzVector lvHit, lvTrack;
+            lvHit.SetPxPyPzE( hit->getX(), hit->getY(), hit->getZ(), 1 );
+            
             auto ttv3 = ObjExporter::trackPosition( gt, htv3.Z() );
-
+            lvTrack.SetPxPyPzE( ttv3.X(), ttv3.Y(), ttv3.Z(), 1 );
+            
             mTreeData.thdX.push_back( (ttv3.X() - htv3.X()) );
             mTreeData.thdY.push_back( (ttv3.Y() - htv3.Y()) );
+
+            mTreeData.thdP.push_back( lvTrack.DeltaPhi( lvHit ) );
+            mTreeData.thdR.push_back( lvTrack.Pt() - lvHit.Pt() );
+
             mTreeData.thaX.push_back( htv3.X() );
             mTreeData.thaY.push_back( htv3.Y() );
             mTreeData.thaZ.push_back( htv3.Z() );
             mTreeData.thdN++;
-        }
-    }
+        } // hit
+    } // i
 } //FillTrackDeltas
 
 void StFwdTrackMaker::FitVertex(){
-    const auto &genfitTracks = mForwardTracker -> globalTracks();
+    vector<genfit::Track *> genfitTracks;
 
+    const auto &trackResults = mForwardTracker -> getTrackResults();
+    for ( auto gtr : trackResults ){
+        genfitTracks.push_back( gtr.track );
+    }
     if ( genfitTracks.size() >= 2 ){
         genfit::GFRaveVertexFactory gfrvf;
 
@@ -1404,18 +1439,16 @@ void StFwdTrackMaker::FitVertex(){
         bscm(1, 1) = bssXY*bssXY;
         bscm(2, 2) = 50.5 * 50.5;
         gfrvf.setBeamspot( TVector3( 0, 0, 0 ), bscm );
-        // std::vector< genfit::GFRaveVertex * > vertices;
-        const auto &genfitTracks = mForwardTracker -> globalTracks();
+        
         mRaveVertices.clear();
         gfrvf.findVertices( &mRaveVertices, genfitTracks, false );
         
         LOG_DEBUG << "mRaveVertices.size() = " << mRaveVertices.size() << endm;
-        
         for ( auto vert : mRaveVertices ){
             LOG_DEBUG << TString::Format( "RAVE vertex @(%f, %f, %f)\n\n", vert->getPos().X(), vert->getPos().Y(), vert->getPos().Z() ) << endm;
         }
     }
-}
+} // FitVertex
 
 void StFwdTrackMaker::FillTTree(){
 
@@ -1571,7 +1604,17 @@ void StFwdTrackMaker::FillTTree(){
 
             int idt = 0;
             double qual = 0;
-            idt = MCTruthUtils::dominantContribution(fittedTracks[i].trackSeed, qual);
+            // TODO: combine these
+            Seed_t combinedSeed;
+            combinedSeed.insert( combinedSeed.begin(), fittedTracks[i].fstSeed.begin(), fittedTracks[i].fstSeed.end() ); // this is goofed but will fix
+            combinedSeed.insert( combinedSeed.end(), fittedTracks[i].fttSeed.begin(), fittedTracks[i].fttSeed.end() );
+            idt = MCTruthUtils::dominantContribution(combinedSeed, qual);
+            if ( idt == -1 ){
+                idt = MCTruthUtils::dominantContribution(fittedTracks[i].fttSeed, qual);
+                if ( idt == -1 ){
+                    idt = MCTruthUtils::dominantContribution(fittedTracks[i].fstSeed, qual);
+                }
+            }
 
             if ( fittedTracks[i].track == nullptr || fittedTracks[i].trackRep == nullptr ) {
                 LOG_INFO << "Skip saving null track" << endm;
@@ -1593,16 +1636,15 @@ void StFwdTrackMaker::FillTTree(){
             mTreeData.rcPhi.push_back( fittedTracks[i].momentum.Phi() );
 
             mTreeData.rcNumPV.push_back( fittedTracks[i].nPV );
-            mTreeData.rcNumFTT.push_back( fittedTracks[i].nFTT );
-            mTreeData.rcNumFST.push_back( fittedTracks[i].nFST );
+            mTreeData.rcNumFTT.push_back( fittedTracks[i].numFTT() );
+            mTreeData.rcNumFST.push_back( fittedTracks[i].numFST() );
 
             mTreeData.rcN ++;
         }
         LOG_INFO << "Filling TTree" << endm;
         mTree->Fill();
     } // if mGenTree
-}
-
+} // FillTree
 
 //________________________________________________________________________
 void StFwdTrackMaker::Clear(const Option_t *opts) {
@@ -1645,6 +1687,9 @@ void StFwdTrackMaker::Clear(const Option_t *opts) {
         mTreeData.mcPhi.clear();
         mTreeData.mcVertexId.clear();
         mTreeData.mcCharge.clear();
+        mTreeData.mcNumFst.clear();
+        mTreeData.mcNumFtt.clear();
+
         mTreeData.vmcX.clear();
         mTreeData.vmcY.clear();
         mTreeData.vmcZ.clear();
@@ -1660,6 +1705,8 @@ void StFwdTrackMaker::Clear(const Option_t *opts) {
         mTreeData.vrcZ.clear();
         mTreeData.thdX.clear();
         mTreeData.thdY.clear();
+        mTreeData.thdP.clear();
+        mTreeData.thdR.clear();
         mTreeData.thaX.clear();
         mTreeData.thaY.clear();
         mTreeData.thaZ.clear();

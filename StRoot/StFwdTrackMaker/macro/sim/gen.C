@@ -1,3 +1,4 @@
+//usr/bin/env root4star -l -b -q $0'('$1', '$2')'; exit $?
 // macro to instantiate the Geant3 from within
 // STAR  C++  framework and get the starsim prompt
 // To use it do
@@ -44,7 +45,7 @@ void trig( Int_t n=1 )
     // Clear the chain from the previous event
     chain->Clear();
 
-    kinematics->Kine( numParticles, nameParticle.Data(), 0.2, 5.0, 2.0, 4.50  );
+    kinematics->Kine( numParticles, nameParticle.Data(), 0.2, 50.0, 2.0, 4.50  );
 		// kinematics->Kine( numParticles, nameParticle.Data(), 10.2, 12.0, 2.5, 4.00  );
 
     // Generate the event
