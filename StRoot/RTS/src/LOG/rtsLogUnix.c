@@ -30,23 +30,6 @@ volatile int tonkoLogLevel = 2 ;
 
 
 
-
-
-
-#ifdef RTS_ENABLE_LOG
-#warning "DAQ logging is enabled"
-#ifdef RTS_LOG_DEFAULT_NET
-#warning "DAQ logging defaults to daqman"
-#else
-#warning "DAQ logging defaults to STDERR"
-#endif  /* RTS_LOG_DEFAULT_NET */
-#else
-#warning "DAQ logging is disabled"
-#endif  /* RTS_ENABLE_LOG */
-
-
-#ifdef RTS_ENABLE_LOG
-
 #ifdef RTS_LOG_DEFAULT_NET
 static int output_flag = RTS_LOG_NET ;
 #else
@@ -390,11 +373,6 @@ static const char *getCmd(void)
 	return ps.pr_fname ;
 #endif
 }
-
-
-#endif
-
-
 
 #ifdef __cplusplus
 }

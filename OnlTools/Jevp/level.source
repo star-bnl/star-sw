@@ -1,4 +1,7 @@
 # STAR LEVEL for EVP code
 
-starver SL23b
+starver SL23c 
 #starver SL21b
+
+
+unsetenv DB_SERVER_LOCAL_CONFIG
