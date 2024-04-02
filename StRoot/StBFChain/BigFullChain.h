@@ -1046,6 +1046,15 @@ Bfc_st BFC[] = { // standard chains
    "B2023a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2023 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2024 initial chains
+  {"B2024a"  ,"","",
+   "ry2024a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2024 data (tpc)",kFALSE},
+
+  {"pp2024a","" ,"",
+   "B2024a,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
+      "","","Production chain for year 2024 pp data - CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
+
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
