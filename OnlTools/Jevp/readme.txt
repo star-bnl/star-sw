@@ -22,6 +22,14 @@ From scratch
 > git init
 > get remote add origin https://github.com/YOURCLONE/star-sw.git
 > git remote add upstream https://github.com/jml985/star-sw.git
+
+> git config core.sparseCheckout true
+> echo 'OnlTools/Jevp' > .git/info/sparse-checkout
+> echo 'StRoot/RTS' >> .git/info/sparse-checkout
+> echo 'StRoot/StEEmcPool' >> .git/info/sparse-checkout
+> echo 'StRoot/StEmcPool' >> .git/info/sparse-checkout
+> echo 'StRoot/StEmcUtil' >> .git/info/sparse-checkout
+
 > git fetch upstream
 > git checkout upstream/JevpProduction -b JevpProduction
 > source OnlTools/Jevp/level.source
