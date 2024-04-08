@@ -1931,7 +1931,7 @@ Bfc_st BFC[] = { // standard chains
   {"ppDAQfilter1","","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"ppLPeval1"   ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"QA"          ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event,MuDST","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"QAalltrigs"  ,"", "","",                                     "","","Analyze all triggers in QA",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
