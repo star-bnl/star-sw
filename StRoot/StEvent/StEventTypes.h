@@ -169,6 +169,8 @@
  **************************************************************************/
 #ifndef StEventTypes_hh
 #define StEventTypes_hh
+
+#include "StContainers.h"
  
 #include "StBbcTriggerDetector.h"
 #include "StCalibrationVertex.h"
@@ -330,6 +332,8 @@
 #include "StFgtHitCollection.h"
 #include "StFgtPoint.h"
 #include "StFgtPointCollection.h"
+#include "StGmtHit.h"
+#include "StGmtCollection.h"
 #include "StIstHit.h"
 #include "StIstSensorHitCollection.h" 
 #include "StIstLadderHitCollection.h"
