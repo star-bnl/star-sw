@@ -204,7 +204,7 @@ void bfcread_hist_integrated_to_ps(
          cout << "bfcread_hist_integrated_to_ps.C, # histograms added with prefix " <<
            HU->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
-       delete dirList; // Only when using PrintList or Prefixes
+       HU->Clear();
       } // found hists
 
      } // loop over prefixes
