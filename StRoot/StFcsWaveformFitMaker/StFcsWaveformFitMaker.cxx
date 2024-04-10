@@ -501,11 +501,11 @@ int StFcsWaveformFitMaker::Make() {
 	  if( mAnaWaveform ){
 	    integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,res[6]);
 	    hits[i]->setAdcSum(integral);
+	    hits[i]->setFitPeak(res[2]);
+	    hits[i]->setFitSigma(res[3]);
+	    hits[i]->setFitChi2(res[4]);
+	    hits[i]->setNPeak(res[5]);
 	  }
-	  hits[i]->setFitPeak(res[2]);	    
-	  hits[i]->setFitSigma(res[3]);	    
-	  hits[i]->setFitChi2(res[4]);	    
-	  hits[i]->setNPeak(res[5]);	    
 	  //apply gain and update energy
 	  float gain = mDb->getGain(hits[i]);
 	  float gaincorr = mDb->getGainCorrection(hits[i]);
