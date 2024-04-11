@@ -476,6 +476,9 @@ StHistUtil::StHistUtil(){
   m_PaperHeight = 0;
 
   m_Detectors = "";
+
+  m_ItemsToClear = new TList();
+  m_ItemsToClear->SetOwner();
 }
 //_____________________________________________________________________________
 
@@ -500,6 +503,11 @@ StHistUtil::~StHistUtil(){
     for (int ijk=0; ijk<maxHistCopy; ijk++) delete newHist[ijk];
     delete [] newHist;
   }
+  delete m_ItemsToClear;
+}
+//_____________________________________________________________________________
+void StHistUtil::Clear() {
+  m_ItemsToClear->Clear();
 }
 //_____________________________________________________________________________
 void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
@@ -1789,6 +1797,7 @@ TList* StHistUtil::TrimListByPrefix(TList* dList, const Char_t* withPrefix) {
                   (obj->InheritsFrom("TH1") &&
                    m_ListOfPrint->FindObject(obj->GetName())))) dList2->AddLast(obj);
   }
+  m_ItemsToClear->Add(dList2);
   return dList2;
 }
 //_____________________________________________________________________________
