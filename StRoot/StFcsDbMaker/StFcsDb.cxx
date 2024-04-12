@@ -798,7 +798,6 @@ StThreeVectorD StFcsDb::projectTrack(int det, const g2t_track_st* g2ttrk, const 
   double linedir[3] = {g2ttrk->p[0],g2ttrk->p[1],g2ttrk->p[2]};
   if( g2tvert!=0 ){
     int vertind = g2ttrk->start_vertex_p - 1; //To correct for offset by one between fortran array and c array. 0 start index means it was generated at the starting vertex
-    std::cout << "+++++ DEBUG: vertind = " << vertind << " +++++" << std::endl;
     double linestart[3] = {g2tvert[vertind].ge_x[0],g2tvert[vertind].ge_x[1],g2tvert[vertind].ge_x[2]};
     if( vertind >= 0 ){//Since start index==0 means no start then vertind<0 will default to using origin
       return projectLine(det, linedir, linestart, showermaxz);

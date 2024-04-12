@@ -3,6 +3,7 @@
 //
 //critical plots for offline QA: h1_inv_mass_cluster , h1_two_cluster_energy_allcut , h1_dgg_cluster  , h2_cluster_dgg_vs_E1pE2
 //
+//Update 3/12/24: move the StFcsPi0FinderForEcal to StRoot , no dependent on StSpinPool , also comment out 2 unused head file
 //
 
 #include "StFcsPi0FinderForEcal.h"
@@ -16,8 +17,8 @@
 #include "StFcsDbMaker/StFcsDbMaker.h"
 #include "StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
-#include "StSpinPool/StFcsQaMaker/StFcsQaMaker.h"
-#include "StSpinPool/StFcsRawDaqReader/StFcsRawDaqReader.h"
+//#include "StSpinPool/StFcsQaMaker/StFcsQaMaker.h"
+//#include "StSpinPool/StFcsRawDaqReader/StFcsRawDaqReader.h"
 #include "StThreeVectorF.hh"
 #include "Stypes.h"
 #include "TBox.h"

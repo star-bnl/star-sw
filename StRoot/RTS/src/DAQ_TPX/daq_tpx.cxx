@@ -89,6 +89,8 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	sfs_name = "tpx" ;
 	caller = rts_caller ;
 
+	mode = 0 ;
+
 	if(caller) caller->insert(this, rts_id) ;
 
 	// create now!
@@ -972,6 +974,8 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 				t23->run_type = 3 ;
 				t23->no_cld = 1 ;
 				t23->log_level = 0 ;
+
+				t23->mode = mode ;
 
 				t23->data_c = 0 ; // &altro_c ;
 				t23->tpx_d = 0 ;
