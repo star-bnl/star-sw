@@ -1,9 +1,10 @@
-from Handler import Handler
+from Dyson.Export.Handler import Handler
 
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes import shape_params
 
-import os, copy
+import os, copy, io
+
 
 export_comments = True
 
@@ -39,15 +40,14 @@ class SimplePrint:
     def __init__(self):
         pass
     def __call__(self,line,indent=True):
-        print "    "+line
+        print("    "+line)
 
 class NoPrint:
     def __init__(self):
         pass
-##    def __call__(self,line,indent=True):
     def __call__(self,line,**kw):
         pass
-    ##print "!!// "+line    
+
 
 # ====================================================================================================
 type_map = {
@@ -114,14 +114,12 @@ class PrettyPrint:
         self.limit = limit
 
         if ( debug ):
-            print 'Pretty Print called with: '
-            print line
-            print ''
+            print('Pretty Print called with: ')
+            print(line)
         
 
         if ( indent and lstrip ):
             line = line.lstrip()    # remove whitespace on left
-        #self.sepline(line)         # print separators
 
         if ( indent ):
             self.decrease(line)         # decrease indentation level
@@ -134,10 +132,10 @@ class PrettyPrint:
                 i+=1
 
         if ( debug ):
-            print '!' + myline + '^'
+            print('!' + myline + '^')
 
         # Perform replacement of structure tags
-        for search,replace in _structures.iteritems():            
+        for search,replace in _structures.items():            
             line = line.replace( search.lower(),
                                  replace.upper() )
 
@@ -146,11 +144,9 @@ class PrettyPrint:
         else:        
             self.cprint (myline+line,cchar,debug,breakers)  # print the line
         
-        #self.spcline(line)          # add space behind line
         if ( indent ):
             self.increase(line)
-
-        #self.update(line)
+            
     #
     # ================================================        
     def spcline(self,line):
@@ -158,7 +154,7 @@ class PrettyPrint:
         for spc in spacers:
             try:
                 index = line.index(spc)
-                print ""
+                print("")
             except ValueError:
                 pass
                    
@@ -171,7 +167,7 @@ class PrettyPrint:
         for s in seps:
             try:
                 index = line.index(s)
-                print "c --------------------------------------------------------------------------------"
+                print("c --------------------------------------------------------------------------------")
             except ValueError:
                 pass
 
@@ -182,7 +178,7 @@ class PrettyPrint:
         end of continuation lines
         """
 
-        if ( debug ): print 'cprint got '+ line
+        if ( debug ): print('cprint got '+ line)
         
         # Require non null characters
         if ( not len(line.strip()) ): return
@@ -209,7 +205,7 @@ class PrettyPrint:
             # the next ' ' with a '\n' + level+1 indents
             if ( atlimit ):
 
-                if ( debug ): print '! at limit is true'
+                if ( debug ): print('! at limit is true')
 
                 for b in breakers:
                     if ( char == b ):
@@ -223,7 +219,7 @@ class PrettyPrint:
             outline += char
 
         # And finally output the line we have built up
-        print _prepend + outline
+        print(_prepend + outline)
         
 
     def increase(self,line):
@@ -292,9 +288,8 @@ class Formatter:
     def __call__(self, line, indent=True, cchar=',', lstrip=True, debug=False, breakers=' ,' ):
 
         if ( debug ):
-            print 'Pretty Print called with: '
-            print line
-            print ''
+            print('Pretty Print called with: ')
+            print(line)
         
 
         if ( indent and lstrip ):
@@ -308,7 +303,7 @@ class Formatter:
                 i+=1
 
         # Perform replacement of structure tags
-        for search,replace in _structures.iteritems():            
+        for search,replace in _structures.items():            
             line = line.replace( search.lower(),
                                  replace.upper() )
         
@@ -324,7 +319,7 @@ class Formatter:
 
         limit = self.limit
 
-        if ( debug ): print 'cprint got '+ line
+        if ( debug ): print('cprint got '+ line)
         
         # Require non null characters
         if ( not len(line.strip()) ): return
@@ -349,7 +344,7 @@ class Formatter:
 
         oline += tline
 
-        print oline
+        print(oline)
         
 
     def increase(self,line):
@@ -491,7 +486,7 @@ class Setup( Handler ):
             # to creating the NEW detector bank for the module, otherwise
             # this flag is reset to default.
             #
-            for flag,value in self.flags.iteritems():
+            for flag,value in self.flags.items():
                 formatter("   CALL Agsflag('%s',%i)"%(flag,value))
 
             #
@@ -680,7 +675,7 @@ class Subroutine ( Handler ):
 
     def startElement(self,tag,attr):
         self.name = attr.get('name',None)        
-        assert self.name
+        assert(self.name)
         form( '! ---------------------------------------------------------------------------------- %s'%self.name )        
         args = attr.get('args',None)
         if args:
@@ -705,7 +700,6 @@ class Subroutine ( Handler ):
         pass
 
     def characters( self, content ):
-##      print "cHai! " + content
         content = content.strip() # remove whitespace
         if len(content):
             form(content)
@@ -726,7 +720,7 @@ class Keep(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p
     def startElement(self,tag,attr):
-        print "Warning in Mortran.Keep: Keep not implemented"
+        print("Warning in Mortran.Keep: Keep not implemented")
 
 
 # ====================================================================================================
@@ -853,12 +847,11 @@ class Import( Handler ):
             temp[0] = os.getenv(temp[0][1:])
             file = '/'.join(temp)
 
-        with open(file,'r') as f:
-
+        with io.open(file,'r',errors='replace') as f:
             for line in f:
                 if line.strip()=='\n':
                     continue
-                print line.rstrip()
+                print(line.rstrip())
 
     def endElement(self,tag):
         pass
@@ -917,7 +910,7 @@ class Varlist( Handler ):
     def endElement(self,tag):
         varlist = self.type + ' ' + ( ','.join(self.mylist) ).lstrip()
         form(varlist)
-        print ''
+        print('')
 
         # Handle variables defined in functions
 #        if ( isinstance( self.parent, Function ) ):
@@ -939,7 +932,6 @@ class Var ( Handler ):
         #pass
         name = attr.get('name')
         type = attr.get('type','float')
-        #print 'Var: type='+type+' name='+name
         if ( type == 'float' ):
             type = 'real'
         if ( type == 'double' ):
@@ -1001,14 +993,6 @@ class Parameter( Handler ):
         if ( type == 'double' ):
             type = 'real *8'
         name = attr.get('name')
-        #try:
-        #    lu = _symbol_table[ name.lower() ]
-        #except KeyError:
-        #    print _symbol_table.keys()
-        #    _symbol_table[ name.lower() ] = type
-        #    form ( type + ' ' + name )
-        #if ( type != None ):                      # simplifies age --> agml conversion
-        #    form( type + ' ' + name )
         value = attr.get('value')
         form( 'PARAMETER (%s = %s)'%(name,value) )
 class Enum( Handler ):
@@ -1105,7 +1089,7 @@ class ArrayFormatter:
         npad = len(pad)
 
         # And this will be the number of fields per line of output
-        nfields = ( self.limit - npad ) / (myfield+3)
+        nfields = int( ( self.limit - npad ) / (myfield+3) )
 
         # Counter for the number of fields
         ifield  = 0
@@ -1142,7 +1126,7 @@ class ArrayFormatter:
         # And now add the comment
         output += ' ! %s' % comment
 
-        print output
+        print(output)
 
         
         
@@ -1378,7 +1362,7 @@ class Create(Handler):
         """
         block = attr.get('block')
         keys=[]
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             keys.append(key)
         output = 'CREATE %s' %( block )
         for key in keys:
@@ -1468,7 +1452,6 @@ class Create_and_Position(Position):
             val = attr.get(key,None)
             if ( val != None ):
                 pos = "%s=%s"%(key,val);
-                #print "Add pos=%s" %pos
                 self.pos.append(pos)
 
         # And next the position arguements
@@ -1632,7 +1615,7 @@ class Placement(Handler):
 
         for key in self.attr.keys():
 
-            val = self.attr.pop(key,None)
+            val = self.attr.get(key,None)
             if val:
                 formatter( "%%%s = %s"%( key, tryFloat(val) ) )
         
@@ -1667,10 +1650,10 @@ class Placement(Handler):
                     val = rotation.value
                     formatter( "CALL agml_ortho('%s'//char(0))"%val )
 
-		if key == 'matrix':
-		    val = rotation.value
-		    formatter( "agml_rotm = %s"%val );
-		    formatter( "CALL agml_rotation(agml_rotm)")
+                if key == 'matrix':
+                    val = rotation.value
+                    formatter( "agml_rotm = %s"%val );
+                    formatter( "CALL agml_rotation(agml_rotm)")
 		    
 
             #
@@ -2373,13 +2356,13 @@ class Replace(Handler):
             form( "REPLACE [%s] with [%s];"%( self.match.rstrip(';'),
                                               self.replace[0].rstrip(';') ) );
         else:
-            print ""
+            print("")
             form( "REPLACE [%s] with [" %self.match.rstrip(';') )
             for rpl in self.replace:
                 rpl = rpl.rstrip(';')
                 form( "    %s"%( rpl ) )
             form( "    ];" )
-            print ""
+            print("")
         
 # ====================================================================================================
 class Function(Handler):
@@ -2549,24 +2532,6 @@ class Geometry(Handler):
             formatter( '%s_addr = SETUP_%s()'%(sub,config))
             formatter( 'call construct_%s'%config )
         
-        # First setup integers to hold pointer to the method's address
-##         global module_tags
-##         for module in self.modules:
-##             formatter( 'INTEGER :: %s /0/' % module )
-##         formatter( 'SELECT CASE (tag)' )
-##         for tag in module_tags:
-##             formatter( '  Case ("%s")'%tag )
-##             formatter( '     EXE %s'%tag )
-##         formatter( '  Case DEFAULT' )
-##         formatter( "     write(*,*) 'Unknown tag ',tag " )
-##         formatter( 'END SELECT' )
-##         for construct in self.constructs:
-##             print str(construct) 
-## #   
-# Loop over all modules again and create
-#        for module in self.modules:
-#           formatter( 'IF %s { Call CsJCAL( %s, 0, 0,0,0,0,0, 0,0,0,0,0) }'%(module,module) )
-
         formatter('END SUBROUTINE GEOM_%s'%self.name)
                   
        
@@ -2586,9 +2551,6 @@ class Construct(Handler):
 
         self.sys     = attr.get('sys', None)
         self.config  = attr.get('config', None)
-        
-        #self.module = attr.get('module', None)
-        #self.track  = attr.get('track', 'primary' )
 
         self.parent.addSystem( self.sys, self.config )
         
