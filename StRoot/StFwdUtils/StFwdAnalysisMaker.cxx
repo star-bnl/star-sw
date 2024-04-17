@@ -1,12 +1,13 @@
-#include "StFwdUtils/StFwdAnalysisMaker.h"
-
 #include "TVector3.h"
+
+#include "St_base/StMessMgr.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StFcsCluster.h"
 #include "StEvent/StFttCollection.h"
 #include "StEvent/StFcsCollection.h"
+#include "StEvent/StFwdTrack.h"
 #include "StEvent/StFwdTrackCollection.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -14,10 +15,9 @@
 #include "StMuDSTMaker/COMMON/StMuFwdTrack.h"
 #include "StMuDSTMaker/COMMON/StMuFwdTrackCollection.h"
 
-#include "St_base/StMessMgr.h"
-
-#include "StEvent/StFwdTrack.h"
 #include "StFcsDbMaker/StFcsDb.h"
+#include "StFwdTrackMaker/Common.h"
+#include "StFwdUtils/StFwdAnalysisMaker.h"
 
 //________________________________________________________________________
 StFwdAnalysisMaker::StFwdAnalysisMaker() : StMaker("fwdAna"){
