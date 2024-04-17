@@ -38,7 +38,6 @@ StFttClusterMaker::StFttClusterMaker( const char* name )
   mDebug( false ),       /// print out of all full messages for debugging
   mFttDb( nullptr )
 {
-    LOG_DEBUG << "StFttClusterMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -51,8 +50,6 @@ StFttClusterMaker::~StFttClusterMaker()
 Int_t
 StFttClusterMaker::Init()
 {
-    LOG_INFO << "StFttClusterMaker::Init" << endm;
-
     return kStOk;
 }
 
@@ -62,7 +59,7 @@ StFttClusterMaker::InitRun( Int_t runnumber )
 { 
     mRunYear = ( runnumber + 727000 ) / 1000000 + 1999;
 
-    LOG_INFO << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
+    LOG_DEBUG << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
 
     return kStOk;
 }
@@ -103,8 +100,6 @@ StFttClusterMaker::Make()
 
     LOG_DEBUG << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
     ApplyHardwareMap();
-
-    
 
     // InjectTestData();
 
@@ -210,11 +205,12 @@ void StFttClusterMaker::InjectTestData(){
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    int time_cut0 = -999;
-    int time_cut1 =  999;
-    int time_cutm = 0;
+    int time_cut0 = -40;
+    int time_cut1 =  150;
+    int time_cutm = 1;
     //  in principle it could vary VMM to VMM;
-    mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
+    // mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
+    // LOG_INFO << "Time Cut: " << time_cutm << " , " << time_cut0 << ", " << time_cut1 << endm;
     if ( time_cutm == 0 ) // default, cut on bunch crossing
         return (hit->time() <= time_cut1 && hit->time() >= time_cut0); 
 
@@ -229,7 +225,7 @@ StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, si
                              [](const StFttRawHit* a,const StFttRawHit* b) { return a->adc() < b->adc(); });
 
     pos = (itMax - hits.begin());
-    if ( itMax == hits.end() ) return nullptr;
+    if ( itMax == hits.end() || pos >= hits.size() ) return nullptr;
     return *itMax;
 }
 
@@ -303,17 +299,16 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     float m2Sum = 0;
 
     std::for_each (clu->rawHits().begin(), clu->rawHits().end(), [&](const StFttRawHit *h) {
-        float x = ( h->strip() * 3.2 - 1.6 ); // replace with CONST
-        
+        float x = h->stripCenter(); // ideal position is ( h->strip() * 3.2 - 1.6 );
         m0Sum += h->adc();
         m1Sum += (h->adc() * x); 
         m2Sum += ( h->adc() * x * x );
     });
 
     if ( mDebug ) {
-        LOG_INFO << "m0Sum = " << m0Sum << endm; 
-        LOG_INFO << "m1Sum = " << m1Sum << endm;
-        LOG_INFO << "m2Sum = " << m2Sum << endm;
+        LOG_DEBUG << "m0Sum = " << m0Sum << endm; 
+        LOG_DEBUG << "m1Sum = " << m1Sum << endm;
+        LOG_DEBUG << "m2Sum = " << m2Sum << endm;
     }
 
     // m0Sum = sumAdc
@@ -325,8 +320,6 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     float var = (m2Sum - m1Sum*m1Sum / m0Sum) / m0Sum;
     clu->setSigma( sqrt( var ) );
 }
-
-
 
 std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRawHit * > hits ){
     std::vector<StFttCluster*> clusters;
@@ -363,7 +356,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         });
 
     if ( mDebug ) {
-        LOG_INFO << "We have " << hits.size() << " hits after removing duplicates" << endm;
+        LOG_DEBUG << "We have " << hits.size() << " hits after removing duplicates" << endm;
     }
 
 
@@ -389,6 +382,14 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         clu->setQuadrant    ( maxAdcHit->quadrant    ( ) );
         clu->setRow         ( maxAdcHit->row         ( ) );
         clu->setOrientation ( maxAdcHit->orientation ( ) );
+        clu->setIndexMaxStrip 
+                            ( maxAdcHit->strip()         );
+        clu->setMaxStripCenter
+                            ( maxAdcHit->stripCenter()   );
+        clu->setMaxStripLeftEdge
+                            ( maxAdcHit->stripLeftEdge() );
+        clu->setMaxStripRightEdge
+                            ( maxAdcHit->stripRightEdge() );
 
         // Now find the cluster edges
         size_t left = anchor, right = anchor;
@@ -423,6 +424,5 @@ void StFttClusterMaker::ApplyHardwareMap(){
     for ( StFttRawHit* rawHit : mFttCollection->rawHits() ) {
         mFttDb->hardwareMap( rawHit );
     }
-
 }
 

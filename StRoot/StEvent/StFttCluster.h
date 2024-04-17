@@ -28,6 +28,13 @@ public:
     float x() const;  // Mean x ("center of gravity") in local grid coordinate (1st moment).
     float sigma() const; // Maximum 2nd moment (along major axis).
 
+    float maxADC() const;
+    int   indexMaxStrip() const;
+    float maxStripCenter() const;
+    float maxStripLeftEdge() const;
+    float maxStripRightEdge() const;
+
+
     void setId(int cluid);
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
@@ -37,6 +44,12 @@ public:
     void setSumAdc(int theSumAdc);
     void setX(float x0);
     void setSigma(float sigma);
+
+    void setMaxADC(int theMaxADC);
+    void setIndexMaxStrip(int index);
+    void setMaxStripCenter(float sc);
+    void setMaxStripLeftEdge(float LEdge);
+    void setMaxStripRightEdge(float REdge);
 
     StPtrVecFttRawHit& rawHits();
     const StPtrVecFttRawHit& rawHits() const;
@@ -48,22 +61,28 @@ public:
     const StPtrVecFttPoint& points() const;
     void addPoint(StFttPoint* p);
     // void print(Option_t *option="") const;
+    void print();
 
 private:
-    Int_t mId=-1;             // Eventwise cluster ID
+    Int_t   mId=-1;             // Eventwise cluster ID
     UChar_t mPlane;
     UChar_t mQuadrant;
     UChar_t mRow;
     UChar_t mOrientation = kFttUnknownOrientation;        // Orientation of cluster
-    Int_t mNStrips=0;         // Number of strips
+    Int_t   mNStrips=0;         // Number of strips
     Float_t mSumAdc=0.0;      // Total ADC (0th moment)
-    Float_t mX=0.0;             // Mean x ("center of gravity") in local grid coordinate (1st moment)
-    Float_t mSigma=0.0;        // 2nd moment
+    Float_t mX=-999;             // Mean x ("center of gravity") in local grid coordinate (1st moment)
+    Float_t mSigma=-999;        // 2nd moment
+    Float_t mMaxADC = -999;     // ADC of the strip with maximum ADC
+    Int_t   mIndexMaxStrip = -999;// index of the strip with maximum ADC
+    Float_t mMaxStripCenter = -999;// Strip center of strip with maximum ADC
+    Float_t mMaxStripLeftEdge = -999;//left edge of the strip with maximum ADC
+    Float_t mMaxStripRightEdge = -999;//right edge of the strip with maximum ADC
     StPtrVecFttRawHit mRawHits;            // Tower hits of the current cluster
     StPtrVecFttCluster mNeighbors;    // Neighbor clusters
     StPtrVecFttPoint mPoints;        // Fitted points (photons) in the cluster
 
-    ClassDef(StFttCluster, 2)
+    ClassDef(StFttCluster, 3)
 };
 
 std::ostream& operator << ( std::ostream&, const StFttCluster& clu ); // Printing operator
@@ -82,6 +101,14 @@ inline float StFttCluster::sumAdc() const { return mSumAdc; }
 inline float StFttCluster::x() const { return mX; } // Mean x ("center of gravity") in local grid coordinate (1st moment).
 inline float StFttCluster::sigma() const { return mSigma; } // 2nd moment
 
+inline float StFttCluster::maxADC() const{ return mMaxADC; }
+inline int StFttCluster::indexMaxStrip() const { return mIndexMaxStrip; } 
+inline float StFttCluster::maxStripCenter() const { return mMaxStripCenter; } 
+inline float StFttCluster::maxStripLeftEdge() const { return mMaxStripLeftEdge; } 
+inline float StFttCluster::maxStripRightEdge() const { return mMaxStripRightEdge; } 
+
+
+
 inline void StFttCluster::setPlane(UChar_t plane) { mPlane = plane; }
 inline void StFttCluster::setQuadrant(UChar_t quadrant) { mQuadrant = quadrant; }
 inline void StFttCluster::setRow(UChar_t row) { mRow = row; }
@@ -90,6 +117,12 @@ inline void StFttCluster::setNStrips(int numStrips) { mNStrips = numStrips; }
 inline void StFttCluster::setSumAdc(int theSumAdc) { mSumAdc = theSumAdc; }
 inline void StFttCluster::setX(float x0) { mX = x0; }
 inline void StFttCluster::setSigma(float sigma) { mSigma = sigma; }
+
+inline void StFttCluster::setMaxADC(int theMaxADC) {mMaxADC = theMaxADC;}
+inline void StFttCluster::setIndexMaxStrip( int index ) { mIndexMaxStrip = index; }
+inline void StFttCluster::setMaxStripCenter( float sc ) { mMaxStripCenter = sc; }
+inline void StFttCluster::setMaxStripLeftEdge( float LEdge ) { mMaxStripLeftEdge = LEdge; }
+inline void StFttCluster::setMaxStripRightEdge( float REdge ) { mMaxStripRightEdge = REdge; }
 
 inline void StFttCluster::setId(int cluid) { mId = cluid; }
 

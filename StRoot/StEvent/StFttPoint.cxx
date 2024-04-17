@@ -17,6 +17,12 @@ StFttPoint::StFttPoint() :  StObject(), mClusters{0,0,0,0} { /* no op */ }
 StFttPoint::~StFttPoint() { /* no op */ }
 
 void StFttPoint::print(int opt) {
+    LOG_INFO << "Point with " << this->nClusters() <<" clusters " 
+             << ",x = " << this->x() << ", y = " << this->y() 
+             << ", d1 = " << this->d1() << ", d2 = " << this->d2()
+             << " at Plane : " << (int)this->plane() 
+             << " at Quad : " << (int)this->quadrant() 
+             << endm;
 }
 
 

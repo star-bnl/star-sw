@@ -27,6 +27,9 @@ mPlane(255),
 mQuadrant(kFttUnknownQuadrant),
 mRow(255),
 mStrip(255),
+mStripCenter(-999),
+mStripLeftEdge(-999),
+mStripRightEdge(-999),
 mOrientation(kFttUnknownOrientation)
 { /*noop*/ }
 
@@ -59,7 +62,12 @@ void StFttRawHit::setMapping(   UChar_t mPlane, UChar_t mQuadrant,
     this->mOrientation = mOrientation;
 }
 
-
+void StFttRawHit::setStripEdges( Float_t mStripCenter, Float_t mStripLeftEdge, Float_t mStripRightEdge )
+{
+    this->mStripCenter      = mStripCenter;
+    this->mStripLeftEdge    = mStripLeftEdge;
+    this->mStripRightEdge   = mStripRightEdge;
+}
 
 ostream&
 operator<<( ostream &os, const StFttRawHit& rh )
