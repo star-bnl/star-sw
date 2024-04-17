@@ -1,62 +1,21 @@
 #include "StFwdUtils/StFwdAnalysisMaker.h"
-#include "StFwdTrackMaker/Common.h"
 
-#include "TMath.h"
 #include "TVector3.h"
 
-#include <limits>
-#include <map>
-#include <string>
-#include <string>
-#include <vector>
-
-#include "StBFChain/StBFChain.h"
-
 #include "StEvent/StEvent.h"
-#include "StEvent/StGlobalTrack.h"
-#include "StEvent/StHelixModel.h"
-#include "StEvent/StPrimaryTrack.h"
-#include "StEvent/StRnDHit.h"
-#include "StEvent/StRnDHitCollection.h"
-#include "StEvent/StTrack.h"
-#include "StEvent/StTrackGeometry.h"
-#include "StEvent/StTrackNode.h"
-#include "StEvent/StPrimaryVertex.h"
 #include "StEvent/StEnumerations.h"
-#include "StEvent/StTrackDetectorInfo.h"
-#include "StEvent/StFttPoint.h"
-#include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StEvent/StFttCollection.h"
 #include "StEvent/StFcsCollection.h"
-#include "StEvent/StTriggerData.h"
-#include "StEvent/StFstHitCollection.h"
-#include "StEvent/StFstHit.h"
 #include "StEvent/StFwdTrackCollection.h"
-#include "StChain/StChainOpt.h"
-
-#include "StEventUtilities/StEventHelper.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuFwdTrack.h"
 #include "StMuDSTMaker/COMMON/StMuFwdTrackCollection.h"
 
-
-#include "tables/St_g2t_fts_hit_Table.h"
-#include "tables/St_g2t_track_Table.h"
-#include "tables/St_g2t_vertex_Table.h"
-#include "tables/St_g2t_event_Table.h"
-
-#include "StarMagField/StarMagField.h"
-
 #include "St_base/StMessMgr.h"
-#include "StarClassLibrary/StPhysicalHelix.hh"
-#include "StarClassLibrary/SystemOfUnits.h"
 
-
-#include "TROOT.h"
-#include "TLorentzVector.h"
 #include "StEvent/StFwdTrack.h"
 #include "StFcsDbMaker/StFcsDb.h"
 
