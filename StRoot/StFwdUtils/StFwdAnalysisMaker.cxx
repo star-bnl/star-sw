@@ -1,4 +1,6 @@
 #include "TVector3.h"
+#include "TH1F.h"
+#include "TH2F.h"
 
 #include "St_base/StMessMgr.h"
 
