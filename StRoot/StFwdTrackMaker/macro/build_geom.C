@@ -2,7 +2,7 @@
 // that is a valid shebang to run script as executable
 
 
-void build_geom( TString geomtag = "dev2022", TString output="fGeom.root" ) {
+void build_geom( TString geomtag = "y2023", TString output="fGeom.root" ) {
 
     gSystem->Load( "libStarRoot.so" );
     

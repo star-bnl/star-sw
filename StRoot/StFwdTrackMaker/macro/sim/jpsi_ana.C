@@ -7,49 +7,29 @@
 
 TFile *output = 0;
 
-void reportMem(){
-    struct sysinfo memInfo;
-
-    sysinfo (&memInfo);
-    long long totalVirtualMem = memInfo.totalram;
-    //Add other values in next statement to avoid int overflow on right hand side...
-    totalVirtualMem += memInfo.totalswap;
-    totalVirtualMem *= memInfo.mem_unit;
-
-    long long virtualMemUsed = memInfo.totalram - memInfo.freeram;
-    //Add other values in next statement to avoid int overflow on right hand side...
-    virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
-    virtualMemUsed *= memInfo.mem_unit;
-
-    LOG_INFO << "MEM USED % = " << ( (double)virtualMemUsed / (double)totalVirtualMem ) << endm;
-}
-
-void sim( int n = 5, // nEvents to run
-                string outputName = "stFwdTrackMaker_ideal_sim.root",
+void jpsi_ana( int n = 5, // nEvents to run
+                string outputName = "stFwdTrackMaker_ideal_jpsi.root",
                 bool useFstForSeedFinding = false, // use FTT (default) or FST for track finding
                 bool enableTrackRefit = true, // Enable track refit (default off)
                 bool realisticSim = false, // enables data-like mode, real track finding and fitting without MC seed
-                char *inFile =  "sim.fzd"
+                char *inFile =  "jpsi.fzd"
             ) {
     cout << "Running " << n << " events from " << inFile << endl;
-    const char *geom = "y2023 agml usexgeom";
+    const char *geom = "y2023";
     TString _geom = geom;
 
     // Switches for common options 
     bool SiIneff = false;
     bool useConstBz = false;
     bool useFCS = true;
-
-    // to use the geom cache (skip agml build which is faster)
-    // set the _geom string to "" and make sure the cache file ("fGeom.root") is present
-    // _geom = "";
+    
     
     // Setup the chain for reading an FZD
     TString _chain;
     if ( useFCS )
-        _chain = Form("fzin %s sdt20211016 fstFastSim fcsSim fcsWFF fcsCluster fwdTrack MakeEvent StEvent ReverseField bigbig  evout cmudst tree", _geom.Data() );
+        _chain = Form("fzin %s sdt20211016 fstFastSim fcsSim fcsWFF fcsCluster fwdTrack MakeEvent StEvent ReverseField agml usexgeom bigbig  evout cmudst tree", _geom.Data());
     else 
-        _chain = Form("fzin %s sdt20211016 MakeEvent StEvent ReverseField bigbig fstFastSim fcsSim fwdTrack evout cmudst tree", _geom.Data());
+        _chain = Form("fzin %s sdt20211016 MakeEvent StEvent ReverseField agml usexgeom bigbig fstFastSim fcsSim fwdTrack evout cmudst tree", _geom.Data());
 
     gSystem->Load( "libStarRoot.so" );
     gROOT->SetMacroPath(".:/star-sw/StRoot/macros/:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/calib:./StRoot/macros/mudst:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/analysis:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/test:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/examples:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/html:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/qa:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/calib:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/mudst:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/macros:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/tutorials");
@@ -61,10 +41,6 @@ void sim( int n = 5, // nEvents to run
 
     gSystem->Load( "libStFttSimMaker" );
     gSystem->Load( "libStFcsTrackMatchMaker" );
-
-    gSystem->Load( "libMathMore.so" );
-    gSystem->Load( "libStarGeneratorUtil" );
-    
 
     // FCS setup, if included
     if (useFCS) {
@@ -109,56 +85,39 @@ void sim( int n = 5, // nEvents to run
         cout << "Adding StFstFastSimMaker to chain" << endl;
         chain->AddMaker(fstFastSim);
 
-    
+
     // Configure the Forward Tracker
         StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
         
-        if ( fwdTrack ){
-            // config file set here for ideal simulation
-            if (!realisticSim){
-                cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
-                fwdTrack->setConfigForIdealSim( );
-            } else {
-                cout << "Configured for realistic simulation" << endl;
-                fwdTrack->setConfigForRealisticSim( );
-                cout << "Configured for realistic simulation DONE" << endl;
-            }
-
-            if ( _geom == "" ){
-                cout << "Using the Geometry cache: fGeom.root" << endl;
-                fwdTrack->setGeoCache( "fGeom.root" );
-            }
-
-            if (useFstForSeedFinding)
-                fwdTrack->setSeedFindingWithFst();
-            else
-                fwdTrack->setSeedFindingWithFtt();
-
-            fwdTrack->setTrackRefit( enableTrackRefit );
-            fwdTrack->setOutputFilename( outputName );
-            fwdTrack->SetGenerateTree( false );
-            fwdTrack->SetGenerateHistograms( false );
-            fwdTrack->SetVisualize( false );
-            fwdTrack->SetDebug();
-
-            // fwdTrack->setZeroB( true );
-        
-            bool doFitQA = true;
-            if ( doFitQA ){    
-                StFwdFitQAMaker *fwdFitQA = new StFwdFitQAMaker();
-                fwdFitQA->SetDebug();
-                chain->AddAfter("fwdTrack", fwdFitQA);
-            }
-            cout << "fwd tracker setup" << endl;
+        // config file set here for ideal simulation
+        if (!realisticSim){
+            cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
+            fwdTrack->setConfigForIdealSim( );
+        } else {
+            cout << "Configured for realistic simulation" << endl;
+            fwdTrack->setConfigForRealisticSim( );
+            cout << "Configured for realistic simulation DONE" << endl;
         }
+
+        if (useFstForSeedFinding)
+            fwdTrack->setSeedFindingWithFst();
+        else
+            fwdTrack->setSeedFindingWithFtt();
+
+        fwdTrack->setTrackRefit( enableTrackRefit );
+        fwdTrack->setOutputFilename( outputName );
+        fwdTrack->SetGenerateTree( true );
+        fwdTrack->SetGenerateHistograms( true );
+        fwdTrack->SetDebug();
+
+        cout << "fwd tracker setup" << endl;
+
         
-        bool doFwdAna = false;
-        if (!useFCS && doFwdAna ){
+        if (!useFCS){
             StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
             fwdAna->SetDebug();
             chain->AddAfter("fwdTrack", fwdAna);
         }
-
 
     StMuDstMaker * muDstMaker = (StMuDstMaker*)chain->GetMaker( "MuDst" );
     if (useFCS) {
@@ -170,18 +129,24 @@ void sim( int n = 5, // nEvents to run
         match->SetDebug();
         chain->AddMaker(match);
 
-        if ( doFwdAna ){
-            StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
-            fwdAna->SetDebug();
-            chain->AddAfter("FcsTrkMatch", fwdAna);
-        }
+        StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
+        fwdAna->SetDebug();
+        chain->AddAfter("FcsTrkMatch", fwdAna);
+
+        StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+        fwdJPsi->SetDebug();
+        chain->AddAfter("FcsTrkMatch", fwdJPsi);
+
+	gSystem->Load("StFcsDiLeptonMaker");
+        StFcsDiLeptonMaker *dilep = new StFcsDiLeptonMaker;
+	//TString dilepfile(outfile); dilepfile.ReplaceAll(".root",".dilep.root");                                                                  
+        dilep->setFileName("dilep.root");//dilepfile.Data());                                                                                       
+        //chain->AddAfter("FcsTrkMatch", dilep);            
 
         // Produce MuDst output
-        if ( muDstMaker )
-            chain->AddAfter( "FcsTrkMatch", muDstMaker );
+        chain->AddAfter( "FcsTrkMatch", muDstMaker );
     } else {
-        if ( muDstMaker )
-            chain->AddAfter( "fwdAna", muDstMaker );
+        chain->AddAfter( "fwdAna", muDstMaker );
     }
 
     
@@ -210,7 +175,7 @@ chain_loop:
         //     cout << "muFwdTrack->mPt = " << muFwdTrack->momentum().Pt() << endl;
 
         // }
-        // reportMem();
+
         cout << "<---------- END EVENT" << endl;
     } // event loop
 }
