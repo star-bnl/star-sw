@@ -168,6 +168,7 @@ void bfcread_hist_prefixes_add_to_ps(
            HO->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
       } // found hists
+      HO->Clear();
 
      } // loop over prefixes
 

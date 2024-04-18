@@ -349,6 +349,18 @@ int stgc_data_c::event_0001()
 
 	feb_id = dd>>29 ;
 
+#if 0
+	if(rdo1==2) {
+		switch(feb_id) {
+		case 1 :
+		case 3 :
+		case 5 :
+			LOG(WARN,"%d: FEB %d\n",rdo1,feb_id) ;
+			break ;
+		}
+	}
+#endif
+
 	datum_ix++ ;
 
 
@@ -731,6 +743,8 @@ int stgc_data_c::event()
 
 	}
 	else {
+
+//		printf("%d: ROD %d, FEB %d\n",rdo1,rod_id,feb_id) ;
 
 		vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
 		vmm.ch = channel ;
