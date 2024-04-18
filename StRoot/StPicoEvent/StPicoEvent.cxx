@@ -147,8 +147,11 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
     mJetPatchThreshold[iIter] = event.mJetPatchThreshold[iIter];
   }
   
-  for(int iIter=0; iIter<108; iIter++) {
+  for(int iIter=0; iIter<1728; iIter++) {
     mETofGoodEventFlag[iIter] = event.mETofGoodEventFlag[iIter];
+  }
+  for(int iIter=0; iIter<108; iIter++) {
+    mETofHasPulsersFlag[iIter] = event.mETofHasPulsersFlag[iIter];
   }
 }
 
@@ -339,7 +342,7 @@ void StPicoEvent::setBunchId(Int_t id) {
 }
 
 //_________________
-bool StPicoEvent::eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort_t iCounter ) const {
+bool StPicoEvent::eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort_t iCounter ,  UShort_t iGet4) const {
 	if( iSector < 13 || iSector > 24 ){
 		    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing sector id " << iSector <<"  -> return false"<< endm;
 		    return false;
@@ -352,13 +355,17 @@ bool StPicoEvent::eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort
 	    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing counter id " << iCounter <<"  -> return false"<< endm;
 	    return false;
 	}
+	if( iGet4 < 1 || iGet4 > 16 ){
+	    LOG_INFO << "StPicoEvent::eTofGoodEventFlag() - non-existing Get4 id " << iGet4 <<"  -> return false"<< endm;
+	    return false;
+	}
 
-	return (bool) mETofGoodEventFlag[ 9*(iSector-13) + 3*(iModule-1) + (iCounter-1) ];
+	return (bool) mETofGoodEventFlag[ 3*3*16*(iSector-13) + 3*16*(iModule-1) + 16*(iCounter-1)+ (iGet4 - 1) ];
 }
 //_________________
 void StPicoEvent::setETofGoodEventFlag( std::vector<bool> flagVec ) {
-	if( flagVec.size() != 108 ){
-	    LOG_INFO << "StPicoEvent::setETofGoodEventFlag() - eTof flag vector wrong size " << flagVec.size() <<" / 108"<< endm;
+	if( flagVec.size() != 1728 ){
+	    LOG_INFO << "StPicoEvent::setETofGoodEventFlag() - eTof flag vector wrong size " << flagVec.size() <<" / 1728"<< endm;
 	}else{
 	    std::copy(flagVec.begin(), flagVec.end(), mETofGoodEventFlag);
 	}

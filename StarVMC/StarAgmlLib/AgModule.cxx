@@ -25,6 +25,8 @@ TDataSet *AgModule::Geom()
   else           return mGeomSet;
 };
 
+void AgModule::AddHitScoring( TString name, AgMLScoring* sc ){ mHitScoring[name] = sc; }
+
 // ---------------------------------------------------------------------------------------------
 AgBlock *AgModule::AddBlock( const Char_t *name, AgBlock *_block )
 {

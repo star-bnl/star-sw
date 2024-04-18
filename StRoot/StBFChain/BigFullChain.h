@@ -1046,6 +1046,15 @@ Bfc_st BFC[] = { // standard chains
    "B2023a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2023 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2024 initial chains
+  {"B2024a"  ,"","",
+   "ry2024a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2024 data (tpc)",kFALSE},
+
+  {"pp2024a","" ,"",
+   "B2024a,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
+      "","","Production chain for year 2024 pp data - CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
+
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
@@ -1639,6 +1648,7 @@ Bfc_st BFC[] = { // standard chains
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters",                                     kFALSE},
   {"fcsPoint"   ,"","fcsChain", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
+  {"fcsPi0Libs","", "", "MuDst", "", "StFcsPi0FinderForEcal", "Libs for FCS Pi0 Finder",            kFALSE},
   // FTT
   {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain"        ,kFALSE}, 
   {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
@@ -1715,7 +1725,7 @@ Bfc_st BFC[] = { // standard chains
   // Sti/Stv chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    ,                      "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
-  {"StiCA"      ,"Sti","","Sti","StiMaker","TPCCATracker,StiCA"                    ,"StiCA tracker",kFALSE},
+  {"StiCA"      ,"Sti","","Sti","StiMaker","TPCCATracker"                          ,"StiCA tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
   {"StiCA"    ,"Sti","","Sti,StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
@@ -1922,7 +1932,8 @@ Bfc_st BFC[] = { // standard chains
   {"ppDAQfilter1","","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"ppLPeval1"   ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"QA"          ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event,fcsPi0Libs","StEventQAMaker"
+    ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"QAalltrigs"  ,"", "","",                                     "","","Analyze all triggers in QA",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},

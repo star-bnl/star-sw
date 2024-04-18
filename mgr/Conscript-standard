@@ -197,7 +197,8 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
-    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG -DRTS_ENABLE_LOG ";
+
 }
 
 #$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
@@ -895,7 +896,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
 	#    print "StarVMC change CPPPATH to $CPPPATH =========\n";
 
-    } elsif ($pkg eq "TPCCATracker" or $pkg eq "StiCA") {
+    } elsif ($pkg eq "TPCCATracker" or $pkg eq "Sti") {
         $CPPPATH .=
 	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
 
@@ -1432,7 +1433,7 @@ if ( $#src > -1 ) {
       }
     }
     if ($pkg eq "RTS") {
-      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN";
+      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN ";
       my $cpppath  = $main::PATH_SEPARATOR . "#StRoot/RTS/include"
 	. $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
 	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"

@@ -178,7 +178,11 @@ StMuETofHeader::goodEventFlagVec() const
 {
     return mGoodEventFlagVec;
 }
-
+std::vector <bool>
+StMuETofHeader::hasPulsersVec() const
+{
+    return mHasPulsersVec;
+}
 
 void
 StMuETofHeader::setTrgGdpbFullTime( const double& gdpbFullTime )
@@ -239,4 +243,9 @@ void
 StMuETofHeader::setGoodEventFlagVec( const std::vector<bool>& FlagVec )
 {
     mGoodEventFlagVec = FlagVec;
+}
+void    
+StMuETofHeader::setHasPulsersVec( const std::vector<bool>& PulserVec )
+{
+    mHasPulsersVec = PulserVec;
 }

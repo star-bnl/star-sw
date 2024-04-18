@@ -69,6 +69,8 @@ daq_tpx.o: tpxFCF_flags.h
 daq_tpx.o: tpxFCF_2D.h
 daq_tpx.o: ../DAQ_TPX/tpxFCF.h
 daq_tpx.o: tpxStat.h
+daq_tpx.o: ../DAQ_TPC23/tpx23.h
+daq_tpx.o: ../DAQ_TPC23/tpc23_base.h
 tpxCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxCore.o: ../../../../StRoot/RTS/include/DAQ1000/ddl_struct.h

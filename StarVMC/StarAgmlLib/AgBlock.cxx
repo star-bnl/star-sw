@@ -98,6 +98,9 @@ void AgBlock::AddGroup( const Char_t *name )
 ;//{ mGroups.push_back( name ); }
 
 
+void AgBlock::AddCut( TString cut, double value ){ mGstpar[cut] = value; }
+
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> WHY IS THIS COMMENTED OUT???
 void AgBlock::Inherit()
 {

@@ -29,6 +29,13 @@ extern "C" {
 volatile int tonkoLogLevel = 2 ;	
 
 
+
+#ifdef RTS_LOG_DEFAULT_NET
+static int output_flag = RTS_LOG_NET ;
+#else
+static int output_flag = RTS_LOG_STDERR ;
+#endif
+
 static const char *getCmd(void) ;
 static int  odesc = -1 ;
 static int handchange ;
@@ -42,7 +49,7 @@ static char servER[80] = RTS_LOG_HOST ;
 #endif
 
 static int port = RTS_LOG_PORT ;
-static int output_flag = RTS_LOG_NET ;
+
 static char cmd[1024] ;
 
 /*
@@ -112,7 +119,6 @@ void rtsLogAddJmlFile (char *fname)
 	strcpy(_g_fname, fname);
 	jml_fname = _g_fname;
 }
-
 
 int rtsLogUnix_v(const char *str, ...) 
 {
@@ -327,8 +333,6 @@ int rtsLogUnix_v(const char *str, ...)
 
 	return 0 ;
 }
-
-
 
 static const char *getCmd(void)
 {
