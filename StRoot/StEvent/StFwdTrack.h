@@ -128,6 +128,8 @@ public:
 
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
 
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
@@ -140,6 +142,7 @@ public:
     void setNDF( float lNDF ) { mNDF = lNDF;}
     void setPval( float lPval ) { mPval = lPval;}
     void setCharge( short  lCharge ) { mCharge = lCharge;}
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
 
     // ECAL clusters
     StPtrVecFcsCluster& ecalClusters();
@@ -168,12 +171,14 @@ protected:
     float mPval;
     short mCharge;
     StThreeVectorD mPrimaryMomentum;
-    
-
     StPtrVecFcsCluster mEcalClusters;
     StPtrVecFcsCluster mHcalClusters;
+    /// MC track id
+    UShort_t mIdTruth;
+    /// MC track quality (percentage of hits coming from corresponding MC track)
+    UShort_t mQATruth;
     
-    ClassDef(StFwdTrack,2)
+    ClassDef(StFwdTrack,3)
 
 };
 
