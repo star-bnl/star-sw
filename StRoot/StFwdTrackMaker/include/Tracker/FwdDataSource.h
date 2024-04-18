@@ -37,6 +37,7 @@ class FwdDataSource {
       for ( auto kv : mFttHits ){
           for ( auto h : kv.second ){
               delete h;
+              h = 0;
           }
           kv.second.clear();
       }
@@ -44,6 +45,7 @@ class FwdDataSource {
       for ( auto kv : mFstHits ){
           for ( auto h : kv.second ){
               delete h;
+              h = 0;
           }
           kv.second.clear();
       }

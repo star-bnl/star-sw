@@ -74,25 +74,34 @@ public:
     GenfitTrackResult(){}
     GenfitTrackResult(  Seed_t &fttSeed, 
                         Seed_t &fstSeed, 
-                        genfit::Track *track ) {
+                        std::shared_ptr<genfit::Track> track ) {
         set( fttSeed, fstSeed, track );
+    }
+    ~GenfitTrackResult(){
+        // Clear();
+    }
+    void Clear() {
+        if ( track ){
+            track->Clear();
+        }
     }
 void set(   Seed_t &fttSeed, 
                 Seed_t &fstSeed, 
-                genfit::Track *track ){
+                std::shared_ptr<genfit::Track> track ){
         this->fttSeed = fttSeed;
         this->fstSeed = fstSeed;
 
         try {
-            this->track = new genfit::Track(*track);
-            this->status = *(this->track->getFitStatus());
+            // this->track = new genfit::Track(*track);
+            this->track = track;
+            this->status = this->track->getFitStatus();
             this->trackRep = this->track->getCardinalRep();
 
-            this->isFitConverged = this->status.isFitConverged();
-            this->isFitConvergedFully = this->status.isFitConvergedFully();
-            this->isFitConvergedPartially = this->status.isFitConvergedPartially();
-            this->nFailedPoints = this->status.getNFailedPoints();
-            this->charge = this->status.getCharge();
+            this->isFitConverged = this->status->isFitConverged();
+            this->isFitConvergedFully = this->status->isFitConvergedFully();
+            this->isFitConvergedPartially = this->status->isFitConvergedPartially();
+            this->nFailedPoints = this->status->getNFailedPoints();
+            this->charge = this->status->getCharge();
 
             this->nPV = this->track->getNumPoints() - (numFTT() + numFST());
 
@@ -114,17 +123,15 @@ void set(   Seed_t &fttSeed,
         }
     }
 
-    void addFST( Seed_t &nfstSeed, genfit::Track *track ) {
+    void addFST( Seed_t &nfstSeed, std::shared_ptr<genfit::Track> track ) {
         set( fttSeed, nfstSeed, track );
     }
-    void addFTT( Seed_t &nfttSeed, genfit::Track *track ) {
+    void addFTT( Seed_t &nfttSeed, std::shared_ptr<genfit::Track> track ) {
         set( nfttSeed, fstSeed, track );
     }
 
     size_t numFTT() const { return fttSeed.size();}
     size_t numFST() const { return fstSeed.size();}
-
-    ~GenfitTrackResult() {}
 
 
     Seed_t fttSeed;
@@ -133,9 +140,9 @@ void set(   Seed_t &fttSeed,
     TVector3 momentum;
     double charge;
     size_t nPV = 0;
-    genfit::FitStatus status;
+    genfit::FitStatus *status = nullptr;
     genfit::AbsTrackRep *trackRep = nullptr;
-    genfit::Track *track = nullptr;
+    std::shared_ptr<genfit::Track> track = nullptr;
     bool isFitConverged = false;
     bool isFitConvergedFully = false;
     bool isFitConvergedPartially = false;
@@ -156,6 +163,13 @@ class ForwardTrackMaker {
     
     const std::vector<GenfitTrackResult> &getTrackResults() const { return mTrackResults; }
     const std::vector<Seed_t> &getTrackSeeds() const { return mRecoTracks; }
+
+    void Clear(){
+        for ( auto gtr : mTrackResults ){
+            gtr.Clear();
+        }
+        mTrackResults.clear();
+    }
 
     /**
      * @brief Set the Config File object
@@ -191,7 +205,7 @@ class ForwardTrackMaker {
         if (mGenHistograms) setupHistograms();
 
         mGeoCache = geoCache;
-        mDoTrackFitting = !(mConfig.get<bool>("TrackFitter:off", false));
+        mDoTrackFitting = mConfig.get<bool>("TrackFitter:active", true);
 
         if (!mConfig.exists("TrackFitter"))
             mDoTrackFitting = false;
@@ -260,6 +274,16 @@ class ForwardTrackMaker {
 
         return crits;
     } // loadCriteria
+
+    void clearCriteria( std::vector<KiTrack::ICriterion *> &crits ){
+        for ( size_t i = 0; i < crits.size(); i++ ){
+            if ( crits[i] ){
+                delete crits[i];
+                crits[i] = nullptr;
+            }
+        }
+        crits.clear();
+    }
 
     /**
      * @brief Get the Criteria Values object
@@ -487,9 +511,6 @@ class ForwardTrackMaker {
         // Moved cleanup to the start of doEvent, so that the fit results
         // persist after the call
         mRecoTracks.clear();
-        mRecoTrackQuality.clear();
-        mRecoTrackIdTruth.clear();
-        
         mTrackResults.clear();
         /************** Cleanup **************************/
 
@@ -608,58 +629,48 @@ class ForwardTrackMaker {
         if (!mDoTrackFitting)
             return;
 
-        /*******************************************************/
-        // Only for Simulation
-        // Calculate the MC info first and check filters
-        int idt = 0;
-        double qual = 0;
-        //  Get the quality and MC truth id
-        idt = MCTruthUtils::dominantContribution(seed, qual);
-        
-        TVector3 mcSeedMom;
-        auto mctm = mDataSource->getMcTracks();
-        // get the MC track momentum if we can (may be used for state seed)
-        if (mctm.count(idt)) {
-            auto mct = mctm[idt];
-            mcSeedMom.SetPtEtaPhi(mct->mPt, mct->mEta, mct->mPhi);
+        std::shared_ptr<genfit::Track> genTrack;
+
+        mAttemptedFits++;
+        if ( mGenHistograms ){
+            mHist["FitStatus"]->Fill("AttemptFit", 1);
         }
-        /*******************************************************/
 
-        genfit::FitStatus fitStatus;
-        genfit::AbsTrackRep *trackRep = nullptr;//new genfit::RKTrackRep(211); // pdg for pi+
-        genfit::Track *genTrack = nullptr;//new genfit::Track( trackRep, TVector3(0, 0, 0), TVector3(0, 0, 0) );
+        double vertex[3] = { mEventVertex.X(), mEventVertex.Y(), mEventVertex.Z() };
 
+        double * pVertex = 0;
+        if ( fabs(mEventVertex.X()) < 150 ){
+            pVertex = vertex; // only use it if it has been set from default
+        }
 
-        if (mDoTrackFitting) {
-            if ( mGenHistograms ){
-                mHist["FitStatus"]->Fill("AttemptFit", 1);
+        bool useMcSeed = mConfig.get<bool>("TrackFitter:mcSeed", false);
+        if (true == useMcSeed) {
+            /*******************************************************/
+            // Only for Simulation
+            // Calculate the MC info first and check filters
+            int idt = 0;
+            double qual = 0;
+            //  Get the quality and MC truth id
+            idt = MCTruthUtils::dominantContribution(seed, qual);
+            
+            TVector3 mcSeedMom;
+            auto mctm = mDataSource->getMcTracks();
+            // get the MC track momentum if we can (may be used for state seed)
+            if (mctm.count(idt)) {
+                auto mct = mctm[idt];
+                mcSeedMom.SetPtEtaPhi(mct->mPt, mct->mEta, mct->mPhi);
             }
+            /*******************************************************/
+            
+            // use the MC pt, eta, phi as the seed for fitting
+            mTrackFitter->fitTrack(seed, pVertex, &mcSeedMom);
+        } else {
+            // Normal case, real data
+            mTrackFitter->fitTrack(seed, pVertex);
+        }
 
-            double vertex[3] = { mEventVertex.X(), mEventVertex.Y(), mEventVertex.Z() };
-
-            double * pVertex = 0;
-            if ( fabs(mEventVertex.X()) < 150 ){
-                pVertex = vertex; // only use it if it has been set from default
-            }
-
-            if (true == mConfig.get<bool>("TrackFitter:mcSeed", false)) {
-                // use the MC pt, eta, phi as the seed for fitting
-                mTrackFitter->fitTrack(seed, pVertex, &mcSeedMom);
-            } else {
-                // Normal case, real data
-                mTrackFitter->fitTrack(seed, pVertex);
-            }
-
-            if ( mGenHistograms ){
-                if (mTrackFitter->getStatus().isFitConvergedFully()) {
-                    mHist["FitStatus"]->Fill("GoodFit", 1);
-                } else {
-                    mHist["FitStatus"]->Fill("BadFit", 1);
-                }
-            }
-
-            genTrack = new genfit::Track(*mTrackFitter->getTrack());
-            genTrack->setMcTrackId(idt);
+        if (mTrackFitter->getTrack() != nullptr ){
+            genTrack = mTrackFitter->getTrack();
             Seed_t nonSeeds; // none
             GenfitTrackResult gtr;
             if ( useFttAsSource )
@@ -667,13 +678,24 @@ class ForwardTrackMaker {
             else 
                 gtr.set( nonSeeds, seed, genTrack );
 
-            if ( mGenHistograms && genTrack->getFitStatus(genTrack->getCardinalRep())->isFitConverged()) {
-                mHist["FitStatus"]->Fill("GoodCardinal", 1);
+            if (gtr.status && gtr.status->isFitConvergedFully()) {
+                mGoodFits ++;
+                if ( mGenHistograms ) mHist["FitStatus"]->Fill("GoodFit", 1);
+            } else {
+                mFailedFits ++;
+                if ( mGenHistograms ) mHist["FitStatus"]->Fill("BadFit", 1);
+            }
+
+            if ( genTrack->getFitStatus(genTrack->getCardinalRep())->isFitConverged()) {
+                mGoodCardinals++;
+                if ( mGenHistograms ) mHist["FitStatus"]->Fill("GoodCardinal", 1);
             }
             mTrackResults.push_back( gtr );
-            
-            LOG_DEBUG << "FwdTracker::fitTrack complete" << endm;
-        } // if (mDoTrackFitting)
+        } else {
+            mFailedFits ++;
+            if ( mGenHistograms ) mHist["FitStatus"]->Fill("BadFit", 1);
+        }
+        LOG_DEBUG << "FwdTracker::fitTrack complete" << endm;
     } // fitTrack
 
     /**
@@ -683,15 +705,33 @@ class ForwardTrackMaker {
      */
     void doTrackFitting( std::vector<Seed_t> &trackSeeds) {
         long long itStart = FwdTrackerUtils::nowNanoSecond();
+
+        // metrics for this round
+        mAttemptedFits = 0;
+        mGoodFits = 0;
+        mFailedFits = 0;
+        mGoodCardinals = 0;
+
         // Fit each accepted track seed
+        LOG_DEBUG << "Starting Track fitting loop on " << trackSeeds.size() << " track seeds" << endm;
+        size_t index = 0;
         for (auto t : trackSeeds) {
+            LOG_DEBUG << "Track seed fit #" << index << endm;
             fitTrack(t);
+            index++;
         }
         long long itEnd = FwdTrackerUtils::nowNanoSecond();
         long long duration = (itEnd - itStart) * 1e-6; // milliseconds
         if ( mGenHistograms ){
             this->mHist["FitDuration"]->Fill(duration);
         }
+
+        double perGood = (double) mGoodFits / (double) mAttemptedFits;
+        double perFailed = (double) mFailedFits / (double) mAttemptedFits;
+        double perCardinals = (double) mGoodCardinals / (double) mGoodFits;
+        LOG_DEBUG << "Track Fitting Results:" <<
+                    TString::Format( "Attempts = %lu, Good = %lu (%f%), Failed = %lu (%f%), GoodCardinals = %lu (%f%)", mAttemptedFits, mGoodFits, perGood, mFailedFits, perFailed, mGoodCardinals, perCardinals ) << endm;
+        LOG_DEBUG << "Track fitting took " << duration << "ms" << endm; 
     } // doTrackFitting
 
     /**
@@ -738,8 +778,6 @@ class ForwardTrackMaker {
                 int idt = 0;
                 double qual = 0;
                 idt = MCTruthUtils::dominantContribution(track, qual);
-                mRecoTrackQuality.push_back(qual);
-                mRecoTrackIdTruth.push_back(idt);
             } else {
                 //Skipping track that doesnt have hits on all layers 
             }
@@ -810,7 +848,7 @@ class ForwardTrackMaker {
             criteriaPath = "TrackFinder.SegmentBuilder";
         }
 
-        mTwoHitCrit.clear();
+        clearCriteria( mTwoHitCrit );
         mTwoHitCrit = loadCriteria(criteriaPath);
         builder.addCriteria(mTwoHitCrit);
 
@@ -856,7 +894,7 @@ class ForwardTrackMaker {
         if (false == mConfig.exists(criteriaPath))
             criteriaPath = "TrackFinder.ThreeHitSegments";
 
-        mThreeHitCrit.clear();
+        clearCriteria( mThreeHitCrit );
         mThreeHitCrit = loadCriteria(criteriaPath);
         automaton.addCriteria(mThreeHitCrit);
         automaton.lengthenSegments();
@@ -957,7 +995,7 @@ class ForwardTrackMaker {
     void doTrackIteration(size_t iIteration, FwdDataSource::HitMap_t &hitmap) {
 
         // empty the list of reco tracks for the iteration
-        mRecoTracksThisItertion.clear();
+        mRecoTracksThisIteration.clear();
 
         // check to see if we have hits!
         size_t nHitsThisIteration = nHitsInHitMap(hitmap);
@@ -983,7 +1021,7 @@ class ForwardTrackMaker {
             // Steps 2 - 4 here
             /*************************************************************/
             auto acceptedTracks = doTrackingOnHitmapSubset( iIteration, hitmap );
-            mRecoTracksThisItertion.insert( mRecoTracksThisItertion.end(), acceptedTracks.begin(), acceptedTracks.end() );
+            mRecoTracksThisIteration.insert( mRecoTracksThisIteration.end(), acceptedTracks.begin(), acceptedTracks.end() );
         } else {
 
             FwdDataSource::HitMap_t slicedHitMap;
@@ -1018,7 +1056,7 @@ class ForwardTrackMaker {
                 // Steps 2 - 4 here
                 /*************************************************************/
                 auto acceptedTracks = doTrackingOnHitmapSubset( iIteration, slicedHitMap );
-                mRecoTracksThisItertion.insert( mRecoTracksThisItertion.end(), acceptedTracks.begin(), acceptedTracks.end() );
+                mRecoTracksThisIteration.insert( mRecoTracksThisIteration.end(), acceptedTracks.begin(), acceptedTracks.end() );
             } //loop on phi slices
         }// if loop on phi slices
 
@@ -1030,23 +1068,23 @@ class ForwardTrackMaker {
         if ( false == mConfig.exists( hrmPath ) ) hrmPath = "TrackFinder.HitRemover";
 
         if ( true == mConfig.get<bool>( hrmPath + ":active", true ) ){
-            removeHits( hitmap, mRecoTracksThisItertion );
+            removeHits( hitmap, mRecoTracksThisIteration );
         }
         
-        LOG_DEBUG << " FITTING " << mRecoTracksThisItertion.size() << " now" << endm;
+        LOG_DEBUG << " FITTING " << mRecoTracksThisIteration.size() << " now" << endm;
 
-        if ( mRecoTracksThisItertion.size() < 2001 ){
-            doTrackFitting( mRecoTracksThisItertion );
+        if ( mRecoTracksThisIteration.size() < 10001 ){
+            doTrackFitting( mRecoTracksThisIteration );
         } else {
             LOG_ERROR << "BAILING OUT of fit, too many track candidates" << endm;
         }
         
         if ( mGenHistograms ){
-            mQualityPlotter->afterIteration( iIteration, mRecoTracksThisItertion );
+            mQualityPlotter->afterIteration( iIteration, mRecoTracksThisIteration );
         }
         
         // Add the set of all accepted tracks (this iteration) to our collection of found tracks from all iterations
-        mRecoTracks.insert( mRecoTracks.end(), mRecoTracksThisItertion.begin(), mRecoTracksThisItertion.end() );
+        mRecoTracks.insert( mRecoTracks.end(), mRecoTracksThisIteration.begin(), mRecoTracksThisIteration.end() );
 
     } // doTrackIteration
 
@@ -1060,7 +1098,7 @@ class ForwardTrackMaker {
         for (size_t i = 0; i < mTrackResults.size(); i++) {
             GenfitTrackResult &gtr = mTrackResults[i];
             
-            if ( gtr.status.isFitConverged() == false || gtr.momentum.Perp() < 1e-3) {
+            if ( gtr.status->isFitConverged() == false || gtr.momentum.Perp() < 1e-3) {
                 LOG_DEBUG << "Skipping addFstHitsMc, fit failed" << endm;
                 return;
             }
@@ -1208,9 +1246,9 @@ class ForwardTrackMaker {
                     LOG_DEBUG << "Track Refit with FTT points converged" << endm;
                     t.addFTT( hits_to_add, mTrackFitter->getTrack() );
                     LOG_DEBUG << "Track Refit with " << t.track->getNumPoints() << " points" << endm;
-                    mHist["FitStatus"]->Fill("GoodReFit", 1);
+                    if ( mGenHistograms ) mHist["FitStatus"]->Fill("GoodReFit", 1);
                 } else {
-                    mHist["FitStatus"]->Fill("BadReFit", 1);
+                    if ( mGenHistograms ) mHist["FitStatus"]->Fill("BadReFit", 1);
                     LOG_DEBUG << "Track Refit with FTT points FAILED" << endm;
                 }
             }
@@ -1232,7 +1270,7 @@ class ForwardTrackMaker {
         for (size_t i = 0; i < mTrackResults.size(); i++) {
             GenfitTrackResult &gtr = mTrackResults[i];
             
-            if ( gtr.status.isFitConverged() == false || gtr.momentum.Perp() < 1e-3) {
+            if ( gtr.status->isFitConverged() == false || gtr.momentum.Perp() < 1e-6) {
                 LOG_DEBUG << "Skipping addFttHitsMc on this track, fit failed" << endm;
                 return;
             }
@@ -1272,7 +1310,12 @@ class ForwardTrackMaker {
                 combinedSeed.insert( combinedSeed.end(), fttHitsForThisTrack.begin(), fttHitsForThisTrack.end() );
 
                 double vertex[3] = { mEventVertex.X(), mEventVertex.Y(), mEventVertex.Z() };
-                LOG_DEBUG << "Using previous fit momentum as the seed: " << TString::Format( "(pt=%f, eta=%f, phi=%f)", gtr.momentum.Pt(), gtr.momentum.Eta(), gtr.momentum.Phi() ) << endm;
+                LOG_DEBUG << "Using previous fit momentum as the seed: " << endm;
+                LOG_DEBUG << TString::Format( "(px=%f, py=%f, pz=%f)", gtr.momentum.Px(), gtr.momentum.Py(), gtr.momentum.Pz() ) << endm;
+                // this prevents an exception when momentum is outrageous
+                if ( fabs(gtr.momentum.Pz()) > 100000 )
+                    gtr.momentum.SetZ( 10000 );
+                LOG_DEBUG << TString::Format( "(pt=%f, eta=%f, phi=%f)", gtr.momentum.Pt(), gtr.momentum.Eta(), gtr.momentum.Phi() ) << endm;
 
                 mTrackFitter->fitTrack(combinedSeed, vertex, &(gtr.momentum) );
 
@@ -1281,9 +1324,9 @@ class ForwardTrackMaker {
                     LOG_DEBUG << "Track Refit with FTT points converged" << endm;
                     gtr.addFTT( fttHitsForThisTrack, mTrackFitter->getTrack() );
                     LOG_DEBUG << "Track Refit with " << gtr.track->getNumPoints() << " points" << endm;
-                    mHist["FitStatus"]->Fill("GoodReFit", 1);
+                    if (mGenHistograms) mHist["FitStatus"]->Fill("GoodReFit", 1);
                 } else {
-                    mHist["FitStatus"]->Fill("BadReFit", 1);
+                    if (mGenHistograms) mHist["FitStatus"]->Fill("BadReFit", 1);
                     LOG_DEBUG << "Track Refit with FTT points FAILED" << endm;
                 }
             } // we have at least one Fst hit to refit with
@@ -1516,7 +1559,7 @@ class ForwardTrackMaker {
     unsigned long long int nEvents;
 
     bool mDoTrackFitting = true;
-    bool mSaveCriteriaValues = true;
+    bool mSaveCriteriaValues = false;
 
     FwdTrackerConfig mConfig;
     std::string mConfigFile;
@@ -1525,15 +1568,16 @@ class ForwardTrackMaker {
     std::vector<GenfitTrackResult> mTrackResults;
 
     std::vector<Seed_t> mRecoTracks; // the tracks recod from all iterations
-    std::vector<Seed_t> mRecoTracksThisItertion;
+    std::vector<Seed_t> mRecoTracksThisIteration;
+
+    // Metrics about the event 
+    size_t mAttemptedFits = 0;
+    size_t mGoodFits = 0;
+    size_t mFailedFits = 0;
+    size_t mGoodCardinals = 0;
 
     // Set to the Primary vertex for the event
     TVector3 mEventVertex;
-    
-    // These are vectors with info about each track / fit
-    // they should all have the same length
-    std::vector<float> mRecoTrackQuality;
-    std::vector<int> mRecoTrackIdTruth;
 
     QualityPlotter *mQualityPlotter;
     std::shared_ptr<FwdDataSource> mDataSource;
