@@ -19,6 +19,9 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
     mCharge = evTrack->charge();
     mPrimaryMomentum = TVector3( evTrack->momentum().x(), evTrack->momentum().y(), evTrack->momentum().z() );
 
+    mIdTruth = evTrack->idTruth();
+    mQATruth = evTrack->qaTruth();
+    
     //copy the projections
     for ( auto proj : evTrack->mProjections ){
         mProjections.push_back(
