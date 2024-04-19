@@ -73,6 +73,8 @@ public:
 
 	static int no_sw16 ;
 
+	int online ;
+	int mode ;
 	int rdo_fmt ;
 } ;
 

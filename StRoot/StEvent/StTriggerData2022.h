@@ -47,6 +47,7 @@ public:
     unsigned int   token() const;
     unsigned int   triggerWord() const;
     unsigned int   actionWord() const;      
+    unsigned int   zdcKillerBit() const;
     unsigned short busyStatus() const;
     unsigned short dsmInput() const;
     unsigned short trgToken() const;
@@ -283,7 +284,7 @@ protected:
     void swapRawDetOfflen(TrgOfflen2022* offlen);
     void swapRawDet(DataBlock2022* data, int name, int hlength, int bs);
     
-    ClassDef(StTriggerData2022,1) 
+    ClassDef(StTriggerData2022,2) 
 };
 
 inline void StTriggerData2022::swapOfflen(TrgOfflen2022* offlen)

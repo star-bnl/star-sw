@@ -104,7 +104,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mMaxYPos( 15. ), 
   mMergingRadius( 1. ),
   mSigVel(),
-  mSoftwareDeadTime( 5. ),
+  mSoftwareDeadTime( 150. ),
   mDoClockJumpShift( true ),
   mDoDoubleClockJumpShift( true ),
   mClockJumpDirection(),
@@ -115,6 +115,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mIsSim( false ), 
   mDoQA( false ),
   mDebug( false ),
+  mApCorr(false),
   mHistFileName( "" ),
   mHistograms(),
   mCounterActive()
@@ -337,13 +338,13 @@ StETofHitMaker::InitRun( Int_t runnumber )
     }
 
     // --------------------------------------------------------------------------------------------
-    for( int i=0; i<eTofConst::nCountersInSystem; i++ ) {
+    for(int i=0; i<eTofConst::nCountersInSystem; i++ ) {
         mCounterActive.push_back( false );
     }
     // --------------------------------------------------------------------------------------------
     // initializie etof geometry
     // --------------------------------------------------------------------------------------------
-
+    
     if( !mETofGeom ) {
       LOG_INFO << " creating a new eTOF geometry . . . " << endm;
       mETofGeom = new StETofGeometry( "etofGeometry", "etofGeometry in HitMaker" );
@@ -979,7 +980,7 @@ StETofHitMaker::matchSides()
         }
         //--------------------------------------------------------------------------------
 	
-
+	std::vector< unsigned int > containedDigiIndices; //
         double posX     = 0.0;
         double posY     = 0.0;
         double time     = 0.0;
@@ -991,6 +992,53 @@ StETofHitMaker::matchSides()
         if( mDoQA && digiVec->size() == 1 ) {
 	  mHistograms.at( histNameDigisErased )->Fill( 2 );
         }
+
+
+	//single sided digi hit building
+		if( digiVec->size() == 1 ) {
+
+	  // create the hit candidate:
+	  StETofDigi* xDigiA = digiVec->at( 0 );
+	  StETofDigi* xDigiB = digiVec->at( 0 );
+
+	  //get get4flag statistics
+	  // StMuETofHeader* etofHeader = mMuDst->etofHeader();
+	  //  TClass* headerClass = etofHeader->IsA();
+	  //  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
+	  // std::vector< bool > goodEventFlagVec = mMuDst->etofHeader()->goodEventFlagVec();
+
+            // the "strip" time is the mean time between each end
+            time = 0.5 * ( xDigiA->calibTime() + xDigiB->calibTime() );
+            //TODO: Afterpulse handling: correct hit time by the time difference between the first and second digi on the same side
+	    if(!mIsSim && mApCorr){//merge skip corrections for simulation
+	    time += t_corr_afterpulse;
+	    }//merge
+            // weight of merging of hits (later) is the total charge => sum of both ends ToT
+            totSum = xDigiA->calibTot() + xDigiB->calibTot();
+	 
+	    if(xDigiA->side() == 1){	    
+	      posY = 1;
+	    }else{	     
+	      posY = -1;
+	    }
+	    
+
+            // use local coordinates... (0,0,0) is in the center of counter
+            posX = ( -1 * eTofConst::nStrips / 2. + strip - 0.5 ) * eTofConst::stripPitch;
+
+	    unsigned int clusterSize = 1000;
+	    
+	    StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
+
+	    mStoreHit[ detIndex ].push_back( constructedHit );
+
+            containedDigiIndices.push_back( mMapDigiIndex.at( xDigiA ) );
+            containedDigiIndices.push_back( mMapDigiIndex.at( xDigiB ) );
+
+            mMapHitDigiIndices[ constructedHit ] = containedDigiIndices;
+                 
+	}
+
 	
         // loop over digis on the same strip
         while( digiVec->size() > 1 ) {	        
@@ -1025,7 +1073,7 @@ StETofHitMaker::matchSides()
 			  delete *iterDigi;
 			  digiVec->erase( iterDigi );                           
 			  //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-			  t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); //CHECK IF THAT actually makes things better!!
+			  if(mApCorr) t_corr_afterpulse   = digiVec->at( 0 )->calibTime() - digiVec->at( 1 )->calibTime(); 
 			  if( mDoQA ) {
 			    mHistograms.at( histNameDigisErased )->Fill( 4 );
 			  }
@@ -1130,7 +1178,7 @@ StETofHitMaker::matchSides()
 		  
 		  if( xDigiC->side() == xDigiA->side() ) {
 	                     //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-		    t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		  if(mApCorr)  t_corr_afterpulse   = xDigiA->calibTime() - xDigiC->calibTime();
 		    xDigiA = xDigiC;
 		    iterDigi = digiVec->begin();
 		    delete *iterDigi;
@@ -1141,7 +1189,7 @@ StETofHitMaker::matchSides()
 		  }
 		  else {
 		    //TODO: Afterpulse handling: save time difference between digi 1 and digi 2 and substract from hit time!
-		    t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime(); //CHECK IF THAT actually makes things better!!
+		  if(mApCorr)  t_corr_afterpulse   = xDigiB->calibTime() - xDigiC->calibTime();
 		    xDigiB = xDigiC;
 		    iterDigi = digiVec->begin() + 1;
 		    delete *iterDigi;
@@ -1171,7 +1219,7 @@ StETofHitMaker::matchSides()
             // the "strip" time is the mean time between each end
             time = 0.5 * ( xDigiA->calibTime() + xDigiB->calibTime() );
             //TODO: Afterpulse handling: correct hit time by the time difference between the first and second digi on the same side
-	    if(!mIsSim){//merge skip corrections for simulation
+	    if(!mIsSim && mApCorr){//merge skip corrections for simulation
 	      time += t_corr_afterpulse;
 	    }
             // weight of merging of hits (later) is the total charge => sum of both ends ToT
@@ -1252,14 +1300,14 @@ StETofHitMaker::matchSides()
 	      clusterSize += 100;
             }
 
-            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 
 	    //Modify individual counters if needed (e.g. flip in local y due to switched cables)
 	    if(mModMatrix.at(detIndex) > 0){
 	      int mode = mModMatrix.at(detIndex);
 	      modifyHit(mode, posX , posY , time);
 	    }
-	    
+
+      StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 	    	    
 	    //Check for "same direction double clockjumps" and update FlagMap
 	    if(mDoDoubleClockJumpShift){
@@ -1310,7 +1358,7 @@ StETofHitMaker::matchSides()
 		       tof += eTofConst::coarseClockCycle;
 		     }		        
 	    }
-	    }   
+	    }  
 	    
             // push hit into intermediate collection
             mStoreHit[ detIndex ].push_back( constructedHit ); 
@@ -1570,9 +1618,14 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             int highestStrip = lowestStrip;
 
             bool hasClockJump = false;
-            if( pHit->clusterSize() > 100 ) {
+            if( pHit->clusterSize() > 100  && pHit->clusterSize() < 999) {
                 hasClockJump = true;
             }
+
+	    bool isSingleSided = false;
+	    if(pHit->clusterSize() > 999){
+	      isSingleSided = true;
+	    }
 
             unsigned int index = 1;
             while( hitVec->size() > 1 ) {
@@ -1602,10 +1655,19 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     isLowerAdjacentStip = true;
                 }
 
+		double MergingRadius = 0;
+
+		// dont merge single sided matches here!! has to happen after matching!!
+		if(pMergeHit->clusterSize() > 500 || pHit->clusterSize() > 500){ 
+		  MergingRadius = 0; 
+		}else{
+		  MergingRadius = mMergingRadius; 
+		}
+
                 // check merging condition: X is not convoluted into the clusterbuilding radius 
                 // since it is not supposed to be zero --> check if X position is on a adjacent strip
                 if( ( isHigherAdjacentStip || isLowerAdjacentStip ) && 
-                    ( sqrt( timeDiff * timeDiff + posYDiff * posYDiff ) ) < mMergingRadius )
+                    ( sqrt( timeDiff * timeDiff + posYDiff * posYDiff ) ) < MergingRadius )  //
                 {
                     if( mDebug ) {
                         LOG_DEBUG << "mergeClusters() - merging is going on" << endm; 
@@ -1632,7 +1694,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     weightsTotSum  += hitWeight;
 
                     clusterSize++;
-                    if( pMergeHit->clusterSize() > 100 ) {
+                    if( pMergeHit->clusterSize() > 100 && pMergeHit->clusterSize() < 200) {
                         hasClockJump = true;
                     }
 
@@ -1708,6 +1770,10 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             if( hasClockJump ) {
                 clusterSize += 100;
             }
+
+	    if(isSingleSided){
+	      clusterSize += 1000;
+	    }
 
             if( mDebug ) {
                 LOG_DEBUG << "mergeClusters() - MERGED HIT: ";

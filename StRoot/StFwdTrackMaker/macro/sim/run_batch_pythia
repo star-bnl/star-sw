@@ -1,3 +1,4 @@
+#!/usr/bin/bash
 nEvents=100
 
 fzd=$1

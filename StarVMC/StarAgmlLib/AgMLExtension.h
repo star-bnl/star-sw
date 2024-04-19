@@ -57,7 +57,7 @@ public:
 
   std::vector<AgMLScoring*> GetUserHits(){ return mHitScoring; }
 
-  void AddCut( TString cut, double value ){ mGstpar[cut] = value; }
+  void AddCut( TString cut, double value );
   std::map<TString,double>& GetCuts() { return mGstpar; }
   
  

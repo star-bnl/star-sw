@@ -17,6 +17,8 @@ ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
 endif
 
 
+HOSTDOMAIN = $(shell hostname -d)
+
 # jml...  TARGET_CPU_STRING to mean the full string...
 
 # go from "uname" to gcc -mcpu=TARGET_CPU variant
@@ -373,14 +375,38 @@ DEFINES = -D_REENTRANT ${RTS_DAQMAN_FLAGS} -DRTS_HOST_NAME=\"${HOST_NAME}\" -DTA
 
 
 # Set strict errors in LINUX
-BASEFLAGS = -O3 -Wall -Werror -Wno-error=strict-overflow -Wno-error=maybe-uninitialized -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
+BASEFLAGS = -O3 -Wall -Wno-error=strict-overflow -Wno-error=maybe-uninitialized -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
 
+
+#-O3
 ifneq (${TARGET_SYSTEM}, LINUX)
-     BASEFLAGS = -O3 -Wall  -pipe -fverbose-asm ${HOSTFLAGS} 
+     BASEFLAGS = -Wall  -pipe -fverbose-asm ${HOSTFLAGS} 
 endif
 
 ifeq (${HOST_NAME},xvme01.daq.bnl.local) 
-     BASEFLAGS = -O3 -Wall -Werror -Wno-error=strict-overflow -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
+     BASEFLAGS = -O3 -Wall -Wno-error=strict-overflow -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
+endif
+
+# if not compiling on one of the standard domains, then 
+# use the default log destination of std_err
+# if compiling on local domain, write to daqman
+#
+# if compiling somewhere else for writing to daqman these defines
+ifeq (${HOSTDOMAIN},starp.bnl.gov)
+	DEFINES += -DRTS_LOG_DEFAULT_NET
+	DEFINES += -DRTS_ENABLE_LOG
+else ifeq (${HOSTDOMAIN},daq.bnl.local) 
+	DEFINES += -DRTS_LOG_DEFAULT_NET
+	DEFINES += -DRTS_ENABLE_LOG
+else ifeq (${HOSTDOMAIN},daq2.bnl.local)
+	DEFINES += -DRTS_LOG_DEFAULT_NET
+	DEFINES += -DRTS_ENABLE_LOG
+else ifeq (${HOSTDOMAIN},trg.bnl.local)
+	DEFINES += -DRTS_LOG_DEFAULT_NET
+	DEFINES += -DRTS_ENABLE_LOG
+else ifeq (${HOSTDOMAIN},l4.bnl.local)
+	DEFINES += -DRTS_LOG_DEFAULT_NET
+	DEFINES += -DRTS_ENABLE_LOG
 endif
 
 CCFLAGS  = ${BASEFLAGS} ${USRCCFLAGS}  ${DEFINES} ${INCLUDES} 
@@ -395,6 +421,10 @@ ifeq ($(RTS_PROJECT),PP2PP)
 	export LDLIBS = -L${LIBDIR} -lrtsComLib -lsunRT -lrtslog  ${HOSTLIBS}
 endif
 endif
+
+
+
+
 
 # noticed problems on Linux where the default linker gcc doesn't work well for g++ compiled
 # files

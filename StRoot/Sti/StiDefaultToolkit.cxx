@@ -390,6 +390,7 @@
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiDetectorGroups.h"
+#include "Sti/StiCATpcSeedFinder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtHitLoader.h"
@@ -639,11 +640,7 @@ StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinderKNN()
 //______________________________________________________________________________
 StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinderCA()
 {
-  gSystem->Load("TPCCATracker");
-  gSystem->Load("StiCA");
-  auto *mySeed = (StiTrackFinder*)gROOT->ProcessLineFast("StiCALoader::New()");
-  assert(mySeed);
-  return mySeed;
+  return new StiCATpcSeedFinder();
 }
 
 //______________________________________________________________________________

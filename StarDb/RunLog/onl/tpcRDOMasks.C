@@ -1,3 +1,5 @@
+#include "tables/St_tpcRDOMasks_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcRDOMasks")) return 0;
   tpcRDOMasks_st row;

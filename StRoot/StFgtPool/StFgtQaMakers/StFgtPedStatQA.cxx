@@ -80,6 +80,7 @@
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 #include <TCanvas.h>
+#include <TLine.h>
 #include <TPave.h>
 #include <TPaveText.h>
 #include <TPaveStats.h>

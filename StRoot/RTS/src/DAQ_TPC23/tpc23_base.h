@@ -12,7 +12,7 @@ public:
 	virtual ~tpc23_base() ;
 
 	static const int ROW_MAX = 45 ;
-	static const int PAD_MAX = 144 ;
+	static const int PAD_MAX = 182 ;
 	static const int SEQ_MAX = 64 ;
 	static const int SIM_FIFOS = 64 ;
 
@@ -24,7 +24,9 @@ public:
 
 	virtual int rdo_scan(char *mem, int words) ;
 	virtual int from22to23(char *dta, int words) ;	// rewrite the old FY22 raw data foramt to FY23
-	
+
+//	int fee_errs ;
+
 	u_char rts_id ;	// tpx, itpc
 	u_char fmt ;	// 22: old data format, 23: FY23 data format
 	u_char online ;	// 1:running online, 0:offline with quality and track_id stuff
@@ -47,6 +49,9 @@ public:
 
 	u_char no_cld ;
 
+
+	u_char mode ;	// for various debugging steering
+
 	u_int last_ix ;
 	int sequence_cou ;
 
@@ -56,6 +61,7 @@ public:
 
 	u_int err ;		// cleared at rdo_scan?
 
+	u_int run_errors ;
 
 	static itpcData *data_c ;
 
@@ -70,8 +76,8 @@ public:
 	} ;
 
 
-	static short bad_fee_cou[24][6] ;
-	static short bad_fee[24][6][36] ; 
+	static short bad_fee_cou[24][46] ;
+	static short bad_fee[24][46][36] ; 
 
 	struct row_pad_t (*rp_gain)[ROW_MAX+1][PAD_MAX+1] ;	// max for both dets; all sectors
 
@@ -93,7 +99,7 @@ public:
 	} sim_dta[SIM_FIFOS] ;
 
 	int load_replay(const char *fname, int sec_soft) ;
-	virtual inline void set_rdo(int sec, int rdo) { return ; } ;
+	virtual u_int set_rdo(int sec, int rdo) { return 0 ; } ;
 
 
 	// simulation

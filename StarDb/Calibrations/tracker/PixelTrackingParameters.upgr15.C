@@ -1,3 +1,5 @@
+#include "tables/St_TrackingParameters_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.ssdTrackingParameters/ssdTrackingParameters Allocated rows: 1  Used rows: 1  Row size: 32 bytes

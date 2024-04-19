@@ -2,8 +2,6 @@
 
 #if !defined(__CINT__) || defined(__CLING__)
 #include "StBFChain/StBFChain.h"
-#include "StarVMC/StarAgmlLib/AgModule.h"
-#include "StarVMC/StarAgmlLib/StarTGeoStacker.h"
 #include "StarVMC/StarGeometry/StarGeo.h"
 #endif
 
@@ -33,27 +31,18 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   // Append geom.root to the extentionless filename
   filename+=".geom.root";
 
-  // Detect second call to the system
-  if ( AgModule::Find("HALL") ) {
-    if ( chain->GetOption("Sti")    ||
-	 chain->GetOption("StiCA")  ||
-	 chain->GetOption("StiVMC") ){
-      cout << "AgML geometry:  HALL exists.  Restore from cache file " 
-	   << filename.Data() << endl;
+  if ( gGeoManager ) {
+    if ( chain->GetOption("Sti")    || 	 chain->GetOption("StiCA")  ) {
       gGeoManager = 0;
-      assert(0);
+      assert(0);      // this assert should be called in our Sti reconstruction chains... why not?
       TGeoManager::Import( filename );
-      assert(gGeoManager);
     }
-    return geom;
   }
-
   cout << "AgML: Building geometry " << name << " " << endl;
 
-  // Create the geometry using TGeo
-  AgBlock::SetStacker( new StarTGeoStacker() ); 
 
   Geometry *build = new Geometry();  
+  build->InitAgML( "StarTGeoStacker" );
 
   // Suppress copious ROOT warnings 
   Long_t save = gErrorIgnoreLevel; gErrorIgnoreLevel = 9999;

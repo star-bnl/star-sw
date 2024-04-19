@@ -285,7 +285,7 @@ float StFcsClusterMaker::isNeighbor(StFcsHit* hit, StFcsCluster* clu){
 	if(ehp==1) thr=mNeighborDistance_Hcal;
 	float d = distance(hit,h);
 	float e = h->energy();
-	if(d < thr) ne=e;
+	if(d < thr && e>ne) ne=e;
     }
     return ne;
 }

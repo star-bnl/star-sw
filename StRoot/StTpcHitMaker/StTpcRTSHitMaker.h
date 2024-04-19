@@ -71,39 +71,35 @@ class daq_itpc;
 class daq_dta;
 class daq_cld;
 class tpc23_base;
+class TH2F;
 class StTpcRTSHitMaker : public StMaker {
  public:
  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), 
-#ifdef __TFG__VERSION__
     fTpx23(0), fiTpc23(0),
-#endif /*  __TFG__VERSION__ */
-    fminCharge(0) {}
+    fminCharge(0) {fgStTpcRTSHitMaker = this;}
   virtual ~StTpcRTSHitMaker();
-  
+  static StTpcRTSHitMaker *instance() {return fgStTpcRTSHitMaker;}
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
   Int_t               InitRun23(Int_t runnumber);
   Int_t               Make();
-#ifdef __TFG__VERSION__
   Int_t               Make23();
-#endif /*  __TFG__VERSION__ */
-#ifdef __USE_GAIN_FROM_FILE__
   Int_t               from_file(daq_dta *gain_dta, const Char_t *fname = "");
-#endif /* __USE_GAIN_FROM_FILE__ */
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
+  static TH2F *PlotSecRow(Int_t sec = 1, Int_t row = 1, Int_t flags = 2);
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
-#ifdef __TFG__VERSION__
   tpc23_base   *fTpx23; //!
   tpc23_base  *fiTpc23; //!
-#endif /*  __TFG__VERSION__ */
+  Int_t         FixGains(tpc23_base *tpc23, Int_t sector, Int_t row, Int_t npads); // fix dead pads and edges
   Bool_t    fNoiTPCLu; //!
   Double_t  fminCharge; // ! minimum cluster charge in ADC
   Int_t     maxHits[24];
   Int_t     maxBin0Hits;
   Int_t     bin0Hits;
+  static  StTpcRTSHitMaker *fgStTpcRTSHitMaker;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.19 2021/05/10 21:13:19 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;

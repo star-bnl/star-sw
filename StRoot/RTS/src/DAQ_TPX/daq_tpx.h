@@ -13,6 +13,8 @@ class tpxStat ;
 class daqReader;
 class tpxFCF_2D ;
 
+class tpx23 ;
+
 class daq_tpx : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
@@ -73,6 +75,12 @@ private:
 
 	int cld23 ;
 
+	int rdo_fmt ;
+
+	tpx23 *t23 ;
+
+
+
 protected:
 
 public:
@@ -84,6 +92,8 @@ public:
 	char fcf_afterburner_disable ;
 	char fcf_run_compatibility ;
 	char fcf_do_cuts ;
+
+	u_char mode ;
 
 	// for use by simulation
 	int sim_row_count ;

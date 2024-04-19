@@ -55,7 +55,7 @@ public:
      ** @brief Full constructor including goodEventFlag, which is normally set in calibrations only.
      **/                
     StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
-                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const std::vector<bool>&, const std::vector<bool>&  );              
+                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const std::vector<bool>&, const std::vector<bool>& , const std::vector<bool>& );              
 
     ~StETofHeader();
 
@@ -78,6 +78,8 @@ public:
      **/      
     std::vector<bool>       goodEventFlagVec()  const;
 
+    std::vector<bool>       hasPulsersVec()  const;
+
 
     void    setTrgGdpbFullTime( const double& gdpbFullTime );
     void    setTrgStarFullTime( const double& starFullTime );
@@ -92,7 +94,7 @@ public:
     void    setEventStatusFlag( const uint64_t& statusFlag );
     void    setGoodEventFlagVec( const std::vector<bool>& FlagVec );
     void    setGoodEventFlagVec( int blubb ) {return;}
-    //    void    setGoodEventFlagVec( const std::vector<bool>& FlagVec );
+    void    setHasPulsersVec( const std::vector<bool>& PulserVec );
 
 private:
     Double_t    mTrgGdpbFullTime;
@@ -109,8 +111,9 @@ private:
 
     std::vector< Bool_t > mMissMatchFlagVec;
     std::vector< Bool_t > mGoodEventFlagVec; 
+    std::vector< Bool_t > mHasPulsersVec; 
 
-    ClassDef( StETofHeader, 3 )
+    ClassDef( StETofHeader, 4 )
 };
 
 #endif // STETOFHEADER_H

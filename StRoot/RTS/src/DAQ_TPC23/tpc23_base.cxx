@@ -31,8 +31,8 @@
 //tpc23_base::row_pad_t (*tpc23_base::rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
 //tpc23_base::row_pad_t (*tpc23_base::rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;
 
-short tpc23_base::bad_fee_cou[24][6] ;
-short tpc23_base::bad_fee[24][6][36] ;
+short tpc23_base::bad_fee_cou[24][46] ;
+short tpc23_base::bad_fee[24][46][36] ;
 
 //int tpc23_base::rowlen[ROW_MAX+1] ;
 //int tpc23_base::row_min ;
@@ -943,7 +943,8 @@ int tpc23_base::row_stage1(int row)
 {
 	int got_one = 0 ;
 	int p_max ;
-	
+	int odd_errs = 0 ;
+
 	blob_cou = 1 ;
 	int blob_merges = 0 ;
 
@@ -951,8 +952,13 @@ int tpc23_base::row_stage1(int row)
 #ifdef DBG_PRINT
 	printf("ROW %2d: STAGE1, rowlen %2d\n",row,p_max) ;
 #endif
+
 	for(int pad=1;pad<p_max;pad++) {	// < is on purpose!!!
-		struct seq_t *seq_l = s1[row][pad].seq ;
+		struct seq_t *seq_l ;
+
+		//error_retry:; 
+
+		seq_l = s1[row][pad].seq ;
 
 #ifdef DBG_PRINT
 		printf("   pad %d: t_hi %d\n",pad,seq_l->t_hi) ;
@@ -980,8 +986,15 @@ int tpc23_base::row_stage1(int row)
 				u_int tr_lo = seq_r->t_lo ;
 				int br = seq_r->blob_id ;
 
-				if(tr_hi>=512 || tr_lo>=512) LOG(ERR,"tr_hi %d, tr_lo %d: row %d, pad %d",
-								 tr_hi,tr_lo,row,pad) ;
+				if(tr_hi>=512 || tr_lo>=512) {
+					odd_errs++ ;
+					if(odd_errs<5) {
+						LOG(ERR,"S%d: tr_hi %d, tr_lo %d: row %d, pad %d",sector1,
+						 tr_hi,tr_lo,row,pad+1) ;
+					}
+					seq_r->t_hi = -1 ;
+					continue ;
+				}
 
 				//printf("tr_hi %d, tr_lo %d: row %d, pad %d\n", tr_hi,tr_lo,row,pad) ;
 
@@ -1156,7 +1169,7 @@ int tpc23_base::row_stage1(int row)
 
 	}
 
-
+//	error_retry:;
 
 #ifdef DBG_PRINT
 	printf("ROW %2d: STAGE1: %d blobs, blob_merges %d\n",row,blob_cou-1,blob_merges) ;
@@ -1212,7 +1225,7 @@ int tpc23_base::evt_stop()
 
 		if((s2_dta-s2_start)>(s2_max_words-1000)) {
 			LOG(ERR,"T %d: row %d: lots of CLD words %d vs %d, sequences %d -- skipping the rest",token,row,
-			    s2_dta-s2_start, s2_max_words,
+			    s2_dta-s2_start, s2_max_words-1000,
 			    sequence_cou) ;
 
 			break ;
@@ -1327,7 +1340,7 @@ int tpc23_base::run_start()
 			s1_bytes = (ROW_MAX*PAD_MAX)*512*2 ;
 		}
 
-		LOG(INFO,"%d: allocing %d s1_bytes, s1_t %d, blobs %d",id,s1_bytes,sizeof(s1),sizeof(blob)) ;
+		if(online) LOG(INFO,"%d: allocing %d s1_bytes, s1_t %d, blobs %d",id,s1_bytes,sizeof(s1),sizeof(blob)) ;
 
 		s1_dta = (u_short *) malloc(s1_bytes) ;
 	}
@@ -1339,7 +1352,9 @@ int tpc23_base::run_start()
 	evt = 0 ;
 	evt_trgd = 0 ;
 
-	
+	run_errors = 0 ;
+//	fee_errs = 0 ;
+
 	return 0 ;
 
 }
@@ -1348,7 +1363,7 @@ int tpc23_base::run_start()
 // Called at run-stop: generally dumps statistics
 int tpc23_base::run_stop()
 {
-	LOG(NOTE,"%d: run_stop: %d/%d events",id,evt_trgd,evt) ;
+//	LOG(TERR,"%d: run_stop: %d/%d events, run_errors %d",id,evt_trgd,evt,run_errors) ;
 
 	return 0 ;
 }
@@ -1369,6 +1384,7 @@ tpc23_base::tpc23_base()
 	s2_words = 0 ;
 
 	no_cld = 0 ;
+	mode = 0 ;
 
 //	rp_gain_tpx = 0 ;
 //	rp_gain_itpc = 0 ;
@@ -1461,7 +1477,7 @@ int tpc23_base::gains_from_cache(const char *fname)
 	}}}
 
 	for(int s=0;s<24;s++) {
-	for(int r=0;r<6;r++) {
+	for(int r=0;r<46;r++) {
 		bad_fee_cou[s][r] = 0 ;
 	}}
 
@@ -1537,6 +1553,12 @@ int tpc23_base::gains_from_cache(const char *fname)
 #ifdef DBG_PRINT
 			//printf("gain %d %d %d = %f %f\n",sec,row,pad,g,t) ;
 #endif 
+			int flags = rp_gain[sec-1][row][pad].flags ;
+
+			if(log_level>0) {
+				printf("gain %d %d %d = %f %f; %d\n",sec,row,pad,g,t,flags) ;
+			}
+
 			rp_gain[sec-1][row][pad].gain = g ;
 			rp_gain[sec-1][row][pad].t0 = t ;
 		
@@ -1546,6 +1568,12 @@ int tpc23_base::gains_from_cache(const char *fname)
 
 				if(p1<1) p1 = 1 ;
 				if(p2>rowlen[row]) p2 = rowlen[row] ;
+
+				
+				if(log_level>0) printf("dead edge row %d, pad %d %d %d: %d %d %d\n",row,pad,p1,p2,
+						       rp_gain[sec-1][row][pad].flags,
+						       rp_gain[sec-1][row][p1].flags,
+						       rp_gain[sec-1][row][p2].flags) ;
 
 				rp_gain[sec-1][row][pad].flags |= FCF_DEAD_EDGE ;
 				rp_gain[sec-1][row][p1].flags |= FCF_DEAD_EDGE ;

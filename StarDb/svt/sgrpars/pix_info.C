@@ -1,3 +1,5 @@
+#include "tables/St_sgr_pixmap_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sgrpars/pix_info Allocated rows: 4  Used rows: 4  Row size: 28 bytes

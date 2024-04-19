@@ -62,6 +62,10 @@ struct FwdTreeData {
     vector<float> fstX, fstY, fstZ;
     vector<int> fstTrackId;
 
+    int fcsN;
+    vector<float> fcsX, fcsY, fcsZ;
+    vector<int> fcsDet;
+
     // RC tracks
     int rcN;
     vector<float> rcPt, rcEta, rcPhi, rcQuality;
@@ -89,6 +93,7 @@ struct FwdTreeData {
     int thdN;
     vector<float> thdX, thdY, thaX, thaY, thaZ;
 
+    bool saveCrit = false;
     std::map<string, std::vector<float>> Crits;
     std::map<string, std::vector<int>> CritTrackIds;
 
@@ -112,7 +117,9 @@ class StFwdTrackMaker : public StMaker {
 
     void SetConfigFile(std::string n) {
         mConfigFile = n;
+        LoadConfiguration();
     }
+    void LoadConfiguration();
     void SetGenerateHistograms( bool _genHisto ){ mGenHistograms = _genHisto; }
     void SetGenerateTree(bool _genTree) { mGenTree = _genTree; }
     void SetVisualize( bool _viz ) { mVisualize = _viz; }
@@ -177,6 +184,175 @@ class StFwdTrackMaker : public StMaker {
     void FillTTree(); // if debugging ttree is turned on (mGenTree)
     void FitVertex();
 
+    static std::string defaultConfigIdealSim;
+    static std::string defaultConfigData;
+    std::string defaultConfig;
+    bool configLoaded = false;
+
+    // Helper functions for modifying configuration
+    // NOTE: to override configuration, call individual functions after setConfigForXXX
+    public:
+    /**@brief Setup the StFwdTrackMaker for running on Data
+     * Load the default configuration for Data. 
+     * Note: Apply any overrides after calling this
+    */
+    void setConfigForData() { defaultConfig = defaultConfigData; LoadConfiguration(); }
+    /**@brief Setup the StFwdTrackMaker for running on Data
+     * Load the default configuration for IDEAL simulation.
+     * This runs with MC track finding and MC-seeded track fitting.
+     * - MC track finding uses the MCTrackId to collect stgc/fst hits into track seeds 
+     * - MC-seeded track fitting uses the MC particle momentum to seed the track fit
+     * - Also uses the simulated MC primary vertex with smearing according to the simgaXY,Z
+     * Note: Apply any overrides after calling this
+    */
+    void setConfigForIdealSim()  { defaultConfig = defaultConfigIdealSim; LoadConfiguration();  }
+
+    /**@brief Setup the StFwdTrackMaker for running on Data
+     * Load the default configuration for Realistic simulation.
+     * This runs tracking on simulation using the same parameters / approach as on data.
+     * Note: Apply any overrides after calling this
+    */
+    void setConfigForRealisticSim()  { 
+      defaultConfig = defaultConfigData; 
+      LoadConfiguration();  
+      // Note: Once the slow sims work this override will not be needed
+      // because the slow sims will put hits into StEvent just like (data) reco chain
+      setFttHitSource( "GEANT" );
+    }
+
+
+    /**@brief Set the filename for output ROOT file
+     * @param fn : filename of output ROOT file
+    */
+    void setOutputFilename( std::string fn ) { mFwdConfig.set( "Output:url", fn ); }
+    /**@brief Set the data source for FTT hits
+     * 
+     * @param source : {DATA, GEANT}, DATA means read from StEvent, GEANT means read directly from the GEANT hits
+    */
+    void setFttHitSource( std::string source ) { mFwdConfig.set( "Source:ftt", source ); }
+    
+    /**@brief Enable or disable the Fst Rasterizer
+     * @param use : if true, load FST hits from GEANT and raster them according to r, phi resolutions.
+    */
+    void setUseFstRasteredGeantHits( bool use = true ){ mFwdConfig.set<bool>( "SiRasterizer:active", use ); }
+    /**@brief Set the resolution in R for rasterizing FST hits (from fast sim)
+     * Only used when the Rasterizer is enabled, which results from reading FST hits from GEANT
+     * @param r : resolution in r (cm)
+    */
+    void setFstRasterR( double r = 3.0 /*cm*/ ){ mFwdConfig.set<double>( "SiRasterizer:r", r ); }
+    /**@brief Set the resolution in phi for rasterizing FST hits (from fast sim)
+     * Only used when the Rasterizer is enabled, which results from reading FST hits from GEANT
+     * @param phi : resolution in phi (rad)
+    */
+    void setFstRasterPhi( double phi = 0.00409 /*2*pi/(12*128)*/ ){ mFwdConfig.set<double>( "SiRasterizer:phi", phi ); }
+
+    //Track Finding
+    /**@brief Use Ftt hits in the Seed Finding
+     * 
+    */
+    void setSeedFindingWithFtt() { mFwdConfig.set( "TrackFinder:source", "ftt" ); }
+    /**@brief Use Fst hits in the Seed Finding
+     * 
+    */
+    void setSeedFindingWithFst() { mFwdConfig.set( "TrackFinder:source", "fst" ); }
+    /**@brief Set the number of track finding iterations
+     * @param n : number of iterations to run
+    */
+    void setSeedFindingNumInterations( int n = 1 ) { mFwdConfig.set<int>("TrackFinder:nIterations", n); }
+    /**@brief Set the number of phi slices to split the track iterations into
+     * @param n : number of slices of equal size (2pi)/n
+    */
+    void setSeedFindingNumPhiSlices( int n = 8 ) { mFwdConfig.set<int>("TrackFinder.Iteration:nPhiSlices", n); }
+    /**@brief Set the connector distance for track finding
+     * @param d : distance between planes (1 = adjacent)
+    */
+    void setSeedFindingConnectorDistance( int d = 1 ) { mFwdConfig.set<int>( "TrackFinder.Connector:distance", d ); }
+    /**@brief Enable or disable the SubsetNN
+     * @param use : if true, enables the subsetNN which find the most compatible set of tracks without shared hits
+     *            if false, all tracks are reported regardless of shared hits
+    */
+    void setSeedFindingUseSubsetNN( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder.SubsetNN:active", use ); }
+    /**@brief Enable or disable the SubsetNN
+     * @param n : minimum number of hits on a track seed. Seeds with fewer hits are discarded
+    */
+    void setSeedFindingMinHitsOnTrack( int n = 3 ) { mFwdConfig.set<int>( "TrackFinder.SubsetNN:min-hits-on-track", n ); }
+    /**@brief Enable or disable the HitRemover
+     * @param use : if true, enables the hit remover which removes any hits from the hitmap that were used in a track
+     *            if false, hits are not removed after each iteration
+    */
+    void setSeedFindingUseHitRemover( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder.HitRemover:active", use ); }
+    /**@brief Enable or disable the Truth Seed finding
+     * @param use : if true, use Mc info to group hits into track seeds
+     *            if false, seed finding uses options as in the case for data
+    */
+    void setUseTruthSeedFinding( bool use = true ) { mFwdConfig.set<bool>( "TrackFinder:active", !use ); }
+
+    // Track Fitting
+    /**@brief Turn off track fitting 
+     * Useful if you want to speed up the run but dont need fitting (testing seed finding)
+    */
+    void setTrackFittingOff() { mFwdConfig.set( "TrackFitter:active", "false" ); }
+    /**@brief Enable / disable material effects
+     * Material effects in kalman filter
+    */
+    void setFittingMaterialEffects( bool mat = true) { mFwdConfig.set<bool>( "TrackFitter:materialEffects", mat ); }
+    /**@brief Set the resolution for the Primary Vertex in XY
+     * @params sXY : sigma in XY (cm)
+    */
+    void setPrimaryVertexSigmaXY( double sXY ) { mFwdConfig.set<double>( "TrackFitter.Vertex:sigmaXY", sXY ); }
+    /**@brief Set the resolution for the Primary Vertex in Z
+     * @params sZ : sigma in Z (cm)
+    */
+    void setPrimaryVertexSigmaZ(  double sZ ) { mFwdConfig.set<double>( "TrackFitter.Vertex:sigmaZ", sZ ); }
+    // TODO: add options for beamline constraint
+
+    /**@brief Include or exclude the Primary Vertex in fit
+     * @param pvf : if true, use PRimary Vertex in fit
+    */
+    void setIncludePrimaryVertexInFit( bool pvf = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:includeInFit", pvf ); }
+    /**@brief Set B-field to zero (for zero field running)
+     * @param zeroB : if true, use Zero B field
+    */
+    void setZeroB( bool zeroB = true ) { mFwdConfig.set<bool>( "TrackFitter:zeroB", zeroB ); }
+    /**@brief Set B-field to constant (even outside of TPC)
+     * @param constB : if true, use const 0.5T B field
+    */
+    void setConstB( bool constB = true ) { mFwdConfig.set<bool>( "TrackFitter:constB", constB ); }
+    /**@brief Force the use of McSeed for fit
+     * @param mcSeed : if true, use mc momentum as the seed for the track fitter
+    */
+    void setUseMcSeedForFit( bool mcSeed = true ) { mFwdConfig.set<bool>( "TrackFitter:mcSeed", mcSeed ); }
+
+    /**@brief Sets the tracking to refit 
+     * This adds compatible hits from whichever detector was NOT used in seed finding
+     * if FTT seeding -> project to and add FST hits
+     * if FST seeding -> project to and add FTT hits
+     * @param refit : true, perform refit, false do not
+    */
+    void setTrackRefit( bool refit = true) { mFwdConfig.set<bool>( "TrackFitter:refit", refit ); }
+
+    /**@brief Sets the maximum number of hits that can be considered failed before the entire track fit fails
+     * @param n : number of failed hits allowed, -1 = no limit
+    */
+    void setMaxFailedHitsInFit( int n = -1 /*no lim*/ ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MaxFailedHits", n);}
+    /**@brief Sets Fitter debug level
+     * @param level : 0 = no output, higher numbers are more verbose
+    */
+    void setFitDebugLvl( int level = 0 /*0=no output*/ ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:DebugLvl", level); }
+    /**@brief Sets Max fit iterations before failing
+     * @param n : num iterations
+    */
+    void setFitMaxIterations( int n=4 ) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MaxIterations", n); }
+    /**@brief Sets Min fit iterations before converging
+     * @param n : num iterations
+    */
+    void setFitMinIterations( int n = 1) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MinIterations", n); }
+
+    /**@brief Enables smearing of the MC Primary Vertex according to sigmaXY,Z
+     * @param pvs : if true, smear vertex 
+    */
+    void setSmearMcPrimaryVertex( bool pvs = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:smearMcVertex", pvs ); }
+  
 };
 
 #endif

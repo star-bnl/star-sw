@@ -39,6 +39,7 @@ u_int fcs_data_c::run_type ;
 
 // for ZS
 float fcs_data_c::n_sigma ;
+float fcs_data_c::n_sigma_hcal ;
 float fcs_data_c::n_sigma_epd ;
 short fcs_data_c::n_pre ;
 short fcs_data_c::n_post ;
@@ -267,6 +268,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	float sigma ;
 
 	if(hdr_det==2) sigma = n_sigma_epd ;
+	else if(hdr_det==1) sigma = n_sigma_hcal ;
 	else sigma = n_sigma ;
 
 	// trigger channels are special so figure this out
@@ -2261,7 +2263,8 @@ int fcs_data_c::load_sc_map(const char *fname)
 
 				// FPRE is special: Akio marked unused channels with non-0
 				if(dd==2) {
-					if(sipm!=0) {
+					//if(sipm!=0) {
+					if(sipm>=2) {	// new for FY23 EPD use
 						//LOG(TERR,"%d %d %d = %d",s,r,c,sipm) ;
 						sipm = 0xFF ;
 					}

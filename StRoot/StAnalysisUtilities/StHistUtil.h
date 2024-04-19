@@ -134,6 +134,7 @@ class StHistUtil {
   const Char_t** possibleSuffixes; //!
   TString m_Detectors;   // List of detectors
   UInt_t  m_PrintMode;   // Which output files to print
+  TList*  m_ItemsToClear; // List of items to clear at some intervals
 
   // For reference analyses:
   Bool_t m_analMode;
@@ -154,6 +155,7 @@ class StHistUtil {
  public: 
   StHistUtil();
   virtual        ~StHistUtil();
+  virtual void    Clear();
   virtual void    SetDebug(Bool_t dbg=kTRUE) { debug=dbg; }
   virtual Bool_t  Debug() { return debug; }
   virtual Int_t   DrawHists(const Char_t *dirName="EventQA");

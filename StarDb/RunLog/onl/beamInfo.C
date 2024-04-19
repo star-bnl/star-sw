@@ -1,3 +1,5 @@
+#include "tables/St_beamInfo_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/RunLog/onl/.beamInfo/beamInfo Allocated rows: 1  Used rows: 1  Row size: 120 bytes

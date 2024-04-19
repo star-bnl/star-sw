@@ -1,3 +1,5 @@
+#include "tables/St_svtRDOstripped_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtRDOstripped")) return 0;
   svtRDOstripped_st row[72] = {

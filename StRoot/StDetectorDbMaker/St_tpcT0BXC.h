@@ -21,7 +21,7 @@ class St_tpcT0BXC : public TChair {
   Float_t 	dslope(Int_t i = 0) 	const {return Struct(i)->dslope;}
   Float_t 	CountPs(Int_t i = 0) 	const {return Struct(i)->CountPs;}
   Float_t 	dCountPs(Int_t i = 0) 	const {return Struct(i)->dCountPs;}
-  Double_t      getT0(Double_t values[6]) const;
+  Double_t      getT0(Double_t values[7]) const;
  protected:
   St_tpcT0BXC(St_tpcT0BX *table=0) : TChair(table) {}
   virtual ~St_tpcT0BXC() {fgInstance = 0;}

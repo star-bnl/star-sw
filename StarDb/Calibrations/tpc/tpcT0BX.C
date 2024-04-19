@@ -1,3 +1,5 @@
+#include "tables/St_tpcT0BX_Table.h"
+
 TDataSet *CreateTable() { 
 // ------  Test whether this table share library was loaded ------
   if (!TClass::GetClass("St_tpcT0BX")) return 0;

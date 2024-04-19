@@ -1,3 +1,5 @@
+#include "tables/St_tpcCorrection_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/Calibrations/tpc/.TpcAdcCorrectionC/TpcAdcCorrectionC Allocated rows: 50  Used rows: 50  Row size: 120 bytes

@@ -1037,6 +1037,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         LOG_INFO << "the use of pulser relations inside a Gbtx is turned off" << endm;
     }
 
+    //reset histo keeping track of mod average distance to clock
+    mHistograms.at( "pulserDigiTimeDiff_GbtxCorrProfMod" )->Reset();
+
     // --------------------------------------------------------------------------------------------
 
 
@@ -1230,37 +1233,32 @@ StETofCalibMaker::processStEvent()
     // collect status bit information and fill good event flag for 2020+ data
 	 TClass* headerClass = etofHeader->IsA();
 	 if( headerClass->GetClassVersion() > 2 ){
-	 	mNStatusBitsCounter.clear();			
-	  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
-		int iGet4Id = 0;
-		for( auto iMissMatchFlag : vMissmatchVec ){
-			// From DigiMaker:
-		   // mMissMatchFlagVec.at( 144 * ( sector - 13 ) + 48 * ( zplane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 ) ) = true;
-		   if (iMissMatchFlag == false) continue;			
-			int iCounter = iGet4Id / 16;
-			if( mNStatusBitsCounter.count(iCounter) ){
-				mNStatusBitsCounter[iCounter]++;
-			}else{
-				mNStatusBitsCounter[iCounter] = 1;
-			}	
-		 }
 		
-		std::vector<bool> goodEventFlagVec; 	
-	  	for( int iCounter = 0; iCounter < 108; iCounter++){
-	  		if ( !(mNPulsersCounter.count(iCounter) ) ){
-	  			goodEventFlagVec.push_back(false);
-	  		}else{
-		  		if ( !(mNStatusBitsCounter.count(iCounter)) && mNPulsersCounter[iCounter] == 2){
-		  			goodEventFlagVec.push_back(true); //true when 2 pulser digis and zero status bits are available on this counter
-		  		}else{
-		  			goodEventFlagVec.push_back(false);
-		  		}
-		  	}
-	  	}
-	  	if (goodEventFlagVec.size() == 108){
-	  		etofHeader->setGoodEventFlagVec(goodEventFlagVec);
+		std::vector<bool> goodEventFlagVec; 
+		std::vector<bool> hasPulsersVec;
+		
+		//drag along pulser information
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
+		  if ( !(mNPulsersCounter.count(iCounter) ) ){
+		    hasPulsersVec.push_back(false);
+		  }else{	
+		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
+		  }		  
+		}
+		if (hasPulsersVec.size() == 108){
+		  //etofHeader->setHasPulsersVec(hasPulsersVec);  // not working but not of relevance at the moment 
+	  	} 
+
+		//fill good event flag into header
+		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){	  	
+		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+		}
+				
+	  	if (goodEventFlagVec.size() == 1728){
+		  etofHeader->setGoodEventFlagVec(goodEventFlagVec);
 	  	}   
-	  }
+	 }
+
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     StructStuckFwDigi current = { -1, -1., -1. };
@@ -1365,6 +1363,7 @@ StETofCalibMaker::processMuDst()
     mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );
     std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
 
+
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
         //LOG_INFO << "accessing etof digis: "<< i <<"/"<< nDigis << endm;
@@ -1378,10 +1377,13 @@ StETofCalibMaker::processMuDst()
         //LOG_INFO << "resetting digi "<< i <<"/"<< nDigis << endm;
         resetToRaw( aDigi );
 
+
         /// apply hardware mapping from rocId, chipId, channelId to
         /// sector, zplane, counter, strip, side
         //LOG_INFO << "mapping digi: "<< i <<"/"<< nDigis << endm; 
         applyMapping( aDigi );
+
+
 
         /// flag pulser digis
     //LOG_INFO << "pulser digi flagging: "<< i <<"/"<< nDigis << endm;
@@ -1390,44 +1392,41 @@ StETofCalibMaker::processMuDst()
         }
     }
 
+
     //LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
 
     calculatePulserOffsets( pulserCandMap );
+
     
     // collect status bit information and fill good event flag for 2020+ data
 	 TClass* headerClass = etofHeader->IsA();
 	 if( headerClass->GetClassVersion() > 2 ){
-	 	mNStatusBitsCounter.clear();			
-	  std::vector< Bool_t >  vMissmatchVec = etofHeader->missMatchFlagVec();
-		int iGet4Id = 0;
-		for( auto iMissMatchFlag : vMissmatchVec ){
-			// From DigiMaker:
-		   // mMissMatchFlagVec.at( 144 * ( sector - 13 ) + 48 * ( zplane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 ) ) = true;
-		   if (iMissMatchFlag == false) continue;			
-			int iCounter = iGet4Id / 16;
-			if( mNStatusBitsCounter.count(iCounter) ){
-				mNStatusBitsCounter[iCounter]++;
-			}else{
-				mNStatusBitsCounter[iCounter] = 1;
-			}	
-		 }
+
+		std::vector<bool> goodEventFlagVec;
+		std::vector<bool> hasPulsersVec;//
 		
-		std::vector<bool> goodEventFlagVec; 	
-	  	for( int iCounter = 0; iCounter < 108; iCounter++){
-	  		if ( !(mNPulsersCounter.count(iCounter) ) ){
-	  			goodEventFlagVec.push_back(false);
-	  		}else{
-		  		if ( !(mNStatusBitsCounter.count(iCounter)) && mNPulsersCounter[iCounter] == 2){
-		  			goodEventFlagVec.push_back(true); //true when 2 pulser digis and zero status bits are available on this counter
-		  		}else{
-		  			goodEventFlagVec.push_back(false);
-		  		}
-		  	}
+		//drag along pulser information
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
+		  if ( !(mNPulsersCounter.count(iCounter) ) ){
+		    hasPulsersVec.push_back(false);
+		  }else{	
+		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
+		  }		  
+		}
+
+		if (hasPulsersVec.size() == 108){
+		  etofHeader->setHasPulsersVec(hasPulsersVec);
+	  	} 
+		
+		//fill good event flag into header
+		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
+		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+		}		
+		
+	  	if (goodEventFlagVec.size() == 1728){
+		  etofHeader->setGoodEventFlagVec(goodEventFlagVec);
 	  	}
-	  	if (goodEventFlagVec.size() == 108){
-	  		etofHeader->setGoodEventFlagVec(goodEventFlagVec);
-	  	}   
-	  }
+	 }
 
     /// second loop to apply calibrations to (non-pulser) digis inside the timing window
     StructStuckFwDigi current = { -1, -1., -1. };
@@ -1466,7 +1465,6 @@ StETofCalibMaker::processMuDst()
         else {
             prev = current;
         }
-
 
         /// calculate calibrated time and tot for the digi
         /// only for digis inside the timing window
@@ -1566,11 +1564,15 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
 
     unsigned int key = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->counter() * 10 + aDigi->side();
 
+
     // pulser channel
     if( ( aDigi->strip() == 1 && aDigi->side() == 1 ) || ( aDigi->strip() == 32 && aDigi->side() == 2 ) ) {
         float timeToTrigger = aDigi->rawTime() - mTriggerTime;
+
+
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
         float totToHalfPeak = aDigi->rawTot()  - mPulserPeakTot.at( key ) * 0.5;
+
 
         if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
             if( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) {
@@ -1579,9 +1581,11 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
         }
     }
 
+
     if( isPulserCand ) {
         pulserDigiMap[ key ].push_back( index );
     }
+
 }
 
 
@@ -2283,7 +2287,7 @@ StETofCalibMaker::applyPulserOffset( StETofDigi* aDigi )
 {
     int key = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->counter() * 10 + aDigi->side();
 
-    if( !mPulserTimeDiff.count( key ) ) {
+    if( !mPulserTimeDiff.count( key )) {
         return 0.;
     }
 
