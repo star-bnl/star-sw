@@ -444,10 +444,10 @@ void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadra
 	     Most likely it was intended to adjust the indexes for this specific
 	     region of the detector, but not known if needed;   -jml 3/25/24
 
-	     if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
-	     int ix0 = ax->FindBin( x0 + (row - 1) * rLength );
-	     int ix1 = ax->FindBin( x0 + (row) * rLength - 1 );
-	     }
+        if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
+            int ix0 = ax->FindBin( x0 + (row - 1) * rLength );
+            int ix1 = ax->FindBin( x0 + (row) * rLength - 1 );
+        }
 	*/
 
         const int iy0 = ay->FindBin( y0 + strip * sPitch );
