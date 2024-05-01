@@ -52,9 +52,9 @@ void unit_test_track_data_model() {
   // // Generate 10 e+
   // for ( int i=0;i<9;i++ ) 
   //   add_particle( "e+", 0.4251, 3.1415/4, 10.0 );
-  throw_particle( "e+", 0.4251, 3.1415/4, 10.0 );
+  //  throw_particle( "e+", 0.4251, 3.1415/4, 10.0 );
 
-  //throw_particle( "mu+", 0.4251, 3.1415/4, 10.0 );
+  throw_particle( "mu+", 0.4251, 3.1415/4, 10.0 );
 
   timer.Stop();
   
@@ -191,8 +191,8 @@ void unit_test_track_data_model() {
       return result;
     }, idx);
 
-  
   }
+
 
   expectedId=0;
   idIsNotUnique.clear();
@@ -268,7 +268,6 @@ void unit_test_track_data_model() {
       return result;
     }, idx);
 
-
   }
 
   // Hit accumulation
@@ -276,30 +275,50 @@ void unit_test_track_data_model() {
     auto hit = static_cast<const g2t_emc_hit_st*>( hit_table->At(idx) );
     if ( 0==hit ) continue;
     edep( hit->de * 1000 );
-    //    std::cout << "hit dE=" << hit->de << " volume_id=" << hit->volume_id << std::endl;
-    std::cout << *hit << std::endl;
+    std::cout << "hit dE=" << hit->de << " volume_id=" << hit->volume_id << std::endl;
+    //    std::cout << *hit << std::endl;
   }
 
   // Print out energy deposition
+  if ( 1 )
   {
     
     int    _count         = boost::accumulators::count(edep);
-    double _sum           = boost::accumulators::sum(edep);
-    double _mean          = boost::accumulators::mean(edep);
-    double _median        = boost::accumulators::median(edep);
-    double _min           = boost::accumulators::min(edep);
-    double _max           = boost::accumulators::max(edep);
-    double _error_of_mean = boost::accumulators::error_of<tag::mean>(edep);
-    
     LOG_TEST << Form( "number of hits                   = %i", _count)          << std::endl;
-    LOG_TEST << Form( "energy deposition: sum           = %f MeV", _sum  )          << std::endl;
-    LOG_TEST << Form( "energy deposition: mean          = %f MeV", _mean )          << std::endl;
-    LOG_TEST << Form( "energy deposition: median        = %f MeV", _median )        << std::endl;
-    LOG_TEST << Form( "energy deposition: min           = %f MeV", _min  )          << std::endl;
-    LOG_TEST << Form( "energy deposition: max           = %f MeV", _max  )          << std::endl;
-    LOG_TEST << Form( "energy deposition: error of mean = %f MeV", _error_of_mean ) << std::endl;
+    if ( _count < 0 ) {
+      LOG_TEST << "count < 0 makes no sense..." << std::endl;
+    }
+    else if ( _count == 0 ) {
+      LOG_TEST << "no hits were registered..." << std::endl;
+    }
+    else {
+
+      double _sum           = boost::accumulators::sum(edep);
+      LOG_TEST << Form( "energy deposition: sum           = %f MeV", _sum  )          << std::endl;
+
+
+      double _mean          = boost::accumulators::mean(edep);
+      LOG_TEST << Form( "energy deposition: mean          = %f MeV", _mean )          << std::endl;
+
+
+      double _median        = boost::accumulators::median(edep);
+      LOG_TEST << Form( "energy deposition: median        = %f MeV", _median )        << std::endl;
+
+
+      double _min           = boost::accumulators::min(edep);
+      LOG_TEST << Form( "energy deposition: min           = %f MeV", _min  )          << std::endl;
+
+
+      double _max           = boost::accumulators::max(edep);
+      LOG_TEST << Form( "energy deposition: max           = %f MeV", _max  )          << std::endl;
+
+
+      double _error_of_mean = boost::accumulators::error_of<tag::mean>(edep);   
+      LOG_TEST << Form( "energy deposition: error of mean = %f MeV", _error_of_mean ) << std::endl;
+    }
 
   }
+
 
   // Print the track list
   track_table->Print(0, track_table->GetNRows());
