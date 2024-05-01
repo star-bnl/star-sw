@@ -26,6 +26,7 @@ stats< tag::count,
 >>;
 
 
+
 const double GeV = 1;
 const double MeV = 1E3;
 const double keV = 1E6;
@@ -175,7 +176,8 @@ void unit_test_muons() {
   int    nbinPt = 100;
 
   // Throw 1k gammas at BEMC, EEMC
-  _kine->Kine(3000,"e+,e-",4.9999,5.0001,-0.95,+2.00);
+  //  _kine->Kine(3000,"e+,e-",4.9999,5.0001,-0.95,+2.00);
+  _kine->Kine(10,"mu+,mu-",4.9999,5.0001,-0.95,+2.00);
 
   chain->Clear();
   chain->Make();
