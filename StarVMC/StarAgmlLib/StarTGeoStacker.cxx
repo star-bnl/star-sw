@@ -645,8 +645,10 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       }
       agmlExt->SetVolumeName( nn );
       agmlExt->SetFamilyName( block->GetName() );
-      agmlExt->SetModuleName( module->GetName() );
-      agmlExt->SetSensitive( mMedium.par("isvol") );
+      agmlExt->SetModuleName( module->GetName() );      
+      int isvol = mMedium.par("isvol");
+      if ( 0==isvol ) isvol=mMaterial.par("isvol");
+      agmlExt->SetSensitive( isvol );
       agmlExt->SetTracking( module->GetTrackingFlag() );
       // Get tracking cuts from the block
       for ( auto kv : block->GetCuts() ) {
@@ -739,7 +741,11 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  agmlExt->SetVolumeName( nn );
 	  agmlExt->SetFamilyName( block->GetName() );
 	  agmlExt->SetModuleName( module->GetName() );
-	  agmlExt->SetSensitive( mMedium.par("isvol") );
+	  int isvol = mMedium.par("isvol");
+	  if ( 0==isvol ) isvol=mMaterial.par("isvol");
+	  //mMedium.Print();
+	  //mMaterial.Print();
+	  agmlExt->SetSensitive( isvol );
 	  agmlExt->SetTracking( module->GetTrackingFlag() );
 	  // Get tracking cuts from the block
 	  for ( auto kv : block->GetCuts() ) {
