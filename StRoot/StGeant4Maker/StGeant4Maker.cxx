@@ -918,6 +918,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     TGeoVolume* volume = (TGeoVolume *)volumes->At(i);
     AgMLExtension* ae = getExtension(volume);
+
     if ( 0==ae ) {
       LOG_INFO << "No agml extension on volume = " << volume->GetName() << endm;
       continue; // shouldn't happen
@@ -931,7 +932,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     ae->SetEngine( engineFromModule( mname.Data() ) );
 
     if ( 0==ae->GetSensitive() ) {
-      LOG_DEBUG << "Not sensitive = " << volume->GetName() << endm;
+      LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
       continue; 
     }
 
@@ -1165,7 +1166,7 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_epd_hit>( "EPDH", {"EPDT"}, "g2t_epd_hit", sd2table_epd  );
   AddHits<St_g2t_fts_hit>( "FSTH", {"FTUS"}, "g2t_fsi_hit", sd2table_fst  );
-  AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
+  AddHits<St_g2t_fts_hit>( "STGH", {"STGP","STGL","STGS"}, "g2t_stg_hit", sd2table_stgc );
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
   AddHits<St_g2t_hca_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_hca  ); // HCA should have its own copier
@@ -1297,6 +1298,8 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
 void StGeant4Maker::Stepping(){                                           
 
+  LOG_INFO << ".............................................................................. stepping" << endm;
+
   // At start of user stepping, try to transfer the track between engine
   auto* mgr = TMCManager::Instance();
   auto* mc = TVirtualMC::GetMC(); 
@@ -1363,6 +1366,11 @@ void StGeant4Maker::Stepping(){
 
   };
 
+  if ( IAttr("Stepping:verbose") > 0 ) {
+    //    truth->Print();
+    current->Print();
+  }
+
   // Check if option to stop punchout tracks is enabled
   if ( IAttr("Stepping:Punchout:Stop") && 1==transit && !trackingRegion() ) {
     
@@ -1393,6 +1401,8 @@ void StGeant4Maker::Stepping(){
 
     mc->StopTrack();
     stopped = true;
+
+    if ( IAttr("Stepping:verbose") > 0 ) { std::cout << "Track is stopped" << std::endl; }
     
   }
 
@@ -1452,7 +1462,7 @@ void StGeant4Maker::Stepping(){
 
   }
 
-  if ( stopped ) {
+  if ( stopped || IAttr("Stepping:verbose") ) {
     LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
