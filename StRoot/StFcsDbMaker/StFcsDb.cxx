@@ -287,9 +287,28 @@ void StFcsDb::setFcsPresValley(fcsPresValley_st* t){
   else   { memcpy(&mFcsPresValley,t,sizeof(fcsPresValley_st)); }
 }
 
+void StFcsDb::setFcsEcalGainOnline(fcsEcalGainOnline_st* t){
+  if(!t) { memset(&mFcsEcalGainOnline,0,sizeof(fcsEcalGainOnline_st)); }
+  else   { memcpy(&mFcsEcalGainOnline,t,sizeof(fcsEcalGainOnline_st)); }
+}
+
+void StFcsDb::setFcsHcalGainOnline(fcsHcalGainOnline_st* t){
+  if(!t) { memset(&mFcsHcalGainOnline,0,sizeof(fcsHcalGainOnline_st)); }
+  else   { memcpy(&mFcsHcalGainOnline,t,sizeof(fcsHcalGainOnline_st)); }
+}
+
+void StFcsDb::setFcsPresThreshold(fcsPresThreshold_st* t){
+  if(!t) { memset(&mFcsPresThreshold,0,sizeof(fcsPresThreshold_st)); }
+  else   { memcpy(&mFcsPresThreshold,t,sizeof(fcsPresThreshold_st)); }
+}
+
 int StFcsDb::InitRun(int runNumber) {
     LOG_INFO << "StFcsDb::InitRun - run = " << runNumber << endm;
     mRun=runNumber;
+    if(mEtGainMode==0){
+	if(20000000<mRun && mRun<23027048) mEtGainMode=1;
+	else mEtGainMode=2;
+    }
 
     if(mRun19>0){
 	makeMap2019();
@@ -354,8 +373,31 @@ int StFcsDb::InitRun(int runNumber) {
       readGainCorrFromText();
     }
 
+    int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
+    for(int ins=0; ins<kFcsNorthSouth; ins++){
+        int det=kFcsEcalNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	    mGainOnline[ehp][ns][dep][ch]=mFcsEcalGainOnline.gainOnline[ie];
+	    ie++;
+        }
+        det=kFcsHcalNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	    mGainOnline[ehp][ns][dep][ch]=mFcsHcalGainOnline.gainOnline[ih];
+	    ih++;
+        }
+        det=kFcsPresNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	    mGainOnline[ehp][ns][dep][ch]=mFcsPresThreshold.threshold[ip];
+	    ip++;
+        }
+    }    
+
     // Get beamline 
-    TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Calibrations/rhic/vertexSeed");
+    //TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Calibrations/rhic/vertexSeed");
+    TDataSet* dbDataSet = 0;
     if(dbDataSet){
       vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
       if(vSeed){
@@ -934,6 +976,36 @@ float StFcsDb::getPresValley(StFcsHit* hit) const  {
 float StFcsDb::getPresValley(int det, int id) const  {
     return getGainCorrection(det,id);
 }
+
+float StFcsDb::getGainOnline(StFcsHit* hit) const  {
+    return getGainOnline(hit->detectorId(), hit->id());
+}
+
+float StFcsDb::getGainOnline(int det, int id) const  {
+  switch(mGainOnlineMode){
+  case GAINMODE::FORCED :
+    if(det<=kFcsEcalSouthDetId) return mForceUniformGainOnlineEcal;
+    if(det<=kFcsHcalSouthDetId) return mForceUniformGainOnlineHcal;
+    if(det<=kFcsPresSouthDetId) return mForceUniformGainOnlinePres;
+  case GAINMODE::DB :
+  default:
+    if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
+      int ehp,ns,dep,ch,crt,slt;
+      getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+      return mGainOnline[ehp][ns][dep][ch];
+    }
+  }
+  return 1.0;
+}
+
+float StFcsDb::getPresThreshold(StFcsHit* hit) const  {
+    return getGainCorrection(hit->detectorId(), hit->id());
+}
+
+float StFcsDb::getPresThreshold(int det, int id) const  {
+    return getGainCorrection(det,id);
+}
+
 
 float StFcsDb::getGain8(StFcsHit* hit) const  {
   return getGain8(hit->detectorId(), hit->id());
@@ -1942,19 +2014,33 @@ float StFcsDb::getEtGain(int det, int id, float factor) const{
 }
 
 void  StFcsDb::printEtGain(){
-    // double norm[2]={0.24711, 0.21781}; // [MeV/coint]
+    // double norm[2]={0.24711, 0.21781}; // [MeV/coint]    
     double norm[2]={0.24711, 0.24711};
+    double xoff[2]={6.570*2.54 - 6.850*2.54, 7.430*2.54-8.380*2.54};
+    double yoff[2]={-5.26,1.80};
+    double gain=0.0053;
+    if(mEtGainMode==1){ 
+	gain/=0.7;
+	norm[1]=0.24711;
+    }
     for(int det=0; det<kFcsNDet; det++){
       int eh=det/2;
-      double gain=getGain(det,0);
+      int ns=det%2;
       for(int i=0; i<maxId(det); i++){
 	double ratio=1.0;
 	if(eh<2){ //PRES stays 1.0
 	  StThreeVectorD xyz=getStarXYZ(det,i);
-	  double r=xyz.perp();
+	  if(mEtGainMode==1) {
+	      if(ns==0) xyz.setX(xyz.x()-xoff[eh]);
+	      else      xyz.setX(xyz.x()+xoff[eh]);
+	      xyz.setY(xyz.y()+yoff[eh]);	      
+	  }
+	  double r=xyz.perp();	 
 	  double l=xyz.mag();
 	  double ptch=gain/l*r;
 	  ratio=ptch/norm[eh]*1000; 
+	  //printf("BBB det=%1d id=%3d gain=%8.5f xyz=%6.2f %6.2f %6.2f r=%6.2f l=%6.2f ptch=%6.2f ratio==%6.2f\n",
+	  //det,i,gain,xyz.x(),xyz.y(),xyz.z(),r,l,ptch,ratio);
 	}
 	mEtGain[det][i]=ratio;
       }
