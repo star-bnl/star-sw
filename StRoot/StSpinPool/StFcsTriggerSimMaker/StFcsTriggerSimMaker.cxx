@@ -237,11 +237,11 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 
 	    /*
 	    printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
-		   fcs_trg_pt_correction[ns][ehp][dep][ch],
-		   fcs_trg_gain_correction[ns][ehp][dep][ch],
-		   fcs_trg_pedestal[ns][ehp][dep][ch]);
+		  fcs_trg_pt_correction[ns][ehp][dep][ch],
+		  fcs_trg_gain_correction[ns][ehp][dep][ch],
+		  fcs_trg_pedestal[ns][ehp][dep][ch]);
 	    */
-		
+    
 	    if(gainfile) 
 		fprintf(gainfile,"%2d %2d %2d %2d %8.3f\n",ns,ehp,dep,ch,
 			fcs_trg_pt_correction[ns][ehp][dep][ch]);
