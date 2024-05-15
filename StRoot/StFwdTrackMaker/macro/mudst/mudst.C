@@ -72,17 +72,11 @@ void mudst( const Char_t * fileList = "mudst.lis", int nEvents = 5000, int nFile
 
 
 void loadLibs(){	
-	// if (gClassTable->GetID("TTable") < 0) {
-	// 	gSystem->Load("libStar");
-	// 	gSystem->Load("libPhysics");
-	// }  
-	cout << "LL0" << endl;
+	
 	gSystem->Load("libStarClassLibrary.so");
 	gSystem->Load("libStarRoot.so");
-	cout << "LL1" << endl;
 	gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
 	loadSharedLibraries();
-	cout << "LL2" << endl;
 	
 	gSystem->Load("StarMagField");
 	gSystem->Load("StMagF");
@@ -102,7 +96,6 @@ void loadLibs(){
 	
 	// Added for Run16 And beyond
 	gSystem->Load("libGeom.so");
-	
 	gSystem->Load("St_base.so");
 	gSystem->Load("StUtilities.so");
 	gSystem->Load("libPhysics.so");
@@ -110,19 +103,8 @@ void loadLibs(){
 	gSystem->Load("StarAgmlLib.so");
 	gSystem->Load("libStarGeometry.so");
 	gSystem->Load("libGeometry.so");
-	
 	gSystem->Load("xgeometry");
- 
 	gSystem->Load("St_geant_Maker");
-
-
-	// needed since I use the StMuTrack
-	gSystem->Load("StarClassLibrary");
-	gSystem->Load("StStrangeMuDstMaker");
-	gSystem->Load("StMuDSTMaker");
-	gSystem->Load("StBTofCalibMaker");
-	gSystem->Load("StVpdCalibMaker");
-	gSystem->Load("StBTofMatchMaker");
 	gSystem->Load("StFcsDbMaker");	
 
 
