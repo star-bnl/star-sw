@@ -1229,7 +1229,9 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom," libVMC ",libgeant321.so", "VMC geant3",kFALSE},
+
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",          libVMC ",libgeant321.so", "VMC geant3",kFALSE},
+
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                    ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
@@ -1258,7 +1260,7 @@ Bfc_st BFC[] = { // standard chains
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"SstUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSstUtil","Load SST Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
-  {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
+  {"EEmcUtil"    ,""  ,"","",""                                       ,"EEmcUtil","Load StEEmcUtil",kFALSE},
   {"FmsUtil"     ,""  ,"","",""                             ,"StFmsUtil,libMinuit","Load StFmsUtil",kFALSE},
   {"RhicfUtil"   ,""  ,"","",""                       ,"StRHICfUtil,libSpectrum","Load StRHICfUtil",kFALSE},
   {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
