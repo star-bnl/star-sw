@@ -3,7 +3,7 @@
 
 #include "StEvent/StFwdTrack.h"
 
-StMuFwdTrack::StMuFwdTrack() {
+StMuFwdTrack::StMuFwdTrack() : mDidFitConverge(0),mDidFitConvergeFully(0),mNumberOfFailedPoints(0),mNumberOfSeedPoints(0),mNumberOfFitPoints(0),mChi2(0),mNDF(0),mPval(0),mCharge(0),mPrimaryMomentum(0,0,0),mIdTruth(0),mQATruth(0) {
 
 }
 
