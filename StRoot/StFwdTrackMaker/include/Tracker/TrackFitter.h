@@ -520,7 +520,7 @@ class TrackFitter {
 
         size_t planeId = h->getSector();
 
-        TVector3 hitXYZ( h->getX(), h->getY(), h->getZ() );
+        static const TVector3 hitXYZ( h->getX(), h->getY(), h->getZ() );
 
         double phi = hitXYZ.Phi();
         if ( phi < 0 ) phi = TMath::Pi() * 2 + phi;
@@ -551,7 +551,7 @@ class TrackFitter {
      * @return TVector3 : momentum
      */
     TVector3 refitTrackWithFstHits(genfit::Track *originalTrack, Seed_t fstHits) {
-        TVector3 pOrig = originalTrack->getCardinalRep()->getMom(originalTrack->getFittedState(1, originalTrack->getCardinalRep()));
+        static const TVector3 pOrig = originalTrack->getCardinalRep()->getMom(originalTrack->getFittedState(1, originalTrack->getCardinalRep()));
 
         if (originalTrack->getFitStatus(originalTrack->getCardinalRep())->isFitConverged() == false) {
             // in this case the original track did not converge so we should not refit. 
@@ -619,7 +619,7 @@ class TrackFitter {
             mFitTrack->insertPoint(new genfit::TrackPoint(measurement, mFitTrack));
 
 
-            TVector3 hitXYZ( h->getX(), h->getY(), h->getZ() );
+            static const TVector3 hitXYZ( h->getX(), h->getY(), h->getZ() );
             float phi = hitXYZ.Phi();
             if ( phi < 0 ) phi = TMath::Pi() * 2 + phi;
             double phi_slice = phi / (TMath::Pi() / 6.0); // 2pi/12
@@ -685,7 +685,7 @@ class TrackFitter {
             } catch (genfit::Exception &e) {
             }
 
-            TVector3 p = mFitTrack->getCardinalRep()->getMom(mFitTrack->getFittedState(1, mFitTrack->getCardinalRep()));
+            static const TVector3 p = mFitTrack->getCardinalRep()->getMom(mFitTrack->getFittedState(1, mFitTrack->getCardinalRep()));
             return p;
         }
         return pOrig;
@@ -693,7 +693,7 @@ class TrackFitter {
 
     TVector3 refitTrackWithGBL( genfit::Track *originalTrack ) {
         // mem leak, global track is overwritten without delete.
-        TVector3 pOrig = originalTrack->getCardinalRep()->getMom(originalTrack->getFittedState(1, originalTrack->getCardinalRep()));
+        static const TVector3 pOrig = originalTrack->getCardinalRep()->getMom(originalTrack->getFittedState(1, originalTrack->getCardinalRep()));
         
         // auto cardinalStatus = originalTrack->getFitStatus(originalTrack->getCardinalRep());
 
@@ -790,7 +790,7 @@ class TrackFitter {
 
             mFitTrack->determineCardinalRep();
             auto cardinalRep = mFitTrack->getCardinalRep();
-            TVector3 p = cardinalRep->getMom(mFitTrack->getFittedState(1, cardinalRep));
+            static const TVector3 p = cardinalRep->getMom(mFitTrack->getFittedState(1, cardinalRep));
             // sucess, return momentum
             return p;
         } catch (genfit::Exception &e) {
@@ -827,7 +827,7 @@ class TrackFitter {
         }
 
         // get the seed info from our hits
-        TVector3 seedMom, seedPos;
+        static TVector3 seedMom, seedPos;
         LOG_DEBUG << "Getting seed state" << endm;
         // returns track curvature if needed
         seedState(trackSeed, seedPos, seedMom);
