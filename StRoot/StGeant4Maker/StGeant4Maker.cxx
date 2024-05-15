@@ -931,10 +931,10 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     ae->SetEngine( engineFromModule( mname.Data() ) );
 
-    if ( 0==ae->GetSensitive() ) {
-      LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
-      continue; 
-    }
+    //    if ( 0==ae->GetSensitive() ) {
+    //      LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
+    //      continue; 
+    //    }
 
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
@@ -1297,8 +1297,6 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
 //________________________________________________________________________________________________
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
 void StGeant4Maker::Stepping(){                                           
-
-  LOG_INFO << ".............................................................................. stepping" << endm;
 
   // At start of user stepping, try to transfer the track between engine
   auto* mgr = TMCManager::Instance();
