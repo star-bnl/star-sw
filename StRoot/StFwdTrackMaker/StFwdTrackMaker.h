@@ -161,6 +161,8 @@ class StFwdTrackMaker : public StMaker {
 
     std::vector< genfit::GFRaveVertex * > mRaveVertices;
 
+    vector<float> mFttZFromGeom, mFstZFromGeom;
+
     void ProcessFwdTracks();
     void FillEvent();
     void FillTrackDeltas();

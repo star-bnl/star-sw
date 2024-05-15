@@ -460,6 +460,16 @@ int StFwdTrackMaker::Init() {
     mForwardTracker->setData(mForwardData);
     mForwardTracker->initialize( mGeoCache, mGenHistograms );
 
+    // geometry should be available from here (mForwardTracker will initialize cache if needed)
+    if (gGeoManager) {
+        FwdGeomUtils fwdGeoUtils( gGeoManager );
+        // get the z-locations from geometry model and fallback to the defaults
+        auto fstZ = fwdGeoUtils.fstZ( {151.750000, 165.248001, 178.781006} );
+        mFstZFromGeom.assign( fstZ.begin(), fstZ.end() );
+        auto fttZ = fwdGeoUtils.fttZ( {280.904999, 303.704987, 326.605011, 349.404999} );
+        mFttZFromGeom.assign( fttZ.begin(), fttZ.end() );
+    }
+
     if ( mGenHistograms ){
         mHistograms["fwdVertexZ"] = new TH1D("fwdVertexZ", "FWD Vertex (RAVE);z", 1000, -50, 50);
         mHistograms["fwdVertexXY"] = new TH2D("fwdVertexXY", "FWD Vertex (RAVE);x;y", 100, -1, 1, 100, -1, 1);
@@ -803,11 +813,13 @@ int StFwdTrackMaker::loadFstHitsFromMuDst( FwdDataSource::McTrackMap_t &mcTrackM
         float vPhi = muFstHit->localPosition(1);
         float vZ = muFstHit->localPosition(2);
 
-        const float dz0 = fabs( vZ - 151.75 );
-        const float dz1 = fabs( vZ - 165.248 );
-        const float dz2 = fabs( vZ - 178.781 );
+        const float dz0 = fabs( vZ - mFstZFromGeom[0] );
+        const float dz1 = fabs( vZ - mFstZFromGeom[1] );
+        const float dz2 = fabs( vZ - mFstZFromGeom[2] );
+        static const float fstThickness = 2.0; // thickness in cm between inner and outer on sigle plane
 
-        int d = 0 * ( dz0 < 1.0 ) + 1 * ( dz1 < 1.0 ) + 2 * ( dz2 < 1.0 );
+        // assign disk according to which z value the hit has, within the z-plane thickness
+        int d = 0 * ( dz0 < fstThickness ) + 1 * ( dz1 < fstThickness ) + 2 * ( dz2 < fstThickness );
 
         float x0 = vR * cos( vPhi );
         float y0 = vR * sin( vPhi );
@@ -859,11 +871,13 @@ int StFwdTrackMaker::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrac
                     float vPhi = fsthits[ih]->localPosition(1);
                     float vZ = fsthits[ih]->localPosition(2);
 
-                    const float dz0 = fabs( vZ - 151.75 );
-                    const float dz1 = fabs( vZ - 165.248 );
-                    const float dz2 = fabs( vZ - 178.781 );
+                    const float dz0 = fabs( vZ - mFstZFromGeom[0] );
+                    const float dz1 = fabs( vZ - mFstZFromGeom[1] );
+                    const float dz2 = fabs( vZ - mFstZFromGeom[2] );
+                    static const float fstThickness = 2.0; // thickness in cm between inner and outer on sigle plane
 
-                    int d = 0 * ( dz0 < 1.0 ) + 1 * ( dz1 < 1.0 ) + 2 * ( dz2 < 1.0 );
+                    // assign disk according to which z value the hit has, within the z-plane thickness
+                    int d = 0 * ( dz0 < fstThickness ) + 1 * ( dz1 < fstThickness ) + 2 * ( dz2 < fstThickness );
 
                     float x0 = vR * cos( vPhi );
                     float y0 = vR * sin( vPhi );
@@ -1389,28 +1403,13 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     // compute projections to z-planes of various detectors
     vector<float> zPlanes = {
         0, // PV TODO, update with event vertex?
-        151.750000, 165.248001, 178.781006, // FST
-        280.904999, 303.704987, 326.605011, 349.404999, // FTT
+        mFstZFromGeom[0], mFstZFromGeom[1], mFstZFromGeom[2], // FST
+        mFttZFromGeom[0], mFttZFromGeom[1], mFttZFromGeom[2], // FTT
         375.0, // EPD
         715.0, //ECAL
         807.0 // HCAL
     };
     
-    // Note: as discussed, after verification storage of the projections 
-    // @ the FST and FTT may no longer be needed, not saved in e.g. MuDst
-
-    // this should always be the case, but being careful
-    if (gGeoManager) {
-        FwdGeomUtils fwdGeoUtils( gGeoManager );
-        // get the z-locations from geometry model and fallback to the defaults
-        auto fstZ = fwdGeoUtils.fstZ( {151.750000, 165.248001, 178.781006} );
-        auto fttZ = fwdGeoUtils.fttZ( {280.904999, 303.704987, 326.605011, 349.404999} );
-
-        // copy new values into the zPlanes vector
-        std::copy( fstZ.begin(), fstZ.end(), zPlanes.begin()+1 );
-        std::copy( fttZ.begin(), fttZ.end(), zPlanes.begin()+4 );
-    }
-
     // Match these to the z-planes above
     const int FST = kFstId;
     const int FTT = kFttId;
