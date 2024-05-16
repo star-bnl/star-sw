@@ -30,6 +30,12 @@ public:
     int  Finish();
     int  Make();
 
+    void SetTimeCut( int mode, int min, int max ) {
+        mTimeCutMode = mode;
+        mTimeCutMin = min;
+        mTimeCutMax = max;
+    }
+
 private:
     void ApplyHardwareMap();
     std::vector<StFttCluster*> FindClusters( std::vector<StFttRawHit * > );
@@ -45,11 +51,17 @@ private:
     float GetThresholdFor( StFttRawHit * hit ) { return 0.0;}
     bool PassTimeCut( StFttRawHit * hit );
 
+
+
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
     int                  mRunYear;
     bool                 mDebug;
     StFttDb*             mFttDb;
+
+    int mTimeCutMin  = -999;
+    int mTimeCutMax  =  999;
+    int mTimeCutMode = -1; //default - lookup from DB
 
 
     ClassDef( StFttClusterMaker, 1 )

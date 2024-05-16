@@ -86,6 +86,7 @@ StFttClusterMaker::Finish()
 Int_t
 StFttClusterMaker::Make()
 { 
+    LOG_INFO << "StFttClusterMaker::Make" << endm;
     mEvent = (StEvent*)GetInputDS("StEvent");
     if(mEvent) {
     } else {
@@ -210,16 +211,26 @@ void StFttClusterMaker::InjectTestData(){
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    int time_cut0 = -999;
-    int time_cut1 =  999;
-    int time_cutm = 0;
-    //  in principle it could vary VMM to VMM;
-    mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
-    if ( time_cutm == 0 ) // default, cut on bunch crossing
-        return (hit->time() <= time_cut1 && hit->time() >= time_cut0); 
+    
+    if ( mTimeCutMode == -1 ){
+        int time_cut0 = -999;
+        int time_cut1 =  999;
+        int time_cutm = 0;
+        //  in principle it could vary VMM to VMM;
+        mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
+        if ( time_cutm == 0 ) // default, cut on bunch crossing
+            return (hit->time() <= time_cut1 && hit->time() >= time_cut0); 
 
-    // cut on timebin
-    return (hit->tb() <= time_cut1 && hit->tb() >= time_cut0);
+        // cut on timebin
+        return (hit->tb() <= time_cut1 && hit->tb() >= time_cut0);
+    } else { // manually set, use that
+        if ( mTimeCutMode == 0 ){
+            return (hit->time() <= mTimeCutMax && hit->time() >= mTimeCutMin); 
+        }
+        else if ( mTimeCutMode == 1 ){
+            return (hit->tb() <= mTimeCutMax && hit->tb() >= mTimeCutMin); 
+        }
+    }
 }
 
 
