@@ -86,7 +86,6 @@ StFttClusterMaker::Finish()
 Int_t
 StFttClusterMaker::Make()
 { 
-    LOG_INFO << "StFttClusterMaker::Make" << endm;
     mEvent = (StEvent*)GetInputDS("StEvent");
     if(mEvent) {
     } else {
