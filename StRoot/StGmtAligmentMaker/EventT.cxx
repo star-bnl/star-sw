@@ -436,12 +436,12 @@ void TBase::Loop(Int_t Nevents) {
   TH1F *hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
   TH1F *hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
   TH1F *uAll = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
+  TH1F * xCuts[NM];
 #endif
   TH1F * uPAll  = new TH1F("UPall","uPall", plotUP.nx, plotUP.xmin, plotUP.xmax);
   TH1F * duB[NM][2];
   TH1F * dvB[NM];
   TH1F * uCuts[NM];
-  TH1F * xCuts[NM];
   TH1F * uCut   = new TH1F("Ucut","uc", plotDu.nx, plotDu.xmin, plotDu.xmax);
   TH1F * vCut   = new TH1F("Vcut","vc", 200, -3., 3.);
   TH2F * dMin   = new TH2F("DMin","vumin",100,-0.75,0.75,100,-0.75,0.75); 
@@ -470,7 +470,9 @@ void TBase::Loop(Int_t Nevents) {
     uCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
     uName  = Form("%sxM%i", plotDu.Name, module);
     uTitle = Form("u-uP corr M %i", module);
+#ifdef 0
     xCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+#endif
   } // for (int M = 0; M < NM; M++)
 
   Long64_t nentries = fChain->GetEntriesFast();
