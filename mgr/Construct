@@ -231,13 +231,7 @@ my  $excludeDirList = join ("|", @excludeDirList);
 #   such a case, those packages shouldbe stricly optional.
 #
 my  @items = qw(); #  StBTofPool StFgtPool
-if ( 1==0 ){ # disable the exclusion
-    if ($USE_64BITS and $USE_64BITS != "0"){
-	push @items, "gstar";
-	push @items, "control";
-	push @items, "St_geant_Maker";
-    }
-}
+
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
 #if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
 #    $items .= "|Vc|TBB|TPCCATracker";
