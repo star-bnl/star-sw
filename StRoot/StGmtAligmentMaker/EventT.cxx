@@ -64,7 +64,9 @@ EventT::~EventT()
 
 //______________________________________________________________________________
 Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
+#if 0
   static const Int_t NoFitPointCutForGoodTrackT = 15;
+#endif
   Clear();
   Int_t iok = 1;
   fIsValid = kFALSE;
@@ -404,8 +406,8 @@ void EventT::RestoreListOfRotations() {
 void TBase::Loop(Int_t Nevents) {  
 #if 1
   struct PlotPar_t {
-    Char_t *Name;
-    Char_t *Title;
+    const Char_t *Name;
+    const Char_t *Title;
     Int_t    nx;
     Int_t    ny;
     Double_t xmin; 
@@ -413,14 +415,12 @@ void TBase::Loop(Int_t Nevents) {
     Double_t ymin;
     Double_t ymax;  
   };
-  const  PlotPar_t plotUP = // plots for uP
-    { "uP","track u", 320, 3, -5.,5., 0.,3. };
-  
-  const  PlotPar_t plotDu = // plots for u-uP
-    { "Du","Du before cut", 250, 3, -2.,2., 0.,3. };
-  
-  const  PlotPar_t plotDuv = // plots for du & dv
-    { "Du","Du cuts", 200, 3, -1.,1., 0.,3. };
+  // plots for uP
+  const  PlotPar_t plotUP =  { "uP", "track u", 320, 3, -5., 5., 0., 3. };
+  // plots for u-uP
+  const  PlotPar_t plotDu = { "Du", "Du before cut", 250, 3, -2., 2., 0., 3. };
+  // plots for du & dv
+  const  PlotPar_t plotDuv = { "Du", "Du cuts", 200, 3, -1., 1., 0., 3. };
   
   TFile *fOut = new TFile(fOutFileName,"recreate");
   TString Name;
@@ -431,10 +431,12 @@ void TBase::Loop(Int_t Nevents) {
   //              B 
   TH1F *LocPlots[NM];
   TH1F *  uPlots[NM];
-  TH1F *    hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
-  TH1F *    hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
+#if 0
+  TH1F *hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
+  TH1F *hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
+  TH1F *uAll = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
+#endif
   TH1F * uPAll  = new TH1F("UPall","uPall", plotUP.nx, plotUP.xmin, plotUP.xmax);
-  TH1F * uAll   = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
   TH1F * duB[NM][2];
   TH1F * dvB[NM];
   TH1F * uCuts[NM];
@@ -444,7 +446,7 @@ void TBase::Loop(Int_t Nevents) {
   TH2F * dMin   = new TH2F("DMin","vumin",100,-0.75,0.75,100,-0.75,0.75); 
   TH1F * vMin   = new TH1F("VMin","vmin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
   TH1F * uMin   = new TH1F("UMin","umin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
-  TH1F * uMinC  = new TH1F("UMinC","umC", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
+  //TH1F * uMinC  = new TH1F("UMinC","umC", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
   memset(LocPlots,0,NM*sizeof(TH1F *));
   memset(  uPlots,0,NM*sizeof(TH1F *));
   for (int M = 0; M < NM; M++) {// over gmt Modules
@@ -496,8 +498,8 @@ void TBase::Loop(Int_t Nevents) {
     for (UInt_t trk = 0; trk < Ntrack; trk++) {
       TrackT *track = (TrackT *)fEvent->GetTracks()->UncheckedAt(trk);
       if (! track) continue;
-      Int_t Npoints = track->GetNpoint();
 #if 0
+      Int_t Npoints = track->GetNpoint();
       if (minNoFitPoints > 0 && Npoints%100 < minNoFitPoints) continue;
       if (UseSsd && Npoints < 1000) continue; 
       if (UseSvt && Npoints <  100) continue; 
