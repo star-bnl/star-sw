@@ -61,7 +61,6 @@ class StGmtStrip : public StObject {
   Short_t getMaxAdcTB() const { return mMaxAdcTB; }
   /// Maximal over the time bins
   Short_t getMaxPedSubtractedAdcTB() const { return mMaxPedSubtractedAdcTB; }
-  //Short_t getClusterSeedType() const { return mClusterSeedType; }
 
   /// Charge before GEM (in C)
   Float_t getCharge() const   { return mCharge; }
@@ -120,7 +119,6 @@ class StGmtStrip : public StObject {
   void setMaxAdc(Short_t adc)        { mMaxAdc=adc; }
   /// Set maximal pedestal subtracked ADC over time buckets
   void setMaxPedSubtractedAdc(Short_t adc) { mMaxPedSubtractedAdc = adc; }
-  // void setClusterSeedType( Short_t seedType ) { mClusterSeedType=seedType; }
 
   /// Set charge before the GEM (in C)
   void setCharge( Float_t charge )   { mCharge = charge; }
@@ -164,7 +162,6 @@ class StGmtStrip : public StObject {
   Short_t mMaxAdcTB;
   /// Max over the time bins
   Short_t mMaxPedSubtractedAdcTB;
-  // Short_t mClusterSeedType;      // See types in StGmtConsts.h
   /// Charge before GEM, units (C)
   /// relation: ADC = ped + charge*gain(r,phi,disc)
   Float_t mCharge;

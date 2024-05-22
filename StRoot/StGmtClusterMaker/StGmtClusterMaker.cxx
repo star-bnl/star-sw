@@ -15,7 +15,7 @@
 #include "StMessMgr.h" 
 ClassImp(StGmtClusterMaker);
 
-Int_t StGmtClusterMaker::gmtStat = 0;
+int StGmtClusterMaker::gmtStat = 0;
 const UInt_t         CLUS_BINS = 128;
 const Double_t       CLUS_MIN  = 0.0;
 const Double_t       CLUS_MAX  = 128*0.08;

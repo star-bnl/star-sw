@@ -89,24 +89,29 @@ class EventT : public TObject {
   virtual void      Print(Option_t *opt="") const;
   ClassDef(EventT,1)  //EventT structure
 };
+
 class TBase {
-public :
+
+ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
    EventT         *fEvent;
    TString         fOutFileName;
-   TBase(TTree *tree = 0) : fEvent(0) {
+
+   TBase( TTree *tree = 0,
+          const Char_t *f_name = "/star/data09/calib/fisyak/Pass112/TpcSsd/065/Event_6065045_raw_1010001.root") : fEvent(0) {
      // if parameter tree is not specified (or zero), connect the file
      // used to generate this class and read the Tree.
      if (tree == 0) {
-       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/star/data09/calib/fisyak/Pass112/TpcSsd/065/Event_6065045_raw_1010001.root");
+       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(f_name);
        if (!f) {
-         f = new TFile("/star/data09/calib/fisyak/Pass112/TpcSsd/065/Event_6065045_raw_1010001.root");
+         f = new TFile(f_name);
        }
        tree = (TTree*)gDirectory->Get("T");
      }
      Init(tree);
    }
+
    virtual ~TBase() {if (!fChain) return; delete fChain->GetCurrentFile();}
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry) { if (!fChain) return 0; return fChain->GetEntry(entry);}

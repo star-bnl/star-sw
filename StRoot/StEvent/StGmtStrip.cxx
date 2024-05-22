@@ -50,7 +50,6 @@ StGmtStrip::StGmtStrip(const StGmtStrip& h) : StObject(),                       
     mIsY( h.mIsY ), mIsC( h.mIsC ), mPosition( h.mPosition ),
     mMaxAdc(h.mMaxAdc), mMaxPedSubtractedAdc(h.mMaxPedSubtractedAdc),
     mMaxAdcTB(h.mMaxAdcTB), mMaxPedSubtractedAdcTB(h.mMaxPedSubtractedAdcTB),
-    // mClusterSeedType(h.mClusterSeedType),
     mCharge( h.mCharge ), mChargeUncert(h.mChargeUncert),
     mRdo( h.mRdo ), mArm( h.mArm ), mApv( h.mApv ), mChan( h.mChan ),
     mPed(h.mPed), mPedStdDev(h.mPedStdDev), mPedErr(h.mPedErr) {
@@ -74,7 +73,6 @@ StGmtStrip& StGmtStrip::operator=( const StGmtStrip& h) {
   mMaxPedSubtractedAdc = h.mMaxPedSubtractedAdc;
   mMaxAdcTB = h.mMaxAdcTB;
   mMaxPedSubtractedAdcTB = h.mMaxPedSubtractedAdcTB;
-// mClusterSeedType = h.mClusterSeedType;
   mCharge = h.mCharge;
   mChargeUncert = h.mChargeUncert;
   mRdo = h.mRdo;

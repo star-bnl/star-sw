@@ -32,14 +32,6 @@ StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key ) : StHit(), mKe
    }
 
    mHitLocalX = mHitLocalY = 0;
-   // if ( !(hit1->isY()) && hit2->isY() ) {
-   //   mHitLocalX = hit1;
-   //   mHitLocalY = hit2;
-   // } 
-   // else if ( !(hit2->isY()) && hit1->isY() ) {
-   //   mHitLocalX = hit2;
-   //   mHitLocalY = hit1;
-   // }
 
    if ( !mHitLocalX || !mHitLocalY ) {
      LOG_ERROR << "Constructor not provided a (LocalX,LocalY) pair." << endm;

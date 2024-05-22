@@ -65,7 +65,7 @@ class StGmtStripCollection : public StObject {
     // strip.  New strip is created if it does not exist, but only
     // using StGmtStrip() constructor.  Ownership is retained by the
     // collection.
-//     StGmtStrip* getStrip( int elecId );
+
     StGmtStrip* getStrip( int Id );
     StGmtStrip* getSortedStrip( int Id );
     
@@ -95,25 +95,11 @@ class StGmtStripCollection : public StObject {
 
 
 // inline functions
-
-// inline StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
-//     mStripElecIdVec.resize( kGmtNumElecIds );
-//     for (unsigned int i=0; i<mStripElecIdVec.size(); i++)
-//         mStripElecIdVec[i] = static_cast< StGmtStrip* >(0);
-// };
-
 inline StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
     mStripGeoIdVec.resize( kGmtNumGeoIds );
     for (unsigned int i=0; i<mStripGeoIdVec.size(); i++)
         mStripGeoIdVec[i] = static_cast< StGmtStrip* >(0);
 };
-
-// inline StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
-//     mStripVec.resize( kGmtNumGeoIds );
-//     for (unsigned int i=0; i<mStripVec.size(); i++)
-//         mStripVec[i] = static_cast< StGmtStrip* >(0);
-// };
-
 
 // sort by geoId
 inline void StGmtStripCollection::sortByGeoId(){
