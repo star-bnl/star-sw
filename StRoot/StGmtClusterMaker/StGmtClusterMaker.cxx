@@ -16,16 +16,17 @@
 ClassImp(StGmtClusterMaker);
 
 int StGmtClusterMaker::gmtStat = 0;
-const UInt_t         CLUS_BINS = 128;
-const Double_t       CLUS_MIN  = 0.0;
-const Double_t       CLUS_MAX  = 128*0.08;
-const UInt_t         MAX_PEAKS = 20;
+const unsigned int CLUS_BINS = 128;
+const double       CLUS_MIN  = 0.0;
+const double       CLUS_MAX  = 128*0.08;
+const unsigned int MAX_PEAKS = 20;
 
-//________________________________________________________________________________
+//_________________
 inline Double_t MyGaus(Double_t x, Double_t mean, Double_t sigma, Double_t delta) {
   return TMath::Freq((x-mean+delta/2)/sigma)-TMath::Freq((x-mean-delta/2)/sigma);
 }
-//________________________________________________________________________________
+
+//_________________
 Double_t fpeaks(Double_t *x, Double_t *par) {
   Float_t result=0.0;
   UInt_t nPar=(UInt_t)par[0];
@@ -37,7 +38,8 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
   }
   return result;
 }
-//________________________________________________________________________________
+
+//_________________
 TF1* StGmtClusterMaker::FindPeaks(TH1F* hist) {
   TSpectrum spect(MAX_PEAKS);
   TF1 back("poly","pol0",CLUS_MIN,CLUS_MAX);
@@ -90,7 +92,8 @@ TF1* StGmtClusterMaker::FindPeaks(TH1F* hist) {
   
   return fitFunc;
 }
-//________________________________________________________________________________
+
+//_________________
 void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& hits) {
   static TCanvas* canv=0;
   static TH1F* histX=0;
@@ -216,12 +219,14 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
     }
   }
 }
-//________________________________________________________________________________
+
+//_________________
 StGmtClusterMaker::StGmtClusterMaker( const Char_t* name ) : //StMaker(name),
   StRTSBaseMaker( "clustser", name ) {
   SetAttr("gmtCosmics"             ,kFALSE);
-};
-//________________________________________________________________________________
+}
+
+//_________________
 Int_t StGmtClusterMaker::Make() {
   LOG_INFO << "MAKE of StGmtClusterMaker" << endm;
   Int_t ierr = kStOk;
@@ -294,7 +299,8 @@ Int_t StGmtClusterMaker::Make() {
   }
   return ierr;
 }
-//________________________________________________________________________________
+
+//_________________
 Int_t StGmtClusterMaker::Init() {
   LOG_INFO << "INTI of StGmtClusterMaker" << endm;
   if (IAttr("gmtCosmics")) SetAttr(".Privilege",kTRUE);
