@@ -232,10 +232,6 @@ my  $excludeDirList = join ("|", @excludeDirList);
 #
 my  @items = qw(); #  StBTofPool StFgtPool
 
-#print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
-#if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
-#    $items .= "|Vc|TBB|TPCCATracker";
-#}
 if ($STAR_HOST_SYS =~ /sl61_gcc445/) {# broken Qt4
   push @items, "St_geom_Maker";
 }
@@ -251,9 +247,7 @@ if ($STAR_SYS =~ /x86_darwin/) {
 #endif /* ____MAC_____ */
 }
 
-# _________________________________________________________________________
-# Do not compile StGeant4Maker if ROOT is < 6.24 or build is 32 bit
-push @items, "StGeant4Maker" if (
+push @items, "StGeant4Maker" if ( # Do not compile StGeant4Maker if ROOT is < 6.24 or build is 32 bit
    !$USE_64BITS            or 
     $USE_64BITS==0         or 
     $ROOT_VERSION_MAJOR<=5 or (
@@ -263,7 +257,7 @@ push @items, "StGeant4Maker" if (
 );
 
 # closing exclusion list
-my $items = "";# print "items $#items  = @items\n";
+my $items = "";
 
 if ( defined($SKIP_DIRS) ) {
   $items = join("|", split(" ", $SKIP_DIRS));
