@@ -256,8 +256,18 @@ if ($STAR_SYS =~ /x86_darwin/) {
   push @items, "StSpinPool";
 #endif /* ____MAC_____ */
 }
-#$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
-#$items .= "StBTofPool|StFgtPool|StPeCMaker";
+
+# _________________________________________________________________________
+# Do not compile StGeant4Maker if ROOT is < 6.24 or build is 32 bit
+push @items, "StGeant4Maker" if (
+   !$USE_64BITS            or 
+    $USE_64BITS==0         or 
+    $ROOT_VERSION_MAJOR<=5 or (
+         $ROOT_VERSION_MAJOR==6 and 
+         $ROOT_VERSION_MINOR<24
+    )
+);
+
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
 
@@ -267,11 +277,15 @@ if ( defined($SKIP_DIRS) ) {
   $items = "StShadowMaker|PWGTools";
 }
 
+
+
 if ( $#items > -1){
   if (!$items) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
   print "SKIP_DIRS is now: $#items $items\n";
 }
+
+
 # Search for directories (one level down) and make
 # list of targets
 #
