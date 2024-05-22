@@ -38,11 +38,10 @@ TClonesArray *EventT::fgTracks = 0;
 TClonesArray *EventT::fgHits = 0;
 THashList *EventT::fRotList = 0;
 
+static int _debug = 0;
 
-static Int_t _debug = 0;
-//______________________________________________________________________________
-EventT::EventT() : fIsValid(kFALSE)
-{
+//_________________
+EventT::EventT() : fIsValid(kFALSE) {
   // Create an EventT object.
   // When the constructor is invoked for the first time, the class static
   // variable fgTracks is 0 and the TClonesArray fgTracks is created.
@@ -55,14 +54,13 @@ EventT::EventT() : fIsValid(kFALSE)
   fNhit = 0;
 }
 
-//______________________________________________________________________________
-EventT::~EventT()
-{
+//_________________
+EventT::~EventT() {
   Clear();
   SafeDelete(fRotList);
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
 #if 0
   static const Int_t NoFitPointCutForGoodTrackT = 15;
@@ -248,7 +246,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
   if (nTotMatch) iok = 0;
   return iok;
 }  
-//______________________________________________________________________________
+//_________________
 TrackT *EventT::AddTrackT()
 {
   // Add a new track to the list of tracks for this event.
@@ -262,7 +260,7 @@ TrackT *EventT::AddTrackT()
   //Save reference to last TrackT in the collection of Tracks
   return track;
 }
-//______________________________________________________________________________
+//_________________
 HitT *EventT::AddHitT()
 {
   // Add a new hit to the list of hits for this event.
@@ -277,14 +275,14 @@ HitT *EventT::AddHitT()
   return hit;
 }
 
-//______________________________________________________________________________
+//_________________
 void EventT::Clear(Option_t * /*option*/)
 {
   fTracks->Clear("C"); //will also call TrackT::Clear
   fHits->Clear("C"); //will also call HitT::Clear
 }
 
-//______________________________________________________________________________
+//_________________
 void EventT::Reset(Option_t * /*option*/)
 {
   // Static function to reset all static objects for this event
@@ -294,14 +292,14 @@ void EventT::Reset(Option_t * /*option*/)
   delete fgHits; fgHits = 0;
 }
 
-//______________________________________________________________________________
+//_________________
 void EventT::SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field)
 {
   fNtrack = 0;
   fNhit = 0;
   fEvtHdr.Set(i, run, date, field);
 }
-//________________________________________________________________________________
+//___________________
 void EventT::Print(Option_t *opt) const {
   cout << "Run/EventT\t" << fEvtHdr.GetRun() << "/" << fEvtHdr.GetEvtNum() << "\tDate " << fEvtHdr.GetDate() 
        << "\tField " << fEvtHdr.GetField() << endl;
@@ -315,7 +313,7 @@ void EventT::Print(Option_t *opt) const {
   for (UInt_t i = 0; i < GetNhit(); i++) {cout << i << "\t"; GetHitT(i)->Print();}
   
 }
-//________________________________________________________________________________
+//___________________
 HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
   UInt_t B = 0, L = 0, l = 0, W = 0, H = 0;
   Int_t rdo = 0;
@@ -368,7 +366,7 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
   }
   return h;
 }
-//________________________________________________________________________________
+//___________________
 void TrackT::Print(Option_t *opt) const {
   cout << "TrackT: InvpT " << fInvpT << "\tTanL " << fTanL 
        << "\tPhi " << fPhi << "\tRho " << fRho 
@@ -376,18 +374,18 @@ void TrackT::Print(Option_t *opt) const {
   for (UInt_t i = 0; i < fNsp; i++) cout << "\t" << fIdHitT[i];
   cout << endl;
 }
-//________________________________________________________________________________
+//___________________
 void HitT::SetId(Int_t B, Int_t L, Int_t l, Int_t W, Int_t H) {
   barrel = B; layer = L; ladder = l; wafer = W; hybrid = H;
 }
-//________________________________________________________________________________
+//___________________
 void HitT::Print(Option_t *opt) const {
   cout << "HitT: Id " << Id << "\tpT = " << pT << "\tmomentum " << pMom << endl;
   TRVector glob(3,&xG); cout << "Global :" << glob << endl;
   cout << "Local      u/v/w " << u << "/ " << v << "/ " << w << endl;
   cout << "Prediction uP/vP " << uP << "/ " << vP << "\ttuP/tvP " << tuP << "/ " << tvP << endl;
 }
-//________________________________________________________________________________
+//___________________
 void EventT::RestoreListOfRotations() {
   if (fRotList) return;
   if (! gDirectory) return;
@@ -402,9 +400,12 @@ void EventT::RestoreListOfRotations() {
     }
   }
 }
-//________________________________________________________________________________
-void TBase::Loop(Int_t Nevents) {  
-#if 1
+
+//___________________
+void TBase::Loop(Int_t Nevents) { 
+
+//#if 1
+
   struct PlotPar_t {
     const Char_t *Name;
     const Char_t *Title;
@@ -463,19 +464,20 @@ void TBase::Loop(Int_t Nevents) {
     uName  = plotUP.Name;
     uName += Form("M%i", module);
     uTitle = Form("uP for Module %i", module);
-    uPlots[module] = 
-      new TH1F(uName, uTitle, plotUP.nx, plotUP.xmin, plotUP.xmax );
+    uPlots[module] = new TH1F(uName, uTitle, plotUP.nx, plotUP.xmin, plotUP.xmax );
     uName  = Form("%sM%i", plotDu.Name, module);
     uTitle = Form("u-uP for M %i", module);
-    uCuts[module]= 
-      new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+    uCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
     uName  = Form("%sxM%i", plotDu.Name, module);
     uTitle = Form("u-uP corr M %i", module);
-    xCuts[module]= 
-      new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
-  }
+    xCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+  } // for (int M = 0; M < NM; M++)
+
   Long64_t nentries = fChain->GetEntriesFast();
-  if (Nevents > 0 && nentries > Nevents) nentries = Nevents;
+  if (Nevents > 0 && nentries > Nevents) {
+    nentries = Nevents;
+  }
+
   Long64_t nbytes = 0, nb = 0;
   Int_t TreeNo = -1;
   TString currentFile("");
@@ -485,16 +487,18 @@ void TBase::Loop(Int_t Nevents) {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     if (! jentry%1000 || TreeNo != fChain->GetTreeNumber()) {
-      cout << "Read event \t" << jentry 
+      std::cout << "Read event \t" << jentry 
 	   << " so far, switch to file " << fChain->GetCurrentFile()->GetName() 
-	   << endl;
-      cout << " current TreeNo: " << TreeNo
-	   <<  " new TreeNo: " << fChain->GetTreeNumber() << endl;
+	   << std::endl;
+      std::cout << " current TreeNo: " << TreeNo
+	   <<  " new TreeNo: " << fChain->GetTreeNumber() << std::endl;
       TreeNo = fChain->GetTreeNumber();
-    }
+    } // for (Long64_t jentry=0; jentry<nentries;jentry++)
+
     //     if (VertexZCut > 0 && TMath::Abs(fVertex[2]) > VertexZCut) continue;
     UInt_t Ntrack = fEvent->GetTracks()->GetEntriesFast();
-    //     int k_used[100000] = {0};    
+    //     int k_used[100000] = {0};
+
     for (UInt_t trk = 0; trk < Ntrack; trk++) {
       TrackT *track = (TrackT *)fEvent->GetTracks()->UncheckedAt(trk);
       if (! track) continue;
@@ -507,47 +511,55 @@ void TBase::Loop(Int_t Nevents) {
       Int_t Nsp = track->GetN();
       double dvmin = 1000.;
       double dumin = 1000.;
-      int kmin;
+      int kmin{0};
       for (Int_t hit = 0; hit < Nsp; hit++) {
-	Int_t k = track->GetHitTId(hit) - 1;
-	//	 assert(k>=0);
-	HitT *hitT = (HitT *) fEvent->GetHitT(k);
-	if ( k < 0) cout <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< endl;
-	if ( k < 0) continue;
-	Int_t module  = hitT->Barrel();
-	Double32_t u = hitT->GetU();       
-	Double32_t v = hitT->GetV();
-	Double32_t uP = hitT->GetPredU();       
-	Double32_t vP = hitT->GetPredV();
-	Double32_t du = u - uP;
-	Double32_t dv = v - vP;
+        Int_t k = track->GetHitTId(hit) - 1;
+        //	 assert(k>=0);
+        HitT *hitT = (HitT *) fEvent->GetHitT(k);
+        if ( k < 0 ) std::cout <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< std::endl;
+        if ( k < 0 ) continue;
+        Int_t module  = hitT->Barrel();
+        Double32_t u = hitT->GetU();       
+        Double32_t v = hitT->GetV();
+        Double32_t uP = hitT->GetPredU();       
+        Double32_t vP = hitT->GetPredV();
+        Double32_t du = u - uP;
+        Double32_t dv = v - vP;
 #if 0	   
-	hpT->Fill(hitT->GetXyzPGl());
-	hpM->Fill(hitT->GetpMom());
-	if (TMath::Abs(hitT->GetpT()) < 0.2) continue;
+        hpT->Fill(hitT->GetXyzPGl());
+        hpM->Fill(hitT->GetpMom());
+        if (TMath::Abs(hitT->GetpT()) < 0.2) continue;
 #endif
-	if ( TMath::Abs(dv) < TMath::Abs(dvmin) ) {dvmin = dv; dumin= du; kmin = k;}
-	uPAll->Fill( uP );
-	uPlots[module]->Fill( uP );
-	
-	duB[module][0]->Fill(du);
-	dvB[module]->Fill(dv);
-	vCut->Fill(dv);
-	//	if (TMath::Abs(dv) > rCut ) continue;
-	uCut->Fill(du);
-	
-	duB[module][1]->Fill(du);
-	//	if (TMath::Abs(du) > 2.*rCut) continue;
-	
+        
+        if ( TMath::Abs(dv) < TMath::Abs(dvmin) ) {
+          dvmin = dv; 
+          dumin= du; 
+          kmin = k;
+        }
+        uPAll->Fill( uP );
+        uPlots[module]->Fill( uP );
+        
+        duB[module][0]->Fill(du);
+        dvB[module]->Fill(dv);
+        vCut->Fill(dv);
+        //	if (TMath::Abs(dv) > rCut ) continue;
+        uCut->Fill(du);
+        
+        duB[module][1]->Fill(du);
+        //	if (TMath::Abs(du) > 2.*rCut) continue;
       } //hits loop
+
       if (TMath::Abs(dvmin) < 1000.) {
-	dMin->Fill(dvmin,dumin);
-	vMin->Fill(dvmin);
-	uMin->Fill(dumin);
-	//	if (TMath::Abs(dvmin) < rCut ) uMinC->Fill(dumin);
-      }	 
+        dMin->Fill(dvmin,dumin);
+        vMin->Fill(dvmin);
+        uMin->Fill(dumin);
+        // if (TMath::Abs(dvmin) < rCut ) uMinC->Fill(dumin);
+      }	// if (TMath::Abs(dvmin) < 1000.)
+
     } //track loop
   } //jentry loop (event loop)
   fOut->Write();
-#endif
+
+//#endif  // #ifdef 1
+
 } //end of Loop()
