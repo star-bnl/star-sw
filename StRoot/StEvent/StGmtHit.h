@@ -55,13 +55,13 @@ class StGmtHit : public StHit {
   /// ADC error in Y
   Float_t getErrorAdcY() const { return mdAdcY; }
   /// Local X coordinate
-  Float_t getLocalX() const    { return mPosition().x(); }
+  Float_t getLocalX() const    { return position().x(); }
   /// Local X coordinate error
-  Float_t getErrorLocalX() const { return mPositionError().x(); }
+  Float_t getErrorLocalX() const { return positionError().x(); }
   /// Local Y coordinate
-  Float_t getLocalY() const    { return mPosition().y(); }
+  Float_t getLocalY() const    { return position().y(); }
   /// Local Y coordinate error
-  Float_t getErrorLocalY() const { return mPositionError().y(); }
+  Float_t getErrorLocalY() const { return positionError().y(); }
   /// Position in X
   Float_t getSigmaX() const    { return mSigmaX; }
   /// Position error in X
