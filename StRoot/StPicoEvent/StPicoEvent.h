@@ -141,10 +141,14 @@ class StPicoEvent : public TObject {
   UShort_t etofHitMultiplicity() const   { return mETofHitMultiplicity; }
   /// Return number of digis in ETOF modules
   UShort_t etofDigiMultiplicity() const  { return mETofDigiMultiplicity; }
-  /// Return goodEventFlag for a specific eTOF counter
-  bool eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort_t iCounter ) const;
-    /// Return goodEventFlag by array entry
+  /// Return goodEventFlag for a specific eTOF Get4
+  bool eTofGoodEventFlag( UShort_t iSector, UShort_t iModule,  UShort_t iCounter , UShort_t iGet4) const;
+  /// Return goodEventFlag by array entry
   bool eTofGoodEventFlag( UShort_t iDet ) const { return (bool) mETofGoodEventFlag[ iDet ]; }
+  /// Return pulser status for a specific eTOF counter (true if both pulsers present)
+  bool eTofPulserStatus( UShort_t iSector, UShort_t iModule,  UShort_t iCounter ) const;
+  /// Return pulser ststus by array entry
+  bool eTofPulserStatus( UShort_t iDet ) const { return (bool) mETofGoodEventFlag[ iDet ]; }
   /// Return number of primary tracks
   UShort_t numberOfPrimaryTracks() const { return mNumberOfPrimaryTracks; }
   /// Return FXT multiplicity (corresponds to the number of primary tracks)
@@ -279,9 +283,11 @@ class StPicoEvent : public TObject {
   /// Set total number of digis in ETOF modules
   void setETofDigiMultiplicity(UShort_t mult)   { mETofDigiMultiplicity = (UShort_t)mult; }
   /// Set goodEventFlag for a specific eTOF counter
-  void setETofGoodEventFlag( bool flag, UShort_t iSector, UShort_t iModule,  UShort_t iCounter ) { mETofGoodEventFlag[ 9*(iSector-1) + 3*(iModule-1) + (iCounter-1) ] = flag; }
-  /// Full setter goodEventFlag all specific eTOF counter. Used to copy over MuDst data
+    void setETofGoodEventFlag( bool flag, UShort_t iSector, UShort_t iModule,  UShort_t iCounter,  UShort_t iGet4 ) { mETofGoodEventFlag[ 3*3*16*(iSector-1) + 3*16*(iModule-1) + 16*(iCounter-1) + (iGet4-1)] = flag; }
+  /// Full setter goodEventFlag all specific eTOF Get4. Used to copy over MuDst data
   void setETofGoodEventFlag( std::vector<bool> flagVec ); 
+  /// Full setter pulserStatusFlag all specific eTOF counter. Used to copy over MuDst data
+    void setETofHasPulsersFlag( std::vector<bool> pulserVec ); 
   /// Set number of primary tracks
   void setNumberOfPrimaryTracks(UShort_t mult)  { mNumberOfPrimaryTracks = (UShort_t)mult; }
 
@@ -609,8 +615,9 @@ protected:
   UShort_t mETofHitMultiplicity ;
   /// Total digi multiplicity in ETOF modules
   UShort_t mETofDigiMultiplicity ;
-  /// Flag to mark if the event is good for physics analysis for each counter. A counter is considered good in each event when there are zero missmatch flags set and pulser digis on both sides are found. In this case, the counter should perform at its best. Counter efficiency should be constant between good events. Here: CounterNr = 9*sector + 3*module + counter.
-  bool mETofGoodEventFlag[108];
+  /// Flag to mark if the event is good for physics analysis for each Get4. A Get4 is considered good in each event when there are zero missmatch flags set.  Get4 efficiency should be constant between good events. As additional sanity check one can request that both pulsers were present for any given event and counter. Best performance to be expected with zero status bits and both pulsers. Here: CounterNr = 9*(sector-13) + 3*(module-1) + counter. Get4Nr = 3*3*16*(sector-13)+ 3*16*(module -1) + 16*(counter -1) + Get4.
+  bool mETofGoodEventFlag[1728];
+  bool mETofHasPulsersFlag[108];
 
   /// Number of primary tracks
   UShort_t mNumberOfPrimaryTracks;
@@ -619,9 +626,9 @@ protected:
   UShort_t mZdcUnAttenuated[2];
 
 #if defined (__TFG__VERSION__)
-  ClassDef(StPicoEvent, 9)
+  ClassDef(StPicoEvent, 10)
 #else /* ! __TFG__VERSION__ */
-  ClassDef(StPicoEvent, 7)
+  ClassDef(StPicoEvent, 8)
 #endif
 };
 

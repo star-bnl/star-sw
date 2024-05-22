@@ -1874,10 +1874,14 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    bx64 = (bx64 << 32) + bx_low;
 	    float bx_sec = bx64/9.3e6;
 	    int bx7 = bx64 % 120;
-		
+	    
+	    int addBits = swap16(evtDesc->addBits);
+
             int trg_tkn = swap16(evtDesc->TrgToken) ;
 
-	    printf("tinfo: token %d, pre %d, post %d\n",trg_tkn,pre,post) ;
+	    if(addBits != 0) {
+	    printf("tinfo: token %d, pre %d, post %d, 0x%016llx 0x%04x\n",trg_tkn,pre,post, rdr->daqbits64, addBits) ;
+	    }
 
 	    int crate_sz[MAX_CONF_NUM];
 	    int crate_internal_usec[MAX_CONF_NUM];

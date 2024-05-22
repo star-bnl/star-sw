@@ -215,7 +215,7 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    mFcsDb->getDepfromId(det,id,ehp,ns,crt,sub,dep,ch);
 	    if(det<4){
 		fcs_trg_pt_correction[ns][ehp][dep][ch] = mFcsDb->getEtGain(det,id,mEtFactor);
-		fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainCorrection(det,id);
+		fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainOnline(det,id);
 	    }else{
 		fcs_trg_pt_correction[ns][ehp][dep][ch] = 1.0;
 		fcs_trg_gain_correction[ns][ehp][dep][ch] = 1.0;
@@ -224,19 +224,21 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    
 	    mTrgSim->p_g[ns][ehp][dep][ch].ped  = fcs_trg_pedestal[ns][ehp][dep][ch];
 
-	    float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
-	    //float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
-	    float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
-	    int g = (uint32_t)(gg*256.0+0.5) ;
-	    mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
+	    if(mOverwriteGain==1){
+		float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
+		//float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
+		float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
+		int g = (uint32_t)(gg*256.0+0.5) ;
+		mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
+	    }
 
 	    /*
-	      printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
-	      fcs_trg_pt_correction[ns][ehp][dep][ch],
-	      fcs_trg_gain_correction[ns][ehp][dep][ch],
-	      fcs_trg_pedestal[ns][ehp][dep][ch]);
-	    */
-
+	    printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
+		   fcs_trg_pt_correction[ns][ehp][dep][ch],
+		   fcs_trg_gain_correction[ns][ehp][dep][ch],
+		   fcs_trg_pedestal[ns][ehp][dep][ch]);
+	   */
+		
 	    if(gainfile) 
 		fprintf(gainfile,"%2d %2d %2d %2d %8.3f\n",ns,ehp,dep,ch,
 			fcs_trg_pt_correction[ns][ehp][dep][ch]);
@@ -278,15 +280,16 @@ int StFcsTriggerSimMaker::Finish(){
 int StFcsTriggerSimMaker::Make(){
     StEvent* event = nullptr;
     event = (StEvent*)GetInputDS("StEvent");
-    if(!event) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm;}
-    mFcsColl = event->fcsCollection();
-    if(!mFcsColl) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm;}
-    
+    if(!event){
+	LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm;}
+    else {
+	mFcsColl = event->fcsCollection();
+	if(!mFcsColl){LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm;}
+    }
+
     StMuEvent* muevent = nullptr;
-    if((!event)||(!mFcsColl)){
-        
+    if((!event)||(!mFcsColl)){        
         LOG_INFO<<"No StEvent info available for StFcsTriggerSimMaker. "<< endm;
-    
         muevent = StMuDst::event();
         mMuFcsColl = StMuDst::muFcsCollection();
         if(muevent && mMuFcsColl){

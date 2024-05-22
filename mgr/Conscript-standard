@@ -199,7 +199,8 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
-    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG -DRTS_ENABLE_LOG ";
+
 }
 
 #$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
@@ -1451,7 +1452,7 @@ if ( $#src > -1 ) {
       }
     }
     if ($pkg eq "RTS") {
-      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN";
+      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN ";
       my $cpppath  = $main::PATH_SEPARATOR . "#StRoot/RTS/include"
 	. $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
 	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"

@@ -87,6 +87,7 @@ public:
      **/      
     std::vector<bool>       goodEventFlagVec()  const;
 
+    std::vector<bool>       hasPulsersVec()  const;
 
     void    setTrgGdpbFullTime( const double& gdpbFullTime );
     void    setTrgStarFullTime( const double& starFullTime );
@@ -100,6 +101,7 @@ public:
 
     void    setEventStatusFlag( const uint64_t& statusFlag );
     void    setGoodEventFlagVec( const std::vector<bool>& FlagVec );
+    void    setHasPulsersVec( const std::vector<bool>& PulserVec );
 
 private:
     Double_t    mTrgGdpbFullTime;
@@ -115,9 +117,10 @@ private:
     ULong64_t   mEventStatusFlag;
 
 	 std::vector< Bool_t > mMissMatchFlagVec;
-	 std::vector< Bool_t > mGoodEventFlagVec;  
+	 std::vector< Bool_t > mGoodEventFlagVec; 
+	 std::vector< Bool_t > mHasPulsersVec;
 
-    ClassDef( StMuETofHeader, 3 )
+    ClassDef( StMuETofHeader, 4 )
 };
 
 #endif // STMUETOFHEADER_H

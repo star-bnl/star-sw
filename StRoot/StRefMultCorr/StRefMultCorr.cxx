@@ -406,6 +406,207 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
     }
+    else if ( mParameterIndex==42 ) { // Au+Au 9.2 GeV 2020 TriggerID = 780020
+
+      if ( -145. <= vz && vz < -87. ) {
+        b0=25.6055790979197;
+        b1=2.02528136596901;
+        b2=-0.0058370984051939;
+        b3=2.59602314466234e-05;
+        b4=-5.3014743584261e-08;
+        c0=-17.7059596791057;
+        c1=0.614538168662738;
+        c2=0.00534180935164814;
+        c3=-1.79582873880806e-05;
+        c4=1.01623054170579e-08;
+      }
+      else if ( -87. <= vz && vz < -29. ) {
+        b0=23.0160060308621;
+        b1=1.61885832757588;
+        b2=-0.00275873189631398;
+        b3=1.31262550392554e-05;
+        b4=-2.94368020941846e-08;
+        c0=-17.3591842617911;
+        c1=0.796170989774258;
+        c2=0.000670722514533827;
+        c3=3.26258075150876e-06;
+        c4=-1.60611460182112e-08;
+      }
+      else if ( -29. <= vz && vz < 29. ) {
+        b0=16.4277056306649;
+        b1=1.71652229539398;
+        b2=-0.00406847684302521;
+        b3=1.65203560938885e-05;
+        b4=-2.96250329214512e-08;
+        c0=-15.7887025834219;
+        c1=0.789786364309292;
+        c2=-0.000637115144252616;
+        c3=1.00019972792727e-05;
+        c4=-2.45208851616324e-08;        
+      }
+      else if ( 29. <= vz && vz < 87. ) {
+        b0=21.2024767158778;
+        b1=1.70521848381614;
+        b2=-0.00352260930859763;
+        b3=1.60905730948817e-05;
+        b4=-3.37443468806432e-08;
+        c0=-17.1166088395929;
+        c1=0.814739436616432;
+        c2=0.000227197779215977;
+        c3=6.55397838050604e-06;
+        c4=-2.28812912596058e-08;
+      }
+      else if ( 87. <= vz && vz <= 145. ) {
+        b0=26.0970905882739;
+        b1=1.88889714311734;
+        b2=-0.00195374948885512;
+        b3=-6.14244087431038e-06;
+        b4=1.99930095058841e-08;
+        c0=-15.6624325989392;
+        c1=0.52385751891358;
+        c2=0.00794996911844969;
+        c3=-4.09239155250494e-05;
+        c4=6.40163739983216e-08;
+      }
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    }
+    else if ( mParameterIndex==43 ) { // Au+Au 17.3 GeV 2021
+
+      if ( -145. <= vz && vz < -87. ) {
+        b0=25.8023785946209;
+        b1=1.80974818833103;
+        b2=-0.00230107205687879;
+        b3=1.04069753338853e-05;
+        b4=-2.43265995270951e-08;
+        c0=-25.7628397848;
+        c1=1.15844463977968;
+        c2=-0.00285234327923795;
+        c3=1.68279361312683e-05;
+        c4=-2.89872992178789e-08;
+      }
+      else if ( -87. <= vz && vz < -29. ) {
+        b0=26.2142811336132;
+        b1=1.40180659301151;
+        b2=-0.000197781802002694;
+        b3=1.02666189094347e-06;
+        b4=-5.52762010064236e-09;
+        c0=-21.4352021999217;
+        c1=1.01067273031472;
+        c2=-0.00160328567162831;
+        c3=8.94486444751978e-06;
+        c4=-1.46093145276812e-08;
+      }
+      else if ( -29. <= vz && vz < 29. ) {
+        b0=20.1361585417616;
+        b1=1.54339163322734;
+        b2=-0.00277257992675217;
+        b3=1.01670412308599e-05;
+        b4=-1.4564482074994e-08;
+        c0=-18.0093218064881;
+        c1=0.858263071231256;
+        c2=-0.000411359635522234;
+        c3=4.21562873026016e-06;
+        c4=-8.07993954642765e-09;
+      }
+      else if ( 29. <= vz && vz < 87. ) {
+        b0=25.8570023358432;
+        b1=1.37245590215625;
+        b2=-5.45184310087876e-05;
+        b3=6.25643605701836e-07;
+        b4=-4.90542835006027e-09;
+        c0=-20.7158089395719;
+        c1=1.00148007639466;
+        c2=-0.00138806953636318;
+        c3=7.92595642206008e-06;
+        c4=-1.32107375325913e-08;
+      }
+      else if ( 87. <= vz && vz <= 145. ) {
+        b0=28.2036847494035;
+        b1=1.640750436652;
+        b2=-0.000569887807630565;
+        b3=3.95821109316978e-06;
+        b4=-1.60367555403757e-08;
+        c0=-26.3129222166004;
+        c1=1.21481523017369;
+        c2=-0.00341644731702994;
+        c3=1.84782571448044e-05;
+        c4=-3.03333077890128e-08;
+      }
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    }
+    else if ( mParameterIndex==44 ) { // Au+Au 11.5 GeV 2020
+
+      if ( -145. <= vz && vz < -87. ) {
+        b0=18.0402708948567;
+        b1=2.09478604674414;
+        b2=-0.00685576746251115;
+        b3=3.88333589216404e-05;
+        b4=-8.12179090437804e-08;
+        c0=-12.7515169659501;
+        c1=0.705235205311516;
+        c2=0.00321598985910965;
+        c3=-1.56896265545575e-05;
+        c4=2.97072869656044e-08;
+      }
+      else if ( -87. <= vz && vz < -29. ) {
+        b0=14.2601983060724;
+        b1=1.71255613728895;
+        b2=-0.00383919825526746;
+        b3=1.7756145374654e-05;
+        b4=-3.19509246865534e-08;
+        c0=-10.9408282877465;
+        c1=0.617024824873745;
+        c2=0.00264576299008488;
+        c3=-1.158420066816e-05;
+        c4=2.01763088491799e-08;
+      }
+      else if ( -29. <= vz && vz < 29. ) {
+        b0=11.1331231719184;
+        b1=1.69710478538775;
+        b2=-0.00464826171041643;
+        b3=2.02639545153783e-05;
+        b4=-3.4169236655577e-08;
+        c0=-8.82209022882564;
+        c1=0.524312884632579;
+        c2=0.00321682247003759;
+        c3=-1.35894996081641e-05;
+        c4=2.26005417512409e-08;
+      }
+      else if ( 29. <= vz && vz < 87. ) {
+        b0=14.615141872526;
+        b1=1.69217111894767;
+        b2=-0.00377600546419821;
+        b3=1.83551619792816e-05;
+        b4=-3.48332786210067e-08;
+        c0=-11.0113966446419;
+        c1=0.616128886729022;
+        c2=0.00278642638292705;
+        c3=-1.3124493295967e-05;
+        c4=2.44388293439677e-08;
+      }
+      else if ( 87. <= vz && vz <= 145. ) {
+        b0=17.988224598148;
+        b1=2.07853473508418;
+        b2=-0.00668791264313384;
+        b3=3.61562317906595e-05;
+        b4=-7.30405696800251e-08;
+        c0=-12.6730707166176;
+        c1=0.709713827776669;
+        c2=0.00318794623382361;
+        c3=-1.47530903374243e-05;
+        c4=2.55638251982488e-08;
+      }
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    }
     else {
       notPileUp = kTRUE;
     }
@@ -508,10 +709,65 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
     }
+    else if (mParameterIndex == 7) { // Run 20 Au+Au 13.5 GeV (sqrt(s_NN)=5.2 GeV)
+      b0=18.6707;
+      b1=6.92307;
+      b2=-0.0293523;
+      b3=0.000412261;
+      b4=-4.74922e-06;      
+      c0=-14.4436;
+      c1=-0.047413;
+      c2=0.100793;
+      c3=-0.00121203;
+      c4=5.59521e-06;
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
+    }    
+    else if (mParameterIndex == 8) { // Run 20 Au+Au 19.5 GeV (sqrt(s_NN)=6.2 GeV)
+      b0=25.0191;
+      b1=5.51924;
+      b2=0.0694824;
+      b3=-0.00121388;
+      b4=3.44057e-06;
+      c0=-16.9132;
+      c1=2.35278;
+      c2=-0.0341491;
+      c3=0.00131257;
+      c4=-9.0295e-06;
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
+    }    
     else {
       notPileUp = kTRUE;
     }
   }
+
+  /*
+  else if ( mRefX == 6 ) { // refMult6
+    if ( mParameterIndex==0 ) { // d+Au 200 GeV 2021
+      b0 =  2.4412914662443033;
+      b1 =  5.523540420923605;
+      b2 = -0.16458436958697667;
+      b3 =  0.002805908341435613;
+      b4 = -1.6300934820294975e-05;
+      c0 = -0.86595124167792;
+      c1 =  0.44263208748354943;
+      c2 =  0.06024976895762696;
+      c3 = -0.0013523620327006189;
+      c4 =  1.0553696607739253e-05;
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    }
+    else {
+      notPileUp = kTRUE;
+    }  
+  }
+  */
 
   if (mVerbose) {
     std::cout << "\t notPileUp: ";
@@ -750,13 +1006,17 @@ Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) const 
   const Double_t par0_lum = mPar_luminosity[0][mParameterIndex] ;
   const Double_t par1_lum = mPar_luminosity[1][mParameterIndex] ;
   
-  if( mParameterIndex==36 || mParameterIndex==37 || mParameterIndex==40 ) {
+  if( mParameterIndex==36 || mParameterIndex==37 || mParameterIndex==40 || 
+      ( mRefX==5 && mParameterIndex==7 ) || 
+      ( mRefX==5 && mParameterIndex==8 ) ) {
     // if(mYear[mParameterIndex] == 2018 && mIsZr) zdcmean = 96.9914;
     // if(mYear[mParameterIndex] == 2018 && mIsRu) zdcmean = 97.9927;
     Double_t b_prime = 1.;
     if(mParameterIndex==36) b_prime = 96.9914; // Zr
     if(mParameterIndex==37) b_prime = 97.9927; // Ru
     if(mParameterIndex==40) b_prime = 213.383; // AuAu 200GeV Run19
+    if(mParameterIndex==7 ) b_prime = 106.245; // AuAu 5.2GeV FXT Run20
+    if(mParameterIndex==8 ) b_prime = 114.041; // AuAu 6.2GeV FXT Run20
     lumiCorr = (par0_lum<std::numeric_limits<double>::epsilon() ) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
   }
   else {
@@ -795,7 +1055,7 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
 
   }
   Double_t vzCorr = 1.;
-  if ( mParameterIndex < 38 ) { 
+  if ( mParameterIndex < 38 ) {
     // Old correction based on the 6th-order polynomial fit of the high-end point 
     // fit of refMult for the given Vz range
 
@@ -833,6 +1093,18 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
     // New Vz correction. All vz bins bins are normalize to that at the center
     vzCorr = auau7_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
   }
+  else if ( mParameterIndex == 42 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780020
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau9_trig2_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
+  else if ( mParameterIndex == 43 ) {  // Au+Au 17.3 GeV Run 21
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau17_run21_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
+  else if ( mParameterIndex == 44 ) {  // Au+Au 11.5 GeV Run 20
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau11_run20_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
 
   if (mVerbose) {
     std::cout << "\t Acceptance correction factor: " << vzCorr << std::endl;
@@ -849,7 +1121,7 @@ Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
   }
 
   Double_t refMult_d = -9999.;
-  if( mParameterIndex>=30 && mParameterIndex<=41 ) {
+  if( mParameterIndex>=30 && mParameterIndex<=44 ) {
     refMult_d = (Double_t)refMult - 0.5 + gRandom->Rndm();
   }
   else {
@@ -1140,7 +1412,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
   }
   else if (mParameterIndex == 41) { // Au+Au 7.7 GeV 2020
 
-    if (iVzBinIndex < 0 || iVzBinIndex > auau200_run19_nVzBins) return 1.0;
+    if (iVzBinIndex < 0 || iVzBinIndex > auau7_run21_nVzBins) return 1.0;
 
     weight = auau7_run21_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
     // Handle bad weight
@@ -1148,6 +1420,50 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   }
+  else if (mParameterIndex == 42) { // Au+Au 9.2 GeV 2020 TrigerID = 780020
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau9_run20_nVzBins) return 1.0;
+
+    weight = auau9_trig2_run20_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
+  else if (mParameterIndex == 43) { // Au+Au 17.3 GeV 2021
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau17_run21_nVzBins) return 1.0;
+
+    weight = auau17_run21_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
+  else if (mParameterIndex == 44) { // Au+Au 11.5 GeV 2020
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau11_run20_nVzBins) return 1.0;
+
+    weight = auau11_run20_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
+
+  /*
+  else if (mRefX == 6 && mParameterIndex == 0) { // d+Au 200 GeV 2021
+
+    if (iVzBinIndex < 0 || iVzBinIndex > dau200_run21_nVzBins) return 1.0;
+
+    weight = dau200_run21_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }
+  */
+
   else {
     weight = 1.0;
   }
@@ -1200,11 +1516,17 @@ Double_t StRefMultCorr::triggerWeight() const {
        && mRefMult_corr != -(par3/par2)  ) { // avoid denominator = 0 
 
     // Parametrization of MC/data RefMult ratio
-    weight = ( par0 +
-               par1 / (par2 * mRefMult_corr + par3) +
-               par4 * (par2 * mRefMult_corr + par3) +
-               par6 / ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) +
-               par7 * ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) );
+    if (mRefX == 5 && mParameterIndex == 0) { // Run 18 Au+Au 3.85 GeV (sqrt(s_NN)=3 GeV)
+      // Trigger efficiency correction does not exist. Temporarily set weight to 1
+      weight = 1.;
+    } // else if (mRefX == 5 && mParameterIndex == 0)
+    else {
+      weight = ( par0 +
+                par1 / (par2 * mRefMult_corr + par3) +
+                par4 * (par2 * mRefMult_corr + par3) +
+                par6 / ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) +
+                par7 * ( (par2 * mRefMult_corr + par3) * (par2 * mRefMult_corr + par3) ) );
+    }
     /*
     std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
               << " par3: " << par3 << " par4: " << par4 << " A: " << A
@@ -1389,6 +1711,40 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau7_run21_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 41 )
+  else if ( mParameterIndex == 42 ) {  // Au+Au 9.2 GeV Run 20 TriggerID = 780020
+    for ( Int_t iVz=0; iVz<auau9_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
+      if ( auau9_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau9_run20_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau9_run20_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 42 )
+  else if ( mParameterIndex == 43 ) {  // Au+Au 17.3 GeV 2021
+    for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
+      if ( auau17_run21_vzRangeLimits[iVz][0] <= mVz && mVz < auau17_run21_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 43 )
+  else if ( mParameterIndex == 44 ) {  // Au+Au 11.5 GeV 2020
+    for ( Int_t iVz=0; iVz<auau11_run20_nVzBins; iVz++ ) { // Utilize Vz binning: (29 bins, -145., 145.)
+      if ( auau11_run20_vzRangeLimits[iVz][0] <= mVz && mVz < auau11_run20_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
+  } // else if ( mParameterIndex == 44 )
+  /*
+  else if ( mRefX == 6 && mParameterIndex == 0 ) {  // d+Au 200 GeV 2021
+    for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ ) {
+      if ( dau200_run21_vzRangeLimits[iVz][0] <= mVz && mVz < dau200_run21_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ )
+  } // else if ( mRefX == 6 && mParameterIndex == 0 )
+  */
   else {
     iBinVz = -1;
   }
@@ -1442,6 +1798,7 @@ const Int_t StRefMultCorr::getRefX() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return 3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return 5;
+  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return 6;
   else return 9999;
 }
 
@@ -1453,6 +1810,7 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return nID_ref3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return nID_ref5; 
+  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return nID_ref6;
   else return 9999;
 }
 
