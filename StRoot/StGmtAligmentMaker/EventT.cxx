@@ -63,7 +63,7 @@ EventT::~EventT() {
 //_________________
 Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
 
-#if 0
+#ifdef Extra
     static const Int_t NoFitPointCutForGoodTrackT = 15;
 #endif
     Clear();
@@ -266,6 +266,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     if (nTotMatch) iok = 0;
     return iok;
 }  
+
 //_________________
 TrackT *EventT::AddTrackT() {
     // Add a new track to the list of tracks for this event.
@@ -459,7 +460,7 @@ void TBase::Loop(Int_t Nevents) {
     //              B 
     TH1F *LocPlots[NM];
     TH1F *  uPlots[NM];
-#if 0
+#ifdef Extra
     TH1F *hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
     TH1F *hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
     TH1F *uAll = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
@@ -498,7 +499,7 @@ void TBase::Loop(Int_t Nevents) {
         uCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
         uName  = Form("%sxM%i", plotDu.Name, module);
         uTitle = Form("u-uP corr M %i", module);
-#if 0
+#ifdef Extra
         xCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
 #endif
     } // for (int M = 0; M < NM; M++)
@@ -535,7 +536,7 @@ void TBase::Loop(Int_t Nevents) {
         for (UInt_t trk = 0; trk < Ntrack; trk++) {
             TrackT *track = (TrackT *)fEvent->GetTracks()->UncheckedAt(trk);
             if (! track) continue;
-#if 0
+#ifdef Extra
             Int_t Npoints = track->GetNpoint();
             if (minNoFitPoints > 0 && Npoints%100 < minNoFitPoints) continue;
             if (UseSsd && Npoints < 1000) continue; 
@@ -559,7 +560,7 @@ void TBase::Loop(Int_t Nevents) {
                 Double32_t vP = hitT->GetPredV();
                 Double32_t du = u - uP;
                 Double32_t dv = v - vP;
-#if 0	   
+#ifdef Extra	   
                 hpT->Fill(hitT->GetXyzPGl());
                 hpM->Fill(hitT->GetpMom());
                 if (TMath::Abs(hitT->GetpT()) < 0.2) continue;
