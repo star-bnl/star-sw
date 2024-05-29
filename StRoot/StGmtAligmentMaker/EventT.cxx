@@ -465,11 +465,11 @@ void TBase::Loop(Int_t Nevents) {
     TH1F *hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
     TH1F *uAll = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
     TH1F * xCuts[NM];
+    TH1F * uCuts[NM];
 #endif
     TH1F * uPAll  = new TH1F("UPall","uPall", plotUP.nx, plotUP.xmin, plotUP.xmax);
     TH1F * duB[NM][2];
     TH1F * dvB[NM];
-    TH1F * uCuts[NM];
     TH1F * uCut   = new TH1F("Ucut","uc", plotDu.nx, plotDu.xmin, plotDu.xmax);
     TH1F * vCut   = new TH1F("Vcut","vc", 200, -3., 3.);
     TH2F * dMin   = new TH2F("DMin","vumin",100,-0.75,0.75,100,-0.75,0.75); 
@@ -496,11 +496,11 @@ void TBase::Loop(Int_t Nevents) {
         uPlots[module] = new TH1F(uName, uTitle, plotUP.nx, plotUP.xmin, plotUP.xmax );
         uName  = Form("%sM%i", plotDu.Name, module);
         uTitle = Form("u-uP for M %i", module);
-        uCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
         uName  = Form("%sxM%i", plotDu.Name, module);
         uTitle = Form("u-uP corr M %i", module);
 #ifdef Extra
         xCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+        uCuts[module] = new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
 #endif
     } // for (int M = 0; M < NM; M++)
 
@@ -545,7 +545,7 @@ void TBase::Loop(Int_t Nevents) {
             Int_t Nsp = track->GetN();
             double dvmin = 1000.;
             double dumin = 1000.;
-            int kmin{0};
+            //int kmin{0};
             // Loop over hits
             for (Int_t hit = 0; hit < Nsp; hit++) {
                 Int_t k = track->GetHitTId(hit) - 1;
@@ -569,7 +569,7 @@ void TBase::Loop(Int_t Nevents) {
                 if ( TMath::Abs(dv) < TMath::Abs(dvmin) ) {
                     dvmin = dv; 
                     dumin= du; 
-                    kmin = k;
+                    //kmin = k;
                 }
                 uPAll->Fill( uP );
                 uPlots[module]->Fill( uP );
