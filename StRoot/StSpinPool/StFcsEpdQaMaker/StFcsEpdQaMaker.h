@@ -37,10 +37,10 @@ class StFcsEpdQaMaker : public StMaker {
    int mRun=0;
    TFile* mFile;
    char mFilename[100];
-
-   TH2F* mQtDepA[15];
-   TH2F* mQtDepT[15];
-   TH2F* mQtDepR[15];
+   
+   TH2F* mQtDepA[kFcsNorthSouth][kFcsPresMaxId+1];
+   TH2F* mQtDepT[kFcsNorthSouth][kFcsPresMaxId+1];
+   TH2F* mQtDepR[kFcsNorthSouth][kFcsPresMaxId+1];
 
    ClassDef(StFcsEpdQaMaker,1);
 };

@@ -38,26 +38,37 @@ Int_t StFcsEpdQaMaker::Init(){
     return kStFatal;
   }
   
-  if(mFilename[0]==0 && mRun>0){
+  if(mFilename[0]=='0' && mRun>0){
       int yday=mRun/1000;
       sprintf(mFilename,"%d/%d.epdqa.root",yday,mRun);
       printf("StFcsEpdQaMaker::Init - Opening %s\n",mFilename);
   }
   mFile=new TFile(mFilename,"RECREATE");
-
-  char t[100], tt[100];
-  for(int i=0; i<16; i++){
-    sprintf(t,"QtDepAdcCh%d",i);
-    sprintf(tt,"Dep01Ch%d-PP10TT%d; QTADC; DEP Fit Integral",i,i*2);
-    mQtDepA[i] = new TH2F(t,tt,256,0,1024,256,0,1024*4);
-    sprintf(t,"QtDepTacCh%d",i);
-    sprintf(tt,"Dep01Ch%d-PP10TT%d; QTTAC; DEP Peak Timebin",i,i*2);
-    mQtDepT[i] = new TH2F(t,tt,100,0,3000,100,45,56);
-    sprintf(t,"QtDepRatCh%d",i);
-    sprintf(tt,"Dep01Ch%d-PP10TT%d; DEP Peak Timebin; QTADC/DEPIntg;",i,i*2);
-    mQtDepR[i] = new TH2F(t,tt,100,44,57,100,0.0,0.8);
-  }
   
+  char t[100], n[100];
+  char *cNS[2]={"N","S"};
+  for(int det=kFcsPresNorthDetId; det<=kFcsPresSouthDetId; det++){
+      for(int id=0; id<kFcsPresMaxId; id++){
+	  char name[100];
+	  int ns= mFcsDb->northSouth(det);
+	  mFcsDb->getName(det,id,name);	  
+	  sprintf(t,"EPDADC_%1s%03d",cNS[ns],id);
+	  sprintf(n,"%s; QTADC; DEP Fit Integral",name);
+	  mQtDepA[ns][id] = new TH2F(t,n,64,0,1024,64,0,1024*4);
+	  sprintf(t,"EPDTAC_%1s%03d",cNS[ns],id);
+	  sprintf(n,"%s; QTTAC; DEP Fit Peak Timebin",name);
+	  mQtDepT[ns][id] = new TH2F(t,n,50,0,3000,50,45,56);
+          sprintf(t,"EPDRatio_%1s%03d",cNS[ns],id);
+          sprintf(n,"%s; DEP Peak Timebin; QTADC/DEPIntg",name);
+	  mQtDepR[ns][id] = new TH2F(t,n,50,44,57,50,0.0,0.8);
+      }
+  }
+  mQtDepA[0][kFcsPresMaxId] = new TH2F("EPDADCc","EPDADC QTc; QTc ADC; DEP Fit Integral",64,0,1024,64,0,1024*4);
+  mQtDepT[0][kFcsPresMaxId] = new TH2F("EPDTACc","EPDTAC QTc; QTc TAC; DEP Fit Peak Timebin",50,0,3000,50,45,56);
+  mQtDepR[0][kFcsPresMaxId] = new TH2F("EPDRatioc","EPDRatio QTc; DEP Peak Timebin; QTcADC/DEPIntg",50,44,57,50,0.0,0.8);
+  mQtDepA[1][kFcsPresMaxId] = new TH2F("EPDADCbmqtad","EPDADC QTb; QTb ADC; DEP Fit Integral",64,0,1024,64,0,1024*4);
+  mQtDepT[1][kFcsPresMaxId] = new TH2F("EPDTACb","EPDTAC QTb; QTb TAC; DEP Fit Peak Timebin",50,0,3000,50,45,56);
+  mQtDepR[1][kFcsPresMaxId] = new TH2F("EPDRatiob","EPDRatio QTb; DEP Peak Timebin; QTbADC/DEPIntg",50,44,57,50,0.0,0.8);
   return kStOK;
 };
 
@@ -95,8 +106,9 @@ Int_t StFcsEpdQaMaker::Make(){
       //unsigned short lastdsm4 = trg->lastDSM(4);
       //unsigned short fcs2019 = (lastdsm4 >> 10) & 0x1;
       //printf("fcs2019=%1d\n",fcs2019);
+      unsigned short lastdsm2 = trg->lastDSM(2);
       unsigned short lastdsm5 = trg->lastDSM(5);
-      printf("lastdsm5=%04x tofmult=%d\n",lastdsm5,tofmult);
+      printf("lastdsm2=%04x lastdsm5=%04x tofmult=%d\n",lastdsm2,lastdsm5,tofmult);
   }
   
   if(!event) { 
@@ -121,21 +133,20 @@ Int_t StFcsEpdQaMaker::Make(){
     StSPtrVecFcsHit& hits = mFcsCollection->hits(det); 
     for (int i=0; i<nhit; i++){
       int id  = hits[i]->id();
-      int ehp = hits[i]->ehp();
+      //int ehp = hits[i]->ehp();
       int ns  = hits[i]->ns();
       int dep = hits[i]->dep();
       int ch  = hits[i]->channel();
-      int ntb = hits[i]->nTimeBin();
+      //int ntb = hits[i]->nTimeBin();
       int pp,tt;
       mFcsDb->getEPDfromId(det,id,pp,tt);
-      if(pp==11) pp=10; //HACK for run21 map
-      if(pp!=10 || ch>=16 || ch<0) continue;
+      int QTcQRb = tt<=9?0:1;
 
       //from fits
       float fititeg=0;
       float fitpeak=0;
       fititeg = hits[i]->adcSum();
-      fitpeak = hits[i]->fitPeak();
+      fitpeak = hits[i]->fitPeak();      
       //      printf("Dep=%02d Ch=%02d PP=%02d TT=%02d   DEP=%6d PEAK=%f",
       //	     dep,ch,pp,tt,fititeg,fitpeak);
       
@@ -153,12 +164,16 @@ Int_t StFcsEpdQaMaker::Make(){
 	  break;
 	}
       }
-      printf("  Dep=%02d Ch=%02d PP=%02d TT=%02d  QT=%4d DEP=%6.1f  TAC=%4d PEAK=%4.2f\n",
-	     dep,ch,pp,tt,adc,fititeg,tac,fitpeak);           
-      mQtDepA[ch]->Fill(adc,fititeg);
-      mQtDepT[ch]->Fill(tac,fitpeak);
-      if(fititeg>100){
-	mQtDepR[ch]->Fill(fitpeak,float(adc)/fititeg);
+      if(Debug()) printf("  Dep=%02d Ch=%02d PP=%02d TT=%02d  QT=%4d DEP=%6.1f  TAC=%4d PEAK=%4.2f\n",
+			 dep,ch,pp,tt,adc,fititeg,tac,fitpeak);           
+
+      mQtDepA[ns][id]->Fill(adc,fititeg);
+      mQtDepA[QTcQRb][kFcsPresMaxId]->Fill(adc,fititeg);
+      if(fititeg>100) {
+	mQtDepT[ns][id]->Fill(tac,fitpeak);
+	mQtDepT[QTcQRb][kFcsPresMaxId]->Fill(tac,fitpeak);	
+	mQtDepR[ns][id]->Fill(fitpeak,float(adc)/fititeg);
+	mQtDepR[QTcQRb][kFcsPresMaxId]->Fill(fitpeak,float(adc)/fititeg);
       }
     }
   }

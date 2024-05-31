@@ -7,8 +7,6 @@
 #ifndef STAR_StFcsTrgQaMaker_HH
 #define STAR_StFcsTrgQaMaker_HH
 
-#include "StRoot/St_base/Stypes.h"
-#include "StRoot/StEvent/StEnumerations.h"
 #include "StMaker.h"
 
 class StFcsDb;
@@ -90,7 +88,7 @@ private:
     TH1F* mTcuDep;
     TH1F* mSimDep;
     
-    TH2F* mAdc[3];
+    TH2F* mAdc[6];
 
     ClassDef(StFcsTrgQaMaker,1);
 };
