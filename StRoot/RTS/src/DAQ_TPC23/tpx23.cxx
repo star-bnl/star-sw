@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #include <rtsLog.h>
 
@@ -35,6 +36,21 @@
 #include "tpx23.h"
 
 
+static double mark(void)
+{
+        struct timeval tmval ;
+
+        gettimeofday(&tmval,0) ;
+
+        return ((double)tmval.tv_sec*1000000.0 + (double)tmval.tv_usec) ;
+}
+
+static double delta(double v)
+{
+        return mark() - v ;
+}
+
+
 tpxPed *tpx23::peds ;
 tpc23_base::row_pad_t (*tpx23::rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
 
@@ -62,6 +78,7 @@ int tpx23::fee_scan()
 	int ch_pre = -1 ;
 	int s_cou ;
 	char retry ;
+//	double s_tmx = mark() ;
 
 	get_token((char *)d_start,words) ;
 
@@ -93,9 +110,15 @@ int tpx23::fee_scan()
 	u_int *h_to_continue ;
 	retry = 0 ;
 
+
+	f_stat.evt_cou++ ;
+
 	// NOTE: ALTRO scans from the end!!!
 	while(h>(d_start+2)) {
 		u_int hi, lo ;
+
+//		double tmx ;
+//		tmx=mark() ;
 
 		lo = *h-- ;
 		hi = *h-- ;
@@ -225,6 +248,9 @@ int tpx23::fee_scan()
 
 		while(wc%4) wc++ ;
 
+
+//		f_stat.tm[0] += delta(tmx) ;
+
 		// if this is a physics run: skip pads which have flags
 		// hmm... is this right?
 		if(flags && run_type==3) {
@@ -260,6 +286,8 @@ int tpx23::fee_scan()
 
 		//TLOGX(row) ;
 
+
+//		tmx = mark() ;
 
 		for(int i=0;i<wc;) {	// NOTE: no increment!
 			lo = *h-- ;
@@ -314,6 +342,10 @@ int tpx23::fee_scan()
 			u_short t_hi ;
 			u_short d[512] ;
 		} sseq[SEQ_MAX] ;
+
+//		f_stat.tm[1] += delta(tmx) ;
+
+//		tmx = mark() ;
 
 		while(dd<(d+ix)) {
 			u_short t_lo ;
@@ -404,6 +436,31 @@ int tpx23::fee_scan()
 			}
 		
 		}
+		else if(altro) {
+			altro[altro_cou].row = row ;
+			altro[altro_cou].pad = pad ;
+			altro[altro_cou].ch = ch ;
+			altro[altro_cou].id = id ;
+			altro[altro_cou].count = 0 ;
+
+			int aix = 0 ;
+
+			for(int i=(seq_ix-1);i>=0;i--) {
+				int t_len = sseq[i].t_hi - sseq[i].t_lo + 1 ;
+
+				int ii = 0 ;
+				for(int j=(t_len-1);j>=0;j--) {
+					int adc = sseq[i].d[j] ;
+					altro[altro_cou].adc[aix] = adc ;
+					altro[altro_cou].tb[aix] = sseq[i].t_lo + ii ;
+					altro[altro_cou].count++ ;
+					ii++ ;
+					aix++ ;
+				}
+			}
+
+			altro_cou++ ;
+		}
 		else if(tpx_d) {
 			tpx_d->sector = sector1 ;
 			tpx_d->rdo = rdo1 ;
@@ -411,7 +468,7 @@ int tpx23::fee_scan()
 			tpx_d->pad = pad ;
 			tpx_d->altro = id ;
 
-			//LOG(TERR,"%d:%d %d:%d %d:%d",sector1,rdo1,row,pad,id,ch) ;
+			LOG(TERR,"%d:%d %d:%d %d:%d",sector1,rdo1,row,pad,id,ch) ;
 
 			tpx_d->ch_start(ch) ;	// sets tpx_d->ch within
 
@@ -441,6 +498,7 @@ int tpx23::fee_scan()
 
 		
 
+//		f_stat.tm[2] += delta(tmx) ;
 
 
 		//LOG(TERR,"Here 2") ;
@@ -449,6 +507,9 @@ int tpx23::fee_scan()
 		seq = s1[row][pad].seq ;
 
 //		printf("row %d, pad %d: seq_ix %d\n",row,pad,seq_ix) ;
+
+
+//		tmx = mark() ;
 
 		for(int i=(seq_ix-1);i>=0;i--) {
 			seq[s_cou].t_lo = sseq[i].t_lo;
@@ -499,12 +560,17 @@ int tpx23::fee_scan()
 		id_pre = id ;
 		ch_pre = ch ;
 		
+
+//		f_stat.tm[3] += delta(tmx) ;
+
 		end_loop:;
 	}
 
 
 
 	done:;
+
+//	f_stat.tm[4] += delta(s_tmx) ;
 
 	TLOG() ;
 
@@ -1112,6 +1178,8 @@ tpx23::tpx23()
 	hdr_version = 0 ;	// 0:pre FY23
 
 	memset(fpga_usercode,0,sizeof(fpga_usercode)) ;
+
+	altro = 0 ;
 
 	tpx_d = 0 ;
 }

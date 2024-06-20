@@ -540,7 +540,7 @@ int fcs_trg_base::end_event()
 
 	verify_event_io() ;	// verify interconnectivity 
 
-	//int dsmout = 0;  moved to .h file
+	int dsmout = 0;
 
 	self_trigger = 0 ;
 
@@ -1274,6 +1274,7 @@ u_int fcs_trg_base::run_event_sim(int xing, int type)
 	return d_out.s3.dsm_out
 	    + ((int)(d_out.s2[0].s2_to_dsm & 0xFF) << 16)
 	    + ((int)(d_out.s2[1].s2_to_dsm & 0xFF) << 24);
+	
 }
 
 
