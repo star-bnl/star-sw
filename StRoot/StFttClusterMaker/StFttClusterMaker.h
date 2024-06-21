@@ -59,12 +59,22 @@ private:
     bool                 mDebug;
     StFttDb*             mFttDb;
 
-    int mTimeCutMin  = -999;
-    int mTimeCutMax  =  999;
-    int mTimeCutMode = -1; //default - lookup from DB
+    enum HitTimeModes {
+        kHitCalibratedTime = 0,
+        kHitTimebin = 1
+    }
+    enum TimeCutModes {
+        kTimeCutModeDB = 0,
+        kTimeCutModeAcceptAll = 1,
+        kTimeCutModeCalibratedTime = 2,
+        kTimeCutModeTimebin = 3
+    };
+    int mTimeCutMin  = -40; // value from Run22 - Run24 online QA approximately 1 bx
+    int mTimeCutMax  =  100; // value from Run22 - Run24 online QA approximately 1 bx
+    int mTimeCutMode = kTime; //default - lookup from DB
 
 
-    ClassDef( StFttClusterMaker, 1 )
+    ClassDef( StFttClusterMaker, 0 )
 };
 
 #endif // STFTTCLUSTERMAKER_H
