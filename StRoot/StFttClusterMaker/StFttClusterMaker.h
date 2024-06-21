@@ -62,7 +62,7 @@ private:
     enum HitTimeModes {
         kHitCalibratedTime = 0,
         kHitTimebin = 1
-    }
+    };
     enum TimeCutModes {
         kTimeCutModeDB = 0,
         kTimeCutModeAcceptAll = 1,
@@ -71,7 +71,7 @@ private:
     };
     int mTimeCutMin  = -40; // value from Run22 - Run24 online QA approximately 1 bx
     int mTimeCutMax  =  100; // value from Run22 - Run24 online QA approximately 1 bx
-    int mTimeCutMode = kTime; //default - lookup from DB
+    int mTimeCutMode = 0; //default - kTimeCutModeDB, CINT cant use the enum directly
 
 
     ClassDef( StFttClusterMaker, 0 )
