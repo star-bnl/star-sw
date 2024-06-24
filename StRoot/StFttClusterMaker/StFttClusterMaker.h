@@ -51,8 +51,6 @@ private:
     float GetThresholdFor( StFttRawHit * hit ) { return 0.0;}
     bool PassTimeCut( StFttRawHit * hit );
 
-
-
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
     int                  mRunYear;
