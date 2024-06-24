@@ -107,29 +107,29 @@ Int_t StFstRawHitMaker::InitRun(Int_t runnumber)
     else {
         for (int i = 0; i < kFstNumApvs; i++) {
             for ( int j = 0; j < kFstNumRStripsPerSensor; j++) {
-                for ( int k = 0; k < kFstNumTimeBins; k++) {
-                    LOG_DEBUG << Form(" Print entry %d-%d-%d : CM noise=%f ", i, j, k, (float)gPN[0].cmNoise[(i*kFstNumRStripsPerSensor+j)*kFstNumTimeBins+k] / 100.) << endm;
-                    mCmnVec[i][j][k] = (float)gPN[0].cmNoise[(i*kFstNumRStripsPerSensor+j)*kFstNumTimeBins+k] / 100.0;
+                for ( int k = 0; k < mCurrentTimeBinNum; k++) {
+                    LOG_DEBUG << Form(" Print entry %d-%d-%d : CM noise=%f ", i, j, k, (float)gPN[0].cmNoise[(i*kFstNumRStripsPerSensor+j)*mCurrentTimeBinNum+k] / 100.) << endm;
+                    mCmnVec[i][j][k] = (float)gPN[0].cmNoise[(i*kFstNumRStripsPerSensor+j)*mCurrentTimeBinNum+k] / 100.0;
                 }
             }
         }
 
         for (int i = 0; i < kFstNumElecIds; i++) {
-            for ( int j = 0; j < kFstNumTimeBins; j++) {
-                LOG_DEBUG << Form(" Print entry %d-%d : pedestal=%f ", i, j, (float)gPN[0].pedestal[i*kFstNumTimeBins+j]) << endm;
-                mPedVec[i][j] = (float)gPN[0].pedestal[i*kFstNumTimeBins+j];
+            for ( int j = 0; j < mCurrentTimeBinNum; j++) {
+                LOG_DEBUG << Form(" Print entry %d-%d : pedestal=%f ", i, j, (float)gPN[0].pedestal[i*mCurrentTimeBinNum+j]) << endm;
+                mPedVec[i][j] = (float)gPN[0].pedestal[i*mCurrentTimeBinNum+j];
             }
         }
         for (int i = 0; i < kFstNumElecIds; i++) {
-            for ( int j = 0; j < kFstNumTimeBins; j++) {
-                LOG_DEBUG << Form(" Print entry %d-%d : RMS noise=%f ", i, j, (float)gPN[0].totNoise[i*kFstNumTimeBins+j] / 100.) << endm;
-                mTotRmsVec[i][j] = (float)gPN[0].totNoise[i*kFstNumTimeBins+j] / 100.;
+            for ( int j = 0; j < mCurrentTimeBinNum; j++) {
+                LOG_DEBUG << Form(" Print entry %d-%d : RMS noise=%f ", i, j, (float)gPN[0].totNoise[i*mCurrentTimeBinNum+j] / 100.) << endm;
+                mTotRmsVec[i][j] = (float)gPN[0].totNoise[i*mCurrentTimeBinNum+j] / 100.;
             }
         }
         for (int i = 0; i < kFstNumElecIds; i++) {
-             for ( int j = 0; j < kFstNumTimeBins; j++) {
-                LOG_DEBUG << Form(" Print entry %d-%d : RMS noise=%f ", i, j, (float)gPN[0].ranNoise[i*kFstNumTimeBins+j] / 100.) << endm;
-                mRanRmsVec[i][j] = (float)gPN[0].ranNoise[i*kFstNumTimeBins+j] / 100.;
+             for ( int j = 0; j < mCurrentTimeBinNum; j++) {
+                LOG_DEBUG << Form(" Print entry %d-%d : RMS noise=%f ", i, j, (float)gPN[0].ranNoise[i*mCurrentTimeBinNum+j] / 100.) << endm;
+                mRanRmsVec[i][j] = (float)gPN[0].ranNoise[i*mCurrentTimeBinNum+j] / 100.;
              }
         }
     }
