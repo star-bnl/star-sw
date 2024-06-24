@@ -2361,7 +2361,7 @@ void StPicoDstMaker::fillEpdHits() {
     StMuEpdHit* aHit = mMuDst->epdHit(i);
     if (!aHit) continue;
     int counter = mPicoArrays[StPicoArrays::EpdHit]->GetEntries();
-    new((*(mPicoArrays[StPicoArrays::EpdHit]))[counter]) StPicoEpdHit(aHit->id(), aHit->qtData(), aHit->nMIP());
+    new((*(mPicoArrays[StPicoArrays::EpdHit]))[counter]) StPicoEpdHit(aHit->id(), aHit->qtData(), aHit->nMIP_QT(), aHit->depData(), aHit->nMIP_DEP()); // added DEP info - March 2023 - mike lisa
   } //for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++)
 }
 

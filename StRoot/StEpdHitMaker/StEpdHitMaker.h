@@ -13,6 +13,10 @@
   If it is not there, it creates one and fills it from the
   StTriggerData object and info from the StEpdDbMaker (database)
 
+
+  Update March 2023 - Mike Lisa
+  now must read in DEP data and store it in the newly-updated StEpdHit objects
+
 */
 
 
@@ -50,6 +54,10 @@ class StEpdHitMaker : public StMaker {
 
   /// Returns a pointer to the StEvent object
   StEvent* GetStEvent(){return mStEvent;}
+
+  /// update March 2023 Mike Lisa - method to get and calibrate DEP information
+  /// This does not NEED to be public, but no harm and may be useful for debugging
+  void getEpdDepInfo(short ew, short pp, short tt, unsigned short& rawDEP, float& calibratedDEP);
 
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
