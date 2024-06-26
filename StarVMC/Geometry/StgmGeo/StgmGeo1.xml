@@ -452,7 +452,8 @@
 
         <!-- Sub-shhapes of the pentagon for the active Gas chamber -->
         <Block name="STGP" comment="Gas pgon triangle for pentagon shape gas active region"  >
-            <Material name="NPCO2" isvol="1" />
+            <Material name="NPCO2" />
+            <Material name="NPCO2_stgp_sens" isvol="1" />
             <Attribute for="STGP" lwid="2" seen="1" colo="2"  />
             <Shape type="Pgon" phi1="0.0" rmx="{29.450262431173993, 29.450262431173993}" nz="2" npdiv="1" dphi="90.0" rmn="{0.0, 0.0}" zi="{0.0, PENT_gdz}"  />
             <!-- Double layer of Gas, Gas layer is twice as thick as PCB layer -->
@@ -476,7 +477,8 @@
         </Block>
         
         <Block name="STGL" comment="long box for pentagon shape gas active region"  >
-            <Material name="NPCO2" isvol="1" />
+            <Material name="NPCO2" />
+            <Material name="NPCO2_stgl_sens" isvol="1" />
             <Attribute for="STGL" lwid="2" seen="1" colo="2"  />
             <Shape type="BBox" dx="PENT_ls/2.0" dy="PENT_ss/2.0" dz="PENT_gdz/2.0"  />
 
@@ -499,7 +501,8 @@
         </Block>
         
         <Block name="STGS" comment="short box for pentagon shape gas active region"  >
-            <Material name="NPCO2" isvol="1" />
+            <Material name="NPCO2" />
+            <Material name="NPCO2_stgs_sens" isvol="1" />
             <Attribute for="STGS" lwid="2" seen="1" colo="2"  />
             <Shape type="BBox" dx="PENT_ss/2.0" dy="PENT_ms/2.0" dz="PENT_gdz/2.0"  />
 
