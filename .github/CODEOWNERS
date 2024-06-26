@@ -12,8 +12,8 @@
 /StRoot/StBichsel                                  @fisyak      @R-Witt        @iraklic
 /StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong   @jdbrice
 /StRoot/StBbcSimulationMaker                       @akioogawa
-/StRoot/StChain                                    @klendathu2k       @perevbnlgov @fisyak      @R-Witt        @iraklic
-/StRoot/StDAQMaker                                 @perevbnlgov       @akioogawa
+/StRoot/StChain                                    @klendathu2k       @fisyak      @R-Witt        @iraklic
+/StRoot/StDAQMaker                                 @akioogawa
 /StRoot/StDaqLib                                   @jml985
 /StRoot/StDaqLib/EEMC                              @kkauder           @rkunnawa    @zlchang
 /StRoot/StDaqLib/EMC                               @kkauder           @rkunnawa    @Navagyan
@@ -60,17 +60,17 @@
 /StRoot/StFst*                                     @jdbrice           @sunxuhit    @yezhenyu2003   @techuan-huang
 /StRoot/StFtt*                                     @jdbrice
 /StRoot/StFwd*					   @jdbrice
-/StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov @akioogawa   @klendathu2k @fisyak      @R-Witt        @iraklic
+/StRoot/StGenericVertexMaker                       @plexoos           @akioogawa   @klendathu2k @fisyak      @R-Witt        @iraklic
 /StRoot/StHbtMaker                                 @JohnTheBlindMilkman            @DanielWielanek
 /StRoot/StHeavyPool                                @starsdong         @fgeurts
-/StRoot/StIOMaker                                  @plexoos           @perevbnlgov
+/StRoot/StIOMaker                                  @plexoos
 /StRoot/StIst*                                     @plexoos           @starsdong
 /StRoot/StJetFinder                                @zlchang           @veprbl
 /StRoot/StJetMaker                                 @zlchang           @veprbl
 /StRoot/StLaser*                                   @fisyak      @R-Witt        @iraklic
 /StRoot/StMCFilter                                 @klendathu2k
 /StRoot/StMagF                                     @fisyak      @R-Witt        @iraklic
-/StRoot/StMc*                                      @klendathu2k       @perevbnlgov
+/StRoot/StMc*                                      @klendathu2k
 /StRoot/StMcAnalysisMaker                          @klendathu2k
 /StRoot/StMcEvent*                                 @klendathu2k
 /StRoot/StMiniMc*				   @klendathu2k	      @fisyak      @R-Witt        @iraklic	   @zhux97
@@ -93,38 +93,34 @@
 /StRoot/StTagsMaker                                @fisyak      @R-Witt        @iraklic
 /StRoot/StTof*                                     @jdbrice           @fgeurts     @starsdong
 /StRoot/StTpc*                                     @fisyak      @R-Witt        @iraklic
-/StRoot/StTreeMaker                                @perevbnlgov
 /StRoot/StTriggerDataMaker                         @akioogawa
 /StRoot/StTriggerUtilities                         @zlchang           @akioogawa   @jml985
 /StRoot/StTrsMaker                                 @fisyak      @R-Witt            @iraklic
 /StRoot/StUtilities/StMess*                        @genevb
 /StRoot/StUtilities/StMultiH*                      @genevb
 /StRoot/StVpd*                                     @ZaochenYe         @fgeurts
-/StRoot/StXTrakMaker                               @perevbnlgov
 /StRoot/St_QA_Maker                                @genevb
-/StRoot/St_TLA_Maker                               @perevbnlgov
-/StRoot/St_base*                                   @perevbnlgov       @fisyak      @R-Witt        @iraklic
-/StRoot/St_db_Maker                                @dmarkh            @perevbnlgov
-/StRoot/St_geant_Maker                             @klendathu2k       @perevbnlgov @fisyak      @R-Witt        @iraklic
+/StRoot/St_base*                                   @fisyak      @R-Witt        @iraklic
+/StRoot/St_db_Maker                                @dmarkh
+/StRoot/St_geant_Maker                             @klendathu2k @fisyak      @R-Witt        @iraklic
 /StRoot/St_geant_Maker/Embed                       @zhux97         
 /StRoot/St_l3Clufi_Maker                           @jml985            @tonko-lj
 /StRoot/St_l3t_Maker                               @jml985            @tonko-lj
 /StRoot/St_tcl_Maker                               @fisyak      @R-Witt           @iraklic
-/StRoot/Star2Root                                  @perevbnlgov       @fisyak      @R-Witt        @iraklic
+/StRoot/Star2Root                                  @fisyak      @R-Witt        @iraklic
 /StRoot/StarClassLibrary                           @klendathu2k
-/StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
+/StRoot/StarGenerator                              @klendathu2k
 /StRoot/StarMagField                               @fisyak      @R-Witt        @iraklic
-/StRoot/StarRoot                                   @klendathu2k       @perevbnlgov @fisyak      @R-Witt        @iraklic
+/StRoot/StarRoot                                   @klendathu2k @fisyak      @R-Witt        @iraklic
 /StRoot/StdEdx*                                    @fisyak      @R-Witt        @iraklic
-/StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong   @perevbnlgov @fisyak      @R-Witt        @iraklic
+/StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong @fisyak      @R-Witt        @iraklic
 /StRoot/Stl3*                                      @jml985            @tonko-lj
-/StRoot/Stv*                                       @perevbnlgov
-/StRoot/StvUtil                                    @klendathu2k       @perevbnlgov
+/StRoot/StvUtil                                    @klendathu2k
 /StRoot/TPCCATracker                               @fisyak      @R-Witt        @iraklic
 /StRoot/macros                                     @genevb            @plexoos     @fisyak      @R-Witt        @iraklic
 /StRoot/macros/embedding                           @zhux97
 /StRoot/macros/mudst                               @nigmatkulov       @plexoos
-/StarDb                                            @dmarkh            @perevbnlgov @fisyak      @R-Witt        @iraklic
+/StarDb                                            @dmarkh @fisyak      @R-Witt        @iraklic
 /StarDb/AgML*                                      @klendathu2k
 /StarDb/AgiGeometry                                @klendathu2k
 /StarDb/Calibrations                               @genevb
@@ -139,8 +135,6 @@
 /StarVMC                                           @klendathu2k
 /StarVMC/geant3                                    @fisyak      @R-Witt        @iraklic
 /StarVMC/Geometry                                  @klendathu2k
-/StarVMC/GeoTestMaker                              @perevbnlgov
-/StarVMC/minicern                                  @perevbnlgov
 /StarVMC/StarAgml*                                 @klendathu2k
 /StarVMC/StarBASE                                  @klendathu2k
 /StarVMC/StarGeometry                              @klendathu2k
@@ -150,4 +144,4 @@
 /pams                                              @klendathu2k       @fisyak      @R-Witt        @iraklic
 /pams/sim                                          @akioogawa         @klendathu2k
 /pams/tables                                       @dmarkh
-/asps                                              @klendathu2k       @perevbnlgov
+/asps                                              @klendathu2k
