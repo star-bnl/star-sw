@@ -10,7 +10,7 @@
 /StRoot/StAssociationMaker/EMC                     @kkauder           @Navagyan
 /StRoot/StBFChain                                  @genevb            @plexoos     @klendathu2k @fisyak      @R-Witt        @iraklic
 /StRoot/StBichsel                                  @fisyak      @R-Witt        @iraklic
-/StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong   @jdbrice
+/StRoot/StBTof*                                    @Morning-Ye        @fgeurts     @starsdong   @jdbrice
 /StRoot/StBbcSimulationMaker                       @akioogawa
 /StRoot/StChain                                    @klendathu2k       @fisyak      @R-Witt        @iraklic
 /StRoot/StDAQMaker                                 @akioogawa
@@ -21,7 +21,7 @@
 /StRoot/StDaqLib/L3                                @jml985            @tonko-lj
 /StRoot/StDaqLib/SC                                @genevb
 /StRoot/StDaqLib/SSD                               @starsdong
-/StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong   @jdbrice
+/StRoot/StDaqLib/TOF                               @Morning-Ye        @fgeurts     @starsdong   @jdbrice
 /StRoot/StDaqLib/TRG                               @akioogawa
 /StRoot/StDataFilterMaker                          @genevb
 /StRoot/StDb*                                      @dmarkh
@@ -98,7 +98,7 @@
 /StRoot/StTrsMaker                                 @fisyak      @R-Witt            @iraklic
 /StRoot/StUtilities/StMess*                        @genevb
 /StRoot/StUtilities/StMultiH*                      @genevb
-/StRoot/StVpd*                                     @ZaochenYe         @fgeurts
+/StRoot/StVpd*                                     @Morning-Ye        @fgeurts
 /StRoot/St_QA_Maker                                @genevb
 /StRoot/St_base*                                   @fisyak      @R-Witt        @iraklic
 /StRoot/St_db_Maker                                @dmarkh
@@ -125,7 +125,7 @@
 /StarDb/AgiGeometry                                @klendathu2k
 /StarDb/Calibrations                               @genevb
 /StarDb/Calibrations/emc                           @kkauder           @Navagyan
-/StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
+/StarDb/Calibrations/tof                           @Morning-Ye        @fgeurts
 /StarDb/Calibrations/tpc                           @fisyak      @R-Witt            @iraklic
 /StarDb/Calibrations/tracker                       @klendathu2k
 /StarDb/Geometry                                   @genevb            @klendathu2k
