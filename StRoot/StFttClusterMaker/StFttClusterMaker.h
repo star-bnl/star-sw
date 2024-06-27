@@ -30,6 +30,12 @@ public:
     int  Finish();
     int  Make();
 
+    void SetTimeCut( int mode, int min, int max ) {
+        mTimeCutMode = mode;
+        mTimeCutMin = min;
+        mTimeCutMax = max;
+    }
+
 private:
     void ApplyHardwareMap();
     std::vector<StFttCluster*> FindClusters( std::vector<StFttRawHit * > );
@@ -51,8 +57,22 @@ private:
     bool                 mDebug;
     StFttDb*             mFttDb;
 
+    enum HitTimeModes {
+        kHitCalibratedTime = 0,
+        kHitTimebin = 1
+    };
+    enum TimeCutModes {
+        kTimeCutModeDB = 0,
+        kTimeCutModeAcceptAll = 1,
+        kTimeCutModeCalibratedTime = 2,
+        kTimeCutModeTimebin = 3
+    };
+    int mTimeCutMin  = -40; // value from Run22 - Run24 online QA approximately 1 bx
+    int mTimeCutMax  =  100; // value from Run22 - Run24 online QA approximately 1 bx
+    int mTimeCutMode = 0; //default - kTimeCutModeDB, CINT cant use the enum directly
 
-    ClassDef( StFttClusterMaker, 1 )
+
+    ClassDef( StFttClusterMaker, 0 )
 };
 
 #endif // STFTTCLUSTERMAKER_H
