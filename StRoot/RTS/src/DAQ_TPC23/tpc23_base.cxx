@@ -1372,7 +1372,7 @@ int tpc23_base::run_stop()
 		f_stat.tm[i] /= f_stat.evt_cou ;
 	}
 
-	LOG(TERR,"id %d: evts %d, means %f %f %f %f %f %f",id,f_stat.evt_cou,
+	LOG(NOTE,"id %d: evts %d, means %f %f %f %f %f %f",id,f_stat.evt_cou,
 	    f_stat.tm[0],f_stat.tm[1],f_stat.tm[2],f_stat.tm[3],f_stat.tm[4],
 	    f_stat.tm[5]) ;
 	}
@@ -1425,6 +1425,8 @@ tpc23_base::tpc23_base()
 	subdet_id = 1;
 
 	data_c = 0 ;
+
+	store_track_id = 0 ;
 
 	token = 1 ;	// for ease of simulation
 }

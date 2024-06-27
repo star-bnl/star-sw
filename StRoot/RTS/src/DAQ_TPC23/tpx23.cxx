@@ -468,7 +468,7 @@ int tpx23::fee_scan()
 			tpx_d->pad = pad ;
 			tpx_d->altro = id ;
 
-			LOG(TERR,"%d:%d %d:%d %d:%d",sector1,rdo1,row,pad,id,ch) ;
+			LOG(NOTE,"%d:%d %d:%d %d:%d",sector1,rdo1,row,pad,id,ch) ;
 
 			tpx_d->ch_start(ch) ;	// sets tpx_d->ch within
 

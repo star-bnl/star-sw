@@ -530,7 +530,7 @@ u_int *itpc23::ch_scan(u_int *start)
 				seq[seq_ix].t_hi = tb_start + tb_cou - 1 ;
 				seq[seq_ix].dta_p = (dd-d_start) ;	// where is this sequence...
 				seq[seq_ix].blob_id = 0 ;
-				seq_ix++ ;
+				//seq_ix++ ;
 
 				//dd += tb_cou ;	// this doesn't sound correct!!!
 
@@ -539,6 +539,10 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(tb_start<=tb_last)) {
 					run_errors++ ;
 					if(mode || (online && run_errors<10))LOG(ERR,"%d: rp %d:%d: tb_start %d, tb_last %d",rdo1,row,pad,tb_start,tb_last) ;
+
+					seq[seq_ix].t_lo = 400 ;
+					seq[seq_ix].t_hi = 401 ;
+
 				}
 
 
@@ -547,9 +551,12 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(tb_last>500)) {
 					run_errors++ ;
 					if(mode || (online && run_errors<10)) LOG(ERR,"%d: rp %d:%d: tb_last %d [0x%08X,%d]",rdo1,row,pad,tb_last,d[i],i) ;
+
+					seq[seq_ix].t_lo = 400 ;
+					seq[seq_ix].t_hi = 401 ;
 				}
 
-
+				seq_ix++ ;
 
 				ix = 2 ;
 				break ;
