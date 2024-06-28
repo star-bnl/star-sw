@@ -1,10 +1,7 @@
 {
   if (TClassTable::GetDict("StMaker"))
   {
-    StMaker* mk = StMaker::GetChain();
-    if (mk) {
-      mk->Finish();
-    }
+    gROOT->Macro("rootlogoff2.C");
   }
 
   std::cout << "\nThis is the end of STAR ROOT -- Goodbye\n" << std::endl;
