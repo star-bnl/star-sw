@@ -23,6 +23,7 @@
 #include "StEvent/StEpdCollection.h"
 #include "StEpdDbMaker/StEpdDbMaker.h"
 
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include <iostream>
 #include <fstream>
@@ -47,6 +48,13 @@ int StEpdHitMaker::Init(){
 int StEpdHitMaker::Make(){
   mEventCounter++ ;
   mTriggerEventCounter++;
+  if( mReadMuDst ){
+    StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+    if(!mudst){LOG_ERROR<<"StEpdHitMaker::GetEpdCollection found no StMuDst"<<endm; return 0; }
+    TClonesArray* epdhits = mudst->epdHits();
+    if( epdhits!=0 && epdhits->GetEntriesFast()!=0 ){ return kStOk; } //If processing MuDsts and non-zero hits exist in MuDst then stop and just use those hits otherwise fill StEvent
+  }
+  
   mTriggerData   = this->GetTriggerData();
   if (!mTriggerData){
     LOG_ERROR << "StEpdHitMaker::Make - no TriggerData object" << endm;
@@ -81,13 +89,22 @@ int StEpdHitMaker::Finish(){
 }
 
 //----------------------------------------------
-StTriggerData* StEpdHitMaker::GetTriggerData(){
-  StTriggerData* trg=0;
-  mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));  // this is how the StBtofHitMaker does it.
-  if (mStEvent){
-    trg = mStEvent->triggerData();
+const StTriggerData* StEpdHitMaker::GetTriggerData(){
+  const StTriggerData* trg=0;
+  if( mReadMuDst ){
+    StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+    if( mudst==0 ){ LOG_ERROR << "StEpdHitMaker::GetTriggerData - !StMuDst" << endm; return 0; }
+    StMuEvent* muevent = mudst->event();
+    if( muevent==0 ){ LOG_ERROR <<"StEpdHitMaker::GetTriggerData - !StMuEvent" <<endm; return 0; }
+    else{ trg = muevent->triggerData(); }
   }
-  else {LOG_WARN << "No StEvent found by StEpdHitMaker::GetTriggerData" << endm;}  
+  else{
+    mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));  // this is how the StBtofHitMaker does it.
+    if (mStEvent){
+      trg = mStEvent->triggerData();
+    }
+    else {LOG_WARN << "No StEvent found by StEpdHitMaker::GetTriggerData" << endm;}
+  }
   return trg;
 }
 
@@ -95,6 +112,7 @@ StTriggerData* StEpdHitMaker::GetTriggerData(){
 // this is patterned after the StBTofHitMaker
 StEpdCollection* StEpdHitMaker::GetEpdCollection(){
   StEpdCollection* epdCollection = 0;
+  //This will get executed if no epdhits from mudsts. This way it will still generate the epd collection
   mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));  // this is how the StBtofHitMaker does it.
   if (mStEvent){
     epdCollection = mStEvent->epdCollection();
@@ -104,20 +122,17 @@ StEpdCollection* StEpdHitMaker::GetEpdCollection(){
       epdCollection = new StEpdCollection();
       mStEvent->setEpdCollection(epdCollection);
     }
-    else { 
+    else {
       LOG_INFO << "StEpdHitMaker::GetEpdCollection - StEvent already has a StEpdCollection - not making a new one" << endm;
     }
   }
-  else {
-    LOG_WARN << "No StEvent found by StEpdHitMaker::GetEpdCollection" << endm;
-  }
-
+  else{ LOG_WARN << "No StEvent found by StEpdHitMaker::GetEpdCollection" << endm; }
   return epdCollection;
 }
 
 void StEpdHitMaker::FillStEpdData(){
 
-  StTriggerData* trg=mTriggerData;
+  const StTriggerData* trg=mTriggerData;
 
   //  This is for BBC.  We can do this if we ever have a StBbc class.
   // for (Int_t ew=0; ew<2; ew++){
