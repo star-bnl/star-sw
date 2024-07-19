@@ -29,16 +29,19 @@ StEpdHit::StEpdHit() : StEpdHit(0, 0, 0, 0, 0, 0, false, 0.0, false, 0)
   /* no-op */
 }
 
+// March 2023:
+//  * add arguments for DEPdata and nMIP_DEP
 StEpdHit::StEpdHit(int position, int tile,
 		   short EW, int ADC, int TAC,
-		   int TDC, bool hasTAC, float nMIP,
-		   bool statusIsGood, int truthId) :
+		   int TDC, bool hasTAC, float nMIP_QT,
+		   bool statusIsGood, int truthId,
+		   unsigned short DEPdata, float nMIP_DEP) :
   mId( (100*position + tile)*EW ),
   mQTdata( (ADC & 0x0FFF) | (TAC & 0x0FFF) << 12 | (TDC & 0x001F) << 24 | hasTAC << 29 | statusIsGood << 30 ),
-  mnMIP(nMIP),
-  mTruthId(truthId)
+  mnMIP(nMIP_QT),
+  mTruthId(truthId),
+  mDEPdata(DEPdata),
+  mnMIP_DEP(nMIP_DEP)
 {
   /* no-op */
 }
-
-
