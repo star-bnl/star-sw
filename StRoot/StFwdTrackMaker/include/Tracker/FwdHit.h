@@ -93,16 +93,11 @@ class FwdHit : public KiTrack::IHit {
                                  // cleaner in future.
         }
     };
-    bool isFst() const { return _z <= 250.0 && _z > 125; } // approximate Z-locations of FST
-    bool isFtt() const { return _z > 250.0 && _z < 355; } // sTGC is approximately 280 -> 350
-
-    std::shared_ptr<McTrack> getMcTrack() { return _mcTrack; }
 
     const KiTrack::ISectorSystem *getSectorSystem() const {
         return FwdSystem::sInstance;
     }
 
-    void setSector( int s ){ _sector = s; }
     int getTrackId() { return _tid;}
     int _tid; // aka ID truth
     int _vid; // volume id
@@ -113,8 +108,7 @@ class FwdHit : public KiTrack::IHit {
     StHit *_hit;
 };
 
-// Track Seed typdef
-typedef std::vector<KiTrack::IHit *> Seed_t;
+using Seed_t = std::vector<KiTrack::IHit *>;
 
 class FwdConnector : public KiTrack::ISectorConnector {
   public:
