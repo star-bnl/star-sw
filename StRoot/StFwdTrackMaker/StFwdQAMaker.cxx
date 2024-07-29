@@ -22,6 +22,7 @@
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuFstCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFstHit.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
@@ -30,139 +31,66 @@
 #include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFcsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFcsHit.h"
+#include "StMuDSTMaker/COMMON/StMuFttCluster.h"
+#include "StMuDSTMaker/COMMON/StMuFttPoint.h"
+#include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+#include "StMuDSTMaker/COMMON/StMuFstHit.h"
 
+// ClassImp(FcsClusterWithStarXYZ);
 
-/** Clear the FwdTreeData from one event to next */
-void FwdTreeData::clear(){
+/** Clear the FwdQATreeData from one event to next */
+void FwdQATreeData::clear(){
     header.clear();
-    ftt.reset();
+    mcTracks.reset();
+    fttPoints.reset();
     fttClusters.reset();
-    fst.reset();
+    fstPoints.reset();
     reco.reset();
     seeds.reset();
     wcal.reset();
     hcal.reset();
+    wcalHits.reset();
+    hcalHits.reset();
+    epdHits.reset();
 }
 
-/** @brief Sets the Tree cluster from StFcsCluster 
-*  @param clu - StFcsCluster
-*  @param fcsDb - StFcsDb
-* @return void
-*/
-void FwdTreeFcsCluster::set( StFcsCluster *clu, StFcsDb * fcsDb ) {
-    if (!clu) {
-        mId = -1;
-        return;
+FcsClusterWithStarXYZ::FcsClusterWithStarXYZ( StMuFcsCluster *clu, StFcsDb *fcsDb ) {
+    if ( nullptr == clu ) return;
+    StThreeVectorD xyz = fcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
+    float detOffset = 0.0;
+    if ( clu->detectorId() == kFcsEcalNorthDetId || clu->detectorId() == kFcsEcalSouthDetId ){
+        detOffset = 715.0; // cm from IP
+    } else if ( clu->detectorId() == kFcsHcalNorthDetId || clu->detectorId() == kFcsHcalSouthDetId ){
+        detOffset = 807.0; // cm from IP
     }
-    if ( fcsDb ){
-        StThreeVectorD xyz = fcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
-        pos.SetXYZ( xyz.x(), xyz.y(), xyz.z() );
-    } else {
-        pos.SetXYZ( 0, 0, 0 );
-    }
-
-    mDetectorId = clu->detectorId();
-    
-    mEnergy = clu->energy();
-    mNTowers = clu->nTowers();
-    mId = clu->id();
-    mCategory = clu->category();
-    mX = clu->x();
-    mY = clu->y();
-    mSigmaMin = clu->sigmaMin();
-    mSigmaMax = clu->sigmaMax();
-    mTheta = clu->theta();
-    mChi2Ndf1Photon = clu->chi2Ndf1Photon();
-    mChi2Ndf2Photon = clu->chi2Ndf2Photon();
+    mXYZ.SetXYZ( xyz.x(), xyz.y(), xyz.z() + detOffset );
+    mClu = clu;
 }
 
-void FwdTreeFcsCluster::set( StMuFcsCluster *clu, StFcsDb * fcsDb ) {
-    if (!clu) {
-        mId = -1;
-        return;
+FcsHitWithStarXYZ::FcsHitWithStarXYZ( StMuFcsHit *hit, StFcsDb *fcsDb ) {
+    if ( nullptr == hit ) return;
+    StThreeVectorD xyz = fcsDb->getStarXYZ(hit->detectorId(),hit->id());
+    float detOffset = 0.0;
+    if ( hit->detectorId() == kFcsEcalNorthDetId || hit->detectorId() == kFcsEcalSouthDetId ){
+        detOffset = 715.0; // cm from IP
+    } else if ( hit->detectorId() == kFcsHcalNorthDetId || hit->detectorId() == kFcsHcalSouthDetId ){
+        detOffset = 807.0; // cm from IP
+    } else if ( hit->detectorId() == kFcsPresNorthDetId || hit->detectorId() == kFcsPresSouthDetId ){
+        StEpdGeom epdgeo;
+        double zepd=375.0;
+        int pp,tt,n;
+        double x[5],y[5];
+        fcsDb->getEPDfromId(hit->detectorId(),hit->id(),pp,tt);
+        epdgeo.GetCorners(100*pp+tt,&n,x,y);
+        double x0 = (x[0] + x[1] + x[2] + x[3]) / 4.0;
+        double y0 = (y[0] + y[1] + y[2] + y[3]) / 4.0;
+        xyz.setX(x0);
+        xyz.setY(y0);
+        xyz.setZ(zepd);
     }
-    if ( fcsDb ){
-        StThreeVectorD xyz = fcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
-        pos.SetXYZ( xyz.x(), xyz.y(), xyz.z() );
-    } else {
-        pos.SetXYZ( 0, 0, 0 );
-    }
-
-    mDetectorId = clu->detectorId();
-    mEnergy = clu->energy();
-    mNTowers = clu->nTowers();
-    mId = clu->id();
-    mCategory = clu->category();
-    mX = clu->x();
-    mY = clu->y();
-    mSigmaMin = clu->sigmaMin();
-    mSigmaMax = clu->sigmaMax();
-    mTheta = clu->theta();
-    mChi2Ndf1Photon = clu->chi2Ndf1Photon();
-    mChi2Ndf2Photon = clu->chi2Ndf2Photon();
+    mXYZ.SetXYZ( xyz.x(), xyz.y(), xyz.z() + detOffset );
+    mHit = hit;
 }
-
-void FwdTreeRecoTrack::set( StMuFwdTrack *muFwd ){
-    if ( !muFwd ){
-        LOG_DEBUG << "Invalid muFwdTrack found, skipping FwdTreeRecoTrack::set" << endm;
-        return;
-    }
-
-    if (muFwd->didFitConverge()) status = 2;
-    if (muFwd->didFitConvergeFully()) status = 1;
-    nFailedPoints = muFwd->numberOfFailedPoints();
-    q = muFwd->charge();
-    mom = muFwd->momentum();
-    projs.clear();
-    seeds.clear();
-    for ( auto p : muFwd->mProjections ){
-        FwdTreeTrackProjection tp;
-        tp.set( p.mDetId, p.mXYZ, p.mMom, p.mCov );
-        projs.push_back( tp );
-    }
-    for ( auto s : muFwd->mFSTPoints ){
-        FwdTreeHit h;
-        h.set( s.mXYZ.X(), s.mXYZ.Y(), s.mXYZ.Z(), 1, 1 );
-        seeds.push_back( h );
-    }
-    for ( auto s : muFwd->mFTTPoints ){
-        FwdTreeHit h;
-        h.set( s.mXYZ.X(), s.mXYZ.Y(), s.mXYZ.Z(), 1, 1 );
-        seeds.push_back( h );
-    }
-}
-
-void FwdTreeRecoTrack::set( StFwdTrack *fwd ){
-    if ( !fwd ){
-        LOG_DEBUG << "Invalid fwdTrack found, skipping FwdTreeRecoTrack::set" << endm;
-        return;
-    }
-
-    if (fwd->didFitConverge()) status = 2;
-    if (fwd->didFitConvergeFully()) status = 1;
-    nFailedPoints = fwd->numberOfFailedPoints();
-    mChi2 = fwd->chi2();
-    q = fwd->charge();
-    mom.SetXYZ( fwd->momentum().x(), fwd->momentum().y(), fwd->momentum().z() );
-    projs.clear();
-    seeds.clear();
-    for ( auto p : fwd->mProjections ){
-        FwdTreeTrackProjection tp;
-        tp.set( p.mDetId, TVector3(p.mXYZ.x(), p.mXYZ.y(), p.mXYZ.z()), TVector3(p.mMom.x(), p.mMom.y(), p.mMom.z()), p.mCov );
-        projs.push_back( tp );
-    }
-    for ( auto s : fwd->mFSTPoints ){
-        FwdTreeHit h;
-        h.set( s.mXYZ.x(), s.mXYZ.y(), s.mXYZ.z(), 1, 1 );
-        seeds.push_back( h );
-    }
-    for ( auto s : fwd->mFTTPoints ){
-        FwdTreeHit h;
-        h.set( s.mXYZ.x(), s.mXYZ.y(), s.mXYZ.z(), 1, 1 );
-        seeds.push_back( h );
-    }
-}
-
 
 StFwdQAMaker::StFwdQAMaker() : StMaker("fwdQAMaker"), mTreeFile(nullptr), mTree(nullptr) {
 
@@ -174,12 +102,18 @@ int StFwdQAMaker::Init() {
     mTree = new TTree("fwd", "fwd tracking tree");
 
     mTree->Branch("header",           &mTreeData. header, 3200, 99 );
+    mTreeData.mcTracks.createBranch(mTree, "mcTracks");
     mTree->Branch("nSeedTracks",      &mTreeData.nSeedTracks, "nSeedTracks/I");
-    mTreeData.fst.createBranch(mTree, "fst");
-    mTreeData.ftt.createBranch(mTree, "ftt");
+    mTreeData.fstPoints.createBranch(mTree, "fstHits");
+    mTreeData.fttPoints.createBranch(mTree, "fttPoints");
     mTreeData.fttClusters.createBranch(mTree, "fttClusters");
+    mTreeData.fstPoints.createBranch(mTree, "fstPoints");
     mTreeData.wcal.createBranch(mTree, "wcalClusters");
     mTreeData.hcal.createBranch(mTree, "hcalClusters");
+
+    mTreeData.wcalHits.createBranch(mTree, "wcalHits");
+    mTreeData.hcalHits.createBranch(mTree, "hcalHits");
+    mTreeData.epdHits.createBranch(mTree, "epdHits");
 
     mTreeData.reco.createBranch(mTree, "reco");
     mTreeData.seeds.createBranch(mTree, "seeds");
@@ -196,7 +130,15 @@ int StFwdQAMaker::Finish() {
     return kStOk;
 }
 int StFwdQAMaker::Make() {
-    LOG_DEBUG << "SETUP START" << endm;
+    LOG_INFO << "FWD Report:" << endm;
+    StEvent *mStEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
+    if ( mStEvent ){
+        // report number of fwd tracks
+        auto fwdTracks = mStEvent->fwdTrackCollection();
+        LOG_INFO << "Number of FwdTracks (StFwdTrackCollection): " << fwdTracks->tracks().size() << endm;
+        LOG_INFO << "Number of Ftt Points (StEvent)" << mStEvent->fttCollection()->points().size() << endm;
+    }
+    LOG_INFO << "SETUP START" << endm;
     // setup the datasets / makers
     mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
     if(mMuDstMaker) {
@@ -217,108 +159,93 @@ int StFwdQAMaker::Make() {
         // return kStOk;
     }
 
-    // Event header info from stevent
-    StEvent *mStEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
+    mTreeData.header.run = mMuDst->event()->runNumber();
     LOG_DEBUG << "SETUP COMPLETE" << endm;
-    // Get the primary vertex used by the FWD Tracker
-    auto eventPV = mFwdTrackMaker->GetEventPrimaryVertex();
-    mTreeData.header.set( 0, 0, 0, eventPV );
 
-    // Fill Header from StEvent
-    if ( mMuDstMaker ){
-
-    }
-    else if ( mStEvent ){
-        StBTofCollection *btofC = mStEvent->btofCollection();
-        if (btofC) {
-            StBTofHeader * btofHeader = btofC->tofHeader();
-            if (btofHeader){
-
-                int nEast = btofHeader->numberOfVpdHits( east );
-                int nWest = btofHeader->numberOfVpdHits( west );
-                int nTof = btofC->tofHits().size();
-                float vpdVz = btofHeader->vpdVz();
-
-                mTreeData.header.set( 1, GetEventNumber(), nTof, eventPV  );
-                mTreeData.header.vpdVz = vpdVz;
-            }
-        } // btofC != nullptr
-    }
-    LOG_DEBUG << "HEADER COMPLETE" << endm;
-
-    FwdTreeHit fh;
-
-    auto fttHits = mFwdTrackMaker -> GetFttHits();
-    for ( auto h : fttHits ){
-        fh.set( h.getX(), h.getY(), h.getZ(), 1, 2 );
-        mTreeData.ftt.add( fh );
-    }
-    LOG_DEBUG << "FTT COMPLETE" << endm;
-    auto fstHits = mFwdTrackMaker -> GetFstHits();
-    for ( auto h : fstHits ){
-        fh.set( h.getX(), h.getY(), h.getZ(), 1, 1 );
-        mTreeData.fst.add( fh );
-    }
-    LOG_DEBUG << "FST COMPLETE" << endm;
-    auto seeds = mFwdTrackMaker -> getTrackSeeds();
-    LOG_DEBUG << "Number of Seeds to save: " << seeds.size() << endm;
-    if (seeds.size() > 5000){
-        LOG_WARN << "Number of seeds is too large, truncating to 5000" << endm;
-        // seeds.resize(1000);
-    }
-    size_t iSeed = 0;
-    for ( auto s : seeds ){
-        for ( auto h : s ){
-            fh.set( h->getX(), h->getY(), h->getZ(), 1, 1 );
-            fh.trackId = iSeed;
-            mTreeData.seeds.add( fh );
-        }
-        iSeed++;
-        if (iSeed > 5000) break;
-    } // for s in seeds
-    LOG_DEBUG << "SEEDS COMPLETE, saved " << iSeed << " seed hits" << endm;
-    mTreeData.nSeedTracks = (int)iSeed;
-
-    size_t iTrack = 0;
-    FwdTreeRecoTrack frt;
-    FwdTreeHit fth;
-    if ( mMuForwardTrackCollection ){
-        LOG_DEBUG << "Adding " << mMuForwardTrackCollection->numberOfFwdTracks() << " FwdTracks (MuDst)" << endm;
-        for ( size_t iTrack = 0; iTrack < mMuForwardTrackCollection->numberOfFwdTracks(); iTrack++ ){
-            auto muTrack = mMuForwardTrackCollection->getFwdTrack(iTrack);
-            frt.set( muTrack );
-            mTreeData.reco.add( frt );
-            if ( iTrack > 5000 ) break;
+    auto muFstCollection = mMuDst->muFstCollection();
+    if ( muFstCollection ){
+        LOG_DEBUG << "MuDst has #fst hits: " << muFstCollection->numberOfHits() << endm;
+        for ( size_t i = 0; i < muFstCollection->numberOfHits(); i++ ){
+            StMuFstHit * h = muFstCollection->getHit(i);
+            mTreeData.fstPoints.add( h );
         }
     }
-
-    if ( mStEvent && mStEvent->fwdTrackCollection() ){
-        iTrack = 0;
-        auto fwdTracks = mStEvent->fwdTrackCollection()->tracks();
-        LOG_DEBUG << "Adding " << fwdTracks.size() << " FwdTracks (StEvent)" << endm;
-        for ( auto ft : fwdTracks ){
-            frt.set( ft );
-            mTreeData.reco.add( frt );
-            if ( iTrack > 5000 ) break;
-            iTrack++;
-        }
-    }
-    LOG_DEBUG << "TRACKS COMPLETE" << endm;
-
-
+    FillMcTracks();
+    FillTracks();
+    FillFstPoints();
     FillFttClusters();
-    if ( mMuDstMaker ){
-        FillFcsStMuDst();
-    } else {
-        FillFcsStEvent();
-    }
-
+    FillFcsStMuDst();
     mTree->Fill();
     return kStOk;
 }
 void StFwdQAMaker::Clear(const Option_t *opts) {
     mTreeData.clear();
     return;
+}
+
+void StFwdQAMaker::FillFstPoints(){
+    StMuFstCollection * fst = mMuDst->muFstCollection();
+    if (!fst) {
+        LOG_WARN << "No StMuFstCollection ... bye-bye" << endm;
+        return;
+    }
+
+    // size_t numFwdHitsPrior = mFwdHitsFst.size();
+    LOG_INFO << "Loading " << fst->numberOfHits() << " StMuFstHits" << endm;
+    // TMatrixDSym hitCov3(3);
+    for ( unsigned int index = 0; index < fst->numberOfHits(); index++){
+        StMuFstHit * muFstHit = fst->getHit( index );
+        mTreeData.fstPoints.add( muFstHit );
+
+
+        // float vR = muFstHit->localPosition(0);
+        // float vPhi = muFstHit->localPosition(1);
+        // float vZ = muFstHit->localPosition(2);
+
+        // const float dz0 = fabs( vZ - mFstZFromGeom[0] );
+        // const float dz1 = fabs( vZ - mFstZFromGeom[1] );
+        // const float dz2 = fabs( vZ - mFstZFromGeom[2] );
+        // static const float fstThickness = 2.0; // thickness in cm between inner and outer on sigle plane
+
+        // // assign disk according to which z value the hit has, within the z-plane thickness
+        // int d = 0 * ( dz0 < fstThickness ) + 1 * ( dz1 < fstThickness ) + 2 * ( dz2 < fstThickness );
+
+        // float x0 = vR * cos( vPhi );
+        // float y0 = vR * sin( vPhi );
+        // hitCov3 = makeSiCovMat( TVector3( x0, y0, vZ ), mFwdConfig );
+
+        // LOG_DEBUG << "FST HIT: d = " << d << ", x=" << x0 << ", y=" << y0 << ", z=" << vZ << endm;
+        // mFstHits.push_back( TVector3( x0, y0, vZ)  );
+
+        // // we use d+4 so that both FTT and FST start at 4
+        // mFwdHitsFst.push_back(FwdHit(count++, x0, y0, vZ, d+4, 0, hitCov3, nullptr));
+        // count++;
+    } // index
+}
+
+void StFwdQAMaker::FillTracks() {
+    mTreeData.nSeedTracks = 0;
+    if ( mMuForwardTrackCollection ){
+        LOG_DEBUG << "Adding " << mMuForwardTrackCollection->numberOfFwdTracks() << " FwdTracks (MuDst)" << endm;
+        for ( size_t iTrack = 0; iTrack < mMuForwardTrackCollection->numberOfFwdTracks(); iTrack++ ){
+            auto muTrack = mMuForwardTrackCollection->getFwdTrack(iTrack);
+            mTreeData.reco.add( muTrack );
+
+            for (auto fsth : muTrack->mFSTPoints){
+                mTreeData.seeds.add( fsth );
+                mTreeData.nSeedTracks++;
+            }
+            for (auto ftth : muTrack->mFTTPoints){
+                mTreeData.seeds.add( ftth );
+                mTreeData.nSeedTracks++;
+            }
+            if ( iTrack > 5000 ) {
+                LOG_WARN << "Truncating to 5000 tracks" << endm;
+                break;
+            }
+        }
+    }
+    LOG_DEBUG << "TRACKS COMPLETE" << endm;
 }
 
 void StFwdQAMaker::FillFcsStMuDst( ) {
@@ -333,118 +260,74 @@ void StFwdQAMaker::FillFcsStMuDst( ) {
         return;
     }
 
-    StEpdGeom epdgeo;
-    FwdTreeFcsCluster fcsclu;
+    StFcsDb* fcsDb=static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+
     // LOAD ECAL / HCAL CLUSTERS
+    LOG_INFO << "MuDst has #fcs clusters: " << fcs->numberOfClusters() << endm;
     for( size_t i = 0; i < fcs->numberOfClusters(); i++){
         StMuFcsCluster * clu = fcs->getCluster(i);
-        LOG_DEBUG << "FCS CLUSTERS: " << fcs->numberOfClusters() << endm;
-        fcsclu.set( clu, mFcsDb );
-
+        FcsClusterWithStarXYZ *cluSTAR = new FcsClusterWithStarXYZ(clu, fcsDb);
         if ( clu->detectorId() == kFcsEcalNorthDetId || clu->detectorId() == kFcsEcalSouthDetId ){
-            LOG_DEBUG << "Adding WCAL Cluster to FwdTree" << endm;
-            mTreeData.wcal.add( fcsclu );
+            LOG_INFO << "Adding WCAL Cluster to FwdTree" << endm;
+            mTreeData.wcal.add( cluSTAR );
         } else if ( clu->detectorId() == kFcsHcalNorthDetId || clu->detectorId() == kFcsHcalSouthDetId ){
-            LOG_DEBUG << "Adding HCAL Cluster to FwdTree" << endm;
-            mTreeData.hcal.add( fcsclu );
-        }
-    }
-}
+            LOG_INFO << "Adding HCAL Cluster to FwdTree" << endm;
+            mTreeData.hcal.add( cluSTAR );
+        } 
 
-void StFwdQAMaker::FillFcsStEvent( ) {
-    if ( !mStEvent ){
-        LOG_DEBUG << "No StEvent found, skipping StFwdQAMaker::FillFcsStEvent" << endm;
-        return;
-    }
-    StFcsCollection* fcsCol = mStEvent->fcsCollection();
-    if ( !fcsCol ){
-        LOG_DEBUG << "No StFcsCollection found, skipping StFwdQAMaker::FillFcsStEvent" << endm;
-        return;
+        delete cluSTAR;
     }
 
-    StEpdGeom epdgeo;
-
-    FwdTreeFcsCluster fcsclu;
     // LOAD ECAL / HCAL CLUSTERS
-    for ( int idet = 0; idet  < 4; idet++ ){
-        StSPtrVecFcsCluster& clusters = fcsCol->clusters(idet);
-        LOG_DEBUG << "FCS CLUSTERS [" << idet << "]: " << clusters.size() << endm;
-        int nc=fcsCol->numberOfClusters(idet);
-        for ( int i = 0; i < nc; i++ ){
-            StFcsCluster* clu = clusters[i];
-            
-            fcsclu.set( clu, mFcsDb );
+    LOG_INFO << "MuDst has #fcs hits: " << fcs->numberOfHits() << endm;
+    for( size_t i = 0; i < fcs->numberOfHits(); i++){
+        StMuFcsHit * hit = fcs->getHit(i);
+        FcsHitWithStarXYZ *hitSTAR = new FcsHitWithStarXYZ(hit, fcsDb);
+        if ( hit->detectorId() == kFcsEcalNorthDetId || hit->detectorId() == kFcsEcalSouthDetId ){
+            LOG_DEBUG << "Adding WCAL Cluster to FwdTree" << endm;
+            mTreeData.wcalHits.add( hitSTAR );
+        } else if ( hit->detectorId() == kFcsHcalNorthDetId || hit->detectorId() == kFcsHcalSouthDetId ){
+            LOG_DEBUG << "Adding HCAL Cluster to FwdTree" << endm;
+            mTreeData.hcalHits.add( hitSTAR );
+        } else if ( hit->detectorId() == kFcsPresNorthDetId || hit->detectorId() == kFcsPresSouthDetId ){
+            LOG_DEBUG << "Adding PRES hit to FwdTree" << endm;
+            mTreeData.epdHits.add( hitSTAR );
+        }
+        delete hitSTAR;
+    }
 
-            if ( clu->detectorId() == kFcsEcalNorthDetId || clu->detectorId() == kFcsEcalSouthDetId ){
-                LOG_DEBUG << "Adding WCAL Cluster to FwdTree" << endm;
-                mTreeData.wcal.add( fcsclu );
-            } else if ( clu->detectorId() == kFcsHcalNorthDetId || clu->detectorId() == kFcsHcalSouthDetId ){
-                LOG_DEBUG << "Adding HCAL Cluster to FwdTree" << endm;
-                mTreeData.hcal.add( fcsclu );
-            }
-
-        } // i
-    } // idet
-
+    // TODO, cleanup?
 }
+
+void StFwdQAMaker::FillMcTracks(){
+    // Retrieve pointer to MC tracks
+    TClonesArray *mcTracks = mMuDst->mcArray(1);
+    LOG_INFO << "MuDst has #mc tracks: " << mcTracks->GetEntriesFast() << endm;
+    // Loop over MC vertices
+    for (Int_t iVtx=0; iVtx<mcTracks->GetEntriesFast(); iVtx++) {
+        // Retrieve i-th MC vertex from MuDst
+        StMuMcTrack *mcTrack = (StMuMcTrack*)mcTracks->UncheckedAt(iVtx);
+        if ( !mcTrack ) continue;
+
+        // Add MC track to the tree
+        mTreeData.mcTracks.add( mcTrack );
+    }
+}
+
 
 void StFwdQAMaker::FillFttClusters(){
-    float pz[] = {280.90499, 303.70498, 326.60501, 349.40499};
-    float SCALE = 1.0;
-    TVector3 cp;
-    FwdTreeHit fh;
-    FwdTreeFttCluster ftc;
-    StEvent *event = static_cast<StEvent *>(GetInputDS("StEvent"));
-    if ( !event || !event->fttCollection() ) return;
 
-    LOG_DEBUG << "FTT RawHits: " << event->fttCollection()->numberOfRawHits() << endm;
-    LOG_DEBUG << "FTT Clusters: " << event->fttCollection()->numberOfClusters() << endm;
-
-    for ( size_t i = 0; i < event->fttCollection()->numberOfClusters(); i++ ){
-        StFttCluster* c = event->fttCollection()->clusters()[i];
-        if ( c->nStrips() < 1 ) continue;
-        float dw = 0.05, dlh = 60.0, dlv = 60.0;
-        float mx = 0.0, my = 0.0;
-        float sx = 1.0, sy = 1.0;
-
-
-        if ( c->quadrant() == kFttQuadrantA ){
-            mx = 0; my = 0;
-            sx = 1.0; sy = 1.0;
-        } else if ( c->quadrant() == kFttQuadrantB ){
-            mx = 10.16*SCALE; my = 0.0*SCALE;
-            sy = -1;
-            dlv = -dlv;
-
-        } else if ( c->quadrant() == kFttQuadrantC ){
-            mx = -10.16*SCALE ; my = -00.0*SCALE;
-            sx = -1.0; sy = -1.0;
-            dlh = -dlh; dlv = -dlv;
-
-        } else if ( c->quadrant() == kFttQuadrantD ){
-            sx = -1;
-            dlh = -dlh;
+    auto muFttCollection = mMuDst->muFttCollection();
+    if ( muFttCollection ){
+        LOG_DEBUG << "MuDst has #ftt clusters: " << muFttCollection->numberOfClusters() << endm;
+        for ( size_t i = 0; i < muFttCollection->numberOfClusters(); i++ ){
+            StMuFttCluster * c = muFttCollection->getCluster(i);
+            mTreeData.fttClusters.add( c );
         }
 
-        cp.SetZ( -pz[ c->plane() ] * SCALE );
-        if ( c->orientation() == kFttHorizontal ){
-            cp.SetY( my + sy * c->x()/10.0 * SCALE );
-            cp.SetX( mx );
-        } else if ( c->orientation() == kFttVertical ){
-            cp.SetX( mx + sx * c->x()/10.0 * SCALE );
-            cp.SetY( my );
+        for ( size_t i = 0; i < muFttCollection->numberOfPoints(); i++ ){
+            StMuFttPoint * c = muFttCollection->getPoint(i);
+            mTreeData.fttPoints.add( c );
         }
-        // fh.set( cp.X(), cp.Y(), cp.Z(), c->nStrips(), c->quadrant() );
-        ftc.pos.SetXYZ( cp.X(), cp.Y(), cp.Z() );
-        ftc.mQuadrant = c->quadrant();
-        ftc.mRow = c->row();
-        ftc.mOrientation = c->orientation();
-        ftc.mPlane = c->plane();
-        ftc.mId = c->id();
-        ftc.mNStrips = c->nStrips();
-        ftc.mX = c->x();
-        ftc.mSumAdc = c->sumAdc();
-
-        mTreeData.fttClusters.add( ftc );
     }
 }
