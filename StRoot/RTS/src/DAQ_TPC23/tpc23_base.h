@@ -112,6 +112,11 @@ public:
 	// called from daq_itpc
 	int init(daq_dta *gain) ;
 
+	struct f_stat_t {
+		int evt_cou ;
+		double tm[10] ;
+	} f_stat ;
+
 //private:
 
 
