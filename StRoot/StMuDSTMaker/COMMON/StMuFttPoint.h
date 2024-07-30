@@ -32,6 +32,7 @@ public:
     int nParentClusters()   const; // Number of points in the parent cluster.
     // StMuFttCluster* cluster( size_t i); //  Parent cluster of the photon.
     const TVector3& xyz()   const; // XYZ position in global STAR coordinate
+    UShort_t idTruth() const { return mIdTruth; } // Get the truth ID
 
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
@@ -39,6 +40,7 @@ public:
     void setY(float y);
     // void addCluster(StMuFttCluster* cluster);
     void setXYZ(const TVector3& p3);
+    void setIdTruth(UShort_t id) { mIdTruth = id; }
 
     
     void print(int option=0);
@@ -52,8 +54,9 @@ private:
     Float_t mY=0.0;         // y-position in local coordinate
     TRefArray mClusters=0; // parent clusters (could be up to 3?)
     TVector3  mXYZ;    // Photon position in STAR coordinate
+    UShort_t mIdTruth=0; // Truth ID    
 
-    ClassDef(StMuFttPoint, 1)
+    ClassDef(StMuFttPoint, 2)
 };
 
 inline UChar_t StMuFttPoint::plane() const { return mPlane; }
