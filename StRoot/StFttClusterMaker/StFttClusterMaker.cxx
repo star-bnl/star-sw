@@ -14,7 +14,7 @@
 #include <map>
 #include <array>
 #include <algorithm>    // std::is_sorted
-
+#include <climits>
 
 #include "StEvent.h"
 #include "StEnumerations.h"
@@ -209,18 +209,52 @@ void StFttClusterMaker::InjectTestData(){
 } // InjectTestData
 
 
+/**
+ * @brief Checks if a hit passes the time cut.
+ *
+ * This function checks if a given hit passes the time cut based on 
+ * the current time cut mode.
+ * - mTimeCutMode = kTimeCutModeAcceptAll: accept all hits
+ * - mTimeCutMode = kTimeCutModeDB: use the time cut from the database
+ * - mTimeCutMode = kTimeCutModeCalibratedTime: use the calibrated time cut 
+ *      set by the user
+ * - mTimeCutMode = kTimeCutModeTimebin: use the timebin cut set by the user
+ * 
+ * if unrecognized time cut mode is set, the function will return true accepting all hits
+ *
+ * @param hit Pointer to the StFttRawHit object to be checked.
+ * @return true if the hit passes the time cut, false otherwise.
+ */
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    int time_cut0 = -999;
-    int time_cut1 =  999;
-    int time_cutm = 0;
-    //  in principle it could vary VMM to VMM;
-    mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
-    if ( time_cutm == 0 ) // default, cut on bunch crossing
-        return (hit->time() <= time_cut1 && hit->time() >= time_cut0); 
+    if (mTimeCutMode == kTimeCutModeAcceptAll) 
+        return true;
+    else if (mTimeCutMode == kTimeCutModeDB ) {
+        int timeCutMin = INT_MIN;
+        int timeCutMax = INT_MAX;
+        int hitTimeMode = (int)kHitCalibratedTime;
 
-    // cut on timebin
-    return (hit->tb() <= time_cut1 && hit->tb() >= time_cut0);
-}
+        mFttDb->getTimeCut(hit, hitTimeMode, timeCutMin, timeCutMax);
+        LOG_DEBUG << TString::Format( "StFttClusterMaker::PassTimeCut - DB gave hit time mode: %d, time cut min: %d, time cut max: %d", hitTimeMode, timeCutMin, timeCutMax ) << endm;
+        if (hitTimeMode == kHitCalibratedTime) {
+            return (hit->time() >= timeCutMin && hit->time() <= timeCutMax);
+        } else if ( hitTimeMode == kHitTimebin ) {
+            return (hit->tb() >= timeCutMin && hit->tb() <= timeCutMax);
+        } else {
+            LOG_WARN << "StFttClusterMaker::PassTimeCut - Unknown hit time mode from database: " << hitTimeMode << endm;
+            LOG_WARN << "Accepting all hits" << endm;
+            return true;
+        }
+    } else if (mTimeCutMode == kTimeCutModeCalibratedTime) {
+        return (hit->time() >= mTimeCutMin && hit->time() <= mTimeCutMax);
+    } else if (mTimeCutMode == kTimeCutModeTimebin) {
+        return (hit->tb() >= mTimeCutMin && hit->tb() <= mTimeCutMax);
+    } else {
+        LOG_WARN << "StFttClusterMaker::PassTimeCut - Unknown time cut mode: " << mTimeCutMode << endm;
+        LOG_WARN << "Accepting all hits" << endm;
+        return true; // Default return value if no conditions are met
+    }
+    return true;
+} // PassTimeCut
 
 
 StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, size_t &pos ){

@@ -1936,6 +1936,7 @@ Bfc_st BFC[] = { // standard chains
     ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"QAalltrigs"  ,"", "","",                                     "","","Analyze all triggers in QA",kFALSE},
+  {"QAallevents" ,"", "","",                                       "","","Analyze all events in QA",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"SvtHitFilt"  ,"", "","HitFilt",                                    "","","SVT Hit filter Maker",kFALSE},
   {"TpcHitFilt"  ,"", "","HitFilt",                       "","","filter out TPC Hits not on tracks",kFALSE},
