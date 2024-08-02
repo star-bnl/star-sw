@@ -1,10 +1,11 @@
 #ifndef __unit_tests__
 #define __unit_tests__
+
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <StarGenerator/EVENT/StarGenParticle.h>
 #include <StarGenerator/BASE/StarPrimaryMaker.h>
 #include <StarGenerator/Kinematics/StarKinematics.h>
 #include <StChain.h>
-#include <iostream>
 #include <TVector3.h>
 #include <TSystem.h>
 #include <TStopwatch.h>
@@ -19,7 +20,12 @@
 #include <g2t_mtd_hit.h>
 #include <TTable.h>
 #include <TROOT.h>
+#endif
+
 #include <string>
+#include <iostream>
+
+
 #define __COLOR__
 #ifdef __COLOR__
 const std::string FAIL  = "\u001b[31m -failed- \u001b[0m";

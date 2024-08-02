@@ -1,9 +1,11 @@
 class StBFChain;
 StBFChain* chain = 0;
 
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <TString.h>
 #include <iostream>
 #include <StMessMgr.h>
+#endif
 
 //extern "C" {
 //  void Load( const char* lib );
