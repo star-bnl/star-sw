@@ -9,7 +9,7 @@ double _phid = 0;
 std::map<int,int> idIsNotUnique;
 int               expectedId = 0;
 
-#ifndef __CINT__
+#if !defined(__CINT__) 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>

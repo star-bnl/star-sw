@@ -1,6 +1,8 @@
+#if !defined(__CINT__) && !defined(__CLING__)
 #include <TString.h>
 #include <TSystem.h>
 #include <TGeoManager.h>
+#endif
 
 void Load( const char* lib ) {
   std::cout << "Loading shared library " << lib << std::endl;
