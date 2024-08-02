@@ -1,6 +1,10 @@
 {
-  StMaker* mk = StMaker::GetChain();
-  if (mk) {
-    mk->Finish();
+
+  {
+    StMaker* mk = StMaker::GetChain();
+    if (mk) {
+      mk->Finish();
+    }
   }
+
 }
