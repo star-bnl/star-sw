@@ -9,6 +9,7 @@
 #endif
 #include <Stiostream.h>
 #include "StEventTypes.h"
+#include "StEnumerations.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -147,15 +148,20 @@ static int nCall =0; nCall++;
       mz = gz;
       double dd[3]={mx,my,mz};
 
-
-      if (!detector->insideL(dd,7,1.2)) {
+//		Special TPC case. Pileup tracks could be very far
+//              from volume in Z for splitted sectors
+      int mask = 7;
+      if (detector->getGroupId()==kTpcId) mask = 3;
+      if (!detector->insideL(dd,mask,1.2)) {
          LOG_ERROR <<
            Form("**** StiHit.%s outside (%d) by %g (%g) ****"
            ,detector->getName().c_str()
 	   ,StiDetector::mgIndex
 	   ,StiDetector::mgValue[0],StiDetector::mgValue[1])
          << endm;
-          assert( detector->insideL(dd,7,1.5));     // 
+	 //	 assert( detector->insideL(dd,7,1.5));     // 
+	 static Int_t ibreak = 0;
+	 ibreak++;
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
@@ -240,7 +246,12 @@ static int nCall =0; nCall++;
  void StiHit::addTimesUsed()
 {
     mTimesUsed++;
-    assert(mTimesUsed <=mMaxTimes);
+    //    assert(mTimesUsed <=mMaxTimes);
+    static Int_t iwarn = 0;
+    if (iwarn <= 13 && mTimesUsed > mMaxTimes) {
+      iwarn++; 
+      LOG_ERROR << "StiHit::addTimesUsed : mTimesUsed = " << (UInt_t) mTimesUsed << " > mMaxTimes " << mMaxTimes <<endm;
+    }
 }
 //_____________________________________________________________________________
  void StiHit::subTimesUsed()
@@ -256,7 +267,7 @@ static int nCall =0; nCall++;
 }
 
 //_____________________________________________________________________________
- const StThreeVectorF StiHit::globalPosition() const
+StThreeVectorF StiHit::globalPosition() const
 {
   return StThreeVectorF(_xg,_yg,_zg); ////msthit->position();
 }
@@ -309,7 +320,13 @@ int StiHit::qaTruth() const
   if (!stHit) return 0;
   return stHit->qaTruth();
 }
-
-
+//________________________________________________________________________________
+Float_t   StiHit::y(Float_t time) const {
+  return my + _vy*time + _dY;
+}
+//________________________________________________________________________________
+Float_t   StiHit::z(Float_t time) const {
+  return mz + _vz*time + _dZ;
+}
 
 
