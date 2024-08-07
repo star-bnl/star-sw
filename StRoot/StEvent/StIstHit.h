@@ -66,19 +66,19 @@ protected:
 
 ostream &operator<<(ostream &, const StIstHit &);
 
-inline unsigned char StIstHit::getLadder() const          { return 1 + (mHardwarePosition - 1) / kIstNumSensorsPerLadder;};
-inline unsigned char StIstHit::getSensor() const          { return 1 + (mHardwarePosition - 1) % kIstNumSensorsPerLadder;};
-inline unsigned char StIstHit::getMaxTimeBin() const      { return mMaxTimeBin;         };
-inline float StIstHit::getChargeErr()    const            { return mChargeErr;          };
-inline unsigned char StIstHit::getNRawHits() const        { return mNRawHits;           };
-inline unsigned char StIstHit::getNRawHitsZ() const       { return mNRawHitsZ;          };
-inline unsigned char StIstHit::getNRawHitsRPhi() const    { return mNRawHitsRPhi;       };
+inline unsigned char StIstHit::getLadder() const          { return 1 + (mHardwarePosition - 1) / kIstNumSensorsPerLadder;}
+inline unsigned char StIstHit::getSensor() const          { return 1 + (mHardwarePosition - 1) % kIstNumSensorsPerLadder;}
+inline unsigned char StIstHit::getMaxTimeBin() const      { return mMaxTimeBin;         }
+inline float StIstHit::getChargeErr()    const            { return mChargeErr;          }
+inline unsigned char StIstHit::getNRawHits() const        { return mNRawHits;           }
+inline unsigned char StIstHit::getNRawHitsZ() const       { return mNRawHitsZ;          }
+inline unsigned char StIstHit::getNRawHitsRPhi() const    { return mNRawHitsRPhi;       }
 
-inline void StIstHit::setMaxTimeBin(unsigned char tb)             { mMaxTimeBin = tb;             };
-inline void StIstHit::setChargeErr(float chargeErr)               { mChargeErr = chargeErr;       };
-inline void StIstHit::setNRawHits(unsigned char nRawHits)         { mNRawHits = nRawHits;         };
-inline void StIstHit::setNRawHitsZ(unsigned char nRawHitsZ)       { mNRawHitsZ = nRawHitsZ;       };
-inline void StIstHit::setNRawHitsRPhi(unsigned char nRawHitsRPhi) { mNRawHitsRPhi = nRawHitsRPhi; };
+inline void StIstHit::setMaxTimeBin(unsigned char tb)             { mMaxTimeBin = tb;             }
+inline void StIstHit::setChargeErr(float chargeErr)               { mChargeErr = chargeErr;       }
+inline void StIstHit::setNRawHits(unsigned char nRawHits)         { mNRawHits = nRawHits;         }
+inline void StIstHit::setNRawHitsZ(unsigned char nRawHitsZ)       { mNRawHitsZ = nRawHitsZ;       }
+inline void StIstHit::setNRawHitsRPhi(unsigned char nRawHitsRPhi) { mNRawHitsRPhi = nRawHitsRPhi; }
 
 #endif
 

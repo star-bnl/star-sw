@@ -7,6 +7,7 @@
 #include "TMath.h"
 #include "TString.h"
 #include "Math/SMatrix.h"
+#include "TArrayD.h"
 using namespace ROOT::Math;
 
 #include "TCernLib.h"
@@ -17,6 +18,8 @@ using namespace ROOT::Math;
 #include "tables/St_tpcSectorT0offset_Table.h"
 #include "tables/St_tofTrayConfig_Table.h"
 #define makeSTRING(PATH) # PATH
+//     if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def.t0[i] = -22.257;} 
+
 #define CHECKTABLED(C_STRUCT)			  \
   if (table->InheritsFrom("St_" # C_STRUCT)) {		      \
     St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
@@ -26,7 +29,6 @@ using namespace ROOT::Math;
     Int_t shift = 0;							\
     Int_t NrowSize = t->GetRowSize();					\
     if (! strcmp(makeSTRING(C_STRUCT),"Survey")) {shift = 4; NrowSize = 12*8;} \
-    if (! strcmp(makeSTRING(C_STRUCT),"tpcSectorT0offset")) {for (Int_t i = 0; i < 24; i++) def.t0[i] = -22.257;} \
     if (! strcmp(makeSTRING(C_STRUCT),"tofTrayConfig")) {def.entries = 120; for (Int_t i = 0; i < 120; i++) {def.iTray[i] = i+1; def.nModules[i] = 32;} \
       for (Int_t i = 0; i < table->GetNRows(); i++, s++) {		\
 	if (memcmp(&def+shift, s+shift,  NrowSize)) {iprt = kTRUE; break;} \
@@ -2395,6 +2397,8 @@ Float_t St_starTriggerDelayC::TrigT0GG(Int_t io, Int_t i)   const {
   else      delay += -0.502;
   return delay;
 }
+#include "St_CosmicsDelayC.h"
+MakeChairInstance2(starTriggerDelay,St_CosmicsDelayC,Calibrations/tpc/CosmicsDelay);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -2526,7 +2530,146 @@ static Double_t kuAtomicMassUnit = 931.4940054e-3;
 static Double_t kProtonMass =  kuAtomicMassUnit*1.00727646662;
 //________________________________________________________________________________
 Bool_t        St_beamInfoC::IsFixedTarget() {
-  Bool_t isFixTag = kFALSE;
+  Int_t run = runNumber();
+  Int_t year = 2000 + run/1000000 - 1;
+  if (year < 2018 || year > 2022) return kFALSE;
+  if (year == 2019 && (/* 27GeV_fixedTarget_2018 */ ( run >= 19138032 && run <= 19138036 ) ||
+		       /* 27GeV_fixedTarget_2018 */ ( run >= 19148036 && run <= 19148036 ) ||
+		       /* 27GeV_fixedTarget_2018 */ ( run >= 19148038 && run <= 19148047 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151029 && run <= 19151029 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151031 && run <= 19151031 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151034 && run <= 19151034 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151036 && run <= 19151036 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151039 && run <= 19151039 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151041 && run <= 19151041 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151043 && run <= 19151050 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151052 && run <= 19151056 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151066 && run <= 19151072 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19151082 && run <= 19151084 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152001 && run <= 19152003 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152008 && run <= 19152010 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152014 && run <= 19152014 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152016 && run <= 19152016 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152021 && run <= 19152021 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152023 && run <= 19152025 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152027 && run <= 19152046 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152048 && run <= 19152048 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152051 && run <= 19152055 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152071 && run <= 19152071 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152073 && run <= 19152076 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19152078 && run <= 19152081 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153001 && run <= 19153004 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153007 && run <= 19153007 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153009 && run <= 19153025 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153027 && run <= 19153029 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153031 && run <= 19153037 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153042 && run <= 19153044 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153050 && run <= 19153059 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19153061 && run <= 19153066 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154001 && run <= 19154002 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154005 && run <= 19154005 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154007 && run <= 19154007 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154012 && run <= 19154024 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154026 && run <= 19154032 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154036 && run <= 19154041 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154044 && run <= 19154049 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154051 && run <= 19154058 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154061 && run <= 19154061 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19154063 && run <= 19154067 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19155001 && run <= 19155001 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19155003 && run <= 19155006 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19155008 && run <= 19155011 ) ||
+		       /* 3p85GeV_fixedTarget_2018 */ ( run >= 19155016 && run <= 19155022 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19158057 && run <= 19158057 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19159043 && run <= 19159046 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19160032 && run <= 19160044 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19161001 && run <= 19161001 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19161020 && run <= 19161030 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19161034 && run <= 19161042 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19162033 && run <= 19162034 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19162043 && run <= 19162044 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19163001 && run <= 19163004 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19163024 && run <= 19163028 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19163032 && run <= 19163036 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19163042 && run <= 19163048 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19164001 && run <= 19164001 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19164022 && run <= 19164025 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19165030 && run <= 19165049 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19166001 && run <= 19166002 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19166004 && run <= 19166004 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19166019 && run <= 19166020 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19167001 && run <= 19167001 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19167050 && run <= 19167053 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19168004 && run <= 19168015 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19168017 && run <= 19168020 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19168041 && run <= 19168046 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19169001 && run <= 19169015 ) ||
+		       /* 26p5GeV_fixedTarget_2018 */ ( run >= 19169017 && run <= 19169017 ))           ) return kTRUE; 
+  else if (year == 2019 && (/* 2019: 0832 7.3GeV_fixedTarget  */ ( run >= 20107029 && run <= 20107029 ) ||
+			    /* 2019: 0865 7.3GeV_fixedTarget  */ ( run >= 20113042 && run <= 20113048 ) ||
+			    /* 2019: 1102 3p85GeV_fixedTarget */ ( run >= 20158041 && run <= 20158042 ) ||
+			    /* 2019: 1113 3p85GeV_fixedTarget */ ( run >= 20160023 && run <= 20160027 ) ||
+			    /* 2019: 1164 7.3GeV_fixedTarget  */ ( run >= 20169028 && run <= 20169055 ) ||
+			    /* 2019: 1206 4p59GeV_fixedTarget */ ( run >= 20179039 && run <= 20183025 ) ||
+			    /* 2019: 1261 31GeV_fixedTarget   */ ( run >= 20189035 && run <= 20190024)) ) return kTRUE;
+  else if (year == 2020 && (/* 2020: 0161 5p75GeV_fixedTarget */ ( run >= 20355020 && run <= 20355021 ) ||
+			    /* 2020: 0363 31p2GeV_fixedTarget */ ( run >= 21028011 && run <= 21029036 ) ||
+			    /* 2020: 0374 9p8GeV_fixedTarget  */ ( run >= 21029051 && run <= 21032016 ) ||
+			    /* 2020: 0387 19p5GeV_fixedTarget */ ( run >= 21032046 && run <= 21034013 ) ||
+			    /* 2020: 0399 7p3GeV_fixedTarget  */ ( run >= 21035003 && run <= 21036013 ) ||
+			    /* 2020: 0461 5p75GeV_fixedTarget */ ( run >= 21044023 && run <= 21045011 ) ||
+			    /* 2020: 0889 26p5GeV_fixedTarget */ ( run >= 21211028 && run <= 21211028 ) ||
+			    /* 2020: 0966 26p5GeV_fixedTarget */ ( run >= 21226023 && run <= 21226036 ) ||
+			    /* 2020: 1000 26p5GeV_fixedTarget */ ( run >= 21232025 && run <= 21232025 ) ||
+			    /* 2020: 1045 26p5GeV_fixedTarget */ ( run >= 21240017 && run <= 21240028 ) ||
+			    /* 2020: 1104 26p5GeV_fixedTarget */ ( run >= 21251020 && run <= 21252033 ) ||
+			    /* 2020: 1122 26p5GeV_fixedTarget */ ( run >= 21256006 && run <= 21257018 ) ||
+			    /* 2020: 1131 26p5GeV_fixedTarget */ ( run >= 21257029 && run <= 21258004)) ) return kTRUE;
+  else if (year == 2021 && (/* 2021: 0548 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22121022 && run <= 22121030 ) ||
+			    /* 2021: 0550 3p85GeV_fixedTarget_2021      */ ( run >= 22121033 && run <= 22121033 ) ||
+			    /* 2021: 0551 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22121035 && run <= 22121035 ) ||
+			    /* 2021: 0552 3p85GeV_fixedTarget_2021      */ ( run >= 22121036 && run <= 22121041 ) ||
+			    /* 2021: 0553 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22121042 && run <= 22121043 ) ||
+			    /* 2021: 0554 3p85GeV_fixedTarget_2021      */ ( run >= 22121044 && run <= 22125011 ) ||
+			    /* 2021: 0576 tune_44p5GeV_fixedTarget_2021 */ ( run >= 22126003 && run <= 22126009 ) ||
+			    /* 2021: 0577 44p5GeV_fixedTarget_2021      */ ( run >= 22126010 && run <= 22126023 ) ||
+			    /* 2021: 0580 tune_44p5GeV_fixedTarget_2021 */ ( run >= 22126024 && run <= 22126024 ) ||
+			    /* 2021: 0581 44p5GeV_fixedTarget_2021      */ ( run >= 22126025 && run <= 22126029 ) ||
+			    /* 2021: 0582 70GeV_fixedTarget_2021        */ ( run >= 22126045 && run <= 22127018 ) ||
+			    /* 2021: 0585 100GeV_fixedTarget_2021       */ ( run >= 22128001 && run <= 22128011 ) ||
+			    /* 2021: 0760 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22154032 && run <= 22154034 ) ||
+			    /* 2021: 0762 26p5GeV_fixedTarget_2021      */ ( run >= 22154036 && run <= 22154037 ) ||
+			    /* 2021: 0783 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22158025 && run <= 22158031 ) ||
+			    /* 2021: 0784 3p85GeV_fixedTarget_2021      */ ( run >= 22158032 && run <= 22158033 ) ||
+			    /* 2021: 0785 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22158035 && run <= 22158035 ) ||
+			    /* 2021: 0786 3p85GeV_fixedTarget_2021      */ ( run >= 22158036 && run <= 22158036 ) ||
+			    /* 2021: 0787 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22158037 && run <= 22158037 ) ||
+			    /* 2021: 0788 3p85GeV_fixedTarget_2021      */ ( run >= 22159001 && run <= 22159001 ) ||
+			    /* 2021: 0789 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22159002 && run <= 22159002 ) ||
+			    /* 2021: 0790 3p85GeV_fixedTarget_2021      */ ( run >= 22159003 && run <= 22159015 ) ||
+			    /* 2021: 0794 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22159026 && run <= 22159050 ) ||
+			    /* 2021: 0798 3p85GeV_fixedTarget_2021      */ ( run >= 22159051 && run <= 22160032 ) ||
+			    /* 2021: 0801 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22160045 && run <= 22160045 ) ||
+			    /* 2021: 0802 3p85GeV_fixedTarget_2021      */ ( run >= 22160046 && run <= 22168015 ) ||
+			    /* 2021: 0841 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22168028 && run <= 22168028 ) ||
+			    /* 2021: 0842 26p5GeV_fixedTarget_2021      */ ( run >= 22168037 && run <= 22170022 ) ||
+			    /* 2021: 0858 3p85GeV_fixedTarget_2021      */ ( run >= 22171021 && run <= 22172010 ) ||
+			    /* 2021: 0862 3p85GeV_fixedTarget_2021      */ ( run >= 22172022 && run <= 22174019 ) ||
+			    /* 2021: 0874 3p85GeV_fixedTarget_2021      */ ( run >= 22174046 && run <= 22178013 ) ||
+			    /* 2021: 0885 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22178018 && run <= 22178018 ) ||
+			    /* 2021: 0886 26p5GeV_fixedTarget_2021      */ ( run >= 22178019 && run <= 22178021 ) ||
+			    /* 2021: 0887 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22178025 && run <= 22178025 ) ||
+			    /* 2021: 0888 26p5GeV_fixedTarget_2021      */ ( run >= 22178026 && run <= 22178029 ) ||
+			    /* 2021: 0889 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22178030 && run <= 22178030 ) ||
+			    /* 2021: 0890 26p5GeV_fixedTarget_2021      */ ( run >= 22178031 && run <= 22178033 ) ||
+			    /* 2021: 0893 tune_3p85GeV_fixedTarget_2021 */ ( run >= 22179019 && run <= 22179019 ) ||
+			    /* 2021: 0894 3p85GeV_fixedTarget_2021      */ ( run >= 22179020 && run <= 22179022 ) ||
+			    /* 2021: 0915 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22183023 && run <= 22183023 ) ||
+			    /* 2021: 0916 26p5GeV_fixedTarget_2021      */ ( run >= 22183024 && run <= 22183028 ) ||
+			    /* 2021: 0920 tune_26p5GeV_fixedTarget_2021 */ ( run >= 22184016 && run <= 22184016 ) ||
+			    /* 2021: 0921 26p5GeV_fixedTarget_2021      */ ( run >= 22184017 && run <= 22184019)) ) return kTRUE;
+  return kFALSE;
+#if 0
   Float_t MaxIntensity = TMath::Max(blueIntensity(), yellowIntensity());
   Float_t MinIntensity = TMath::Min(blueIntensity(), yellowIntensity());
   if (MaxIntensity > 0.5) {
@@ -2541,6 +2684,7 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
 	)	isFixTag = kTRUE;
   }
   return isFixTag;
+#endif
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaYellow() {
@@ -2772,7 +2916,9 @@ MakeChairInstance2(Survey,StsstSensorOnLadder,Geometry/sst/sstSensorOnLadder);
 MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
+MakeChairInstance2(Survey,StTpcSuperSectorPositionD,Geometry/tpc/TpcSuperSectorPositionD);
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
+MakeChairInstance2(Survey,StTpcWheelPosition,Geometry/tpc/TpcWheelPosition);
 MakeChairInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
 #include "St_iTPCSurveyC.h"
 MakeChairInstance(iTPCSurvey,Geometry/tpc/iTPCSurvey);
@@ -2900,6 +3046,10 @@ void St_SurveyC::Normalize(TGeoHMatrix &R) {
 }
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
+#if 0
+  static TGeoIdentity identity;
+  if (i > (Int_t) getNumRows()) return *&identity;
+#endif
   assert(fRotations || fRotations[i]);
   assert(TMath::Abs(fRotations[i]->Determinant())-1 < 1.e-3);
   return *fRotations[i];
@@ -2965,10 +3115,13 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "SsdSectorsOnGlobal")   	return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();
   if (Name == "SsdLaddersOnSectors")  	return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
   if (Name == "SsdWafersOnLadders")   	return (St_SurveyC   *) StSsdWafersOnLadders::instance();
+  if (Name == "TpcPosition")            return (St_SurveyC   *) StTpcPosition::instance();
+  if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
+  if (Name == "TpcWheelPosition")       return (St_SurveyC   *) StTpcWheelPosition::instance();
+  if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
+  if (Name == "TpcSuperSectorPositionD")return (St_SurveyC   *) StTpcSuperSectorPositionD::instance();
   if (Name == "TpcInnerSectorPosition") return (St_SurveyC   *) StTpcInnerSectorPosition::instance();
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
-  if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
-  if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
   if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();
   if (Name == "pstOnIds")        	return (St_SurveyC   *) StpstOnIds::instance();
   if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();
@@ -2976,6 +3129,28 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();
   if (Name == "istSensorOnLadder")      return (St_SurveyC   *) StistSensorOnLadder::instance();
   return 0;
+}
+//________________________________________________________________________________
+void St_SurveyC::GetGraphs(const St_Survey* table, TGraph* g[6]) {
+  if (! table) return;
+  Int_t N = table->GetNRows();
+  const Char_t *Names[6] = {"x","y","z","#alpha","#beta","#gamma"};
+  TArrayD S(N);
+  TArrayD X(6*N), eX(6*N);
+  Survey_st *row = table->GetTable();
+  for (Int_t i = 0; i < N; i++, row++) {
+    S[i] = i + 1;
+    X[0*N+i] = 1e4*row->t0;  eX[0*N+i] = 1e4*row->sigmaTrX;
+    X[1*N+i] = 1e4*row->t1;  eX[1*N+i] = 1e4*row->sigmaTrY;
+    X[2*N+i] = 1e4*row->t2;  eX[2*N+i] = 1e4*row->sigmaTrZ;
+    X[3*N+i] = 1e3*row->r21; eX[3*N+i] = 1e3*row->sigmaRotX;
+    X[4*N+i] = 1e3*row->r02; eX[4*N+i] = 1e3*row->sigmaRotY;
+    X[5*N+i] = 1e3*row->r10; eX[5*N+i] = 1e3*row->sigmaRotZ;
+  }
+  for (Int_t i = 0; i < 6; i++) {
+    //    g[i] = new TGraphErrors(N, S.GetArray(), X.GetArray()+i*N, 0, eX.GetArray()+i*N); g[i]->SetName(Names[i]);
+    g[i] = new TGraph(N, S.GetArray(), X.GetArray()+i*N); g[i]->SetName(Names[i]);
+  }
 }
 //__________________Calibrations/rhic______________________________________________________________
 #include "St_vertexSeedC.h"

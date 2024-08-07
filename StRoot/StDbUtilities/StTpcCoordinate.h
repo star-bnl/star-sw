@@ -4,7 +4,6 @@
  */
 #ifndef ST_TPC_COORDINATE_H
 #define ST_TPC_COORDINATE_H
-#include "Stiostream.h"
 #include "StThreeVector.hh"
 
 class StTpcCoordinate {
@@ -27,6 +26,7 @@ class StTpcCoordinate {
   virtual void  setPosition(StThreeVector<double>& position) { mPosition = position; }
   virtual void  setSector(Int_t sector)            { mFromSector = sector; }
   virtual void  setRow(Int_t row)                  { mFromRow   = row; }
+  virtual void  Print(Option_t *option="") const;
 protected:
   StThreeVector<double> mPosition;
   Int_t                 mFromSector;

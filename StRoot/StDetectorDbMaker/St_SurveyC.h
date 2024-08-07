@@ -1,9 +1,9 @@
 #ifndef St_SurveyC_h
 #define St_SurveyC_h
-
 #include "TChair.h"
 #include "tables/St_Survey_Table.h"
 #include "TGeoMatrix.h"
+#include "TGraph.h"
 class St_SurveyC : public TChair {
  public:
   virtual  ~St_SurveyC();
@@ -40,6 +40,7 @@ class St_SurveyC : public TChair {
   const Double_t *t(Int_t i = 0)        const {return &Struct(i)->t0;}
   static void Normalize(TGeoHMatrix &rot);
   static Double_t IsOrtogonal(const Double_t *r);
+  static void GetGraphs(const St_Survey* table, TGraph *g[6]);
  protected:
   St_SurveyC(St_Survey *table=0);
  private:

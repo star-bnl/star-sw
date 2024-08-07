@@ -54,6 +54,8 @@
 #ifndef ST_TPC_LOCAL_COORDINATE_HH
 #define ST_TPC_LOCAL_COORDINATE_HH
 #include "StTpcCoordinate.h"
+#include "StThreeVectorD.hh"
+#include "TMath.h"
 class StTpcLocalCoordinate : public StTpcCoordinate {
 public:
   StTpcLocalCoordinate() :  StTpcCoordinate(0,0,0,0,0) {}
@@ -64,6 +66,17 @@ public:
   StTpcLocalCoordinate(const StThreeVector<double>& xyz, int sector, int row) :
     StTpcCoordinate(xyz,sector,row) {}
   virtual ~StTpcLocalCoordinate() {}
+  Int_t  sector()  { if (! mFromSector) setSectorFromCoordinates(); return mFromSector; }
+  static Int_t sectorFromCoordinate(Double_t x, Double_t y, Double_t z) {
+    Double_t angle = TMath::RadToDeg()*TMath::ATan2(y,x);
+    if(angle < 0) angle += 360;
+    Int_t sectorNumber = (Int_t) ( (angle+15)/30);
+    if(z > 0){sectorNumber =15-sectorNumber; if(sectorNumber> 12) sectorNumber -= 12;}
+    else     {sectorNumber+=9;               if(sectorNumber<=12) sectorNumber += 12;}
+    return sectorNumber;
+  }
+  static Int_t sectorFromCoordinate(StThreeVectorD &position) {return sectorFromCoordinate(position.x(), position.y(), position.z());}
+  Int_t setSectorFromCoordinates() {return mFromSector = sectorFromCoordinate(position());}
 };
 ostream& operator<<(ostream&, const StTpcLocalCoordinate&);
 #endif

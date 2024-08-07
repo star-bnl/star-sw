@@ -115,11 +115,11 @@
 #include "StHit.h"
 #include "StMemoryPool.hh"
 #include "TMath.h"
-
+#include "TString.h"
 class StTpcHit : public StHit {
   
  public:
- StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mAdc =0; mChargeModified = 0; mdX = 0;}
+ StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mAdc =0; mChargeModified = mdX = mdY = mdZ = 0;}
  StTpcHit(const StThreeVectorF& p,
 	  const StThreeVectorF& e,
 	  UInt_t hw, float q, UChar_t c = 0,
@@ -128,7 +128,9 @@ class StTpcHit : public StHit {
 	  Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
 	  Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
    :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {
-    setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0; mdX = 0;}
+    mChargeModified = mdX = mdY = mdZ = 0;
+    setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); 
+  }
   ~StTpcHit() {}
     
   StDetectorId   detector() const;
@@ -141,7 +143,9 @@ class StTpcHit : public StHit {
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
     void     setAdc(UShort_t Adc = 0) {mAdc = Adc;}
-    void     setdX(Float_t dX) {mdX = dX;}
+    void     setdX(Float_t DX) {mdX = DX;}
+    void     setdY(Float_t DY) {mdY = DY;}
+    void     setdZ(Float_t DZ) {mdZ = DZ;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 7);}   // bits 9-15 -> 1-128
     UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;}
@@ -153,38 +157,46 @@ class StTpcHit : public StHit {
     Int_t    volumeID() const {return 100 * sector() + padrow();}
     Short_t  timeBucketsInHit()   const {return maxTmbk() - minTmbk() + 1;} // number of time bucket fired in this hit
     Float_t  timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
+    Float_t  timeBucketC()const {return mTimeBucket;}
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
     UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
-    Float_t  dX() {return mdX;}
+    Float_t  dX() const {return mdX;}
+    Float_t  dY() const {return mdY;}
+    Float_t  dZ() const {return mdZ;}
     void     Print(Option_t *option="") const;
     virtual Bool_t   IsSortable() const { return kTRUE; }
-    virtual Int_t    Compare(const TObject *obj) const {
-        StTpcHit *hit = (StTpcHit *) obj;
-        if (sector() > hit->sector()) return kTRUE;
-        if (padrow() > hit->padrow()) return kTRUE;
-        if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return kTRUE;
-        return kFALSE;
-    }
+    virtual Int_t    Compare(const TObject *obj) const;
     virtual const StThreeVectorF& positionU() const {return *&mPositionU;}
     virtual const StThreeVectorF& positionL() const {return *&mPositionL;}
     virtual void setPositionU(const StThreeVectorF& p) {mPositionU = p;}
     virtual void setPositionL(const StThreeVectorF& p) {mPositionL = p;}
-    
+    virtual void setTimeBucket(Float_t tb) {mTimeBucket = tb;}
+#ifdef __TFG__VERSION__
+    static  const Char_t  *GetFMT()                     {return fgFMT.Data();}  
+    static  void           SetFMT(const Char_t *path=0) {fgFMT = path;}  
+    virtual const Char_t  *GetPath() const;    
+#endif /*  __TFG__VERSION__ */
 protected:
     static StMemoryPool mPool;  //!
-    UChar_t     mMinpad;     /* central pad - lowest pad id in this hit*/
-    UChar_t     mMaxpad;     /* highest pad id in this hit - central pad */
-    UChar_t     mMintmbk;    /* central timebucket - lowest time bucket in hit*/
-    UChar_t     mMaxtmbk;    /* highest time bucket in hit - central timebucket */
-    Short_t     mMcl_x;      /* average pad*64 */
-    Short_t     mMcl_t;      /* average timebucket*64 */
-    UShort_t    mAdc;        /* cluster ADC sum */
-    Float_t     mChargeModified; //!
-    StThreeVectorF mPositionU; //  upper position = y_local + padlength/2.
-    StThreeVectorF mPositionL; //  lower position = y_local - padlength/2.
-    Float_t        mdX;        //  estimated dX from StdEdxY2Maker
-    ClassDef(StTpcHit,10)
+    UChar_t        mMinpad;     /* central pad - lowest pad id in this hit*/	    
+    UChar_t        mMaxpad;     /* highest pad id in this hit - central pad */	    
+    UChar_t        mMintmbk;    /* central timebucket - lowest time bucket in hit*/    
+    UChar_t        mMaxtmbk;    /* highest time bucket in hit - central timebucket */  
+    Short_t        mMcl_x;      /* average pad*64 */				    
+    Short_t        mMcl_t;      /* average timebucket*64 */			    
+    UShort_t       mAdc;        /* cluster ADC sum */				    
+    Float_t        mChargeModified; //!                                                
+    StThreeVectorF mPositionU;  //  upper position = y_local + padlength/2.
+    StThreeVectorF mPositionL;  //  lower position = y_local - padlength/2.
+    Float_t        mdX;         //  estimated dX from StdEdxY2Maker
+    Float_t        mTimeBucket; // average timebucket corrected
+    Float_t        mdY;         // Z correction from Hit error parameterization
+    Float_t        mdZ;         // Z correction from Hit error parameterization
+#ifdef __TFG__VERSION__
+    static TString fgFMT;        
+#endif /*  __TFG__VERSION__ */
+    ClassDef(StTpcHit,13)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 

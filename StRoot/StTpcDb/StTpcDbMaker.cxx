@@ -229,17 +229,22 @@
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StarMagField.h"
-#include "math_constants.h"
+#include "StTriggerIdCollection.h"
+#include "StTriggerData.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
+#include "StDetectorDbMaker/St_trgTimeOffsetC.h"
+#include "StDetectorDbMaker/St_tpcChargeEventC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcChargeEventC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
 #include "TCernLib.h"
 #endif
 #include "TEnv.h"
+#include "TROOT.h"
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
@@ -255,7 +260,17 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     gMessMgr->QAInfo() << "ReSet environment NewTpcAlignment (year >= 2013)  from " << iNewTpcAlignmentOld << " to " << iNewTpcAlignment << endm;
     gEnv->SetValue("NewTpcAlignment", iNewTpcAlignment);
   }
- 
+#if 0 /* move to  StBFChain::SetDbOptions */
+  if (IAttr("TFGdbOpt")) {
+    LOG_INFO << "Disable MySQL for TPC alignment parameters" << endm;
+    SetFlavor("TFG","tpcSectorT0offset"); // disable MySQL 
+    SetFlavor("TFG","TpcPosition"); // disable MySQL 
+    SetFlavor("TFG","TpcHalfPosition"); // disable MySQL 
+    SetFlavor("TFG","TpcSuperSectorPositionB"); // disable MySQL 
+    SetFlavor("TFG","TpcInnerSectorPositionB"); // disable MySQL 
+    SetFlavor("TFG","TpcOuterSectorPositionB"); // disable MySQL 
+  }
+#endif 
   // Create Needed Tables:    
   if (! IAttr("Simu")) {
     Float_t gFactor = StarMagField::Instance()->GetFactor();
@@ -294,9 +309,19 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     SetFlavor("ofl+TFG+laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
+  if( IAttr("Alignment2024")    ) {
+    StTpcDb::SetAlignment2024(kTRUE);
+    gMessMgr->Info() << "StTpcDbMaker::Use Alignment2024 " << endm;
+  } else {
+    StTpcDb::SetAlignment2024(kFALSE);
+  }
   StTpcDb::instance()->SetDriftVelocity();
   
   if (IAttr("ExB")) { 
+    if(! IAttr("OSpaceFXT") && St_beamInfoC::instance()->IsFixedTarget() ) {
+      SetAttr("OSpaceFXT"  , kTRUE);
+      SetAttr("OSpaceZ2"   , kFALSE);
+    }
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
@@ -339,7 +364,14 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     new StMagUtilities(gStTpcDb, option);
 #endif
   }
-  StTpcDb::instance()->SetTpcRotations();
+  if (IAttr("Cosmics")) {
+    StTpcDb::SetCosmics(kTRUE);
+    gMessMgr->Info() << "StTpcDbMaker::Use Cosmics " << endm;
+  }
+  if (  gROOT->GetClass("StTpcRTSHitMaker") || gROOT->GetClass("StiMaker")) {
+    St_tpcPadGainT0C::instance();  // activate extra gain corrections for tpx
+    St_itpcPadGainT0C::instance(); // activate extra gain corrections for iTPC
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -350,35 +382,6 @@ Int_t StTpcDbMaker::Make(){
     return kStEOF;
   }
   StTpcDb::instance()->SetDriftVelocity();
-#if 0
-  if (IAttr("laserIT")) {
-    St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
-    StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
-    if (pEvent) {
-      const StTriggerIdCollection* trig = pEvent->triggerIdCollection();
-      if (trig) {
-	const StTriggerId *nominal = trig->nominal();
-	if (nominal) {
-	  Int_t TriggerId = 0;
-	  StTpcDb::instance()->SetTriggerId(TriggerId);
-	  static Int_t goodIds[2] = {9200,9201}; // Laser trigger IDs
-	  for (Int_t i = 0; i < 2; i++) {
-	    if (nominal->isTrigger(goodIds[i])) {TriggerId = goodIds[i]; break;}
-	  }
-	  if (TriggerId) {
-	    St_trgTimeOffsetC::instance()->SetLaser(kTRUE);
-	    StTpcDb::instance()->SetTriggerId(TriggerId);
-	  }
-	}
-      }
-      if (IAttr("OAbortGap")) {
-        StTriggerData* trg = pEvent->triggerData();
-        if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
-      }
-    }
-    if (! St_trgTimeOffsetC::instance()->IsLaser()) return kStSkip;
-  }
-#endif
   //  SetTpcRotations();
   return kStOK;
 }
