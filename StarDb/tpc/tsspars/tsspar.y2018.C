@@ -1,4 +1,6 @@
+#ifndef __CINT__
 #include "tables/St_tss_tsspar_Table.h"
+#endif
 
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
