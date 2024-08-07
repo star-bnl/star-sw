@@ -17,7 +17,7 @@ template<class T> class StiCompositeTreeNode;
 class StiHitErrorCalculator;
 class StiElossCalculator;
 class StiDetector;
-
+class StiTpcHitErrorMDF4;
 typedef std::vector<StiDetector*> StiDetVect;
 
 
@@ -84,7 +84,9 @@ public:
     StiCompositeTreeNode<StiDetector> * getTreeNode() const {return mNode;}
     
     void setHitErrorCalculator(const StiHitErrorCalculator * calculator) {_hitErrorCalculator = calculator;}
+    void setHitErrorCalculatorMDF4(const StiTpcHitErrorMDF4    * calculator) {_hitErrorCalculatorMDF4 = calculator;}
     const StiHitErrorCalculator * getHitErrorCalculator() const {return _hitErrorCalculator;}
+    const StiTpcHitErrorMDF4    * getHitErrorCalculatorMDF4() const {return _hitErrorCalculatorMDF4;}
 
     void setGroupId(int id) { _groupId = _groupId < 0 ? id : _groupId; }
     int  getGroupId() const {return _groupId;}
@@ -115,6 +117,7 @@ public:
 
     /// Hit Error Calculator for this detector
     const StiHitErrorCalculator * _hitErrorCalculator;
+    const StiTpcHitErrorMDF4        *_hitErrorCalculatorMDF4;
     
     /// Continuous scatter attributes.
     StiMaterial *gas;         
