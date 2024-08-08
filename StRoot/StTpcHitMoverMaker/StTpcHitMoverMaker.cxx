@@ -7,7 +7,6 @@
 #ifdef __CORRECT_CHARGE__
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #endif /* __CORRECT_CHARGE__ */
-#include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
@@ -34,10 +33,6 @@ StTpcHitMover::~StTpcHitMover() {
   FlushDB();
 }
 //________________________________________________________________________________
-Int_t StTpcHitMover::Init() {
-  return StMaker::Init();
-}
-//________________________________________________________________________________
 Int_t StTpcHitMover::InitRun(Int_t runnumber) {
   FlushDB();
   return kStOk;
@@ -54,24 +49,29 @@ Int_t StTpcHitMover::Make() {
     return kStSkip;
   }
   static StGlobalCoordinate    coorG;
+  static St_tpcTimeBucketCorC *tpcTimeBucketCor = St_tpcTimeBucketCorC::instance();
+  if (tpcTimeBucketCor && (tpcTimeBucketCor->nrows() == 0 || StTpcDb::IsOldScheme())) tpcTimeBucketCor = 0;
   Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
+  Double_t triggerOffset = 0;
+  int doEPDT0Correction = 0;
   if (! pEvent) {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
   }
 
+  double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+  double ebyeT0 = (IAttr("EbyET0") ? StEbyET0::Instance()->getT0(pEvent) / mTimeBinWidth : 0);
+  if (pEvent->epdCollection()) {
 
 //	EPD (or other trigger detector) based event-by-event correction for the hit timing
-	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
         // StEbyET0 returns microsec, will need it in time buckets
-        double ebyeT0 = (IAttr("EbyET0") ? StEbyET0::Instance()->getT0(pEvent) / mTimeBinWidth : 0);
 
-	int ew = 0;
+// 	int ew = 0;
         int TAC = 0;
 	int maxTAC = -1;
 
-	int doEPDT0Correction = StTpcBXT0CorrEPDC::instance()->nrows();
+	doEPDT0Correction = StTpcBXT0CorrEPDC::instance()->nrows();
 
 	if (doEPDT0Correction) {
 		StEpdCollection * epdCol = pEvent->epdCollection();
@@ -83,17 +83,19 @@ Int_t StTpcHitMover::Make() {
 				StEpdHit * epdHit = dynamic_cast<StEpdHit*>(epdHits[i]);
 				TAC = 0;
 				if (epdHit->tile() > 9)  continue; // only tiles 1 - 9 have timing info
-				if (epdHit->id() < 0) ew = -1; // tile is on the east
-				else ew = 1;
+// 				if (epdHit->id() < 0) ew = -1; // tile is on the east
+// 				else ew = 1;
 				if (epdHit->adc() < 100) continue;
 				TAC = epdHit->tac(); // this is the timing
 				if (TAC > maxTAC) maxTAC = TAC;
 			}
 		}
+		double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
+		triggerOffset = StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
 	}
 //	======================================================
-
-  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
+  }
+//  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
   if (! gStTpcDb) {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
     return kStErr;
@@ -119,14 +121,14 @@ Int_t StTpcHitMover::Make() {
       if (sectorCollection) {
 	Int_t sector = i + 1;
 
-	double driftVelocity = StTpcDb::instance()->DriftVelocity(sector);
+	//	double driftVelocity = StTpcDb::instance()->DriftVelocity(sector);
 
 	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
 	for (int j = 0; j< numberOfPadrows; j++) {
 	  Int_t row = j + 1;
-	  Int_t io = 0;
-	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
-	  Double_t padlength = (io == 0) ? 
+	  Int_t io = 1;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 0;
+	  Double_t padlength = (io == 1) ? 
 	    St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : 
 	    St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
 	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
@@ -152,22 +154,24 @@ Int_t StTpcHitMover::Make() {
 		  moveTpcHit(coorL,coorG);
 		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
 		  tpcHit->setPosition(xyzF);
-		} else { //  transoform from original pad and time bucket measurements
+		} else { //  transform from original pad and time bucket measurements
 		  Float_t pad  = tpcHit->pad();
 		  Float_t time = tpcHit->timeBucket();
-		  if (! StTpcDb::IsOldScheme()) {
-		    if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
-		      Int_t io = 0;
-		      if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 1;
+		  if (tpcTimeBucketCor) {
+		    if (TMath::Abs(209.4 - TMath::Abs(tpcHit->position().z())) < 3.0) {
+		      // Don't touch prompt hits
+		    } else if (tpcTimeBucketCor) {
 		      Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
-		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
+		      Int_t iowe = io;
+		      if (sector > 12 && tpcTimeBucketCor->nrows() >= 4) iowe += 2;
+		      time += tpcTimeBucketCor->CalcCorrection(iowe, noTmbks);
 		    }
 		  }
 //		THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
-		if (doEPDT0Correction) time += StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
+		  if (doEPDT0Correction) time += triggerOffset;
                   time += ebyeT0;
 //		======================================================
-
+		  tpcHit->setTimeBucket(time);
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
 		  StTpcLocalSectorCoordinate  coorS;
 		  transform(padcoord,coorS,kFALSE);

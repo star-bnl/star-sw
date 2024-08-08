@@ -1,7 +1,3 @@
-#ifndef __CINT__
-#include "tables/St_MagFactor_Table.h"
-#endif
-
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // StarDb/.data/StarDb/RunLog/MagFactor Allocated rows: 1  Used rows: 1  Row size: 4 bytes
@@ -13,7 +9,7 @@ MagFactor_st row;
 St_MagFactor *tableSet = new St_MagFactor("MagFactor",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.ScaleFactor	 =         -1; // ;
+    row.ScaleFactor	 =         1; // Run XIX starts with FF
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;

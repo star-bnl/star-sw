@@ -1,3 +1,4 @@
+#include "Riostream.h"
 #include "TMath.h"
 #include "StarChairDefs.h"
 #include "St_db_Maker/St_db_Maker.h"
@@ -64,15 +65,15 @@ void StiTpcHitErrorMDF4::calculateError(Double_t _z,  Double_t _eta, Double_t _t
 					Double_t &ecross, Double_t &edip, 
 					Double_t fudgeFactor, Double_t AdcL, 
 					Double_t *dZ, Double_t *dX) {
-  static const Double_t tenMicrons = 1e-3;
-  static const Double_t min2Err = tenMicrons*tenMicrons;
+  static const Double_t hundredMicrons = 1e-2;
+  static const Double_t min2Err = hundredMicrons*hundredMicrons;
   static const Double_t max2Err = 1.;
   static const Double_t scale = 1.;
   convert(_z, _eta, _tanl, AdcL);
   Double_t dPadSigmaSQ  = Eval(  0, fxx);
   Double_t dTimeSigmaSQ = Eval(  2, fxx);
-  ecross = scale*padPitch() *padPitch() *dPadSigmaSQ  * fudgeFactor;
-  edip   = scale*timePitch()*timePitch()*dTimeSigmaSQ * fudgeFactor;
+  ecross = scale*padPitch() *padPitch() *dPadSigmaSQ ;
+  edip   = scale*timePitch()*timePitch()*dTimeSigmaSQ;
   Int_t fail = 0;
   if (ecross< min2Err) {ecross = min2Err; fail++;}
   if (ecross> max2Err) {ecross = max2Err; fail++;}
@@ -91,6 +92,19 @@ void StiTpcHitErrorMDF4::calculateError(Double_t _z,  Double_t _eta, Double_t _t
       Double_t dPad         = Eval( 1, fxx);
       *dX = - padPitch()*dPad;
     }
+  }
+  if (fudgeFactor > 1.0) {
+    ecross *= fudgeFactor;
+    edip   *= fudgeFactor;
+  }
+  static Int_t _debug = 0;
+  if (_debug) {
+    cout << "z = " << _z << " eta = " << _eta << " tanl = " << _tanl << " AdcL = " << AdcL << " fudgeFactor = " << fudgeFactor
+	 << ": ecross = " << ecross << " edip = " << edip;
+    if (dZ) cout << " dZ = " << *dZ;
+    if (dX) cout << " dX = " << *dX;
+    cout << endl;
+    _debug++;
   }
 }
 MakeChairInstance2(MDFCorrection4,StiTpcInnerHitErrorMDF4,Calibrations/tracker/TpcInnerHitErrorMDF4);
