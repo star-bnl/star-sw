@@ -133,7 +133,7 @@ public:
 virtual ~StXRefMain();
 virtual  	void  		Split()=0;
 virtual	       	StXRefMain     *MakeMain() {return this;}
- virtual		      void      Synchro(int /* toMain */){};
+virtual		      void      Synchro(int toMain){};
 ClassDef(StXRefMain,1)
 };
 
