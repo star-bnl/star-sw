@@ -53,4 +53,5 @@ void StMuFttCluster::set( StFttCluster * clu ){
     mSumAdc      = clu->sumAdc();
     mX           = clu->x();
     mSigma       = clu->sigma();
+    mIdTruth     = clu->idTruth();
 }
