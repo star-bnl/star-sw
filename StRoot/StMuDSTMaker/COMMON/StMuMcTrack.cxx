@@ -30,6 +30,14 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), m
     mHits[ktof] = 0xff & t.n_tof_hit;  /* Nhits in tof */
     mHits[ktpc] = 0xff & t.n_tpc_hit;  /* Nhits in tpc */
     mHits[kvpd] = 0xff & t.n_vpd_hit;  /* Nhits in vpd */
+    mHits[ketr] = 0xff & t.n_etr_hit;  /* Nhits in etr */
+    mHits[khca] = 0xff & t.n_hca_hit;  /* Nhits in hca */
+    mHits[kfts] = 0xff & t.n_fts_hit;  /* Nhits in fts */
+    mHits[keto] = 0xff & t.n_eto_hit;  /* Nhits in eto */
+    mHits[kstg] = 0xff & t.n_stg_hit;  /* Nhits in stg */
+    mHits[kwca] = 0xff & t.n_wca_hit;  /* Nhits in wca */
+    mHits[kpre] = 0xff & t.n_pre_hit;  /* Nhits in pre */
+    mHits[kepd] = 0xff & t.n_epd_hit;  /* Nhits in epd */
 
 assert(t.pt<0 || mPxyz.perp()>1e-6);
 
