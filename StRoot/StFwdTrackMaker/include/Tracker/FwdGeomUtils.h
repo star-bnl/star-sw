@@ -9,13 +9,19 @@
 class FwdGeomUtils {
     public:
 
+
+
         FwdGeomUtils( TGeoManager * gMan ) {
-            if ( gMan != nullptr )
+            if ( gMan != nullptr ){
                 _navigator = gMan->AddNavigator();
+                _gMan = gMan;
+            }
         }
 
         ~FwdGeomUtils(){
-
+            if ( _gMan != nullptr && _navigator != nullptr){
+                _gMan->RemoveNavigator( _navigator );
+            }
         }
 
         bool cd( const char* path ){
@@ -85,6 +91,7 @@ class FwdGeomUtils {
     TGeoHMatrix   *_matrix    = nullptr;
     TGeoIterator  *_iter      = nullptr;
     TGeoNavigator *_navigator = nullptr;
+    TGeoManager   *_gMan      = nullptr;
 };
 
 #endif
