@@ -36,6 +36,7 @@ class StSCReader
     double getZDCWestNoKiller();
     double getZDCEastNoKiller();
     double getZDCXNoKiller();
+    double getEPDX();
     double getMult();
     double getL0();
     double getBBCX();
@@ -57,6 +58,7 @@ class StSCReader
     sc_t *fSC;
     short flipBBCBkg;
     short useNoKillers;
+    short useEPD;
 };
 
 #endif

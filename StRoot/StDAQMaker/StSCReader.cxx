@@ -36,8 +36,9 @@ void StSCReader::FillTime(  unsigned int utime)
   //but new DAQ reader only gets used for 2009+ anyhow
   time_t UTime = utime; //er->getEventInfo().UnixTime;
   struct tm *time=gmtime(&UTime);
-  flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
-  useNoKillers = (time->tm_year > 110 ? 1 : 0);;
+  flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0);
+  useNoKillers = (time->tm_year > 110 ? 1 : 0);
+  useEPD = (time->tm_year > 118 || (time->tm_year = 118 && time->tm_mon > 2) ? 1 : 0);
 }
 
 double StSCReader::getCTBWest() {
@@ -78,6 +79,10 @@ double StSCReader::getZDCEastNoKiller() {
 
 double StSCReader::getZDCXNoKiller() {
   return sc.rich_scalers[14];
+}
+
+double StSCReader::getEPDX() {
+  return sc.rich_scalers[13];
 }
 
 double StSCReader::getMult() {
@@ -170,7 +175,11 @@ TDataSet* StSCReader::getSCTable(unsigned long runno) {
     tb->ctbEast      = getCTBEast();
     tb->ctbTOFp      = getCTBOrTOFp();
   }
-  tb->tofp         = getTOFp();
+  if (useEPD) { // use otherwise empty space
+    tb->tofp         = getEPDX();
+  } else {
+    tb->tofp         = getTOFp();
+  }
   tb->zdcWest      = getZDCWest();
   tb->zdcEast      = getZDCEast();
   tb->zdcX         = getZDCX();

@@ -21,6 +21,7 @@ class St_trigDetSumsC : public TChair {
   Double_t 	ctbEast(Int_t i = 0) 	        {return validity(Struct(i)->ctbEast);}
   Double_t 	ctbTOFp(Int_t i = 0) 	        {return validity(Struct(i)->ctbTOFp);}
   Double_t 	tofp(Int_t i = 0) 	        {return validity(Struct(i)->tofp);}
+  Double_t 	epdx(Int_t i = 0) 	        {return validity(Struct(i)->tofp);} // re-use for EPD
   Double_t 	zdcWest(Int_t i = 0) 	        {return validity(Struct(i)->zdcWest);}
   Double_t 	zdcEast(Int_t i = 0) 	        {return validity(Struct(i)->zdcEast);}
   Double_t 	zdcX(Int_t i = 0) 	        {return validity(Struct(i)->zdcX);}
@@ -42,6 +43,7 @@ class St_trigDetSumsC : public TChair {
   Double_t getCTBEast() {return ctbEast();}
   Double_t getCTBOrTOFp() {return ctbTOFp();}
   Double_t getTOFp() {return tofp();}
+  Double_t getEPDX() {return epdx();}
   Double_t getZDCWest() {return zdcWest();}
   Double_t getZDCEast() {return zdcEast();}
   Double_t getZDCX() {return zdcX();}
