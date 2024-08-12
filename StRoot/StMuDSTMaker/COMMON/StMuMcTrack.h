@@ -70,9 +70,9 @@ class StMuMcTrack : public TObject {
   UChar_t     		No_vpd_hit()   const {return NoHits(kvpd);}   /* Nhits in vpd */   
   UChar_t     		No_etr_hit()   const {return NoHits(ketr);}   /* Nhits in etr */
   UChar_t     		No_hca_hit()   const {return NoHits(khca);}   /* Nhits in hca */
-  UChar_t     		No_fts_hit()   const {return NoHits(kfts);}   /* Nhits in fts */
+  UChar_t     		No_fts_hit()   const {return NoHits(kfts);}   /* Nhits in fts (fst) */
   UChar_t     		No_eto_hit()   const {return NoHits(keto);}   /* Nhits in eto */
-  UChar_t     		No_stg_hit()   const {return NoHits(kstg);}   /* Nhits in stg */
+  UChar_t     		No_stg_hit()   const {return NoHits(kstg);}   /* Nhits in stgc (ftt) */
   UChar_t     		No_wca_hit()   const {return NoHits(kwca);}   /* Nhits in wca */
   UChar_t     		No_pre_hit()   const {return NoHits(kpre);}   /* Nhits in pre */
   UChar_t     		No_epd_hit()   const {return NoHits(kepd);}   /* Nhits in epd */
