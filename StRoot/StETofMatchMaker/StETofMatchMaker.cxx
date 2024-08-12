@@ -3234,9 +3234,7 @@ void StETofMatchMaker::checkClockJumps()
 //---------------------------------------------------------------------------
 void
 StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap )
-{
-
-
+{  
   // sort & flag Match candidates
 
     // define temporary vectors for iterating through matchCandVec
@@ -3246,79 +3244,63 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
     tempMMVec.clear();
     std::map< Int_t, eTofHitVec >  MMMap;
     MMMap.clear();
-
     eTofHitVec ssVec;
-
-     // get multi Hit sets 
-    // int deltaSize = 0;
     
+    // get multi Hit sets 
     eTofHitVecIter tempIter   = tempVec.begin();    
-    eTofHitVecIter erasedIter = erasedVec.begin();
     
-
     if(tempVec.size() < 1 ) return;
-
-    while( tempVec.size() != 0 ) { 
-
-      tempIter   = tempVec.begin();
-      erasedIter = erasedVec.begin();
-
-  
-      tempMMVec.push_back(*tempIter); 
-      erasedVec.erase( erasedIter );
-
-      // int sizeOld = tempMMVec.size();
-      int count =0;
-      int countwhile = 0;
-	
-      for(unsigned int s =0; s < tempMMVec.size(); s++){
-	 
-	count++;
-
-	erasedIter = erasedVec.begin();
-
-	if(erasedVec.size() <= 0 ) continue;
-
-	countwhile = 0;
-
-	while( erasedIter != erasedVec.end() ) {
-	  
-	    countwhile++;
-
-	  if(tempMMVec.at(s).trackId == erasedIter->trackId && tempMMVec.at(s).index2ETofHit == erasedIter->index2ETofHit){
-
-	    erasedVec.erase( erasedIter );
-	    erasedIter++;
-	    continue;}
-	  if(tempMMVec.at(s).trackId == erasedIter->trackId || tempMMVec.at(s).index2ETofHit == erasedIter->index2ETofHit){
-	    if(!mIsSim){
-	      // erasedIter->matchFlag = 0;
-	    }
-	    tempMMVec.push_back(*erasedIter);
-
-	    erasedVec.erase( erasedIter );
-	    
-	  } 
-	  if( erasedVec.size() <= 0 ) break;
-	  if( erasedIter == erasedVec.end()) break;
-	  erasedIter++;
-
-	} //while inner
-
-      }// for
-
-      // deltaSize = sizeOld - tempMMVec.size();
-
-      MMMap[tempMMVec.begin()->trackId] = tempMMVec;
-      tempMMVec.clear();
-
-      tempVec = erasedVec;
-    }
     
+    eTofHitVec storeVecTmp;
+    
+    while(tempVec.size() > 0){
+      
+      std::vector< int > trackIdVec;
+      std::vector< int > hitIdVec;
+      trackIdVec.clear();
+      trackIdVec.resize(0);
+      hitIdVec.clear();
+      hitIdVec.resize(0);
+      tempIter = tempVec.begin();
+      storeVecTmp.push_back(tempVec.at(0));
+      trackIdVec.push_back(tempVec.at(0).trackId);
+      hitIdVec.push_back(tempVec.at(0).index2ETofHit);
+      tempVec.erase(tempVec.begin());
+      bool done = false;
+
+      while(done == false){
+
+	unsigned int sizeOld = storeVecTmp.size();
+	unsigned int size = tempVec.size();
+	tempIter= tempVec.begin();
+
+	for(unsigned int i=0; i < size; i++){
+
+	  if( (std::find(trackIdVec.begin(), trackIdVec.end(), tempVec.at(i).trackId) != trackIdVec.end()) || (std::find(hitIdVec.begin(), hitIdVec.end(), tempVec.at(i).index2ETofHit) != hitIdVec.end())  ){ 
+	      
+	    storeVecTmp.push_back(tempVec.at(i));
+	    trackIdVec.push_back(tempVec.at(i).trackId);
+	    hitIdVec.push_back(tempVec.at(i).index2ETofHit);
+	    tempVec.erase(tempIter);
+
+	    i = 0;
+	    size = tempVec.size();
+	    tempIter = tempVec.begin();
+	  }else{		  
+	  tempIter++;
+	  }
+	}
+  
+      if(sizeOld == storeVecTmp.size() ) done = true;
+
+      }// while done
+
+      MMMap[storeVecTmp.begin()->trackId] = storeVecTmp;
+      storeVecTmp.clear();
+
+    }// while all hits on counter
 
     outputMap = MMMap;
-
-
 }
 //---------------------------------------------------------------------------
 void 
@@ -3926,4 +3908,115 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	}						
       }// loop over MMMap
   }//loop over counters
+}
+
+
+void
+StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
+  
+  eTofHitVec overlapHitVec;
+  
+  //eTofHitVecIter detHitIter;
+  //eTofHitVecIter detHitIter2;
+  //eTofHitVecIter detHitIter3;
+
+  //int counter1 =0;
+  // int counter2 =0;
+  
+  eTofHitVec tempVecOL        = finalMatchVec;
+  
+  std::vector<int> trackIdVec;
+  
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+    
+    if( !(std::find(trackIdVec.begin(), trackIdVec.end(), finalMatchVec.at(i).trackId) != trackIdVec.end())){
+      
+      trackIdVec.push_back(finalMatchVec.at(i).trackId);
+
+      int counterId1 = (finalMatchVec.at(i).sector*100) + (finalMatchVec.at(i).plane*10) + (finalMatchVec.at(i).counter);
+      
+      for(unsigned int j =0; j< finalMatchVec.size(); j++){
+	
+	int counterId2 = (finalMatchVec.at(j).sector*100) + (finalMatchVec.at(j).plane*10) + (finalMatchVec.at(j).counter);
+	
+	if(counterId1 != counterId2  && finalMatchVec.at(i).trackId == finalMatchVec.at(j).trackId){
+	  
+	  if(!(finalMatchVec.at(j).matchFlag % 2))	finalMatchVec.at(j).matchFlag++;
+	  if(!(finalMatchVec.at(i).matchFlag % 2))	finalMatchVec.at(i).matchFlag++;
+	  
+	}
+      }  
+    }else{    
+      continue;
+    }
+  }
+
+  eTofHitVec tmpVec;
+  eTofHitVec OlVec;
+  std::map< Int_t, eTofHitVec >  overlapHitMap;
+
+  tmpVec = finalMatchVec;
+  finalMatchVec.clear();
+  finalMatchVec.resize(0);
+  
+  for(unsigned int i=0; i< tmpVec.size(); i++){ 
+
+    if(tmpVec.at(i).matchFlag%2 == 0){
+      finalMatchVec.push_back(tmpVec.at(i));
+    }else{
+      OlVec.push_back(tmpVec.at(i));
+    }
+  }
+
+  // sort out OlVec
+  for(unsigned int i =0; i < OlVec.size(); i++){
+    overlapHitMap[OlVec.at(i).trackId].push_back(OlVec.at(i));
+  }
+
+  map<Int_t, eTofHitVec >::iterator it;
+  
+  for (it = overlapHitMap.begin(); it != overlapHitMap.end(); it++){
+    
+    eTofHitVec trackVec = it->second;
+    int ind_best;
+    int dr_best = 9999;
+    
+    for(unsigned int n=0; n< trackVec.size();n++){
+      
+      float dr = sqrt((trackVec.at(n).deltaX * trackVec.at(n).deltaX ) + (trackVec.at(n).deltaY * trackVec.at(n).deltaY ));
+      
+      if(dr < dr_best){	    
+	dr_best=dr;
+	ind_best=n;
+	  }
+    }
+    finalMatchVec.push_back(trackVec.at(ind_best));
+  }
+
+  //fix matchFlags 
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+
+    char singlemixdouble = 9;
+    char matchcase = 9;
+    char isOl = 9;
+
+    if((finalMatchVec.at(i).matchFlag / 100 ) == 1) matchcase = 3;
+    if((finalMatchVec.at(i).matchFlag / 100 ) == 2) matchcase = 2;
+    if((finalMatchVec.at(i).matchFlag / 100 ) == 3) matchcase = 1;
+    if((finalMatchVec.at(i).matchFlag / 100 ) == 4) matchcase = 0;
+
+    if((finalMatchVec.at(i).matchFlag % 2)){isOl = 0;}else{isOl = 1;}
+
+    if((finalMatchVec.at(i).matchFlag % 100 ) == 10 || (finalMatchVec.at(i).matchFlag % 100 ) == 11) singlemixdouble = 2;
+    if((finalMatchVec.at(i).matchFlag % 100 ) == 20 || (finalMatchVec.at(i).matchFlag % 100 ) == 21) singlemixdouble = 0;
+    if((finalMatchVec.at(i).matchFlag % 100 ) == 30 || (finalMatchVec.at(i).matchFlag % 100 ) == 31) singlemixdouble = 2;
+    if((finalMatchVec.at(i).matchFlag % 100 ) == 40 || (finalMatchVec.at(i).matchFlag % 100 ) == 41) singlemixdouble = 0;
+    if((finalMatchVec.at(i).matchFlag % 100 ) == 50 || (finalMatchVec.at(i).matchFlag % 100 ) == 51) singlemixdouble = 1;
+
+    char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
+
+    if(singlemixdouble == 9 || isOl == 9 || matchcase == 9) newFlag = 0;
+
+    finalMatchVec.at(i).matchFlag = newFlag;
+  }
 }
