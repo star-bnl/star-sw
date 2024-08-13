@@ -3973,7 +3973,7 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   for (it = overlapHitMap.begin(); it != overlapHitMap.end(); it++){
     
     eTofHitVec trackVec = it->second;
-    int ind_best;
+    int ind_best = 0;
     int dr_best = 9999;
     
     for(unsigned int n=0; n< trackVec.size();n++){
