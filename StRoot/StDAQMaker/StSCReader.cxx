@@ -38,7 +38,7 @@ void StSCReader::FillTime(  unsigned int utime)
   struct tm *time=gmtime(&UTime);
   flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0);
   useNoKillers = (time->tm_year > 110);
-  useEPD = (time->tm_year > 118 || (time->tm_year = 118 && time->tm_mon > 2));
+  useEPD = (time->tm_year > 118 || (time->tm_year == 118 && time->tm_mon > 2));
 }
 
 double StSCReader::getCTBWest() {
