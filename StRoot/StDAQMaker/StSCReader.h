@@ -57,8 +57,8 @@ class StSCReader
 
     sc_t *fSC;
     short flipBBCBkg;
-    short useNoKillers;
-    short useEPD;
+    bool useNoKillers;
+    bool useEPD;
 };
 
 #endif

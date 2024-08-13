@@ -37,8 +37,8 @@ void StSCReader::FillTime(  unsigned int utime)
   time_t UTime = utime; //er->getEventInfo().UnixTime;
   struct tm *time=gmtime(&UTime);
   flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0);
-  useNoKillers = (time->tm_year > 110 ? 1 : 0);
-  useEPD = (time->tm_year > 118 || (time->tm_year = 118 && time->tm_mon > 2) ? 1 : 0);
+  useNoKillers = (time->tm_year > 110);
+  useEPD = (time->tm_year > 118 || (time->tm_year = 118 && time->tm_mon > 2));
 }
 
 double StSCReader::getCTBWest() {
