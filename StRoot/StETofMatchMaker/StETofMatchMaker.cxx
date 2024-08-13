@@ -3235,6 +3235,7 @@ void StETofMatchMaker::checkClockJumps()
 void
 StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap )
 {  
+
   // sort & flag Match candidates
 
     // define temporary vectors for iterating through matchCandVec
@@ -3244,6 +3245,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
     tempMMVec.clear();
     std::map< Int_t, eTofHitVec >  MMMap;
     MMMap.clear();
+
     eTofHitVec ssVec;
     
     // get multi Hit sets 
@@ -3290,7 +3292,6 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
 	  tempIter++;
 	  }
 	}
-  
       if(sizeOld == storeVecTmp.size() ) done = true;
 
       }// while done
@@ -3908,20 +3909,14 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	}						
       }// loop over MMMap
   }//loop over counters
+  
+  sortOutOlDoubles(finalMatchVec);
 }
-
 
 void
 StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   
   eTofHitVec overlapHitVec;
-  
-  //eTofHitVecIter detHitIter;
-  //eTofHitVecIter detHitIter2;
-  //eTofHitVecIter detHitIter3;
-
-  //int counter1 =0;
-  // int counter2 =0;
   
   eTofHitVec tempVecOL        = finalMatchVec;
   

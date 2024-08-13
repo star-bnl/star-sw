@@ -163,6 +163,7 @@ void bfcread_hist_prefixes_add(
            HU[nbranch]->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
       } // found hists
+      HU[nbranch]->Clear();
 
      } // loop over prefixes
 

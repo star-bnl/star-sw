@@ -1,4 +1,4 @@
-#if !defined(__CINT__)
+#if !defined(__CINT__) && !defined(__CLING__)
 #include "TROOT.h"
 #endif
 #include "Bfc.h"

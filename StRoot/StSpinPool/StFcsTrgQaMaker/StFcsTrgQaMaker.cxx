@@ -7,16 +7,17 @@
 
 #include "StFcsTrgQaMaker.h"
 
-#include "StRoot/StEvent/StEvent.h"
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/StEvent/StTriggerData.h"
-#include "StRoot/StEvent/StFcsCollection.h"
-#include "StRoot/StEvent/StFcsHit.h"
-#include "StRoot/StEvent/StFcsCluster.h"
-#include "StRoot/StFcsDbMaker/StFcsDb.h"
-#include "StRoot/StSpinPool/StFcsTriggerSimMaker/StFcsTriggerSimMaker.h"
+#include "StMessMgr.h"
+//#include "Stypes.h"
+#include "StEvent/StEventTypes.h"
+#include "StEvent/StTriggerData.h"
+#include "StEvent/StFcsCollection.h"
+#include "StEvent/StFcsHit.h"
+#include "StEvent/StFcsCluster.h"
+#include "StFcsDbMaker/StFcsDb.h"
+#include "StSpinPool/StFcsTriggerSimMaker/StFcsTriggerSimMaker.h"
 
-#include "StRoot/RTS/src/TRG_FCS/fcs_trg_base.h"
+#include "RTS/src/TRG_FCS/fcs_trg_base.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -122,6 +123,7 @@ Int_t StFcsTrgQaMaker::Init(){
   mAdc[3]=new TH2F("HS_Id_Adc","HcalSouth; Id; ADC",mFcsDb->maxId(3),0.0,mFcsDb->maxId(3),500,0.0,maxadc);
   mAdc[4]=new TH2F("PN_Id_Adc","PresNorth; Id; ADC",mFcsDb->maxId(4),0.0,mFcsDb->maxId(4),500,0.0,maxadc);
   mAdc[5]=new TH2F("PS_Id_Adc","PresSouth; Id; ADC",mFcsDb->maxId(5),0.0,mFcsDb->maxId(5),500,0.0,maxadc);
+
   return kStOK;
 };
 
@@ -133,7 +135,9 @@ Int_t StFcsTrgQaMaker::Make() {
     }
     
     //Getting StEvent and FcsCollection
-    StEvent* event= (StEvent*)GetInputDS("StEvent");
+    StEvent* event=0;
+    event = static_cast<StEvent*>(GetInputDS("StEvent"));
+
     StFcsCollection *fcs = 0;
     if(!event) {
       LOG_INFO << "No StEvent found" << endm;
