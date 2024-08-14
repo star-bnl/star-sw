@@ -9,8 +9,6 @@
 
 class StEvent;
 
-float DEGS_TO_RAD = 3.14159f/180.0f;
-float SCALE = 0.1;
 
 class ObjExporter {
 public:
@@ -33,6 +31,7 @@ public:
         int p, s, i, j;
         float x, y, z, out;
         int nPitch = nLongitude + 1;
+        const float DEGS_TO_RAD = 3.14159f/180.0f;
 
         float pitchInc = (180. / (float)nPitch) * DEGS_TO_RAD;
         float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
@@ -209,6 +208,7 @@ public:
         fout << "usemtl stgc_hits\n" << endl;
         float pz[] = {280.90499, 303.70498, 326.60501, 349.40499};
         TVector3 cp;
+        const float SCALE = 0.1;
         
 
         for ( size_t i = 0; i < event->fttCollection()->numberOfClusters(); i++ ){
@@ -263,6 +263,7 @@ public:
             std::vector<float>    &fcsClusterEnergy
             ){
 		
+        const float SCALE = 0.1;
 		LOG_INFO << "Writing: " << filename << endm;
         numVertices = 0;
         // OPEN output

@@ -7,7 +7,9 @@ class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
-	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ktot};
+	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, 
+       ketr, khca, kfts, keto, kstg, kwca, kpre, kepd,
+       ktot};
   StMuMcTrack(const g2t_track_st &t);
 #if 0
   StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), mId(t.id), mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
@@ -65,7 +67,15 @@ class StMuMcTrack : public TObject {
   UChar_t     		No_pix_hit()   const {return NoHits(kpix);}   /* Nhits in pix */			   
   UChar_t     		No_tof_hit()   const {return NoHits(ktof);}   /* Nhits in tof */			   
   UChar_t     		No_tpc_hit()   const {return NoHits(ktpc);}   /* Nhits in tpc */			   
-  UChar_t     		No_vpd_hit()   const {return NoHits(kvpd);}   /* Nhits in vpd */                     
+  UChar_t     		No_vpd_hit()   const {return NoHits(kvpd);}   /* Nhits in vpd */   
+  UChar_t     		No_etr_hit()   const {return NoHits(ketr);}   /* Nhits in etr */
+  UChar_t     		No_hca_hit()   const {return NoHits(khca);}   /* Nhits in hca */
+  UChar_t     		No_fts_hit()   const {return NoHits(kfts);}   /* Nhits in fts (fst) */
+  UChar_t     		No_eto_hit()   const {return NoHits(keto);}   /* Nhits in eto */
+  UChar_t     		No_stg_hit()   const {return NoHits(kstg);}   /* Nhits in stgc (ftt) */
+  UChar_t     		No_wca_hit()   const {return NoHits(kwca);}   /* Nhits in wca */
+  UChar_t     		No_pre_hit()   const {return NoHits(kpre);}   /* Nhits in pre */
+  UChar_t     		No_epd_hit()   const {return NoHits(kepd);}   /* Nhits in epd */
   Int_t                 ItrmdVertex()  const {return mItrmdVertex;} /* First intermediate vertex */	   
   Int_t          	IdVx       ()  const {return mIdVx;       } /* Id of start vertex of track */	   
   Int_t          	IdVxEnd    ()  const {return mIdVxEnd;    } /* Id of stop vertex of this track */ 
@@ -94,7 +104,7 @@ class StMuMcTrack : public TObject {
   Float_t        mpT;          /* Transverse momentum */
   Float_t        mPtot;        /* Total momentum */
   Float_t        mRapidity;    /* Rapidity */
-  ClassDef(StMuMcTrack,1)
+  ClassDef(StMuMcTrack,2)
 };
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
