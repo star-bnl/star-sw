@@ -22,7 +22,10 @@ mSumAdc(0.0),
 mX(0.0),
 mSigma(0.0),
 mRawHits(0),
-mNeighbors(0)
+mNeighbors(0),
+mPoints(0),
+mIdTruth(0),
+mQaTruth(0)
 {
 
 }
@@ -54,4 +57,5 @@ void StMuFttCluster::set( StFttCluster * clu ){
     mX           = clu->x();
     mSigma       = clu->sigma();
     mIdTruth     = clu->idTruth();
+    mQaTruth     = clu->qaTruth();
 }
