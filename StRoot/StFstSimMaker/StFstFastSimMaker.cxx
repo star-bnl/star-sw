@@ -59,7 +59,6 @@ StFstFastSimMaker::StFstFastSimMaker(const Char_t *name)
     mNumR{8},
     mNumPHI{128},
     mNumSEC{12},
-    mRaster{0},
     mInEff{0},
     mHist{false},
 	mGEANTPassthrough{false},
@@ -154,19 +153,9 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 	const int MAXR = mNumR;
 	const int MAXPHI = mNumPHI * mNumSEC;
 
-	float X0[] = {0, 0, 0, 0, 0, 0};
-	float Y0[] = {0, 0, 0, 0, 0, 0};
-
 	if ( mGEANTPassthrough ){
 		LOG_INFO << "FST Hits using GEANT xyz directly (no raster etc.)" << endm;
 	}
-	
-	if (mRaster > 0)
-		for (int i = 0; i < 6; i++) {
-			X0[i] = mRaster * TMath::Cos(i * 60 * TMath::DegToRad());
-			Y0[i] = mRaster * TMath::Sin(i * 60 * TMath::DegToRad());
-		}
-
 	
 	// maps for hit and energy for each disk's r-phi strip
 	std::map< FstGlobal::FstKeyTriple, StRnDHit* > hitMap;
@@ -233,10 +222,6 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 		if (trk)
 			isShower = trk->is_shower;
 
-		// raster coordinate offsets
-		double xc = X0[disk_index];
-		double yc = Y0[disk_index];
-
 		// This z-offset is used to shift the hits
 		// to the center of the FST where the tracking planes are defined
 		const double z_delta = 1.755;
@@ -248,17 +233,8 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 		if (z > 200)
 			continue; // skip large disks
 
-		// rastered
-		double rastered_x = x - xc;
-		double rastered_y = y - yc;
-
 		double r = sqrt(x * x + y * y);
 		double p = atan2(y, x);
-
-		// rastered
-		double rr = sqrt(rastered_x * rastered_x + rastered_y * rastered_y);
-		double pp = atan2(rastered_y, rastered_x);
-
 
 		// wrap an angle between 0 and 2pi
 		auto wrapAngle = [&]( double angle ) {
@@ -269,27 +245,22 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 		};
 
 		p = wrapAngle( p );
-		pp = wrapAngle( pp );
 
-		LOG_DEBUG << "rr = " << rr << " pp=" << pp << endm;
+		LOG_DEBUG << "r = " << r << " p=" << p << endm;
 		LOG_DEBUG << "RMIN = " << FstGlobal::RMIN[disk_index] << " RMAX= " << FstGlobal::RMAX[disk_index] << endm;
 
-		// Cuts made on rastered value to require the r value is within limits
-		if (rr < FstGlobal::RMIN[disk_index] || rr > FstGlobal::RMAX[disk_index])
+		// Cuts made on the r value to ensure it is within limits
+		if (r < FstGlobal::RMIN[disk_index] || r > FstGlobal::RMAX[disk_index])
 			continue;
 
-		LOG_DEBUG << "rr = " << rr << endm;
-
 		// Strip numbers on rastered value
-		int r_index = floor(MAXR * (rr - FstGlobal::RMIN[disk_index]) / (FstGlobal::RMAX[disk_index] - FstGlobal::RMIN[disk_index]));
-		
-		// this gives a different conflicting answer for r_index and does not handle r outside of range
+		int r_index = floor(MAXR * (r - FstGlobal::RMIN[disk_index]) / (FstGlobal::RMAX[disk_index] - FstGlobal::RMIN[disk_index]));
 		for (int ii = 0; ii < MAXR; ii++)
-			if (rr > FstGlobal::RSegment[ii] && rr <= FstGlobal::RSegment[ii + 1])
+			if (r > FstGlobal::RSegment[ii] && r <= FstGlobal::RSegment[ii + 1])
 				r_index = ii;
 		
 		// Phi number
-		int phi_index = int(MAXPHI * pp / 2.0 / M_PI);
+		int phi_index = int(MAXPHI * p / 2.0 / M_PI);
 
 		if (r_index >= 8)
 			continue;
@@ -328,8 +299,8 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 			double r0 = (FstGlobal::RSegment[r_index] + FstGlobal::RSegment[r_index + 1]) * 0.5;
 			double dr = FstGlobal::RSegment[r_index + 1] - FstGlobal::RSegment[r_index];
 			
-			double x0 = r0 * cos(p0) + xc;
-			double y0 = r0 * sin(p0) + yc;
+			double x0 = r0 * cos(p0);
+			double y0 = r0 * sin(p0);
 			assert(TMath::Abs(x0) + TMath::Abs(y0) > 0);
 			double dz = 0.03 / FstGlobal::SQRT12;
 			double er = dr / FstGlobal::SQRT12;
