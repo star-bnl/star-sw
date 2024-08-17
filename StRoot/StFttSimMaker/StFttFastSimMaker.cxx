@@ -65,7 +65,7 @@ Int_t StFttFastSimMaker::Make() {
         
         StFttPoint *point = new StFttPoint();
         point->setPlane(plane_id);
-        point->setQuadrant(0); // TODO this could be improved, but it is not used in the current implementation
+        point->setQuadrant(0);
         StThreeVectorD xyz;
         xyz.set(x, y, z);
         point->setXYZ( xyz );
