@@ -771,6 +771,14 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
     m_emc_energy[i]=0;       //!
   }
 
+// for EMC-BSMD hits
+  for (i=0; i<8; i++) {
+    m_emc_hits_per_module[i]=0;         //!
+    m_emc_energy_per_module[i]=0;     //!
+    m_emc_strip_hits_per_module[i]=0;         //!
+    m_emc_strip_energy_per_module[i]=0;     //!
+  }
+
 // for EMC cluster finder
   m_emc_ncl=0;             //!
   m_emc_etotCl=0;          //!
@@ -2014,6 +2022,12 @@ void StQABookHist::BookHistEMC(){
   const Char_t* tit={"Barrel"};
   const Int_t   nx[4] = {40,40,300,20};
   const Int_t   ny[4]  = {120, 120, 60, 900};
+
+  // for BSMD per-module histos
+  Axis_t   ModNumLo[4] = {1.,31.,61.,91.};
+  Axis_t   ModNumHi[4] = {31.,61.,91.,121.};
+  const TString   PerModuleHistName[4] = {"West1","West2","East1","East2"};
+
   Float_t rpi = M_PI + 0.00001;
   TString name, title;
   TArrayD *xb = StEmcMath::binForSmde();
@@ -2025,7 +2039,7 @@ void StQABookHist::BookHistEMC(){
     else m_emc_hits[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
 
     name   = detname[i] + "Energy2D";
-    title  = tit + detname[i] + " energy dist. in eta&phi";
+    title  = tit + detname[i] + " energy dist. in eta-phi";
     if(i==2) m_emc_energy2D[i] = QAH::H2F(name,title, xb->GetSize()-1,xb->GetArray(), ny[i],-rpi,rpi);
     else m_emc_energy2D[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
 
@@ -2039,6 +2053,30 @@ void StQABookHist::BookHistEMC(){
   }
   delete xb;
 
+  for(Int_t i=2; i<4; i++){  // Detector ID for BSMDE and BSMDP (BSMD eta and phi)
+    for (Int_t j=0; j<4; j++){ // split 120 modules into 4 histos
+
+      Int_t k = j;
+      if (i>2) k = j + 4;
+
+      name  = detname[i] + PerModuleHistName[j] + "HitsPerModule";
+      title = tit  + detname[i] + " " + PerModuleHistName[j] + " - hits per module";
+      m_emc_hits_per_module[k] = QAH::H1F(name,title, 30, ModNumLo[j], ModNumHi[j]);
+
+      name   = detname[i] + PerModuleHistName[j] + "EnergyPerModule";
+      title  = tit + detname[i] + " " + PerModuleHistName[j]  + " - energy-weighted hits per module";
+      m_emc_energy_per_module[k] = QAH::H1F(name,title, 30, ModNumLo[j], ModNumHi[j]);
+
+      name  = detname[i] + PerModuleHistName[j] + "StripHitsPerModule";
+      title = tit  + detname[i] + " " + PerModuleHistName[j]  + " - hits in strip (within mod) vs. mod";
+      m_emc_strip_hits_per_module[k] = QAH::H2F(name,title, 30, ModNumLo[j], ModNumHi[j], 150, 1., 151.);
+
+      name   = detname[i] + PerModuleHistName[j] + "StripEnergyPerModule";
+      title  = tit + detname[i] + " " + PerModuleHistName[j]  + " - energy in strip (within mod) vs. mod";
+      m_emc_strip_energy_per_module[k] = QAH::H2F(name,title, 30, ModNumLo[j], ModNumHi[j], 150, 1., 151.);
+    }
+  }
+ 
 // Book the hists for cluster finder
   Int_t greta[4]={40,40,300,20};   // eta bins
   Int_t grphi[4]={120,120,60,900}; // phi bins  => 16-apr by PAI
