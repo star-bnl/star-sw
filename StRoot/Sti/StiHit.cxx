@@ -160,8 +160,8 @@ static int nCall =0; nCall++;
 	   ,StiDetector::mgValue[0],StiDetector::mgValue[1])
          << endm;
 	 //	 assert( detector->insideL(dd,7,1.5));     // 
-	 static Int_t ibreak = 0;
-	 ibreak++;
+// 	 static Int_t ibreak = 0;
+// 	 ibreak++;
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
