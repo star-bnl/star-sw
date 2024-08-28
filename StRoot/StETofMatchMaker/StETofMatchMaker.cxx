@@ -4005,11 +4005,19 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
 
     isOl = 1 - ( finalMatchVec.at(i).matchFlag % 2 );
 
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 10 || (finalMatchVec.at(i).matchFlag % 100 ) == 11) singlemixdouble = 2;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 20 || (finalMatchVec.at(i).matchFlag % 100 ) == 21) singlemixdouble = 0;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 30 || (finalMatchVec.at(i).matchFlag % 100 ) == 31) singlemixdouble = 2;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 40 || (finalMatchVec.at(i).matchFlag % 100 ) == 41) singlemixdouble = 0;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 50 || (finalMatchVec.at(i).matchFlag % 100 ) == 51) singlemixdouble = 1;
+    switch (finalMatchVec.at(i).matchFlag % 100) {
+      case 10 :
+      case 11 :
+      case 30 :
+      case 31 : singlemixdouble = 2; break;
+      case 20 :
+      case 21 :
+      case 40 :
+      case 41 : singlemixdouble = 0; break;
+      case 50 :
+      case 51 : singlemixdouble = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for singlemixdouble!" << endm; }
+    }
 
     char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
 
