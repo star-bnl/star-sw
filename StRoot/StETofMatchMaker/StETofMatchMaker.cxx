@@ -3292,7 +3292,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
 	  tempIter++;
 	  }
 	}
-      if(sizeOld == storeVecTmp.size() ) done = true;
+      done = ( sizeOld == storeVecTmp.size() );
 
       }// while done
 
