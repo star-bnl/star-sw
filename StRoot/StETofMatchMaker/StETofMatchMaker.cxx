@@ -3995,10 +3995,13 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
     char matchcase = 9;
     char isOl = 9;
 
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 1) matchcase = 3;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 2) matchcase = 2;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 3) matchcase = 1;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 4) matchcase = 0;
+    switch (finalMatchVec.at(i).matchFlag / 100) {
+      case 1 : matchcase = 3; break;
+      case 2 : matchcase = 2; break;
+      case 3 : matchcase = 1; break;
+      case 4 : matchcase = 0; break;
+      default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
+    }
 
     if((finalMatchVec.at(i).matchFlag % 2)){isOl = 0;}else{isOl = 1;}
 
