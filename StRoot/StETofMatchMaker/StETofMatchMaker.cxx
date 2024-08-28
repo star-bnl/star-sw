@@ -3270,7 +3270,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
       tempVec.erase(tempVec.begin());
       bool done = false;
 
-      while(done == false){
+      while(!done){
 
 	unsigned int sizeOld = storeVecTmp.size();
 	unsigned int size = tempVec.size();
