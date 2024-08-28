@@ -4003,7 +4003,7 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
       default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
     }
 
-    if((finalMatchVec.at(i).matchFlag % 2)){isOl = 0;}else{isOl = 1;}
+    isOl = 1 - ( finalMatchVec.at(i).matchFlag % 2 );
 
     if((finalMatchVec.at(i).matchFlag % 100 ) == 10 || (finalMatchVec.at(i).matchFlag % 100 ) == 11) singlemixdouble = 2;
     if((finalMatchVec.at(i).matchFlag % 100 ) == 20 || (finalMatchVec.at(i).matchFlag % 100 ) == 21) singlemixdouble = 0;
