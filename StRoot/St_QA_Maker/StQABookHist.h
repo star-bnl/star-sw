@@ -658,6 +658,10 @@ class StQABookHist : public TObject {
   TH2F *m_emc_energy2D[4];     //!
   TH1F *m_emc_adc[4];          //!
   TH1F *m_emc_energy[4];       //!
+  TH1F *m_emc_hits_per_module[8];          // SM added for BSMD eta and phi, West and East Barrels, split into 30 modules each 
+  TH1F *m_emc_energy_per_module[8];       // SM added for BSMD eta and phi, West and East Barrels, split into 30 modules each  
+  TH2F *m_emc_strip_hits_per_module[8];          // SM added for BSMD eta and phi, West and East Barrels, split into 30 modules each  
+  TH2F *m_emc_strip_energy_per_module[8];       // SM added for BSMD eta and phi, West and East Barrels, split into 30 modules each  
  
   // Hists for EMC cluster finder
   TH2F *m_emc_ncl;             //!
