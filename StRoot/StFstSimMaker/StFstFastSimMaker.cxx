@@ -4,6 +4,8 @@
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRnDHit.h"
+#include "StEvent/StFstHit.h"
+#include "StEvent/StFstHitCollection.h"
 #include "StEvent/StRnDHitCollection.h"
 
 #include "tables/St_g2t_fts_hit_Table.h"
@@ -57,9 +59,9 @@ StFstFastSimMaker::StFstFastSimMaker(const Char_t *name)
     mNumR{8},
     mNumPHI{128},
     mNumSEC{12},
-    mRaster{0},
     mInEff{0},
     mHist{false},
+	mGEANTPassthrough{false},
     mQAFileName(0),
     hTrutHitYXDisk(0),
     hTrutHitRDisk(0),
@@ -125,6 +127,15 @@ Int_t StFstFastSimMaker::Make() {
 		LOG_DEBUG << "Creating StRnDHitCollection for FTS" << endm;
 	}
 
+	// Get pointer to an existing StFstHitCollection if any
+	StFstHitCollection *fstHitCollection = event->fstHitCollection();
+	// If no fst hit collection, create one
+	if (!fstHitCollection) {
+		fstHitCollection = new StFstHitCollection();
+		event->setFstHitCollection(fstHitCollection);
+		LOG_DEBUG << "Make() - Added new StFstHitCollection to this StEvent" << endm;
+	}
+
 	// Digitize GEANT FTS hits
 	FillSilicon(event);
 
@@ -142,15 +153,9 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 	const int MAXR = mNumR;
 	const int MAXPHI = mNumPHI * mNumSEC;
 
-	float X0[] = {0, 0, 0, 0, 0, 0};
-	float Y0[] = {0, 0, 0, 0, 0, 0};
-	
-	if (mRaster > 0)
-		for (int i = 0; i < 6; i++) {
-			X0[i] = mRaster * TMath::Cos(i * 60 * TMath::DegToRad());
-			Y0[i] = mRaster * TMath::Sin(i * 60 * TMath::DegToRad());
-		}
-
+	if ( mGEANTPassthrough ){
+		LOG_INFO << "FST Hits using GEANT xyz directly (no raster etc.)" << endm;
+	}
 	
 	// maps for hit and energy for each disk's r-phi strip
 	std::map< FstGlobal::FstKeyTriple, StRnDHit* > hitMap;
@@ -217,29 +222,19 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 		if (trk)
 			isShower = trk->is_shower;
 
-		// raster coordinate offsets
-		double xc = X0[disk_index];
-		double yc = Y0[disk_index];
-
+		// This z-offset is used to shift the hits
+		// to the center of the FST where the tracking planes are defined
+		const double z_delta = 1.755;
 		// hit coordinates
 		double x = hit->x[0];
 		double y = hit->x[1];
-		double z = hit->x[2];
+		double z = hit->x[2] + z_delta;
 
 		if (z > 200)
 			continue; // skip large disks
 
-		// rastered
-		double rastered_x = x - xc;
-		double rastered_y = y - yc;
-
 		double r = sqrt(x * x + y * y);
 		double p = atan2(y, x);
-
-		// rastered
-		double rr = sqrt(rastered_x * rastered_x + rastered_y * rastered_y);
-		double pp = atan2(rastered_y, rastered_x);
-
 
 		// wrap an angle between 0 and 2pi
 		auto wrapAngle = [&]( double angle ) {
@@ -250,27 +245,22 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 		};
 
 		p = wrapAngle( p );
-		pp = wrapAngle( pp );
 
-		LOG_DEBUG << "rr = " << rr << " pp=" << pp << endm;
+		LOG_DEBUG << "r = " << r << " p=" << p << endm;
 		LOG_DEBUG << "RMIN = " << FstGlobal::RMIN[disk_index] << " RMAX= " << FstGlobal::RMAX[disk_index] << endm;
 
-		// Cuts made on rastered value to require the r value is within limits
-		if (rr < FstGlobal::RMIN[disk_index] || rr > FstGlobal::RMAX[disk_index])
+		// Cuts made on the r value to ensure it is within limits
+		if (r < FstGlobal::RMIN[disk_index] || r > FstGlobal::RMAX[disk_index])
 			continue;
 
-		LOG_DEBUG << "rr = " << rr << endm;
-
 		// Strip numbers on rastered value
-		int r_index = floor(MAXR * (rr - FstGlobal::RMIN[disk_index]) / (FstGlobal::RMAX[disk_index] - FstGlobal::RMIN[disk_index]));
-		
-		// this gives a different conflicting answer for r_index and does not handle r outside of range
+		int r_index = floor(MAXR * (r - FstGlobal::RMIN[disk_index]) / (FstGlobal::RMAX[disk_index] - FstGlobal::RMIN[disk_index]));
 		for (int ii = 0; ii < MAXR; ii++)
-			if (rr > FstGlobal::RSegment[ii] && rr <= FstGlobal::RSegment[ii + 1])
+			if (r > FstGlobal::RSegment[ii] && r <= FstGlobal::RSegment[ii + 1])
 				r_index = ii;
 		
 		// Phi number
-		int phi_index = int(MAXPHI * pp / 2.0 / M_PI);
+		int phi_index = int(MAXPHI * p / 2.0 / M_PI);
 
 		if (r_index >= 8)
 			continue;
@@ -297,7 +287,8 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 			fsihit = new StRnDHit();
 			fsihit->setDetectorId(kFtsId);
 			fsihit->setLayer(disk);
-
+			fsihit->setLadder(wedge);
+			fsihit->setWafer(sensor);
 			//
 			// Set position and position error based on radius-constant bins
 			//
@@ -308,12 +299,16 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 			double r0 = (FstGlobal::RSegment[r_index] + FstGlobal::RSegment[r_index + 1]) * 0.5;
 			double dr = FstGlobal::RSegment[r_index + 1] - FstGlobal::RSegment[r_index];
 			
-			double x0 = r0 * cos(p0) + xc;
-			double y0 = r0 * sin(p0) + yc;
+			double x0 = r0 * cos(p0);
+			double y0 = r0 * sin(p0);
 			assert(TMath::Abs(x0) + TMath::Abs(y0) > 0);
 			double dz = 0.03 / FstGlobal::SQRT12;
 			double er = dr / FstGlobal::SQRT12;
 			fsihit->setPosition(StThreeVectorF(x0, y0, z));
+			// pass the GEANT hits through without modification
+			if ( mGEANTPassthrough ){
+				fsihit->setPosition(StThreeVectorF(x, y, z));
+			}
 			
 			fsihit->setPositionError(StThreeVectorF(er, dp, dz));
 			// set covariance matrix
@@ -384,16 +379,25 @@ void StFstFastSimMaker::FillSilicon(StEvent *event) {
 	int nfsihit = hits.size();
 
 	StarRandom &rand = StarRandom::Instance();
-
+	LOG_INFO << "FST Fast simulator is using mInEff = " << mInEff << endm;
 	// NOW run back through the hits and add them if they pass an efficiency roll
 	for (int i = 0; i < nfsihit; i++) {
 		double rnd_save = rand.flat();
-		if (rnd_save > mInEff){
+		if (rnd_save > mInEff || mGEANTPassthrough){
 			fsicollection->addHit(hits[i]);
+
+			StFstHit *fHit = new StFstHit(hits[i]->position(), hits[i]->positionError(), 0, hits[i]->charge(), 0);
+			fHit->setIdTruth(hits[i]->idTruth());
+			float r = sqrt(hits[i]->position().x() * hits[i]->position().x() + hits[i]->position().y() * hits[i]->position().y());
+			float phi = atan2(hits[i]->position().y(), hits[i]->position().x());
+			fHit->setLocalPosition( r, phi, hits[i]->position().z() );
+			fHit->setDiskWedgeSensor(hits[i]->layer(), hits[i]->ladder(), hits[i]->wafer());
+			event->fstHitCollection()->addHit(fHit);
+		} else {
 		}
 	}
 	if (FstGlobal::verbose) {
-		LOG_DEBUG << Form("Found %d/%d g2t hits in %d cells, created %d hits with ADC>0", count, nHits, nfsihit, fsicollection->numberOfHits()) << endm;
+		LOG_DEBUG << Form("Found %d/%d g2t hits in %d cells, created %d hits with ADC>0 and put %d into StFstHitCollection", count, nHits, nfsihit, fsicollection->numberOfHits(), event->fstHitCollection()->numberOfHits()) << endm;
 	}
 
 }
