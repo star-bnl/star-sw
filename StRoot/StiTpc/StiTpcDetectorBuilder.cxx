@@ -237,15 +237,15 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   pDetector->setShape(pShape);
   pDetector->setPlacement(pPlacement);
 
-  if (tpc_padrow_id <= nInnerPadrows) {
-#ifdef StiTpcHitErrorMDF4_h
-    pDetector->setHitErrorCalculatorMDF4(StiTpcInnerHitErrorMDF4::instance());
-#endif
-    pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
+  if (row <= nInnerPadrows) {
+    if (StTpcDb::Alignment2024()) {
+      pDetector->setHitErrorCalculatorMDF4(StiTpcInnerHitErrorMDF4::instance());
+    }
+    pDetector->setHitErrorCalculator(StiTPCHitErrorCalculator::instance());
   } else {
-#ifdef StiTpcHitErrorMDF4_h
-    pDetector->setHitErrorCalculatorMDF4(StiTpcOuterHitErrorMDF4::instance());
-#endif
+    if (StTpcDb::Alignment2024()) {
+      pDetector->setHitErrorCalculatorMDF4(StiTpcOuterHitErrorMDF4::instance());
+    }
     pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
   }
   pDetector->setKey(1,stiLayer.sti_padrow_id);
