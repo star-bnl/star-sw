@@ -2526,8 +2526,75 @@ MakeChairInstance(starMagOnl,RunLog/onl/starMagOnl);
 MakeChairOptionalInstance(starMagAvg,RunLog/onl/starMagAvg);
 #include "St_beamInfoC.h"
 MakeChairInstance(beamInfo,RunLog/onl/beamInfo);
-static Double_t kuAtomicMassUnit = 931.4940054e-3; 
-static Double_t kProtonMass =  kuAtomicMassUnit*1.00727646662;
+static Double_t kuAtomicMassUnit = 931.4940054e-3; // GeV
+static Double_t kElectronMass    =  0.51099907e-3; // GeV
+//________________________________________________________________________________
+Double_t St_beamInfoC::BeamMass(Int_t MassNumber, const Char_t *Species, Int_t &A) { // return mass in GeV
+  /*
+
+MySQL [RunLog_onl]> select DISTINCT  blueSpecies,blueMassNumber,yellowSpecies,yellowMassNumber from beamInfo where blueEnergy > 0 or yellowEnergy > 0 limit 200;
++-------------+----------------+---------------+------------------+
+| blueSpecies | blueMassNumber | yellowSpecies | yellowMassNumber |
++-------------+----------------+---------------+------------------+
+| Au          |            197 | Au            |              197 |
+| Au          |            197 | Proton        |                1 |
+| Proton      |              1 | Proton        |                1 |
+| Deuteron    |              2 | Au            |              197 |
+| d           |              2 | Au            |              197 |
+| PP          |              0 | PP            |                0 |
+| Cu          |              0 | Cu            |                0 |
+| U           |              0 | U             |                0 |
+| Cu          |              0 | Au            |              197 |
+| He3         |              0 | Au            |              197 |
+| PP          |              0 | Au            |              197 |
+| PP          |              0 | Al            |                0 |
+| Au          |            197 | Al            |                0 |
+| D           |              0 | Au            |              197 |
+| Zr          |              0 | Zr            |                0 |
+| Au          |            197 | Zr            |                0 |
+| Ru          |              0 | Ru            |                0 |
+| Al          |              0 | Au            |              197 |
+| O           |              0 | O             |                0 |
+| He3         |              0 | He3           |                0 |
++-------------+----------------+---------------+------------------+
+20 rows in set (0.00 sec)
+   */
+  TString IonName(Species);
+  A = MassNumber;
+  if (A <= 0) {
+    if      (IonName == "Proton")   A =   1;
+    else if (IonName == "PP")       A =   1;
+    else if (IonName == "d")        A =   2;
+    else if (IonName == "D")        A =   2;
+    else if (IonName == "He3")      A =   3;
+    else if (IonName == "O")        A =  16;
+    else if (IonName == "Al")       A =  27;
+    else if (IonName == "Cu")       A =  63;
+    else if (IonName == "Zr")       A =  96; 
+    else if (IonName == "Ru")       A =  96; 
+    else if (IonName == "Au")       A = 197;
+    else if (IonName == "U")        A = 238;
+    else assert(A);
+  }
+  Double_t Z = 1;
+  Double_t AU = 0.0;
+  // https://periodictable.com/Isotopes/
+  if      (A ==   1) {AU =   1.00782503207; Z =  1;}
+  else if (A ==   2) {AU =   2.01410177785; Z =  1;}
+  else if (A ==   3) {AU =   2.01410177785; Z =  2;}
+  else if (A ==  16) {AU =  15.99491461956; Z =  8;}
+  else if (A ==  27) {AU =  26.981538627;   Z = 13;}
+  else if (A ==  63) {AU =  62.929597474;   Z = 29;}
+  else if (A ==  96) {
+    if       (IonName == "Zr") { A = 95.908273386; Z = 40;}
+    else  if (IonName == "Ru") { A = 95.907597835; Z = 44;}
+  }
+  else if (A == 197) {AU = 196.966568662;   Z = 79;}
+  else if (A == 238) {AU = 238.050788247;   Z = 92;}
+  else assert(0);
+  Double_t Mass = kuAtomicMassUnit * AU - Z*kElectronMass;
+  return Mass;
+}
 //________________________________________________________________________________
 Bool_t        St_beamInfoC::IsFixedTarget() {
   Int_t run = runNumber();
@@ -2689,10 +2756,9 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaYellow() {
   Float_t gamma = 1;
-  Int_t N = TMath::Nint(getYellowMassNumber()); // no. of nucleons
-  if (N < 1) N = 1;
+  Int_t N;
+  Double_t M = BeamMass(getYellowMassNumber(), getYellowSpecies(), N);
   Double_t E = N*getYellowEnergy(); // total energy per nucleon 
-  Double_t M = kuAtomicMassUnit*N;
   gamma = E/M;
   return gamma;
 }
@@ -2700,10 +2766,9 @@ Float_t        St_beamInfoC::GammaYellow() {
 Float_t        St_beamInfoC::GammaBlue() {
   Float_t gamma = 1;
   if (! IsFixedTarget()) { 
-    Int_t N = TMath::Nint(getBlueMassNumber()); // no. of nucleons
-    if (N < 1) N = 1;
+    Int_t N;
+    Double_t M = BeamMass(getBlueMassNumber(), getBlueSpecies(), N);
     Double_t E = N*getBlueEnergy(); // total energy
-    Double_t M = kuAtomicMassUnit*N;
     if (E < M) E = M;
     gamma = E/M;
   }
@@ -2711,8 +2776,12 @@ Float_t        St_beamInfoC::GammaBlue() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaCMS() {
-  Double_t eBlue   = kProtonMass*GammaBlue(); 
-  Double_t eYellow = kProtonMass*GammaYellow();
+  Int_t NBlue;
+  Double_t MBlue = BeamMass(getBlueMassNumber(), getBlueSpecies(), NBlue);
+  Double_t eBlue   = MBlue*GammaBlue()/NBlue; 
+  Int_t NYellow;
+  Double_t MYellow = BeamMass(getYellowMassNumber(), getYellowSpecies(), NYellow);
+  Double_t eYellow = MYellow*GammaYellow()/NYellow;
   Double_t Etot    = eBlue + eYellow;
   Double_t Ecm     = SqrtS();
   Double_t gammaCM = Etot/Ecm;
@@ -2730,18 +2799,29 @@ Float_t        St_beamInfoC::BetaYellow() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaCMS() {
-  Double_t eBlue   = kProtonMass*GammaBlue(); 
-  Double_t eYellow = kProtonMass*GammaYellow();
+  Int_t NBlue;
+  Double_t MBlue = BeamMass(getBlueMassNumber(), getBlueSpecies(), NBlue);
+  Double_t MBluePerNucleon = MBlue/NBlue;
+  Double_t eBlue   = MBluePerNucleon*GammaBlue(); 
+  Int_t NYellow;
+  Double_t MYellow = BeamMass(getYellowMassNumber(), getYellowSpecies(), NYellow);
+  Double_t MYellowPerNucleon = MYellow/NYellow;
+  Double_t eYellow   = MYellowPerNucleon*GammaYellow(); 
   Double_t Etot    = eBlue + eYellow;
   Double_t betaCM  = (eBlue*BetaBlue() + eYellow*BetaYellow())/Etot;
   return betaCM;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::SqrtS() {
-  static Double_t mP = kuAtomicMassUnit*1.00727646662; // proton mass 
-  Double_t eBlue   = mP*GammaBlue(); 
-  Double_t eYellow = mP*GammaYellow();
-  return TMath::Sqrt(2*mP*mP + 2*eBlue*eYellow*(1 - BetaBlue()*BetaYellow()));
+  Int_t NBlue;
+  Double_t MBlue = BeamMass(getBlueMassNumber(), getBlueSpecies(), NBlue);
+  Double_t MBluePerNucleon = MBlue/NBlue;
+  Double_t eBlue   = MBluePerNucleon*GammaBlue(); 
+  Int_t NYellow;
+  Double_t MYellow = BeamMass(getYellowMassNumber(), getYellowSpecies(), NYellow);
+  Double_t MYellowPerNucleon = MYellow/NYellow;
+  Double_t eYellow   = MYellowPerNucleon*GammaYellow(); 
+  return TMath::Sqrt(MBluePerNucleon*MBluePerNucleon + MYellowPerNucleon*MYellowPerNucleon + 2*eBlue*eYellow*(1 - BetaBlue()*BetaYellow()));
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Ycms() {
