@@ -3260,9 +3260,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
       std::vector< int > trackIdVec;
       std::vector< int > hitIdVec;
       trackIdVec.clear();
-      trackIdVec.resize(0);
       hitIdVec.clear();
-      hitIdVec.resize(0);
       tempIter = tempVec.begin();
       storeVecTmp.push_back(tempVec.at(0));
       trackIdVec.push_back(tempVec.at(0).trackId);
@@ -3941,14 +3939,12 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
 	  
 	}
       }  
-    }else{    
-      continue;
     }
   }
 
   eTofHitVec tmpVec;
   eTofHitVec OlVec;
-  std::map< Int_t, eTofHitVec >  overlapHitMap;
+  std::map< int , eTofHitVec >  overlapHitMap;
 
   tmpVec = finalMatchVec;
   finalMatchVec.clear();
@@ -3989,6 +3985,21 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   }
 
   //fix matchFlags 
+  // New match-flag scheme provides information on hit-type, match case, and overlap	
+  // 0: no valid match, otherwise 3 digits encode at first position hit type , at second position overlap info and at third position match type
+  // hit types    : 0 = single sided hits only (time resolution about 25 ps lower than for normal hits)
+  // hit types    : 1 = single sided and normal hits got merged into "mixed hit" for matching  
+  // hit types    : 2 = normal hits only (best quality , most common case)	
+  // overlap info : 0 = hit has no contribution from overlap
+  // overlap info : 1 = hit has only contributions from overlap
+  // overlap info : 2 = hit has contributions from inside and outside of overlap region
+  // match case   : 0 = no match
+  // match case   : 1 = match from cluster of multiple hits and multiple tracks close in space ( ambiguities leave room for missmatches -> frequent case for most central events!!)
+  // match case   : 2 = single hit could have been matched to multiple tracks 	
+  // match case   : 3 = single track could have been matched to multiple hits 	
+  // match case   : 4 = single track matched to single hit ( no ambiguity -> best quality)	
+  // example :: matchFlag = 204 -> 2 = only normal hits, 0 = not  in overlap, 4 = single track single hit match
+	
   for(unsigned int i =0; i< finalMatchVec.size(); i++){
 
     char singlemixdouble = 9;
@@ -3996,10 +4007,10 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
     char isOl = 9;
 
     switch (finalMatchVec.at(i).matchFlag / 100) {
-      case 1 : matchcase = 3; break;
-      case 2 : matchcase = 2; break;
-      case 3 : matchcase = 1; break;
-      case 4 : matchcase = 0; break;
+      case 1 : matchcase = 4; break;
+      case 2 : matchcase = 3; break;
+      case 3 : matchcase = 2; break;
+      case 4 : matchcase = 1; break;
       default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
     }
 
