@@ -20,8 +20,8 @@ void StFttPoint::print(int opt) {
 }
 
 
-int StFttPoint::nClusters() const {
-    int n = 0;
+size_t StFttPoint::nClusters() const {
+    size_t n = 0;
     for ( size_t i = 0; i < 4; i++ ){
         if ( mClusters[i] != nullptr )
         n++;

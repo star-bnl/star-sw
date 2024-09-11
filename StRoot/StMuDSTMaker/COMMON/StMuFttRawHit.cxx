@@ -27,7 +27,9 @@ mPlane(255),
 mQuadrant(kFttUnknownQuadrant),
 mRow(255),
 mStrip(255),
-mOrientation(kFttUnknownOrientation)
+mOrientation(kFttUnknownOrientation),
+mIdTruth(0),
+mQaTruth(0)
 { /*noop*/ }
 
 StMuFttRawHit::StMuFttRawHit( StFttRawHit * stHit ){
@@ -66,6 +68,8 @@ void StMuFttRawHit::setMapping(   UChar_t mPlane, UChar_t mQuadrant,
 void StMuFttRawHit::set( StFttRawHit * stHit ){
     setRaw( stHit->sector(), stHit->rdo(), stHit->feb(), stHit->vmm(), stHit->channel(), stHit->adc(), stHit->bcid(), stHit->tb(), stHit->dbcid());
     setMapping( stHit->plane(), stHit->quadrant(), stHit->row(), stHit->strip(), stHit->orientation() );
+    setIdTruth( stHit->idTruth() );
+    setQaTruth( stHit->qaTruth() );
 } // set from StEvent object
 
 
@@ -88,6 +92,9 @@ operator<<( ostream &os, const StMuFttRawHit& rh )
     os << "\tmQuadrant = "    << (int)rh.quadrant()    << endl;
     os << "\tmRow = "         << (int)rh.row()         << endl;
     os << "\tmStrip = "       << (int)rh.strip()       << endl;
-    os << "\tmOrientation = " << (int)rh.orientation() << " ) " << endl;
+    os << "\tmOrientation = " << (int)rh.orientation() << endl;
+    os << "\tidTruth = "      << (int)rh.idTruth()     << endl;
+    os << "\tqaTruth = "      << (int)rh.qaTruth()     << endl;
+    os << " ) " << endl;
     return os;
 } // operator<< ostream
