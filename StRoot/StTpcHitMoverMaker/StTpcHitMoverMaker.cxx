@@ -49,8 +49,11 @@ Int_t StTpcHitMover::Make() {
     return kStSkip;
   }
   static StGlobalCoordinate    coorG;
-  static St_tpcTimeBucketCorC *tpcTimeBucketCor = St_tpcTimeBucketCorC::instance();
-  if (tpcTimeBucketCor && (tpcTimeBucketCor->nrows() == 0 || StTpcDb::IsOldScheme())) tpcTimeBucketCor = 0;
+  static St_tpcTimeBucketCorC *tpcTimeBucketCor = 0;
+  if (! StTpcDb::IsOldScheme()) {
+    tpcTimeBucketCor = St_tpcTimeBucketCorC::instance();
+    if (tpcTimeBucketCor && (tpcTimeBucketCor->nrows() == 0)) tpcTimeBucketCor = 0;
+  }
   Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
   Double_t triggerOffset = 0;
