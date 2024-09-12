@@ -1125,6 +1125,7 @@ Bfc_st BFC[] = { // standard chains
   {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+  {"Geant4Out"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu"        ,""  ,"","" ,"","","Simulated Data, force to use Db time stamp from used geometry",kFALSE},
   {"HitsBranch"  ,""  ,"",""  ,"","","take out points from dst branch and put them into HitsBranch",kFALSE},
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
@@ -1324,7 +1325,7 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
 #endif
-  {"geant4mk",    "","", "stargen,geant4vmc,geant3vmc",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
+  {"geant4mk",    "","", "stargen,geant4vmc,geant3vmc,geant4out",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
