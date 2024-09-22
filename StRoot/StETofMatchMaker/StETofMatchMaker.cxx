@@ -90,6 +90,7 @@
 
 #include "StETofMatchMaker.h"
 #include "StETofHitMaker/StETofHitMaker.h"
+#include "StETofCalibMaker/StETofCalibMaker.h"
 #include "StETofUtil/StETofGeometry.h"
 #include "StETofUtil/StETofConstants.h"
 
@@ -3235,6 +3236,7 @@ void StETofMatchMaker::checkClockJumps()
 void
 StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap )
 {  
+
   // sort & flag Match candidates
 
     // define temporary vectors for iterating through matchCandVec
@@ -3244,6 +3246,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
     tempMMVec.clear();
     std::map< Int_t, eTofHitVec >  MMMap;
     MMMap.clear();
+
     eTofHitVec ssVec;
     
     // get multi Hit sets 
@@ -3258,9 +3261,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
       std::vector< int > trackIdVec;
       std::vector< int > hitIdVec;
       trackIdVec.clear();
-      trackIdVec.resize(0);
       hitIdVec.clear();
-      hitIdVec.resize(0);
       tempIter = tempVec.begin();
       storeVecTmp.push_back(tempVec.at(0));
       trackIdVec.push_back(tempVec.at(0).trackId);
@@ -3268,7 +3269,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
       tempVec.erase(tempVec.begin());
       bool done = false;
 
-      while(done == false){
+      while(!done){
 
 	unsigned int sizeOld = storeVecTmp.size();
 	unsigned int size = tempVec.size();
@@ -3290,8 +3291,7 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
 	  tempIter++;
 	  }
 	}
-  
-      if(sizeOld == storeVecTmp.size() ) done = true;
+      done = ( sizeOld == storeVecTmp.size() );
 
       }// while done
 
@@ -3307,15 +3307,25 @@ void
 StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec){
   
 
- //flag Overlap-Hits -------------------------------------------------------------------
+ //flag Overlap-Hits & jumped Hits  -------------------------------------------------------------------
   std::map< Int_t, eTofHitVec >  overlapHitMap;
   eTofHitVec overlapHitVec;
   eTofHitVec tempVecOL        = matchCandVec;  
   eTofHitVecIter detHitIter;
   eTofHitVecIter detHitIter2;
+  std::map< int, bool >  jumpHitMap;
+
+  for(unsigned int i=0; i<matchCandVec.size();i++){
+    if(matchCandVec.at(i).clusterSize > 100){
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = true;
+    }else{
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = false;
+    }
+  }
   
   for( auto detHitIter = tempVecOL.begin(); detHitIter != tempVecOL.end(); ) {
     
+
     detHitIter  = tempVecOL.begin();
     detHitIter2 = tempVecOL.begin();
     
@@ -3908,20 +3918,36 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	}						
       }// loop over MMMap
   }//loop over counters
-}
+  
+  //set clustersize for jumped hits: +100 if early , +200 if late, + 300 if still jumped
+ 
+  for(unsigned int i=0;i<finalMatchVec.size();i++){
 
+    if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+      finalMatchVec.at(i).clusterSize += 300;
+    }
+   
+    StETofCalibMaker*  mETofCalibMaker;
+    mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
+
+    int keyGet4up   = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 1 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+    int keyGet4down = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 2 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+
+    if(mETofCalibMaker->GetState(keyGet4up) == 1 || mETofCalibMaker->GetState(keyGet4down) == 1){
+      finalMatchVec.at(i).clusterSize += 100;
+    }
+    if(mETofCalibMaker->GetState(keyGet4up) == 2 || mETofCalibMaker->GetState(keyGet4down) == 2 ){
+      finalMatchVec.at(i).clusterSize += 200;
+    }
+  }
+
+  sortOutOlDoubles(finalMatchVec);
+}
 
 void
 StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   
   eTofHitVec overlapHitVec;
-  
-  //eTofHitVecIter detHitIter;
-  //eTofHitVecIter detHitIter2;
-  //eTofHitVecIter detHitIter3;
-
-  //int counter1 =0;
-  // int counter2 =0;
   
   eTofHitVec tempVecOL        = finalMatchVec;
   
@@ -3946,14 +3972,12 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
 	  
 	}
       }  
-    }else{    
-      continue;
     }
   }
 
   eTofHitVec tmpVec;
   eTofHitVec OlVec;
-  std::map< Int_t, eTofHitVec >  overlapHitMap;
+  std::map< int , eTofHitVec >  overlapHitMap;
 
   tmpVec = finalMatchVec;
   finalMatchVec.clear();
@@ -3978,7 +4002,7 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   for (it = overlapHitMap.begin(); it != overlapHitMap.end(); it++){
     
     eTofHitVec trackVec = it->second;
-    int ind_best;
+    int ind_best = 0;
     int dr_best = 9999;
     
     for(unsigned int n=0; n< trackVec.size();n++){
@@ -3994,29 +4018,56 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
   }
 
   //fix matchFlags 
+  // New match-flag scheme provides information on hit-type, match case, and overlap	
+  // 0: no valid match, otherwise 3 digits encode at first position hit type , at second position overlap info and at third position match type
+  // hit types    : 0 = single sided hits only (time resolution about 25 ps lower than for normal hits)
+  // hit types    : 1 = single sided and normal hits got merged into "mixed hit" for matching  
+  // hit types    : 2 = normal hits only (best quality , most common case)	
+  // overlap info : 0 = hit has no contribution from overlap
+  // overlap info : 1 = hit has only contributions from overlap
+  // overlap info : 2 = hit has contributions from inside and outside of overlap region
+  // match case   : 0 = no match
+  // match case   : 1 = match from cluster of multiple hits and multiple tracks close in space ( ambiguities leave room for missmatches -> frequent case for most central events!!)
+  // match case   : 2 = single hit could have been matched to multiple tracks 	
+  // match case   : 3 = single track could have been matched to multiple hits 	
+  // match case   : 4 = single track matched to single hit ( no ambiguity -> best quality)	
+  // example :: matchFlag = 204 -> 2 = only normal hits, 0 = not  in overlap, 4 = single track single hit match
+	
   for(unsigned int i =0; i< finalMatchVec.size(); i++){
 
     char singlemixdouble = 9;
     char matchcase = 9;
     char isOl = 9;
 
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 1) matchcase = 3;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 2) matchcase = 2;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 3) matchcase = 1;
-    if((finalMatchVec.at(i).matchFlag / 100 ) == 4) matchcase = 0;
+    switch (finalMatchVec.at(i).matchFlag / 100) {
+      case 1 : matchcase = 4; break;
+      case 2 : matchcase = 3; break;
+      case 3 : matchcase = 2; break;
+      case 4 : matchcase = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
+    }
 
-    if((finalMatchVec.at(i).matchFlag % 2)){isOl = 0;}else{isOl = 1;}
+    isOl = 1 - ( finalMatchVec.at(i).matchFlag % 2 );
 
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 10 || (finalMatchVec.at(i).matchFlag % 100 ) == 11) singlemixdouble = 2;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 20 || (finalMatchVec.at(i).matchFlag % 100 ) == 21) singlemixdouble = 0;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 30 || (finalMatchVec.at(i).matchFlag % 100 ) == 31) singlemixdouble = 2;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 40 || (finalMatchVec.at(i).matchFlag % 100 ) == 41) singlemixdouble = 0;
-    if((finalMatchVec.at(i).matchFlag % 100 ) == 50 || (finalMatchVec.at(i).matchFlag % 100 ) == 51) singlemixdouble = 1;
+    switch (finalMatchVec.at(i).matchFlag % 100) {
+      case 10 :
+      case 11 :
+      case 30 :
+      case 31 : singlemixdouble = 2; break;
+      case 20 :
+      case 21 :
+      case 40 :
+      case 41 : singlemixdouble = 0; break;
+      case 50 :
+      case 51 : singlemixdouble = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for singlemixdouble!" << endm; }
+    }
 
     char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
 
     if(singlemixdouble == 9 || isOl == 9 || matchcase == 9) newFlag = 0;
 
     finalMatchVec.at(i).matchFlag = newFlag;
+
   }
 }

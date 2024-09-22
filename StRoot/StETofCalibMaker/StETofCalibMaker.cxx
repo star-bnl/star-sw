@@ -80,6 +80,7 @@
 #include "tables/St_etofResetTimeCorr_Table.h"
 #include "tables/St_etofPulserTotPeak_Table.h"
 #include "tables/St_etofPulserTimeDiffGbtx_Table.h"
+#include "tables/St_etofGet4StateMap_Table.h"
 
 namespace etofSlewing {
     const unsigned int nTotBins = 30;
@@ -117,7 +118,18 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mUsePulserGbtxDiff( true ),
   mDoQA( false ),
   mDebug( false ),
-  mHistFileName( "" )
+  mHistFileName( "" ),
+  mFileNameGet4State("/star/data06/ETOF/calib12/JumpFiles/JumpFileOL_2s1s_Run21029051_Nr1_VNew5MB.txt"),
+  //mFileNameGet4State("/star/data06/ETOF/calib12/JumpFiles/JumpFileOL_2s1s_Run21030009_Nr1_VNew5MB.txt"),
+  mStateVec(),
+  mStartVec(),
+  mGet4StateMap(),
+  mStateMapStart(0),
+  mStateMapStop(0),
+  mDbEntryStart(0),
+  mDbEntryStop(0),
+  mGlobalCounter(1)
+  
 {
     /// default constructor
     LOG_DEBUG << "StETofCalibMaker::ctor"  << endm;
@@ -132,9 +144,9 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
     mPulserPeakTot.clear();
     mPulserTimeDiff.clear();
     mPulserTimeDiffGbtx.clear();
-	 mNPulsersCounter.clear();
-	 mNStatusBitsCounter.clear();
-	 mPulserPresent.clear();
+    mNPulsersCounter.clear();
+    mNStatusBitsCounter.clear();
+    mPulserPresent.clear();
 
     mJumpingPulsers.clear();
 
@@ -177,6 +189,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // --------------------------------------------------------------------------------------------
     // initialize calibration parameters from parameter file (if filename is provided) or database:
+    // -- Get4 status map (Clock-Jump-Correction)
     // -- electronics-to-hardware map
     // -- status map
     // -- timing window
@@ -187,6 +200,10 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     // -- slewing corrections
     // -- reset time correction
     // --------------------------------------------------------------------------------------------
+
+    //Get4 status map
+    
+    readGet4State(mGlobalCounter , 0);
 
     // electronics-to-hardware map
     if( mFileNameElectronicsMap.empty() ) {
@@ -1080,6 +1097,11 @@ StETofCalibMaker::FinishRun( Int_t runnumber )
 
     mJumpingPulsers.clear();
 
+    mGet4StateMap.clear();
+    mGet4ZeroStateMap.clear();
+    mMasterStartVec.clear();
+   
+
     return kStOk;
 }
 
@@ -1105,6 +1127,35 @@ StETofCalibMaker::Make()
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
     //mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
+
+    //check if get4 state map is still valid for this event
+
+    unsigned long int evtNr = GetEventNumber();
+    if(mFileNameGet4State.empty()){
+      //read from db
+
+      readGet4State(mGlobalCounter , 99);
+
+    }else{
+      //read from file
+      short cnt = 0;
+      while( evtNr > mDbEntryStop ||  evtNr < mDbEntryStart){
+
+	cnt++;
+	if(cnt > 99){
+	  LOG_ERROR << " Get4 State File for event Nr:" << GetEventNumber() << "not found" << endm;
+	  return kStFatal;
+	}
+ 
+	short forward = 1;
+	if(evtNr < mDbEntryStart) forward = -1;
+	readGet4State(mGlobalCounter , forward);
+      }
+
+
+    }
+    checkGet4State( evtNr );
+
 
     if ( mEvent ) {
         LOG_DEBUG << "Make(): running on StEvent" << endm;
@@ -1421,6 +1472,11 @@ StETofCalibMaker::processMuDst()
 		//fill good event flag into header
 		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+
+		  //flag jumpwise inconsistent events/get4s
+		  if(mGet4StateMap[iGet4] == 3){
+		    goodEventFlagVec.at(iGet4) = false;
+		  }
 		}		
 		
 	  	if (goodEventFlagVec.size() == 1728){
@@ -2119,14 +2175,28 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
         aDigi->setCalibTot( calibTot );
 
+	int get4Id = 144 * ( aDigi->sector() - 13 ) + 48 * ( aDigi->zPlane() -1 ) + 16 * ( aDigi->counter() - 1 ) + 8 * ( aDigi->side() - 1 ) + ( ( aDigi->strip() - 1 ) / 4 );
+
+	double stateCorr =0;
+	if(mGet4StateMap[get4Id] == 1) stateCorr =  6.25;
+	if(mGet4StateMap[get4Id] == 2) stateCorr =  -6.25;
+	if(mGet4StateMap[get4Id] == 3) stateCorr =  -0.0;
+
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
                                             - calibTimeOffset(   aDigi )
                                             - slewingTimeOffset( aDigi )
-                                            - applyPulserOffset( aDigi );
+                                            - applyPulserOffset( aDigi )
+	                                    + stateCorr;
+					    
+					    					
+	if(mGet4StateMap[get4Id] == 3){
+	  calibTime = 0; // mask digis with undefined state (e.g. one hit with jump and one without in same event)
+	  
+	}
 
-        aDigi->setCalibTime( calibTime );
-
+    aDigi->setCalibTime( calibTime );
+	
         if( mDebug ) {
             // print out the new information
             LOG_DEBUG << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
@@ -2609,3 +2679,301 @@ StETofCalibMaker::writeHistograms()
         LOG_INFO << "histogram file name is empty string --> cannot write histograms" << endm;
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void StETofCalibMaker::readGet4State(int fileNr, short forward){
+
+   bool fileZero = false;
+
+   //Clean up last entry first
+   for(int i =0; i< 1728;i++){
+     mStateVec[i].clear();
+     mStateVec[i].resize(0);
+     mStartVec[i].clear();
+     mStartVec[i].resize(0);
+     mGet4StateMap[i] = 0;
+   }
+   mStateMapStart=0;
+   mStateMapStop=0;
+   mDbEntryStop=0;
+   mMasterStartVec.clear();
+   mMasterStartVec.resize(0);
+
+   std::vector< unsigned long int > intVec;
+   
+   //first read
+    if(forward == 0) mGlobalCounter = 1;
+    //jump forward
+    if(forward > 0) mGlobalCounter++;
+    //jump backward
+    if(forward < 0) mGlobalCounter--;
+    
+    if(mGlobalCounter == 0){
+      mGlobalCounter++;
+      fileZero = true;
+    }
+    
+    if(mFileNameGet4State.empty()){
+         
+      TDataSet* dbDataSet = nullptr;
+      dbDataSet = GetDataBase( "Calibrations/etof/etofGet4StateMap" );
+      int intsPerEntry = 1000000;
+      
+      St_etofGet4StateMap* etofStateMap = static_cast< St_etofGet4StateMap* > ( dbDataSet->Find( "etofGet4StateMap" ) );
+      if( !etofStateMap ) {
+	LOG_ERROR << "unable to get the get4 state map from the database" << endm;	  
+	return;
+      }
+      
+      etofGet4StateMap_st* stateMapTable = etofStateMap->GetTable();
+      
+      for( size_t i=0; i< intsPerEntry; i++ ) {
+	if(stateMapTable->etofGet4State[ i ] > 0) intVec.push_back(  stateMapTable->etofGet4State[ i ]);
+      } 
+          
+    }else{
+           
+      std::ifstream paramFile;
+      
+      paramFile.open( mFileNameGet4State.c_str() );
+      
+      if( !paramFile.is_open() ) {
+	LOG_ERROR << "unable to get the 'Get4State' parameters from file --> file does not exist" << endm;
+       	return;
+      }
+      
+      unsigned long int temp;
+      while( paramFile >> temp ) {
+	intVec.push_back( temp );
+      }        
+    }
+    
+    std::vector<unsigned long int> startVec;
+    std::map<unsigned long int,vector<int>> stateVec;
+    std::map<unsigned long int ,vector<int>> get4IdVec;
+    
+    unsigned long int lastEvtId =0;
+    
+    for(unsigned int i = 0; i < intVec.size(); i++){
+      
+      // decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
+      if((intVec.at(i) / 100000000 == 42)){
+	
+	int tmp       = intVec.at(i) % 4200000000;
+	int stateInt1 = tmp / 10000;
+	int stateInt2 = tmp % 10000;
+	
+	int Get4Id1 = -1;
+	int get4state1 = -1;
+	int Get4Id2 = -1;
+	int get4state2 = -1;
+	
+	if(stateInt1 <= 1727) {	 
+	  Get4Id1    = stateInt1;
+	  get4state1 = 0;
+	}
+	if(stateInt1 >= 1728 && stateInt1 < 3456){
+	  Get4Id1    = stateInt1 - 1728;
+	  get4state1 = 1;
+	}
+	if(stateInt1 >= 3456 && stateInt1 < 5184){
+	  Get4Id1    = stateInt1  - (1728*2);
+	  get4state1 = 2;
+	}
+	if(stateInt1 >= 5184 && stateInt1 < 6912){
+	  Get4Id1    = stateInt1  - (1728*3);
+	  get4state1 = 3;
+	}
+	if(stateInt2 <= 1727) {	 
+	  Get4Id2    = stateInt2;
+	  get4state2 = 0;
+	}
+	if(stateInt2 >= 1728 && stateInt2 < 3456){
+	  Get4Id2    = stateInt2 - 1728;
+	  get4state2 = 1;
+	}
+	if(stateInt2 >= 3456 && stateInt2 < 5184){
+	  Get4Id2    = stateInt2  - (1728*2);
+	  get4state2 = 2;
+       }
+	if(stateInt2 >= 5184 && stateInt2 < 6912){
+	  Get4Id2    = stateInt2  - (1728*3);
+	  get4state2 = 3;
+	}
+	
+	if(i < 864){
+	  
+	  mGet4StateMap[Get4Id1] = get4state1;
+	  mGet4StateMap[Get4Id2] = get4state2;
+	  mGet4ZeroStateMap[Get4Id1] = get4state1;
+	  mGet4ZeroStateMap[Get4Id2] = get4state2;
+	}
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+	stateVec[lastEvtId].push_back(get4state2);
+	get4IdVec[lastEvtId].push_back(Get4Id2);
+	
+      }else if((intVec.at(i) / 100000000 == 40)){  //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
+	
+	int EvtId = intVec.at(i) % 4000000000;   
+
+	startVec.push_back(EvtId);
+	mMasterStartVec.push_back(EvtId);
+	
+	lastEvtId = EvtId;
+      } else if((intVec.at(i) / 100000000 == 41)){ // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
+	
+	int tmp       = intVec.at(i) % 4100000000;
+	int stateInt1 = tmp / 10000;
+	int Get4Id1 = -1;
+	int get4state1 = -1;
+	
+	if(stateInt1 <= 1727) {	 
+	  Get4Id1    = stateInt1;
+	  get4state1 = 0;
+	}
+	if(stateInt1 >= 1728 && stateInt1 < 3456){
+	  Get4Id1    = stateInt1 - 1728;
+	 get4state1 = 1;
+	}
+	if(stateInt1 >= 3456 && stateInt1 < 5184){
+	  Get4Id1    = stateInt1 - (1728*2);
+	  get4state1 = 2;
+       }
+	if(stateInt1 >= 5184 && stateInt1 < 6912){
+	  Get4Id1    = stateInt1 - (1728*3);
+	  get4state1 = 3;
+	}
+	
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);	
+     }
+   }
+
+   // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
+   for(int i = 0; i< 1728;i++){
+     
+     for(unsigned int j=0; j< startVec.size(); j++){
+       
+       unsigned long int key = startVec.at(j);
+       
+       for(unsigned int n =0; n < get4IdVec.at(key).size(); n++){
+	 
+	 //steering vecs
+	 if(i == get4IdVec.at(key).at(n)){ 
+	   mStateVec[i].push_back(stateVec.at(key).at(n));
+	   mStartVec[i].push_back(startVec.at(j));	   
+	 } 	 
+       }  
+     }
+   }
+   
+   //set map validity check evtids ... EvtZero states only valid to first change of state on any get4
+   mStateMapStart = 0 ;
+   mStateMapStop  = startVec.at(0);
+   mDbEntryStart   = startVec.at(0);
+   mDbEntryStop    = startVec.at((startVec.size()-1));
+
+
+   if(fileZero){
+     mDbEntryStart   = 0;
+   }
+  
+   sort( mMasterStartVec.begin(), mMasterStartVec.end() );
+   mMasterStartVec.erase( unique( mMasterStartVec.begin(), mMasterStartVec.end() ), mMasterStartVec.end() );
+
+ }
+
+// -------------------------------------------------------------------------------
+
+void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
+
+  if(eventNr >= mStateMapStart && eventNr < mStateMapStop) {
+    return; // stateMap still valid 
+  }
+
+  unsigned long int closestStop  = 99999999;
+  unsigned long int closestStart = 0;
+
+  //loop over stateMap
+
+  for(unsigned int i =0; i< 1728; i++){
+
+    std::vector<unsigned long int> tmpStart = mStartVec[i];
+    std::vector<short>             tmpState = mStateVec[i];
+
+    //find closest evtNr & state for each Get4
+    unsigned int      indexStart = 0;
+    // int               indexStop  = 0;
+    short             newState   = 0;
+    // unsigned long int newStart   = 0;
+    // unsigned long int newStop    = 0;
+
+    if(tmpStart.size() == 0 ) continue;
+    
+    auto lower = std::lower_bound(tmpStart.begin(), tmpStart.end(), eventNr);
+    indexStart = std::distance(tmpStart.begin(), lower);    
+    if(indexStart > 0) indexStart--;
+
+    //event past last change on get4 in entry
+    if(eventNr > tmpStart.at((tmpStart.size() -1))){
+      indexStart = (tmpStart.size() -1);
+    }
+  
+    if((indexStart < (tmpStart.size() -1 )) && eventNr == tmpStart.at(indexStart + 1)){
+	indexStart++;	
+    }
+    
+    //get new state and push to map
+    newState = tmpState.at(indexStart);
+
+    if(tmpStart.at(indexStart) > eventNr ) newState = mGet4ZeroStateMap[i];
+
+    mGet4StateMap[i] = newState;
+     
+  } //Get4 Loop
+
+  //  bool Found=false;
+    for(unsigned int z=0; z< mMasterStartVec.size();z++){
+
+      if(z==0){
+	closestStart = 0;
+	closestStop  = mMasterStartVec.at(z);
+	continue;
+      }
+
+      if(z != (mMasterStartVec.size()-1)){
+	
+	if(eventNr == mMasterStartVec.at(z) ){
+	  closestStart = mMasterStartVec.at(z);
+	  closestStop  = mMasterStartVec.at(z+1);
+	  //	  Found = true;
+	  break;
+	}else if(eventNr < mMasterStartVec.at(z+1) && eventNr > mMasterStartVec.at(z)){	
+	  closestStart = mMasterStartVec.at(z);
+	  closestStop  = mMasterStartVec.at(z+1);
+	  //  Found = true;
+	  break;
+	}
+
+      }else{ // last interval
+	closestStart = mMasterStartVec.at(z);
+	closestStop  = 99999999;
+	//	Found = true;
+	break;
+      }
+
+    }
+
+    mStateMapStart = closestStart;
+    mStateMapStop  = closestStop;
+    
+  if(mStateMapStart == mDbEntryStop) {
+    
+    mStateMapStop  = 99999999;
+  }
+
+}
+
+//-----------------------------------------------------
