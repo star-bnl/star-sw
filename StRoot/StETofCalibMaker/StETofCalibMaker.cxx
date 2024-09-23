@@ -2899,31 +2899,21 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
   //  bool Found=false;
     for(unsigned int z=0; z< mMasterStartVec.size();z++){
 
-      if(z==0){
+      if(z == 0){ // first interval
 	closestStart = 0;
 	closestStop  = mMasterStartVec.at(z);
-	continue;
-      }
 
-      if(z != (mMasterStartVec.size()-1)){
-	
-	if(eventNr == mMasterStartVec.at(z) ){
-	  closestStart = mMasterStartVec.at(z);
-	  closestStop  = mMasterStartVec.at(z+1);
-	  //	  Found = true;
-	  break;
-	}else if(eventNr < mMasterStartVec.at(z+1) && eventNr > mMasterStartVec.at(z)){	
-	  closestStart = mMasterStartVec.at(z);
-	  closestStop  = mMasterStartVec.at(z+1);
-	  //  Found = true;
-	  break;
-	}
+      } else if(z == (mMasterStartVec.size()-1)){ // last interval
+        closestStart = mMasterStartVec.at(z);
+        closestStop  = 99999999;
+        // Found = true;
 
-      }else{ // last interval
-	closestStart = mMasterStartVec.at(z);
-	closestStop  = 99999999;
-	//	Found = true;
-	break;
+      } else if(eventNr == mMasterStartVec.at(z) ||
+          (eventNr < mMasterStartVec.at(z+1) && eventNr > mMasterStartVec.at(z))){
+        closestStart = mMasterStartVec.at(z);
+        closestStop  = mMasterStartVec.at(z+1);
+        //  Found = true;
+        break;
       }
 
     }
