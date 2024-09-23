@@ -2689,9 +2689,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
    //Clean up last entry first
    for(int i =0; i< 1728;i++){
      mStateVec[i].clear();
-     mStateVec[i].resize(0);
      mStartVec[i].clear();
-     mStartVec[i].resize(0);
      mGet4StateMap[i] = 0;
    }
    mStateMapStart=0;
