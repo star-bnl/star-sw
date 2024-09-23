@@ -2800,7 +2800,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	int Get4Id1 = -1;
 	int get4state1 = -1;
 	
-	if(stateInt1 <= 6912) {	 
+	if(stateInt1 < 6912) {	 
 	  Get4Id1    = stateInt1 % 1728;
 	  get4state1 = stateInt1 / 1728;
 	}
