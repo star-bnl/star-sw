@@ -119,8 +119,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mDoQA( false ),
   mDebug( false ),
   mHistFileName( "" ),
-  mFileNameGet4State("/star/data06/ETOF/calib12/JumpFiles/JumpFileOL_2s1s_Run21029051_Nr1_VNew5MB.txt"),
-  //mFileNameGet4State("/star/data06/ETOF/calib12/JumpFiles/JumpFileOL_2s1s_Run21030009_Nr1_VNew5MB.txt"),
+  mFileNameGet4State(""),
   mStateVec(),
   mStartVec(),
   mGet4StateMap(),
@@ -1289,12 +1288,8 @@ StETofCalibMaker::processStEvent()
 		std::vector<bool> hasPulsersVec;
 		
 		//drag along pulser information
-		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
-		  if ( !(mNPulsersCounter.count(iCounter) ) ){
-		    hasPulsersVec.push_back(false);
-		  }else{	
-		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
-		  }		  
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){	
+		hasPulsersVec.push_back((mNPulsersCounter.count(iCounter) > 0) && (mNPulsersCounter[iCounter] == 2));
 		}
 		if (hasPulsersVec.size() == 108){
 		  //etofHeader->setHasPulsersVec(hasPulsersVec);  // not working but not of relevance at the moment 
@@ -1457,12 +1452,8 @@ StETofCalibMaker::processMuDst()
 		std::vector<bool> hasPulsersVec;//
 		
 		//drag along pulser information
-		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
-		  if ( !(mNPulsersCounter.count(iCounter) ) ){
-		    hasPulsersVec.push_back(false);
-		  }else{	
-		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
-		  }		  
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){		
+		hasPulsersVec.push_back((mNPulsersCounter.count(iCounter) > 0) && (mNPulsersCounter[iCounter] == 2)); 			
 		}
 
 		if (hasPulsersVec.size() == 108){
@@ -1629,14 +1620,11 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
         float totToHalfPeak = aDigi->rawTot()  - mPulserPeakTot.at( key ) * 0.5;
 
-
-        if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
-            if( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) {
-                isPulserCand = true;
-            }
-        }
+	isPulserCand = ( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first &&
+         	         timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  &&
+          	       ( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) );
+	    
     }
-
 
     if( isPulserCand ) {
         pulserDigiMap[ key ].push_back( index );
@@ -2727,7 +2715,8 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
       etofGet4StateMap_st* stateMapTable = etofStateMap->GetTable();
       
       for( size_t i=0; i< intsPerEntry; i++ ) {
-	if(stateMapTable->etofGet4State[ i ] > 0) intVec.push_back(  stateMapTable->etofGet4State[ i ]);
+	if(stateMapTable->etofGet4State[ i ] <= 0) break; 
+	intVec.push_back(  stateMapTable->etofGet4State[ i ]);
       } 
           
     }else{
@@ -2756,8 +2745,9 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     for(unsigned int i = 0; i < intVec.size(); i++){
       
       // decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
-      if((intVec.at(i) / 100000000 == 42)){
-	
+	switch (intVec.at(i) / 100000000) {
+		
+	case 42	:	
 	int tmp       = intVec.at(i) % 4200000000;
 	int stateInt1 = tmp / 10000;
 	int stateInt2 = tmp % 10000;
@@ -2787,17 +2777,24 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	get4IdVec[lastEvtId].push_back(Get4Id1);
 	stateVec[lastEvtId].push_back(get4state2);
 	get4IdVec[lastEvtId].push_back(Get4Id2);
-	
-      }else if((intVec.at(i) / 100000000 == 40)){  //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
-	
+
+	break;
+		
+        //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
+	case 40:
+		
 	int EvtId = intVec.at(i) % 4000000000;   
 
 	startVec.push_back(EvtId);
 	mMasterStartVec.push_back(EvtId);
 	
 	lastEvtId = EvtId;
-      } else if((intVec.at(i) / 100000000 == 41)){ // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
-	
+
+	break;		
+		
+        // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
+	case 41:
+		
 	int tmp       = intVec.at(i) % 4100000000;
 	int stateInt1 = tmp / 10000;
 	int Get4Id1 = -1;
@@ -2809,7 +2806,12 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	}
 	
 	stateVec[lastEvtId].push_back(get4state1);
-	get4IdVec[lastEvtId].push_back(Get4Id1);	
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+
+	break;
+
+	default:
+	LOG_ERROR << "Get4 state not well defined -> Check db / state file !" << endm;	
      }
    }
 
