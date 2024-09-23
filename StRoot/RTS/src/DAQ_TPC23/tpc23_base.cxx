@@ -1353,7 +1353,9 @@ int tpc23_base::run_start()
 	evt_trgd = 0 ;
 
 	run_errors = 0 ;
-	fee_errs = 0 ;
+//	fee_errs = 0 ;
+
+	memset(&f_stat,0,sizeof(f_stat)) ;
 
 	return 0 ;
 
@@ -1364,6 +1366,16 @@ int tpc23_base::run_start()
 int tpc23_base::run_stop()
 {
 //	LOG(TERR,"%d: run_stop: %d/%d events, run_errors %d",id,evt_trgd,evt,run_errors) ;
+	
+	if(online || mode) {
+	for(int i=0;i<10;i++) {
+		f_stat.tm[i] /= f_stat.evt_cou ;
+	}
+
+	LOG(NOTE,"id %d: evts %d, means %f %f %f %f %f %f",id,f_stat.evt_cou,
+	    f_stat.tm[0],f_stat.tm[1],f_stat.tm[2],f_stat.tm[3],f_stat.tm[4],
+	    f_stat.tm[5]) ;
+	}
 
 	return 0 ;
 }
@@ -1384,6 +1396,7 @@ tpc23_base::tpc23_base()
 	s2_words = 0 ;
 
 	no_cld = 0 ;
+	mode = 0 ;
 
 //	rp_gain_tpx = 0 ;
 //	rp_gain_itpc = 0 ;
@@ -1412,6 +1425,8 @@ tpc23_base::tpc23_base()
 	subdet_id = 1;
 
 	data_c = 0 ;
+
+	store_track_id = 0 ;
 
 	token = 1 ;	// for ease of simulation
 }

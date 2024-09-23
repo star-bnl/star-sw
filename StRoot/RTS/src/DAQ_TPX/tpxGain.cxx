@@ -269,7 +269,7 @@ void tpxGain::accum(char *evbuff, int bytes)
 
 	t = tpx_get_start(evbuff, bytes/4, &rdo, 0) ;
 
-	LOG(NOTE,"RDO %d: %d bytes,token %d",rdo.rdo,bytes,t) ;
+//	LOG(WARN,"RDO %d: %d bytes,token %d %d",rdo.rdo,bytes,t,rdo.token) ;
 
 	if(t <= 0) return ;	// non data event...
 
@@ -1054,7 +1054,7 @@ int tpxGain::to_file(const char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.37 2022/09/23 19:55:47 jml Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.38 2024/04/10 12:01:00 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {

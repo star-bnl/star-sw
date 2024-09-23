@@ -37,9 +37,10 @@ public:
 
     void setMapping( UChar_t mPlane, UChar_t mQuadrant, UChar_t mRow, UChar_t mStrip, UChar_t mOrientation );
     void set( StFttRawHit * stHit );
+    void setIdTruth( UShort_t id ) { mIdTruth = id; }
+    void setQaTruth( UShort_t qa ) { mQaTruth = qa; }
 
     // consant getters
-
     UChar_t sector() const;
     UChar_t rdo() const;
     UChar_t feb() const;
@@ -55,6 +56,8 @@ public:
     UChar_t row() const;
     UChar_t strip() const;
     UChar_t orientation() const;
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQaTruth; }
 
 protected:
     UChar_t mSector;
@@ -74,10 +77,10 @@ protected:
     UChar_t mStrip;
     UChar_t mOrientation;
 
-    // StFttCluster *mCluster;
-    // StFttPoint   *mPoint;
+    UShort_t mIdTruth;
+    UShort_t mQaTruth;
 
-    ClassDef( StMuFttRawHit, 2 );
+    ClassDef( StMuFttRawHit, 3 );
 };
 
 std::ostream& operator << ( std::ostream&, const StMuFttRawHit& hit ); // Printing operator

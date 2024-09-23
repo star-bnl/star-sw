@@ -25,7 +25,7 @@ public:
 	virtual int rdo_scan(char *mem, int words) ;
 	virtual int from22to23(char *dta, int words) ;	// rewrite the old FY22 raw data foramt to FY23
 
-	int fee_errs ;
+//	int fee_errs ;
 
 	u_char rts_id ;	// tpx, itpc
 	u_char fmt ;	// 22: old data format, 23: FY23 data format
@@ -48,6 +48,9 @@ public:
 	u_short token ;
 
 	u_char no_cld ;
+
+
+	u_char mode ;	// for various debugging steering
 
 	u_int last_ix ;
 	int sequence_cou ;
@@ -108,6 +111,11 @@ public:
 
 	// called from daq_itpc
 	int init(daq_dta *gain) ;
+
+	struct f_stat_t {
+		int evt_cou ;
+		double tm[10] ;
+	} f_stat ;
 
 //private:
 

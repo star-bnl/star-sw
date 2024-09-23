@@ -3306,13 +3306,15 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
 void 
 StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec){
   
-
+  
  //flag Overlap-Hits & jumped Hits  -------------------------------------------------------------------
+
   std::map< Int_t, eTofHitVec >  overlapHitMap;
   eTofHitVec overlapHitVec;
   eTofHitVec tempVecOL        = matchCandVec;  
   eTofHitVecIter detHitIter;
   eTofHitVecIter detHitIter2;
+
   std::map< int, bool >  jumpHitMap;
 
   for(unsigned int i=0; i<matchCandVec.size();i++){
@@ -3325,7 +3327,6 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
   
   for( auto detHitIter = tempVecOL.begin(); detHitIter != tempVecOL.end(); ) {
     
-
     detHitIter  = tempVecOL.begin();
     detHitIter2 = tempVecOL.begin();
     

@@ -25,6 +25,8 @@ public:
     float sumAdc() const;
     float x() const;  // Mean x ("center of gravity") in local grid coordinate (1st moment).
     float sigma() const; // Maximum 2nd moment (along major axis).
+    UShort_t idTruth() const { return mIdTruth; } // Get the truth ID
+    UShort_t qaTruth() const { return 0; } // Get the truth quality
 
     void setId(int cluid);
     void setPlane(UChar_t plane);
@@ -34,6 +36,8 @@ public:
     void setSumAdc(int theSumAdc);
     void setX(float x0);
     void setSigma(float sigma);
+    void setIdTruth(UShort_t id) { mIdTruth = id; }
+    void setQaTruth(UShort_t qa) { mQaTruth = qa; }
 
     TRefArray* rawHits();
     const TRefArray* rawHits() const;
@@ -60,8 +64,10 @@ private:
     TRefArray mRawHits;            // Tower hits of the current cluster
     TRefArray mNeighbors;    // Neighbor clusters
     TRefArray mPoints;        // Fitted points (photons) in the cluster
+    UShort_t mIdTruth=0; // Truth ID
+    UShort_t mQaTruth=0; // Truth quality
 
-    ClassDef(StMuFttCluster, 1)
+    ClassDef(StMuFttCluster, 3)
 };
 
 

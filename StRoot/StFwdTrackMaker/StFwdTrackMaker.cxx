@@ -76,6 +76,8 @@ float BDTCrit2::Crit2_DeltaRho = -999;
 float BDTCrit2::Crit2_DeltaPhi = -999;
 float BDTCrit2::Crit2_StraightTrackRatio = -999;
 
+
+
 //_______________________________________________________________________________________
 class GenfitUtils{
     public:
@@ -85,7 +87,6 @@ class GenfitUtils{
 
     
 }; // GenfitUtils
-
 
 // Basic sanity cuts on genfit tracks
 template<> bool GenfitUtils::accept( genfit::Track *track )
@@ -148,9 +149,7 @@ template<> bool GenfitUtils::accept( genfit::Track *track )
 
 };
 
-
 //______________________________________________________________________________________
-
 class SiRasterizer {
   public:
     SiRasterizer() {}
@@ -226,8 +225,6 @@ class ForwardTracker : public ForwardTrackMaker {
     }
 };
 
-
-
 //________________________________________________________________________
 StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mGenHistograms(false), mGenTree(false), mForwardTracker(nullptr), mForwardData(nullptr){
     SetAttr("useFtt",1);                 // Default Ftt on 
@@ -244,6 +241,7 @@ int StFwdTrackMaker::Finish() {
         
         // output file name
         string name = mFwdConfig.get<string>("Output:url", "fwdTrackerOutput.root");
+        LOG_INFO << "Saving StFwdTrackMaker Histograms to ROOT file: " << name << endm;
         TFile *fOutput = new TFile(name.c_str(), "RECREATE");
         fOutput->cd();
 
@@ -268,17 +266,28 @@ int StFwdTrackMaker::Finish() {
     return kStOk;
 }
 
+void StFwdTrackMaker::LoadConfiguration() {
+    if (mConfigFile.length() < 5){    
+        LOG_INFO << "Forward Tracker is using default config for ";
+        if ( defaultConfig == defaultConfigData ){
+            LOG_INFO << " DATA" << endm;
+        } else {
+            LOG_INFO << " Simulation" << endm;
+        }
+        mFwdConfig.load( defaultConfig, true );
+    } else {
+        LOG_INFO << "Forward Tracker is using config from file : " <<  mConfigFile << endm;
+        mFwdConfig.load( mConfigFile );
+    }
+    configLoaded = true;
+}
+
 //________________________________________________________________________
 int StFwdTrackMaker::Init() {
 
-    // Initialize configuration file
-    std::string configFile = SAttr("config");
-    if (mConfigFile.length() > 4) {
-        configFile = mConfigFile;
-        LOG_INFO << "Forward Tracker is using config file : " <<  mConfigFile << endm;
+    if ( !configLoaded ){
+        LoadConfiguration();
     }
-
-    mFwdConfig.load( configFile );
 
     if (mGenTree) {
         mTreeFile = new TFile("fwdtree.root", "RECREATE");
@@ -580,8 +589,6 @@ void StFwdTrackMaker::loadFttHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdD
         return;
     }
 } // loadFttHits
-
-
 
 void StFwdTrackMaker::loadFttHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap, int count ){
     LOG_DEBUG << "Loading FTT Hits from Data" << endm;
@@ -1686,3 +1693,61 @@ void StFwdTrackMaker::ProcessFwdTracks(  ){
         }
     }
 }
+
+
+std::string StFwdTrackMaker::defaultConfigIdealSim = R"(
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <Output url="fwdTrackMaker_ideal_sim.root" />
+    <Source ftt="GEANT"  />
+
+	<TrackFitter refit="true" mcSeed="true" >
+        <Vertex sigmaXY="0.001" sigmaZ="0.01" includeInFit="true" smearMcVertex="true" />
+    </TrackFitter>
+</config>
+)";
+
+
+
+std::string StFwdTrackMaker::defaultConfigData = R"(
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <Output url="stfwdtrackmaker_data.root" />
+    <Source ftt="DATA" />
+
+    <SiRasterizer r="3.0" phi="0.004" />
+
+    <TrackFinder nIterations="1">
+        <Iteration nPhiSlices="32" > <!-- Options for first iteration -->
+            <SegmentBuilder>
+                <Criteria name="Crit2_RZRatio" min="0" max="1.20" />
+                <Criteria name="Crit2_DeltaRho" min="-50" max="50.9"/>
+                <Criteria name="Crit2_DeltaPhi" min="0" max="30.0" />
+                <Criteria name="Crit2_StraightTrackRatio" min="0.01" max="5.85"/>
+            </SegmentBuilder>
+
+            <ThreeHitSegments>
+				<Criteria name="Crit3_3DAngle" min="0" max="30" />
+                <Criteria name="Crit3_PT" min="0" max="100" />
+				<Criteria name="Crit3_ChangeRZRatio" min="0.8" max="1.21" />
+				<Criteria name="Crit3_2DAngle" min="0" max="30" />
+            </ThreeHitSegments>
+        </Iteration>
+
+        <Connector distance="1"/>
+
+        <SubsetNN active="true" min-hits-on-track="3" >
+            <!-- <InitialTemp>2.1</InitialTemp> -->
+            <!-- <InfTemp>0.1</InfTemp> -->
+            <Omega>0.99</Omega>
+            <StableThreshold>0.001</StableThreshold>
+        </SubsetNN> 
+
+        <HitRemover active="false" />
+    </TrackFinder>
+    
+	<TrackFitter refitSi="true" mcSeed="false" zeroB="true">
+        <Vertex sigmaXY="0.01" sigmaZ="0.01" includeInFit="true" smearMcVertex="false" />
+    </TrackFitter>
+</config>
+)";

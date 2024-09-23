@@ -271,6 +271,7 @@ class StQAMakerBase : public StMaker {
   Bool_t ITTF;
   Int_t EST;
   Bool_t allTrigs;
+  Bool_t allEvents;
 
   virtual void NewQABookHist();
   virtual TH2F* MH1F(const Text_t* name, const Text_t* title,

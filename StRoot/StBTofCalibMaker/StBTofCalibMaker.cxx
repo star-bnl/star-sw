@@ -2835,36 +2835,20 @@ void StBTofCalibMaker::writePPPAHistograms()
 //_____________________________________________________________________________
 float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModuleChan)
 {
+    float resolution(0.013); // 0.013 by default - 1/beta resolution
+    if (itray<0){return resolution;}
 
- float resolution(0.013); // 0.013 by default - 1/beta resolution
- if (itray<0){return resolution;}
+    int module = iModuleChan/6 + 1;
+    int cell   = iModuleChan%6 + 1;
+    // mBTofRes::timeres_tof() reports in picoseconds
+    float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell)/1000.;
 
- int module = iModuleChan/6 + 1;
- int cell   = iModuleChan%6 + 1;
- // mBTofRes::timeres_tof() reports in picoseconds
- float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell)/1000.;
+    float start_resolution = 0.0;
+    if (mUseVpdStart)
+        start_resolution = mVpdResConfig->singleTubeRes(mVPDHitPatternEast, mVPDHitPatternWest)/1000.;
+    else
+        start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero)/1000.;
+    resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
 
-float start_resolution(0);
- if (mUseVpdStart){
-
-   // For VPD timing determine the VPD starttime by combing the resolutions of
-   //   tray == 122 (east)
-   //   mSimParams[singleHit.tubeId-1+19].singleTubeRes
-   //   tray 121 (west)
-   //   mSimParams[singleHit.tubeId-1].singleTubeRes
-   //
-   // needs to be implemented
-
- }
- else {
-   // combine an average BTOF resolution based on NT0
-   // more sophisticated: figure out what BTOF cells actually went into the NT0 count.
-
-   // mBTofRes::timeres_tof() reports in picoseconds
-   start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero)/1000.;
- }
-
- resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
-
-return resolution;
+    return resolution;
 }
