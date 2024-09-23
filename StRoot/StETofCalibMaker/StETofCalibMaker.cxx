@@ -2179,8 +2179,8 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
 	double stateCorr =0;
 	if(mGet4StateMap[get4Id] == 1) stateCorr =  6.25;
-	if(mGet4StateMap[get4Id] == 2) stateCorr =  -6.25;
-	if(mGet4StateMap[get4Id] == 3) stateCorr =  -0.0;
+	else if(mGet4StateMap[get4Id] == 2) stateCorr =  -6.25;
+	// else if(mGet4StateMap[get4Id] == 3) stateCorr =  0.0;
 
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
