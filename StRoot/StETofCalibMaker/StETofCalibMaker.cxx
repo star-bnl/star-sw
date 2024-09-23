@@ -2803,21 +2803,9 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	int Get4Id1 = -1;
 	int get4state1 = -1;
 	
-	if(stateInt1 <= 1727) {	 
-	  Get4Id1    = stateInt1;
-	  get4state1 = 0;
-	}
-	if(stateInt1 >= 1728 && stateInt1 < 3456){
-	  Get4Id1    = stateInt1 - 1728;
-	 get4state1 = 1;
-	}
-	if(stateInt1 >= 3456 && stateInt1 < 5184){
-	  Get4Id1    = stateInt1 - (1728*2);
-	  get4state1 = 2;
-       }
-	if(stateInt1 >= 5184 && stateInt1 < 6912){
-	  Get4Id1    = stateInt1 - (1728*3);
-	  get4state1 = 3;
+	if(stateInt1 <= 6912) {	 
+	  Get4Id1    = stateInt1 % 1728;
+	  get4state1 = stateInt1 / 1728;
 	}
 	
 	stateVec[lastEvtId].push_back(get4state1);
