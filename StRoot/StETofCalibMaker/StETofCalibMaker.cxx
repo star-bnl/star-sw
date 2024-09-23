@@ -2716,7 +2716,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
          
       TDataSet* dbDataSet = nullptr;
       dbDataSet = GetDataBase( "Calibrations/etof/etofGet4StateMap" );
-      int intsPerEntry = 1000000;
+      const int intsPerEntry = 1000000;
       
       St_etofGet4StateMap* etofStateMap = static_cast< St_etofGet4StateMap* > ( dbDataSet->Find( "etofGet4StateMap" ) );
       if( !etofStateMap ) {
