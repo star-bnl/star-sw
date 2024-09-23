@@ -2703,9 +2703,9 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
    //first read
     if(forward == 0) mGlobalCounter = 1;
     //jump forward
-    if(forward > 0) mGlobalCounter++;
+    else if(forward > 0) mGlobalCounter++;
     //jump backward
-    if(forward < 0) mGlobalCounter--;
+    else mGlobalCounter--; // forward < 0
     
     if(mGlobalCounter == 0){
       mGlobalCounter++;
