@@ -2767,37 +2767,13 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	int Get4Id2 = -1;
 	int get4state2 = -1;
 	
-	if(stateInt1 <= 1727) {	 
-	  Get4Id1    = stateInt1;
-	  get4state1 = 0;
+	if(stateInt1 < 6912){
+	  Get4Id1 = statInt1 % 1728;
+	  get4state1 = stateInt1 / 1728;
 	}
-	if(stateInt1 >= 1728 && stateInt1 < 3456){
-	  Get4Id1    = stateInt1 - 1728;
-	  get4state1 = 1;
-	}
-	if(stateInt1 >= 3456 && stateInt1 < 5184){
-	  Get4Id1    = stateInt1  - (1728*2);
-	  get4state1 = 2;
-	}
-	if(stateInt1 >= 5184 && stateInt1 < 6912){
-	  Get4Id1    = stateInt1  - (1728*3);
-	  get4state1 = 3;
-	}
-	if(stateInt2 <= 1727) {	 
-	  Get4Id2    = stateInt2;
-	  get4state2 = 0;
-	}
-	if(stateInt2 >= 1728 && stateInt2 < 3456){
-	  Get4Id2    = stateInt2 - 1728;
-	  get4state2 = 1;
-	}
-	if(stateInt2 >= 3456 && stateInt2 < 5184){
-	  Get4Id2    = stateInt2  - (1728*2);
-	  get4state2 = 2;
-       }
-	if(stateInt2 >= 5184 && stateInt2 < 6912){
-	  Get4Id2    = stateInt2  - (1728*3);
-	  get4state2 = 3;
+	if(stateInt2 < 6912){
+	  Get4Id2 = statInt2 % 1728;
+	  get4state2 = stateInt2 / 1728;
 	}
 	
 	if(i < 864){
