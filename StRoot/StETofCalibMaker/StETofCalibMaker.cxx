@@ -2675,7 +2675,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
    bool fileZero = false;
 
    //Clean up last entry first
-   for(int i =0; i< 1728;i++){
+   for(int i =0; i< eTofConst::nGet4sInSystem; i++){
      mStateVec[i].clear();
      mStartVec[i].clear();
      mGet4StateMap[i] = 0;
@@ -2757,12 +2757,12 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	int get4state2 = -1;
 	
 	if(stateInt1 < 6912){
-	  Get4Id1 = statInt1 % 1728;
-	  get4state1 = stateInt1 / 1728;
+	  Get4Id1 = statInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
 	}
 	if(stateInt2 < 6912){
-	  Get4Id2 = statInt2 % 1728;
-	  get4state2 = stateInt2 / 1728;
+	  Get4Id2 = statInt2 % eTofConst::nGet4sInSystem;
+	  get4state2 = stateInt2 / eTofConst::nGet4sInSystem;
 	}
 	
 	if(i < 864){
@@ -2800,8 +2800,8 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 	int get4state1 = -1;
 	
 	if(stateInt1 < 6912) {	 
-	  Get4Id1    = stateInt1 % 1728;
-	  get4state1 = stateInt1 / 1728;
+	  Get4Id1    = stateInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
 	}
 	
 	stateVec[lastEvtId].push_back(get4state1);
@@ -2815,7 +2815,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
    }
 
    // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
-   for(int i = 0; i< 1728;i++){
+   for(int i = 0; i< eTofConst::nGet4sInSystem;i++){
      
      for(unsigned int j=0; j< startVec.size(); j++){
        
@@ -2861,7 +2861,7 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
 
   //loop over stateMap
 
-  for(unsigned int i =0; i< 1728; i++){
+  for(unsigned int i =0; i< eTofConst::nGet4sInSystem; i++){
 
     std::vector<unsigned long int> tmpStart = mStartVec[i];
     std::vector<short>             tmpState = mStateVec[i];
