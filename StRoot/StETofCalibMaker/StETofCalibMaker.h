@@ -212,6 +212,7 @@ private:
     unsigned long int              mDbEntryStop;
     int                            mGlobalCounter;
 
+    void decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec);
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
