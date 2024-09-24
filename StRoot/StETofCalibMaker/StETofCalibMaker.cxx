@@ -2803,11 +2803,12 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
     indexStart = std::distance(tmpStart.begin(), lower);    
     if(indexStart > 0) indexStart--;
 
-    //event past last change on get4 in entry
+    //event past last change on get4 in entry -> keep last state in line
     if(eventNr > tmpStart.at((tmpStart.size() -1))){
       indexStart = (tmpStart.size() -1);
     }
-  
+
+    //if state change happens in this very event increase index by one to hit proper state 
     if((indexStart < (tmpStart.size() -1 )) && eventNr == tmpStart.at(indexStart + 1)){
 	indexStart++;	
     }
