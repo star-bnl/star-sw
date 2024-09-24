@@ -2870,7 +2870,7 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
     unsigned int      indexStart = 0;
     short             newState   = 0;
 
-    if(tmpStart.size() == 0 ) continue;
+    if (tmpStart.empty()) continue;
     
     auto lower = std::lower_bound(tmpStart.begin(), tmpStart.end(), eventNr);
     indexStart = std::distance(tmpStart.begin(), lower);    
