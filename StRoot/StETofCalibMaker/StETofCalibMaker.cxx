@@ -2739,80 +2739,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     std::map<unsigned long int,vector<int>> stateVec;
     std::map<unsigned long int ,vector<int>> get4IdVec;
     
-    unsigned long int lastEvtId =0;
-    
-    for(unsigned int i = 0; i < intVec.size(); i++){
-      
-      // decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
-	switch (intVec.at(i) / 100000000) {
-		
-	case 42	:	
-	int tmp       = intVec.at(i) % 4200000000;
-	int stateInt1 = tmp / 10000;
-	int stateInt2 = tmp % 10000;
-	
-	int Get4Id1 = -1;
-	int get4state1 = -1;
-	int Get4Id2 = -1;
-	int get4state2 = -1;
-	
-	if(stateInt1 < 6912){
-	  Get4Id1 = statInt1 % eTofConst::nGet4sInSystem;
-	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
-	}
-	if(stateInt2 < 6912){
-	  Get4Id2 = statInt2 % eTofConst::nGet4sInSystem;
-	  get4state2 = stateInt2 / eTofConst::nGet4sInSystem;
-	}
-	
-	if(i < 864){
-	  
-	  mGet4StateMap[Get4Id1] = get4state1;
-	  mGet4StateMap[Get4Id2] = get4state2;
-	  mGet4ZeroStateMap[Get4Id1] = get4state1;
-	  mGet4ZeroStateMap[Get4Id2] = get4state2;
-	}
-	stateVec[lastEvtId].push_back(get4state1);
-	get4IdVec[lastEvtId].push_back(Get4Id1);
-	stateVec[lastEvtId].push_back(get4state2);
-	get4IdVec[lastEvtId].push_back(Get4Id2);
-
-	break;
-		
-        //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
-	case 40:
-		
-	int EvtId = intVec.at(i) % 4000000000;   
-
-	startVec.push_back(EvtId);
-	mMasterStartVec.push_back(EvtId);
-	
-	lastEvtId = EvtId;
-
-	break;		
-		
-        // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
-	case 41:
-		
-	int tmp       = intVec.at(i) % 4100000000;
-	int stateInt1 = tmp / 10000;
-	int Get4Id1 = -1;
-	int get4state1 = -1;
-	
-	if(stateInt1 < 6912) {	 
-	  Get4Id1    = stateInt1 % eTofConst::nGet4sInSystem;
-	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
-	}
-	
-	stateVec[lastEvtId].push_back(get4state1);
-	get4IdVec[lastEvtId].push_back(Get4Id1);
-
-	break;
-
-	default:
-	LOG_ERROR << "Get4 state not well defined -> Check db / state file !" << endm;	
-     }
-   }
+    decodeInt(intVec , mGet4StateMap , mGet4ZeroStateMap , startVec , mMasterStartVec , stateVec , get4IdVec); 	
 
    // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
    for(int i = 0; i< eTofConst::nGet4sInSystem;i++){
@@ -2925,5 +2852,89 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
   }
 
 }
-
 //-----------------------------------------------------
+void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec){
+
+  unsigned long int lastEvtId =0;
+    
+    for(unsigned int i = 0; i < intVec.size(); i++){
+      
+      	int tmp;
+	int stateInt1;
+	int stateInt2;
+	unsigned long int EvtId;
+	int Get4Id1;
+	int get4state1;
+	int Get4Id2;
+	int get4state2;
+
+      // decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
+	switch (intVec.at(i) / 100000000) {
+		
+	case 42	:	
+	tmp       = intVec.at(i) % 4200000000;
+	stateInt1 = tmp / 10000;
+        stateInt2 = tmp % 10000;
+	
+        Get4Id1 = -1;
+	get4state1 = -1;
+	Get4Id2 = -1;
+	get4state2 = -1;
+	
+	if(stateInt1 < 6912){
+	  Get4Id1 = stateInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
+	}
+	if(stateInt2 < 6912){
+	  Get4Id2 = stateInt2 % eTofConst::nGet4sInSystem;
+	  get4state2 = stateInt2 / eTofConst::nGet4sInSystem;
+	}
+	
+	if(i < 864){	  
+	  mGet4StateMap[Get4Id1] = get4state1;
+	  mGet4StateMap[Get4Id2] = get4state2;
+	  mGet4ZeroStateMap[Get4Id1] = get4state1;
+	  mGet4ZeroStateMap[Get4Id2] = get4state2;
+	}
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+	stateVec[lastEvtId].push_back(get4state2);
+	get4IdVec[lastEvtId].push_back(Get4Id2);
+
+	break;
+		
+        //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
+	case 40:
+		
+        EvtId = intVec.at(i) % 4000000000;   
+
+	startVec.push_back(EvtId);
+	mMasterStartVec.push_back(EvtId);
+	
+	lastEvtId = EvtId;
+
+	break;		
+		
+        // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
+	case 41:
+		
+	tmp       = intVec.at(i) % 4100000000;
+	stateInt1 = tmp / 10000;
+	Get4Id1 = -1;
+	get4state1 = -1;
+	
+	if(stateInt1 < 6912) {	 
+	  Get4Id1    = stateInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
+	}
+	
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+
+	break;
+
+	default:
+	LOG_ERROR << "Get4 state not well defined -> Check db / state file !" << endm;	
+     }
+   }
+}
