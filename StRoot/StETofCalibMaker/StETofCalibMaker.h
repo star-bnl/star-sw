@@ -158,8 +158,6 @@ private:
     std::string   mFileNamePulserTotPeak;       // name of parameter file for pulser peak tot
     std::string   mFileNamePulserTimeDiffGbtx;  // name of parameter file for pulser time diff
 
-    
-
     Int_t         mRunYear;                 // "year" of operation by using roughly October 1st as reference
     Float_t       mGet4TotBinWidthNs;       // conversion factor for Get4 chip TOT bin to nanoseconds
     Int_t         mMinDigisPerSlewBin;      // minimal required statistics per channel and TOT bin to apply slewing corrections
