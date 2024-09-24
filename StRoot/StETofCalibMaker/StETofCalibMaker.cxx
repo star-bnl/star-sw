@@ -2868,7 +2868,6 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
 
     //find closest evtNr & state for each Get4
     unsigned int      indexStart = 0;
-    // int               indexStop  = 0;
     short             newState   = 0;
     // unsigned long int newStart   = 0;
     // unsigned long int newStop    = 0;
