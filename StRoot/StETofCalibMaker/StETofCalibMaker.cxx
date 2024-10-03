@@ -80,7 +80,7 @@
 #include "tables/St_etofResetTimeCorr_Table.h"
 #include "tables/St_etofPulserTotPeak_Table.h"
 #include "tables/St_etofPulserTimeDiffGbtx_Table.h"
-#include "tables/St_etofGet4StateMap_Table.h"
+#include "tables/St_etofGet4State_Table.h"
 
 namespace etofSlewing {
     const unsigned int nTotBins = 30;
@@ -2702,10 +2702,10 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     
     if(mFileNameGet4State.empty()){
          
-      TDataSet* dbDataSet = GetDataBase( "Calibrations/etof/etofGet4StateMap" );
+      TDataSet* dbDataSet = GetDataBase( "Calibrations/etof/etofGet4State" );
       const int intsPerEntry = 1000000;
       
-      St_etofGet4StateMap* etofStateMap = static_cast< St_etofGet4StateMap* > ( dbDataSet->Find( "etofGet4StateMap" ) );
+      St_etofGet4StateMap* etofStateMap = static_cast< St_etofGet4StateMap* > ( dbDataSet->Find( "etofGet4State" ) );
       if( !etofStateMap ) {
 	LOG_ERROR << "unable to get the get4 state map from the database" << endm;	  
 	return;
