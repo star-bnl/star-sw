@@ -2705,13 +2705,13 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
       TDataSet* dbDataSet = GetDataBase( "Calibrations/etof/etofGet4State" );
       const int intsPerEntry = 1000000;
       
-      St_etofGet4StateMap* etofStateMap = static_cast< St_etofGet4StateMap* > ( dbDataSet->Find( "etofGet4State" ) );
+      St_etofGet4State* etofStateMap = static_cast< St_etofGet4State* > ( dbDataSet->Find( "etofGet4State" ) );
       if( !etofStateMap ) {
 	LOG_ERROR << "unable to get the get4 state map from the database" << endm;	  
 	return;
       }
       
-      etofGet4StateMap_st* stateMapTable = etofStateMap->GetTable();
+      etofGet4State_st* stateMapTable = etofStateMap->GetTable();
       
       for( size_t i=0; i< intsPerEntry; i++ ) {
 	if(stateMapTable->etofGet4State[ i ] <= 0) break; 
