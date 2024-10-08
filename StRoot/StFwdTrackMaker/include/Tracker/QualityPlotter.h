@@ -217,12 +217,12 @@ class QualityPlotter {
             if (kv.second == nullptr)
                 continue;
 
-            this->get("nHitsOnTrackMc")->Fill(kv.second->mHits.size());
+            this->get("nHitsOnTrackMc")->Fill(kv.second->mFttHits.size());
             this->get("McPt")->Fill(kv.second->mPt);
             this->get("McEta")->Fill(kv.second->mEta);
             this->get("McPhi")->Fill(kv.second->mPhi);
 
-            if (kv.second->mHits.size() >= 4) {
+            if (kv.second->mFttHits.size() >= 4) {
                 this->get("McPt_4hits")->Fill(kv.second->mPt);
                 this->get("McEta_4hits")->Fill(kv.second->mEta);
                 this->get("McPhi_4hits")->Fill(kv.second->mPhi);
@@ -231,25 +231,25 @@ class QualityPlotter {
                 ((TH3 *)this->get("McPtEtaPhi_4hits"))->Fill(kv.second->mPt, kv.second->mEta, kv.second->mPhi);
             }
 
-            if (kv.second->mHits.size() >= 5) {
+            if (kv.second->mFttHits.size() >= 5) {
                 this->get("McPt_5hits")->Fill(kv.second->mPt);
                 this->get("McEta_5hits")->Fill(kv.second->mEta);
                 this->get("McPhi_5hits")->Fill(kv.second->mPhi);
             }
 
-            if (kv.second->mHits.size() >= 6) {
+            if (kv.second->mFttHits.size() >= 6) {
                 this->get("McPt_6hits")->Fill(kv.second->mPt);
                 this->get("McEta_6hits")->Fill(kv.second->mEta);
                 this->get("McPhi_6hits")->Fill(kv.second->mPhi);
             }
 
-            if (kv.second->mHits.size() >= 7) {
+            if (kv.second->mFttHits.size() >= 7) {
                 this->get("McPt_7hits")->Fill(kv.second->mPt);
                 this->get("McEta_7hits")->Fill(kv.second->mEta);
                 this->get("McPhi_7hits")->Fill(kv.second->mPhi);
             }
 
-            for (auto h : kv.second->mHits) {
+            for (auto h : kv.second->mFttHits) {
                 auto fh = static_cast<FwdHit *>(h);
                 this->get("McHitMap")->Fill(abs(fh->_vid));
                 std::string n = "McHitMapLayer" + std::to_string(fh->getLayer());

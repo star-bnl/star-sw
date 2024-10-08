@@ -5,6 +5,7 @@
 
 #ifndef __CINT__
 #include "GenFit/Track.h"
+#include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #endif
 
 #include "FwdTrackerConfig.h"
@@ -49,50 +50,54 @@ class GenfitTrackResult;
 const size_t MAX_TREE_ELEMENTS = 4000;
 struct FwdTreeData {
   
-    // hits;
+    /**@brief Ftt hit related info*/
     int fttN;
     vector<float> fttX, fttY, fttZ;
     vector<int> fttVolumeId;
-    // Only avalaible for hits if MC
+    // Note: Below are only avalaible for hits if MC
     vector<float> fttPt;
     vector<int> fttTrackId, fttVertexId;
 
-    // hits;
+    /**@brief Fst hit related info*/
     int fstN;
     vector<float> fstX, fstY, fstZ;
     vector<int> fstTrackId;
 
+    /**@brief Fcs hit related info*/
     int fcsN;
-    vector<float> fcsX, fcsY, fcsZ;
+    vector<float> fcsX, fcsY, fcsZ, fcsE;
     vector<int> fcsDet;
 
-    // RC tracks
+    /**@brief RC track related info*/
     int rcN;
     vector<float> rcPt, rcEta, rcPhi, rcQuality;
     vector<int> rcTrackId, rcNumFST, rcCharge, rcNumFTT, rcNumPV;
 
-    // MC Tracks
+    /**@brief MC Track related info*/
     int mcN;
     vector<float> mcPt, mcEta, mcPhi;
     vector<int> mcVertexId, mcCharge;
+    vector<int> mcNumFtt, mcNumFst;
 
-    // MC Level vertex info
-    // maybe use also for TPC vertex if available in data
+    /**@brief MC Vertex related info*/
     int vmcN;
     vector<float> vmcX, vmcY, vmcZ;
 
+    /**@brief Track Projection related info*/
     int tprojN;
     vector<float> tprojX, tprojY, tprojZ;
     vector<float> tprojPx, tprojPy, tprojPz;
     vector<int> tprojIdD, tprojIdT;
 
-    // RAVE reco vertices
+    /**@brief RAVE RC Vertex related info*/
     int vrcN;
     vector<float> vrcX, vrcY, vrcZ;
 
+    /**@brief Track-to-hit delta related info*/
     int thdN;
-    vector<float> thdX, thdY, thaX, thaY, thaZ;
+    vector<float> thdX, thdY, thdP, thdR, thaX, thaY, thaZ;
 
+    /**@brief Seed finding Criteria related info*/
     bool saveCrit = false;
     std::map<string, std::vector<float>> Crits;
     std::map<string, std::vector<int>> CritTrackIds;
@@ -134,8 +139,8 @@ class StFwdTrackMaker : public StMaker {
 
     
     // for Wavefront OBJ export
-    size_t eventIndex = 0;
-    
+    size_t eventIndex = 0; // counts up for processed events
+    size_t mEventNum = 0; // global event num (index)
 
     bool mGenHistograms = false;
     bool mGenTree = false;
@@ -156,6 +161,8 @@ class StFwdTrackMaker : public StMaker {
 
     std::vector< genfit::GFRaveVertex * > mRaveVertices;
 
+    vector<float> mFttZFromGeom, mFstZFromGeom;
+
     void ProcessFwdTracks();
     void FillEvent();
     void FillTrackDeltas();
@@ -165,6 +172,7 @@ class StFwdTrackMaker : public StMaker {
     // I could not get the library generation to succeed with these.
     // so I have removed them
     #ifndef __CINT__
+        vector<FwdHit> mFwdHits;
         std::shared_ptr<SiRasterizer> mSiRasterizer;
         FwdTrackerConfig mFwdConfig;
         std::shared_ptr<ForwardTracker> mForwardTracker;
@@ -176,9 +184,11 @@ class StFwdTrackMaker : public StMaker {
         void loadFttHitsFromStEvent( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
         void loadFttHitsFromGEANT( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
 
-        void loadFstHits( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
-        void loadFstHitsFromGEANT( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
-        void loadFstHitsFromStEvent( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
+        int loadFstHits( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
+        int loadFstHitsFromMuDst( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
+        int loadFstHitsFromGEANT( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
+        int loadFstHitsFromStEvent( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
+        int loadFstHitsFromStEventFastSim( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
     #endif
 
     void FillTTree(); // if debugging ttree is turned on (mGenTree)
@@ -188,6 +198,7 @@ class StFwdTrackMaker : public StMaker {
     static std::string defaultConfigData;
     std::string defaultConfig;
     bool configLoaded = false;
+    TString mGeoCache;
 
     // Helper functions for modifying configuration
     // NOTE: to override configuration, call individual functions after setConfigForXXX
@@ -353,6 +364,60 @@ class StFwdTrackMaker : public StMaker {
     */
     void setSmearMcPrimaryVertex( bool pvs = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:smearMcVertex", pvs ); }
   
+    /**
+     * @brief Sets geometry cache filename
+     * 
+     */
+    void setGeoCache( TString gc ) { mGeoCache = gc; }
+
+    /**
+     * @brief Set a generic Key Value in the Config object
+     * 
+     * @param k key: any string representing absolute path e.g. `the.path.to.node:attribute`
+     * @param v value: value encoded as a string
+     */
+    void setConfigKeyValue( std::string k, std::string v ){
+      mFwdConfig.set( k, v );
+    }
+
+    /** @brief Sets a criteria value in the config for 2-hit criteria
+     *  @param string name: name of the crit2, e.g. Crit2_RZRatio
+     *  @param double min: minimum for the criteria, meaning depends on specific crit2
+     *  @param double max: maximum for the criteria, meaning depends on specific crit2
+     */
+    void setCrit2( std::string name, double min, double max ){
+      for ( auto p : mFwdConfig.childrenOf( "TrackFinder.Iteration.SegmentBuilder" ) ){
+        auto nName = mFwdConfig.get<std::string>( p + ":name", "DNE" );
+        
+        if (nName == name) {
+          LOG_DEBUG << "Setting Crit2=" << nName << " (min=" << min << ", max=" << max << ")" << endm;
+          mFwdConfig.set<double>(p + ":min", min );
+          mFwdConfig.set<double>(p + ":max", max );
+          return;
+        }
+      } // loop on existing crit2
+      // if we got here then the crit did not exist
+
+    }
+
+    /** @brief Sets a criteria value in the config for 3-hit criteria
+     *  @param string name: name of the crit3, e.g. Crit2_RZRatio
+     *  @param double min: minimum for the criteria, meaning depends on specific crit2
+     *  @param double max: maximum for the criteria, meaning depends on specific crit2
+     */
+    void setCrit3( std::string name, double min, double max ){
+      for ( auto p : mFwdConfig.childrenOf( "TrackFinder.Iteration.ThreeHitSegments" ) ){
+        auto nName = mFwdConfig.get<std::string>( p + ":name", "DNE" );
+        if (nName == name) {
+          LOG_DEBUG << "Setting Crit3=" << nName << " (min=" << min << ", max=" << max << ")" << endm;
+          mFwdConfig.set<double>(p + ":min", min );
+          mFwdConfig.set<double>(p + ":max", max );
+          return;
+        }
+      } // loop on existing crit3
+      // if we got here then the crit did not exist
+    }
+
 };
 
 #endif

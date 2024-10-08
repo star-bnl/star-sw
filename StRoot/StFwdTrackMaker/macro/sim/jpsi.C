@@ -17,9 +17,9 @@ class StarKinematics;
 StarKinematics *kinematics = 0;
 
 
-TH1F* hNumHits = 0;
-TString nameParticle = "mu+";
-float numParticles = 200;
+TH1F* hMll = 0;
+bool decayJPsiToElectrons = false;
+float numParticles = 1;
 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
@@ -45,18 +45,65 @@ void trig( Int_t n=1 )
     // Clear the chain from the previous event
     chain->Clear();
 
-    kinematics->Kine( numParticles, nameParticle.Data(), 0.2, 50.0, 2.5, 4.00  );
-		kinematics->Kine( numParticles, "mu-", 0.2, 50.0, 2.5, 4.00  );
+    //(Momentum, Energy units are Gev/C, GeV)
+    Double_t masses[2] = { 0.00051099895000, 0.00051099895000} ;
+  
+    if (!decayJPsiToElectrons){
+      masses[0] = 0.1056583755;
+      masses[1] = 0.1056583755;
+    }
+
+    TGenPhaseSpace genEvent;
+    TLorentzVector W;
+    // W.SetPtEtaPhiM( 0.0, 100.0, 0, 3.096 );
+    W.SetXYZM( 0, 0, 30, 3.096 );
+    genEvent.SetDecay(W, 2, masses);
+
+    TLorentzVector lv;
+    for ( int j = 0; j < numParticles; j++ ){
+      Double_t weight = genEvent.Generate();
+      TLorentzVector *pElectron = genEvent.GetDecay(0);
+      TLorentzVector *pPositron = genEvent.GetDecay(1);
+      lv = *pElectron + *pPositron;
+
+      StarGenParticle *ele;
+      if ( decayJPsiToElectrons )
+        ele = kinematics->AddParticle( "e-" );
+      else
+        ele = kinematics->AddParticle( "mu-" );
+      ele->SetPx(pElectron->Px());
+      ele->SetPy(pElectron->Py());
+      ele->SetPz(pElectron->Pz());
+      ele->SetMass( masses[0] );
+
+      StarGenParticle *pos;
+      if ( decayJPsiToElectrons )
+        pos = kinematics->AddParticle( "e+" );
+      else 
+        pos = kinematics->AddParticle( "mu+" );
+      pos->SetPx(pPositron->Px());
+      pos->SetPy(pPositron->Py());
+      pos->SetPz(pPositron->Pz());
+      pos->SetMass( masses[0] );
+
+      hMll->Fill( lv.M() );
+
+      cout << "ele eta = " << pElectron->Eta() << endl;
+      cout << "pos eta = " << pPositron->Eta() << endl;
+    }
+
+    
+		// kinematics->Kine( numParticles, nameParticle.Data(), 10.2, 12.0, 2.5, 4.00  );
 
     // Generate the event
     chain->Make();
 
-    TTable* hits = chain->GetDataSet("bfc/.make/geant/.data/g2t_stg_hit");
-    if ( hits ) {
-      double nhits = hits->GetNRows();
-      hNumHits->Fill( double(i), nhits / 4.0 / numParticles );
-      std::cout << "N hits  = " << nhits << std::endl;
-    }
+    // TTable* hits = chain->GetDataSet("bfc/.make/geant/.data/g2t_stg_hit");
+    // if ( hits ) {
+    //   double nhits = hits->GetNRows();
+    //   hNumHits->Fill( double(i), nhits / 4.0 / numParticles );
+    //   std::cout << "N hits  = " << nhits << std::endl;
+    // }
 
     // Print the event
     // command("gprint hits stgh");
@@ -78,10 +125,17 @@ void Kinematics()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void gen( Int_t nevents=100, Int_t rngSeed=12352342 )
+void jpsi( Int_t nevents=100, Int_t rngSeed=12352342, bool decayToElectrons = true )
 { 
 
-    cout << "Generating: " << nevents << " events with seed: " << rngSeed << endl;
+  hMll = new TH1F("hMll",";Mll;counts [10MeV]", 200, 2.0, 4.0 );
+  decayJPsiToElectrons = decayToElectrons;
+  cout << "Generating: " << nevents << " events with seed: " << rngSeed << endl;
+  if ( decayToElectrons ){
+    cout << "Simulating J/psi->e+e-" << endl;
+  }  else {
+    cout << "Simulating J/psi->mu+mu-" << endl;
+  }
   gSystem->Load( "libStarRoot.so" );
   gROOT->SetMacroPath(".:/star-sw/StRoot/macros/:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/calib:./StRoot/macros/mudst:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/analysis:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/test:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/examples:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/html:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/qa:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/calib:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/mudst:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/macros:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/tutorials");
 
@@ -111,7 +165,7 @@ void gen( Int_t nevents=100, Int_t rngSeed=12352342 )
   //  StarPrimaryMaker *
   _primary = new StarPrimaryMaker();
   {
-    _primary -> SetFileName( "sim.root");
+    _primary -> SetFileName( "jpsi.root");
     chain -> AddBefore( "geant", _primary );
   }
 
@@ -129,7 +183,7 @@ void gen( Int_t nevents=100, Int_t rngSeed=12352342 )
   //
   //geometry("y2012");
   command("gkine -4 0");
-  command("gfile o sim.fzd");
+  command("gfile o jpsi.fzd");
 
 
   hNumHits = new TH1F("hNumEvents","Nhits/plane/incident track vs event number",nevents + 1, -0.5, (float)( nevents ) + 0.5 );
@@ -157,10 +211,10 @@ void gen( Int_t nevents=100, Int_t rngSeed=12352342 )
   //
   trig( nevents );
 
-      // TFile * f = new TFile( "gen.root", "RECREATE" );
-  // f->cd();
-  // hNumHits->Write();
-  // f->Write();
+  TFile * f = new TFile( "jpsi_gen.root", "RECREATE" );
+  f->cd();
+  hMll->Write();
+  f->Write();
 
   command("call agexit");  // Make sure that STARSIM exits properly
 

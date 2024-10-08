@@ -50,14 +50,14 @@ class McTrack {
         mStartVertex = start_vertex;
     }
 
-    void addHit(KiTrack::IHit *hit) { mHits.push_back(hit); }
-    // void addFstHit(KiTrack::IHit *hit) { mFstHits.push_back(hit); }
+    void addHit(KiTrack::IHit *hit) { mFttHits.push_back(hit); }
+    void addFstHit(KiTrack::IHit *hit) { mFstHits.push_back(hit); }
 
     double mPt, mEta, mPhi;
     int mTid, mQ, mStartVertex;
 
-    std::vector<KiTrack::IHit *> mHits;
-    // std::vector<KiTrack::IHit *> mFstHits;
+    std::vector<KiTrack::IHit *> mFttHits;
+    std::vector<KiTrack::IHit *> mFstHits;
 };
 
 
