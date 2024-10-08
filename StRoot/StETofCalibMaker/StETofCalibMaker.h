@@ -1,4 +1,4 @@
- /***************************************************************************
+/***************************************************************************
  *
  * $Id: StETofCalibMaker.h,v 1.6 2019/12/19 02:19:13 fseck Exp $
  *
@@ -90,6 +90,8 @@ public:
     void setStrictPulserHandling( const bool debug );
     void setReferencePulserIndex( const int index );
     
+    short GetState(int);
+
     //moved to public to avoid problem with root6
     struct StructStuckFwDigi{
 		  Int_t     geomId;
@@ -138,6 +140,8 @@ private:
     void setHistFileName();
     void writeHistograms();
 
+    void readGet4State(int fileNr, short forward);
+    void checkGet4State( unsigned long int eventNr);
 
     StEvent*             mEvent;
     StMuDst*             mMuDst;
@@ -188,7 +192,7 @@ private:
 
     std::vector< StructStuckFwDigi > mStuckFwDigi; // list of digis to ignore for the rest of the run due to stuck firmware
 
-	 Bool_t 			mStrictPulserHandling;
+    Bool_t 			mStrictPulserHandling;
     Bool_t        mUsePulserGbtxDiff;
     Bool_t        mDoQA;
     Bool_t        mDebug;
@@ -196,14 +200,25 @@ private:
     std::map< std::string, TH1* >  mHistograms;
 
 
+    std::string                    mFileNameGet4State;
+    std::vector<short>             mStateVec[1728];
+    std::vector<unsigned long int> mStartVec[1728];
+    std::vector<unsigned long int> mMasterStartVec;
+    std::map<int , short>          mGet4StateMap;
+    std::map<int , short>          mGet4ZeroStateMap;
+    unsigned long int              mStateMapStart;
+    unsigned long int              mStateMapStop;
+    unsigned long int              mDbEntryStart;
+    unsigned long int              mDbEntryStop;
+    int                            mGlobalCounter;
 
-
+    void decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec);
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
     ClassDef( StETofCalibMaker, 0 )
 };
-
+inline short StETofCalibMaker::GetState(         int get4 )     { return mGet4StateMap.at(get4); }
 inline void StETofCalibMaker::setFileNameCalibParam(         const char* fileName )     { mFileNameCalibParam         = fileName; }
 inline void StETofCalibMaker::setFileNameElectronicsMap(     const char* fileName )     { mFileNameElectronicsMap     = fileName; }
 inline void StETofCalibMaker::setFileNameStatusMap(          const char* fileName )     { mFileNameStatusMap          = fileName; }
