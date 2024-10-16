@@ -1133,7 +1133,7 @@ StETofCalibMaker::Make()
     if(mFileNameGet4State.empty()){
       //read from db
 
-      readGet4State(mGlobalCounter , 99);
+     if( evtNr > mDbEntryStop ||  evtNr < mDbEntryStart) readGet4State(mGlobalCounter , 99);
 
     }else{
       //read from file
