@@ -55,6 +55,7 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
   mExternalSeedPresent = kFALSE;
   mRequireCTB        = kFALSE;
   requireCTB         = kFALSE;
+  mFXT               = kFALSE;
   mUseITTF           = kFALSE;
   mUseOldBEMCRank    = kFALSE;
   mLowerSplitVtxRank = kFALSE;
@@ -413,7 +414,12 @@ int StMinuitVertexFinder::fit(StEvent* event)
       if (!accept(g)) continue;
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
-      if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
+      // In FXT mode, we want to bias 2 cm below the z-axis
+      //   for the approximate physical target location
+      // gDCA->impact() is the same as -(gDCA->helix().geometricSignedDistance(0,0))
+      double RImpact = (mFXT ? -(gDCA->helix().geometricSignedDistance(0,-2))
+                             : gDCA->impact());
+      if (TMath::Abs(RImpact) >  mRImpactMax) continue;
       mDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
