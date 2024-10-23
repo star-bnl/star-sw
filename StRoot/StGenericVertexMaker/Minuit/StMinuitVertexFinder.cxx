@@ -414,10 +414,12 @@ int StMinuitVertexFinder::fit(StEvent* event)
       if (!accept(g)) continue;
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
-      // In FXT mode, we want to bias 2 cm below the z-axis
-      //   for the approximate physical target location
-      // gDCA->impact() is the same as -(gDCA->helix().geometricSignedDistance(0,0))
-      double RImpact = (mFXT ? -(gDCA->helix().geometricSignedDistance(0,-2))
+      // In FXT mode, we want to have a bias = -2 cm below the z-axis
+      //   for the approximate physical target location. This could
+      //   potentially be a database table (PrimaryVertexCuts) parameter,
+      //   but the bias is approximate and highly unlikely to change/finetune.
+      // gDCA->impact() is the same as -(gDCA->helix().geometricSignedDistance(0.0,0.0))
+      double RImpact = (mFXT ? -(gDCA->helix().geometricSignedDistance(0.0,-2.0))
                              : gDCA->impact());
       if (TMath::Abs(RImpact) >  mRImpactMax) continue;
       mDCAs.push_back(gDCA);
