@@ -36,7 +36,7 @@
 #include "TGeant4.h"
 #include "TG4RunManager.h"
 #include "TG4RunConfiguration.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 //________________________________________________________________________________________________
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
