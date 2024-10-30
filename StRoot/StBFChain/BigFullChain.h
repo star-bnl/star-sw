@@ -1293,6 +1293,9 @@ Bfc_st BFC[] = { // standard chains
 
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
+
+  {"geantTables","","","geomT,gen_T,sim_T","","geometry,Geom,St_db_Maker,St_g2t",    "Geant tables",kFALSE},
+
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
   {"flux"        ,"","","simu"                                           ,"","flux","Load flux lib",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
