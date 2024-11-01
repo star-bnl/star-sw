@@ -1320,7 +1320,8 @@ Bfc_st BFC[] = { // standard chains
   {"GEANT4 Libs ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 
-  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  //  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  {"g4interfaces","", "", "",                     "", "libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
   {"g4physics",   "", "", "",                     "", "libG4materials.so,libG4graphics_reps.so,libG4geometry.so,libG4particles.so,libG4track.so,libG4zlib.so,libG4digits_hits.so,libG4processes.so,libG4tracking.so,libG4event.so,libG4run.so,libG4physicslists.so", "Load G4",false},
   {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
   {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
