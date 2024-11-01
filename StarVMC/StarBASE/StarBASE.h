@@ -17,7 +17,7 @@
 
 #include "StMaker.h"
 #include "StVMCApplication.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 
 class StMCStepping;
 

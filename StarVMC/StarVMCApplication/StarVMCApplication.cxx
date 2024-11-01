@@ -13,7 +13,7 @@
 #include "TVirtualMC.h"
 #include "TPDGCode.h"
 #include "TApplication.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 
 ClassImp(StarVMCApplication);
 

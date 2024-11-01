@@ -19,7 +19,7 @@
 #include "StMaker.h"
 #endif
 #include "StarVMCApplication.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 
 class StVMCMaker : public StMaker {
  public: 

@@ -8,7 +8,7 @@
 #include "TGeoManager.h"
 #include "TROOT.h"
 #include "TPDGCode.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 #include "StMCStack.h"
 #include "StMCStepping.h"
 
