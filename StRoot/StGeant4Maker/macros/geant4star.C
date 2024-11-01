@@ -1,11 +1,28 @@
-class StBFChain;
+R__LOAD_LIBRARY(libGeom.so);
+R__LOAD_LIBRARY(libVMCLibrary.so);
+R__LOAD_LIBRARY(libgeant321.so);
+
+R__LOAD_LIBRARY(libTable.so);
+R__LOAD_LIBRARY(StarRoot.so);
+R__LOAD_LIBRARY(St_base.so);
+R__LOAD_LIBRARY(StStarLogger.so);
+R__LOAD_LIBRARY(StChain.so);
+R__LOAD_LIBRARY(StBFChain.so);
+
+struct _dummyinit_ {
+  _dummyinit_(){
+    gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");
+  };
+} __1;
+
+//class StBFChain;
 StBFChain* chain = 0;
 
 #if !defined(__CINT__) && !defined(__CLING__)
 #include <TString.h>
 #include <iostream>
-#include <StMessMgr.h>
 #endif
+#include <StMessMgr.h>
 
 //extern "C" {
 //  void Load( const char* lib );
@@ -72,8 +89,9 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
   gROOT->ProcessLine("chain->cd();");
   gROOT->ProcessLine("chain->SetDebug(1);");  
 
-  TString chainOpts = "agml geant4 geant3vmc geant4vmc stargen geant4mk kinematics -emc_t -ftpcT mysql nodefault ";
-  ///TString chainOpts = "agml geant4 geant4vmc stargen kinematics -emc_t -ftpcT nodefault ";
+//TString chainOpts = "agml geant4 geant3vmc geant4vmc stargen geant4mk kinematics -emc_t -ftpcT mysql nodefault ";
+  TString chainOpts = "agml geant4           geant4vmc stargen geant4mk kinematics -emc_t -ftpcT mysql nodefault ";
+
 
   // pickup command line options ala "--" and add them as a chain option
 
@@ -347,4 +365,9 @@ void geant4star(){
   }
   std::cout << cmdline.Data() << std::endl;
   loadStar(); 
+
+  gROOT->ProcessLine(".I");
+  gROOT->ProcessLine("gSystem->GetLibraries()");
+  gROOT->ProcessLine("gSystem->GetLinkedLibs()");
+
 }
