@@ -1,3 +1,4 @@
+#ifndef __CLING__
 #include <TH2F.h> 
 #include <TCanvas.h>
 #include <TTable.h>
@@ -6,6 +7,7 @@
 #include   <g2t_vertex.h>
 #include <StBFChain.h>
 #include <StChain.h>
+#endif
 
 TH2F* hYX = 0;
 TH2F* vYX = 0;
