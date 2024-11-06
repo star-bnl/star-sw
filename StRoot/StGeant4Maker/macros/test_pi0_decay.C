@@ -1,5 +1,7 @@
+#ifndef __CLING__
 #include <StBFChain.h>
 #include <StChain.h>
+#endif
 
 void test_pi0_decay() {
 

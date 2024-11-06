@@ -1,3 +1,4 @@
+#ifndef __CLING__
 #include "StChain/StMaker.h"
 
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
@@ -12,6 +13,7 @@
 #include <vector>
 
 #include <string>
+#endif
 
 StarParticleData& particleData = StarParticleData::instance();
 StarPrimaryMaker* primaryMk = 0;

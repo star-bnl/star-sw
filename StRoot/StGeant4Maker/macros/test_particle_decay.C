@@ -1,8 +1,10 @@
+#ifndef __CLING__
 #include <StBFChain.h>
 #include <StChain.h>
 #include <StGeant4Maker/StMCParticleStack.h>
 #include <TVirtualMC.h>
 #include <StMessMgr.h>
+#endif
 
 void test_particle_decay(int n=1,const char* particles="pi0") {
 
