@@ -182,8 +182,6 @@ class StFwdTrackMaker : public StMaker {
     void FillTTree(); // if debugging ttree is turned on (mGenTree)
     void FitVertex();
 
-<<<<<<< Updated upstream
-=======
     static std::string defaultConfigIdealSim;
     static std::string defaultConfigData;
     std::string defaultConfig;
@@ -359,7 +357,6 @@ class StFwdTrackMaker : public StMaker {
      * 
      */
     void setGeoCache( TString gc ) { mGeoCache = gc; }
->>>>>>> Stashed changes
 };
 
 #endif
