@@ -2535,6 +2535,7 @@ If LL>0
 
   case y2021 { y2021: y2021 first cut geometry; Geom =        'y2021     '; call geom_y2021;} 
   case y2021a { y2021a: y2021 first production geometry; Geom =        'y2021a    '; call geom_y2021a;} 
+  case y2021b { y2021b: y2021 first production geometry; Geom =        'y2021b    '; call geom_y2021b;} 
 
   case y2022 { y2022: y2022 first cut geometry; Geom =        'y2022     '; call geom_y2022;} 
   case y2022a { y2022a: y2022 first production geometry; Geom =        'y2022a    '; call geom_y2022a;} 
