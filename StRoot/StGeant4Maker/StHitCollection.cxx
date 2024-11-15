@@ -146,6 +146,9 @@ void StTrackerHitCollection::ProcessHits() {
 
   // This should be the current particle truth 
   StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
+  if ( 0==truth ) {
+    LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
+  }
 
   LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
 
@@ -168,7 +171,7 @@ void StTrackerHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new TrackerHit );
-    truth->addHit( hit );
+    if (truth) truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
@@ -197,7 +200,7 @@ void StTrackerHitCollection::ProcessHits() {
     // Assign the hit the ID truth of the current track (index + 1)
     //    hit->idtruth = particleTable.size();
     //    hit->idtruth = truthTable.size();
-    hit->idtruth = userstack->GetIdTruth ( truth );
+    hit->idtruth = (truth)? userstack->GetIdTruth ( truth ) : -1;
 
 
 
@@ -296,6 +299,9 @@ void StCalorimeterHitCollection::ProcessHits() {
 
   // This should be the current particle truth 
   StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
+  if ( 0==truth ) {
+    LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
+  }
 
   LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
 
@@ -321,7 +327,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     }
 
     mHits.push_back( hit = new CalorimeterHit );
-    truth->addHit( hit );
+    if (truth) truth->addHit( hit );
 
     // Get the current path to the sensitive volume
     hit->path = mc->CurrentVolPath(); 
@@ -351,7 +357,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     // Assign the hit the ID truth of the current track (index + 1)
     //    hit->idtruth = particleTable.size();
     //    hit->idtruth = truthTable.size();
-    hit->idtruth = userstack->GetIdTruth ( truth );
+    hit->idtruth = (truth)? userstack->GetIdTruth ( truth ) : -1;
 
     // Score entrance
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );
@@ -411,7 +417,9 @@ void StCalorimeterHitCollection::EndOfEvent() {
       myhit->idtruth=hit->idtruth;      
     }
 
-    myhit->idtruth = TMath::Min( hit->idtruth, myhit->idtruth );
+    if ( hit->idtruth>=0 ) // negative truth is ignored
+      myhit->idtruth = TMath::Min( hit->idtruth, myhit->idtruth );
+
     myhit->nsteps += hit->nsteps;
     myhit->de     += hit->de;
 
