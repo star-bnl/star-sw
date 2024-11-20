@@ -160,7 +160,7 @@ public:
     /// returns digitized (ADC) amplitude
     float A = this->GetDE(ipmt);
     short N = (short)(A/pC_per_ADCBins[ipmt] + shift_ADC0[ipmt]);
-    if (N>=NADCbins) {return NADCbins-1;}
+    if (N>=ADCBin) {return ADCBin-1;}
     if (N<0){return 0;}
     return N;
   }
