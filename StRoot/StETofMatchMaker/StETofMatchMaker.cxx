@@ -3306,13 +3306,15 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
 void 
 StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec){
   
-
+  
  //flag Overlap-Hits & jumped Hits  -------------------------------------------------------------------
+
   std::map< Int_t, eTofHitVec >  overlapHitMap;
   eTofHitVec overlapHitVec;
   eTofHitVec tempVecOL        = matchCandVec;  
   eTofHitVecIter detHitIter;
   eTofHitVecIter detHitIter2;
+
   std::map< int, bool >  jumpHitMap;
 
   for(unsigned int i=0; i<matchCandVec.size();i++){
@@ -3325,7 +3327,6 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
   
   for( auto detHitIter = tempVecOL.begin(); detHitIter != tempVecOL.end(); ) {
     
-
     detHitIter  = tempVecOL.begin();
     detHitIter2 = tempVecOL.begin();
     
@@ -3920,12 +3921,9 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
   }//loop over counters
   
   //set clustersize for jumped hits: +100 if early , +200 if late, + 300 if still jumped
+  //set clustersize for jumped hits: +100 if default , +200 if cal/def2
  
   for(unsigned int i=0;i<finalMatchVec.size();i++){
-
-    if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
-      finalMatchVec.at(i).clusterSize += 300;
-    }
    
     StETofCalibMaker*  mETofCalibMaker;
     mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
@@ -3933,14 +3931,30 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
     int keyGet4up   = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 1 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
     int keyGet4down = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 2 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
 
-    if(mETofCalibMaker->GetState(keyGet4up) == 1 || mETofCalibMaker->GetState(keyGet4down) == 1){
-      finalMatchVec.at(i).clusterSize += 100;
-    }
-    if(mETofCalibMaker->GetState(keyGet4up) == 2 || mETofCalibMaker->GetState(keyGet4down) == 2 ){
-      finalMatchVec.at(i).clusterSize += 200;
+    if(!mETofCalibMaker){      
+      if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	finalMatchVec.at(i).clusterSize += 100;
+      }
+    }else{
+      if(!mETofCalibMaker->calState()){
+	if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	  if(mETofCalibMaker->GetState(keyGet4up) != 0 || mETofCalibMaker->GetState(keyGet4down) != 0){
+	    finalMatchVec.at(i).clusterSize += 200;
+	  }else{
+	    finalMatchVec.at(i).clusterSize += 100;
+	  }
+	}
+      }else{
+	if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	  finalMatchVec.at(i).clusterSize += 100;
+	}
+	if(mETofCalibMaker->GetState(keyGet4up) != 0 || mETofCalibMaker->GetState(keyGet4down) != 0){
+	  finalMatchVec.at(i).clusterSize += 200;
+	}
+      }
     }
   }
-
+  
   sortOutOlDoubles(finalMatchVec);
 }
 
@@ -4035,9 +4049,9 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
 	
   for(unsigned int i =0; i< finalMatchVec.size(); i++){
 
-    char singlemixdouble = 9;
-    char matchcase = 9;
-    char isOl = 9;
+    unsigned char singlemixdouble = 9;
+    unsigned char matchcase = 9;
+    unsigned char isOl = 9;
 
     switch (finalMatchVec.at(i).matchFlag / 100) {
       case 1 : matchcase = 4; break;
@@ -4063,7 +4077,7 @@ StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
       default : { LOG_WARN << "Errant ETOF match flag for singlemixdouble!" << endm; }
     }
 
-    char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
+    unsigned char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
 
     if(singlemixdouble == 9 || isOl == 9 || matchcase == 9) newFlag = 0;
 

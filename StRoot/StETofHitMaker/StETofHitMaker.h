@@ -127,6 +127,8 @@ private:
     StMuDst*                mMuDst;
     StETofGeometry*         mETofGeom;   // pointer to the ETof geometry utility class
 
+    std::map< int, std::vector< int > >  mGet4PartnerPairMap;
+    std::map< int , int  >    mGet4DefaultMap;
 
     std::string   mFileNameHitParam;        // name of parameter file for hit parameters
     std::string   mFileNameSignalVelocity;  // name of parameter file for signal velocity
@@ -201,3 +203,4 @@ inline void StETofHitMaker::setDebug( const bool debug )                        
 inline void StETofHitMaker::setDoAfterPulseCorr( const bool apcorr )              { mApCorr = apcorr; }
 
 #endif
+

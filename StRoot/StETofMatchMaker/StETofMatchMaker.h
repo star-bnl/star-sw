@@ -50,7 +50,6 @@ class StTrack;
 class StMuTrack;
 class StTrackGeometry;
 class StETofHitMaker;
-class StETofCalibMaker;
 
 class TH1;
 class TH2;

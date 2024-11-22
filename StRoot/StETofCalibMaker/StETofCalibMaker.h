@@ -84,6 +84,8 @@ public:
     void setFileNameResetTimeCorr(      const char* fileName );
     void setFileNamePulserTotPeak(      const char* fileName );
     void setFileNamePulserTimeDiffGbtx( const char* fileName );
+    void setCalState(         const bool calTrue );
+    bool calState();
 
     void setDoQA(  const bool doQA  );
     void setDebug( const bool debug );
@@ -91,6 +93,7 @@ public:
     void setReferencePulserIndex( const int index );
     
     short GetState(int);
+    short GetDefaultState(int);
 
     //moved to public to avoid problem with root6
     struct StructStuckFwDigi{
@@ -103,6 +106,12 @@ public:
 		  }
     };
 
+   struct stateStruct{
+      int     get4Id;
+      unsigned long int  evtId;
+      Double_t  state;
+    };
+     
 
 private:
     bool isFileExisting( const std::string fileName );
@@ -142,6 +151,7 @@ private:
 
     void readGet4State(int fileNr, short forward);
     void checkGet4State( unsigned long int eventNr);
+    
 
     StEvent*             mEvent;
     StMuDst*             mMuDst;
@@ -157,8 +167,6 @@ private:
     std::string   mFileNameResetTimeCorr;       // name of parameter file for reset time correction
     std::string   mFileNamePulserTotPeak;       // name of parameter file for pulser peak tot
     std::string   mFileNamePulserTimeDiffGbtx;  // name of parameter file for pulser time diff
-
-    
 
     Int_t         mRunYear;                 // "year" of operation by using roughly October 1st as reference
     Float_t       mGet4TotBinWidthNs;       // conversion factor for Get4 chip TOT bin to nanoseconds
@@ -208,18 +216,24 @@ private:
     std::vector<unsigned long int> mMasterStartVec;
     std::map<int , short>          mGet4StateMap;
     std::map<int , short>          mGet4ZeroStateMap;
+    std::map<int , short>          mGet4DefaultStateMap;
     unsigned long int              mStateMapStart;
     unsigned long int              mStateMapStop;
     unsigned long int              mDbEntryStart;
     unsigned long int              mDbEntryStop;
     int                            mGlobalCounter;
+    bool                           mCalState;
 
+    void decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec, std::map<int , short>&  mGet4DefaultStateMap);
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
     ClassDef( StETofCalibMaker, 0 )
 };
-inline short StETofCalibMaker::GetState(         int get4 )     { return mGet4StateMap.at(get4); }
+inline bool  StETofCalibMaker::calState(                                          )     { return mCalState; }
+inline short StETofCalibMaker::GetDefaultState(                          int get4 )     { return mGet4DefaultStateMap.at(get4); }
+inline short StETofCalibMaker::GetState(                                 int get4 )     { return mGet4StateMap.at(get4); }
+inline void StETofCalibMaker::setCalState(                   const bool calTrue   )     { mCalState         = calTrue; }
 inline void StETofCalibMaker::setFileNameCalibParam(         const char* fileName )     { mFileNameCalibParam         = fileName; }
 inline void StETofCalibMaker::setFileNameElectronicsMap(     const char* fileName )     { mFileNameElectronicsMap     = fileName; }
 inline void StETofCalibMaker::setFileNameStatusMap(          const char* fileName )     { mFileNameStatusMap          = fileName; }
