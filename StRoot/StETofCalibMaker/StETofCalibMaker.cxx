@@ -3005,16 +3005,16 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
     std::sort(startVec.begin(), startVec.end());
     std::sort(mMasterStartVec.begin(), mMasterStartVec.end());
  
-    for(int i=0; i< 1728;i++){
+    for(unsigned int i=0; i< 1728;i++){
 
      std::vector<stateStruct> tmpVec = stateMap.at(i);
      
-     for(int j=0; j < stateMap.at(i).size();j++){
+     for(unsigned int j=0; j < stateMap.at(i).size();j++){
        tmpVec.push_back(stateMap.at(i).at(j));
      }
      std::sort(tmpVec.begin(), tmpVec.end(), [] (stateStruct x, stateStruct  y) { return x.evtId < y.evtId; } );
      
-     for(int j=0; j< tmpVec.size();j++){
+     for(unsigned int j=0; j< tmpVec.size();j++){
        
        stateVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).state);
        get4IdVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).get4Id);
