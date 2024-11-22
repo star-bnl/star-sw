@@ -3920,10 +3920,9 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
       }// loop over MMMap
   }//loop over counters
   
-  //set clustersize for jumped hits: +100 if early , +200 if late, + 300 if still jumped
   //set clustersize for jumped hits: +100 if default , +200 if cal/def2
- 
   for(unsigned int i=0;i<finalMatchVec.size();i++){
+
    
     StETofCalibMaker*  mETofCalibMaker;
     mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );

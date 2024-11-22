@@ -27,7 +27,9 @@ mPlane(255),
 mQuadrant(kFttUnknownQuadrant),
 mRow(255),
 mStrip(255),
-mOrientation(kFttUnknownOrientation)
+mOrientation(kFttUnknownOrientation),
+mIdTruth(0),
+mQaTruth(0)
 { /*noop*/ }
 
 StFttRawHit::StFttRawHit(   UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
@@ -79,7 +81,10 @@ operator<<( ostream &os, const StFttRawHit& rh )
     os << "\tmQuadrant = "    << (int)rh.quadrant()    << endl;
     os << "\tmRow = "         << (int)rh.row()         << endl;
     os << "\tmStrip = "       << (int)rh.strip()       << endl;
-    os << "\tmOrientation = " << (int)rh.orientation() << " ) " << endl;
+    os << "\tmOrientation = " << (int)rh.orientation() << endl;
+    os << "\tidTruth = "      << (int)rh.idTruth()     << endl;
+    os << "\tqaTruth = "      << (int)rh.qaTruth()     << endl;
+    os << " ) " << endl;
 
 
     return os;

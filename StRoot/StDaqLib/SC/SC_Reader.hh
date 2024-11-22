@@ -16,6 +16,7 @@ public:
   int ZDCWestNoKiller();
   int ZDCEastNoKiller();
   int ZDCXNoKiller();
+  int EPDX();
   int Mult();
   int L0();
   int BBCX();

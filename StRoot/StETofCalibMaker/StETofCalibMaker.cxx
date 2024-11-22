@@ -129,6 +129,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mDbEntryStop(0),
   mGlobalCounter(1),
   mCalState(false)
+
   
 {
     /// default constructor
@@ -1460,7 +1461,7 @@ StETofCalibMaker::processMuDst()
 		if (hasPulsersVec.size() == 108){
 		  etofHeader->setHasPulsersVec(hasPulsersVec);
 	  	} 
-		
+
 		//fill good event flag into header
 		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
@@ -2173,6 +2174,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 	// only calibrate here if flag is set
 	if(!mCalState) stateCorr = 0;
 
+
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
                                             - calibTimeOffset(   aDigi )
@@ -2697,7 +2699,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     else if(forward > 0){ mGlobalCounter++;
     //jump backward
     }else {mGlobalCounter--;} // forward < 0
-    
+
     if(mGlobalCounter == 0){
       mGlobalCounter++;
       fileZero = true;
@@ -2727,8 +2729,6 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
           
     }else{
            
-      cout << "reading file " << mFileNameGet4State << endl;
-
       std::ifstream paramFile;
       
       paramFile.open( mFileNameGet4State.c_str() );
@@ -2867,6 +2867,7 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 
   unsigned long int lastEvtId =0;
   std::map<int, std::vector< stateStruct > > stateMap;
+
     
     for(unsigned int i = 0; i < intVec.size(); i++){
       
@@ -2933,6 +2934,7 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 	}
 	
 	if(i >= (eTofConst::nGet4sInSystem/4) && i < ((eTofConst::nGet4sInSystem/4) + (eTofConst::nGet4sInSystem/2))){	  
+
 	  mGet4StateMap[Get4Id1] = get4state1;
 	  mGet4StateMap[Get4Id2] = get4state2;
 	  mGet4ZeroStateMap[Get4Id1] = get4state1;
@@ -3018,6 +3020,4 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
        get4IdVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).get4Id);
      }     
    }
-
-
 }

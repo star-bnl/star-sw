@@ -202,6 +202,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   ITTF = kFALSE;
   EST = -1; // -1 = unknown
   allTrigs = kFALSE;
+  allEvents = kFALSE;
 
 //  - Set all the histogram booking constants
 
@@ -309,6 +310,8 @@ StQAMakerBase::~StQAMakerBase() {
 Int_t StQAMakerBase::Init() {
 // Histogram booking must wait until first event Make() to determine event type
   eventCount = 0;
+  if (IAttr("allTrigs")) allTrigs = kTRUE;
+  if (IAttr("allEvents")) allEvents = kTRUE;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -337,7 +340,7 @@ Int_t StQAMakerBase::Make() {
 
     
 
-  if (!fillHists) return kStOk;
+  if (!(fillHists || allEvents)) return kStOk;
   // Call methods to fill histograms
 
   // Those divided by event class:

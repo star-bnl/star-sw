@@ -684,7 +684,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[123];
+      static float X[124];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
@@ -770,6 +770,12 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[43] = s0*X[43] + s1*St_trigDetSumsC::instance()->getCTBOrTOFp(); // ZDCXNoKiller
       X[44] = s0*X[44] + s1*St_trigDetSumsC::instance()->getCTBWest();   // ZDCWestNoKiller
       X[45] = s0*X[45] + s1*St_trigDetSumsC::instance()->getCTBEast();   // ZDCEastNoKiller
+
+      // EPD:
+      // Stored in rich scaler rs14 for 2018+ data, and available
+      //   for the DAQ stream via otherwise empty TOFp member of
+      //   trigDetSums starting with SL24b
+      X[123] = s0*X[123] + s1*St_trigDetSumsC::instance()->getEPDX();
 
       // StMagUtilities distortion correction parameters
       X[46] = s0*X[46] + s1*m_ExB->GetConst_0();
@@ -1036,7 +1042,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:zdcxnk:zdcwnk:zdcenk:const0:const1:sce:scw:usce:sc1:gapf1:gapi1:sc2:gapf2:gapi2:sc3:gapf3:gapi3:sc4:gapf4:gapi4:sc5:gapf5:gapi5:sc6:gapf6:gapi6:sc7:gapf7:gapi7:sc8:gapf8:gapi8:sc9:gapf9:gapi9:sc10:gapf10:gapi10:sc11:gapf11:gapi11:sc12:gapf12:gapi12:sc13:gapf13:gapi13:sc14:gapf14:gapi14:sc15:gapf15:gapi15:sc16:gapf16:gapi16:sc17:gapf17:gapi17:sc18:gapf18:gapi18:sc19:gapf19:gapi19:sc20:gapf20:gapi20:sc21:gapf21:gapi21:sc22:gapf22:gapi22:sc23:gapf23:gapi23:sc24:gapf24:gapi24");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:zdcxnk:zdcwnk:zdcenk:const0:const1:sce:scw:usce:sc1:gapf1:gapi1:sc2:gapf2:gapi2:sc3:gapf3:gapi3:sc4:gapf4:gapi4:sc5:gapf5:gapi5:sc6:gapf6:gapi6:sc7:gapf7:gapi7:sc8:gapf8:gapi8:sc9:gapf9:gapi9:sc10:gapf10:gapi10:sc11:gapf11:gapi11:sc12:gapf12:gapi12:sc13:gapf13:gapi13:sc14:gapf14:gapi14:sc15:gapf15:gapi15:sc16:gapf16:gapi16:sc17:gapf17:gapi17:sc18:gapf18:gapi18:sc19:gapf19:gapi19:sc20:gapf20:gapi20:sc21:gapf21:gapi21:sc22:gapf22:gapi22:sc23:gapf23:gapi23:sc24:gapf24:gapi24:epdx");
 
   if (doGaps) {
     gapZhist = new TH2F("Gaps","Gaps",GZN,GZL,GZH,GN,GL,GH);

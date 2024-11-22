@@ -540,8 +540,6 @@ int fcs_trg_base::end_event()
 
 	verify_event_io() ;	// verify interconnectivity 
 
-	int dsmout = 0;
-
 	self_trigger = 0 ;
 
 	s3_to_dsm = d_in[trg_xing].s3.dsm_out.d[0] ;

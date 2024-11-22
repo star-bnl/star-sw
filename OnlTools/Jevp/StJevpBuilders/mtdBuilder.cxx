@@ -675,7 +675,13 @@ void mtdBuilder::event(daqReader *rdr) {
   int err1 = (int)(contents.MTD_Error1->GetEntries());
   int err2 = (int)(contents.MTD_Error2->GetEntries());
   int err3 = (int)(contents.MTD_Error3->GetEntries());
-  
+  bool is_ignore = true;
+  for(int bin=1; bin<=contents.MTD_Error3->GetNbinsX(); bin++)
+    {
+      if(contents.MTD_Error3->GetBinContent(bin)>2)
+	is_ignore = false;
+    }
+ 
   //error1 label
   if(err1== 0) {
     sprintf(t, "No electronics errors in %d events",nev);
@@ -702,6 +708,10 @@ void mtdBuilder::event(daqReader *rdr) {
   if( err3== 0) {
     sprintf(t, "No read out errors in %d events",nev);
     MTD_Error3_label->SetTextColor(3);
+  }
+  else if(is_ignore) {
+    sprintf(t, "%d read out errors in %d events. Ignore!",err3, nev);
+    MTD_Error3_label->SetTextColor(4);
   }
   else {
     sprintf(t, "%d read out errors in %d events!",err3, nev);

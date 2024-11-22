@@ -28,9 +28,11 @@ public:
     UChar_t quadrant()   const; // detector quadrant.
     float x() const;  // x position in cell unit at which point intersects the sub-detector in local coordinate
     float y() const;  // y position in cell unit at which point intersects the sub-detector in local coordinate
-    int nClusters() const; // Number of points in the parent cluster.
+    size_t nClusters() const; // Number of points in the parent cluster.
     StFttCluster* cluster( size_t i); //  Parent cluster of the photon.
     const StThreeVectorD& xyz() const; // XYZ position in global STAR coordinate
+    UShort_t idTruth() const { return mIdTruth; } // Get the truth ID
+    UShort_t qaTruth() const { return mQaTruth; } // Get the truth quality
 
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
@@ -38,7 +40,8 @@ public:
     void setY(float y);
     void addCluster(StFttCluster* cluster, UChar_t dir);
     void setXYZ(const StThreeVectorD& p3);
-
+    void setIdTruth(UShort_t id) { mIdTruth = id; }
+    void setQaTruth(UShort_t qa) { mQaTruth = qa; }
     
     void print(int option=0);
 
@@ -49,8 +52,10 @@ private:
     Float_t  mY=0.0;         // y-position in local coordinate
     StFttCluster *mClusters[4];
     StThreeVectorD  mXYZ;    // Photon position in STAR coordinate
+    UShort_t mIdTruth=0; // Truth ID
+    UShort_t mQaTruth=0; // Truth quality
 
-    ClassDef(StFttPoint, 1)
+    ClassDef(StFttPoint, 3)
 };
 
 inline UChar_t StFttPoint::plane() const { return mPlane; }

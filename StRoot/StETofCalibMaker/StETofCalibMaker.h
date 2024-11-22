@@ -95,6 +95,7 @@ public:
     short GetState(int);
     short GetDefaultState(int);
 
+
     //moved to public to avoid problem with root6
     struct StructStuckFwDigi{
 		  Int_t     geomId;
@@ -151,7 +152,6 @@ private:
 
     void readGet4State(int fileNr, short forward);
     void checkGet4State( unsigned long int eventNr);
-    
 
     StEvent*             mEvent;
     StMuDst*             mMuDst;
@@ -217,6 +217,7 @@ private:
     std::map<int , short>          mGet4StateMap;
     std::map<int , short>          mGet4ZeroStateMap;
     std::map<int , short>          mGet4DefaultStateMap;
+
     unsigned long int              mStateMapStart;
     unsigned long int              mStateMapStop;
     unsigned long int              mDbEntryStart;
@@ -226,14 +227,17 @@ private:
 
     void decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec, std::map<int , short>&  mGet4DefaultStateMap);
 
+
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
     ClassDef( StETofCalibMaker, 0 )
 };
+
 inline bool  StETofCalibMaker::calState(                                          )     { return mCalState; }
 inline short StETofCalibMaker::GetDefaultState(                          int get4 )     { return mGet4DefaultStateMap.at(get4); }
 inline short StETofCalibMaker::GetState(                                 int get4 )     { return mGet4StateMap.at(get4); }
 inline void StETofCalibMaker::setCalState(                   const bool calTrue   )     { mCalState         = calTrue; }
+
 inline void StETofCalibMaker::setFileNameCalibParam(         const char* fileName )     { mFileNameCalibParam         = fileName; }
 inline void StETofCalibMaker::setFileNameElectronicsMap(     const char* fileName )     { mFileNameElectronicsMap     = fileName; }
 inline void StETofCalibMaker::setFileNameStatusMap(          const char* fileName )     { mFileNameStatusMap          = fileName; }
