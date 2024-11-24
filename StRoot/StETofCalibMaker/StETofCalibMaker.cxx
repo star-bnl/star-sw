@@ -203,7 +203,12 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     // --------------------------------------------------------------------------------------------
 
     //Get4 status map
-    
+    for(int i=0; i < eTofConst::nGet4sInSystem; i++){
+      mGet4StateMap[i] = 0;
+      if(i < (eTofConst::nGet4sInSystem/2)){
+	mGet4DefaultStateMap[i] = 0;
+      }
+    }
     readGet4State(mGlobalCounter , 0);
 
     // electronics-to-hardware map
