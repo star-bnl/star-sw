@@ -3010,7 +3010,7 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
     std::sort(startVec.begin(), startVec.end());
     std::sort(mMasterStartVec.begin(), mMasterStartVec.end());
  
-    for(unsigned int i=0; i< 1728;i++){
+    for(unsigned int i=0; i< eTofConst::nGet4sInSystem;i++){
 
      std::vector<stateStruct> tmpVec = stateMap.at(i);
      
