@@ -2753,7 +2753,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     std::map<unsigned long int,vector<int>> stateVec;
     std::map<unsigned long int ,vector<int>> get4IdVec;
     
-    decodeInt(intVec , mGet4StateMap , mGet4ZeroStateMap , startVec , mMasterStartVec , stateVec , get4IdVec, mGet4DefaultStateMap); 	
+    decodeInt(intVec , startVec , stateVec , get4IdVec); 	
 
    // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
    for(int i = 0; i< eTofConst::nGet4sInSystem;i++){
