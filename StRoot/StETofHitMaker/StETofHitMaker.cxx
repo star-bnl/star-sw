@@ -1346,10 +1346,13 @@ StETofHitMaker::matchSides()
 		  
 		  if(!mETofCalibMaker->calState()){
 		    if(mETofCalibMaker->GetState(keyGet4) != 0 || mETofCalibMaker->GetState(keyGet4_comp) != 0){
-		      if(def == 1 ) def = 3;
-		      if(def == 2 ) def = 4;
-		      if(def == 3 ) def = 1;
-		      if(def == 4 ) def = 2;
+		      switch (def) {
+		        case 1 : def = 3; break;
+		        case 2 : def = 4; break;
+		        case 3 : def = 1; break;
+		        case 4 : def = 2; break;
+		        default : LOG_ERROR << "Unknown default state" << endm;
+		      }
 		    }
 		  }
 		  
