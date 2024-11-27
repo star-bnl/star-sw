@@ -29,7 +29,6 @@ inline Double_t MyGaus(Double_t x, Double_t mean, Double_t sigma, Double_t delta
 //_________________
 Double_t fpeaks(Double_t *x, Double_t *par) {
   Float_t result=0.0;
-  UInt_t nPar=(UInt_t)par[0];
   for (UInt_t p=0;p<par[0];p++) {
     Double_t norm  = TMath::Exp(par[3*p+1]);
     Double_t mean  = par[3*p+2];
@@ -75,9 +74,10 @@ TF1* StGmtClusterMaker::FindPeaks(TH1F* hist) {
   if (! npx) return 0;
   
   TString funcName=Form("Func%s",hist->GetName());
-  TF1* fitFunc;
-  if(fitFunc=(TF1*)gROOT->GetListOfFunctions()->FindObject(funcName)) delete fitFunc;
-  fitFunc=new TF1(funcName,fpeaks,CLUS_MIN,CLUS_MAX,3*npx+1);
+  TF1* fitFunc = nullptr; 
+  fitFunc = (TF1*)gROOT->GetListOfFunctions()->FindObject(funcName);
+  if ( fitFunc ) delete fitFunc;
+  fitFunc = new TF1(funcName,fpeaks,CLUS_MIN,CLUS_MAX,3*npx+1);
   
   for(UInt_t i=0; i < npx; i++) {fitFunc->SetParLimits(3*i+3,0.08*0.5,10*0.08);}
   fitFunc->SetParameters(par);
