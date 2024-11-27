@@ -143,7 +143,7 @@ StETofHitMaker::Init()
     int pairId = 0;
     int pairId2 = 0;
     std::vector<int> nll;
-    for(int i=0;i<1728;i++){
+    for(int i=0;i<eTofConst::nGet4sInSystem;i++){
       mGet4PartnerPairMap[i] = nll;
       bool reset = false;
       int partnerId = i;      
