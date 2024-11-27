@@ -241,7 +241,8 @@ Short_t StGmtGeom::getModuleIdFromElecCoord(Int_t rdo, Int_t arm, Int_t apv) {
 
 //________________
 Int_t StGmtGeom::getCoordNumFromElecCoord(Int_t rdo, Int_t arm, Int_t apv, Int_t channel) {
-    if ( (rdo - 1) < 0 || (rdo - 1) >= kGmtNumRdos ) {
+
+    if ( (rdo - 1) < 0 || ( (rdo - 1) >= kGmtNumRdos ) ) {
         LOG_DEBUG << "RDO " << rdo << " out of range in StGmtGeom::getCoordNumFromElecCoord." << endm;
         return kGmtError;
     }
