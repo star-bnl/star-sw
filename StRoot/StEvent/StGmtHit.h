@@ -128,7 +128,7 @@ class StGmtHit : public StHit {
   Float_t mChargeUncert;
     
 private:   
-  ClassDef(StGmtHit,2)
+  ClassDef(StGmtHit,1)
 };
 
 ostream& operator<<(ostream& os, StGmtHit const & v);

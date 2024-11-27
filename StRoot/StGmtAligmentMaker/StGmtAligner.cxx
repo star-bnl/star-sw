@@ -16,7 +16,6 @@
 #include "TProfile.h"
 #include "TMath.h"
 #include "TVector3.h"
-#include "TProcessID.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "StBFChain.h"
@@ -24,6 +23,7 @@
 #include "EventT.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StDetectorDbMaker/StGmtSurveyC.h"
+
 //________________________________________________________________________________
 StGmtAligner::StGmtAligner(const Char_t *name) : StMaker(name),fFile(0), fTree(0), fEvent(0) {
   SetMinNoHits();
@@ -84,9 +84,6 @@ Int_t StGmtAligner::Make() {
   if (! EventT::RotMatrices()) MakeListOfRotations();
 //  StEvent* pEvent = (StEvent*) GetInputDS("StEvent");
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");  
-  cout << "ALARM!!!!" << endl;
-  cout << "WE ARE FEELING THE TREE!!!! " << endl;
-  cout << "LOOOK!!!!! I'M HERE!!!!" << endl;
   if (pEvent && !fEvent->Build(pEvent,fpCut)) fTree->Fill();  //fill the tree
   return kStOK;
 }
@@ -101,9 +98,9 @@ void StGmtAligner::Print(Option_t *opt) const {
     Int_t Ladder = Id%100;
     Int_t Layer  = Id/1000; if (Layer > 7) Layer = 7;
     Int_t Wafer  = (Id - 1000*Layer)/100;
-    cout << comb->GetName() << "\tLayer/Ladder/Wafer = " << Layer << "/" << Ladder << "/" << Wafer << endl;
+    std::cout << comb->GetName() << "\tLayer/Ladder/Wafer = " << Layer << "/" << Ladder << "/" << Wafer << std::endl;
     comb->Print();
-    cout << "=================================" << endl;
+    std::cout << "=================================" << endl;
   }
 }
 //________________________________________________________________________________
@@ -130,7 +127,7 @@ void StGmtAligner::MakeListOfRotations() {
     if (Name.BeginsWith("R")) {
       TGeoHMatrix *WL = (TGeoHMatrix *) rotMHash->FindObject(Form("WL%s",Name.Data()+1));
       if (! WL) {
-	cout << Form("WL%s",Name.Data()+1) << " has not been found" << endl;
+	std::cout << Form("WL%s",Name.Data()+1) << " has not been found" << std::endl;
 	fail++;
       }
     }

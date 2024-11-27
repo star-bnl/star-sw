@@ -22,6 +22,13 @@ using namespace std;
 // deconstructor
 StGmtStripCollection::~StGmtStripCollection() {/* no op */}
 
+// inline functions 
+StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
+    mStripGeoIdVec.resize( kGmtNumGeoIds );
+    for (unsigned int i=0; i<mStripGeoIdVec.size(); i++)
+        mStripGeoIdVec[i] = static_cast< StGmtStrip* >(0);
+};
+
 // remove all hits with negative geoIds or with clusterSeedType set to
 // kGmtDeadStrip
 void StGmtStripCollection::removeFlagged(){
@@ -58,54 +65,6 @@ bool StGmtStripCollection::hitGeoIdLessThan( const StGmtStrip* h1, const StGmtSt
 
 bool StGmtStripCollection::hitCoordLessThan( const StGmtStrip* h1, const StGmtStrip* h2 ){
     return h1->getCoordNum() < h2->getCoordNum();
-//     if( (h1->isY() && h2->isY()) || ( !(h1->isY()) && !(h2->isY()) ) )
-//     {
-// //       LOG_ERROR << "StGmtStripCollection::hitCoordLessThan sort CASE 1: " << 
-// //       "\n\t h1 " << h1 << 
-// //       "\n\t h1->isY() " << h1->isY() << 
-// //       "\n\t h1->GetCoordNum() " << h1->getCoordNum() << 
-// //       "\n\t h2 " << h2 << 
-// //       "\n\t h2->isY() " << h2->isY() << 
-// //       "\n\t h2->GetCoordNum() " << h2->getCoordNum() << 
-// //       "\n\t will return: " << h1->getCoordNum() << " < " << h2->getCoordNum() << endm;
-//       return h1->getCoordNum() < h2->getCoordNum();
-//     }
-//     else if( h1->isY() && !(h2->isY()) )
-//     {
-// //       LOG_ERROR << "StGmtStripCollection::hitCoordLessThan sort CASE 2: " << 
-// //       "\n\t h1 " << h1 << 
-// //       "\n\t h1->isY() " << h1->isY() << 
-// //       "\n\t h1->GetCoordNum() " << h1->getCoordNum() << 
-// //       "\n\t h2 " << h2 << 
-// //       "\n\t h2->isY() " << h2->isY() << 
-// //       "\n\t h2->GetCoordNum() " << h2->getCoordNum() << 
-// //       "\n\t will return: " << h1->getCoordNum()+kGmtNumStrips << " < " << h2->getCoordNum() << endm;
-//       return (h1->getCoordNum()+kGmtNumStrips) < h2->getCoordNum(); // order X first 
-//     }
-//     else if( !(h1->isY()) && h2->isY() )
-//     {
-// //       LOG_ERROR << "StGmtStripCollection::hitCoordLessThan sort CASE 3: " << 
-// //       "\n\t h1 " << h1 << 
-// //       "\n\t h1->isY() " << h1->isY() << 
-// //       "\n\t h1->GetCoordNum() " << h1->getCoordNum() << 
-// //       "\n\t h2 " << h2 << 
-// //       "\n\t h2->isY() " << h2->isY() << 
-// //       "\n\t h2->GetCoordNum() " << h2->getCoordNum() << 
-// //       "\n\t will return: " << h1->getCoordNum() << " < " <<  h2->getCoordNum()+kGmtNumStrips << endm;
-//       return h1->getCoordNum() < (h2->getCoordNum()+kGmtNumStrips); // order X first 
-//     }
-//     else
-//     {
-// //       LOG_ERROR << "StGmtStripCollection::hitCoordLessThan sort FAILED: " << 
-// //       "\n\t h1 " << h1 << 
-// //       "\n\t h1->isY() " << h1->isY() << 
-// //       "\n\t h1->GetCoordNum() " << h1->getCoordNum() << 
-// //       "\n\t h2 " << h2 << 
-// //       "\n\t h2->isY() " << h2->isY() << 
-// //       "\n\t h2->GetCoordNum() " << h2->getCoordNum() << 
-// //       "\n\t will return: " << -1 << endm;
-//       return -1;
-//     }
 };
 
 bool StGmtStripCollection::hitLayerLessThan( const StGmtStrip* h1, const StGmtStrip* h2 ){
@@ -138,17 +97,7 @@ StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ){  // using geoId now inst
     return stripPtr;
 }
 
-// StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ){  // using geoId now instead of elecId so now using more generic index name
-//     StGmtStrip* &stripPtr = mStripVec[Id]; 
-//     if( !stripPtr ){
-//         stripPtr = new StGmtStrip();
-//         mStripVec.push_back( stripPtr );
-//     }
-//     return stripPtr;
-// }
-
 StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ){  // using geoId now instead of elecId so now using more generic index name
-//     StGmtStrip* &stripPtr = mStripElecIdVec[Id]; 
     StGmtStrip* &stripPtr = mStripVec[Id]; 
     if( !stripPtr ){
       LOG_ERROR << "StGmtStripCollection::getSortedStrip no such Id: " << Id << endm;
@@ -156,5 +105,25 @@ StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ){  // using geoId no
     }
     return stripPtr;
 }
+
+// sort by geoId
+void StGmtStripCollection::sortByGeoId(){
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
+};
+
+// sort by layer (X first then Y)
+void StGmtStripCollection::sortByLayer(){
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
+};
+
+// sort by coordinate number
+void StGmtStripCollection::partialSortByCoord(){
+    partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
+};
+
+// sort by coordinate number
+void StGmtStripCollection::sortByCoord(){
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
+};
 
 ClassImp(StGmtStripCollection)

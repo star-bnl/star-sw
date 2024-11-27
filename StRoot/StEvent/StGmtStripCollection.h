@@ -23,8 +23,6 @@ class StGmtStripCollection : public StObject {
  public:
   /// Constructer
   StGmtStripCollection( short module = 0 );
-  // StGmtStripCollection( const StGmtStripCollection& other );            ---> use default
-  // StGmtStripCollection& operator=( const StGmtStripCollection& other ); ---> use default 
     
   /// Destructor
   ~StGmtStripCollection();
@@ -92,39 +90,6 @@ class StGmtStripCollection : public StObject {
  private:   
   ClassDef(StGmtStripCollection,1)
 }; 
-
-
-// inline functions
-inline StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
-    mStripGeoIdVec.resize( kGmtNumGeoIds );
-    for (unsigned int i=0; i<mStripGeoIdVec.size(); i++)
-        mStripGeoIdVec[i] = static_cast< StGmtStrip* >(0);
-};
-
-// sort by geoId
-inline void StGmtStripCollection::sortByGeoId(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
-    return;
-};
-
-// sort by layer (X first then Y)
-inline void StGmtStripCollection::sortByLayer(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
-    return;
-};
-
-// sort by coordinate number
-inline void StGmtStripCollection::partialSortByCoord(){
-    partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
-    return;
-};
-
-// sort by coordinate number
-inline void StGmtStripCollection::sortByCoord(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
-    return;
-};
-
 
 inline size_t StGmtStripCollection::getNumStrips() const {
     return mStripVec.size();

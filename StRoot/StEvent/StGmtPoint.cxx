@@ -16,8 +16,6 @@
 #include "StGmtPoint.h"
 #include "StRoot/St_base/StMessMgr.h"
 
-ClassImp(StGmtPoint)
-
 //________________
 StGmtPoint::StGmtPoint() : StHit(), mHitLocalX(0), mHitLocalY(0) { 
   /* empty */
@@ -28,7 +26,6 @@ StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key ) : StHit(), mKe
    if ( !hit1 || !hit2 ) {
      LOG_ERROR << "Passed null pointer into StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key )" << endm;
      mKey = -999;
-     return;
    }
 
    mHitLocalX = mHitLocalY = 0;
@@ -36,13 +33,11 @@ StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key ) : StHit(), mKe
    if ( !mHitLocalX || !mHitLocalY ) {
      LOG_ERROR << "Constructor not provided a (LocalX,LocalY) pair." << endm;
      mKey = -999;
-     return;
    }
 
    if ( mHitLocalX->getModule() != mHitLocalY->getModule() ) {
      LOG_ERROR << "Cluster pair are not on the same Module." << endm;
      mKey = -999;
-     return;
    }
 
    mHardwarePosition = mHitLocalX->hardwarePosition();

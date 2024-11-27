@@ -12,7 +12,6 @@
 // StGmtStrip header
 #include "StGmtStrip.h"
 
-ClassImp(StGmtStrip)
 
 // Number of defult time bins.
 // Was 2 for the FGT, RW 03/15/13

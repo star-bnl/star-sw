@@ -37,6 +37,7 @@ class EventTHeader {
 };
 class StEvent;
 
+//________________
 class EventT : public TObject {
   
  private:
@@ -90,6 +91,7 @@ class EventT : public TObject {
   ClassDef(EventT,1)  //EventT structure
 };
 
+//________________
 class TBase {
 
  public :
