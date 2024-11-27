@@ -476,6 +476,9 @@ StHistUtil::StHistUtil(){
   m_PaperHeight = 0;
 
   m_Detectors = "";
+
+  m_ItemsToClear = new TList();
+  m_ItemsToClear->SetOwner();
 }
 //_____________________________________________________________________________
 
@@ -500,6 +503,11 @@ StHistUtil::~StHistUtil(){
     for (int ijk=0; ijk<maxHistCopy; ijk++) delete newHist[ijk];
     delete [] newHist;
   }
+  delete m_ItemsToClear;
+}
+//_____________________________________________________________________________
+void StHistUtil::Clear() {
+  m_ItemsToClear->Clear();
 }
 //_____________________________________________________________________________
 void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
@@ -952,11 +960,17 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           } else graphPad->cd(m_QAShiftMode ? 0 : curPad);
 
           // set x & y grid off by default
+	  TRegexp bsmdPerModule("bsmd.*PerModule");
 	  gPad->SetGridy(0);
           if (oName.Contains("H_matchCand")) {
             gPad->SetGridx(1);
             gStyle->SetGridStyle(6);
             gStyle->SetGridColor(kOrange);
+          } else if (oName.Contains(bsmdPerModule)) {
+	    hobj->GetXaxis()->SetNdivisions(15);
+	    hobj->GetXaxis()->SetLabelSize(0.03);
+	    hobj->GetXaxis()->SetTitle("Module Number");
+            gPad->SetGridx();	    
           } else {
 	    gPad->SetGridx(0);
             gStyle->SetGridStyle(3);
@@ -964,6 +978,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           }
 
           // set stats to draw
+	  TRegexp bsmd2DPerModule("bsmd.*Strip.*PerModule");
           if (oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ||
@@ -971,6 +986,10 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             gStyle->SetOptStat(11);
           } else if (oName.Contains("NullPrim")) {
             gStyle->SetOptStat(1111);
+	  } else if (oName.Contains(bsmd2DPerModule)) {
+	    gStyle->SetOptStat(0);
+	    hobj->GetYaxis()->SetTitle("Strip Within Module");
+	    hobj->GetYaxis()->SetTitleOffset(1.4);
           } else {
             gStyle->SetOptStat(111111);
           }
@@ -1789,6 +1808,7 @@ TList* StHistUtil::TrimListByPrefix(TList* dList, const Char_t* withPrefix) {
                   (obj->InheritsFrom("TH1") &&
                    m_ListOfPrint->FindObject(obj->GetName())))) dList2->AddLast(obj);
   }
+  m_ItemsToClear->Add(dList2);
   return dList2;
 }
 //_____________________________________________________________________________

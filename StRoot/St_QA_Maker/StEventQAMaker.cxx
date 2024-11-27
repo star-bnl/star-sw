@@ -46,9 +46,7 @@
 #include "StEpdCollection.h"
 
 //fcs
-#define SKIPDefImp
-#include "StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.cxx"
-#undef SKIPDefImp
+#include "StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.h"
                                                                             
 #include "StEvent/StTpcRawData.h"
 
@@ -2061,13 +2059,17 @@ void StEventQAMaker::MakeHistEMC() {
         if(module) {
           StSPtrVecEmcRawHit& rawHit=module->hits();
 	  
-          Int_t m,e,s,adc;
+          Int_t m,e,s,adc,sId,stripInMod;
           Float_t eta(0),phi(0),E(0);
           nh += rawHit.size();
           for(UInt_t k=0;k<rawHit.size();k++){
             m   = rawHit[k]->module();
             e   = rawHit[k]->eta();
             s   = rawHit[k]->sub();
+            emcGeom[i]->getId(m, e, s, sId); 
+            stripInMod = sId % 150;  // only used for BSMD
+	    if (stripInMod==0) stripInMod=150;
+	    //	    cout << "strip Id = " << sId << ", strip in Module = " << stripInMod << endl;
             if (s == -1) s = 1; // case of smde
             adc = rawHit[k]->adc();
             E   = rawHit[k]->energy();
@@ -2077,6 +2079,21 @@ void StEventQAMaker::MakeHistEMC() {
             hists->m_emc_energy2D[i]->Fill(eta,phi,E); 
             hists->m_emc_adc[i]->Fill(float(adc)); 
             hists->m_emc_energy[i]->Fill(E);
+	    
+	    if (i>1) { // BSMD module hists 
+
+	      Int_t modIndex = (m-1)/30;
+	      Int_t histIndex = modIndex;  
+	      if (i>2) histIndex = modIndex + 4;
+
+		hists->m_emc_hits_per_module[histIndex]->Fill(m); 
+		hists->m_emc_energy_per_module[histIndex]->Fill(m,E); 
+		hists->m_emc_strip_hits_per_module[histIndex]->Fill(m,stripInMod); 
+		hists->m_emc_strip_energy_per_module[histIndex]->Fill(m,stripInMod,E); 
+	      
+	    }
+
+	    
             energy += E;
           }
 	}

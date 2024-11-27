@@ -13,6 +13,10 @@
   If it is not there, it creates one and fills it from the
   StTriggerData object and info from the StEpdDbMaker (database)
 
+  \author David Kapukchyan
+  \date 10 July 2024
+  It can also process trigger data from Mudst data by calling #setReadMuDst(). Need to call StEventMaker to make it work right though since this maker will still fill into StEvent. This was done so StEvent will clean the collection from event to event.
+
 */
 
 
@@ -39,11 +43,13 @@ class StEpdHitMaker : public StMaker {
   /// Finish does nothing right now
   virtual int Finish();
 
+  void setReadMuDst(bool value=true){ mReadMuDst=value; }
+  
   /// Returns the collection of StEpdHits in the event
   StEpdCollection* GetEpdCollection();  // collection of StEpdHit objects
 
   /// Returns a pointer to the StTriggerData object
-  StTriggerData* GetTriggerData();
+  const StTriggerData* GetTriggerData();
 
   /// Returns a pointer to the StEpdDbMaker
   StEpdDbMaker* GetEpdDbMaker();
@@ -62,10 +68,11 @@ class StEpdHitMaker : public StMaker {
   int mEventCounter;              /// simple event counter
   int mTriggerEventCounter;       /// another event counter.  At the moment, it is redundant with mEventCounter
   StEpdCollection* mEpdCollection;
-  StTriggerData* mTriggerData;
+  const StTriggerData* mTriggerData;
   StEpdDbMaker* mEpdDbMaker;
   StEvent* mStEvent;
 
+  bool mReadMuDst = false;
 
   //  static const int mNPREPOST=2;
 

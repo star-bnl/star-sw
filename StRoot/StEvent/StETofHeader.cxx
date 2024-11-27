@@ -38,7 +38,8 @@ StETofHeader::StETofHeader()
   mStarTrgCmdIn( 0 ),
   mEventStatusFlag( 0 ),
   mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mGoodEventFlagVec( eTofConst::nGet4sInSystem, false ),
+  mHasPulsersVec( eTofConst::nCountersInSystem, false )
 {
     mRocGdpbTs.clear();
     mRocStarTs.clear();
@@ -56,7 +57,8 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
   mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mGoodEventFlagVec( eTofConst::nGet4sInSystem, false ),
+  mHasPulsersVec( eTofConst::nCountersInSystem, false )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
@@ -73,7 +75,8 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
   mMissMatchFlagVec( MissMatchFlagVec ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mGoodEventFlagVec( eTofConst::nGet4sInSystem, false ),
+  mHasPulsersVec( eTofConst::nCountersInSystem, false )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
@@ -82,7 +85,7 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
 StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime,
                             const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
                             const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
-                            const uint64_t& eventStatusFlag, const std::vector<bool>& MissMatchFlagVec, const std::vector<bool>& GoodEventFlagVec  )
+                            const uint64_t& eventStatusFlag, const std::vector<bool>& MissMatchFlagVec, const std::vector<bool>& GoodEventFlagVec, const std::vector<bool>& HasPulsersVec   )
 : mTrgGdpbFullTime( trgGdpbTime ),
   mTrgStarFullTime( trgStarTime ),
   mStarToken( starToken ),
@@ -90,7 +93,8 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
   mMissMatchFlagVec( MissMatchFlagVec ),
-  mGoodEventFlagVec( GoodEventFlagVec )
+  mGoodEventFlagVec( GoodEventFlagVec ),
+  mHasPulsersVec( HasPulsersVec )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs ); 
@@ -169,6 +173,11 @@ StETofHeader::goodEventFlagVec() const
 {
     return mGoodEventFlagVec;
 }
+std::vector <bool>
+StETofHeader::hasPulsersVec() const
+{
+    return mHasPulsersVec;
+}
 
 void
 StETofHeader::setTrgGdpbFullTime( const double& gdpbFullTime )
@@ -229,4 +238,10 @@ void
 StETofHeader::setGoodEventFlagVec( const std::vector<bool>& FlagVec )
 {
     mGoodEventFlagVec = FlagVec;
+}
+
+void    
+StETofHeader::setHasPulsersVec( const std::vector<bool>& PulserVec )
+{
+    mHasPulsersVec = PulserVec;
 }

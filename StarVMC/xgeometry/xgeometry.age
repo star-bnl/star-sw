@@ -2529,12 +2529,15 @@ If LL>0
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
   case y2019a { y2019: y2019a production release; Geom =        'y2019a    '; call geom_y2019a;} 
+  case y2019b { y2019: y2019a production release; Geom =        'y2019b    '; call geom_y2019b;} 
 
   case y2020 { y2020: y2020 first cut geometry; Geom =        'y2020     '; call geom_y2020;} 
   case y2020a { y2020a: y2020a production; Geom =        'y2020a    '; call geom_y2020a;} 
+  case y2020b { y2020b: y2020a production; Geom =        'y2020b    '; call geom_y2020b;} 
 
   case y2021 { y2021: y2021 first cut geometry; Geom =        'y2021     '; call geom_y2021;} 
   case y2021a { y2021a: y2021 first production geometry; Geom =        'y2021a    '; call geom_y2021a;} 
+  case y2021b { y2021b: y2021 first production geometry; Geom =        'y2021b    '; call geom_y2021b;} 
 
   case y2022 { y2022: y2022 first cut geometry; Geom =        'y2022     '; call geom_y2022;} 
   case y2022a { y2022a: y2022 first production geometry; Geom =        'y2022a    '; call geom_y2022a;} 

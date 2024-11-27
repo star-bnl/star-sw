@@ -86,9 +86,11 @@
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
+#include "StMuDSTMaker/COMMON/StMuETofHeader.h"
 
 #include "StETofMatchMaker.h"
 #include "StETofHitMaker/StETofHitMaker.h"
+#include "StETofCalibMaker/StETofCalibMaker.h"
 #include "StETofUtil/StETofGeometry.h"
 #include "StETofUtil/StETofConstants.h"
 
@@ -160,15 +162,20 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mLocalYmax(16.),
   mClockJumpCand(),
   mClockJumpDirection(),
-  mHistFileName( "" ),
-  mHistograms(),
-  mHistograms2d()
+  mHistFileName( "" ),  
+  mHistograms(), 
+  mHistograms2d(),
+  dx_3sig(2.5),
+  dy_3sig(4.0),
+  dt_3sig(0.22),
+  dy_max(5.0)
 {
     mT0corrVec.reserve( 500 );
     mTrackCuts.push_back( 0. ); // nHitsFit
     mTrackCuts.push_back( 0. ); // nHitsRatio
     mTrackCuts.push_back( 0. ); // low pt
 }
+
 
 
 //---------------------------------------------------------------------------
@@ -265,7 +272,6 @@ StETofMatchMaker::InitRun( Int_t runnumber )
     LOG_INFO << " track cut (low pt): "     << mTrackCuts.at( 2 ) << endm;
 
     // --------------------------------------------------------------------------------------------
-
 
 
     // --------------------------------------------------------------------------------------------
@@ -498,7 +504,12 @@ StETofMatchMaker::Make()
 
         return kStOk;
     }
+
+    //Single Sided Hit Matching and clustering
+    eTofHitVec finalMatchVec;
+    sortandcluster(matchCandVec , detectorHitVec , intersectionVec , finalMatchVec);
   
+
     //.........................................................................
     // D. sort matchCand vector and deal with (discard) hits matched by multiple tracks
     //
@@ -506,20 +517,18 @@ StETofMatchMaker::Make()
     eTofHitVec           singleTrackMatchVec;
     vector< eTofHitVec > multiTrackMatchVec;
 
-    sortSingleMultipleHits( matchCandVec, singleTrackMatchVec, multiTrackMatchVec );
+    //sortSingleMultipleHits( matchCandVec, singleTrackMatchVec, multiTrackMatchVec ); // old matching procedure
 
-    if( singleTrackMatchVec.size() == 0 ) {
-        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
-
-        return kStOk;
-    }
+    //if( singleTrackMatchVec.size() == 0 ) {
+    //LOG_INFO << "Make() -- event done ... bye-bye" << endm  
+    //  return kStOk;
+    // }
    
     //.........................................................................
     // E. sort singleTrackMatchVector for multiple hits associated to single tracks and determine the best match
     //
-    eTofHitVec finalMatchVec;
-
-    finalizeMatching( singleTrackMatchVec, finalMatchVec );
+   
+    //finalizeMatching( singleTrackMatchVec, finalMatchVec ); // old matching procedure
 
     if( finalMatchVec.size() == 0 ) {
         //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
@@ -533,14 +542,14 @@ StETofMatchMaker::Make()
     //.........................................................................
     // F. fill ETofPidTraits for global and primary tracks and assign associated track to hits
     //
-    fillPidTraits( finalMatchVec );
+      fillPidTraits( finalMatchVec );
 
     //.........................................................................
     // G. calculate pid variables for primary tracks and update PidTraits
     //
-    int nPrimaryWithPid = 0;
+      int nPrimaryWithPid = 0;
 
-    calculatePidVariables( finalMatchVec, nPrimaryWithPid );
+      calculatePidVariables( finalMatchVec, nPrimaryWithPid );
 
     mHistograms.at( "primaryIntersect_validMatch" )->Fill( nPrimaryWithIntersection, nPrimaryWithPid );
 
@@ -838,6 +847,10 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
             detectorHit.index2ETofHit  = i;
 
             detectorHitVec.push_back( detectorHit );
+
+
+
+
         }
     }
 
@@ -1267,8 +1280,10 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
             bool isMatch = false;
 
             // deltaX, deltaY (subtract offset until alignment is done properly)
-            float deltaX = detHitIter->localX  - interIter->localX;
-            float deltaY = detHitIter->localY  - interIter->localY;
+            float deltaX  = detHitIter->localX  - interIter->localX;
+            float deltaY  = detHitIter->localY  - interIter->localY;
+	    double tstart = startTimeBTof(); //no eToF start time available here!
+	    double deltaT = detHitIter->hitTime - tstart; //basic cut to reject hits far of in time
 
             int counterIndex = ( detHitIter->sector  - eTofConst::sectorStart  ) * eTofConst::nPlanes * eTofConst::nCounters
                              + ( detHitIter->plane   - eTofConst::zPlaneStart  ) * eTofConst::nCounters
@@ -1277,18 +1292,45 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
             deltaX -= etofProjection::deltaXoffset[ counterIndex ];
             deltaY -= etofProjection::deltaYoffset[ counterIndex ];
 
-            if( detHitIter->sector == interIter->sector ) {
-                if( detHitIter->plane == interIter->plane ) {
-                    if( detHitIter->counter == interIter->counter ) {
-                        if( fabs( deltaX ) < mMatchDistX ) {
-                            if( fabs( deltaY ) < mMatchDistY ) {
-                                isMatch = true;
-                            }
-                        }
-                    }
-                }
-            }
+	    bool corrTime=false; // for single sided hit time corr
 
+            if( detHitIter->sector == interIter->sector ) {
+	      if( detHitIter->plane == interIter->plane ) {
+		if( detHitIter->counter == interIter->counter ) {
+		  
+		  if(detHitIter->clusterSize < 999){
+		    
+		    // if( fabs( deltaX ) < mMatchDistX ) {
+		    // if( fabs( deltaY ) < mMatchDistY ) {
+		    
+		    if( ( ( (deltaY*deltaY) / (mMatchDistY*mMatchDistY) ) + ( (deltaX*deltaX) / (mMatchDistX*mMatchDistX) ) ) < 2. ) {
+		      if( fabs( deltaT ) < mMatchDistT ) {
+			isMatch = true;
+		      }
+		    }
+		  }else{
+		    
+		    float mMatchDistYSingleSided = 15;
+		    
+		  
+
+		    if( fabs( deltaX ) < mMatchDistX ) {
+		      if( fabs( deltaY ) < mMatchDistYSingleSided ) {
+			if( fabs( deltaT ) < mMatchDistT ) {		                             
+			  
+		
+			  isMatch = true;
+			  deltaY  = 27; // keep SHs out of NHs way while sorting
+			  corrTime = true;
+			  
+			}
+		      }
+		    }		    
+		  }
+                }
+	      }
+	    }
+	    
             if( isMatch ) {
                 StructETofHit matchCand;
 
@@ -1302,12 +1344,14 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
                 matchCand.tot           = detHitIter->tot;
                 matchCand.clusterSize   = detHitIter->clusterSize;
                 matchCand.index2ETofHit = detHitIter->index2ETofHit;
+		matchCand.IdTruthHit    = detHitIter->IdTruth;
 
                 matchCand.globalPos     = interIter->globalPos;
                 matchCand.trackId       = interIter->trackId;
                 matchCand.theta         = interIter->theta;
                 matchCand.pathLength    = interIter->pathLength;
                 matchCand.isPrimary     = interIter->isPrimary;
+		matchCand.IdTruth       = interIter->IdTruth;
 
                 matchCand.matchFlag = 0;
                 matchCand.deltaX    = deltaX;
@@ -1316,6 +1360,36 @@ StETofMatchMaker::matchETofHits( eTofHitVec& detectorHitVec, eTofHitVec& interse
                 matchCand.tof        = -999.;
                 matchCand.beta       = -999.;
 
+		// correct single sided matches 
+		if(corrTime){
+		matchCand.localY        = interIter->localY;
+
+		// if side A 
+		double corr ;
+		float tcorr = 0;
+		if(sector == 15 || sector == 17 || sector == 21 || sector == 22 ){
+		  tcorr = 16.49;
+		}else{
+		  tcorr = 18.23;
+		}
+		if(detHitIter->localY < 0){		  		  
+		  matchCand.hitTime = detHitIter->hitTime - (((13.5 + interIter->localY ) / tcorr )) + (13.5/tcorr); 
+		  // matchCand.totDiff    = 1;
+		  corr = (((13.5 - interIter->localY ) / tcorr ));	
+		  // if side B
+		}else{		 
+		  matchCand.hitTime = detHitIter->hitTime - (((13.5 - interIter->localY ) / tcorr )) + (13.5/tcorr); 
+		  // matchCand.totDiff    = -1;
+		  corr = (((13.5 + interIter->localY ) / tcorr ));
+		}
+  
+		matchCand.totDiff = matchCand.totDiff * corr;
+
+		//	cout << "interIter->localY " << interIter->localY<< endl;
+		//	cout << "corr " << corr << endl;
+		//	cin.get();
+		
+		}
 
                 matchCandVec.push_back( matchCand );
 
@@ -1954,7 +2028,9 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             StMuETofPidTraits pidTraits = gTrack->etofPidTraits();
 
 
-            double tof = timeOfFlight( tstart, aHit->time() );
+            //double tof = timeOfFlight( tstart, aHit->time() );
+	    double tof = timeOfFlight( tstart, matchCand.hitTime );
+
 
             // set time-of-flight
             matchCand.tof = tof;
@@ -2015,6 +2091,15 @@ StETofMatchMaker::calculatePidVariables( eTofHitVec& finalMatchVec, int& nPrimar
             
             // set beta
             matchCand.beta = beta;
+
+
+	    if( matchCand.clusterSize > 999 ){ 
+
+	      mHistograms.at( "AAA_beta_mom_SD")->Fill( pTrack->momentum().mag() , 1/beta );
+
+	       }
+
+
 
             if( mDebug ) {
                 LOG_INFO << "calculatePidVariables() - pathlength: " << pathLength << "  time-of-flight: " << tof << " and beta: " << beta << " are set" << endm;
@@ -2434,12 +2519,17 @@ StETofMatchMaker::expectedTimeOfFlight( const double& pathLength, const double& 
 void
 StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
 {
+
     vector< int > nPidMatches( 36 );
 
     for( auto& matchCand : finalMatchVec ) {
 
         int charge;
         float mom;
+
+	//	int sector  = 0; //
+	//	int plane   = 0; //
+	//	int counter = 0; //
 
         float dEdx = -999.;
         float nSigmaPion = -999;
@@ -2473,6 +2563,10 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
 
             StMuTrack* pTrack = aHit->primaryTrack();
             if( !pTrack ) continue;
+
+	    //sector  = aHit->sector();
+	    //plane   = aHit->zPlane();
+	    //counter = aHit->counter();
 
             charge = pTrack->charge();
             mom    = pTrack->momentum().mag();
@@ -2517,6 +2611,7 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             mHistograms.at( "matchCand_m2_mom"     )->Fill(        mom, m2 );
             mHistograms.at( "matchCand_m2_signmom" )->Fill( sign * mom, m2 );
 
+	 
 
             // plots per counter
             std::string histName_beta_mom = "matchCand_beta_mom_s" + std::to_string( matchCand.sector ) + "m" + std::to_string( matchCand.plane ) + "c" + std::to_string( matchCand.counter );
@@ -2723,6 +2818,22 @@ StETofMatchMaker::bookHistograms()
         for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
             for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
                 for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
+
+		  //single sided matching qa
+		    std::string histName_t0corr_mom_zoom = "matched_t0corr_mom_zoom_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+	      mHistograms2d[ histName_t0corr_mom_zoom ] = new TH2F( Form( "T_matched_t0corr_mom_zoom_s%dm%dc%d", sector, plane, counter ), Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 500, -5., 5. );
+
+
+	      std::string histName_t0corr_mom_zoom_SD = "matched_t0corr_mom_zoom_SD_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
+
+	      mHistograms2d[ histName_t0corr_mom_zoom_SD ] = new TH2F( Form( "T_matched_t0corr_mom_zoom_SD_s%dm%dc%d", sector, plane, counter ), Form( "measured tof - tof_{#pi} vs. momentum in sector %d module %d counter %d;mom (GeV/c);#Delta time (ns)", sector, plane, counter ), 200, 0., 3., 500, -5., 5. );
+
+
+
+
+
+
                     std::string histName_hit_localXY  = "eTofHits_localXY_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
                     std::string histName_hit_globalXY = "eTofHits_globalXY_s" + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
                     std::string histName_hit_eta_phi  = "eTofHits_phi_eta_s"  + std::to_string( sector ) + "m" + std::to_string( plane ) + "c" + std::to_string( counter );
@@ -3118,5 +3229,846 @@ void StETofMatchMaker::checkClockJumps()
   // if there was a new entry to the map --> push it to the hit maker (if available)
   if( needsUpdate && mETofHitMaker ) {
       mETofHitMaker->updateClockJumpMap( mClockJumpDirection );
+  }
+}
+
+//---------------------------------------------------------------------------
+void
+StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap )
+{  
+
+  // sort & flag Match candidates
+
+    // define temporary vectors for iterating through matchCandVec
+    eTofHitVec tempVec   = inputVec;
+    eTofHitVec erasedVec = tempVec;
+    eTofHitVec tempMMVec;
+    tempMMVec.clear();
+    std::map< Int_t, eTofHitVec >  MMMap;
+    MMMap.clear();
+
+    eTofHitVec ssVec;
+    
+    // get multi Hit sets 
+    eTofHitVecIter tempIter   = tempVec.begin();    
+    
+    if(tempVec.size() < 1 ) return;
+    
+    eTofHitVec storeVecTmp;
+    
+    while(tempVec.size() > 0){
+      
+      std::vector< int > trackIdVec;
+      std::vector< int > hitIdVec;
+      trackIdVec.clear();
+      hitIdVec.clear();
+      tempIter = tempVec.begin();
+      storeVecTmp.push_back(tempVec.at(0));
+      trackIdVec.push_back(tempVec.at(0).trackId);
+      hitIdVec.push_back(tempVec.at(0).index2ETofHit);
+      tempVec.erase(tempVec.begin());
+      bool done = false;
+
+      while(!done){
+
+	unsigned int sizeOld = storeVecTmp.size();
+	unsigned int size = tempVec.size();
+	tempIter= tempVec.begin();
+
+	for(unsigned int i=0; i < size; i++){
+
+	  if( (std::find(trackIdVec.begin(), trackIdVec.end(), tempVec.at(i).trackId) != trackIdVec.end()) || (std::find(hitIdVec.begin(), hitIdVec.end(), tempVec.at(i).index2ETofHit) != hitIdVec.end())  ){ 
+	      
+	    storeVecTmp.push_back(tempVec.at(i));
+	    trackIdVec.push_back(tempVec.at(i).trackId);
+	    hitIdVec.push_back(tempVec.at(i).index2ETofHit);
+	    tempVec.erase(tempIter);
+
+	    i = 0;
+	    size = tempVec.size();
+	    tempIter = tempVec.begin();
+	  }else{		  
+	  tempIter++;
+	  }
+	}
+      done = ( sizeOld == storeVecTmp.size() );
+
+      }// while done
+
+      MMMap[storeVecTmp.begin()->trackId] = storeVecTmp;
+      storeVecTmp.clear();
+
+    }// while all hits on counter
+
+    outputMap = MMMap;
+}
+//---------------------------------------------------------------------------
+void 
+StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec){
+  
+  
+ //flag Overlap-Hits & jumped Hits  -------------------------------------------------------------------
+
+  std::map< Int_t, eTofHitVec >  overlapHitMap;
+  eTofHitVec overlapHitVec;
+  eTofHitVec tempVecOL        = matchCandVec;  
+  eTofHitVecIter detHitIter;
+  eTofHitVecIter detHitIter2;
+
+  std::map< int, bool >  jumpHitMap;
+
+  for(unsigned int i=0; i<matchCandVec.size();i++){
+    if(matchCandVec.at(i).clusterSize > 100){
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = true;
+    }else{
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = false;
+    }
+  }
+  
+  for( auto detHitIter = tempVecOL.begin(); detHitIter != tempVecOL.end(); ) {
+    
+    detHitIter  = tempVecOL.begin();
+    detHitIter2 = tempVecOL.begin();
+    
+    bool isOverlap = false;
+    int counterId1 = (detHitIter->sector*100) + (detHitIter->plane*10) + (detHitIter->counter);
+    
+    for( auto detHitIter2 = tempVecOL.begin(); detHitIter2 != tempVecOL.end(); ) {
+
+      int counterId2 = (detHitIter2->sector*100) + (detHitIter2->plane*10) + (detHitIter2->counter);
+
+      if(counterId1 != counterId2 && detHitIter->trackId == detHitIter2->trackId){
+	
+	int mf2 = counterId2 ;
+	
+	detHitIter2->matchFlag = mf2;
+
+	matchCandVec.at(detHitIter2 - tempVecOL.begin()).matchFlag = 1;
+	
+	overlapHitVec.push_back(*detHitIter2);
+	tempVecOL.erase(detHitIter2);
+	
+	isOverlap = true;
+      }    	   	
+
+      if( tempVecOL.size() <= 0 ) break;
+      if( detHitIter2 == tempVecOL.end()) break;
+      detHitIter2++;
+      
+    }
+    
+    if(isOverlap){
+     
+	detHitIter->matchFlag = counterId1;
+
+	matchCandVec.at(detHitIter - tempVecOL.begin()).matchFlag = 1;
+      
+	overlapHitVec.push_back(*detHitIter);
+      
+      //fill map     
+      overlapHitMap[overlapHitVec.begin()->trackId] = overlapHitVec;
+      
+      overlapHitVec.clear();
+      
+    } 
+    tempVecOL.erase(detHitIter);
+    
+    if( tempVecOL.size() <= 0 ) break;
+    if( detHitIter == tempVecOL.end()) break;
+    detHitIter++;
+    
+  }
+
+  // fill match cand vec counter wise 
+  std::vector< eTofHitVec > matchCandVecCounter(108);
+  
+  for(int i =0; i < 108; i++){
+    
+    for(unsigned int n = 0; n < matchCandVec.size(); n++){
+      
+      int sector  = matchCandVec.at(n).sector;
+      int plane   = matchCandVec.at(n).plane;
+      int counter = matchCandVec.at(n).counter;
+      
+      int counterId = 9*(sector - 13) + 3*(plane - 1) + (counter -1);
+      
+      if(counterId == i ) {
+	matchCandVecCounter.at(i).push_back(matchCandVec.at(n));
+      }      
+    }//loop over hits
+  }//loop over counters
+  
+  
+   // loop over counters
+  for(int counterNr = 0; counterNr < 108; counterNr++){
+
+     // sort & flag Match candidates
+    eTofHitVec tempVec   = matchCandVecCounter.at(counterNr);
+    eTofHitVec tempVec2   = matchCandVecCounter.at(counterNr);
+    std::map< Int_t, eTofHitVec >  MMMap;
+
+    sortMatchCases(tempVec, MMMap);
+
+     // final containers
+    std::map< Int_t, eTofHitVec >  MultMultMap;
+    std::map< Int_t, eTofHitVec >  SingleHitMap;
+    std::map< Int_t, eTofHitVec >  SingleTrackMap;
+    eTofHitVec ssVec;
+
+    map<Int_t, eTofHitVec >::iterator it;
+
+    for (it = MMMap.begin(); it != MMMap.end(); it++)
+      {
+	int nTracks = 1;
+	int nHits   = 1;
+
+	for(unsigned int l =0; l< it->second.size(); l++){
+	  	for(unsigned int j = l; j< it->second.size(); j++){
+
+		  if( it->second.at(l).trackId !=  it->second.at(j).trackId) nTracks++;
+		  if( it->second.at(l).index2ETofHit != it->second.at(j).index2ETofHit ) nHits++;
+	
+		} // for inner	
+	} //for outer
+
+
+	// cases::
+	// Single Hit - Single Track
+	if(nTracks == 1 && nHits == 1) { 
+
+	  ssVec.push_back(it->second.front() );
+
+	  int isMerged   = 10;                                            // 10 codes for normal hit
+	  int isOl       = it->second.front().matchFlag;
+
+	  if( it->second.front().clusterSize > 999 ) {
+	    
+	    isMerged = 20;  // 20 codes for single hit
+	    it->second.front().clusterSize = 1;
+	  }
+
+	  it->second.front().matchFlag = 100 + isMerged + isOl; 
+	  finalMatchVec.push_back(it->second.front());
+	}
+
+
+	// Single Hit - Multi Track
+	if( nTracks > 1 && nHits == 1) { 
+
+	  double dr      = 0.0;
+	  double dr_best = 99999.0; // dy for SHs at 27
+	  unsigned int ind        = 0;
+	  unsigned int ind_best   = 0;	
+	    
+	  for(unsigned int l =0; l < it->second.size(); l++){
+	    
+	    dr = (it->second.at(l).deltaX * it->second.at(l).deltaX) + (it->second.at(l).deltaY * it->second.at(l).deltaY);
+	    ind = l;
+	    
+	    if(dr <= dr_best){ 
+	      dr_best  = dr;
+	      ind_best = ind;
+	    }	    	
+	  }
+	  
+	  SingleHitMap[it->first]   =  it->second; 
+	  
+	  //pick closest track and push to finalMatchVec
+	  int isMerged   = 10;
+	  int isOl       = it->second.at(ind_best).matchFlag;
+
+	  if( it->second.at(ind_best).clusterSize > 999 ){
+
+	    isMerged = 20;
+	    it->second.at(ind_best).clusterSize = 1;
+	  }
+
+	  it->second.at(ind_best).matchFlag = 300 + isMerged + isOl;
+	  finalMatchVec.push_back(it->second.at(ind_best));
+	}
+
+		
+	// Multi Hit - Single Track
+	if( nTracks ==1 && nHits  > 1) {
+
+	  bool isN = false;
+	  bool isS = false;
+	  
+	  for(unsigned int l =0; l < it->second.size(); l++){
+	    
+	    if(it->second.at(l).clusterSize < 999){
+	      isN = true;
+	    }else{
+	      isS = true;
+	    }
+	  }
+	  
+	  SingleTrackMap[it->first] =  it->second;
+	  
+	  // sort by merge cases :: SS, NN, SN
+	  //NN
+	  if(isN && (!isS)){
+	    
+	     std::vector< std::vector<int>  > mergeIndVec(it->second.size());
+
+	     double dr_sum=0;
+	     double dr_diff = 0;
+	     double dr_mean=0;
+
+	     double dr       = 0.0;
+	     double dr_best  = 99999.0; // dy for SHs at 27
+	     unsigned int ind         = 0;
+	     unsigned int ind_best    = 0;
+	     
+	     for(unsigned int l =0; l < it->second.size(); l++){
+
+	       dr = sqrt((it->second.at(l).deltaX * it->second.at(l).deltaX) + (it->second.at(l).deltaY * it->second.at(l).deltaY));
+	       ind = l;
+
+	       dr_sum += abs(dr);
+	    
+	       if(dr <= dr_best){ 
+		 dr_best  = dr;
+		 ind_best = ind;
+	       }
+	     }
+	     
+	     dr_mean = dr_sum / it->second.size();
+
+	     for(unsigned int c =0; c < it->second.size(); c++){
+	       
+	       dr = sqrt((it->second.at(c).deltaX * it->second.at(c).deltaX) + (it->second.at(c).deltaY * it->second.at(c).deltaY));
+	       dr_diff += abs(dr - dr_mean);	       
+	     }
+
+	     // NN Hits already merged in HitMaker
+
+	     int    mergedCluSz     = 0;
+	     int    mergedMatchFlag = 0;
+	     int    isMerged        = 0;
+	     int    isOl            = it->second.at(ind_best).matchFlag;
+
+	     if(it->second.at(ind_best).clusterSize > 100 && it->second.at(ind_best).clusterSize < 200){
+
+	       mergedCluSz = it->second.at(ind_best).clusterSize % 100;
+
+	     }else{
+
+	       mergedCluSz = it->second.at(ind_best).clusterSize;	       
+	     }
+	     
+	     if(mergedCluSz > 1){ isMerged = 30; // 30 codes for normal-normal-merge
+	     }else{
+	       isMerged = 10;
+	     }
+	     
+	     mergedMatchFlag =  200 + isMerged + isOl; // 200 codes for SingleTrackMultiHit
+	     it->second.at(ind_best).matchFlag = mergedMatchFlag;
+	     
+	     finalMatchVec.push_back(it->second.at(ind_best));	     
+	  }
+	  
+	   //SS
+	  if(isS && (!isN)){
+
+	    std::vector< std::vector<int>  > mergeIndVec(it->second.size());
+
+	    for(unsigned int l =0; l < it->second.size(); l++){
+	      mergeIndVec.at(l).push_back(0);
+	    }
+	    
+	    double dr       = 0.0;
+	    double dr_best  = 99999.0; // dy for SHs at 27
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = 0;
+	    
+	    for(unsigned int l =0; l < it->second.size(); l++){
+	      
+	      // localY doesnt contain any ETOF information -> not usefull for merging single sided hits
+	      dr = it->second.at(l).deltaX;
+	      ind = l;
+	      
+	      if(dr <= dr_best){ 
+		dr_best  = dr;
+		ind_best = ind;
+	      }
+	    }
+	    
+	    // merge MatchCands
+	    	    
+	    eTofHitVec hitVec =  it->second ;
+	    
+	    double mergedTime      = it->second.at(ind_best).hitTime;
+	    double mergedToT       = it->second.at(ind_best).tot;
+	    double mergedPosY      = it->second.at(ind_best).localY;
+	    double mergedPosX      = it->second.at(ind_best).localX;
+	    int    mergedCluSz     = 1;
+	    int    mergedMatchFlag = 0;
+	    int    mergedIdTruth   = it->second.at(ind_best).IdTruth;
+	    	    
+	    for(unsigned int j=0; j < hitVec.size(); j++) {
+	      
+	      if( j == ind_best) continue;
+	      
+	      double dx = it->second.at(ind_best).localX - hitVec.at(j).localX;
+	      double dy = it->second.at(ind_best).localY - hitVec.at(j).localY;
+	      double dt = abs( it->second.at(ind_best).hitTime - hitVec.at(j).hitTime);
+	      
+	      // merge 
+	      if( abs(dx) < dx_3sig && abs(dy) < dy_3sig && abs(dt) < dt_3sig ){
+		
+		mergedTime      += hitVec.at(j).hitTime;
+		mergedToT       += hitVec.at(j).tot;
+		mergedPosY      += hitVec.at(j).localY;
+		mergedPosX      += hitVec.at(j).localX;
+		mergedCluSz++;
+		
+		if(mergedIdTruth != hitVec.at(j).IdTruth) mergedIdTruth =0;
+ 
+	      }      
+	    }
+
+	    // create mergend hit and MC;
+	    mergedTime    /= mergedCluSz;
+	    mergedToT     /= mergedCluSz;
+	    mergedPosY    /= mergedCluSz;
+	    mergedPosX    /= mergedCluSz;	   
+	    int isMerged   = 0;
+	    int isOl       = it->second.at(ind_best).matchFlag;
+
+	    if(mergedCluSz > 1){ isMerged = 40; // codes for sigle-single-merge
+	    }else{
+	      isMerged = 20;
+	    }
+
+	    mergedMatchFlag =  200 + isMerged + isOl; // 200 codes for SingleTrackMultiHit
+	    
+	    // use only the floating point remainder of the time with respect the the bTof clock range
+	    mergedTime = fmod( mergedTime, eTofConst::bTofClockCycle );
+	    if( mergedTime < 0 ) mergedTime += eTofConst::bTofClockCycle;
+	    
+	    it->second.at(ind_best).hitTime   = mergedTime;
+	    it->second.at(ind_best).tot       = mergedToT;
+	    it->second.at(ind_best).localX    = mergedPosX;
+	    it->second.at(ind_best).localY    = mergedPosY;
+	    it->second.at(ind_best).IdTruth   = mergedIdTruth; 
+	    it->second.at(ind_best).matchFlag = mergedMatchFlag;
+	    it->second.at(ind_best).clusterSize = mergedCluSz;
+	    
+	    
+	    finalMatchVec.push_back(it->second.at(ind_best));
+	  }
+	  
+	    //SN
+	  if(isN && isS){
+
+	    std::vector< std::vector<int>  > mergeIndVec(it->second.size());
+
+	    for(unsigned int l =0; l < it->second.size(); l++){
+	      mergeIndVec.at(l).push_back(0);
+	    }
+	    
+	    double dr       = 0.0;
+	    double dr_best  = 99999.0; // dy for SHs at 27
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = 0;
+	    
+	    for(unsigned int l =0; l < it->second.size(); l++){
+
+	      if(it->second.at(l).clusterSize > 999) continue;
+	      
+	      // localY doesnt contain any ETOF information for singleSidedHits-> not usefull for merging later on
+	      dr = it->second.at(l).deltaX*it->second.at(l).deltaX + it->second.at(l).deltaY*it->second.at(l).deltaY;
+	      ind = l;
+	      
+	      if(dr <= dr_best){ 
+		dr_best  = dr;
+		ind_best = ind;
+	      }
+	    }
+
+	    
+	    // merge MatchCands	  	    
+	    eTofHitVec hitVec =  it->second ;
+	    
+	    double mergedTime      = it->second.at(ind_best).hitTime;
+	    double mergedToT       = it->second.at(ind_best).tot;
+	    double mergedPosY      = it->second.at(ind_best).localY;
+	    double mergedPosX      = it->second.at(ind_best).localX;
+	    int    mergedCluSz     = 1;
+	    int    mergedMatchFlag = 0;
+	    int    mergedIdTruth   = it->second.at(ind_best).IdTruth;	    
+	    
+	    for(unsigned int j=0; j < hitVec.size(); j++) {
+	      
+	      if( j == ind_best) continue;
+	      
+	      double dx = it->second.at(ind_best).localX - hitVec.at(j).localX;
+	      double dy = it->second.at(ind_best).localY - hitVec.at(j).localY;
+	      double dt = abs( it->second.at(ind_best).hitTime - hitVec.at(j).hitTime);
+	      
+	      // merge 
+	      if( abs(dx) < dx_3sig && abs(dy) < dy_3sig && abs(dt) < dt_3sig ){
+
+		mergedTime      += hitVec.at(j).hitTime;
+		mergedToT       += hitVec.at(j).tot;
+		mergedPosY      += hitVec.at(j).localY;
+		mergedPosX      += hitVec.at(j).localX;
+		mergedCluSz++;
+		
+		if(mergedIdTruth != hitVec.at(j).IdTruth) mergedIdTruth =0; 
+	      }	      
+	    }
+
+	    // create mergend hit and MC
+	    mergedTime    /= mergedCluSz;
+	    mergedToT     /= mergedCluSz;
+	    mergedPosY    /= mergedCluSz;
+	    mergedPosX    /= mergedCluSz;	   
+	    int isMerged   = 0;
+	    int isOl       = it->second.at(ind_best).matchFlag;
+
+	    if(mergedCluSz > 1){ isMerged = 50; // codes for sigle-normal-merge
+	    }else{
+	      isMerged = 10;
+	    }
+
+	    mergedMatchFlag =  200 + isMerged + isOl; // 200 codes for SingleTrackMultiHit
+	    
+	    // use only the floating point remainder of the time with respect the the bTof clock range
+	    mergedTime = fmod( mergedTime, eTofConst::bTofClockCycle );
+	    if( mergedTime < 0 ) mergedTime += eTofConst::bTofClockCycle;
+	    
+	    it->second.at(ind_best).hitTime   = mergedTime;
+	    it->second.at(ind_best).tot       = mergedToT;
+	    it->second.at(ind_best).localX    = mergedPosX;
+	    it->second.at(ind_best).localY    = mergedPosY;
+	    it->second.at(ind_best).IdTruth   = mergedIdTruth; 
+	    it->second.at(ind_best).matchFlag = mergedMatchFlag;
+	    it->second.at(ind_best).clusterSize = mergedCluSz ;
+	    
+	    finalMatchVec.push_back(it->second.at(ind_best));    
+	  }
+	} // multi-hit-single-track
+	
+
+	// Multi Hit - Multi Track
+	if(nTracks > 1  && nHits  > 1) {
+
+	  // for each track pick closest hit 
+	  eTofHitVec hitVec =  it->second ;
+	  eTofHitVec bestMatchVec;
+	  eTofHitVec mergeCandVec;
+	  eTofHitVec ambigVec;
+	  std::map< Int_t, StructETofHit >  bestMatchMap;
+	  std::map< Int_t, eTofHitVec >  mergeCandMap;
+	  std::map< Int_t, eTofHitVec >  mergeCandMap2;
+	  std::map< Int_t, eTofHitVec >  ambigMap;
+	  std::vector<int> indVec;	   
+	    
+	  for(unsigned int l =0; l < it->second.size(); l++){
+
+	    double dr       = it->second.at(l).deltaX*it->second.at(l).deltaX + it->second.at(l).deltaY*it->second.at(l).deltaY;
+	    double dr_best  = 99999.0; // dy for SHs at 27
+	    unsigned int ind         = 0;
+	    unsigned int ind_best    = l;	    
+	    int trackId = it->second.at(l).trackId;
+	    int vcnt = 0;
+	    
+	    if(std::find(indVec.begin(), indVec.end(), trackId) != indVec.end()) continue; 
+	      
+	    for(unsigned int n = 0; n < it->second.size(); n++){
+		
+	      if(it->second.at(n).trackId != trackId) continue;
+
+	      // localY doesnt contain any ETOF information for sHits-> take nHit if possible
+	      dr = it->second.at(n).deltaX*it->second.at(n).deltaX + it->second.at(n).deltaY*it->second.at(n).deltaY;
+	      ind = n;
+	      
+	      if(dr < dr_best){ 
+		
+		if(vcnt){ 
+		  mergeCandVec.push_back(it->second.at(ind_best));
+		}else{
+		  vcnt++;
+		}
+		dr_best  = dr;
+		ind_best = ind;
+		
+	      }else{
+		
+		mergeCandVec.push_back(it->second.at(n));
+	      }	  
+	    }
+	  
+	      indVec.push_back(trackId);
+	      bestMatchMap[trackId] = it->second.at(ind_best);
+	      bestMatchVec.push_back(it->second.at(ind_best));
+	    }
+
+
+	    std::vector<int> indVecBMtrack;
+	    std::vector<int> indVecBMhit;
+
+	     for(unsigned int b =0; b < bestMatchVec.size() ; b++){
+	      indVecBMtrack.push_back(bestMatchVec.at(b).trackId);
+	      indVecBMhit.push_back(bestMatchVec.at(b).index2ETofHit);
+	     }
+
+	     std::vector<int> indVecUsedTrack;
+	     std::vector<int> indVecReplaceTrack;
+	     std::vector<int> indVecUsedHit;
+	     eTofHitVec MatchVecTemp = bestMatchVec;
+	     eTofHitVec finalbestMatchVec;
+
+	     while(MatchVecTemp.size() > 0){
+
+	       double dr       = 0.0;
+	       double dr_best  = 99999.0; // dy for SHs at 27
+	       unsigned int ind         = 0;
+	       unsigned int ind_best    = 0;
+	       for(unsigned int b =0; b < MatchVecTemp.size() ; b++){
+		 
+		 ind = b;
+
+		 dr = MatchVecTemp.at(b).deltaX * MatchVecTemp.at(b).deltaX + MatchVecTemp.at(b).deltaY * MatchVecTemp.at(b).deltaY;
+		 if(dr <= dr_best){ 
+		   dr_best  = dr;
+		   ind_best = ind;
+		 }
+	       }
+	        
+	       finalbestMatchVec.push_back(MatchVecTemp.at(ind_best));
+	       indVecUsedTrack.push_back(MatchVecTemp.at(ind_best).trackId);
+	       indVecUsedHit.push_back(MatchVecTemp.at(ind_best).index2ETofHit);	       
+	       MatchVecTemp.erase(MatchVecTemp.begin() + ind_best);
+
+	       //remove all matches with same hit id
+	        for(unsigned int b =0; b < MatchVecTemp.size() ; b++){
+	
+		 if(std::find(indVecUsedHit.begin(), indVecUsedHit.end(), MatchVecTemp.at(b).index2ETofHit) != indVecUsedHit.end()) {
+		   
+		   indVecReplaceTrack.push_back(MatchVecTemp.at(b).trackId);
+		   MatchVecTemp.erase(MatchVecTemp.begin() + b);
+		   b = -1;
+		 }
+		}
+
+		//check for replacement
+		std::sort( indVecReplaceTrack.begin(), indVecReplaceTrack.end() );
+		indVecReplaceTrack.erase( unique( indVecReplaceTrack.begin(), indVecReplaceTrack.end() ), indVecReplaceTrack.end() );
+
+		bool found1      = false;
+		double dx1       = 0;
+		double dy1       = 0;
+		double dx_best1  = 99999.0;
+		double dy_best1  = 99999.0;
+		unsigned int ind1         = 0;
+		unsigned int ind_best1    = 0;
+		for(unsigned int i = 0; i < mergeCandVec.size();i++){
+
+		  ind1 = i;
+
+		  if(!(std::find(indVecReplaceTrack.begin(), indVecReplaceTrack.end(), mergeCandVec.at(i).trackId) != indVecReplaceTrack.end())) continue;
+		  if(std::find(indVecUsedTrack.begin(), indVecUsedTrack.end(), mergeCandVec.at(i).index2ETofHit) != indVecUsedTrack.end())  continue;
+		  if(std::find(indVecUsedHit.begin(), indVecUsedHit.end(), mergeCandVec.at(i).index2ETofHit) != indVecUsedHit.end())  continue;
+		  if(std::find(indVecBMhit.begin(), indVecBMhit.end(), mergeCandVec.at(i).index2ETofHit) != indVecBMhit.end())  continue;
+		  
+		  dx1 = mergeCandVec.at(i).deltaX;
+		  dy1 = mergeCandVec.at(i).deltaY;
+		  
+		  if(dy1 < dy_best1){ dy_best1 = dy1;}
+
+		  if(dx1 < dx_best1){ 
+		    dx_best1  = dx1;
+		    ind_best1 = ind1;
+		    found1 = true;		    
+		  } else if(dx1 == dx_best1){
+
+		    if(dy1 < dy_best1 && dy1 < dy_max && dy1 != 27.0){		      
+		      ind_best1 = ind1;
+		      found1 = true;
+		    } else if( dy1 == 27.0){
+		      ind_best1 = ind1;
+		      found1 = true;
+		    }		  
+		  }		  
+		}
+
+		if(found1){
+
+		  finalbestMatchVec.push_back(mergeCandVec.at(ind_best1));
+		  indVecUsedTrack.push_back(mergeCandVec.at(ind_best1).trackId);
+		  indVecUsedHit.push_back(mergeCandVec.at(ind_best1).index2ETofHit);	       
+		  mergeCandVec.erase(mergeCandVec.begin() + ind_best1);
+		}
+
+		bestMatchVec = finalbestMatchVec;
+
+		for(unsigned int i=0;i< bestMatchVec.size();i++){
+		  
+		  if(bestMatchVec.at(i).clusterSize < 999 ){
+		    bestMatchVec.at(i).matchFlag = 410;
+		  }else{
+		    bestMatchVec.at(i).matchFlag = 420;
+		    bestMatchVec.at(i).clusterSize -= 1000;
+		  }
+		  finalMatchVec.push_back(bestMatchVec.at(i));
+		}
+	     }
+	}						
+      }// loop over MMMap
+  }//loop over counters
+  
+  //set clustersize for jumped hits: +100 if early , +200 if late, + 300 if still jumped
+ 
+  for(unsigned int i=0;i<finalMatchVec.size();i++){
+
+    if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+      finalMatchVec.at(i).clusterSize += 300;
+    }
+   
+    StETofCalibMaker*  mETofCalibMaker;
+    mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
+
+    int keyGet4up   = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 1 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+    int keyGet4down = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 2 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+
+    if(mETofCalibMaker->GetState(keyGet4up) == 1 || mETofCalibMaker->GetState(keyGet4down) == 1){
+      finalMatchVec.at(i).clusterSize += 100;
+    }
+    if(mETofCalibMaker->GetState(keyGet4up) == 2 || mETofCalibMaker->GetState(keyGet4down) == 2 ){
+      finalMatchVec.at(i).clusterSize += 200;
+    }
+  }
+
+  sortOutOlDoubles(finalMatchVec);
+}
+
+void
+StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
+  
+  eTofHitVec overlapHitVec;
+  
+  eTofHitVec tempVecOL        = finalMatchVec;
+  
+  std::vector<int> trackIdVec;
+  
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+    
+    if( !(std::find(trackIdVec.begin(), trackIdVec.end(), finalMatchVec.at(i).trackId) != trackIdVec.end())){
+      
+      trackIdVec.push_back(finalMatchVec.at(i).trackId);
+
+      int counterId1 = (finalMatchVec.at(i).sector*100) + (finalMatchVec.at(i).plane*10) + (finalMatchVec.at(i).counter);
+      
+      for(unsigned int j =0; j< finalMatchVec.size(); j++){
+	
+	int counterId2 = (finalMatchVec.at(j).sector*100) + (finalMatchVec.at(j).plane*10) + (finalMatchVec.at(j).counter);
+	
+	if(counterId1 != counterId2  && finalMatchVec.at(i).trackId == finalMatchVec.at(j).trackId){
+	  
+	  if(!(finalMatchVec.at(j).matchFlag % 2))	finalMatchVec.at(j).matchFlag++;
+	  if(!(finalMatchVec.at(i).matchFlag % 2))	finalMatchVec.at(i).matchFlag++;
+	  
+	}
+      }  
+    }
+  }
+
+  eTofHitVec tmpVec;
+  eTofHitVec OlVec;
+  std::map< int , eTofHitVec >  overlapHitMap;
+
+  tmpVec = finalMatchVec;
+  finalMatchVec.clear();
+  finalMatchVec.resize(0);
+  
+  for(unsigned int i=0; i< tmpVec.size(); i++){ 
+
+    if(tmpVec.at(i).matchFlag%2 == 0){
+      finalMatchVec.push_back(tmpVec.at(i));
+    }else{
+      OlVec.push_back(tmpVec.at(i));
+    }
+  }
+
+  // sort out OlVec
+  for(unsigned int i =0; i < OlVec.size(); i++){
+    overlapHitMap[OlVec.at(i).trackId].push_back(OlVec.at(i));
+  }
+
+  map<Int_t, eTofHitVec >::iterator it;
+  
+  for (it = overlapHitMap.begin(); it != overlapHitMap.end(); it++){
+    
+    eTofHitVec trackVec = it->second;
+    int ind_best = 0;
+    int dr_best = 9999;
+    
+    for(unsigned int n=0; n< trackVec.size();n++){
+      
+      float dr = sqrt((trackVec.at(n).deltaX * trackVec.at(n).deltaX ) + (trackVec.at(n).deltaY * trackVec.at(n).deltaY ));
+      
+      if(dr < dr_best){	    
+	dr_best=dr;
+	ind_best=n;
+	  }
+    }
+    finalMatchVec.push_back(trackVec.at(ind_best));
+  }
+
+  //fix matchFlags 
+  // New match-flag scheme provides information on hit-type, match case, and overlap	
+  // 0: no valid match, otherwise 3 digits encode at first position hit type , at second position overlap info and at third position match type
+  // hit types    : 0 = single sided hits only (time resolution about 25 ps lower than for normal hits)
+  // hit types    : 1 = single sided and normal hits got merged into "mixed hit" for matching  
+  // hit types    : 2 = normal hits only (best quality , most common case)	
+  // overlap info : 0 = hit has no contribution from overlap
+  // overlap info : 1 = hit has only contributions from overlap
+  // overlap info : 2 = hit has contributions from inside and outside of overlap region
+  // match case   : 0 = no match
+  // match case   : 1 = match from cluster of multiple hits and multiple tracks close in space ( ambiguities leave room for missmatches -> frequent case for most central events!!)
+  // match case   : 2 = single hit could have been matched to multiple tracks 	
+  // match case   : 3 = single track could have been matched to multiple hits 	
+  // match case   : 4 = single track matched to single hit ( no ambiguity -> best quality)	
+  // example :: matchFlag = 204 -> 2 = only normal hits, 0 = not  in overlap, 4 = single track single hit match
+	
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+
+    char singlemixdouble = 9;
+    char matchcase = 9;
+    char isOl = 9;
+
+    switch (finalMatchVec.at(i).matchFlag / 100) {
+      case 1 : matchcase = 4; break;
+      case 2 : matchcase = 3; break;
+      case 3 : matchcase = 2; break;
+      case 4 : matchcase = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
+    }
+
+    isOl = 1 - ( finalMatchVec.at(i).matchFlag % 2 );
+
+    switch (finalMatchVec.at(i).matchFlag % 100) {
+      case 10 :
+      case 11 :
+      case 30 :
+      case 31 : singlemixdouble = 2; break;
+      case 20 :
+      case 21 :
+      case 40 :
+      case 41 : singlemixdouble = 0; break;
+      case 50 :
+      case 51 : singlemixdouble = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for singlemixdouble!" << endm; }
+    }
+
+    char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
+
+    if(singlemixdouble == 9 || isOl == 9 || matchcase == 9) newFlag = 0;
+
+    finalMatchVec.at(i).matchFlag = newFlag;
+
   }
 }

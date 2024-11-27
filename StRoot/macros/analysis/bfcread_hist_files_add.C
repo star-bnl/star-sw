@@ -229,9 +229,6 @@ void bfcread_hist_files_add(
        cout << "bfcread_hist_files_add.C, # histograms copied = " << 
 	 hCCount << endl;
 
-       HM[bnum]->SetHArraySize(HU[bnum]->getNewHistSize());
-       HM[bnum]->SetHArray(HU[bnum]->getNewHist());
-       HM[bnum]->Make();
      }  // first time
 
      else {
@@ -243,13 +240,13 @@ void bfcread_hist_files_add(
        cout << "bfcread_hist_files_add.C, # histograms added = " << 
 	 hCCount << endl;
 
-       HM[bnum]->SetHArraySize(HU[bnum]->getNewHistSize());
-       HM[bnum]->SetHArray(HU[bnum]->getNewHist());
-       HM[bnum]->Make();
-
      }  //else (ifl not #1)
 
-     dirList->Delete();
+
+     HM[bnum]->SetHArraySize(HU[bnum]->getNewHistSize());
+     HM[bnum]->SetHArray(HU[bnum]->getNewHist());
+     HM[bnum]->Make();
+     HU[bnum]->Clear();
 
 // to see an example of histograms being added together:   
 //   TH1** kathyArray = HU[bnum]->getNewHist();

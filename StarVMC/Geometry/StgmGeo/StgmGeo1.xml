@@ -215,20 +215,20 @@
       <!-- Create and place the STGC Mother volume in the CAVE -->
 
         <Create    block="STGM" />
-        <Placement block="STGM" in="CAVE" konly="ONLY" x="0" y="5.9" z="307.65" >
+        <Placement block="STGM" in="CAVE" konly="ONLY" x="0" y="5.9" z="338.8385" >
             <Misalign table="Geometry/stgc/stgcOnTpc" row="0"/>
         </Placement>
 
         <Volume name="STGM" comment="STGC Mother volume" assembly="true" >
             <Material name="Air" />
             <!-- STGM placement and params taken from old geometry -->
-            <Shape type="tube" rmin="0" rmax="95.0" dz="52.0" />
+            <Shape type="tube" rmin="0" rmax="95.0" dz="30.0" />
 
 
             <Create block="STFM"  />
             <!-- First z-plane station -->
             <!-- z relative to Mother zcenter -->
-            zplane = -26.75; 
+            zplane = -26.4965; 
             <Placement in="STGM" y="0" x="0" z="zplane" block="STFM" konly="MANY"  >
                 <Misalign table="Geometry/stgc/pentOnStation"  row="0" />
                 <Misalign table="Geometry/stgc/stationOnStgc"  row="0" />
@@ -255,7 +255,7 @@
             <Info format="Positioning sTGC {2I}">station</Info>
 
 
-            zplane = -3.95; 
+            zplane = -8.8855; 
             <Placement in="STGM" y="0" x="0" z="zplane" block="STFM" konly="MANY"  >
                 <Misalign table="Geometry/stgc/pentOnStation"  row="4" />
                 <Misalign table="Geometry/stgc/stationOnStgc"  row="1" />
@@ -281,7 +281,7 @@
             station = 2;
             <Info format="Positioning sTGC {2I}">station</Info>
 
-            zplane = +18.95; 
+            zplane = +8.7985; 
             <Placement in="STGM" y="0" x="0" z="zplane" block="STFM" konly="MANY"  >
                 <Misalign table="Geometry/stgc/pentOnStation"  row="8" />
                 <Misalign table="Geometry/stgc/stationOnStgc"  row="2" />
@@ -307,7 +307,7 @@
             station = 3;
             <Info format="Positioning sTGC {2I}">station</Info>
 
-            zplane = +41.75; 
+            zplane = +26.5835; 
             <Placement in="STGM" y="0" x="0" z="zplane" block="STFM" konly="MANY"  >
                 <Misalign table="Geometry/stgc/pentOnStation"  row="12" />
                 <Misalign table="Geometry/stgc/stationOnStgc"  row="3" />

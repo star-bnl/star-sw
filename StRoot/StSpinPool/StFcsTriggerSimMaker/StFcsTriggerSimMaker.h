@@ -37,20 +37,26 @@ public:
     void setWriteQaTree(char* filename) {mQaTreeFilename=filename;};
     void setWriteQaHist(char* filename) {mQaHistFilename=filename;};
     void setReadPresMask(char* filename) {mPresMask=filename;};
-    void setSimMode(int v, int tb=52) {mSimMode=v; mTrgTimebin=tb;}
+    void setSimMode(int v, int tb=50) {mSimMode=v; mTrgTimebin=tb;}
     void setTrgTimeBin(int v) {mTrgTimebin=v;} //8 timebin = v-3 to v+4. v=52 for 49~56
     void setThresholdFile(char* file) {mThresholdFile=file;}
+    void setTrgIdFile(char* file) {mTrgIdFile=file;}
     void setThresholdDb(int run) {mThresholdDb=run;}
+    void setOverwriteGain(int v) {mOverwriteGain=v;} // 0=use text Et andelectronics gain file 1=from FscDb(default)
         
     //factor= 1(ET Match), 0(E Match), 0.5(halfway)  
     void setEtGain(float v) {mEtFactor=v;} 
 
     fcs_trg_base* getTriggerEmu() {return mTrgSim;}
     
+    const char* getTriggerName(int i){return mTrgIdName[i].Data();}
+
     template<typename T>  void feedADC(T* hit, int ns, int ehp, uint16_t data_array[]);
 
     //this is for just running stage2 from macro
-    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t &geo, link_t output[]);
+    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t &geo, link_t output[], unsigned short& dsm,
+		   int dta[], int dsmout, int sim[], int simdsmout, int iev);
+
 
 private:
     StFcsDb* mFcsDb=0;
@@ -63,7 +69,7 @@ private:
     FILE* mFile=0;
 
     int mSimMode=0;      //! 0 from data, 1 for MC
-    int mTrgTimebin=52;  //! center timebin for data
+    int mTrgTimebin=50;  //! center timebin for data
 
     fcs_trg_base* mTrgSim;
 
@@ -80,12 +86,17 @@ private:
     float mEtFactor=1.0; 
     char* mThresholdFile=0;
     int mThresholdDb=0;
+    int mOverwriteGain=1;
+    char* mTrgIdFile=0;
 
     void print4B4();
     void printJP();
     void readThresholdFile();
     void readThresholdDb();
 
+    TString mTrgIdName[64];
+    void readTrgId();
+    
     virtual const char *GetCVS() const
     {static const char cvs[]="Tag $Name:  $ $Id: StFcsTriggerSimMaker.h,v 1.2 2021/05/30 21:40:56 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     

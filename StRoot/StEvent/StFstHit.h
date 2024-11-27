@@ -42,6 +42,7 @@ public:
    unsigned char getNRawHitsPhi() const;
    float         localPosition(unsigned int ) const;
 
+   void setDiskWedgeSensor(unsigned char disk, unsigned char wedge, unsigned char sensor);
    void setDisk(unsigned char disk);
    void setWedge(unsigned char wedge);
    void setSensor(unsigned char sensor);
@@ -90,6 +91,8 @@ inline unsigned char StFstHit::getNRawHits() const        { return mNRawHits;   
 inline unsigned char StFstHit::getNRawHitsR() const       { return mNRawHitsR;          };
 inline unsigned char StFstHit::getNRawHitsPhi() const     { return mNRawHitsPhi;        };
 
+inline void StFstHit::setDiskWedgeSensor(unsigned char disk, unsigned char wedge, unsigned char sensor) { setHardwarePosition( 
+  (1+disk)*kFstNumWedgePerDisk * kFstNumSensorsPerWedge*0 + (1 + (wedge - 1)*kFstNumSensorsPerWedge + sensor) ); }
 inline void StFstHit::setApv(unsigned char apv)                   { mApv = apv;                   };
 inline void StFstHit::setMaxTimeBin(unsigned char tb)             { mMaxTimeBin = tb;             };
 inline void StFstHit::setMeanPhiStrip(float meanPhiStrip)         { mMeanPhiStrip = meanPhiStrip; };

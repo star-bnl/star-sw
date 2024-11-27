@@ -54,7 +54,7 @@
 /StRoot/StEventUtilities/StRedoTracks*             @genevb
 /StRoot/StEventUtilities/StuFixTopoMap*            @genevb
 /StRoot/StEventUtilities/TwistPatch*               @genevb
-/StRoot/StFcs*                                     @akioogawa         @jdbrice
+/StRoot/StFcs*                                     @akioogawa         @jdbrice  @mrosales2016
 /StRoot/StFms*                                     @akioogawa
 /StRoot/StFpd*                                     @akioogawa
 /StRoot/StFst*                                     @jdbrice           @sunxuhit    @yezhenyu2003   @techuan-huang
@@ -85,7 +85,7 @@
 /StRoot/StRHICf*				   @ggfdsa10
 /StRoot/StRTSClient                                @jml985            @tonko-lj
 /StRoot/StShadowMaker                              @genevb
-/StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
+/StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl  @mrosales2016
 /StRoot/StSsd*                                     @starsdong         @plexoos
 /StRoot/StSst*                                     @starsdong         @plexoos
 /StRoot/StStarLogger                               @fisyak      @R-Witt        @iraklic

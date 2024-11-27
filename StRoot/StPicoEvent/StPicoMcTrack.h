@@ -46,7 +46,8 @@ class StPicoMcTrack : public TObject {
   enum EHIT {ktpc, ksvt, kssd, kctb, keem, kemc, kesm, 
              kftp, kgem, khpd, kist, kigt, kfst, kfgt, 
              kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, 
-             kvpd, ktot};
+             kvpd, ketr, khca, kfts, keto, kstg, kwca, 
+             kpre, kepd, ktot};
 
   //
   // Getters
@@ -131,6 +132,22 @@ class StPicoMcTrack : public TObject {
   UChar_t nHitsTpc() const            { return mHits[ktpc]; }
   /// Return number of hits in VPD
   UChar_t nHitsVpd() const            { return mHits[kvpd]; }
+  /// Return number of hits in ETR
+  UChar_t nHitsEtr() const            { return mHits[ketr]; }
+  /// Return number of hits in HCA
+  UChar_t nHitsHca() const            { return mHits[khca]; }
+  /// Return number of hits in FTS
+  UChar_t nHitsFts() const            { return mHits[kfts]; }
+  /// Return number of hits in ETO
+  UChar_t nHitsEto() const            { return mHits[keto]; }
+  /// Return number of hits in STG
+  UChar_t nHitsStg() const            { return mHits[kstg]; }
+  /// Return number of hits in WCA
+  UChar_t nHitsWca() const            { return mHits[kwca]; }
+  /// Return number of hits in PRE
+  UChar_t nHitsPre() const            { return mHits[kpre]; }
+  /// Return number of hits in EPD
+  UChar_t nHitsEpd() const            { return mHits[kepd]; }
   /// Return particle names (GEANT ID according to GPART)
   const Char_t *geName();
   /// Return corrected GePid (to take embedding into account)

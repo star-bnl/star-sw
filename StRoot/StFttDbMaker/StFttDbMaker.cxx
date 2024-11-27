@@ -48,8 +48,12 @@ int StFttDbMaker::InitRun(int runNumber) {
     } else { // default
 
         TDataSet *mDbDataSet = GetDataBase("Geometry/ftt/fttHardwareMap");
-        St_fttHardwareMap *dataset = (St_fttHardwareMap*) mDbDataSet->Find("fttHardwareMap");
-        mFttDb->loadHardwareMapFromDb( dataset );
+        if (mDbDataSet){
+          St_fttHardwareMap *dataset = (St_fttHardwareMap*) mDbDataSet->Find("fttHardwareMap");
+          mFttDb->loadHardwareMapFromDb( dataset );
+        } else {
+          LOG_WARN << "Cannot access `Geometry/ftt/fttHardwareMap` and no local `vmm_map.dat` file provided. Cannot load ftt hardware mapping" << endm;
+        }
     }
 
 
@@ -58,6 +62,8 @@ int StFttDbMaker::InitRun(int runNumber) {
     if ( mDbDataSetDW ) {
         St_fttDataWindows *dataset = (St_fttDataWindows*) mDbDataSetDW->Find("fttDataWindows");
         mFttDb->loadDataWindowsFromDb( dataset );
+    } else {
+      LOG_WARN << "Cannot access `Calibrations/ftt/fttDataWindows`" << endm;
     }
 
   

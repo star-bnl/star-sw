@@ -439,10 +439,17 @@ void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadra
 
         int ix0 = ax->FindBin( x0 + row * rLength );
         int ix1 = ax->FindBin( x0 + (row + 1) * rLength - 1 );
+
+	/*   This code does nothing! ----------------------
+	     Most likely it was intended to adjust the indexes for this specific
+	     region of the detector, but not known if needed;   -jml 3/25/24
+
         if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
             int ix0 = ax->FindBin( x0 + (row - 1) * rLength );
             int ix1 = ax->FindBin( x0 + (row) * rLength - 1 );
         }
+	*/
+
         const int iy0 = ay->FindBin( y0 + strip * sPitch );
         const int iy1 = ay->FindBin( y0 + (strip) * sPitch );
         floodFill( h2, ix0, iy0, ix1, iy1 );
@@ -459,10 +466,12 @@ void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadra
 
         int iy0 = ay->FindBin( y0 + row * rLength );
         int iy1 = ay->FindBin( y0 + (row + 1) * rLength - 1 );
+	/*   Does nothing, intened to adjust indexes?
         if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
             int iy0 = ay->FindBin( y0 + (row - 1) * rLength );
             int iy1 = ay->FindBin( y0 + (row) * rLength - 1 );
         }
+	*/
         const int ix0 = ax->FindBin( x0 + strip * sPitch );
         const int ix1 = ax->FindBin( x0 + (strip) * sPitch );
         floodFill( h2, ix0, iy0, ix1, iy1 );
