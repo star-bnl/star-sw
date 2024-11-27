@@ -44,9 +44,9 @@ class StGmtGeom {
 	// number is not continuous. On the R plane strips 280-399 
 	// are not implemented.
 	// static Int_t encodeGeoId( Int_t module, Char_t layer, Int_t strip );
-	static Int_t encodeGeoId( Int_t rdo, Int_t arm, Int_t apv, Int_t channel );
+	static Int_t encodeGeoId( Int_t rdo = -1, Int_t arm = -1, Int_t apv = -1, Int_t channel = -1 );
 	// 	static Int_t decodeGeoId( Int_t geoId, Short_t & module, Char_t & layer, Short_t & strip );
-	static Int_t decodeGeoId( Int_t geoId, Short_t & module, Int_t & layer, Short_t & strip );
+	static Int_t decodeGeoId( Int_t geoId = -999, Short_t &module = -999, Int_t &layer = -999, Short_t &strip = -999 );
 
 
 	// Geoname is human readable form of geoId

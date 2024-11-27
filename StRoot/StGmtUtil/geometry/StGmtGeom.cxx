@@ -21,7 +21,7 @@ double	StGmtGeom::mHalfPi = TMath::PiOver2();
 //________________
 Int_t StGmtGeom::encodeGeoId(Int_t rdo, Int_t arm, Int_t apv, Int_t channel) {
 
-    Short_t module = getModuleIdFromElecCoord( rdo, arm, apv );
+    Short_t module = getModuleIdFromElecCoord(rdo, arm, apv);
     // locally map apv number into [0,1]
     if ( apv <= 3 ) {
       apv = apv % 2;
