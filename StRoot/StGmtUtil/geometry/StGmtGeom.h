@@ -24,8 +24,8 @@
 //  program. However, because the data contained in this class is entirely
 //  static, the class itself is also entirely static.
 class StGmtGeom {
- public:
-
+  
+  public:
 	//  For all functions where they appear: Disc can be >= 0 (in theory,
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
@@ -205,12 +205,6 @@ class StGmtGeom {
 	//  Various constants used in Jan's conversion functions.
 	static double mPi;
 	static double mHalfPi;
-	// 	static double mRadStripOff;
-	// 	static double mPhiStripOff;
-	// 	static int mRadStripLOCId_number;
-	// 	static int mPhiStripLOCId_number;
-	// 	static double mStripOff;
-	// 	static double mPadOff;
 
 
 	//  ---Private member variables---
@@ -243,28 +237,6 @@ inline Int_t StGmtGeom::getOctant( Double_t phi ) {
   int i8=phiDeg/45;
   return i8;
 }
-
-// inline std::string StGmtGeom::getNaiveGeoNameFromElecCoord
-// (
-//     Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-// )
-// {
-//     return
-// 	translateGeoIdToGeoName(
-// 	    getNaiveGeoIdFromElecCoord( rdo, arm, apv, channel )
-// 	);
-// }
-// 
-// inline Int_t StGmtGeom::getNaivePhysCoordFromElecCoord
-// (
-//     Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
-//     Short_t & module, Char_t & layer
-// )
-// {
-//     return getPhysicalCoordinate(
-// 	getNaiveGeoIdFromElecCoord( rdo, arm, apv, channel ),
-// 	module, layer);
-// }
 
 #endif
 
