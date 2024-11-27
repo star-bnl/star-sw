@@ -44,17 +44,17 @@ class StGmtGeom {
 	// number is not continuous. On the R plane strips 280-399 
 	// are not implemented.
 	// static Int_t encodeGeoId( Int_t module, Char_t layer, Int_t strip );
-	static Int_t encodeGeoId( Int_t rdo = -1, Int_t arm = -1, Int_t apv = -1, Int_t channel = -1 );
+	static Int_t encodeGeoId(Int_t rdo = -1, Int_t arm = -1, Int_t apv = -1, Int_t channel = -1);
 	// 	static Int_t decodeGeoId( Int_t geoId, Short_t & module, Char_t & layer, Short_t & strip );
-	static Int_t decodeGeoId( Int_t geoId = -999, Short_t &module = -999, Int_t &layer = -999, Short_t &strip = -999 );
+	static Int_t decodeGeoId(Int_t geoId = -999, Short_t &module = -999, Int_t &layer = -999, Short_t &strip = -999);
 
 
 	// Geoname is human readable form of geoId
-	static std::string encodeGeoName( Int_t module, Char_t layer, Int_t strip );
+	static std::string encodeGeoName(Int_t module = -999, Char_t layer = -120, Int_t strip = -999);
 	// 	static Int_t decodeGeoName( const std::string & geoName, Short_t & module, Char_t & layer, Short_t & strip );
-	static Int_t decodeGeoName( const std::string & geoName, Short_t & module, Int_t & layer, Short_t & strip );
-	static std::string translateGeoIdToGeoName( Int_t geoId );
-	static Int_t translateGeoNameToGeoId( const std::string & geoName );
+	static Int_t decodeGeoName(const std::string & geoName, Short_t &module, Int_t &layer, Short_t &strip);
+	static std::string translateGeoIdToGeoName(Int_t geoId);
+	static Int_t translateGeoNameToGeoId(const std::string & geoName);
 
 	// Returns range upper and lower range of R or Phi valus depending on geoId.  
 	// NOTE phi values are only local - that is they are the same for each quadrant
