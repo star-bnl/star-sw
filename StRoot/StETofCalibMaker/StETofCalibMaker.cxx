@@ -2868,7 +2868,7 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
 
 }
 //-----------------------------------------------------
-void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec, std::map<int , short>& mGet4DefaultStateMap){
+void StETofCalibMaker::decodeInt( std::vector<unsigned long int>& intVec ,std::vector<unsigned long int>& startVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec){
 
   unsigned long int lastEvtId =0;
   std::map<int, std::vector< stateStruct > > stateMap;
