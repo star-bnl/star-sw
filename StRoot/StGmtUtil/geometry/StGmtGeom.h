@@ -82,7 +82,7 @@ class StGmtGeom {
 	static Int_t getGlobalPhysicalCoordinate(const std::string &geoName, Short_t &module, Int_t &layer);
 
 	static Int_t getCoordNumFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
-	static Double_t getPositionFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv, Int_t channel = -999);
+	static Double_t getPositionFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
   
 	//  Please note that the following functions do NOT access the STAR
 	//  database to find mapping information. They assume the most
