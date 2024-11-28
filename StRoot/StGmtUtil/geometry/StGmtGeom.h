@@ -46,7 +46,7 @@ class StGmtGeom {
 	// static Int_t encodeGeoId( Int_t module, Char_t layer, Int_t strip );
 	static Int_t encodeGeoId(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
 	// 	static Int_t decodeGeoId( Int_t geoId, Short_t & module, Char_t & layer, Short_t & strip );
-	static Int_t decodeGeoId(Int_t geoId = -999, Short_t &module, Int_t &layer, Short_t &strip);
+	static Int_t decodeGeoId(Int_t geoId, Short_t &module, Int_t &layer, Short_t &strip);
 
 
 	// Geoname is human readable form of geoId
@@ -60,7 +60,7 @@ class StGmtGeom {
 	// NOTE phi values are only local - that is they are the same for each quadrant
 	// The ordinate, lowerSpan and upperSpan are all in centimeters or radians
 	// static Int_t getPhysicalCoordinate( Int_t geoId, Short_t & module, Char_t & layer);
-	static Int_t getPhysicalCoordinate(Int_t geoId = -999, Short_t &module, Int_t &layer);
+	static Int_t getPhysicalCoordinate(Int_t geoId, Short_t &module, Int_t &layer);
 
 
       
@@ -73,7 +73,7 @@ class StGmtGeom {
 
 	// Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
 	// static Int_t getGlobalPhysicalCoordinate( Int_t geoId, Short_t & module, Char_t & layer);
-	static Int_t getGlobalPhysicalCoordinate(Int_t geoId = -999, Short_t &module, Int_t &layer);
+	static Int_t getGlobalPhysicalCoordinate(Int_t geoId, Short_t &module, Int_t &layer);
 
 	//Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
 	// 	static Int_t getGlobalPhysicalCoordinate( const std::string & geoName,
@@ -99,9 +99,9 @@ class StGmtGeom {
 
 	static Int_t encodeElectronicId(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
 
-	static Int_t decodeElectronicId(Int_t elecId = -999, Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel);
+	static Int_t decodeElectronicId(Int_t elecId, Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel);
 	static Int_t getElectIdFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t ch = -999) { return encodeElectronicId(rdo,arm,apv,ch); }
-	static Int_t getElecCoordFromElectId(Int_t eID = -999, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& ch) { return decodeElectronicId(eID,rdo,arm,apv,ch); }
+	static Int_t getElecCoordFromElectId(Int_t eID, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& ch) { return decodeElectronicId(eID,rdo,arm,apv,ch); }
 
     static Short_t getModuleIdFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999);
 	
@@ -116,7 +116,7 @@ class StGmtGeom {
 	static Int_t getOctant(Double_t phi = 0.);
 
 	static Int_t getNaiveGeoIdFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
-	static Int_t getNaiveElecCoordFromGeoId(Int_t geoId = -999, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel);
+	static Int_t getNaiveElecCoordFromGeoId(Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel);
 	static std::string getNaiveGeoNameFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
 	static Int_t getNaivePhysCoordFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999, Short_t &module, Char_t &layer);
 
