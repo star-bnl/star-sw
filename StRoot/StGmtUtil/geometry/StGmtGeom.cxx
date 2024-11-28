@@ -46,7 +46,7 @@ Int_t StGmtGeom::encodeGeoId(Int_t rdo, Int_t arm, Int_t apv, Int_t channel) {
 }
 
 //________________
-Int_t StGmtGeom::decodeGeoId(Int_t geoId, Short_t & module, Int_t & layer, Short_t & strip) {
+Int_t StGmtGeom::decodeGeoId(Int_t geoId, Short_t &module, Int_t &layer, Short_t &strip) {
     if ( geoId < 0 || geoId >= kGmtNumGeoIds ) {
         LOG_DEBUG << "GeoId " << geoId << " out of range in StGmtGeom::decodeGeoId." << endm;
         module = kGmtError;
