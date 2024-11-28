@@ -141,8 +141,8 @@ std::string StGmtGeom::translateGeoIdToGeoName(Int_t geoId) {
         return kGmtErrorString;
     }
 
-    decodeGeoId( geoId, module, layer, strip );
-    return encodeGeoName( module, layer, strip );
+    decodeGeoId(geoId, module, layer, strip);
+    return encodeGeoName(module, layer, strip);
 }
 
 //________________
@@ -152,15 +152,16 @@ Int_t StGmtGeom::translateGeoNameToGeoId(const std::string & geoName) {
     Int_t rdo, arm, apv, channel;
 
     //	Error message already taken care of in decodeGeoName.
-    if ( decodeGeoName( geoName, module, layer, strip ) < 0 )
-	return kGmtError;
+    if ( decodeGeoName(geoName, module, layer, strip) < 0 ) {
+        return kGmtError;
+    }
 
     // return encodeGeoId( module, layer, strip );
-    return encodeGeoId( rdo, arm, apv, channel );
+    return encodeGeoId(rdo, arm, apv, channel);
 }
 
 //________________
-Int_t StGmtGeom::getPhysicalCoordinate(Int_t geoId, Short_t & module, Int_t & layer) {
+Int_t StGmtGeom::getPhysicalCoordinate(Int_t geoId, Short_t &module, Int_t &layer) {
     if ( geoId < 0 || geoId >= kGmtNumGeoIds ) {
         LOG_DEBUG << "GeoId " << geoId << " out of range in StGmtGeom::getPhysicalCoordinate." << endm;
         module = kGmtError;
@@ -169,12 +170,12 @@ Int_t StGmtGeom::getPhysicalCoordinate(Int_t geoId, Short_t & module, Int_t & la
     }
 
     Short_t strip;
-    decodeGeoId( geoId, module, layer, strip );
+    decodeGeoId(geoId, module, layer, strip);
     return 0;
 }
 
 //________________
-Int_t StGmtGeom::getPhysicalCoordinate(const std::string & geoName, Short_t & module, Int_t & layer) {
+Int_t StGmtGeom::getPhysicalCoordinate(const std::string &geoName, Short_t &module, Int_t &layer) {
     Short_t strip;
     if ( decodeGeoName( geoName, module, layer, strip ) < 0 ) {
         // Error is mostly handled by the decodeGeoName call.
