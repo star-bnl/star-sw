@@ -50,7 +50,7 @@ class StGmtGeom {
 
 
 	// Geoname is human readable form of geoId
-	static std::string encodeGeoName(Int_t module = -999, Char_t layer = -999, Int_t strip = -999);
+	static std::string encodeGeoName(Int_t module = -999, Char_t layer = -120, Int_t strip = -999);
 	// 	static Int_t decodeGeoName( const std::string & geoName, Short_t & module, Char_t & layer, Short_t & strip );
 	static Int_t decodeGeoName(const std::string &geoName, Short_t &module, Int_t &layer, Short_t &strip);
 	static std::string translateGeoIdToGeoName(Int_t geoId = -999);
@@ -118,7 +118,7 @@ class StGmtGeom {
 	static Int_t getNaiveGeoIdFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
 	static Int_t getNaiveElecCoordFromGeoId(Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel);
 	static std::string getNaiveGeoNameFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999);
-	static Int_t getNaivePhysCoordFromElecCoord(Int_t rdo = -999, Int_t arm = -999, Int_t apv = -999, Int_t channel = -999, Short_t &module, Char_t &layer);
+	static Int_t getNaivePhysCoordFromElecCoord(Int_t rdo, Int_t arm, Int_t apv, Int_t channel, Short_t &module, Char_t &layer);
 
 	//  This is similar to the above functions, but it takes electronic
 	//  coordinates and only returns the final ordinate. This is here
@@ -134,9 +134,9 @@ class StGmtGeom {
 	// 	static double rMid()	{ return kGmtRmid; }
 	// 	static double rOut()	{ return kGmtRout; }
 	static double sFirst()  { return kGmtSfirst; }
-	static double sLast()   { return kGmtSlast;}
+	static double sLast()   { return kGmtSlast; }
 	static double pFirst()  { return kGmtPfirst; }
-	static double pLast()   { return kGmtPlast;}
+	static double pLast()   { return kGmtPlast; }
 
 	// 	static double radStrip_pitch() { return kGmtRadPitch; }		//  cm
 	// 	static double phiStrip_pitch() { return  kGmtPhiAnglePitch; }	//  rad
