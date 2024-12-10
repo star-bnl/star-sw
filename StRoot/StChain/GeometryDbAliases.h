@@ -144,26 +144,33 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},   
   {"y2018b",      20171215,     4, "y2018b",   "y2018b physics production geometry version B, AgML,xgeometry"},   
   {"y2018c",      20171215,     5, "y2018c",   "y2018c physics production geometry version C (FXT @ 200.7 cm), AgML,xgeometry"},   
+  {"y2018d",      20171215,     6, "y2018d",   "y2018d physics production geometry version D (FXT @ 200.0 cm), AgML,xgeometry"},   
 
   {"y2019",       20181215,     0, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
   {"y2019a",      20181215,     1, "y2019a",   "y2019a first production release geometry, AgML,xgeometry"},   
-  {"y2019b",      20181215,     1, "y2019b",   "y2019a production geometry (FXT @ 200.7cm), AgML,xgeometry"},   
+  {"y2019b",      20181215,     2, "y2019b",   "y2019a production geometry (FXT @ 200.0cm), AgML,xgeometry"},   
 
   {"y2020",       20191120,     0, "y2020",    "y2020 development geometry, AgML,xgeometry"},   
   {"y2020a",      20191120,     1, "y2020a",   "y2020 fast-offline geometry, AgML,xgeometry"},   
-  {"y2020b",      20191120,     2, "y2020b",   "y2020 production geometry (FXT @ 200.7 cm), AgML,xgeometry"},   
+  {"y2020b",      20191120,     2, "y2020b",   "y2020 production geometry (FXT @ 200.0 cm), AgML,xgeometry"},   
 
   {"y2021",       20201215,     0, "y2021",    "y2021 development geometry, AgML,xgeometry"},   
   {"y2021a",      20201215,     1, "y2021a",   "y2021 first production geometry, AgML,xgeometry"},   
+  {"y2021b",      20201215,     2, "y2021b",   "y2021 production geometry (FXT @ 200.0 cm), AgML,xgeometry"},   
   
   {"y2022",       20211015,     0, "y2022",    "y2022 first cut geometry, AgML,xgeometry"},   
   {"y2022a",      20211015,     1, "y2022a",   "y2022 production geometry, AgML,xgeometry"},  
+  {"y2022b",      20211015,     2, "y2022b",   "y2022 production geometry (FXT @ 200.0 cm), AgML,xgeometry"},  
 
  { "y2023",       20230410,     0, "y2023",    "y2023 first cut geometry, AgML,xgeometry"},    
  { "y2023a",      20230410,     1, "y2023a",    "y2023a production geometry, AgML,xgeometry"},    
+ { "y2023b",      20230410,     2, "y2023b",    "y2023a production geometry (FXT @ 200.0 cm), AgML,xgeometry"},    
 
  { "y2024",       20231210,     0, "y2024",    "y2024 first cut geometry, AgML,xgeometry"},    
  { "y2024a",      20231210,     1, "y2024a",    "y2024a production geometry, AgML,xgeometry"},    
+ { "y2024b",      20231210,     2, "y2024b",    "y2024b production geometry (FXT @ 200.0 cm), AgML,xgeometry"},    
+
+ { "y2024",       20241210,     0, "y2024",    "y2024 first cut geometry, AgML,xgeometry"},    
 
   {"dev2021",     21201210,     1, "dev2021",  "-deprecated- geometry for 2021+ forward program,AgML,xgeometry"},
   {"dev2022",     21211210,     1, "dev2022",  "development geometry for 2022+ forward program,AgML,xgeometry"},
