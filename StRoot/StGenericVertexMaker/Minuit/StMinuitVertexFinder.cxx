@@ -408,26 +408,28 @@ int StMinuitVertexFinder::fit(StEvent* event)
     Int_t n_bemc_match_tot = 0;
     Int_t n_cross_tot = 0;
 
+    // In FXT mode, we want to have a bias = -2 cm below the z-axis
+    //   for the approximate physical target location. This could
+    //   potentially be a database table (PrimaryVertexCuts) parameter,
+    //   but the bias is approximate and highly unlikely to change/finetune.
+    StThreeVectorD beamAxis(0.0, mFXT ? -2.0 : 0.0, 0.0);
+
     for (const StTrackNode* stTrack : event->trackNodes())
     {
       StGlobalTrack* g = ( StGlobalTrack*) stTrack->track(global);
       if (!accept(g)) continue;
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
-      // In FXT mode, we want to have a bias = -2 cm below the z-axis
-      //   for the approximate physical target location. This could
-      //   potentially be a database table (PrimaryVertexCuts) parameter,
-      //   but the bias is approximate and highly unlikely to change/finetune.
-      // gDCA->impact() is the same as -(gDCA->helix().geometricSignedDistance(0.0,0.0))
-      double RImpact = (mFXT ? -(gDCA->helix().geometricSignedDistance(0.0,-2.0))
-                             : gDCA->impact());
-      if (TMath::Abs(RImpact) >  mRImpactMax) continue;
+      StPhysicalHelixD gHelix = gDCA->helix();
+      StThreeVectorD DCAPosition = gHelix.at(gHelix.pathLength(beamAxis.x(),beamAxis.y())) - beamAxis;
+      double RImpact = DCAPosition.perp();
+      if (RImpact > mRImpactMax) continue;
       mDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
       mHelices.push_back(g->geometry()->helix());
       mHelixFlags.push_back(1);
-      Double_t z_lin = gDCA->z();
+      Double_t z_lin = DCAPosition.z();
       mZImpact.push_back(z_lin);
 
       Bool_t shouldHitCTB = kFALSE;
