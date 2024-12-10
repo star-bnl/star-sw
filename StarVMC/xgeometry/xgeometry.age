@@ -2525,7 +2525,7 @@ If LL>0
   case y2018a { y2018a: y2018 first cut geometry; Geom =        'y2018a    '; call geom_y2018a;} 
   case y2018b { y2018b: y2018 + FXT; Geom =        'y2018b    '; call geom_y2018b;} 
   case y2018c { y2018c: y2018 + FXT; Geom =        'y2018c    '; call geom_y2018c;} 
-  case y2018d { y2018d: y2018 + FXT; Geom =        'y2018d    '; call geom_y2018d;} 
+
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
