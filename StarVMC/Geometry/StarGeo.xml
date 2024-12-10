@@ -431,8 +431,7 @@
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
 
-
-  <Geometry tag="y2021b" comment="STAR production tag w/ FCS installation">
+    <Geometry tag="y2021b" comment="STAR production tag w/ FCS installation / Fixed target at 200cm / TPC GG deadzone update">
     <Construct sys="cave" config="CAVE06"  />
     <Construct sys="upst" config="UPSTon"  />
     <Construct sys="shld" config="SHLDon"  />
