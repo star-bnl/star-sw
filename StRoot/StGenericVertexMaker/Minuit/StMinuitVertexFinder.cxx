@@ -413,6 +413,7 @@ int StMinuitVertexFinder::fit(StEvent* event)
     //   potentially be a database table (PrimaryVertexCuts) parameter,
     //   but the bias is approximate and highly unlikely to change/finetune.
     StThreeVectorD beamAxis(0.0, mFXT ? -2.0 : 0.0, 0.0);
+    double RImpactMax2 = mRImpactMax*mRImpactMax;
 
     for (const StTrackNode* stTrack : event->trackNodes())
     {
@@ -422,8 +423,8 @@ int StMinuitVertexFinder::fit(StEvent* event)
       if (! gDCA) continue;
       StPhysicalHelixD gHelix = gDCA->helix();
       StThreeVectorD DCAPosition = gHelix.at(gHelix.pathLength(beamAxis.x(),beamAxis.y())) - beamAxis;
-      double RImpact = DCAPosition.perp();
-      if (RImpact > mRImpactMax) continue;
+      double RImpact2 = DCAPosition.perp2();
+      if (RImpact2 > RImpactMax2) continue; // calculate square once instead of sqrt N times
       mDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
