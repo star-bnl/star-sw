@@ -122,20 +122,20 @@ int RHICfFilter::Filter( StarGenEvent *_event )
 
 int RHICfFilter::InitRHICfGeometry()
 {
-  double tsDetSize = 20.; // [mm]
-  double tlDetSize = 40.; // [mm]
-  double detBoundCut = 2.; // [mm]
-  double distTStoTL = 47.4; // [mm]
+  double tsDetSize = 2.; // [cm]
+  double tlDetSize = 4.; // [cm]
+  double detBoundCut = 0.2; // [cm]
+  double distTStoTL = 4.74; // [cm]
 
-  double detBeamCenter = 0.;
+  double detBeamCenter = 0.; // [cm]
 
   if(mRHICfRunType < 0 || mRHICfRunType > 2){
     cout << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not setted!!!" << endl;
     return 0;
   }
   if(mRHICfRunType == 0){detBeamCenter = 0.;} // TS
-  if(mRHICfRunType == 1){detBeamCenter = -47.4;} // TL
-  if(mRHICfRunType == 2){detBeamCenter = 21.6;} // TOP
+  if(mRHICfRunType == 1){detBeamCenter = -4.74;} // TL
+  if(mRHICfRunType == 2){detBeamCenter = 2.16;} // TOP
 
   mRHICfTowerBoundary[0][0][0] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
   mRHICfTowerBoundary[0][0][1] = 0.;

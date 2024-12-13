@@ -43,7 +43,7 @@ private:
   bool mIsNeuEvent;
 
   double mEnergyCut; // [GeV]
-  double mRHICfDetZ = 17800.; // [mm]
+  double mRHICfDetZ = 1780.; // [cm]
 
   ClassDef(RHICfFilter,0);
 };
