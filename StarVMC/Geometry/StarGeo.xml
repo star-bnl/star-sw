@@ -138,7 +138,7 @@
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
 
-  <Geometry tag="y2024a" comment="STAR initial production tag y2024">
+  <Geometry tag="y2024b" comment="STAR initial production tag y2024"> 
     <Construct sys="cave" config="CAVE06"  />
     <Construct sys="upst" config="UPSTon"  />
     <Construct sys="shld" config="SHLDon"  />
