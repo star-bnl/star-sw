@@ -20,6 +20,11 @@
       <Init struct="TARG" var="zdis"  value="200.7" />
     </Setup>
 
+    <Setup name="TARGv1b" onoff="on" module="TargGeo" simu="2" comment="Target at z=200.0cm"   >
+      <Init struct="TARG" var="onoff" value="2" />
+      <Init struct="TARG" var="zdis"  value="200.0" />
+    </Setup>
+
       
 
     
