@@ -128,7 +128,7 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mDbEntryStart(0),
   mDbEntryStop(0),
   mGlobalCounter(1),
-  mCalState(false)
+  mCalState(true)
 
   
 {
@@ -2173,9 +2173,15 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 	int get4Id = 144 * ( aDigi->sector() - 13 ) + 48 * ( aDigi->zPlane() -1 ) + 16 * ( aDigi->counter() - 1 ) + 8 * ( aDigi->side() - 1 ) + ( ( aDigi->strip() - 1 ) / 4 );
 
 	double stateCorr =0;
-	if(mGet4StateMap[get4Id] == 1) stateCorr =  6.25;
-	else if(mGet4StateMap[get4Id] == 2) stateCorr =  -6.25;
-
+	if(mGet4StateMap[get4Id] == 1){ 
+	  stateCorr =  6.25;
+	}else if(mGet4StateMap[get4Id] == 2){
+	  stateCorr =  -6.25;
+	}else if(mGet4StateMap[get4Id] == 3){
+	  stateCorr = 6.25;
+	}else if(mGet4StateMap[get4Id] == 4){
+	  stateCorr = -6.25;	
+	}
 	// only calibrate here if flag is set
 	if(!mCalState) stateCorr = 0;
 
@@ -2188,7 +2194,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 	                                    + stateCorr;
 					    
 					    					
-	if(mGet4StateMap[get4Id] == 3){
+	if(mGet4StateMap[get4Id] == 5){
 	  calibTime = 0; // mask digis with undefined state (e.g. one hit with jump and one without in same event)
 	  
 	}
@@ -2782,6 +2788,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 
    if(fileZero){
      mDbEntryStart   = 0;
+     mDbEntryStop    = 99999999;	   
    }
   
    sort( mMasterStartVec.begin(), mMasterStartVec.end() );
@@ -2912,8 +2919,8 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int>& intVec ,std::v
 	}
 	
 	if(i < (eTofConst::nGet4sInSystem/4) ){  
-	  mGet4DefaultStateMap[Get4Id1] = get4state1;
-	  mGet4DefaultStateMap[Get4Id2] = get4state2;
+	  mGet4DefaultStateMap[Get4Id1] = get4state1 + 1; // counting from 1 here 
+	  mGet4DefaultStateMap[Get4Id2] = get4state2 + 1; // counting from 1 here
 	} 
 	  
 	break;  
