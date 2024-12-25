@@ -106,8 +106,8 @@
 #include "TH1.h"
 #include "TH2.h"
 static Int_t _debug = 0;
-StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 #endif /* __TFG__VERSION__ */
+StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 #include "StPicoDstMaker/StPicoUtilities.h"
 
 //_________________
@@ -135,9 +135,7 @@ mBField(0),
     createArrays();
     std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
     
-#if defined (__TFG__VERSION__)
     fgPicoDstMaker = this;
-#endif /* __TFG__VERSION__ */
 }
 
 //_________________
@@ -153,9 +151,7 @@ StPicoDstMaker::~StPicoDstMaker() {
   delete mChain;
   delete mPicoDst;
 
-#if defined (__TFG__VERSION__)
   fgPicoDstMaker = 0;
-#endif /* __TFG__VERSION__ */
 }
 
 //_________________
