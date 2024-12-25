@@ -134,6 +134,13 @@ void TDirIter::ResetQQ(const char *path)
 //______________________________________________________________________________
 const char *TDirIter::NextFile()
 {
+   const TNamed *d = TDirIter::NextFileName();
+   if (! d) return 0;
+   return d->GetName();
+}
+//______________________________________________________________________________
+const TNamed *TDirIter::NextFileName()
+{
    if (fIter == -1) {
      const char *name=0;
      while((name=NextFileQ())) {fArr->Add(new TNamed(name,""));}
@@ -141,7 +148,7 @@ const char *TDirIter::NextFile()
    }
    fIter++;
    if (fIter > fArr->GetLast()) return 0;
-   return fArr->At(fIter)->GetName();
+   return (TNamed *) fArr->At(fIter);
 }
 
 //______________________________________________________________________________
@@ -212,7 +219,7 @@ TString TDirIter::MakeWild(const char *re)
   for (int i=0;re[i];i++)
   {
     if (i == 0)		{ts+="^" ;}
-    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.,-= ]*"; 	continue;}
+    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.,-=+ ]*"; 	continue;}
     if (re[i]=='#')	{ts+=".*"; 			continue;}
     if (re[i] == '.')	{ts+="\\.";			continue;}		
     ts += re[i];
@@ -220,7 +227,10 @@ TString TDirIter::MakeWild(const char *re)
   ts += "$";
   return ts;
 }
-   
+//________________________________________________________________________________
+Int_t TDirIter::NoFiles() const {
+  return fArr ?  fArr->GetLast() : 0;
+}
 
 
 
