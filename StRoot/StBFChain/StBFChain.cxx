@@ -218,6 +218,7 @@ Int_t StBFChain::Instantiate()
   if (! fNoChainOptions) return status;
   Long64_t maxsize = kMaxLong64;
   TTree::SetMaxTreeSize(maxsize);
+  if (GetOption("quiet")) gEnv->SetValue("quiet", 1); 
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     TString maker(fBFC[i].Maker);
@@ -380,14 +381,44 @@ Int_t StBFChain::Instantiate()
     // Special makers already created or action which
     // need to take place before 'maker' is created.
     if (! mk) {
-      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-      else                          mk = New(fBFC[i].Maker);
-      if (! mk) {
-	LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
-	assert(mk);
+      if (maker == "StMuDstMaker" && GetOption("RMuDst")) {
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+	mk = new StMuDstMaker(0,0,".",fInFile.Data(),"st:MuDst.root",1e9);
+#else
+	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
+	mk = GetMaker("MuDst");
+#endif
+// 	if (GetOption("RMuDst")) 
+// 	  NoMakersWithInput++;
+      } else if (maker == "StPicoDstMaker") {
+	Int_t io = 1; // IoWrite=1
+	if (GetOption("RpicoDst")) {
+// 	  NoMakersWithInput++;
+	  io = 2; // IoRead=2
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+	  mk = new StPicoDstMaker(io,fInFile.Data());
+#else
+	  ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fInFile.Data()));
+#endif
+	} else {
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+	  mk = new StPicoDstMaker(io,fFileOut.Data());
+#else
+	  ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fFileOut.Data()));
+#endif
+	}
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+	mk = GetMaker("PicoDst");
+#endif
+      } else {
+	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+	else                          mk = New(fBFC[i].Maker);
+	if (! mk) {
+	  LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
+	  assert(mk);
+	}
       }
     }
-
     {
       TString namec = mk->GetName();
       int len       = sizeof(fBFC[i].Name);
