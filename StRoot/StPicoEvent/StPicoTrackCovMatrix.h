@@ -4,9 +4,7 @@
 // ROOT headers
 #include "TObject.h"
 
-#if defined (__TFG__VERSION__)
 #include "StEvent/StDcaGeometry.h"
-#endif /* __TFG__VERSION__ */
 
 //_________________
 class StPicoTrackCovMatrix : public TObject {
@@ -52,10 +50,8 @@ class StPicoTrackCovMatrix : public TObject {
   /// matrix in MuDst
   Bool_t isBadCovMatrix();
 
-#if defined (__TFG__VERSION__)
   /// DCA geometry
   StDcaGeometry &dcaGeometry() const;
-#endif /* __TFG__VERSION__ */
 
   //
   // Setters
