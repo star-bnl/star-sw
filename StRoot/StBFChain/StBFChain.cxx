@@ -585,6 +585,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
       if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
       if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
+      if (GetOption("FXT"        ) )      mk->SetAttr("FXT"             , kTRUE);
 
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
