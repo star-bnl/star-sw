@@ -12,14 +12,11 @@
 #include "StPicoMessMgr.h"
 #include "StPicoTrack.h"
 
-#if defined (__TFG__VERSION__)
 #include "TF1.h"
 #include "St_base/StMessMgr.h"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
-#endif /* __TFG__VERSION__ */
 
 ClassImp(StPicoTrack)
 
@@ -212,7 +209,6 @@ StPicoPhysicalHelix StPicoTrack::helix(Float_t const B) const {
 			      static_cast<float>( charge() ) );
 }
 
-#if defined (__TFG__VERSION__)
 //_________________
 Float_t StPicoTrack::dEdxPull(Float_t mass, UChar_t fit, Int_t charge) const {
   Float_t z = -999.;
@@ -408,7 +404,6 @@ Float_t StPicoTrack::dEdxPullToF(Float_t mass, UChar_t fit, Int_t charge) const 
   return z;
 }
 
-#endif /* __TFG__VERSION__ */
 
 //_________________
 Float_t StPicoTrack::gDCAs(TVector3 point) const {
