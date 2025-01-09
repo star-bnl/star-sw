@@ -74,6 +74,7 @@
 #include "StChain/StChainOpt.h" // for renaming the histogram file
 
 #include "StETofHitMaker.h"
+#include "StETofCalibMaker/StETofCalibMaker.h"
 #include "StETofUtil/StETofConstants.h"
 #include "StETofUtil/StETofGeometry.h"
 
@@ -106,7 +107,7 @@ StETofHitMaker::StETofHitMaker( const char* name )
   mSigVel(),
   mSoftwareDeadTime( 150. ),
   mDoClockJumpShift( true ),
-  mDoDoubleClockJumpShift( true ),
+  mDoDoubleClockJumpShift( false ),
   mClockJumpDirection(),
   mModMatrix(),
   mGet4doublejumpTmin(-1.0),
@@ -137,7 +138,49 @@ StETofHitMaker::Init()
 
     bookHistograms();
 
-    return kStOk;
+    // fill get4Id to partner to pair map
+    int count =0;
+    int pairId = 0;
+    int pairId2 = 0;
+    std::vector<int> nll;
+    for(int i=0;i<eTofConst::nGet4sInSystem;i++){
+      mGet4PartnerPairMap[i] = nll;
+      bool reset = false;
+      int partnerId = i;      
+      count++;
+      if( count == 16){
+	count = 0;
+	reset = true;
+      }else if(count > 8){
+      }
+      
+      if(reset){
+	partnerId -= 8;
+	
+      }else{
+	if(count <= 8 ) {
+	  partnerId += 8;
+	}else{
+	  partnerId -= 8;
+	}
+      }
+      mGet4PartnerPairMap[i].push_back(partnerId);
+      
+      if(count <= 8 && !reset){
+	
+      // cout << "get4 " << i  << " partnerId " << partnerId  << " pairId " << pairId << endl;
+	mGet4PartnerPairMap[i].push_back(pairId);
+	pairId++;   
+	
+      }else if(count < 16 || reset){
+	
+	//cout << "get4 " << i  << " partnerId " << partnerId  << " pairId " << pairId2 << endl;
+	mGet4PartnerPairMap[i].push_back(pairId2);
+	pairId2++;
+      }
+    }
+    
+  return kStOk;
 }
 
 //_____________________________________________________________
@@ -146,8 +189,22 @@ StETofHitMaker::InitRun( Int_t runnumber )
 {
     LOG_INFO << "StETofHitMaker::InitRun()" << endm;
 
+    //fill default jump map
+    StETofCalibMaker*   mETofCalibMaker;
+    mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
+    if(mETofCalibMaker){
+    for(int i = 0; i < 864; i++){
+      mGet4DefaultMap[i] = mETofCalibMaker->GetDefaultState(i);
+    }
+    }else{
+      for(int i = 0; i < 864; i++){
+	mGet4DefaultMap[i] = 0;
+      }
+    }
+
     TDataSet* dbDataSet = nullptr;
     std::ifstream paramFile;
+
 
     // --------------------------------------------------------------------------------------------
     // initialize hit building parameters from parameter file (if filename is provided) or database:
@@ -1262,10 +1319,66 @@ StETofHitMaker::matchSides()
                 if( mDoQA ) {
                     LOG_INFO << "shifted hit time in direction: " << mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ) << endm;
                 }
-
-                time     -= eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 );
-                timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );
-
+	
+		
+		int keyGet4 = -1;
+		int keyGet4_comp = -1;
+		int side = xDigiA->side();
+		if(side == 1){
+		  keyGet4   = 144 * ( sector - 13 ) + 48 * ( plane -1 ) + 16 * ( counter - 1 ) + 8 * ( 1 - 1 ) + ( ( strip - 1 ) / 4 );
+		  keyGet4_comp   = 144 * ( sector - 13 ) + 48 * ( plane -1 ) + 16 * ( counter - 1 ) + 8 * ( 2 - 1 ) + ( ( strip - 1 ) / 4 );
+		}else{
+		  keyGet4   = 144 * ( sector - 13 ) + 48 * ( plane -1 ) + 16 * ( counter - 1 ) + 8 * ( 2 - 1 ) + ( ( strip - 1 ) / 4 );
+		  keyGet4_comp   = 144 * ( sector - 13 ) + 48 * ( plane -1 ) + 16 * ( counter - 1 ) + 8 * ( 1 - 1 ) + ( ( strip - 1 ) / 4 );
+		}
+		int def = mGet4DefaultMap.at(mGet4PartnerPairMap.at(keyGet4).at(1));
+		
+		//old corr
+		if(0 == def){
+		  time     -= eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 );
+		  timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );
+		  
+		}else{
+		  //new corr
+		  
+		  StETofCalibMaker*   mETofCalibMaker;
+		  mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
+		  
+		  if(!mETofCalibMaker->calState()){
+		    if(mETofCalibMaker->GetState(keyGet4) != 0 || mETofCalibMaker->GetState(keyGet4_comp) != 0){
+		      switch (def) {
+		        case 1 : def = 3; break;
+		        case 2 : def = 4; break;
+		        case 3 : def = 1; break;
+		        case 4 : def = 2; break;
+		        default : LOG_ERROR << "Unknown default state" << endm;
+		      }
+		    }
+		  }
+		  
+		  if(def == 1 ){
+		    time     -= eTofConst::coarseClockCycle * 0.5;		
+		  }
+		  if(def == 3){
+		    time     += eTofConst::coarseClockCycle * 0.5;		
+		  }
+		  if(def == 2){
+		    if(posY > 0){
+		      time     -= eTofConst::coarseClockCycle * 0.5;
+		    }else{
+		      time     += eTofConst::coarseClockCycle * 0.5;
+		    }
+		  }
+		  if(def == 4){
+		    if(posY > 0){
+		    time     += eTofConst::coarseClockCycle * 0.5;
+		    }else{
+		      time     -= eTofConst::coarseClockCycle * 0.5;
+		    }
+		  }
+		  timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );       
+		}
+		
 		if(leftjump && mDoDoubleClockJumpShift){
 		  time     += 2*(eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ));		   
 		}
@@ -1307,7 +1420,7 @@ StETofHitMaker::matchSides()
 	      modifyHit(mode, posX , posY , time);
 	    }
 
-      StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
+	    StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, clusterSize, posX, posY );
 	    	    
 	    //Check for "same direction double clockjumps" and update FlagMap
 	    if(mDoDoubleClockJumpShift){

@@ -127,7 +127,9 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mStateMapStop(0),
   mDbEntryStart(0),
   mDbEntryStop(0),
-  mGlobalCounter(1)
+  mGlobalCounter(1),
+  mCalState(true)
+
   
 {
     /// default constructor
@@ -201,7 +203,12 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     // --------------------------------------------------------------------------------------------
 
     //Get4 status map
-    
+    for(int i=0; i < eTofConst::nGet4sInSystem; i++){
+      mGet4StateMap[i] = 0;
+      if(i < (eTofConst::nGet4sInSystem/2)){
+	mGet4DefaultStateMap[i] = 0;
+      }
+    }
     readGet4State(mGlobalCounter , 0);
 
     // electronics-to-hardware map
@@ -1459,7 +1466,7 @@ StETofCalibMaker::processMuDst()
 		if (hasPulsersVec.size() == 108){
 		  etofHeader->setHasPulsersVec(hasPulsersVec);
 	  	} 
-		
+
 		//fill good event flag into header
 		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
@@ -2166,9 +2173,18 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 	int get4Id = 144 * ( aDigi->sector() - 13 ) + 48 * ( aDigi->zPlane() -1 ) + 16 * ( aDigi->counter() - 1 ) + 8 * ( aDigi->side() - 1 ) + ( ( aDigi->strip() - 1 ) / 4 );
 
 	double stateCorr =0;
-	if(mGet4StateMap[get4Id] == 1) stateCorr =  6.25;
-	else if(mGet4StateMap[get4Id] == 2) stateCorr =  -6.25;
-	// else if(mGet4StateMap[get4Id] == 3) stateCorr =  0.0;
+	if(mGet4StateMap[get4Id] == 1){ 
+	  stateCorr =  6.25;
+	}else if(mGet4StateMap[get4Id] == 2){
+	  stateCorr =  -6.25;
+	}else if(mGet4StateMap[get4Id] == 3){
+	  stateCorr = 6.25;
+	}else if(mGet4StateMap[get4Id] == 4){
+	  stateCorr = -6.25;	
+	}
+	// only calibrate here if flag is set
+	if(!mCalState) stateCorr = 0;
+
 
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
@@ -2178,7 +2194,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 	                                    + stateCorr;
 					    
 					    					
-	if(mGet4StateMap[get4Id] == 3){
+	if(mGet4StateMap[get4Id] == 5){
 	  calibTime = 0; // mask digis with undefined state (e.g. one hit with jump and one without in same event)
 	  
 	}
@@ -2689,12 +2705,12 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
    std::vector< unsigned long int > intVec;
    
    //first read
-    if(forward == 0) mGlobalCounter = 1;
+    if(forward == 0) mGlobalCounter = 0;
     //jump forward
-    else if(forward > 0) mGlobalCounter++;
+    else if(forward > 0){ mGlobalCounter++;
     //jump backward
-    else mGlobalCounter--; // forward < 0
-    
+    }else {mGlobalCounter--;} // forward < 0
+
     if(mGlobalCounter == 0){
       mGlobalCounter++;
       fileZero = true;
@@ -2743,7 +2759,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
     std::map<unsigned long int,vector<int>> stateVec;
     std::map<unsigned long int ,vector<int>> get4IdVec;
     
-    decodeInt(intVec , mGet4StateMap , mGet4ZeroStateMap , startVec , mMasterStartVec , stateVec , get4IdVec); 	
+    decodeInt(intVec , startVec , stateVec , get4IdVec); 	
 
    // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
    for(int i = 0; i< eTofConst::nGet4sInSystem;i++){
@@ -2772,6 +2788,7 @@ void StETofCalibMaker::readGet4State(int fileNr, short forward){
 
    if(fileZero){
      mDbEntryStart   = 0;
+     mDbEntryStop    = 99999999;	   
    }
   
    sort( mMasterStartVec.begin(), mMasterStartVec.end() );
@@ -2858,9 +2875,11 @@ void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
 
 }
 //-----------------------------------------------------
-void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::map<int , short>& mGet4StateMap ,std::map<int , short>& mGet4ZeroStateMap ,std::vector<unsigned long int>& startVec ,std::vector<unsigned long int>& mMasterStartVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec){
+void StETofCalibMaker::decodeInt( std::vector<unsigned long int>& intVec ,std::vector<unsigned long int>& startVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec){
 
   unsigned long int lastEvtId =0;
+  std::map<int, std::vector< stateStruct > > stateMap;
+
     
     for(unsigned int i = 0; i < intVec.size(); i++){
       
@@ -2873,9 +2892,40 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 	int Get4Id2;
 	int get4state2;
 
-      // decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
+	stateStruct struct1;
+	stateStruct struct2;
+
 	switch (intVec.at(i) / 100000000) {
-		
+		 
+	//decode default jump states
+        case 39 :
+	  
+	tmp       = intVec.at(i) % 3900000000;
+	stateInt1 = tmp / 10000;
+        stateInt2 = tmp % 10000;
+	
+        Get4Id1 = -1;
+	get4state1 = -1;
+	Get4Id2 = -1;
+	get4state2 = -1;
+	
+	if(stateInt1 < 6912){
+	  Get4Id1 = stateInt1 % (eTofConst::nGet4sInSystem/2);  
+	  get4state1 = stateInt1 / (eTofConst::nGet4sInSystem/2);
+	}
+	if(stateInt2 < 6912){
+	  Get4Id2 = stateInt2 % (eTofConst::nGet4sInSystem/2);
+	  get4state2 = stateInt2 / (eTofConst::nGet4sInSystem/2);
+	}
+	
+	if(i < (eTofConst::nGet4sInSystem/4) ){  
+	  mGet4DefaultStateMap[Get4Id1] = get4state1 + 1; // counting from 1 here 
+	  mGet4DefaultStateMap[Get4Id2] = get4state2 + 1; // counting from 1 here
+	} 
+	  
+	break;  
+	
+	// decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
 	case 42	:	
 	tmp       = intVec.at(i) % 4200000000;
 	stateInt1 = tmp / 10000;
@@ -2895,7 +2945,8 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 	  get4state2 = stateInt2 / eTofConst::nGet4sInSystem;
 	}
 	
-	if(i < 864){	  
+	if(i >= (eTofConst::nGet4sInSystem/4) && i < ((eTofConst::nGet4sInSystem/4) + (eTofConst::nGet4sInSystem/2))){	  
+
 	  mGet4StateMap[Get4Id1] = get4state1;
 	  mGet4StateMap[Get4Id2] = get4state2;
 	  mGet4ZeroStateMap[Get4Id1] = get4state1;
@@ -2905,6 +2956,18 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 	get4IdVec[lastEvtId].push_back(Get4Id1);
 	stateVec[lastEvtId].push_back(get4state2);
 	get4IdVec[lastEvtId].push_back(Get4Id2);
+
+	//stateStruct struct1;
+	struct1.get4Id = Get4Id1;
+	struct1.state  = get4state1;
+	struct1.evtId  = lastEvtId;
+	//stateStruct struct2;
+	struct2.get4Id = Get4Id2;
+	struct2.state  = get4state2;
+	struct2.evtId  = lastEvtId;
+	
+	stateMap[Get4Id1].push_back(struct1);
+	stateMap[Get4Id2].push_back(struct2);
 
 	break;
 		
@@ -2936,10 +2999,37 @@ void StETofCalibMaker::decodeInt( std::vector<unsigned long int> intVec ,std::ma
 	stateVec[lastEvtId].push_back(get4state1);
 	get4IdVec[lastEvtId].push_back(Get4Id1);
 
+	//stateStruct struct1;
+	struct1.get4Id = Get4Id1;
+	struct1.state  = get4state1;
+	struct1.evtId  = lastEvtId;
+	
+	stateMap[Get4Id1].push_back(struct1);
+
 	break;
 
 	default:
 	LOG_ERROR << "Get4 state not well defined -> Check db / state file !" << endm;	
      }
+   }
+
+    //sort vecs (necessary due to get4 splitting)   
+    std::sort(startVec.begin(), startVec.end());
+    std::sort(mMasterStartVec.begin(), mMasterStartVec.end());
+ 
+    for(unsigned int i=0; i< eTofConst::nGet4sInSystem;i++){
+
+     std::vector<stateStruct> tmpVec = stateMap.at(i);
+     
+     for(unsigned int j=0; j < stateMap.at(i).size();j++){
+       tmpVec.push_back(stateMap.at(i).at(j));
+     }
+     std::sort(tmpVec.begin(), tmpVec.end(), [] (stateStruct x, stateStruct  y) { return x.evtId < y.evtId; } );
+     
+     for(unsigned int j=0; j< tmpVec.size();j++){
+       
+       stateVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).state);
+       get4IdVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).get4Id);
+     }     
    }
 }

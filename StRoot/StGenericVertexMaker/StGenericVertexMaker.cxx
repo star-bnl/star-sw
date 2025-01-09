@@ -112,6 +112,7 @@ Int_t StGenericVertexMaker::Init()
 
     if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
     if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
+    if (IAttr("FXT") ) ((StMinuitVertexFinder*) theFinder)->SetFXT();
     if (minTracks > 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
 
   } else if ( IAttr("VFppLMV")){
