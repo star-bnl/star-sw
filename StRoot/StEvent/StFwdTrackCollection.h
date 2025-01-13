@@ -19,7 +19,7 @@ class StFwdTrack;
 class StFwdTrackCollection : public StObject {
 public:
     // StFwdTrackCollection();
-    // ~StFwdTrackCollection();
+    ~StFwdTrackCollection();
 
     void addTrack(StFwdTrack*);              // Add a track
     StSPtrVecFwdTrack& tracks();             // Return the track list
