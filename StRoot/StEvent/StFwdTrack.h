@@ -22,6 +22,7 @@
 #include <vector>
 #include "StThreeVectorD.hh"
 #include "StContainers.h"
+#include <climits>
 
 class StFcsCluster;
 
@@ -77,18 +78,21 @@ struct StFwdTrackProjection : public StObject {
 struct StFwdTrackSeedPoint : public StObject {
     StFwdTrackSeedPoint() {}
     StFwdTrackSeedPoint(    StThreeVectorD xyz, 
-                            short sec, 
+                            short detsec, 
                             unsigned short trackId, 
                             float cov[9] ){
         mXYZ = xyz;
-        mSector = sec;
+        mSector = detsec;
         mTrackId = trackId;
         memcpy( mCov, cov, sizeof( mCov ));
     }
+
+    short detectorId() const { return mSector / 10; }
+    short sector() const { return mSector % 10; }
     
     StThreeVectorD mXYZ;
     unsigned short mTrackId;
-    short mSector;
+    short mSector; // = detId * 10 + sector
     float mCov[9];
     
     ClassDef(StFwdTrackSeedPoint, 1)
@@ -98,6 +102,8 @@ class StFwdTrack : public StObject {
 
 public:
     StFwdTrack(  );
+    // dtor needed for releasing associations
+    ~StFwdTrack(  );
 
     vector<StFwdTrackProjection> mProjections;
     vector<StFwdTrackSeedPoint> mFTTPoints;
@@ -128,7 +134,11 @@ public:
 
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
-
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
+    StThreeVectorD dca() const { return StThreeVectorD( mDCA[0], mDCA[1], mDCA[2] ); }
+    UChar_t vertexIndex() const { return mVtxIndex; }
+    bool isPrimary() const { return mVtxIndex != UCHAR_MAX; }
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
@@ -140,6 +150,10 @@ public:
     void setNDF( float lNDF ) { mNDF = lNDF;}
     void setPval( float lPval ) { mPval = lPval;}
     void setCharge( short  lCharge ) { mCharge = lCharge;}
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
+    void setDCA( StThreeVectorD dca ) { mDCA[0] = dca.x(); mDCA[1] = dca.y(); mDCA[2] = dca.z(); }
+    void setDCA( float dcaX, float dcaY, float dcaZ ) { mDCA[0] = dcaX; mDCA[1] = dcaY; mDCA[2] = dcaZ; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = vtxIndex; }
 
     // ECAL clusters
     StPtrVecFcsCluster& ecalClusters();
@@ -168,12 +182,18 @@ protected:
     float mPval;
     short mCharge;
     StThreeVectorD mPrimaryMomentum;
-    
-
     StPtrVecFcsCluster mEcalClusters;
     StPtrVecFcsCluster mHcalClusters;
+    /// MC track id
+    UShort_t mIdTruth;
+    /// MC track quality (percentage of hits coming from corresponding MC track)
+    UShort_t mQATruth;
+
+    float mDCA[3]; // DCA to the primary vertex
+    UChar_t mVtxIndex;
     
-    ClassDef(StFwdTrack,2)
+
+    ClassDef(StFwdTrack,4)
 
 };
 
