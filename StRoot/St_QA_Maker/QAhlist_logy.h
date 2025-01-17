@@ -299,6 +299,8 @@
  "bemcAdc",
  "bsmdeAdc",
  "bsmdpAdc",
+ "bsmdeEnergy",
+ "bsmdpEnergy",
  "bemcClNum",
  "bemcClEnergy",
  "EmcCat4_Point_Energy",

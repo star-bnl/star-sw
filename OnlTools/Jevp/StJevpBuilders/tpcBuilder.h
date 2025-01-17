@@ -49,6 +49,10 @@ class tpcBuilder : public JevpBuilder {
       TH1 *tpc_pix_occ_laser;
       TH1 *tpc_pix_occ_pulser;
 
+      TH1 *tpc_rdo_bytes;
+      TH1 *itpc_rdo_bytes;
+
+
 
       TH1 *h_tpc_sec1;
       TH1 *h_tpc_sec2;
@@ -206,6 +210,8 @@ class tpcBuilder : public JevpBuilder {
       TH1 *tpc_clpix_occ_laser;
       TH1 *tpc_clpix_occ_pulser;
 
+
+
       TH1 *cl_itpc_chargeStep_s1;
       TH1 *cl_itpc_chargeStep_s2;
       TH1 *cl_itpc_chargeStep_s3;
@@ -231,6 +237,31 @@ class tpcBuilder : public JevpBuilder {
       TH1 *cl_itpc_chargeStep_s23;
       TH1 *cl_itpc_chargeStep_s24;
 
+      TH1 *bad_cl_itpc_chargeStep_s1;
+      TH1 *bad_cl_itpc_chargeStep_s2;
+      TH1 *bad_cl_itpc_chargeStep_s3;
+      TH1 *bad_cl_itpc_chargeStep_s4;
+      TH1 *bad_cl_itpc_chargeStep_s5;
+      TH1 *bad_cl_itpc_chargeStep_s6;
+      TH1 *bad_cl_itpc_chargeStep_s7;
+      TH1 *bad_cl_itpc_chargeStep_s8;
+      TH1 *bad_cl_itpc_chargeStep_s9;
+      TH1 *bad_cl_itpc_chargeStep_s10;
+      TH1 *bad_cl_itpc_chargeStep_s11;
+      TH1 *bad_cl_itpc_chargeStep_s12;
+      TH1 *bad_cl_itpc_chargeStep_s13;
+      TH1 *bad_cl_itpc_chargeStep_s14;
+      TH1 *bad_cl_itpc_chargeStep_s15;
+      TH1 *bad_cl_itpc_chargeStep_s16;
+      TH1 *bad_cl_itpc_chargeStep_s17;
+      TH1 *bad_cl_itpc_chargeStep_s18;
+      TH1 *bad_cl_itpc_chargeStep_s19;
+      TH1 *bad_cl_itpc_chargeStep_s20;
+      TH1 *bad_cl_itpc_chargeStep_s21;
+      TH1 *bad_cl_itpc_chargeStep_s22;
+      TH1 *bad_cl_itpc_chargeStep_s23;
+      TH1 *bad_cl_itpc_chargeStep_s24;
+
       TH1 *cl_tpx_chargeStep_s1;
       TH1 *cl_tpx_chargeStep_s2;
       TH1 *cl_tpx_chargeStep_s3;
@@ -255,6 +286,31 @@ class tpcBuilder : public JevpBuilder {
       TH1 *cl_tpx_chargeStep_s22;
       TH1 *cl_tpx_chargeStep_s23;
       TH1 *cl_tpx_chargeStep_s24;
+
+      TH1 *bad_cl_tpx_chargeStep_s1;
+      TH1 *bad_cl_tpx_chargeStep_s2;
+      TH1 *bad_cl_tpx_chargeStep_s3;
+      TH1 *bad_cl_tpx_chargeStep_s4;
+      TH1 *bad_cl_tpx_chargeStep_s5;
+      TH1 *bad_cl_tpx_chargeStep_s6;
+      TH1 *bad_cl_tpx_chargeStep_s7;
+      TH1 *bad_cl_tpx_chargeStep_s8;
+      TH1 *bad_cl_tpx_chargeStep_s9;
+      TH1 *bad_cl_tpx_chargeStep_s10;
+      TH1 *bad_cl_tpx_chargeStep_s11;
+      TH1 *bad_cl_tpx_chargeStep_s12;
+      TH1 *bad_cl_tpx_chargeStep_s13;
+      TH1 *bad_cl_tpx_chargeStep_s14;
+      TH1 *bad_cl_tpx_chargeStep_s15;
+      TH1 *bad_cl_tpx_chargeStep_s16;
+      TH1 *bad_cl_tpx_chargeStep_s17;
+      TH1 *bad_cl_tpx_chargeStep_s18;
+      TH1 *bad_cl_tpx_chargeStep_s19;
+      TH1 *bad_cl_tpx_chargeStep_s20;
+      TH1 *bad_cl_tpx_chargeStep_s21;
+      TH1 *bad_cl_tpx_chargeStep_s22;
+      TH1 *bad_cl_tpx_chargeStep_s23;
+      TH1 *bad_cl_tpx_chargeStep_s24;
 
       TH1 *cl_itpc_phi_charge;
       TH1 *cl_itpc_sector_charge;

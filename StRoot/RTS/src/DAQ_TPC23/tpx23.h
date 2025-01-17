@@ -8,7 +8,7 @@
 
 class tpxPed ;
 struct daq_dta ;
-
+struct tpx_altro_struct ;
 
 class tpx23Data {
 public:
@@ -76,6 +76,10 @@ public:
 	u_char rhic_clock ;
 
 	class tpx23Data *tpx_d ;
+
+	tpx_altro_struct *altro ;
+	int altro_cou ;
+
 private:
 
 	int fee_scan() ;

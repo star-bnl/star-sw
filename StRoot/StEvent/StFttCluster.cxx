@@ -19,7 +19,10 @@ mSumAdc(0.0),
 mX(0.0),
 mSigma(0.0),
 mRawHits(0),
-mNeighbors(0)
+mNeighbors(0),
+mPoints(0),
+mIdTruth(0),
+mQaTruth(0)
 {
 
 }
@@ -58,6 +61,8 @@ operator<<( std::ostream &os, const StFttCluster& rh )
     os << "\tsumAdc      = " << rh.sumAdc()           << endl;
     os << "\tx           = " << rh.x()                << endl;
     os << "\tsigma       = " << rh.sigma()            << endl;
+    os << "\tidTruth     = " << rh.idTruth()          << endl;
+    os << "\tqaTruth     = " << rh.qaTruth()          << endl;
     os << ")"                << endl;
     return os;
 }

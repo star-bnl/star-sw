@@ -62,9 +62,9 @@
 
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
-  uint32_t   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
-  float   fcs_trg_pt_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
-  float   fcs_trg_gain_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
+  uint32_t fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+  float    fcs_trg_pt_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
+  float    fcs_trg_gain_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
   uint16_t fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
 
   static const int mNTRG=21;
@@ -152,6 +152,9 @@ int StFcsTriggerSimMaker::Init(){
     //mTrgSim->EM_HERATIO_THR = 32;
     //mTrgSim->HAD_HERATIO_THR = 32;
 
+    //Trigger Id names                                                                              
+    readTrgId();
+
     //EPD mask
     if(mPresMask){
 	printf("Reading PresMask from %s\n",mPresMask);
@@ -215,7 +218,7 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    mFcsDb->getDepfromId(det,id,ehp,ns,crt,sub,dep,ch);
 	    if(det<4){
 		fcs_trg_pt_correction[ns][ehp][dep][ch] = mFcsDb->getEtGain(det,id,mEtFactor);
-		fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainCorrection(det,id);
+		fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainOnline(det,id);
 	    }else{
 		fcs_trg_pt_correction[ns][ehp][dep][ch] = 1.0;
 		fcs_trg_gain_correction[ns][ehp][dep][ch] = 1.0;
@@ -224,19 +227,21 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    
 	    mTrgSim->p_g[ns][ehp][dep][ch].ped  = fcs_trg_pedestal[ns][ehp][dep][ch];
 
-	    float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
-	    //float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
-	    float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
-	    int g = (uint32_t)(gg*256.0+0.5) ;
-	    mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
+	    if(mOverwriteGain==1){
+		float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
+		//float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
+		float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
+		int g = (uint32_t)(gg*256.0+0.5) ;
+		mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
+	    }
 
 	    /*
-	      printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
-	      fcs_trg_pt_correction[ns][ehp][dep][ch],
-	      fcs_trg_gain_correction[ns][ehp][dep][ch],
-	      fcs_trg_pedestal[ns][ehp][dep][ch]);
+	    printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
+		  fcs_trg_pt_correction[ns][ehp][dep][ch],
+		  fcs_trg_gain_correction[ns][ehp][dep][ch],
+		  fcs_trg_pedestal[ns][ehp][dep][ch]);
 	    */
-
+    
 	    if(gainfile) 
 		fprintf(gainfile,"%2d %2d %2d %2d %8.3f\n",ns,ehp,dep,ch,
 			fcs_trg_pt_correction[ns][ehp][dep][ch]);
@@ -278,15 +283,16 @@ int StFcsTriggerSimMaker::Finish(){
 int StFcsTriggerSimMaker::Make(){
     StEvent* event = nullptr;
     event = (StEvent*)GetInputDS("StEvent");
-    if(!event) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm;}
-    mFcsColl = event->fcsCollection();
-    if(!mFcsColl) {LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm;}
-    
+    if(!event){
+	LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm;}
+    else {
+	mFcsColl = event->fcsCollection();
+	if(!mFcsColl){LOG_INFO << "StFcsTriggerSimMaker::Make did not find StEvent->StFcsCollection"<<endm;}
+    }
+
     StMuEvent* muevent = nullptr;
-    if((!event)||(!mFcsColl)){
-        
+    if((!event)||(!mFcsColl)){        
         LOG_INFO<<"No StEvent info available for StFcsTriggerSimMaker. "<< endm;
-    
         muevent = StMuDst::event();
         mMuFcsColl = StMuDst::muFcsCollection();
         if(muevent && mMuFcsColl){
@@ -346,6 +352,7 @@ int StFcsTriggerSimMaker::Make(){
     //Run Trigger Simulation
     //   uint16_t dsm_out = fcs_trg_run(mTrgSelect, mDebug);
     uint32_t dsm_out = mTrgSim->end_event();
+    LOG_INFO << Form("AAA dsmout=%08x",dsm_out)<<endm;
   
     //QA Tree
     mFlt=0;
@@ -409,9 +416,73 @@ int StFcsTriggerSimMaker::Make(){
     return kStOK;
 }    
 
-void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
-  uint16_t s2_to_dsm;
-  mTrgSim->stage_2(ecal,hcal,pres,geo,output,&s2_to_dsm);
+void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[], unsigned short& dsm,
+                                     int dta[], int dsmout, int sim[], int simdsmout, int iev){
+  unsigned short emu[8];
+  mTrgSim->stage_2(ecal,hcal,pres,geo,output,&dsm);
+  for(int i=0; i<8; i++) emu[i] = output[0].d[i] + (output[1].d[i] << 8);
+  printf("Event#=%3d emuout   = ",iev); for(int i=0; i<8; i++) {printf("%04x ",emu[i]);}
+  printf("TCU=%04x\n",dsm);
+  printf("Event#=%3d dtaout   = ",iev); for(int i=0; i<8; i++) {printf("%04x ",dta[i]);}
+  printf("TCU=%04x\n",dsmout);
+  printf("Event#=%3d simout   = ",iev); for(int i=0; i<8; i++) {printf("%04x ",sim[i]);}
+  printf("TCU=%04x\n",simdsmout);
+  const char* s2bit[3][16]={{"EM0 ","EM1 ","EM2 ","EM3 ","ELE0","ELE1","ELE2","PRS ",
+                             "HAD0","HAD1","HAD2","xxxx","EHT ","HHT ","ETOT","HTOT"},
+                            {"JPA2","JPB2","JPC2","JPD2","JPE2","xxxx","xxxx","xxxx",
+                             "JPA1","JPB1","JPC1","JPD1","JPE1","xxxx","xxxx","xxxx"},
+                            {"JPA0","JPB0","JPC0","JPD0","JPE0","xxxx","xxxx","xxxx",
+                             "JPAd","JPBd","JPCd","JPDd","JPEd","xxxx","xxxx","xxxx"}};
+  for(int i=0; i<3; i++){
+    for(int j=0; j<16; j++){
+      if( ((dta[i]>>j)&1) != ((sim[i]>>j)&1) ||
+          ((sim[i]>>j)&1) != ((emu[i]>>j)&1) ||
+          ((emu[i]>>j)&1) != ((dta[i]>>j)&1) ){
+        printf("Event#=%3d STG2to3 ns=%1d i=%d j=%2d %s dat=%x sim=%x emu=%x",
+               iev,geo.ns,i,j,s2bit[i][j],(dta[i]>>j)&1,(sim[i]>>j)&1,(emu[i]>>j)&1);
+        if(i==0 && j<7){
+          int maxr=0, maxc=0, max=0;
+          for(int r=0; r<15; r++){
+            for(int c=0; c<9; c++){
+              if(max < mTrgSim->esum[geo.ns][r][c]) {maxr=r; maxc=c; max=mTrgSim->esum[geo.ns][r][c];}
+            }
+          }
+          printf("  EsumMax=%4d ratio=%4.3f",
+                 mTrgSim->esum[geo.ns][maxr][maxc],
+                 mTrgSim->ratiomax[geo.ns][maxr][maxc]);
+          if(j>=4) printf(" Epd=%1d",mTrgSim->epdcoin[geo.ns][maxr][maxc]);
+          if(j==0) printf(" EMTHR0=%4d",mTrgSim->EMTHR0);
+          if(j==1) printf(" EMTHR1=%4d",mTrgSim->EMTHR1);
+          if(j==2) printf(" EMTHR2=%4d",mTrgSim->EMTHR2);
+          if(j==3) printf(" ELETHR2=%4d",mTrgSim->ELETHR2);
+          if(j==4) printf(" ELETHR0=%4d",mTrgSim->ELETHR0);
+          if(j==5) printf(" ELETHR1=%4d",mTrgSim->ELETHR1);
+          if(j==6) printf(" ELETHR2=%4d",mTrgSim->ELETHR2);
+        }
+        if(i==1 && j== 0){ printf("  JPA=%4d thr2=%4d",mTrgSim->jet[geo.ns][0],mTrgSim->JPATHR2);}
+        if(i==1 && j== 1){ printf("  JPB=%4d thr2=%4d",mTrgSim->jet[geo.ns][1],mTrgSim->JPBCTHR2);}
+        if(i==1 && j== 2){ printf("  JPC=%4d thr2=%4d",mTrgSim->jet[geo.ns][2],mTrgSim->JPBCTHR2);}
+        if(i==1 && j== 3){ printf("  JPD=%4d thr2=%4d",mTrgSim->jet[geo.ns][3],mTrgSim->JPDETHR2);}
+        if(i==1 && j== 4){ printf("  JPE=%4d thr2=%4d",mTrgSim->jet[geo.ns][4],mTrgSim->JPDETHR2);}
+        if(i==1 && j== 8){ printf("  JPA=%4d thr1=%4d",mTrgSim->jet[geo.ns][0],mTrgSim->JPATHR1);}
+        if(i==1 && j== 9){ printf("  JPB=%4d thr1=%4d",mTrgSim->jet[geo.ns][1],mTrgSim->JPBCTHR1);}
+        if(i==1 && j==10){ printf("  JPC=%4d thr1=%4d",mTrgSim->jet[geo.ns][2],mTrgSim->JPBCTHR1);}
+        if(i==1 && j==11){ printf("  JPD=%4d thr1=%4d",mTrgSim->jet[geo.ns][3],mTrgSim->JPDETHR1);}
+        if(i==1 && j==12){ printf("  JPE=%4d thr1=%4d",mTrgSim->jet[geo.ns][4],mTrgSim->JPDETHR1);}
+        if(i==2 && j== 0){ printf("  JPA=%4d thr0=%4d",mTrgSim->jet[geo.ns][0],mTrgSim->JPATHR0);}
+        if(i==2 && j== 1){ printf("  JPB=%4d thr0=%4d",mTrgSim->jet[geo.ns][1],mTrgSim->JPBCTHR0);}
+        if(i==2 && j== 2){ printf("  JPC=%4d thr0=%4d",mTrgSim->jet[geo.ns][2],mTrgSim->JPBCTHR0);}
+        if(i==2 && j== 3){ printf("  JPD=%4d thr0=%4d",mTrgSim->jet[geo.ns][3],mTrgSim->JPDETHR0);}
+        if(i==2 && j== 4){ printf("  JPE=%4d thr0=%4d",mTrgSim->jet[geo.ns][4],mTrgSim->JPDETHR0);}
+        if(i==2 && j== 8){ printf("  JPA=%4d thrD=%4d",mTrgSim->jet[geo.ns][0],-1);}
+        if(i==2 && j== 9){ printf("  JPB=%4d thrD=%4d",mTrgSim->jet[geo.ns][1],mTrgSim->JPBCTHRD);}
+        if(i==2 && j==10){ printf("  JPC=%4d thrD=%4d",mTrgSim->jet[geo.ns][2],mTrgSim->JPBCTHRD);}
+        if(i==2 && j==11){ printf("  JPD=%4d thrD=%4d",mTrgSim->jet[geo.ns][3],mTrgSim->JPDETHRD);}
+        if(i==2 && j==12){ printf("  JPE=%4d thrD=%4d",mTrgSim->jet[geo.ns][4],mTrgSim->JPDETHRD);}
+        printf("\n");
+      }
+    }
+  }
 }
 
 void StFcsTriggerSimMaker::print4B4(){
@@ -712,4 +783,20 @@ template<typename T> void StFcsTriggerSimMaker::feedADC(T* hit, int ns, int ehp,
     }
     if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
 
+}
+
+void StFcsTriggerSimMaker::readTrgId(){
+  int i;
+  char trgn[200];
+  if(mTrgIdFile){
+    LOG_INFO<<"Reading "<<mTrgIdFile<<endm;
+    FILE* fp=fopen(mTrgIdFile,"r");
+    if(!fp) {LOG_WARN << "Cannot open "<<mTrgIdFile<<endm; return;}
+    while(!feof(fp)) {
+      fscanf(fp,"%d %s",&i,trgn);
+      mTrgIdName[i]=trgn;
+      LOG_INFO << "TRGID "<<i<<"="<<mTrgIdName[i].Data()<<endm;
+    }
+    fclose(fp);
+  }
 }
