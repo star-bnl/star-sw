@@ -28,7 +28,7 @@ inline Double_t MyGaus(Double_t x, Double_t mean, Double_t sigma, Double_t delta
 
 //_________________
 Double_t fpeaks(Double_t *x, Double_t *par) {
-  Float_t result=0.0;
+  Double_t result=0.0;
   for (UInt_t p=0;p<par[0];p++) {
     Double_t norm  = TMath::Exp(par[3*p+1]);
     Double_t mean  = par[3*p+2];
@@ -44,7 +44,7 @@ TF1* StGmtClusterMaker::FindPeaks(TH1F* hist) {
   TF1 back("poly","pol0",CLUS_MIN,CLUS_MAX);
   Double_t par[MAX_PEAKS*3+1];
   spect.Search(hist,3);
-  float* xpeaks=spect.GetPositionX();
+  Double_t* xpeaks = spect.GetPositionX();
   
   hist->Fit(&back,"Q");
   UInt_t npx=0;
@@ -102,7 +102,7 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
   static TProfile* profY[8]={0};
   
   StGmtStrip* pStrip;
-  Float_t position;
+  Double_t position;
   UInt_t stripsNum=strips.getNumStrips();
   int adc,adc_buf=0;
   TString name, title;
@@ -143,7 +143,7 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
     }
     position=pStrip->getPosition();
     int bin=profPointer->Fill(position,adc);
-    Float_t error=TMath::Sqrt(adc);
+    Double_t error=TMath::Sqrt(adc);
     histPointer->Fill(position,adc);
     histPointer->SetBinError(bin,error);
   }
