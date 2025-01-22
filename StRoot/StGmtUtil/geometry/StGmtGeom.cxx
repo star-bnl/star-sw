@@ -146,19 +146,19 @@ std::string StGmtGeom::translateGeoIdToGeoName(Int_t geoId) {
 }
 
 //________________
-Int_t StGmtGeom::translateGeoNameToGeoId(const std::string & geoName) {
-    Short_t module, strip;
-    Int_t layer;
-    Int_t rdo, arm, apv, channel;
+// Int_t StGmtGeom::translateGeoNameToGeoId(const std::string & geoName) {
+//     Short_t module, strip;
+//     Int_t layer;
+//     Int_t rdo, arm, apv, channel;
 
-    //	Error message already taken care of in decodeGeoName.
-    if ( decodeGeoName(geoName, module, layer, strip) < 0 ) {
-        return kGmtError;
-    }
+//     //	Error message already taken care of in decodeGeoName.
+//     if ( decodeGeoName(geoName, module, layer, strip) < 0 ) {
+//         return kGmtError;
+//     }
 
-    // return encodeGeoId( module, layer, strip );
-    return encodeGeoId(rdo, arm, apv, channel);
-}
+//     // return encodeGeoId( module, layer, strip );
+//     return encodeGeoId(rdo, arm, apv, channel);
+// }
 
 //________________
 Int_t StGmtGeom::getPhysicalCoordinate(Int_t geoId, Short_t &module, Int_t &layer) {

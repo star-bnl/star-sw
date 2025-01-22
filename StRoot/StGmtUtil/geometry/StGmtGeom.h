@@ -54,7 +54,7 @@ class StGmtGeom {
 	// 	static Int_t decodeGeoName( const std::string & geoName, Short_t & module, Char_t & layer, Short_t & strip );
 	static Int_t decodeGeoName(const std::string &geoName, Short_t &module, Int_t &layer, Short_t &strip);
 	static std::string translateGeoIdToGeoName(Int_t geoId = -999);
-	static Int_t translateGeoNameToGeoId(const std::string & geoName);
+	// static Int_t translateGeoNameToGeoId(const std::string & geoName);
 
 	// Returns range upper and lower range of R or Phi valus depending on geoId.  
 	// NOTE phi values are only local - that is they are the same for each quadrant
