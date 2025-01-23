@@ -13,8 +13,6 @@
 #include "StGmtGeom.h"
 #include "StMessMgr.h"
 
-//ClassImp(StGmtGeom)
-
 double	StGmtGeom::mPi = TMath::Pi();
 double	StGmtGeom::mHalfPi = TMath::PiOver2();
 
