@@ -1430,11 +1430,11 @@ Bfc_st BFC[] = { // standard chains
   {"mtdTrkMask","","","db","StMtdTrackingMaskMaker"      ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},
 
   // GMT
-  {"gmt"        ,"","","gmtDat,gmtClu"                                      ,"","","Gmt data Chain",kFALSE},
-  {"gmtDat"     ,"","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
-  {"gmtClu"   ,"","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
-  {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
-  {"gmtClusTree","","","","","",                               "WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"gmt",        "","","gmtDat,gmtClu",                                      "","","Gmt data Chain",kFALSE},
+  {"gmtDat",     "","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
+  {"gmtClu",     "","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
+  {"gmtCosmics", "","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
+  {"gmtClusTree","","","","","",                                                STAR_CHAIN_OBSOLETE,kFALSE},
 
   // EPD
   {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
@@ -1840,10 +1840,6 @@ Bfc_st BFC[] = { // standard chains
   {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
 
-  // GMT
-  {"gmtMatch"                                 ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"gmtPlotter"                               ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDst","StEvtVtxSeedMaker"
@@ -1976,7 +1972,7 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   // GMT
-  {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
+  {"gmtAligner"    ,"","","detDb", "StGmtAlignmentMaker","StGmtAlignmentMaker","GMT cluster plotting",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
