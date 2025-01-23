@@ -17,36 +17,41 @@
 #include "StRoot/St_base/StMessMgr.h"
 
 //________________
-StGmtPoint::StGmtPoint() : StHit(), mHitLocalX(0), mHitLocalY(0) { 
+StGmtPoint::StGmtPoint() : StHit(), mHitLocalX(nullptr), mHitLocalY(nullptr), mKey(-999) { 
   /* empty */
-};
+}
 
 //________________
-StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key ) : StHit(), mKey( key ) {
-   if ( !hit1 || !hit2 ) {
-     LOG_ERROR << "Passed null pointer into StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key )" << endm;
-     mKey = -999;
-   }
+StGmtPoint::StGmtPoint(StGmtHit* mHitLocalX, StGmtHit* mHitLocalY, int key) : StHit(), mKey( key ) {
 
-   mHitLocalX = mHitLocalY = 0;
+    if ( !mHitLocalX || !mHitLocalX ) {
+        LOG_ERROR << "Passed null pointer into StGmtPoint::StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key )" << endm;
+        LOG_ERROR << ( (!mHitLocalX && !mHitLocalY) ? "Both mHitLocalX and mHitLocalY are null." : 
+                       (!mHitLocalX ? "mHitLocalX is null." : "mHitLocalY is null.")) << endm;
+        mKey = -999;
+    }
+    else {
+        // Check if both hits are from the same module
+        if ( mHitLocalX->getModule() != mHitLocalX->getModule() ) {
+            LOG_ERROR << "Cluster pair is not from the same module." << endm;
+            mKey = -999;
+        }
 
-   if ( !mHitLocalX || !mHitLocalY ) {
-     LOG_ERROR << "Constructor not provided a (LocalX,LocalY) pair." << endm;
-     mKey = -999;
-   }
+        mHardwarePosition = mHitLocalX->hardwarePosition();
+        mCharge = mHitLocalX->charge() + mHitLocalX->charge();
+    }
+}
 
-   if ( mHitLocalX->getModule() != mHitLocalY->getModule() ) {
-     LOG_ERROR << "Cluster pair are not on the same Module." << endm;
-     mKey = -999;
-   }
-
-   mHardwarePosition = mHitLocalX->hardwarePosition();
-   mCharge = hit1->charge() + hit2->charge();
+//________________
+StGmtPoint::StGmtPoint(const StGmtPoint& p) : StHit(p), mKey(p.mKey), 
+    mHitLocalX(p.mHitLocalX), mHitLocalY(p.mHitLocalY) {
+    /* empty */
 }
 
 //________________
 StGmtPoint::~StGmtPoint() {
- /* empty */
+    if ( mHitLocalX ) delete mHitLocalX;
+    if ( mHitLocalY ) delete mHitLocalY;
 }
 
 

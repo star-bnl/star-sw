@@ -17,48 +17,50 @@
 // StEvent headers
 #include "StHit.h"
 #include "StGmtHit.h"
-// Forward declaration
-//class StGmtHit;
 
 //________________
 class StGmtPoint : public StHit {
- public:
-  /// Default consturctor
-  StGmtPoint();
-  /// Parametrized constructor
-  StGmtPoint( StGmtHit* hit1, StGmtHit* hit2, int key );
-  // StGmtPoint(const StGmtPoint&);             --> use default
-  // StGmtPoint& operator=(const StGmtPoint&);  --> use default
+  public:
+    /// Default consturctor
+    StGmtPoint();
+    /// Parametrized constructor:
+    /// \param hitX - hit in X axis
+    /// \param hitY - hit in Y axis
+    /// \param key - unique label
+    StGmtPoint(StGmtHit* hitX, StGmtHit* hitY, int key);
+    /// Copy constructor
+    StGmtPoint(const StGmtPoint&);
+    // StGmtPoint& operator=(const StGmtPoint&);  --> use default
 
-  /// Destructor
-  ~StGmtPoint();
+    /// Destructor
+    ~StGmtPoint();
 
-  /// Unique detector ID
-  virtual StDetectorId detector() const { return kGmtId; }
-  /// Unique label
-  Int_t getKey()                        { return mKey; }
-  /// Module
-  Int_t getModule() 
-  { return static_cast< Int_t >(mHardwarePosition/8); /* FIX ME */} 
-  /// Return hit in X axis
-  const StGmtHit* getHitLocalX() const  { return mHitLocalX; }
-  /// Local Y coordinate
-  const StGmtHit* getHitLocalY() const  { return mHitLocalY; }
+    /// Unique detector ID
+    virtual StDetectorId detector() const { return kGmtId; }
+    /// Unique label
+    Int_t getKey()                        { return mKey; }
+    /// Module
+    Int_t getModule() 
+    { return static_cast< Int_t >(mHardwarePosition/8); /* FIX ME */} 
+    /// Return hit in X axis
+    const StGmtHit* getHitLocalX() const  { return mHitLocalX; }
+    /// Local Y coordinate
+    const StGmtHit* getHitLocalY() const  { return mHitLocalY; }
 
-  /// Hit coordinate in X axis
-  Float_t getPositionLocalX() const     { return mHitLocalX->getLocalX(); }
-  /// Hit coordinate in Y axis
-  Float_t getPositionLocalY() const     { return mHitLocalY->getLocalY(); }
-  /// Volume ID
-  Int_t volumeID() const                { return 0; }
+    /// Hit coordinate in X axis
+    Float_t getPositionLocalX() const     { return (mHitLocalX) ? mHitLocalX->getLocalX() : -999.f; }
+    /// Hit coordinate in Y axis
+    Float_t getPositionLocalY() const     { return (mHitLocalY) ? mHitLocalY->getLocalY() : -999.f; }
+    /// Volume ID
+    Int_t volumeID() const                { return 0; }
     
- protected:
-  /// Unique label
-  Int_t mKey;
-  /// Hit in X axis
-  StGmtHit *mHitLocalX;
-  /// Hit in Y axis
-  StGmtHit *mHitLocalY;
+  protected:
+    /// Unique label
+    Int_t mKey;
+    /// Hit in X axis
+    StGmtHit *mHitLocalX;
+    /// Hit in Y axis
+    StGmtHit *mHitLocalY;
 
  private:   
     ClassDef(StGmtPoint,1)
