@@ -1,4 +1,4 @@
-from   Handler import Handler
+from   Dyson.Export.Handler import Handler
 import Dyson.Utils.Shapes
 
 export_comments = False
@@ -45,7 +45,6 @@ class Operator(Handler):
 
         self.firstKey = firstKey
         self.keylist  = keylist
-#       print firstKey
 
     def startElement(self,tag,attr):
         out = ''
@@ -62,7 +61,7 @@ class Operator(Handler):
                 if value != None: out += '%s=%s '%( key, value.strip() )
             except KeyError:
                 pass
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if value != None: out += '%s=%s '%( key, value.strip() )
         out = sanitize(out)
         out = '%s '%( tag.upper() ) + out + ';'
@@ -77,8 +76,6 @@ class Container(Handler):
     def startElement(self,tag,attr):
         global _depth
         out = ''
-#       if ( tag=='Placement' ):
-#           print "PLACEMENT: 1st=%s"%self.firstKey        
         if ( self.firstKey != None ):
             try:
                 firstValue = attr.pop(self.firstKey)
@@ -93,7 +90,7 @@ class Container(Handler):
                 if ( value != None ): out += '%s=%s '%( key, value.strip() )
             except KeyError:
                 pass
-        for key,value in attr.iteritems():
+        for key,value in attr.items():
             if value != None: out += '%s=%s '%( key, value.strip() )
         out = '%s '%tag.upper() + sanitize(out) + '{'
 
@@ -144,7 +141,7 @@ class SimplePrint:
             output += _prepend
             i+=1
         output += line
-        print output
+        print(output)
 
 
 # ====================================================================================================
