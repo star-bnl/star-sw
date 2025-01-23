@@ -18,22 +18,22 @@ class TGeoHMatrix;
 
 //________________
 class EventTHeader {
- private:
-  Int_t      fEvtNum;
-  Int_t      fRun;
-  Int_t      fDate;
-  Double32_t fField;
- public:
-  EventTHeader() : fEvtNum(0), fRun(0), fDate(0), fField(0) { }
-  virtual ~EventTHeader() { }
-  void   Set(Int_t i, Int_t r, Int_t d, Double32_t Field = 0) 
-  { fEvtNum = i; fRun = r; fDate = d; fField = Field;}
-  Int_t  GetEvtNum() const { return fEvtNum; }
-  Int_t  GetRun() const { return fRun; }
-  Int_t  GetDate() const { return fDate; }
-  Double32_t GetField() const {return fField;}
+  private:
+    Int_t      fEvtNum;
+    Int_t      fRun;
+    Int_t      fDate;
+    Double32_t fField;
+  public:
+    EventTHeader() : fEvtNum(0), fRun(0), fDate(0), fField(0) { }
+    virtual ~EventTHeader() { }
+    void   Set(Int_t i, Int_t r, Int_t d, Double32_t Field = 0) 
+    { fEvtNum = i; fRun = r; fDate = d; fField = Field;}
+    Int_t  GetEvtNum() const { return fEvtNum; }
+    Int_t  GetRun() const { return fRun; }
+    Int_t  GetDate() const { return fDate; }
+    Double32_t GetField() const {return fField;}
   
-  ClassDef(EventTHeader,1)  //EventT Header
+    ClassDef(EventTHeader,1)  //EventT Header
 };
 class StEvent;
 
@@ -105,11 +105,11 @@ class TBase {
         // if parameter tree is not specified (or zero), connect the file
         // used to generate this class and read the Tree.
         if (tree == 0) {
-        TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(f_name);
-        if (!f) {
-            f = new TFile(f_name);
-        }
-        tree = (TTree*)gDirectory->Get("T");
+          TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(f_name);
+          if (!f) {
+              f = new TFile(f_name);
+          }
+          tree = (TTree*)gDirectory->Get("T");
         }
         Init(tree);
    }
@@ -125,8 +125,8 @@ class TBase {
         if (!fChain->InheritsFrom(TChain::Class()))  return centry;
         TChain *chain = (TChain*)fChain;
         if (chain->GetTreeNumber() != fCurrent) {
-        fCurrent = chain->GetTreeNumber();
-        Notify();
+            fCurrent = chain->GetTreeNumber();
+            Notify();
         }
         return centry;
     }

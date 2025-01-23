@@ -1,4 +1,4 @@
-#include "StGmtAligmentMaker.h"
+#include "StGmtAlignmentMaker.h"
 #include <stdlib.h>
 #include "Riostream.h"
 #include "TROOT.h"
@@ -25,20 +25,20 @@
 #include "StDetectorDbMaker/StGmtSurveyC.h"
 
 //________________
-StGmtAligmentMaker::StGmtAligmentMaker(const Char_t *name) : StMaker(name), fFile(0), fTree(0), fEvent(0) {
+StGmtAlignmentMaker::StGmtAlignmentMaker(const Char_t *name) : StMaker(name), fFile(0), fTree(0), fEvent(0) {
     SetMinNoHits();
     SetpCut();
     SetOut();
 }
 
 //________________
-Int_t StGmtAligmentMaker::Init() {
+Int_t StGmtAlignmentMaker::Init() {
     SetTree();
     return kStOK;
 }
 
 //________________
-Int_t StGmtAligmentMaker::Finish() {
+Int_t StGmtAlignmentMaker::Finish() {
     if (fFile) {
         fFile = fTree->GetCurrentFile(); // just in case we switched to a new file
         fFile->Write();
@@ -48,7 +48,7 @@ Int_t StGmtAligmentMaker::Finish() {
 }
 
 //________________
-void StGmtAligmentMaker::SetTree() {
+void StGmtAlignmentMaker::SetTree() {
     StBFChain *chain = (StBFChain *)StMaker::GetChain();
     if (!chain) return;
 
@@ -93,7 +93,7 @@ void StGmtAligmentMaker::SetTree() {
 }
 
 //________________
-Int_t StGmtAligmentMaker::Make() {
+Int_t StGmtAlignmentMaker::Make() {
     if (!EventT::RotMatrices()) {
         MakeListOfRotations();
     }
@@ -107,7 +107,7 @@ Int_t StGmtAligmentMaker::Make() {
 }
 
 //________________
-void StGmtAligmentMaker::Print(Option_t *opt) const
+void StGmtAlignmentMaker::Print(Option_t *opt) const
 {
     if (!EventT::RotMatrices()) return;
     TIter next(EventT::RotMatrices());
@@ -127,7 +127,7 @@ void StGmtAligmentMaker::Print(Option_t *opt) const
 }
 
 //________________
-void StGmtAligmentMaker::MakeListOfRotations() {
+void StGmtAlignmentMaker::MakeListOfRotations() {
     if (EventT::RotMatrices()) return;
 
     THashList *rotMHash = new THashList(100, 0);

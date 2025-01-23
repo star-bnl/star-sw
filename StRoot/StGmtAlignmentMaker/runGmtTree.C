@@ -3,7 +3,7 @@
 #include "TString.h"
 
 #include "StMaker.h"
-#include "StGmtAligmentMaker.h"
+#include "StGmtAlignmentMaker.h"
 
 void runGmtTree(const Char_t *input, const Char_t *output=0) {
 
@@ -20,9 +20,9 @@ void runGmtTree(const Char_t *input, const Char_t *output=0) {
     if (db) {
         db->SetDebug(1);
     }
-    StGmtAligmentMaker *mtree = (StGmtAligmentMaker *)chain->Maker("GmtAligner");
+    StGmtAlignmentMaker *mtree = (StGmtAlignmentMaker *)chain->Maker("GmtAligner");
     if (!mtree) {
-        *mtree = new StGmtAligmentMaker();
+        *mtree = new StGmtAlignmentMaker();
     }
     if (!mtree) return;
 #if 0

@@ -1,5 +1,5 @@
-#ifndef __StGmtAligmentMaker_H
-#define __StGmtAligmentMaker_H
+#ifndef __StGmtAlignmentMaker_H
+#define __StGmtAlignmentMaker_H
 #include "StMaker.h"
 #include "TFile.h"
 #include "TArrayI.h"
@@ -9,10 +9,10 @@
 class EventT;
 
 //________________
-class StGmtAligmentMaker : public StMaker {
+class StGmtAlignmentMaker : public StMaker {
   public:
-    StGmtAligmentMaker(const Char_t *name="GmtAligner");
-    virtual ~StGmtAligmentMaker() {}
+    StGmtAlignmentMaker(const Char_t *name="GmtAligner");
+    virtual ~StGmtAlignmentMaker() {}
     virtual Int_t Init();
     virtual Int_t Make();
     virtual Int_t Finish();
@@ -23,7 +23,7 @@ class StGmtAligmentMaker : public StMaker {
     void SetOut(const Char_t *Out="Event") {fOut = Out;}
     void MakeListOfRotations();
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGmtAligmentMaker.h,v 1.1.1.2 2025/01/22 15:01:02 gnigmat Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGmtAlignmentMaker.h,v 1.1.1.2 2025/01/22 15:01:02 gnigmat Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   private:
     TFile   *fFile;
     TTree   *fTree;
@@ -31,6 +31,6 @@ class StGmtAligmentMaker : public StMaker {
     Int_t    fMinNoHits;
     Double_t fpCut;
     const Char_t  *fOut;
-    ClassDef(StGmtAligmentMaker,1)
+    ClassDef(StGmtAlignmentMaker,1)
 };
 #endif
