@@ -16,8 +16,6 @@
 #include "StGmtHit.h"
 #include "StGmtHitCollection.h"
 
-ClassImp(StGmtHitCollection)
-
 //________________
 StGmtHitCollection::StGmtHitCollection( short moduleId ) : StObject(), mModule( moduleId ) {
   /* empty*/

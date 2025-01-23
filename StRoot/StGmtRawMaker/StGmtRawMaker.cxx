@@ -23,7 +23,6 @@
 #include "St_base/Stypes.h"
 
 #include "StGmtRawMaker.h"
-ClassImp(StGmtRawMaker)
 
 const Int_t mChIdToSeqId[128] = {
 	0,16,32,48,64,80,96,112,4,20,36,52,68,84,100,116,8,
@@ -58,12 +57,12 @@ Int_t StGmtRawMaker::prepareEnvironment() {
   }
   return kStOK;
 }
+
 //________________________________________________________________________________
 /**
 Maker main function. Getting pointer to StEvent and fills the event structure
 */
-Int_t StGmtRawMaker::Make()
-{
+Int_t StGmtRawMaker::Make() {
 
   LOG_DEBUG <<"StGmtRawMaker::Make()******************************************************************"<<endm;
 
@@ -74,6 +73,7 @@ Int_t StGmtRawMaker::Make()
     return fillHits();
   }
 }
+
 //________________________________________________________________________________
 /**
 utility function to get the data from the daq file and fill the StEvent structure
@@ -99,7 +99,7 @@ Int_t StGmtRawMaker::fillHits() {
     TString query("gmt/adc");
     //  TString query("gmt/zs");
 
-    while(GetNextDaqElement(query.Data()))    {
+    while(GetNextDaqElement(query.Data())) {
         StRtsTable* rts_tbl=DaqDta();
         Int_t count = 0;
 

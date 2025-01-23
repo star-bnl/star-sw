@@ -29,10 +29,6 @@
 #include "StGmtHitCollection.h"
 #include "StGmtCollection.h"
 #define __OnlyGlobal__
-ClassImp(EventTHeader);
-ClassImp(EventT);
-ClassImp(TrackT);
-ClassImp(HitT);  
 
 TClonesArray *EventT::fgTracks = 0;
 TClonesArray *EventT::fgHits = 0;

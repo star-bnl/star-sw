@@ -12,8 +12,6 @@
 // Load header of the GMT collection
 #include "StGmtCollection.h"
 
-ClassImp(StGmtCollection)
-
 //________________
 StGmtCollection::StGmtCollection() : StObject() {
   // Set the module field for some of the collections

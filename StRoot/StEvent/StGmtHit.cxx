@@ -15,8 +15,6 @@
 // StEvent headers
 #include "StGmtHit.h"
 
-ClassImp(StGmtHit)
-
 //________________
 StGmtHit::StGmtHit( Int_t key, Int_t module, Float_t adcX, 
 	                Float_t adcY, Float_t dadcX, Float_t dadcY,

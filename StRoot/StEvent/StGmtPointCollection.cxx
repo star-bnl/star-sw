@@ -15,8 +15,6 @@
 #include "StGmtPoint.h"
 #include "StGmtPointCollection.h"
 
-ClassImp(StGmtPointCollection)
-
 //________________
 StGmtPointCollection::StGmtPointCollection() : StObject() {
   /* empty */

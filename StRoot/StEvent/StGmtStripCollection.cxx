@@ -14,27 +14,28 @@
 #include "StContainers.h"
 #include "StGmtStrip.h"
 #include "StGmtStripCollection.h"
+
 #include <cmath>
 #include <iostream>
+#include <vector>
 
-using namespace std;
-
-// deconstructor
+//________________
 StGmtStripCollection::~StGmtStripCollection() {/* no op */}
 
-// inline functions 
+//________________
 StGmtStripCollection::StGmtStripCollection( short module ) : StObject(), mModule( module ) {
     mStripGeoIdVec.resize( kGmtNumGeoIds );
-    for (unsigned int i=0; i<mStripGeoIdVec.size(); i++)
+    for (unsigned int i=0; i<mStripGeoIdVec.size(); i++) {
         mStripGeoIdVec[i] = static_cast< StGmtStrip* >(0);
+    }
 };
 
-// remove all hits with negative geoIds or with clusterSeedType set to
-// kGmtDeadStrip
+//________________
 void StGmtStripCollection::removeFlagged(){
+    // remove all hits with negative geoIds or with clusterSeedType set to kGmtDeadStrip
     if( !mStripVec.empty() ){
         // container to hold a copy
-        vector< StGmtStrip* > copy;
+        std::vector< StGmtStrip* > copy;
         copy.reserve( mStripVec.size() );
         sortByGeoId();
         
@@ -44,33 +45,38 @@ void StGmtStripCollection::removeFlagged(){
         
         // copy all valid events
         for( srcIter = mStripVec.begin(); srcIter != mStripVec.end(); ++srcIter )
-//             if( (*srcIter) && (*srcIter)->getClusterSeedType() != kGmtDeadStrip && (*srcIter)->getGeoId() >= 0 )
-            if( (*srcIter) && (*srcIter)->getGeoId() >= 0 )
+            if( (*srcIter) && (*srcIter)->getGeoId() >= 0 ) {
                 copy.push_back( new StGmtStrip( *(*srcIter) ) );
+            }
         
         if ( copy.size() != mStripVec.size() ){
             // this deletes the objects
             mStripVec.clear();
             // note: ownership of new objects passed to StSPtrVec
-            vector< StGmtStrip* >::iterator copyIter;
-            for( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
+            std::vector< StGmtStrip* >::iterator copyIter;
+            for( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter ) {
                 mStripVec.push_back( *copyIter );
+            }
         }
     }
 }
 
+//________________
 bool StGmtStripCollection::hitGeoIdLessThan( const StGmtStrip* h1, const StGmtStrip* h2 ){
     return h1->getGeoId() < h2->getGeoId();
 };
 
+//________________
 bool StGmtStripCollection::hitCoordLessThan( const StGmtStrip* h1, const StGmtStrip* h2 ){
     return h1->getCoordNum() < h2->getCoordNum();
 };
 
+//________________
 bool StGmtStripCollection::hitLayerLessThan( const StGmtStrip* h1, const StGmtStrip* h2 ){
     return h1->isY() < h2->isY();
 };
 
+//________________
 void StGmtStripCollection::Clear( Option_t *opt ){
     
     // no need to delete the objects in mStripVec, is done within its
@@ -87,8 +93,9 @@ void StGmtStripCollection::Clear( Option_t *opt ){
 
 }
 
-StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ){  // using geoId now instead of elecId so now using more generic index name
-//     StGmtStrip* &stripPtr = mStripElecIdVec[Id]; 
+//________________
+StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ) {  
+    // using geoId now instead of elecId so now using more generic index name
     StGmtStrip* &stripPtr = mStripGeoIdVec[Id]; 
     if( !stripPtr ){
         stripPtr = new StGmtStrip();
@@ -97,7 +104,9 @@ StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ){  // using geoId now inst
     return stripPtr;
 }
 
-StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ){  // using geoId now instead of elecId so now using more generic index name
+//________________
+StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ) {  
+    // using geoId now instead of elecId so now using more generic index name
     StGmtStrip* &stripPtr = mStripVec[Id]; 
     if( !stripPtr ){
       LOG_ERROR << "StGmtStripCollection::getSortedStrip no such Id: " << Id << endm;
@@ -108,22 +117,21 @@ StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ){  // using geoId no
 
 // sort by geoId
 void StGmtStripCollection::sortByGeoId(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
-};
+    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
+}
 
 // sort by layer (X first then Y)
 void StGmtStripCollection::sortByLayer(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
+    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
 };
 
 // sort by coordinate number
 void StGmtStripCollection::partialSortByCoord(){
-    partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
+    std::partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
 };
 
 // sort by coordinate number
 void StGmtStripCollection::sortByCoord(){
-    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
+    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
 };
 
-ClassImp(StGmtStripCollection)

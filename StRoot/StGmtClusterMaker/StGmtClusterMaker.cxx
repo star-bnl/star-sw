@@ -13,7 +13,6 @@
 #include "TSystem.h"
 #include "TSpectrum.h"
 #include "StMessMgr.h" 
-ClassImp(StGmtClusterMaker);
 
 int StGmtClusterMaker::gmtStat = 0;
 const unsigned int CLUS_BINS = 128;
