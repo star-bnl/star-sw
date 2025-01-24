@@ -1,10 +1,16 @@
+// ROOT headers
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
 
+// STAR headers
 #include "StMaker.h"
 #include "StGmtAlignmentMaker.h"
 
+// C/C++ headers
+#include <iostream>
+
+//________________
 void runGmtTree(const Char_t *input, const Char_t *output=0) {
 
     gROOT->LoadMacro("bfc.C");

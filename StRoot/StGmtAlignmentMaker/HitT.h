@@ -1,8 +1,15 @@
 #ifndef __HIT__
 #define __HIT__
+
 //#define __USE_GLOBAL__
-#include <string.h>
+
+// ROOT headers
 #include "TObject.h"
+
+// C/C++ headers
+#include <string.h>
+
+// Forward declarations
 class StHit;
 
 //________________
@@ -32,11 +39,7 @@ class HitT : public TObject {
     Double32_t xPGlL, yPGlL, zPGlL; // Ladder
 #endif
     //  Double32_t cxPL, cyPL, czPL; // Ladder
-#if 0
-    Bool_t     fValidDerivatives;
-    Double32_t duPdxV,duPdyV,duPdzV,duPddip,duPdphi,duPdRho; // derivatives uP wrt xV,yV,zV,1/pT,dip,phi
-    Double32_t dvPdxV,dvPdyV,dvPdzV,dvPddip,dvPdphi,dvPdRho; // derivatives vP wrt xV,yV,zV,1/pT,dip,phi
-#endif
+
     Double32_t uM, vM;
     Double32_t anode, timeb;
     Int_t      NoHitPerTrack;
@@ -82,9 +85,7 @@ class HitT : public TObject {
     void SetAnode(Double32_t p=0) {anode=p;}
     void SetTimeB(Double32_t p=0) {timeb=p;}
     void SetId(Int_t B = 0, Int_t L = 0, Int_t l = 0, Int_t W = 0, Int_t H = 0);
-#if 0
-    void SetId(StHit *HitT);
-#endif
+
     void Set(Double32_t *xyzG, Double32_t *xyzL) {Set(xyzG[0],xyzG[1],xyzG[2],xyzL[0],xyzL[1],xyzL[2]);}
     void SetpT(Double32_t p) {pT = p;}
     void SetMom(Double32_t p) {pMom = p;}
@@ -92,10 +93,7 @@ class HitT : public TObject {
     void SettUVPred(Double32_t tu, Double32_t tv) {tuP = tu; tvP = tv;}
     void SetWG(Double32_t wu, Double32_t wv, Double32_t ww) { wGu = wu; wGv = wv; wGw = ww;}
     //  void SetWL(Double32_t wx, Double32_t wy, Double32_t wz) { wLx = wx; wLy = wy; wLz = wz;}
-#if 0
-    void SetValidDerivatives(Bool_t p=kTRUE) {fValidDerivatives = p;}
-    void SetDerivatives(Double32_t *der) {Double32_t *d = &duPdxV; for (Int_t i = 0; i < 12; i++) d[i] = der[i];}
-#endif
+
     void SetXyzG(const Double_t *x) {Double32_t *xyzPG = &xPG; for (Int_t i = 0; i < 3; i++) xyzPG[i] = x[i];}
     void SetDirG(const Double_t *x) {Double32_t *dirPG = &cxPG;for (Int_t i = 0; i < 3; i++) dirPG[i] = x[i];}
     void SetXyzL(const Double_t *x) {Double32_t *xyzPL = &xPL; for (Int_t i = 0; i < 3; i++) xyzPL[i] = x[i];}
@@ -152,10 +150,7 @@ class HitT : public TObject {
     Int_t       Ladder()         const {return ladder;}
     Int_t       Wafer()          const {return wafer;}
     Int_t       GetId()          const {return Id;}
-#if 0
-    const Double32_t *GetDerivatives() const {return &duPdxV;}
-    Bool_t      ValidDerivatives() const {return fValidDerivatives;}
-#endif
+
     virtual void Print(Option_t *opt="") const;
     ClassDef(HitT,1)
 };

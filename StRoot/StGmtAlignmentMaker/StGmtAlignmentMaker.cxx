@@ -1,28 +1,22 @@
+// STAR headers
 #include "StGmtAlignmentMaker.h"
-#include <stdlib.h>
-#include "Riostream.h"
-#include "TROOT.h"
-#include "TSystem.h"
-#include "TFile.h"
-#include "TKey.h"
-#include "TRandom.h"
-#include "TTree.h"
-#include "TBranch.h"
-#include "TStopwatch.h"
-#include "StThreeVectorF.hh"
-#include "StMatrixF.hh"
-#include "TH1.h"
-#include "TH2.h"
-#include "TProfile.h"
-#include "TMath.h"
-#include "TVector3.h"
 #include "StEvent.h"
-#include "StPrimaryVertex.h"
 #include "StBFChain.h"
-#include "TGeoMatrix.h"
 #include "EventT.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StDetectorDbMaker/StGmtSurveyC.h"
+#include "StMatrixF.hh"
+
+// ROOT headers
+#include "TGeoMatrix.h"
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TKey.h"
+#include "TBranch.h"
+
+// C/C++ headers
+#include <stdlib.h>
+#include <iostream>
 
 //________________
 StGmtAlignmentMaker::StGmtAlignmentMaker(const Char_t *name) : StMaker(name), fFile(0), fTree(0), fEvent(0) {
@@ -149,8 +143,7 @@ void StGmtAlignmentMaker::MakeListOfRotations() {
         TString Name(comb->GetName());
         if (Name.BeginsWith("R")) {
             TGeoHMatrix *WL = (TGeoHMatrix *)rotMHash->FindObject(Form("WL%s", Name.Data() + 1));
-            if (!WL)
-            {
+            if (!WL) {
                 std::cout << Form("WL%s", Name.Data() + 1) << " has not been found" << std::endl;
                 fail++;
             }

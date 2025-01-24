@@ -1,11 +1,15 @@
 #ifndef __StGmtAlignmentMaker_H
 #define __StGmtAlignmentMaker_H
+
+// STAR headers
 #include "StMaker.h"
+
+// ROOT headers
 #include "TFile.h"
 #include "TArrayI.h"
 #include "TTree.h"
 
-//________________
+// Forward declarations
 class EventT;
 
 //________________
