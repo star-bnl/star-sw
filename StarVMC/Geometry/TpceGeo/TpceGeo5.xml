@@ -460,7 +460,7 @@
             <var name="dAnode" value="{0.2 ,0.4 }" comment="// Inner/Outer anode width "  />
             <var name="zGatingGrid" value="TPCG_LengthV/2 -(TPCG_dGateGround+2*TPCG_dAnode(2))" comment="//  "  />
             <var name="zGroundGrid" value="TPCG_zGatingGrid+TPCG_dGateGround" comment="// "  />
-            <var name="DeadZone" value="14." comment="// Dead zone before GatingGrid. No hits there "  />
+            <var name="DeadZone" value="0.0" comment="// Dead zone before GatingGrid. No hits there (prev 14)"  />
 	    <var name="tofmax"   value="32.0E-6" comment="// Max time of flight" />
 	    <var name="NTPSSdiv" value="100"    comment="Number of radial TPSS divisions (304 is approx 0.5cm cylindrical divisions)" />
         </Fill>

@@ -494,13 +494,13 @@
             <var name="dAnode" value="{0.2 ,0.4 }" comment="// Inner/Outer anode width "  />
             <var name="zGatingGrid" value="TPCG_LengthV/2 -(TPCG_dGateGround+2*TPCG_dAnode(2))" comment="//  "  />
             <var name="zGroundGrid" value="TPCG_zGatingGrid+TPCG_dGateGround" comment="// "  />
-            <var name="DeadZone" value="12." comment="// Dead zone before GatingGrid. No hits there "  />
+            <var name="DeadZone" value="0." comment="// Dead zone before GatingGrid. No hits there (prev 12)"  />
 	    <var name="tofmax"   value="1.0E-6" comment="// Max time of flight" />
         </Fill>
 	<Fill name="TPCG" comment="Subversion 1">
 	  <var name="version"  value="3.1"     comment="selector" />
 	  <var name="rmax"     value="207.77"  comment="Max envelope radius" />
-	  <var name="deadzone" value="14"      comment="Extend deadzone before gating grid" />
+	  <var name="deadzone" value="0"      comment="Extend deadzone before gating grid (prev 14)" />
 	  <var name="tofmax"   value="32.0E-6" comment="Increase maximum TOF for particles" />
 	</Fill>
         
