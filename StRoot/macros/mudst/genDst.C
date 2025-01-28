@@ -198,6 +198,10 @@ void genDst(unsigned int First,
   // Determine database flavors
   TString flavors = "ofl"; // default flavor for offline
 
+  // FXT flavor
+  if (findAndRemoveOption("FXT",optionTokens))
+    flavors.Prepend("FXT+");
+
   // simulation flavors
   if (findAndRemoveOption("Simu",optionTokens) && ! findAndRemoveOption("NoSimuDb",optionTokens))
     flavors.Prepend("sim+");
