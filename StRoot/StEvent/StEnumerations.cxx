@@ -19,8 +19,11 @@ void detectorId(int *ids=0, char** cds=0)
  memset(ids,0,sizeof(ids[0])*100);
  memset(cds,0,sizeof(cds[0])*100);
 
- // Look for local enumerations (when developing) before global
- TString myPath("./StRoot/StEvent/StEnumerations.h");
+ TString myPath("$STAR/StRoot/StEvent/StEnumerations.h");
+ gSystem->ExpandPathName(myPath);
+ gROOT->ProcessLine("#include <StEnumerations.h>");
+
+
  int notExi = gSystem->AccessPathName(myPath.Data(),kFileExists);
  if (notExi) {
    myPath = "$STAR/StRoot/StEvent/StEnumerations.h";
