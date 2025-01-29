@@ -128,7 +128,6 @@ public:
     virtual void setKinkVertex()      {SETBIT(mFlag,kKinkVtxId);}    
     virtual void setBeamConstrained() {SETBIT(mFlag,kBEAMConstrVtxId);}
     virtual void setRejected()        {SETBIT(mFlag,kRejectedVtxId);}
-    virtual void setFwdVertex()       {SETBIT(mFlag,kFwdVtxId);}
 
     bool        isPrimaryVtx()      const {return TESTBIT(mFlag,kPrimaryVtxId);}
     bool        isV0Vtx()           const {return TESTBIT(mFlag,kV0VtxId);}
@@ -136,7 +135,6 @@ public:
     bool        isKinkVertex()      const {return TESTBIT(mFlag,kKinkVtxId);}
     bool        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
     bool        isRejected()        const {return TESTBIT(mFlag,kRejectedVtxId);}
-    bool        isFwdVtx()          const {return TESTBIT(mFlag,kFwdVtxId);}
     void Print(Option_t *option="") const {cout << option << *this << endl; }
     static void   SetNoFitPointCutForGoodTrack(UInt_t val) {fgNoFitPointCutForGoodTrack = val;}
     static UInt_t NoFitPointCutForGoodTrack() {return fgNoFitPointCutForGoodTrack;}

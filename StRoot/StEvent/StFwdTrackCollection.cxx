@@ -17,8 +17,8 @@ ClassImp(StFwdTrackCollection)
 
 StFwdTrackCollection::~StFwdTrackCollection(){
 	for (unsigned int i=0; i<mTracks.size(); i++) {
-		delete mTracks[i];
-       	mTracks[i] = 0;
+       delete mTracks[i];
+       mTracks[i] = 0;
    }
 }
 

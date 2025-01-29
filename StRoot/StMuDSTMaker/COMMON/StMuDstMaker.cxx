@@ -850,17 +850,17 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     mStMuDst->set(this);
   }
 
-  // if (!mFmsCollection) {
-  //   mFmsCollection=new StMuFmsCollection();
-  //   connectFmsCollection();
-  //   mStMuDst->set(this);
-  // }
+  if (!mFmsCollection) {
+    mFmsCollection=new StMuFmsCollection();
+    connectFmsCollection();
+    mStMuDst->set(this);
+  }
 
-  // if (!mRHICfCollection) {
-  //   mRHICfCollection=new StMuRHICfCollection();
-  //   connectRHICfCollection();
-  //   mStMuDst->set(this);
-  // }
+  if (!mRHICfCollection) {
+    mRHICfCollection=new StMuRHICfCollection();
+    connectRHICfCollection();
+    mStMuDst->set(this);
+  }
 
   if (!mFcsCollection) {
     mFcsCollection=new StMuFcsCollection();
@@ -1049,7 +1049,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillDetectorStates(ev);
     fillEmc(ev);
     fillPmd(ev);
-    // fillFms(ev);
+    fillFms(ev);
     fillRHICf(ev);
     fillFcs(ev);
     fillFtt(ev);
