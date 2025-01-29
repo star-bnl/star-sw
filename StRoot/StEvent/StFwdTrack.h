@@ -130,8 +130,7 @@ public:
 
     // Number of fit points used by GenFit
     short   numberOfFitPoints() const;
-    // unsigned int   numberOfPossibleFitPoints() const;
-
+    
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
     UShort_t idTruth() const { return mIdTruth; }
@@ -166,35 +165,28 @@ public:
     void addHcalCluster(StFcsCluster* p);
     void sortHcalClusterByET();
 
-    
 protected:
-
-    
-
     // Track quality and convergence
-    bool mDidFitConverge;
-    bool mDidFitConvergeFully;
-    short mNumberOfFailedPoints;
-    short mNumberOfSeedPoints;
-    short mNumberOfFitPoints;
-    float mChi2;
-    float mNDF;
-    float mPval;
-    short mCharge;
-    StThreeVectorD mPrimaryMomentum;
-    StPtrVecFcsCluster mEcalClusters;
-    StPtrVecFcsCluster mHcalClusters;
-    /// MC track id
-    UShort_t mIdTruth;
-    /// MC track quality (percentage of hits coming from corresponding MC track)
-    UShort_t mQATruth;
+    bool mDidFitConverge; // did the fit converge
+    bool mDidFitConvergeFully; // did the fit converge fully (fwd and bkw)
+    short mNumberOfFailedPoints; // number of points that failed to converge
+    short mNumberOfSeedPoints; // number of points used in the seed step
+    short mNumberOfFitPoints; // number of points used in the fit (seed + vertex)
+    float mChi2; // chi2 of the fit
+    float mNDF; // number of degrees of freedom
+    float mPval; // p-value of the fit
+    short mCharge; // charge of the track
+    StThreeVectorD mPrimaryMomentum; // momentum at the primary vertex
+    StPtrVecFcsCluster mEcalClusters; // ECAL clusters
+    StPtrVecFcsCluster mHcalClusters; // HCAL clusters
+    
+    UShort_t mIdTruth; // MC track id
+    UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
     float mDCA[3]; // DCA to the primary vertex
     UChar_t mVtxIndex;
     
-
-    ClassDef(StFwdTrack,4)
-
+    ClassDef(StFwdTrack,3)
 };
 
 #endif
