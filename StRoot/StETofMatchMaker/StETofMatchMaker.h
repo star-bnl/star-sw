@@ -166,6 +166,7 @@ private:
 
      void sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec);
      void sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap );
+     void sortOutOlDoubles( eTofHitVec& finalMatchVec);
 
     double  startTimeBTof();
     double  startTimeETof( const eTofHitVec& finalMatchVec, unsigned int& nCand_etofT0 );

@@ -80,6 +80,7 @@
 #include "tables/St_etofResetTimeCorr_Table.h"
 #include "tables/St_etofPulserTotPeak_Table.h"
 #include "tables/St_etofPulserTimeDiffGbtx_Table.h"
+#include "tables/St_etofGet4State_Table.h"
 
 namespace etofSlewing {
     const unsigned int nTotBins = 30;
@@ -117,7 +118,19 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mUsePulserGbtxDiff( true ),
   mDoQA( false ),
   mDebug( false ),
-  mHistFileName( "" )
+  mHistFileName( "" ),
+  mFileNameGet4State(""),
+  mStateVec(),
+  mStartVec(),
+  mGet4StateMap(),
+  mStateMapStart(0),
+  mStateMapStop(0),
+  mDbEntryStart(0),
+  mDbEntryStop(0),
+  mGlobalCounter(1),
+  mCalState(true)
+
+  
 {
     /// default constructor
     LOG_DEBUG << "StETofCalibMaker::ctor"  << endm;
@@ -132,9 +145,9 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
     mPulserPeakTot.clear();
     mPulserTimeDiff.clear();
     mPulserTimeDiffGbtx.clear();
-	 mNPulsersCounter.clear();
-	 mNStatusBitsCounter.clear();
-	 mPulserPresent.clear();
+    mNPulsersCounter.clear();
+    mNStatusBitsCounter.clear();
+    mPulserPresent.clear();
 
     mJumpingPulsers.clear();
 
@@ -177,6 +190,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
     // --------------------------------------------------------------------------------------------
     // initialize calibration parameters from parameter file (if filename is provided) or database:
+    // -- Get4 status map (Clock-Jump-Correction)
     // -- electronics-to-hardware map
     // -- status map
     // -- timing window
@@ -187,6 +201,15 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     // -- slewing corrections
     // -- reset time correction
     // --------------------------------------------------------------------------------------------
+
+    //Get4 status map
+    for(int i=0; i < eTofConst::nGet4sInSystem; i++){
+      mGet4StateMap[i] = 0;
+      if(i < (eTofConst::nGet4sInSystem/2)){
+	mGet4DefaultStateMap[i] = 0;
+      }
+    }
+    readGet4State(mGlobalCounter , 0);
 
     // electronics-to-hardware map
     if( mFileNameElectronicsMap.empty() ) {
@@ -1080,6 +1103,11 @@ StETofCalibMaker::FinishRun( Int_t runnumber )
 
     mJumpingPulsers.clear();
 
+    mGet4StateMap.clear();
+    mGet4ZeroStateMap.clear();
+    mMasterStartVec.clear();
+   
+
     return kStOk;
 }
 
@@ -1105,6 +1133,35 @@ StETofCalibMaker::Make()
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
     //mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
+
+    //check if get4 state map is still valid for this event
+
+    unsigned long int evtNr = GetEventNumber();
+    if(mFileNameGet4State.empty()){
+      //read from db
+
+     if( evtNr > mDbEntryStop ||  evtNr < mDbEntryStart) readGet4State(mGlobalCounter , 99);
+
+    }else{
+      //read from file
+      short cnt = 0;
+      while( evtNr > mDbEntryStop ||  evtNr < mDbEntryStart){
+
+	cnt++;
+	if(cnt > 99){
+	  LOG_ERROR << " Get4 State File for event Nr:" << GetEventNumber() << "not found" << endm;
+	  return kStFatal;
+	}
+ 
+	short forward = 1;
+	if(evtNr < mDbEntryStart) forward = -1;
+	readGet4State(mGlobalCounter , forward);
+      }
+
+
+    }
+    checkGet4State( evtNr );
+
 
     if ( mEvent ) {
         LOG_DEBUG << "Make(): running on StEvent" << endm;
@@ -1238,12 +1295,8 @@ StETofCalibMaker::processStEvent()
 		std::vector<bool> hasPulsersVec;
 		
 		//drag along pulser information
-		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
-		  if ( !(mNPulsersCounter.count(iCounter) ) ){
-		    hasPulsersVec.push_back(false);
-		  }else{	
-		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
-		  }		  
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){	
+		hasPulsersVec.push_back((mNPulsersCounter.count(iCounter) > 0) && (mNPulsersCounter[iCounter] == 2));
 		}
 		if (hasPulsersVec.size() == 108){
 		  //etofHeader->setHasPulsersVec(hasPulsersVec);  // not working but not of relevance at the moment 
@@ -1406,21 +1459,22 @@ StETofCalibMaker::processMuDst()
 		std::vector<bool> hasPulsersVec;//
 		
 		//drag along pulser information
-		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){
-		  if ( !(mNPulsersCounter.count(iCounter) ) ){
-		    hasPulsersVec.push_back(false);
-		  }else{	
-		    hasPulsersVec.push_back(mNPulsersCounter[iCounter] == 2);
-		  }		  
+		for( unsigned int iCounter = 0; iCounter < 108; iCounter++){		
+		hasPulsersVec.push_back((mNPulsersCounter.count(iCounter) > 0) && (mNPulsersCounter[iCounter] == 2)); 			
 		}
 
 		if (hasPulsersVec.size() == 108){
 		  etofHeader->setHasPulsersVec(hasPulsersVec);
 	  	} 
-		
+
 		//fill good event flag into header
 		for( unsigned int iGet4 = 0; iGet4 < 1728; iGet4++){
 		  goodEventFlagVec.push_back(!etofHeader->missMatchFlagVec().at(iGet4));
+
+		  //flag jumpwise inconsistent events/get4s
+		  if(mGet4StateMap[iGet4] == 3){
+		    goodEventFlagVec.at(iGet4) = false;
+		  }
 		}		
 		
 	  	if (goodEventFlagVec.size() == 1728){
@@ -1573,14 +1627,11 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
         float totToPeak     = aDigi->rawTot()  - mPulserPeakTot.at( key );
         float totToHalfPeak = aDigi->rawTot()  - mPulserPeakTot.at( key ) * 0.5;
 
-
-        if( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first  && timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  ) {
-            if( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) {
-                isPulserCand = true;
-            }
-        }
+	isPulserCand = ( timeToTrigger > mPulserWindow.at( aDigi->rocId() ).first &&
+         	         timeToTrigger < mPulserWindow.at( aDigi->rocId() ).second  &&
+          	       ( fabs( totToPeak ) < 25 || fabs( totToHalfPeak ) < 10 ) );
+	    
     }
-
 
     if( isPulserCand ) {
         pulserDigiMap[ key ].push_back( index );
@@ -2119,14 +2170,37 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
         aDigi->setCalibTot( calibTot );
 
+	int get4Id = 144 * ( aDigi->sector() - 13 ) + 48 * ( aDigi->zPlane() -1 ) + 16 * ( aDigi->counter() - 1 ) + 8 * ( aDigi->side() - 1 ) + ( ( aDigi->strip() - 1 ) / 4 );
+
+	double stateCorr =0;
+	if(mGet4StateMap[get4Id] == 1){ 
+	  stateCorr =  6.25;
+	}else if(mGet4StateMap[get4Id] == 2){
+	  stateCorr =  -6.25;
+	}else if(mGet4StateMap[get4Id] == 3){
+	  stateCorr = 6.25;
+	}else if(mGet4StateMap[get4Id] == 4){
+	  stateCorr = -6.25;	
+	}
+	// only calibrate here if flag is set
+	if(!mCalState) stateCorr = 0;
+
+
         double calibTime = aDigi->rawTime() - mResetTime
                                             - resetTimeCorr()
                                             - calibTimeOffset(   aDigi )
                                             - slewingTimeOffset( aDigi )
-                                            - applyPulserOffset( aDigi );
+                                            - applyPulserOffset( aDigi )
+	                                    + stateCorr;
+					    
+					    					
+	if(mGet4StateMap[get4Id] == 5){
+	  calibTime = 0; // mask digis with undefined state (e.g. one hit with jump and one without in same event)
+	  
+	}
 
-        aDigi->setCalibTime( calibTime );
-
+    aDigi->setCalibTime( calibTime );
+	
         if( mDebug ) {
             // print out the new information
             LOG_DEBUG << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
@@ -2608,4 +2682,354 @@ StETofCalibMaker::writeHistograms()
     else {
         LOG_INFO << "histogram file name is empty string --> cannot write histograms" << endm;
     }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void StETofCalibMaker::readGet4State(int fileNr, short forward){
+
+   bool fileZero = false;
+
+   //Clean up last entry first
+   for(int i =0; i< eTofConst::nGet4sInSystem; i++){
+     mStateVec[i].clear();
+     mStartVec[i].clear();
+     mGet4StateMap[i] = 0;
+   }
+   mStateMapStart=0;
+   mStateMapStop=0;
+   mDbEntryStop=0;
+   mMasterStartVec.clear();
+   mMasterStartVec.resize(0);
+
+   std::vector< unsigned long int > intVec;
+   
+   //first read
+    if(forward == 0) mGlobalCounter = 0;
+    //jump forward
+    else if(forward > 0){ mGlobalCounter++;
+    //jump backward
+    }else {mGlobalCounter--;} // forward < 0
+
+    if(mGlobalCounter == 0){
+      mGlobalCounter++;
+      fileZero = true;
+    }
+    
+    if(mFileNameGet4State.empty()){
+         
+      TDataSet* dbDataSet = GetDataBase( "Calibrations/etof/etofGet4State" );
+      if( ! dbDataSet ) {
+	LOG_ERROR << "unable to get the get4 state map database" << endm;	  
+	return;
+      }
+      const int intsPerEntry = 1000000;
+      
+      St_etofGet4State* etofStateMap = static_cast< St_etofGet4State* > ( dbDataSet->Find( "etofGet4State" ) );
+      if( !etofStateMap ) {
+	LOG_ERROR << "unable to get the get4 state map from the database" << endm;	  
+	return;
+      }
+      
+      etofGet4State_st* stateMapTable = etofStateMap->GetTable();
+      
+      for( size_t i=0; i< intsPerEntry; i++ ) {
+	if(stateMapTable->etofGet4State[ i ] <= 0) break; 
+	intVec.push_back(  stateMapTable->etofGet4State[ i ]);
+      } 
+          
+    }else{
+           
+      std::ifstream paramFile;
+      
+      paramFile.open( mFileNameGet4State.c_str() );
+      
+      if( !paramFile.is_open() ) {
+	LOG_ERROR << "unable to get the 'Get4State' parameters from file --> file does not exist" << endm;
+       	return;
+      }
+      
+      unsigned long int temp;
+      while( paramFile >> temp ) {
+	intVec.push_back( temp );
+      }        
+    }
+    
+    std::vector<unsigned long int> startVec;
+    std::map<unsigned long int,vector<int>> stateVec;
+    std::map<unsigned long int ,vector<int>> get4IdVec;
+    
+    decodeInt(intVec , startVec , stateVec , get4IdVec); 	
+
+   // fill stateMap & steering vecs with EvtZero entries: read in first 1728 states & times
+   for(int i = 0; i< eTofConst::nGet4sInSystem;i++){
+     
+     for(unsigned int j=0; j< startVec.size(); j++){
+       
+       unsigned long int key = startVec.at(j);
+       
+       for(unsigned int n =0; n < get4IdVec.at(key).size(); n++){
+	 
+	 //steering vecs
+	 if(i == get4IdVec.at(key).at(n)){ 
+	   mStateVec[i].push_back(stateVec.at(key).at(n));
+	   mStartVec[i].push_back(startVec.at(j));	   
+	 } 	 
+       }  
+     }
+   }
+   
+   //set map validity check evtids ... EvtZero states only valid to first change of state on any get4
+   mStateMapStart = 0 ;
+   mStateMapStop  = startVec.at(0);
+   mDbEntryStart   = startVec.at(0);
+   mDbEntryStop    = startVec.at((startVec.size()-1));
+
+
+   if(fileZero){
+     mDbEntryStart   = 0;
+     mDbEntryStop    = 99999999;	   
+   }
+  
+   sort( mMasterStartVec.begin(), mMasterStartVec.end() );
+   mMasterStartVec.erase( unique( mMasterStartVec.begin(), mMasterStartVec.end() ), mMasterStartVec.end() );
+
+ }
+
+// -------------------------------------------------------------------------------
+
+void StETofCalibMaker::checkGet4State(unsigned long int eventNr){
+
+  if(eventNr >= mStateMapStart && eventNr < mStateMapStop) {
+    return; // stateMap still valid 
+  }
+
+  unsigned long int closestStop  = 99999999;
+  unsigned long int closestStart = 0;
+
+  //loop over stateMap
+
+  for(unsigned int i =0; i< eTofConst::nGet4sInSystem; i++){
+
+    std::vector<unsigned long int> tmpStart = mStartVec[i];
+    std::vector<short>             tmpState = mStateVec[i];
+
+    //find closest evtNr & state for each Get4
+    unsigned int      indexStart = 0;
+    short             newState   = 0;
+
+    if (tmpStart.empty()) continue;
+    
+    auto lower = std::lower_bound(tmpStart.begin(), tmpStart.end(), eventNr);
+    indexStart = std::distance(tmpStart.begin(), lower);    
+    if(indexStart > 0) indexStart--;
+
+    //event past last change on get4 in entry -> keep last state in line
+    if(eventNr > tmpStart.at((tmpStart.size() -1))){
+      indexStart = (tmpStart.size() -1);
+    }
+
+    //if state change happens in this very event increase index by one to hit proper state 
+    if((indexStart < (tmpStart.size() -1 )) && eventNr == tmpStart.at(indexStart + 1)){
+	indexStart++;	
+    }
+    
+    //get new state and push to map
+    newState = tmpState.at(indexStart);
+
+    if(tmpStart.at(indexStart) > eventNr ) newState = mGet4ZeroStateMap[i];
+
+    mGet4StateMap[i] = newState;
+     
+  } //Get4 Loop
+
+  //  bool Found=false;
+    for(unsigned int z=0; z< mMasterStartVec.size();z++){
+
+      if(z == 0){ // first interval
+	closestStart = 0;
+	closestStop  = mMasterStartVec.at(z);
+
+      } else if(z == (mMasterStartVec.size()-1)){ // last interval
+        closestStart = mMasterStartVec.at(z);
+        closestStop  = 99999999;
+        // Found = true;
+
+      } else if(eventNr == mMasterStartVec.at(z) ||
+          (eventNr < mMasterStartVec.at(z+1) && eventNr > mMasterStartVec.at(z))){
+        closestStart = mMasterStartVec.at(z);
+        closestStop  = mMasterStartVec.at(z+1);
+        //  Found = true;
+        break;
+      }
+
+    }
+
+    mStateMapStart = closestStart;
+    mStateMapStop  = closestStop;
+    
+  if(mStateMapStart == mDbEntryStop) {
+    
+    mStateMapStop  = 99999999;
+  }
+
+}
+//-----------------------------------------------------
+void StETofCalibMaker::decodeInt( std::vector<unsigned long int>& intVec ,std::vector<unsigned long int>& startVec ,std::map<unsigned long int,vector<int>>& stateVec ,std::map<unsigned long int,vector<int>>& get4IdVec){
+
+  unsigned long int lastEvtId =0;
+  std::map<int, std::vector< stateStruct > > stateMap;
+
+    
+    for(unsigned int i = 0; i < intVec.size(); i++){
+      
+      	int tmp;
+	int stateInt1;
+	int stateInt2;
+	unsigned long int EvtId;
+	int Get4Id1;
+	int get4state1;
+	int Get4Id2;
+	int get4state2;
+
+	stateStruct struct1;
+	stateStruct struct2;
+
+	switch (intVec.at(i) / 100000000) {
+		 
+	//decode default jump states
+        case 39 :
+	  
+	tmp       = intVec.at(i) % 3900000000;
+	stateInt1 = tmp / 10000;
+        stateInt2 = tmp % 10000;
+	
+        Get4Id1 = -1;
+	get4state1 = -1;
+	Get4Id2 = -1;
+	get4state2 = -1;
+	
+	if(stateInt1 < 6912){
+	  Get4Id1 = stateInt1 % (eTofConst::nGet4sInSystem/2);  
+	  get4state1 = stateInt1 / (eTofConst::nGet4sInSystem/2);
+	}
+	if(stateInt2 < 6912){
+	  Get4Id2 = stateInt2 % (eTofConst::nGet4sInSystem/2);
+	  get4state2 = stateInt2 / (eTofConst::nGet4sInSystem/2);
+	}
+	
+	if(i < (eTofConst::nGet4sInSystem/4) ){  
+	  mGet4DefaultStateMap[Get4Id1] = get4state1 + 1; // counting from 1 here 
+	  mGet4DefaultStateMap[Get4Id2] = get4state2 + 1; // counting from 1 here
+	} 
+	  
+	break;  
+	
+	// decode nonZero/stateChange ints ( int = 42.xxx.xxx.xxx = 2 states only)
+	case 42	:	
+	tmp       = intVec.at(i) % 4200000000;
+	stateInt1 = tmp / 10000;
+        stateInt2 = tmp % 10000;
+	
+        Get4Id1 = -1;
+	get4state1 = -1;
+	Get4Id2 = -1;
+	get4state2 = -1;
+	
+	if(stateInt1 < 6912){
+	  Get4Id1 = stateInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
+	}
+	if(stateInt2 < 6912){
+	  Get4Id2 = stateInt2 % eTofConst::nGet4sInSystem;
+	  get4state2 = stateInt2 / eTofConst::nGet4sInSystem;
+	}
+	
+	if(i >= (eTofConst::nGet4sInSystem/4) && i < ((eTofConst::nGet4sInSystem/4) + (eTofConst::nGet4sInSystem/2))){	  
+
+	  mGet4StateMap[Get4Id1] = get4state1;
+	  mGet4StateMap[Get4Id2] = get4state2;
+	  mGet4ZeroStateMap[Get4Id1] = get4state1;
+	  mGet4ZeroStateMap[Get4Id2] = get4state2;
+	}
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+	stateVec[lastEvtId].push_back(get4state2);
+	get4IdVec[lastEvtId].push_back(Get4Id2);
+
+	//stateStruct struct1;
+	struct1.get4Id = Get4Id1;
+	struct1.state  = get4state1;
+	struct1.evtId  = lastEvtId;
+	//stateStruct struct2;
+	struct2.get4Id = Get4Id2;
+	struct2.state  = get4state2;
+	struct2.evtId  = lastEvtId;
+	
+	stateMap[Get4Id1].push_back(struct1);
+	stateMap[Get4Id2].push_back(struct2);
+
+	break;
+		
+        //decode eventnumber ( int = 40.xxx.xxx.xxx = event number ) 
+	case 40:
+		
+        EvtId = intVec.at(i) % 4000000000;   
+
+	startVec.push_back(EvtId);
+	mMasterStartVec.push_back(EvtId);
+	
+	lastEvtId = EvtId;
+
+	break;		
+		
+        // decode nonZero/stateChange ints ( int = 41.xxx.x00.000 = 1 states only)
+	case 41:
+		
+	tmp       = intVec.at(i) % 4100000000;
+	stateInt1 = tmp / 10000;
+	Get4Id1 = -1;
+	get4state1 = -1;
+	
+	if(stateInt1 < 6912) {	 
+	  Get4Id1    = stateInt1 % eTofConst::nGet4sInSystem;
+	  get4state1 = stateInt1 / eTofConst::nGet4sInSystem;
+	}
+	
+	stateVec[lastEvtId].push_back(get4state1);
+	get4IdVec[lastEvtId].push_back(Get4Id1);
+
+	//stateStruct struct1;
+	struct1.get4Id = Get4Id1;
+	struct1.state  = get4state1;
+	struct1.evtId  = lastEvtId;
+	
+	stateMap[Get4Id1].push_back(struct1);
+
+	break;
+
+	default:
+	LOG_ERROR << "Get4 state not well defined -> Check db / state file !" << endm;	
+     }
+   }
+
+    //sort vecs (necessary due to get4 splitting)   
+    std::sort(startVec.begin(), startVec.end());
+    std::sort(mMasterStartVec.begin(), mMasterStartVec.end());
+ 
+    for(unsigned int i=0; i< eTofConst::nGet4sInSystem;i++){
+
+     std::vector<stateStruct> tmpVec = stateMap.at(i);
+     
+     for(unsigned int j=0; j < stateMap.at(i).size();j++){
+       tmpVec.push_back(stateMap.at(i).at(j));
+     }
+     std::sort(tmpVec.begin(), tmpVec.end(), [] (stateStruct x, stateStruct  y) { return x.evtId < y.evtId; } );
+     
+     for(unsigned int j=0; j< tmpVec.size();j++){
+       
+       stateVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).state);
+       get4IdVec[tmpVec.at(j).evtId].push_back(tmpVec.at(j).get4Id);
+     }     
+   }
 }

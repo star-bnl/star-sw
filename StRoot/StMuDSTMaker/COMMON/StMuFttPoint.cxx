@@ -27,4 +27,6 @@ void StMuFttPoint::set( StFttPoint *point ){
     mX = point->x();
     mY = point->y();
     mXYZ = TVector3( point->xyz().x(), point->xyz().y(), point->xyz().z() );
+    mIdTruth = point->idTruth();
+    mQaTruth = point->qaTruth();
 } // set from StEvent

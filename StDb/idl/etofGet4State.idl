@@ -1,0 +1,16 @@
+/* etofGet4State.idl
+*
+* table: etofGet4State
+*
+* description:Get4States and state changes dealing with "Clock-Jumps"
+*             0 - good,  1 - too early by 6.25ns ,2 too late by 6.25 ns,3 - bad
+*
+* author: Yannick Söhngen ( PI Heidelberg )
+*
+*/
+
+struct etofGet4State {
+
+  unsigned long etofGet4State[1000000]; /* state of get4s, changes & event id */
+
+};

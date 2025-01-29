@@ -25,7 +25,12 @@ void detectorId(int *ids=0, char** cds=0)
  gROOT->ProcessLine("#include <StEnumerations.h>");
 
  int notExi = gSystem->AccessPathName(myPath.Data(),kFileExists);
- if (notExi)    { ids[0]=-1; return;}
+ if (notExi) {
+   myPath = "$STAR/StRoot/StEvent/StEnumerations.h";
+   gSystem->ExpandPathName(myPath);
+   notExi = gSystem->AccessPathName(myPath.Data(),kFileExists);
+   if (notExi)    { ids[0]=-1; return;}
+ }
  FILE *fp = fopen(myPath.Data(),"r");
  if (!fp)       { ids[0]=-1; return;}
  char buf[400];

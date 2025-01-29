@@ -21,17 +21,13 @@ class StFstFastSimMaker : public StMaker {
 		int Make();
 		int Init();
 		int Finish();
-		virtual const char *GetCVS() const;
-		
-		/// Set offset for each disk ( x=R*cos(idisk*60 degrees), y=R*sin(...) )
-		void SetRaster(float R = 1.0) { mRaster = R; }
 
 		/// Set min/max active radii for each disk
 		void SetDisk(const int i, const float rmn, const float rmx);
 		void SetInEfficiency(float ineff = 0.1) { mInEff = ineff; }
 		void SetQAFileName(TString filename = 0.1) { mQAFileName = filename; }
 		void SetFillHist(const bool hist = false) { mHist = hist; }
-		
+		void setGEANTPassthrough(bool passthrough = false) { mGEANTPassthrough = passthrough; }
 
 	private:
 		void FillSilicon(StEvent *event);
@@ -40,9 +36,9 @@ class StFstFastSimMaker : public StMaker {
 		int mNumR;
 		int mNumPHI;
 		int mNumSEC;
-		float mRaster;
 		float mInEff;
 		bool mHist;
+		bool mGEANTPassthrough;
 		TString mQAFileName;
 
 		TH3F *hTrutHitYXDisk;
@@ -66,10 +62,5 @@ class StFstFastSimMaker : public StMaker {
 
 		ClassDef(StFstFastSimMaker, 0)
 };
-
-inline const char *StFstFastSimMaker::GetCVS() const {
-	static const char cvs[] = "Tag $Name:  $ $Id: StFstFastSimMaker.h,v 1.1 2021/03/26 13:58:21 jdb Exp $ built " __DATE__ " " __TIME__;
-	return cvs;
-}
 
 #endif
