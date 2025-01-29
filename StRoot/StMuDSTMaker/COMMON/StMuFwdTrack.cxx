@@ -3,7 +3,14 @@
 
 #include "StEvent/StFwdTrack.h"
 
-StMuFwdTrack::StMuFwdTrack() {
+void StMuFwdTrackSeedPoint::set( StFwdTrackSeedPoint* sp ){
+        mXYZ.SetXYZ( sp->mXYZ.x(), sp->mXYZ.y(), sp->mXYZ.z() );
+        mSector = sp->mSector;
+        mTrackId = sp->mTrackId;
+        memcpy( mCov, sp->mCov, sizeof( mCov ) );
+    }
+
+StMuFwdTrack::StMuFwdTrack() : mDidFitConverge(0),mDidFitConvergeFully(0),mNumberOfFailedPoints(0),mNumberOfSeedPoints(0),mNumberOfFitPoints(0),mChi2(0),mNDF(0),mPval(0),mCharge(0),mPrimaryMomentum(0,0,0),mIdTruth(0),mQATruth(0) {
 
 }
 
@@ -19,6 +26,15 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
     mCharge = evTrack->charge();
     mPrimaryMomentum = TVector3( evTrack->momentum().x(), evTrack->momentum().y(), evTrack->momentum().z() );
 
+    mIdTruth = evTrack->idTruth();
+    mQATruth = evTrack->qaTruth();
+
+    auto dca = evTrack->dca();
+    setDCA( TVector3( dca.x(), dca.y(), dca.z() ) );
+    
+    // copy the vertex index over 
+    mVtxIndex = evTrack->vertexIndex();
+
     //copy the projections
     for ( auto proj : evTrack->mProjections ){
         mProjections.push_back(
@@ -28,16 +44,12 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
 
     //copy the FTT Seed Points
     for ( auto sp : evTrack->mFTTPoints ){
-        mFTTPoints.push_back(
-            StMuFwdTrackSeedPoint( TVector3( sp.mXYZ.x(), sp.mXYZ.y(), sp.mXYZ.z() ), sp.mSector, sp.mTrackId, sp.mCov )
-        );
+        mFTTPoints.push_back(StMuFwdTrackSeedPoint(&sp));
     }
 
     //copy the FST Seed Points
     for ( auto sp : evTrack->mFSTPoints ){
-        mFSTPoints.push_back(
-            StMuFwdTrackSeedPoint( TVector3( sp.mXYZ.x(), sp.mXYZ.y(), sp.mXYZ.z() ), sp.mSector, sp.mTrackId, sp.mCov )
-        );
+        mFSTPoints.push_back(StMuFwdTrackSeedPoint(&sp));
     }
 }
 

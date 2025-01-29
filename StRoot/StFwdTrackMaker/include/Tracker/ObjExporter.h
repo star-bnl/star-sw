@@ -1,4 +1,6 @@
 
+#ifndef __OBJEXPORTER_H__
+#define __OBJEXPORTER_H__
 #include "GenFit/FitStatus.h"
 #include "GenFit/GFRaveVertexFactory.h"
 #include <math.h>
@@ -51,20 +53,20 @@ public:
                 numVertices++;
             }
         }
-      
+
       //## OUTPUT FACES BETWEEN INTERMEDIATE POINTS:
-      
+
       for(p=1; p<nPitch-1; p++) {
         for(s=0; s<nLatitude; s++) {
           i = p*nLatitude + s;
           j = (s==nLatitude-1) ? i-nLatitude : i;
-          fout << TString::Format("f %d %d %d %d\n", 
+          fout << TString::Format("f %d %d %d %d\n",
                   (i+1-nLatitude)+fVert, (j+2-nLatitude)+fVert, (j+2)+fVert, (i+1)+fVert);
         }
       }
-      
+
       //## OUTPUT TRIANGULAR FACES CONNECTING TO TOP AND BOTTOM VERTEX:
-      
+
       int offLastVerts  = fVert + (nLatitude * (nLongitude-1));
       for(s=0; s<nLatitude; s++)
       {
@@ -76,12 +78,12 @@ public:
 
     // output a single face
     void face( ofstream &fout, int anchor, int v0, int v1, int v2 ){
-        fout << TString::Format("f %d %d %d\n", anchor+v0, anchor+v1, anchor+v2).Data(); 
+        fout << TString::Format("f %d %d %d\n", anchor+v0, anchor+v1, anchor+v2).Data();
     }
     void face( ofstream &fout, int anchor, int v0, int v1, int v2, int v3 ){
-        fout << TString::Format("f %d %d %d %d\n", anchor+v0, anchor+v1, anchor+v2, anchor+v3).Data(); 
+        fout << TString::Format("f %d %d %d %d\n", anchor+v0, anchor+v1, anchor+v2, anchor+v3).Data();
     }
-    // output a general prism 
+    // output a general prism
     void prism( ofstream &fout, TVector3 po, TVector3 ds ){
         int fVert = numVertices;    // Record the first vertex index for intermediate vertices.
         // x-y at z=0
@@ -96,7 +98,7 @@ public:
         vert( fout, po.X() + ds.X(), po.Y() + ds.Y(), po.Z() + ds.Z() ); // 7
         vert( fout, po.X(), po.Y() + ds.Y(), po.Z() + ds.Z() ); // 8
 
-        face( fout, fVert, 1, 2, 3, 4 ); // bottom face 
+        face( fout, fVert, 1, 2, 3, 4 ); // bottom face
         face( fout, fVert, 5, 6, 7, 8 ); // top face
         face( fout, fVert, 1, 2, 6, 5 ); // side 1
         face( fout, fVert, 2, 3, 7, 6 ); // side 2
@@ -182,12 +184,12 @@ public:
 
 
             return TVector3( x, y, _z );
-        } catch ( genfit::Exception e ){
+        } catch ( genfit::Exception &e ){
             LOG_INFO << "Track projection Failed from trackPoint " << iPoint  << " E: " << e.what() << endm;
             return TVector3( -990, -990, -990 );
         }
-        
-        
+
+
         return TVector3( -990, -990, -990 );
     }
 
@@ -199,10 +201,9 @@ public:
     }
 
     // Output the sTGC strips into a useful format for event display
-    void output_ftt_strips( 
-        ofstream &fout, 
+    void output_ftt_strips(
+        ofstream &fout,
         StEvent * event ){
-
         fout << "\n" << endl;
         fout << "o fttStrips" << endl;
         fout << "usemtl stgc_hits\n" << endl;
@@ -217,8 +218,8 @@ public:
             float dw = 0.05, dlh = 60.0, dlv = 60.0;
             float mx = 0.0, my = 0.0;
             float sx = 1.0, sy = 1.0;
-            
-            
+
+
             if ( c->quadrant() == kFttQuadrantA ){
                 mx = 0; my = 0;
                 sx = 1.0; sy = 1.0;
@@ -249,13 +250,13 @@ public:
             }
         }
     } // ftt_strips
-    
+
     // Output the event info into a useful format for event display
-    void output( std::string filename, 
+    void output( std::string filename,
             StEvent * event,
-            std::vector< Seed_t> seeds, 
-            std::vector< genfit::Track *> tracks, 
-            const std::vector< genfit::GFRaveVertex *> &vertices, 
+            std::vector< Seed_t> seeds,
+            std::vector< genfit::Track *> tracks,
+            const std::vector< genfit::GFRaveVertex *> &vertices,
             std::vector<TVector3> &fttHits,
             std::vector<TVector3> &fstHits,
             std::vector<TVector3> &fcsPreHits, // EPD = preshower
@@ -306,9 +307,9 @@ public:
             ofile << "o fstHits" << endl;
             ofile << "usemtl fst_hits\n" << endl;
             for ( auto p : fstHits ){
-             
-                float fstphi = TMath::ATan2( p.Y(), p.X() );
-                printf( "FST PHI: %f \n", fstphi );
+
+                // float fstphi = TMath::ATan2( p.Y(), p.X() );
+                // printf( "FST PHI: %f \n", fstphi );
                 // tri( ofile, TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.1f, 0.1f, 3.0f, fstphi );
                 sphere( TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.3, 10, 10, ofile );
             }
@@ -318,12 +319,12 @@ public:
         if (verbose){
             LOG_INFO << "Viz has " << fcsPreHits.size() << " EPD Hits" << endm;
         }
-        if ( fcsPreHits.size() > 0 ){ 
+        if ( fcsPreHits.size() > 0 ){
             ofile << "\n" << endl;
             ofile << "o epd" << endl;
             ofile << "usemtl fcs_hits\n" << endl;
             for ( auto p : fcsPreHits ){
-                
+
                 sphere( TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.25, 10, 10, ofile );
             }
         }
@@ -331,7 +332,7 @@ public:
         if (verbose){
             LOG_INFO << "Viz has " << fcsClusters.size() << " FCS Hits" << endm;
         }
-        if ( fcsClusters.size() > 0 ){ 
+        if ( fcsClusters.size() > 0 ){
             ofile << "\n" << endl;
             ofile << "o fcs" << endl;
             ofile << "usemtl fcs_hits\n" << endl;
@@ -343,7 +344,7 @@ public:
                 i++;
             }
         }
-        
+
         // Write the track seeds
         if (verbose){
             LOG_INFO << "Viz has " << seeds.size() << " seeds" << endm;
@@ -362,7 +363,7 @@ public:
 
                 ofile << "l ";
                 for ( size_t i = vStart; i < numVertices; i++){
-                    ofile << i+1 << " "; 
+                    ofile << i+1 << " ";
                 }
                 ofile << endl;
             }
@@ -382,8 +383,8 @@ public:
             float zStep = 5.0; // cm
             for ( auto t : tracks ) {
                 size_t vStart = numVertices;
-    
-                
+
+
                 TVector3 lpoint;
                 for ( float z = startPos.Z(); z < 875; z += zStep ){
                     TVector3 point = trackPosition( t, z );
@@ -393,18 +394,21 @@ public:
                     vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
                     lpoint = point;
                 }
-                
+
                 ofile << "l ";
                 for ( size_t i = vStart; i < numVertices; i++){
-                    ofile << i+1 << " "; 
+                    ofile << i+1 << " ";
                 }
                 ofile << endl;
             } // for t in tracks
         } // if tracks.size() > 0
 
-        ofile.close();	
+        ofile.close();
     }
 
     size_t numVertices;
 
 };
+
+
+#endif

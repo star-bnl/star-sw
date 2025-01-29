@@ -16,10 +16,7 @@
 
 #include "StMuFcsCluster.h"
 
-
 class StFwdTrack;
-
-
 struct StMuFwdTrackProjection : public TObject {
     StMuFwdTrackProjection() {}
     StMuFwdTrackProjection ( const StMuFwdTrackProjection & other) {
@@ -68,16 +65,38 @@ struct StMuFwdTrackProjection : public TObject {
     ClassDef(StMuFwdTrackProjection, 1)
 };
 
+class StFwdTrackSeedPoint;
 struct StMuFwdTrackSeedPoint : public TObject{
     StMuFwdTrackSeedPoint() {}
     StMuFwdTrackSeedPoint(    TVector3 xyz, 
                             short sec, 
                             unsigned short trackId, 
                             float cov[9] ){
+        set( xyz, sec, trackId, cov );
+    }
+    StMuFwdTrackSeedPoint( StFwdTrackSeedPoint *sp ){
+        set( sp );
+    }
+
+    // setter
+    void set(  TVector3 xyz, 
+                short sec, 
+                unsigned short trackId, 
+                float cov[9] ){
         mXYZ = xyz;
         mSector = sec;
         mTrackId = trackId;
         memcpy( mCov, cov, sizeof( mCov ));
+    }
+    // setter from StFwdTrackSeedPoint
+    void set( StFwdTrackSeedPoint *sp );
+
+    // copy ctor
+    StMuFwdTrackSeedPoint( const StMuFwdTrackSeedPoint & other ){
+        mXYZ = other.mXYZ;
+        mSector = other.mSector;
+        mTrackId = other.mTrackId;
+        memcpy( mCov, other.mCov, sizeof( mCov ) );
     }
     
     TVector3 mXYZ;
@@ -121,6 +140,9 @@ public:
 
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
+    TVector3 dca() const { return TVector3( mDCAXY, mDCAXY, mDCAZ ); }
 
 
     void setPrimaryMomentum( TVector3 mom ) { mPrimaryMomentum = mom; }
@@ -133,46 +155,41 @@ public:
     void setNDF( float lNDF ) { mNDF = lNDF;}
     void setPval( float lPval ) { mPval = lPval;}
     void setCharge( short  lCharge ) { mCharge = lCharge;}
-
-    // ECAL clusters
-    // StPtrVecFcsCluster& ecalClusters();
-    // const StPtrVecFcsCluster& ecalClusters() const;
-    // void addEcalCluster(StFcsCluster* p);
-    // void sortEcalClusterByET();
-    // // HCAL clusters
-    // StPtrVecFcsCluster& hcalClusters();
-    // const StPtrVecFcsCluster& hcalClusters() const;
-    // void addHcalCluster(StFcsCluster* p);
-    // void sortHcalClusterByET();
-
-    // vector<StMuFcsCluster*> 
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
+    void setDCA( float dca[3] ) { mDCAXY = sqrt(dca[0]*dca[0]+dca[1]*dca[1]); mDCAZ = dca[2]; }
+    void setDCA( TVector3 dca ) { mDCAXY = sqrt(dca.X()*dca.X() + dca.Y()*dca.Y()); mDCAZ = dca.Z(); }
 
     void addEcalCluster( StMuFcsCluster* clu);
     void addHcalCluster( StMuFcsCluster* clu);
 
+    // FCS Cluster matches
     TRefArray mEcalClusters;
     TRefArray mHcalClusters;
     
 protected:
 
     // Track quality and convergence
-    bool mDidFitConverge;
-    bool mDidFitConvergeFully;
-    short mNumberOfFailedPoints;
-    short mNumberOfSeedPoints;
-    short mNumberOfFitPoints;
-    float mChi2;
-    float mNDF;
-    float mPval;
-    short mCharge;
-    TVector3 mPrimaryMomentum;
+    bool mDidFitConverge;   // == 0 if the fit did not converge
+    bool mDidFitConvergeFully; // == 0 if the fit did not converge fully
+    short mNumberOfFailedPoints; // Number of points that failed to be fitted
+    short mNumberOfSeedPoints; // Number of points used in the track seed step
+    short mNumberOfFitPoints; // Number of fit points used by GenFit
+    float mChi2; // Chi^2 of the fit
+    float mNDF; // Number of degrees of freedom of the fit
+    float mPval; // P-value of the fit
+    short mCharge; // Charge of the track
+    TVector3 mPrimaryMomentum; // Momentum of the track at the primary vertex
     
+    /// MC track id
+    UShort_t mIdTruth;
+    /// MC track quality (percentage of hits coming from corresponding MC track)
+    UShort_t mQATruth;
 
-    // StPtrVecFcsCluster mEcalClusters;
-    // StPtrVecFcsCluster mHcalClusters;
-    
-    ClassDef(StMuFwdTrack,2)
+    float mDCAXY; // DCA XY to the primary vertex
+    float mDCAZ; // DCA Z to the primary vertex
+    UChar_t mVtxIndex; // Index of the vertex in the event
 
+    ClassDef(StMuFwdTrack,3)
 };
 
 #endif

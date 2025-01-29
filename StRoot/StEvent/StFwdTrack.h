@@ -169,32 +169,27 @@ public:
     
 protected:
 
-    
-
     // Track quality and convergence
-    bool mDidFitConverge;
-    bool mDidFitConvergeFully;
-    short mNumberOfFailedPoints;
-    short mNumberOfSeedPoints;
-    short mNumberOfFitPoints;
-    float mChi2;
-    float mNDF;
-    float mPval;
-    short mCharge;
-    StThreeVectorD mPrimaryMomentum;
-    StPtrVecFcsCluster mEcalClusters;
-    StPtrVecFcsCluster mHcalClusters;
-    /// MC track id
-    UShort_t mIdTruth;
-    /// MC track quality (percentage of hits coming from corresponding MC track)
-    UShort_t mQATruth;
+    bool mDidFitConverge; // did the fit converge
+    bool mDidFitConvergeFully; // did the fit converge fully (forward and backward)
+    short mNumberOfFailedPoints; // number of failed points
+    short mNumberOfSeedPoints; // number of seed points
+    short mNumberOfFitPoints; // number of fit points (seeds + vertex)
+    float mChi2; // chi2 of the fit
+    float mNDF; // number of degrees of freedom
+    float mPval; // p-value of the fit
+    short mCharge; // charge of the track
+    StThreeVectorD mPrimaryMomentum; // momentum at the primary vertex
+    StPtrVecFcsCluster mEcalClusters; // ECAL clusters
+    StPtrVecFcsCluster mHcalClusters; // HCAL clusters
+    
+    UShort_t mIdTruth; // MC track id
+    UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
     float mDCA[3]; // DCA to the primary vertex
-    UChar_t mVtxIndex;
-    
+    UChar_t mVtxIndex; // index of the primary vertex
 
-    ClassDef(StFwdTrack,4)
-
+    ClassDef(StFwdTrack,3)
 };
 
 #endif
