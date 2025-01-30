@@ -1084,14 +1084,16 @@ int StFwdTrackMaker::Make() {
 
     /**********************************************************************/
     // Access forward track and hit maps
+    LOG_INFO << ">>StFwdTrackMaker::Make: Accessing FWD Data" << endm;
     FwdDataSource::McTrackMap_t &mcTrackMap = mForwardData->getMcTracks();
     FwdDataSource::HitMap_t &hitMap = mForwardData->getFttHits();
     FwdDataSource::HitMap_t &fsiHitMap = mForwardData->getFstHits();
 
     /**********************************************************************/
     // get the primary vertex for use with FWD tracking
+    LOG_INFO << ">>StFwdTrackMaker::GetEventPrimaryVertex info" << endm;
     mFwdVertexSource = StFwdTrackMaker::kFwdVertexSourceUnknown;
-    GetEventPrimaryVertex();
+    // GetEventPrimaryVertex();
     LOG_INFO << "FWD Vertex Source: " << mFwdVertexSource << endm;
     if ( mFwdVertexSource == kFwdVertexSourceNone ){
         // TODO: add clean support for beamline constraints
