@@ -374,7 +374,8 @@ u_int *itpc23::ch_scan(u_int *start)
 		is_error = 1 ;
 		run_errors++ ;
 		if(mode || (online && run_errors<20)) {
-			LOG(ERR,"%d: ch_scan %d:%d:%d: pkt %d, sampa %d:%d, words10 %d [0x%08X: 0x%08X 0x%08X], err 0x%X",rdo1,fee_ix,lane_ix,
+			LOG(ERR,"%d: T %d: ch_scan %d:%d:%d: pkt %d, sampa %d:%d, words10 %d [0x%08X: 0x%08X 0x%08X], err 0x%X",
+			    rdo1,token,fee_ix,lane_ix,
 			    ch_ix,
 			    pkt,sampa_id,sampa_ch,words10,
 			    d[0],d[-1],d[1],err) ;
@@ -417,7 +418,7 @@ u_int *itpc23::ch_scan(u_int *start)
 				err |= 0x2000000 ;
 				run_errors++ ;
 				if(mode || (online && run_errors<10)) {
-					LOG(ERR,"%d: ch_scan %d:%d: bx %d, expect %d",rdo1,fee_ix,ch_ix,bx,bx_count) ;
+					LOG(ERR,"%d: T %d: ch_scan %d:%d:%d bx %d, expect %d",rdo1,token,fee_ix,lane_ix,ch_ix,bx,bx_count) ;
 				}
 			}
 		}
@@ -529,7 +530,7 @@ u_int *itpc23::ch_scan(u_int *start)
 				seq[seq_ix].t_hi = tb_start + tb_cou - 1 ;
 				seq[seq_ix].dta_p = (dd-d_start) ;	// where is this sequence...
 				seq[seq_ix].blob_id = 0 ;
-				seq_ix++ ;
+				//seq_ix++ ;
 
 				//dd += tb_cou ;	// this doesn't sound correct!!!
 
@@ -538,6 +539,10 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(tb_start<=tb_last)) {
 					run_errors++ ;
 					if(mode || (online && run_errors<10))LOG(ERR,"%d: rp %d:%d: tb_start %d, tb_last %d",rdo1,row,pad,tb_start,tb_last) ;
+
+					seq[seq_ix].t_lo = 400 ;
+					seq[seq_ix].t_hi = 401 ;
+
 				}
 
 
@@ -546,9 +551,12 @@ u_int *itpc23::ch_scan(u_int *start)
 				if(unlikely(tb_last>500)) {
 					run_errors++ ;
 					if(mode || (online && run_errors<10)) LOG(ERR,"%d: rp %d:%d: tb_last %d [0x%08X,%d]",rdo1,row,pad,tb_last,d[i],i) ;
+
+					seq[seq_ix].t_lo = 400 ;
+					seq[seq_ix].t_hi = 401 ;
 				}
 
-
+				seq_ix++ ;
 
 				ix = 2 ;
 				break ;
@@ -670,7 +678,7 @@ u_int *itpc23::lane_scan(u_int *start)
 	// should be at start of lane 0xB....
 	if((d[0]&0xF0000000)!=0xB0000000) {	// start of lane
 		if((online && run_errors<10) || mode) {
-			LOG(ERR,"%d: lane_scan %d:%d: unknown start 0x%08X [0x%08X 0x%08X]",rdo1,fee_ix,lane_ix,d[0],d[-1],d[1]) ;
+			LOG(ERR,"%d: T %d: lane_scan %d:%d: unknown start 0x%08X [0x%08X 0x%08X]",rdo1,token,fee_ix,lane_ix,d[0],d[-1],d[1]) ;
 		}
 
 		if(d[0]==d[-1]) {
@@ -703,7 +711,7 @@ u_int *itpc23::lane_scan(u_int *start)
 	if((d[0]&0xF0000000)!=0x70000000) {	// end of lane
 		err |= 0x400000 ;	
 		run_errors++ ;
-		if((online && run_errors<20)|| mode) LOG(ERR,"%d: lane_scan %d:%d: unknown end 0x%08X",rdo1,fee_ix,lane_ix,d[0]) ;
+		if((online && run_errors<20)|| mode) LOG(ERR,"%d: T %d: lane_scan %d:%d: unknown end 0x%08X",rdo1,token,fee_ix,lane_ix,d[0]) ;
 	}
 
 	d++ ;	// skip 0x7...
@@ -718,7 +726,7 @@ u_int *itpc23::fee_non_trgd(u_int *start)
 	int fee_words = 0 ;
 
 	if(fee_evt_type != 0x02) {	// no clue
-		if(online || mode) LOG(ERR,"%d: fee_non_trgd %d: evt_type 0x%02X",rdo1,fee_ix,fee_evt_type) ;
+		if(online || mode) LOG(ERR,"%d: T %d: fee_non_trgd %d: evt_type 0x%02X",rdo1,token,fee_ix,fee_evt_type) ;
 
 
 		while(d<trl) {
@@ -830,7 +838,7 @@ u_int *itpc23::fee_scan(u_int *start)
 	// we must be at 0x8....
 	if((d[0]&0xF0000000)!=0x80000000) {	// start of fee
 		err |= 0x10000 ;	// oopsy -- what now!?
-		if(online || mode) LOG(ERR,"%d: fee_scan %d: not start-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
+		if(online || mode) LOG(ERR,"%d: T %d: fee_scan %d: not start-of-FEE 0x%08X",rdo1,token,fee_ix,d[0]) ;
 	}
 	else {
 		if(d[0]&0x00800000) {	// from real FEE
@@ -859,14 +867,14 @@ u_int *itpc23::fee_scan(u_int *start)
 		}
 	}
 	else {	// non-physics trigger... typically send_config stuff
-		LOG(WARN,"%d: non-physics fee_ix %d, padplane %d",rdo1,fee_ix,fee_pp) ;
+		LOG(WARN,"%d: T %d: non-physics fee_ix %d, padplane %d",rdo1,token,fee_ix,fee_pp) ;
 		d = fee_non_trgd(d) ;
 	}
 	
 		
 	if((d[0]&0xF0000000)!=0x40000000) {
 		err |= 0x40000 ;	// oopsy -- what now!?
-		if(online || mode) LOG(ERR,"%d: fee_scan %d: not end-of-FEE 0x%08X",rdo1,fee_ix,d[0]) ;
+		if(online || mode) LOG(ERR,"%d: T %d: fee_scan %d: not end-of-FEE 0x%08X",rdo1,token,fee_ix,d[0]) ;
 	}
 	else {
 		if(d[0]&0x00800000) {
@@ -1064,7 +1072,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 
 	int trg_cou = 0 ;
-
+	int loc_err_cou = 0 ;
 	
 	switch(evt_type) {
 	case 1 :	// timer
@@ -1074,6 +1082,7 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 		goto done ;
 	case 2 :	// trigger!
 		evt_trgd++ ;
+		f_stat.evt_cou++ ;
 		break ;
 	default :
 		LOG(ERR,"%d: %d: unknown event type %d: 0x%08X",rdo1,evt,evt_type,d[1]) ;
@@ -1140,12 +1149,30 @@ int itpc23::rdo_scan(char *c_addr, int iwords)
 
 //	LOG(TERR,"%d: fee_mask 0x%08X",rdo1,fee_mask) ;
 
+
+	if(err) {
+		if(mode || online) {
+			LOG(ERR,"%d: T %d: error 0x%X before fee_scan??",rdo1,token,err) ;
+		}
+	}
+
+
+
 	for(int i=0;i<16;i++) {
 		if(fee_mask & (1<<i)) ;
 		else continue ;
 
 		fee_ix = i ;
 		d = fee_scan(d) ;
+		if(err) {
+			// LOG first FEE which failed
+			if(loc_err_cou==0) {
+				if(mode || online) {
+					LOG(ERR,"%d: T %d: error at FEE #%d (0x%X)",rdo1,token,i+1,err) ;
+				}
+			}
+			loc_err_cou++ ;
+		}
 		if(d>=trl) break ;
 	}
 
@@ -1370,6 +1397,8 @@ itpc23::itpc23()
 	data_c = 0 ;
 
 	fmt = 0 ;
+
+	fee_words = 0 ;
 
 }
 

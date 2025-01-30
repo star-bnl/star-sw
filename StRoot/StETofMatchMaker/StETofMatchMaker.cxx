@@ -90,6 +90,7 @@
 
 #include "StETofMatchMaker.h"
 #include "StETofHitMaker/StETofHitMaker.h"
+#include "StETofCalibMaker/StETofCalibMaker.h"
 #include "StETofUtil/StETofGeometry.h"
 #include "StETofUtil/StETofConstants.h"
 
@@ -3234,8 +3235,7 @@ void StETofMatchMaker::checkClockJumps()
 //---------------------------------------------------------------------------
 void
 StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHitVec >&  outputMap )
-{
-
+{  
 
   // sort & flag Match candidates
 
@@ -3248,89 +3248,82 @@ StETofMatchMaker::sortMatchCases( eTofHitVec inputVec ,  std::map< Int_t, eTofHi
     MMMap.clear();
 
     eTofHitVec ssVec;
-
-     // get multi Hit sets 
-    // int deltaSize = 0;
     
+    // get multi Hit sets 
     eTofHitVecIter tempIter   = tempVec.begin();    
-    eTofHitVecIter erasedIter = erasedVec.begin();
     
-
     if(tempVec.size() < 1 ) return;
-
-    while( tempVec.size() != 0 ) { 
-
-      tempIter   = tempVec.begin();
-      erasedIter = erasedVec.begin();
-
-  
-      tempMMVec.push_back(*tempIter); 
-      erasedVec.erase( erasedIter );
-
-      // int sizeOld = tempMMVec.size();
-      int count =0;
-      int countwhile = 0;
-	
-      for(unsigned int s =0; s < tempMMVec.size(); s++){
-	 
-	count++;
-
-	erasedIter = erasedVec.begin();
-
-	if(erasedVec.size() <= 0 ) continue;
-
-	countwhile = 0;
-
-	while( erasedIter != erasedVec.end() ) {
-	  
-	    countwhile++;
-
-	  if(tempMMVec.at(s).trackId == erasedIter->trackId && tempMMVec.at(s).index2ETofHit == erasedIter->index2ETofHit){
-
-	    erasedVec.erase( erasedIter );
-	    erasedIter++;
-	    continue;}
-	  if(tempMMVec.at(s).trackId == erasedIter->trackId || tempMMVec.at(s).index2ETofHit == erasedIter->index2ETofHit){
-	    if(!mIsSim){
-	      // erasedIter->matchFlag = 0;
-	    }
-	    tempMMVec.push_back(*erasedIter);
-
-	    erasedVec.erase( erasedIter );
-	    
-	  } 
-	  if( erasedVec.size() <= 0 ) break;
-	  if( erasedIter == erasedVec.end()) break;
-	  erasedIter++;
-
-	} //while inner
-
-      }// for
-
-      // deltaSize = sizeOld - tempMMVec.size();
-
-      MMMap[tempMMVec.begin()->trackId] = tempMMVec;
-      tempMMVec.clear();
-
-      tempVec = erasedVec;
-    }
     
+    eTofHitVec storeVecTmp;
+    
+    while(tempVec.size() > 0){
+      
+      std::vector< int > trackIdVec;
+      std::vector< int > hitIdVec;
+      trackIdVec.clear();
+      hitIdVec.clear();
+      tempIter = tempVec.begin();
+      storeVecTmp.push_back(tempVec.at(0));
+      trackIdVec.push_back(tempVec.at(0).trackId);
+      hitIdVec.push_back(tempVec.at(0).index2ETofHit);
+      tempVec.erase(tempVec.begin());
+      bool done = false;
+
+      while(!done){
+
+	unsigned int sizeOld = storeVecTmp.size();
+	unsigned int size = tempVec.size();
+	tempIter= tempVec.begin();
+
+	for(unsigned int i=0; i < size; i++){
+
+	  if( (std::find(trackIdVec.begin(), trackIdVec.end(), tempVec.at(i).trackId) != trackIdVec.end()) || (std::find(hitIdVec.begin(), hitIdVec.end(), tempVec.at(i).index2ETofHit) != hitIdVec.end())  ){ 
+	      
+	    storeVecTmp.push_back(tempVec.at(i));
+	    trackIdVec.push_back(tempVec.at(i).trackId);
+	    hitIdVec.push_back(tempVec.at(i).index2ETofHit);
+	    tempVec.erase(tempIter);
+
+	    i = 0;
+	    size = tempVec.size();
+	    tempIter = tempVec.begin();
+	  }else{		  
+	  tempIter++;
+	  }
+	}
+      done = ( sizeOld == storeVecTmp.size() );
+
+      }// while done
+
+      MMMap[storeVecTmp.begin()->trackId] = storeVecTmp;
+      storeVecTmp.clear();
+
+    }// while all hits on counter
 
     outputMap = MMMap;
-
-
 }
 //---------------------------------------------------------------------------
 void 
 StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detectorHitVec , eTofHitVec& intersectionVec , eTofHitVec& finalMatchVec){
   
+  
+ //flag Overlap-Hits & jumped Hits  -------------------------------------------------------------------
 
- //flag Overlap-Hits -------------------------------------------------------------------
   std::map< Int_t, eTofHitVec >  overlapHitMap;
   eTofHitVec overlapHitVec;
   eTofHitVec tempVecOL        = matchCandVec;  
   eTofHitVecIter detHitIter;
   eTofHitVecIter detHitIter2;
+
+  std::map< int, bool >  jumpHitMap;
+
+  for(unsigned int i=0; i<matchCandVec.size();i++){
+    if(matchCandVec.at(i).clusterSize > 100){
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = true;
+    }else{
+      jumpHitMap[matchCandVec.at(i).index2ETofHit] = false;
+    }
+  }
   
   for( auto detHitIter = tempVecOL.begin(); detHitIter != tempVecOL.end(); ) {
     
@@ -3926,4 +3919,168 @@ StETofMatchMaker::sortandcluster(eTofHitVec& matchCandVec , eTofHitVec& detector
 	}						
       }// loop over MMMap
   }//loop over counters
+  
+  //set clustersize for jumped hits: +100 if default , +200 if cal/def2
+  for(unsigned int i=0;i<finalMatchVec.size();i++){
+
+   
+    StETofCalibMaker*  mETofCalibMaker;
+    mETofCalibMaker = ( StETofCalibMaker* ) GetMaker( "etofCalib" );
+
+    int keyGet4up   = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 1 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+    int keyGet4down = 144 * ( finalMatchVec.at(i).sector - 13 ) + 48 * ( finalMatchVec.at(i).plane -1 ) + 16 * ( finalMatchVec.at(i).counter - 1 ) + 8 * ( 2 - 1 ) + ( ( finalMatchVec.at(i).strip - 1 ) / 4 );
+
+    if(!mETofCalibMaker){      
+      if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	finalMatchVec.at(i).clusterSize += 100;
+      }
+    }else{
+      if(!mETofCalibMaker->calState()){
+	if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	  if(mETofCalibMaker->GetState(keyGet4up) != 0 || mETofCalibMaker->GetState(keyGet4down) != 0){
+	    finalMatchVec.at(i).clusterSize += 200;
+	  }else{
+	    finalMatchVec.at(i).clusterSize += 100;
+	  }
+	}
+      }else{
+	if(jumpHitMap.at(finalMatchVec.at(i).index2ETofHit)){
+	  finalMatchVec.at(i).clusterSize += 100;
+	}
+	if(mETofCalibMaker->GetState(keyGet4up) != 0 || mETofCalibMaker->GetState(keyGet4down) != 0){
+	  finalMatchVec.at(i).clusterSize += 200;
+	}
+      }
+    }
+  }
+  
+  sortOutOlDoubles(finalMatchVec);
+}
+
+void
+StETofMatchMaker::sortOutOlDoubles(eTofHitVec& finalMatchVec){
+  
+  eTofHitVec overlapHitVec;
+  
+  eTofHitVec tempVecOL        = finalMatchVec;
+  
+  std::vector<int> trackIdVec;
+  
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+    
+    if( !(std::find(trackIdVec.begin(), trackIdVec.end(), finalMatchVec.at(i).trackId) != trackIdVec.end())){
+      
+      trackIdVec.push_back(finalMatchVec.at(i).trackId);
+
+      int counterId1 = (finalMatchVec.at(i).sector*100) + (finalMatchVec.at(i).plane*10) + (finalMatchVec.at(i).counter);
+      
+      for(unsigned int j =0; j< finalMatchVec.size(); j++){
+	
+	int counterId2 = (finalMatchVec.at(j).sector*100) + (finalMatchVec.at(j).plane*10) + (finalMatchVec.at(j).counter);
+	
+	if(counterId1 != counterId2  && finalMatchVec.at(i).trackId == finalMatchVec.at(j).trackId){
+	  
+	  if(!(finalMatchVec.at(j).matchFlag % 2))	finalMatchVec.at(j).matchFlag++;
+	  if(!(finalMatchVec.at(i).matchFlag % 2))	finalMatchVec.at(i).matchFlag++;
+	  
+	}
+      }  
+    }
+  }
+
+  eTofHitVec tmpVec;
+  eTofHitVec OlVec;
+  std::map< int , eTofHitVec >  overlapHitMap;
+
+  tmpVec = finalMatchVec;
+  finalMatchVec.clear();
+  finalMatchVec.resize(0);
+  
+  for(unsigned int i=0; i< tmpVec.size(); i++){ 
+
+    if(tmpVec.at(i).matchFlag%2 == 0){
+      finalMatchVec.push_back(tmpVec.at(i));
+    }else{
+      OlVec.push_back(tmpVec.at(i));
+    }
+  }
+
+  // sort out OlVec
+  for(unsigned int i =0; i < OlVec.size(); i++){
+    overlapHitMap[OlVec.at(i).trackId].push_back(OlVec.at(i));
+  }
+
+  map<Int_t, eTofHitVec >::iterator it;
+  
+  for (it = overlapHitMap.begin(); it != overlapHitMap.end(); it++){
+    
+    eTofHitVec trackVec = it->second;
+    int ind_best = 0;
+    int dr_best = 9999;
+    
+    for(unsigned int n=0; n< trackVec.size();n++){
+      
+      float dr = sqrt((trackVec.at(n).deltaX * trackVec.at(n).deltaX ) + (trackVec.at(n).deltaY * trackVec.at(n).deltaY ));
+      
+      if(dr < dr_best){	    
+	dr_best=dr;
+	ind_best=n;
+	  }
+    }
+    finalMatchVec.push_back(trackVec.at(ind_best));
+  }
+
+  //fix matchFlags 
+  // New match-flag scheme provides information on hit-type, match case, and overlap	
+  // 0: no valid match, otherwise 3 digits encode at first position hit type , at second position overlap info and at third position match type
+  // hit types    : 0 = single sided hits only (time resolution about 25 ps lower than for normal hits)
+  // hit types    : 1 = single sided and normal hits got merged into "mixed hit" for matching  
+  // hit types    : 2 = normal hits only (best quality , most common case)	
+  // overlap info : 0 = hit has no contribution from overlap
+  // overlap info : 1 = hit has only contributions from overlap
+  // overlap info : 2 = hit has contributions from inside and outside of overlap region
+  // match case   : 0 = no match
+  // match case   : 1 = match from cluster of multiple hits and multiple tracks close in space ( ambiguities leave room for missmatches -> frequent case for most central events!!)
+  // match case   : 2 = single hit could have been matched to multiple tracks 	
+  // match case   : 3 = single track could have been matched to multiple hits 	
+  // match case   : 4 = single track matched to single hit ( no ambiguity -> best quality)	
+  // example :: matchFlag = 204 -> 2 = only normal hits, 0 = not  in overlap, 4 = single track single hit match
+	
+  for(unsigned int i =0; i< finalMatchVec.size(); i++){
+
+    unsigned char singlemixdouble = 9;
+    unsigned char matchcase = 9;
+    unsigned char isOl = 9;
+
+    switch (finalMatchVec.at(i).matchFlag / 100) {
+      case 1 : matchcase = 4; break;
+      case 2 : matchcase = 3; break;
+      case 3 : matchcase = 2; break;
+      case 4 : matchcase = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for matchcase!" << endm; }
+    }
+
+    isOl = 1 - ( finalMatchVec.at(i).matchFlag % 2 );
+
+    switch (finalMatchVec.at(i).matchFlag % 100) {
+      case 10 :
+      case 11 :
+      case 30 :
+      case 31 : singlemixdouble = 2; break;
+      case 20 :
+      case 21 :
+      case 40 :
+      case 41 : singlemixdouble = 0; break;
+      case 50 :
+      case 51 : singlemixdouble = 1; break;
+      default : { LOG_WARN << "Errant ETOF match flag for singlemixdouble!" << endm; }
+    }
+
+    unsigned char newFlag = (singlemixdouble*100) + (isOl*10) + (matchcase);
+
+    if(singlemixdouble == 9 || isOl == 9 || matchcase == 9) newFlag = 0;
+
+    finalMatchVec.at(i).matchFlag = newFlag;
+
+  }
 }

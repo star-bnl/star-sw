@@ -580,6 +580,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
       if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
       if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
+      if (GetOption("FXT"        ) )      mk->SetAttr("FXT"             , kTRUE);
 
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
@@ -730,8 +731,10 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("EastOff"))      mk->SetAttr("EastOff",kTRUE);
       if ( GetOption("WestOff"))      mk->SetAttr("WestOff",kTRUE);
     }
-    if (maker == "StEventQAMaker" && GetOption("QAalltrigs"))
-      ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
+    if (maker == "StEventQAMaker") {
+      if ( GetOption("QAalltrigs"))   mk->SetAttr("allTrigs",kTRUE);
+      if ( GetOption("QAallevents"))  mk->SetAttr("allEvents",kTRUE);
+    }
     //Special options for V0s and Xis using estGlobal tracks
     if(maker=="StV0FinderMaker" && Key=="v0svt"){
       TString cmd(Form("StV0FinderMaker *V0mk=(StV0FinderMaker*) %p;",mk));

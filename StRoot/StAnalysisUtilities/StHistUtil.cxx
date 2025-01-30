@@ -960,11 +960,17 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           } else graphPad->cd(m_QAShiftMode ? 0 : curPad);
 
           // set x & y grid off by default
+	  TRegexp bsmdPerModule("bsmd.*PerModule");
 	  gPad->SetGridy(0);
           if (oName.Contains("H_matchCand")) {
             gPad->SetGridx(1);
             gStyle->SetGridStyle(6);
             gStyle->SetGridColor(kOrange);
+          } else if (oName.Contains(bsmdPerModule)) {
+	    hobj->GetXaxis()->SetNdivisions(15);
+	    hobj->GetXaxis()->SetLabelSize(0.03);
+	    hobj->GetXaxis()->SetTitle("Module Number");
+            gPad->SetGridx();	    
           } else {
 	    gPad->SetGridx(0);
             gStyle->SetGridStyle(3);
@@ -972,6 +978,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           }
 
           // set stats to draw
+	  TRegexp bsmd2DPerModule("bsmd.*Strip.*PerModule");
           if (oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ||
@@ -979,6 +986,10 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             gStyle->SetOptStat(11);
           } else if (oName.Contains("NullPrim")) {
             gStyle->SetOptStat(1111);
+	  } else if (oName.Contains(bsmd2DPerModule)) {
+	    gStyle->SetOptStat(0);
+	    hobj->GetYaxis()->SetTitle("Strip Within Module");
+	    hobj->GetYaxis()->SetTitleOffset(1.4);
           } else {
             gStyle->SetOptStat(111111);
           }

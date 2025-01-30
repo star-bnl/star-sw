@@ -130,6 +130,7 @@ public:
     void            setFlagBase();
     void            SetFitPointsCut(Int_t fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
     void            SetMinimumTracks(Int_t n) {mMinTrack = n;}
+    void            SetFXT(bool fxt=kTRUE) { mFXT = fxt; }
 
 private:
 
@@ -151,6 +152,7 @@ private:
     bool                   mLowerSplitVtxRank;// Use lower rank for split vertices
     UInt_t                 mFlagBase;         // ITTF track flag
     bool                   mRequireCTB;       // Set maker to use CTB
+    bool                   mFXT;              // Switch on FXT mode
     UInt_t                 mMinNumberOfFitPointsOnTrack;
     Float_t                mDcaZMax;
     Double_t               mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
