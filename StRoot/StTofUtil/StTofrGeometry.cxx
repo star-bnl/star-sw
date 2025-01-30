@@ -1253,6 +1253,7 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   TDataSetIter volume(starHall,0);
 
   TVolume *starDetectorElement = 0;
+  
   while ( (starDetectorElement = ( TVolume *)volume()) )
     {
       //      const char *elementName = starDetectorElement->GetName();
@@ -1286,7 +1287,9 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   TVolumeView *secVolume = 0;
   mTrays = 0;     // non-emtry tray number
   while ( (secVolume = (TVolumeView *)nextSector()) ) {
+    if (0==secVolume) continue;
     TVolumeView *trayVolume = (TVolumeView *)secVolume->First();
+    if (0==trayVolume) continue;
     if ( trayVolume->GetListSize() ) {
       mTrays++;
       mModulesInTray = trayVolume->GetListSize();
@@ -1307,7 +1310,9 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   mNValidModules = 0;
   for(Int_t i=0;i<list->GetSize();i++) {
     sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
+    if (0==sectorVolume) continue;
     TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
+    if (0==trayVolume) continue;
     if( !trayVolume->GetListSize() ) continue;
     if ( i>=60 ) ibtoh = 1;
     //    gMessMgr->Info("","OS") << " test sector size = " << trayVolume->GetListSize() << endm;
