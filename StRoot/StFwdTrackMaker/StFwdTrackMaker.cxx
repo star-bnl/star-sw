@@ -230,7 +230,7 @@ int StFwdTrackMaker::Finish() {
 
 void StFwdTrackMaker::LoadConfiguration() {
     if (mConfigFile.length() < 5){
-        LOG_INFO << "Forward Tracker is using default config for ";
+        LOG_INFO << "WOAH: Forward Tracker is using default config for ";
         if ( defaultConfig == defaultConfigData ){
             LOG_INFO << " DATA" << endm;
         } else {
@@ -246,7 +246,9 @@ void StFwdTrackMaker::LoadConfiguration() {
 
 //________________________________________________________________________
 int StFwdTrackMaker::Init() {
+    LOG_INFO << "StFwdTrackMaker::Init()" << endm;
     if ( !configLoaded ){
+        defaultConfig = defaultConfigData;
         LoadConfiguration();
     }
 
@@ -1073,6 +1075,7 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
 
 //________________________________________________________________________
 int StFwdTrackMaker::Make() {
+    LOG_INFO << ">>StFwdTrackMaker::Make" << endm;
     // START time for measuring tracking
     long long itStart = FwdTrackerUtils::nowNanoSecond();
 
@@ -1089,7 +1092,7 @@ int StFwdTrackMaker::Make() {
     // get the primary vertex for use with FWD tracking
     mFwdVertexSource = StFwdTrackMaker::kFwdVertexSourceUnknown;
     GetEventPrimaryVertex();
-    LOG_DEBUG << "FWD Vertex Source: " << mFwdVertexSource << endm;
+    LOG_INFO << "FWD Vertex Source: " << mFwdVertexSource << endm;
     if ( mFwdVertexSource == kFwdVertexSourceNone ){
         // TODO: add clean support for beamline constraints
         setIncludePrimaryVertexInFit( false );
@@ -1114,13 +1117,14 @@ int StFwdTrackMaker::Make() {
 
     /**********************************************************************/
     // Load sTGC
-    LOG_DEBUG << ">>StFwdTrackMaker::loadFttHits" << endm;
+    LOG_INFO << ">>StFwdTrackMaker::loadFttHits" << endm;
     if ( IAttr("useFtt") ) {
         loadFttHits( mcTrackMap, hitMap );
     }
 
     /**********************************************************************/
     // Load FST
+    LOG_INFO << ">>StFwdTrackMaker::loadFstHits" << endm;
     if ( IAttr("useFst") ) {
         LOG_DEBUG << ">>StFwdTrackMaker::loadFstHits" << endm;
         int fstCount = loadFstHits( mcTrackMap, fsiHitMap );
