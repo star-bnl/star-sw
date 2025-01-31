@@ -83,6 +83,14 @@ protected:
     Float_t mMomentumZ;
     /// convergence (0=no, 1=converge, 2=converge fully)
     UChar_t mStatus;
+    /// DCA to primary vertex (XY)
+    Float_t mDCAXY;
+    /// DCA to primary vertex (Z)
+    Float_t mDCAZ;
+    /// Index of primary vertex used in fit (primary tracks only)
+    UChar_t mVtxIndex;
+    /// Index of the corresponding Global Track if primary, else USHRT_MAX
+    UShort_t mGlobalTrackIndex;
 
     /// ecal match index
     std::vector<UChar_t> mEcalMatchIndex;
