@@ -165,7 +165,7 @@ class SiRasterizer {
     }
 
     bool active() {
-        return cfg.get<bool>("SiRasterizer:active", false);
+        return cfg.get<bool>("SiRasterizer:active", true);
     }
 
     TVector3 raster(TVector3 p0) {
@@ -215,7 +215,12 @@ class ForwardTracker : public ForwardTrackMaker {
 };
 
 //________________________________________________________________________
-StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mForwardTracker(nullptr), mForwardData(nullptr), mGeoCache(""){
+StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mEventVertex(0,0,0), mForwardTracker(nullptr), mForwardData(nullptr), mGeoCache(""){
+    
+    
+    mEventVertexCov.ResizeTo(3, 3);
+    mEventVertexCov.Zero();
+    
     SetAttr("useFtt",1);                 // Default Ftt on
     SetAttr("useFst",1);                 // Default Fst on
     SetAttr("useFcs",1);                 // Default Fcs on
@@ -230,12 +235,8 @@ int StFwdTrackMaker::Finish() {
 
 void StFwdTrackMaker::LoadConfiguration() {
     if (mConfigFile.length() < 5){
-        LOG_INFO << "Forward Tracker is using default config for ";
-        if ( defaultConfig == defaultConfigData ){
-            LOG_INFO << " DATA" << endm;
-        } else {
-            LOG_INFO << " Simulation" << endm;
-        }
+        // no config file specified, use default
+        // 5 characters is the minimum length for a valid filename since we must have at least .xml
         mFwdConfig.load( defaultConfig, true );
     } else {
         LOG_INFO << "Forward Tracker is using config from file : " <<  mConfigFile << endm;
@@ -246,8 +247,13 @@ void StFwdTrackMaker::LoadConfiguration() {
 
 //________________________________________________________________________
 int StFwdTrackMaker::Init() {
+    // user may have loaded config manually before Init()
     if ( !configLoaded ){
         LoadConfiguration();
+
+        // set additional default configuration values
+        setOutputFilename( "stfwdtrackmaker_data.root" );
+
     }
 
     if ( mGeoCache == "" ){
@@ -350,7 +356,7 @@ void StFwdTrackMaker::loadFttHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdD
     LOG_DEBUG << "Loading FTT Hits" << endm;
     // Get the StEvent handle to see if the rndCollection is available
     StEvent *event = (StEvent *)GetDataSet("StEvent");
-    string fttFromSource = mFwdConfig.get<string>( "Source:ftt", "" );
+    string fttFromSource = mFwdConfig.get<string>( "Source:ftt", "DATA" );
 
     if (!event){
         LOG_ERROR << "No StEvent, cannot load Ftt Data" << endm;
@@ -978,8 +984,8 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
 
     mEventVertexCov.ResizeTo(3, 3);
     mEventVertexCov.Zero();
-    double sig2 = 1;
-    mEventVertexCov(0, 0) = sig2; // default resolution
+    double sig2 = 1;// default resolution, overwritten if valid vtx found
+    mEventVertexCov(0, 0) = sig2; 
     mEventVertexCov(1, 1) = sig2;
     mEventVertexCov(2, 2) = sig2;
     // if something is found it will overwrite this, if not
@@ -990,45 +996,47 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
      * Add Primary Vertex to the track
      */
     St_g2t_vertex *g2t_vertex = (St_g2t_vertex *)GetDataSet("geant/g2t_vertex");
+    LOG_INFO << "Searching for Event Vertex from geant/g2t_vertex: " << g2t_vertex << endm;
     if ( g2t_vertex != nullptr ) {
         // Set the MC Vertex for track fitting
         g2t_vertex_st *vert = (g2t_vertex_st*)g2t_vertex->At(0);
-        
-        mEventVertexCov.ResizeTo(3, 3);
-        const double sigXY = 0.1;
-        const double sigZ = 10.0;
-        mEventVertexCov(0, 0) = pow(sigXY,2);
-        mEventVertexCov(1, 1) = pow(sigXY,2);
-        mEventVertexCov(2, 2) = pow(sigZ, 2);
-        auto rhc = TVectorD( 3 );
-        rhc[0] = vert->ge_x[0];
-        rhc[1] = vert->ge_x[1];
-        rhc[2] = vert->ge_x[2];
-        mEventVertex.SetXYZ( vert->ge_x[0], vert->ge_x[1], vert->ge_x[2] );
-        mFwdVertexSource = kFwdVertexSourceMc;
-        return mEventVertex;
+        LOG_INFO << "Setting Event Vertex from geant/g2t_vertex[0]: " << vert << endm;
+        if ( vert ){
+            mEventVertexCov.ResizeTo(3, 3);
+            const double sigXY = 0.1; // TODO: read from MC vertex info?
+            const double sigZ = 0.1;
+            mEventVertexCov(0, 0) = pow(sigXY,2);
+            mEventVertexCov(1, 1) = pow(sigXY,2);
+            mEventVertexCov(2, 2) = pow(sigZ, 2);
+            auto rhc = TVectorD( 3 );
+            rhc[0] = vert->ge_x[0];
+            rhc[1] = vert->ge_x[1];
+            rhc[2] = vert->ge_x[2];
+            mEventVertex.SetXYZ( vert->ge_x[0], vert->ge_x[1], vert->ge_x[2] );
+            mFwdVertexSource = kFwdVertexSourceMc;
+            return mEventVertex;
+        }
     }
 
     // or try the McEvent
     StMcEvent *stMcEvent = static_cast<StMcEvent *>(GetInputDS("StMcEvent"));
-    if (stMcEvent) {
-        LOG_INFO << "Setting Event Vertex from StMcEvent: " << stMcEvent << endm;
+    LOG_INFO << "Searching for Event Vertex from StMcEvent: " << stMcEvent << endm;
+    if (stMcEvent && stMcEvent->primaryVertex() ) {
         StThreeVectorF vertex = stMcEvent->primaryVertex()->position();
         mEventVertex.SetXYZ( vertex.x(), vertex.y(), vertex.z() );
         mFwdVertexSource = kFwdVertexSourceMc;
         LOG_INFO << "FWD Tracking on event with MC Primary Vertex: " << mEventVertex.X() << ", " << mEventVertex.Y() << ", " << mEventVertex.Z() << endm;
 
-        mEventVertexCov(0, 0) = 0.1 * 0.1; // default resolution
-        mEventVertexCov(1, 1) = 0.1 * 0.1; // default resolution
-        mEventVertexCov(2, 2) = 0.1 * 0.1; // default resolution
+        const double sigXY = 0.1; // TODO: read from MC vertex info?
+        const double sigZ = 0.1;
+        mEventVertexCov(0, 0) = pow(sigXY,2);
+        mEventVertexCov(1, 1) = pow(sigXY,2);
+        mEventVertexCov(2, 2) = pow(sigZ, 2);
         return mEventVertex;
-    } else {
-        LOG_DEBUG << "No available Mc Primary Vertex" << endm;
     }
 
-    // MuDst only for now
-    int count = 0;
     StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
+    LOG_INFO << "Searching for Event Vertex from MuDstMaker: " << mMuDstMaker << endm;
     if(mMuDstMaker && mMuDstMaker->muDst() && mMuDstMaker->muDst()->primaryVertex() ) {
         auto muPV = mMuDstMaker->muDst()->primaryVertex();
         mEventVertex.SetX(muPV->position().x());
@@ -1036,34 +1044,43 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
         mEventVertex.SetZ(muPV->position().z());
         mFwdVertexSource = kFwdVertexSourceTpc;
         return mEventVertex;
-    } else {
-        LOG_DEBUG << "FWD Tracking on event without available Mu Primary Vertex" << endm;
-        StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
-        if (!stEvent) return mEventVertex;
-        StBTofCollection *btofC = stEvent->btofCollection();
-        if (!btofC) {
-            LOG_WARN << "Cannot get BTOF collections, Cannot use VPD vertex" << endm;
-            return mEventVertex;
-        }
-
-        StBTofHeader * btofHeader = btofC->tofHeader();
-        if (!btofHeader){
-            LOG_WARN << "Cannot get BTOF Header, Cannot use VPD vertex" << endm;
-            return mEventVertex;
-        }
-
-        int nEast = btofHeader->numberOfVpdHits( east );
-        int nWest = btofHeader->numberOfVpdHits( west );
-        int nTof = btofC->tofHits().size();
-
-        if ( btofHeader->vpdVz() && fabs(btofHeader->vpdVz()) < 100 ){
-            // default event vertex
-            LOG_DEBUG << "FWD Tracking on event using VPD z vertex: (, 0, 0, " << btofHeader->vpdVz() << " )" << endm;
-            mFwdVertexSource = kFwdVertexSourceVpd;
-            mEventVertex.SetXYZ( 0, 0, btofHeader->vpdVz() );
-            return mEventVertex;
-        }
+    } 
+    
+    
+    LOG_DEBUG << "FWD Tracking on event without available Mu Primary Vertex" << endm;
+    StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
+    if (!stEvent) return mEventVertex; // if we get here and there is no StEvent, we are done
+    
+    StBTofCollection *btofC = stEvent->btofCollection();
+    if (!btofC) {
+        LOG_WARN << "Cannot get BTOF collections, Cannot use VPD vertex" << endm;
+        return mEventVertex;
     }
+
+    StBTofHeader * btofHeader = btofC->tofHeader();
+    if (!btofHeader){
+        LOG_WARN << "Cannot get BTOF Header, Cannot use VPD vertex" << endm;
+        return mEventVertex;
+    }
+
+    int nEast = btofHeader->numberOfVpdHits( east );
+    int nWest = btofHeader->numberOfVpdHits( west );
+    int nTof = btofC->tofHits().size();
+
+    if ( btofHeader->vpdVz() && fabs(btofHeader->vpdVz()) < 100 ){
+        // default event vertex
+        LOG_DEBUG << "FWD Tracking on event using VPD z vertex: (, 0, 0, " << btofHeader->vpdVz() << " )" << endm;
+        mFwdVertexSource = kFwdVertexSourceVpd;
+        const double sigXY = 1;
+        const double sigZ = 6; // approximate resolution of VPD in p+p collisions
+        mEventVertexCov(0, 0) = pow(sigXY,2);
+        mEventVertexCov(1, 1) = pow(sigXY,2);
+        mEventVertexCov(2, 2) = pow(sigZ, 2);
+        mEventVertex.SetXYZ( 0, 0, btofHeader->vpdVz() );
+        return mEventVertex;
+    }
+    
+    // if we get here we failed to find a valid vtx
     return mEventVertex;
 }
 
@@ -1086,17 +1103,9 @@ int StFwdTrackMaker::Make() {
     mFwdVertexSource = StFwdTrackMaker::kFwdVertexSourceUnknown;
     GetEventPrimaryVertex();
     LOG_DEBUG << "FWD Vertex Source: " << mFwdVertexSource << endm;
-    if ( mFwdVertexSource == kFwdVertexSourceNone ){
-        // TODO: add clean support for beamline constraints
-        setIncludePrimaryVertexInFit( false );
-    } else if ( mFwdVertexSource == kFwdVertexSourceUnknown ){
-        LOG_WARN << "FwdVertexSource=Unknown even after looking, shouldnt be possible. Not using primary vertex in forward tracking" << endm;
-        // this should not be possible
-        setIncludePrimaryVertexInFit( false );
-    } else {
-        LOG_DEBUG << "Setting FWD event vertex to: " << TString::Format("mEventVertex=(%0.3f+/-%0.3f, %0.3f+/-%0.3f, %0.3f+/-%0.3f)", mEventVertex.X(), sqrt(mEventVertexCov(0, 0)), mEventVertex.Y(), sqrt(mEventVertexCov(1, 1)), mEventVertex.Z(), sqrt(mEventVertexCov(2, 2)) ) << endm;
-        mForwardTracker->setEventVertex( mEventVertex, mEventVertexCov );
-    }
+    LOG_DEBUG << "Setting FWD event vertex to: " << TString::Format("mEventVertex=(%0.3f+/-%0.3f, %0.3f+/-%0.3f, %0.3f+/-%0.3f)", mEventVertex.X(), sqrt(mEventVertexCov(0, 0)), mEventVertex.Y(), sqrt(mEventVertexCov(1, 1)), mEventVertex.Z(), sqrt(mEventVertexCov(2, 2)) ) << endm;
+    mForwardTracker->setEventVertex( mEventVertex, mEventVertexCov );
+    
 
     /**********************************************************************/
     // Load MC tracks
@@ -1409,26 +1418,9 @@ void StFwdTrackMaker::ProcessFwdTracks(  ){
 }
 
 
-std::string StFwdTrackMaker::defaultConfigIdealSim = R"(
+std::string StFwdTrackMaker::defaultConfig = R"(
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <Output url="fwdTrackMaker_ideal_sim.root" />
-	<TrackFitter refit="false" mcSeed="true" active="true">
-        <Vertex sigmaXY="0.001" sigmaZ="0.01" includeInFit="true" smearMcVertex="true" />
-    </TrackFitter>
-</config>
-)";
-
-
-
-std::string StFwdTrackMaker::defaultConfigData = R"(
-<?xml version="1.0" encoding="UTF-8"?>
-<config>
-    <Output url="stfwdtrackmaker_data.root" />
-    <Source ftt="DATA" />
-
-    <SiRasterizer r="3.004" phi="0.004" />
-
     <TrackFinder nIterations="1">
         <Iteration nPhiSlices="1" > <!-- Options for first iteration -->
             <SegmentBuilder>
@@ -1444,7 +1436,6 @@ std::string StFwdTrackMaker::defaultConfigData = R"(
 				<Criteria name="Crit3_ChangeRZRatio" min="0.8" max="1.21" />
 				<Criteria name="Crit3_2DAngle" min="0" max="30" /> -->
             </ThreeHitSegments>
-
         </Iteration>
 
         <Connector distance="2"/>

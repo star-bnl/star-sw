@@ -145,44 +145,12 @@ class StFwdTrackMaker : public StMaker {
     /** @brief Fit the primary vertex using FWD tracks */
     void FitVertex();
 
-    static std::string defaultConfigIdealSim;
-    static std::string defaultConfigData;
-    std::string defaultConfig;
+    static std::string defaultConfig;
     bool configLoaded = false;
     TString mGeoCache;
 
     // Helper functions for modifying configuration
-    // NOTE: to override configuration, call individual functions after setConfigForXXX
     public:
-    /** @brief Setup the StFwdTrackMaker for running on Data
-     * Load the default configuration for Data.
-     * Note: Apply any overrides after calling this
-    */
-    void setConfigForData() { defaultConfig = defaultConfigData; LoadConfiguration(); }
-    /** @brief Setup the StFwdTrackMaker for running on Data
-     * Load the default configuration for IDEAL simulation.
-     * This runs with MC track finding and MC-seeded track fitting.
-     * - MC track finding uses the MCTrackId to collect stgc/fst hits into track seeds
-     * - MC-seeded track fitting uses the MC particle momentum to seed the track fit
-     * - Also uses the simulated MC primary vertex with smearing according to the simgaXY,Z
-     * Note: Apply any overrides after calling this
-    */
-    void setConfigForIdealSim()  { defaultConfig = defaultConfigIdealSim; LoadConfiguration();  }
-
-    /** @brief Setup the StFwdTrackMaker for running on Data
-     * Load the default configuration for Realistic simulation.
-     * This runs tracking on simulation using the same parameters / approach as on data.
-     * Note: Apply any overrides after calling this
-    */
-    void setConfigForRealisticSim()  {
-      defaultConfig = defaultConfigData;
-      LoadConfiguration();
-      // Note: Once the slow sims work this override will not be needed
-      // because the slow sims will put hits into StEvent just like (data) reco chain
-      setFttHitSource( "GEANT" );
-    }
-
-
     /** @brief Set the filename for output ROOT file
      * @param fn : filename of output ROOT file
     */
@@ -275,11 +243,6 @@ class StFwdTrackMaker : public StMaker {
     */
     void setPrimaryVertexSigmaZ(  double sZ ) { mFwdConfig.set<double>( "TrackFitter.Vertex:sigmaZ", sZ ); }
     // TODO: add options for beamline constraint
-
-    /** @brief Include or exclude the Primary Vertex in fit
-     * @param pvf : if true, use PRimary Vertex in fit
-    */
-    void setIncludePrimaryVertexInFit( bool pvf = true ) { mFwdConfig.set<bool>( "TrackFitter.Vertex:includeInFit", pvf ); }
     /** @brief Set B-field to zero (for zero field running)
      * @param zeroB : if true, use Zero B field
     */
