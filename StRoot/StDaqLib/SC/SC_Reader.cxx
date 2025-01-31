@@ -57,6 +57,10 @@ int SC_Reader::ZDCXNoKiller() {
   return sc.rich_scalers[14];
 } 
 
+int SC_Reader::EPDX() {
+  return sc.rich_scalers[13];
+} 
+
 int SC_Reader::PVPDEast() {
   return sc.rich_scalers[8];
 } 

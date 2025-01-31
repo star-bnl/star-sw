@@ -35,6 +35,7 @@ Double_t St_spaceChargeCorC::getSpaceChargeCoulombs(Double_t scaleFactor)
         case (13) : mult = scalers->getCTBOrTOFp(); break; // zdcx-no-killer as of 2011
         case (14) : mult = scalers->getCTBEast(); break; // zdce-no-killer as of 2011
         case (15) : mult = scalers->getCTBWest(); break; // zdcw-no-killer as of 2011
+        case (16) : mult = scalers->getEPDX(); break; // EPD after March 2018
 
         default  : mult = 0.;
       }

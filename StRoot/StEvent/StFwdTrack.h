@@ -22,6 +22,7 @@
 #include <vector>
 #include "StThreeVectorD.hh"
 #include "StContainers.h"
+#include <climits>
 
 class StFcsCluster;
 
@@ -77,18 +78,21 @@ struct StFwdTrackProjection : public StObject {
 struct StFwdTrackSeedPoint : public StObject {
     StFwdTrackSeedPoint() {}
     StFwdTrackSeedPoint(    StThreeVectorD xyz, 
-                            short sec, 
+                            short detsec, 
                             unsigned short trackId, 
                             float cov[9] ){
         mXYZ = xyz;
-        mSector = sec;
+        mSector = detsec;
         mTrackId = trackId;
         memcpy( mCov, cov, sizeof( mCov ));
     }
+
+    short detectorId() const { return mSector / 10; }
+    short sector() const { return mSector % 10; }
     
     StThreeVectorD mXYZ;
     unsigned short mTrackId;
-    short mSector;
+    short mSector; // = detId * 10 + sector
     float mCov[9];
     
     ClassDef(StFwdTrackSeedPoint, 1)
@@ -98,6 +102,8 @@ class StFwdTrack : public StObject {
 
 public:
     StFwdTrack(  );
+    // dtor needed for releasing associations
+    ~StFwdTrack(  );
 
     vector<StFwdTrackProjection> mProjections;
     vector<StFwdTrackSeedPoint> mFTTPoints;
@@ -124,11 +130,14 @@ public:
 
     // Number of fit points used by GenFit
     short   numberOfFitPoints() const;
-    // unsigned int   numberOfPossibleFitPoints() const;
-
+    
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
-
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
+    StThreeVectorD dca() const { return StThreeVectorD( mDCA[0], mDCA[1], mDCA[2] ); }
+    UChar_t vertexIndex() const { return mVtxIndex; }
+    bool isPrimary() const { return mVtxIndex != UCHAR_MAX; }
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
@@ -140,6 +149,10 @@ public:
     void setNDF( float lNDF ) { mNDF = lNDF;}
     void setPval( float lPval ) { mPval = lPval;}
     void setCharge( short  lCharge ) { mCharge = lCharge;}
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
+    void setDCA( StThreeVectorD dca ) { mDCA[0] = dca.x(); mDCA[1] = dca.y(); mDCA[2] = dca.z(); }
+    void setDCA( float dcaX, float dcaY, float dcaZ ) { mDCA[0] = dcaX; mDCA[1] = dcaY; mDCA[2] = dcaZ; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = vtxIndex; }
 
     // ECAL clusters
     StPtrVecFcsCluster& ecalClusters();
@@ -152,29 +165,28 @@ public:
     void addHcalCluster(StFcsCluster* p);
     void sortHcalClusterByET();
 
-    
 protected:
-
-    
-
     // Track quality and convergence
-    bool mDidFitConverge;
-    bool mDidFitConvergeFully;
-    short mNumberOfFailedPoints;
-    short mNumberOfSeedPoints;
-    short mNumberOfFitPoints;
-    float mChi2;
-    float mNDF;
-    float mPval;
-    short mCharge;
-    StThreeVectorD mPrimaryMomentum;
+    bool mDidFitConverge; // did the fit converge
+    bool mDidFitConvergeFully; // did the fit converge fully (fwd and bkw)
+    short mNumberOfFailedPoints; // number of points that failed to converge
+    short mNumberOfSeedPoints; // number of points used in the seed step
+    short mNumberOfFitPoints; // number of points used in the fit (seed + vertex)
+    float mChi2; // chi2 of the fit
+    float mNDF; // number of degrees of freedom
+    float mPval; // p-value of the fit
+    short mCharge; // charge of the track
+    StThreeVectorD mPrimaryMomentum; // momentum at the primary vertex
+    StPtrVecFcsCluster mEcalClusters; // ECAL clusters
+    StPtrVecFcsCluster mHcalClusters; // HCAL clusters
     
+    UShort_t mIdTruth; // MC track id
+    UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
-    StPtrVecFcsCluster mEcalClusters;
-    StPtrVecFcsCluster mHcalClusters;
+    float mDCA[3]; // DCA to the primary vertex
+    UChar_t mVtxIndex;
     
-    ClassDef(StFwdTrack,2)
-
+    ClassDef(StFwdTrack,3)
 };
 
 #endif
