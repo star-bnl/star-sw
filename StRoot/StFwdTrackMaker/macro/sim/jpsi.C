@@ -125,7 +125,7 @@ void Kinematics()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void jpsi( Int_t nevents=100, Int_t rngSeed=12352342, bool decayToElectrons = true )
+void jpsi( Int_t nevents=10000, Int_t rngSeed=12352342, bool decayToElectrons = true )
 { 
 
   hMll = new TH1F("hMll",";Mll;counts [10MeV]", 200, 2.0, 4.0 );
@@ -141,7 +141,7 @@ void jpsi( Int_t nevents=100, Int_t rngSeed=12352342, bool decayToElectrons = tr
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "sdt20211016 y2023 geant gstar usexgeom agml ";
+    TString simple = "sdt20211016 y2024 geant gstar usexgeom agml ";
     bfc(0, simple );
   }
 
@@ -153,6 +153,8 @@ void jpsi( Int_t nevents=100, Int_t rngSeed=12352342, bool decayToElectrons = tr
 
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "xgeometry.so"     );
+
+  
 
   // Setup RNG seed and map all ROOT TRandom here
   StarRandom::seed( rngSeed );

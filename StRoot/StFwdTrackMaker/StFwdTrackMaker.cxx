@@ -971,12 +971,8 @@ void StFwdTrackMaker::loadFcs( ) {
 } // loadFcs
 
 TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
-    if ( mFwdVertexSource == kFwdVertexSourceNone ){
-        // Note - maybe we will add beamline or assume some default
-        return TVector3(0, 0, 0); // the default vertex, but in general it should not be used
-    }
-
     if ( mFwdVertexSource != kFwdVertexSourceUnknown ){
+        // This includes the case where we have already searched and found nothing
         return mEventVertex;
     }
 

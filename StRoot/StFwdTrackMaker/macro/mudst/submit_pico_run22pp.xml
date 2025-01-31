@@ -1,0 +1,43 @@
+<job  name="FwdPicoProd"  simulateSubmission="false" maxFilesPerProcess="1" filesPerHour="500" fileListSyntax="paths">
+
+    <input URL="catalog:star.bnl.gov?production=P23if,trgsetupname=production_pp500_2022,filetype=daq_reco_mudst,storage=NFS" nFiles="500" />
+
+    <!-- Modify these for your case -->
+    <stdout URL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/log/log_pico_$JOBID.log" />
+    <stderr URL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/log/err_pico_$JOBID.err" />
+
+    <output fromScratch="*.event.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*.MuDst.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*.fttQA.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*.fstQa.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*.fttRawHitTime.dat" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*.picoDst.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*StFwdAnalysisMaker.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+    <output fromScratch="*StFwdFitQAMaker.root" toURL="file:/gpfs01/star/pwg_tasks/FwdCalib/PROD/out/" />
+
+    <command>
+        echo "JOBINDEX = ${JOBINDEX}"
+        echo "JOBID = ${JOBID}"
+        
+        ln -s StRoot/StFwdTrackMaker/macro/mudst/ mudst
+        ls -lah
+
+        starver dev
+        root4star -b -q -l 'mudst/pico.C( "'$INPUTFILE0'", 50000 )'
+
+        mv StFwdAnalysisMaker.root ${JOBID}_StFwdAnalysisMaker.root
+        mv StFwdFitQAMaker.root  ${JOBID}_StFwdFitQAMaker.root
+    </command>
+
+    <SandBox>
+        <Package>
+            <File>file:./StRoot</File>
+            <File>file:./fGeom.root</File>
+            <File>file:.sl73_gcc485/</File>
+        </Package>
+    </SandBox>
+
+    <Generator>
+        <Location>/gpfs01/star/pwg_tasks/FwdCalib/PROD/gen</Location>
+    </Generator>
+</job>

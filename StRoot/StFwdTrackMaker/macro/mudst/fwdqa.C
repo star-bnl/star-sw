@@ -2,7 +2,7 @@
 // that is a valid shebang to run script as executable, but with only one arg
 
 void loadLibs();
-void mudst( const Char_t * fileList = "mudst.lis", int nEvents = 5000, int nFiles = 1 ){
+void fwdqa( const Char_t * fileList = "mudst.lis", int nEvents = 5000, int nFiles = 1 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nFiles: " << nFiles << endl;
 	cout << "nEvents: " << nEvents << endl;
@@ -27,15 +27,22 @@ void mudst( const Char_t * fileList = "mudst.lis", int nEvents = 5000, int nFile
 	// St_db_Maker *dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
 
 
-	gSystem->Load("StFwdUtils.so");
-    StFwdAnalysisMaker * fwdAna = new StFwdAnalysisMaker();
-	fwdAna->setMuDstInput();
-    chain->AddMaker(fwdAna);
+	// gSystem->Load("StFwdUtils.so");
+    // StFwdAnalysisMaker * fwdAna = new StFwdAnalysisMaker();
+	// fwdAna->setMuDstInput();
+    // chain->AddMaker(fwdAna);
 
-	StFcsDbMaker * fcsDb = new StFcsDbMaker();
-    chain->AddMaker(fcsDb);
-	fcsDb->SetDebug();
-
+	// StFcsDbMaker * fcsDb = new StFcsDbMaker();
+    // chain->AddMaker(fcsDb);
+	// fcsDb->SetDebug();
+    
+    gSystem->Load("libStarGeneratorUtil.so");
+    gSystem->Load("libgenfit2");
+    gSystem->Load("libKiTrack");
+    gSystem->Load( "StFwdTrackMaker.so" );
+    gSystem->Load("libStEpdUtil.so");
+    StFwdQAMaker *fwdQAMk = new StFwdQAMaker();
+    fwdQAMk->SetDebug(2);
 	
 	// Initialize chain
 	Int_t iInit = chain->Init();
