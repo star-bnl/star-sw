@@ -929,8 +929,8 @@ size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
  */
 void StFwdTrackMaker::loadFcs( ) {
     StEvent *stEvent = static_cast<StEvent *>(GetInputDS("StEvent"));
-    StFcsDb* fcsDb=static_cast<StFcsDb*>(GetDataSet("fcsDb"));
-    if ( !stEvent || !fcsDb ){
+    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+    if ( !stEvent || !mFcsDb ){
         return;
     }
     StFcsCollection* fcsCol = stEvent->fcsCollection();
@@ -946,7 +946,7 @@ void StFwdTrackMaker::loadFcs( ) {
         int nc=fcsCol->numberOfClusters(idet);
         for ( int i = 0; i < nc; i++ ){
             StFcsCluster* clu = clusters[i];
-            StThreeVectorD xyz = fcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
+            StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y());
             mFcsClusters.push_back( TVector3( xyz.x(), xyz.y(), xyz.z() - 2 ) );
             mFcsClusterEnergy.push_back( clu->energy() );
         } // i
@@ -966,7 +966,7 @@ void StFwdTrackMaker::loadFcs( ) {
                 double x[5],y[5];
 
                 if ( hit->energy() < 0.2 ) continue;
-                fcsDb->getEPDfromId(det,hit->id(),pp,tt);
+                mFcsDb->getEPDfromId(det,hit->id(),pp,tt);
                 epdgeo.GetCorners(100*pp+tt,&n,x,y);
                 double x0 = (x[0] + x[1] + x[2] + x[3]) / 4.0;
                 double y0 = (y[0] + y[1] + y[2] + y[3]) / 4.0;
@@ -1304,15 +1304,43 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     float cov[9];
     TVector3 tv3(0, 0, 0);
     for ( auto zp : mapDetectorToZPlane ){
-        int detIndex = zp.first;
+		int detIndex = zp.first;
         float z = zp.second;
         tv3.SetXYZ(0, 0, 0);
         if ( detIndex != kFcsHcalId && detIndex != kFcsWcalId ){
-            tv3 = ObjExporter::trackPosition( gtr.mTrack.get(), z, cov, mom );
+			float detpos[3] = {0,0,z};
+			float detnorm[3] = {0,0,1};
+			if( detIndex==kFcsPresId ){
+				StThreeVectorD xyzoff = mFcsDb->getDetectorOffset(kFcsPresId);
+				detpos[0] = (float)xyzoff.x();
+				detpos[1] = (float)xyzoff.y();
+				detpos[2] = (float)xyzoff.z();
+			}
+			tv3 = ObjExporter::trackPosition( gtr.mTrack.get(), detpos, detnorm, cov, mom );
         } else {
-            // use a straight line projection to HCAL since GenFit cannot handle long projections
-            tv3 = ObjExporter::projectAsStraightLine( gtr.mTrack.get(), 575.0, 625.0, z, cov, mom );
-        }
+	  		// use a straight line projection to HCAL since GenFit cannot handle long projections
+	  		int det=0;
+	  		if( detIndex==kFcsWcalId ){
+				det = 0;   // North side for negative px
+				// South side for positive px, since px==0 does not hit detector choose south side for that case
+				if( p[2]>=0 && p[0]>=0 ){ det=1; }
+				if( p[2]<0  && p[0]<0  ){ det=1; }
+			}
+	  		//Since detIndex cannot be both don't need "else if"
+			if( detIndex==kFcsHcalId ){
+				det = 2;  // North side for negative px
+				// South side for positive px, since px==0 does not hit detector choose south side for that case
+				if( p[2]>=0 && p[0]>=0 ){ det=3; }
+				if( p[2]<0  && p[0]<0  ){ det=3; }
+			}
+			StThreeVectorD xyzoff = mFcsDb->getDetectorOffset(det);
+			StThreeVectorD planenormal = mFcsDb->getNormal(det);
+			float xyz0[3] = { 0, 0, 575.0 };
+			float xyz1[3] = { 0, 0, 625.0 };
+			float xyzdet[3] = { (float)xyzoff.x(), (float)xyzoff.y(), (float)xyzoff.z() };
+			float detnorm[3] = { (float)planenormal.x(), (float)planenormal.y(), (float)planenormal.z() };
+			tv3 = ObjExporter::projectAsStraightLine( gtr.mTrack.get(), xyz0, xyz1, xyzdet, detnorm, cov, mom );
+		}
         fwdTrack->mProjections.push_back( StFwdTrackProjection( detIndex, StThreeVectorF( tv3.X(), tv3.Y(), tv3.Z() ), StThreeVectorF( mom.X(), mom.Y(), mom.Z() ), cov) );
         zIndex++;
     }
@@ -1436,6 +1464,7 @@ std::string StFwdTrackMaker::defaultConfig = R"(
 				<Criteria name="Crit3_ChangeRZRatio" min="0.8" max="1.21" />
 				<Criteria name="Crit3_2DAngle" min="0" max="30" /> -->
             </ThreeHitSegments>
+
         </Iteration>
 
         <Connector distance="2"/>

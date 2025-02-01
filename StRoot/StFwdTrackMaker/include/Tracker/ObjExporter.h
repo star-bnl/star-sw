@@ -133,16 +133,24 @@ public:
     }
 
     // Compute a track projection as a linear (straight) extrapolation from two points from full projections
-    static TVector3 projectAsStraightLine( genfit::Track * t, float z0, float z1, float zf, float * cov, TVector3 &mom ) {
-        TVector3 tv3A = trackPosition( t, z0, cov, mom );
-        TVector3 tv3B = trackPosition( t, z1, cov, mom );
+  static TVector3 projectAsStraightLine( genfit::Track * t, float* xyz0, float* xyz1, float* xyzf, float* planenorm_xyz, float * cov, TVector3 &mom ) {
+    TVector3 tv3A = trackPosition( t, xyz0, planenorm_xyz, cov, mom );
+    TVector3 tv3B = trackPosition( t, xyz1, planenorm_xyz, cov, mom );
 
-        if (verbose){
-            LOG_INFO << "Straight Line Projection using" << endm;
-            LOG_INFO << "A.x = " << tv3A.X() << endm;
-            LOG_INFO << "B.x = " << tv3B.X() << endm;
-        }
-
+    if (verbose){
+      LOG_INFO << "Straight Line Projection using" << endm;
+      LOG_INFO << "A.x = " << tv3A.X() << endm;
+      LOG_INFO << "B.x = " << tv3B.X() << endm;
+    }
+    //Assuming tv3A is starting point of line and tv3B is ending point of line and we are projecting to plane located at xyzf with normal planenorm_xyz
+    TVector3 projlinedir = tv3B-tv3A; //particle straight line direction
+    //Solution of intersection of line and plane where line has direction {xdir,ydir,zdir}*t and starts at {xorigin,yorigin,zorigin} and a plane that has some normal with a point on the plane; "t" is the free parameter in the parametric equation of the line.
+    double tintersection =
+      (planenorm_xyz[0]*(xyzf[0]-tv3A[0])+planenorm_xyz[1]*(xyzf[1]-tv3A[1])+planenorm_xyz[2]*(xyzf[2]-tv3A[2])) /
+      (planenorm_xyz[0]*projlinedir[0]+planenorm_xyz[1]*projlinedir[1]+planenorm_xyz[2]*projlinedir[2]);
+  
+    return TVector3( projlinedir[0]*tintersection+tv3A[0], projlinedir[1]*tintersection+tv3A[1], projlinedir[2]*tintersection+tv3A[2] );
+    /*
         double dxdz = ( tv3B.X() - tv3A.X() ) / ( tv3B.Z() - tv3A.Z() );
         double dydz = ( tv3B.Y() - tv3A.Y() ) / ( tv3B.Z() - tv3A.Z() );
 
@@ -150,54 +158,57 @@ public:
         double dy = dydz * ( zf - z1 );
         TVector3 r( tv3B.X() + dx, tv3B.Y() + dy, zf );
         return r;
+    */
     }
 
-    // Project a track to a given z-plane and return its position, momentum, and cov matrix
-    static TVector3 trackPosition( genfit::Track * t, float z, float * cov, TVector3 &mom ){
+    // Project a track to a given xyz-plane with a normal and return its position, momentum, and cov matrix
+  static TVector3 trackPosition( genfit::Track * t, float* xyz, float* norm, float * cov, TVector3 &mom ){
+    
+    int iPoint = 0;
+    try {
+      auto plane = genfit::SharedPlanePtr(
+					  // these normals make the planes face along z-axis
+					  new genfit::DetPlane(TVector3(xyz), TVector3(norm) )
+					  );
+      
+      genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
+      auto TCM = t->getCardinalRep()->get6DCov(tst);
+      //  returns the track length if needed
+      t->getCardinalRep()->extrapolateToPlane(tst, plane, false, true);
+      
+      TCM = t->getCardinalRep()->get6DCov(tst);
+      
+      // can get the projected positions if needed
+      float x = tst.getPos().X();
+      float y = tst.getPos().Y();
+      float _z = tst.getPos().Z();
 
-        int iPoint = 0;
-        try {
-            auto plane = genfit::SharedPlanePtr(
-                // these normals make the planes face along z-axis
-                new genfit::DetPlane(TVector3(0, 0, z), TVector3(1, 0, 0), TVector3(0, 1, 0) )
-            );
-
-            genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
-            auto TCM = t->getCardinalRep()->get6DCov(tst);
-            //  returns the track length if needed
-            t->getCardinalRep()->extrapolateToPlane(tst, plane, false, true);
-
-            TCM = t->getCardinalRep()->get6DCov(tst);
-
-            // can get the projected positions if needed
-            float x = tst.getPos().X();
-            float y = tst.getPos().Y();
-            float _z = tst.getPos().Z();
-
-            mom.SetXYZ( tst.getMom().X(), tst.getMom().Y(), tst.getMom().Z() );
-
-            if ( cov ){
-                cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
-                cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
-                cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
-            }
-
-
-            return TVector3( x, y, _z );
-        } catch ( genfit::Exception &e ){
-            LOG_INFO << "Track projection Failed from trackPoint " << iPoint  << " E: " << e.what() << endm;
-            return TVector3( -990, -990, -990 );
-        }
+      mom.SetXYZ( tst.getMom().X(), tst.getMom().Y(), tst.getMom().Z() );
+      
+      if ( cov ){
+	cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
+	cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
+	cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
+      }
 
 
-        return TVector3( -990, -990, -990 );
+      return TVector3( x, y, _z );
+    } catch ( genfit::Exception &e ){
+      LOG_INFO << "Track projection Failed from trackPoint " << iPoint  << " E: " << e.what() << endm;
+      return TVector3( -990, -990, -990 );
     }
+
+
+    return TVector3( -990, -990, -990 );
+  }
 
     // Utility method
     static TVector3 trackPosition( genfit::Track * t, float z ){
-        float cov[9];
-        TVector3 mom;
-        return trackPosition( t, z, cov, mom);
+      float cov[9] = {0}; //Force intialize array to 0 
+      TVector3 mom;
+      float detpos[3] = {0,0,z};
+      float detnorm[3] = {0,0,1};
+      return trackPosition( t, detpos, detnorm, cov, mom);
     }
 
     // Output the sTGC strips into a useful format for event display

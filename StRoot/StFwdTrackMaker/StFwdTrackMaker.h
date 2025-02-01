@@ -34,6 +34,8 @@ class StTrackDetectorInfo;
 class SiRasterizer;
 class McTrack;
 
+class StFcsDb;
+
 // ROOT includes
 #include "TNtuple.h"
 #include "TTree.h"
@@ -83,6 +85,8 @@ class StFwdTrackMaker : public StMaker {
   private:
   protected:
 
+  StFcsDb* mFcsDb = 0; // Pointer to fcs db object
+  
     // Event Filters
     float mEventFilterMinTofMult = 2;
     bool  mEventFilterRequireEventVertex = false;
