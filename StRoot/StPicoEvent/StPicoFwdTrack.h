@@ -62,7 +62,11 @@ public:
     void addHcalCluster( UChar_t index ) { mHcalMatchIndex.push_back(index); }
     /// Set index of the corresonding MC track
     void setMcTruth(Int_t index, Int_t qa)   { mIdTruth = (UShort_t)index; mQATruth = (UShort_t)qa; }
-    
+    void setDca( Float_t dcaX, Float_t dcaY, Float_t dcaZ ) { mDCAXY =sqrt(dcaX*dcaX + dcaY*dcaY); mDCAZ = dcaZ; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = vtxIndex; }
+    void setGlobalTrackIndex( UShort_t index ) { mGlobalTrackIndex = index; }
+
+
 protected:
 
     // Track quality and convergence

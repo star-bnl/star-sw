@@ -293,6 +293,9 @@ class StPicoDstMaker : public StMaker {
   /// Pointer to the array of BEMC tower hits
   StEmcRawHit*     mEmcIndex[4800];
 
+  /// Map of StPicoFcsCluster detId + Id to index in the array for track matching
+  std::map<std::pair<int, int>, int> mMapFcsIdPairIndex;
+
   /// Magnetic field of the current event
   Float_t    mBField;
 

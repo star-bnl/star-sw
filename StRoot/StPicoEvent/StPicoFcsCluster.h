@@ -26,8 +26,9 @@ public:
     virtual ~StPicoFcsCluster();
 
     virtual void Print(const Char_t *option = "") const;
+    UShort_t  index() const              { return mIndex; }
     /// Return unique Id of the track
-    Int_t   id() const              { return mId; }
+    UShort_t   id() const              { return mId; }
     unsigned short detectorId() const { return mDetectorId; }
     int category() const { return mCategory; }
     int nTowers() const { return mNTowers; }
@@ -41,6 +42,7 @@ public:
     float chi2Ndf2Photon() const { return mChi2Ndf2Photon; } // chi^2/ndf for 2-photon fit to the cluster.
     const TLorentzVector fourMomentum() const { return TLorentzVector( mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT ); } // Cluster four-momentum (px, py, pz, E)
 
+    void setIndex(int index) { mIndex = (UShort_t)index; }
     void setId(int cluid) { mId = (UShort_t)cluid; }
     void setDetectorId(unsigned short detector) { mDetectorId=(UShort_t)detector; }
     void setCategory(int catag) { mCategory = catag; }
@@ -57,6 +59,7 @@ public:
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
 
 protected:
+    UShort_t mIndex=0;         // Eventwise cluster Index (unique across all detectors)
     UShort_t mId=0;             // Eventwise cluster ID
     UShort_t mDetectorId=0;   // Detector starts from 1
     Int_t mCategory=0;        // Category of cluster (see StMuFcsClusterCategory)

@@ -11,7 +11,6 @@ StPicoFcsHit::StPicoFcsHit() : TObject() {
 }
 
 StPicoFcsHit::StPicoFcsHit(const StPicoFcsHit &hit){
-    mIndex=hit.mIndex;
     mDetectorId=hit.mDetectorId;
     mId=hit.mId;
     mFourMomentumX=hit.mFourMomentumX;
