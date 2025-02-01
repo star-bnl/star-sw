@@ -42,6 +42,7 @@
 #include "StEvent/StL0Trigger.h"
 #include "StEvent/StFwdTrackCollection.h"
 #include "StEvent/StFwdTrack.h"
+#include "StEvent/StFcsCluster.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -905,9 +906,9 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillEpdHits();
   fillBbcHits();
   fillETofHits();
-  fillFwdTracks();
   fillFcsHits();
   fillFcsClusters();
+  fillFwdTracks();
 
   // Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
@@ -2527,8 +2528,19 @@ void StPicoDstMaker::fillFwdTracks() {
       LOG_ERROR << "null FwdTrackCollection" << endm;
       return;
     }
+
+    // fill a map of picodst FCS clusters between index and the cluster pointer
+    map<UShort_t, StPicoFcsCluster*> fcsClusterMap;
+    for ( size_t iClu = 0; iClu < mPicoArrays[StPicoArrays::FcsCluster]->GetEntries(); iClu++ ){
+      StPicoFcsCluster * picoFcsCluster = (StPicoFcsCluster*)mPicoArrays[StPicoArrays::FcsCluster]->At(iClu);
+      fcsClusterMap[picoFcsCluster->index()] = picoFcsCluster; 
+    }
+
+    
+
+
     const StSPtrVecFwdTrack& evTracks = evc->tracks();
-    LOG_INFO << "Adding " << evc->numberOfTracks() << " StMuFwdTracks to MuDSt" << endm; 
+    LOG_INFO << "Adding " << evc->numberOfTracks() << " StFwdTracks from StEvent to PicoDst" << endm; 
     for ( size_t i = 0; i < evc->numberOfTracks(); i++ ){
       StFwdTrack * evTrack = evTracks[i];
       StPicoFwdTrack picoFwdTrack;
@@ -2536,6 +2548,30 @@ void StPicoDstMaker::fillFwdTracks() {
       picoFwdTrack.setNumberOfFitPoints( evTrack->numberOfFitPoints() * evTrack->charge() );
       picoFwdTrack.setNumberOfSeedPoints( evTrack->numberOfSeedPoints() );
       picoFwdTrack.setChi2( evTrack->chi2() );
+      picoFwdTrack.setDca( evTrack->dca().x(), evTrack->dca().y(), evTrack->dca().z() );
+      if ( evTrack->didFitConvergeFully())
+        picoFwdTrack.setStatus( 2 );
+      else if ( evTrack->didFitConverge())
+        picoFwdTrack.setStatus( 1 );
+      else
+        picoFwdTrack.setStatus( 0 );
+
+      picoFwdTrack.setMcTruth( evTrack->idTruth(), evTrack->qaTruth() );
+      picoFwdTrack.setVtxIndex( evTrack->vertexIndex() );
+
+      // fill matched ecal and hcal clusters for the track
+      // ecal
+      for ( auto & cluster : evTrack->ecalClusters() ){
+        int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
+        picoFwdTrack.addEcalCluster( index );
+      }
+      // hcal
+      for ( auto & cluster : evTrack->hcalClusters() ){
+        int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
+        picoFwdTrack.addHcalCluster( index );
+      }
+
+
       int counter = mPicoArrays[StPicoArrays::FwdTrack]->GetEntries();
       picoFwdTrack.setId( counter );
       new((*(mPicoArrays[StPicoArrays::FwdTrack]))[counter]) StPicoFwdTrack(picoFwdTrack);
@@ -2562,7 +2598,8 @@ void StPicoDstMaker::fillFcsClusters() {
   while ((muCluster = static_cast<StMuFcsCluster*>(next()))) {
     int counter = mPicoArrays[StPicoArrays::FcsCluster]->GetEntries();
     StPicoFcsCluster picoFcsCluster;
-    picoFcsCluster.setId(counter);
+    picoFcsCluster.setId(muCluster->id());
+    picoFcsCluster.setIndex(counter);
     picoFcsCluster.setDetectorId(muCluster->detectorId());
     picoFcsCluster.setCategory(muCluster->category());
     picoFcsCluster.setNTowers(muCluster->nTowers());
@@ -2579,6 +2616,7 @@ void StPicoDstMaker::fillFcsClusters() {
     StLorentzVectorD lv = fcsDb->getLorentzVector(xyz, muCluster->energy(), zVertex);
     picoFcsCluster.setFourMomentum(lv.px(),lv.py(),lv.pz(),lv.e());
     new((*(mPicoArrays[StPicoArrays::FcsCluster]))[counter]) StPicoFcsCluster(picoFcsCluster);
+    mMapFcsIdPairIndex[ make_pair( muCluster->detectorId(), muCluster->id() ) ] = counter;
   }
   LOG_INFO << "StPicoDstMaker::fillFcsClusters filled " << mPicoArrays[StPicoArrays::FcsCluster]->GetEntries() << endm;
 }//fillFcsClusters
@@ -2600,7 +2638,6 @@ void StPicoDstMaker::fillFcsHits() {
   while ((muHit = static_cast<StMuFcsHit*>(next()))) {
     int counter = mPicoArrays[StPicoArrays::FcsHit]->GetEntries();
     StPicoFcsHit picoFcsHit;
-    picoFcsHit.setIndex(counter);
     picoFcsHit.setDetectorId(muHit->detectorId());
     picoFcsHit.setId(muHit->id());
     double zVertex=picoDst()->event()->primaryVertex().z();
