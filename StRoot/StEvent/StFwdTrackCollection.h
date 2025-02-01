@@ -18,15 +18,13 @@ class StFwdTrack;
 
 class StFwdTrackCollection : public StObject {
 public:
-    // StFwdTrackCollection();
+    StFwdTrackCollection();
     ~StFwdTrackCollection();
 
     void addTrack(StFwdTrack*);              // Add a track
     StSPtrVecFwdTrack& tracks();             // Return the track list
     const StSPtrVecFwdTrack& tracks() const; // Return the track list
     unsigned int numberOfTracks() const;     // Return the number of tracks
-
-    // void print(int option=1);
 
 private:
     StSPtrVecFwdTrack   mTracks;   //tracks

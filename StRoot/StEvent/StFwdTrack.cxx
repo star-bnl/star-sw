@@ -2,9 +2,9 @@
 #include "StEvent/StFcsCluster.h"
 #include "St_base/StMessMgr.h"
 
-StFwdTrack::StFwdTrack() {
+StFwdTrack::StFwdTrack() {}
 
-}
+StFwdTrack::~StFwdTrack() {}
 
 StFwdTrack::~StFwdTrack() { 
    mEcalClusters.clear();
