@@ -2531,13 +2531,10 @@ void StPicoDstMaker::fillFwdTracks() {
 
     // fill a map of picodst FCS clusters between index and the cluster pointer
     map<UShort_t, StPicoFcsCluster*> fcsClusterMap;
-    for ( size_t iClu = 0; iClu < mPicoArrays[StPicoArrays::FcsCluster]->GetEntries(); iClu++ ){
+    for ( auto iClu = 0; iClu < mPicoArrays[StPicoArrays::FcsCluster]->GetEntries(); iClu++ ){
       StPicoFcsCluster * picoFcsCluster = (StPicoFcsCluster*)mPicoArrays[StPicoArrays::FcsCluster]->At(iClu);
       fcsClusterMap[picoFcsCluster->index()] = picoFcsCluster; 
     }
-
-    
-
 
     const StSPtrVecFwdTrack& evTracks = evc->tracks();
     LOG_INFO << "Adding " << evc->numberOfTracks() << " StFwdTracks from StEvent to PicoDst" << endm; 
@@ -2562,11 +2559,19 @@ void StPicoDstMaker::fillFwdTracks() {
       // fill matched ecal and hcal clusters for the track
       // ecal
       for ( auto & cluster : evTrack->ecalClusters() ){
+        if ( mMapFcsIdPairIndex.count( make_pair( cluster->detectorId(), cluster->id() ) ) == 0 ){
+          LOG_WARN << "No FCS cluster found for ecal cluster with id " << cluster->id() << " and detectorId " << cluster->detectorId() << endm;
+          continue;
+        }
         int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
         picoFwdTrack.addEcalCluster( index );
       }
       // hcal
       for ( auto & cluster : evTrack->hcalClusters() ){
+        if ( mMapFcsIdPairIndex.count( make_pair( cluster->detectorId(), cluster->id() ) ) == 0 ){
+          LOG_WARN << "No FCS cluster found for hcal cluster with id " << cluster->id() << " and detectorId " << cluster->detectorId() << endm;
+          continue;
+        }
         int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
         picoFwdTrack.addHcalCluster( index );
       }
