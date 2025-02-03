@@ -61,15 +61,6 @@ void fast(       char *inFile =  "sim.fzd",
         if ( fwdTrack ){
             fwdTrack->SetDebug(1);
             // config file set here for ideal simulation
-            if (!realisticSim){
-                cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
-                fwdTrack->setConfigForIdealSim( );
-            } else {
-                cout << "Configured for realistic simulation" << endl;
-                fwdTrack->setConfigForRealisticSim( );
-                cout << "Configured for realistic simulation DONE" << endl;
-            }
-
             if ( _geom == "" ){
                 cout << "Using the Geometry cache: fGeom.root" << endl;
                 fwdTrack->setGeoCache( "fGeom.root" );
