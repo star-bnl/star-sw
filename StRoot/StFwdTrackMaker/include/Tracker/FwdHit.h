@@ -129,6 +129,17 @@ class FwdHit : public KiTrack::IHit {
         return FwdSystem::sInstance;
     }
 
+    std::string Print() const {
+        return "FwdHit: \n" + std::to_string(_id) + " x: " + std::to_string(_x) +
+               " y: " + std::to_string(_y) + " z: " + std::to_string(_z) +
+               " detid: " + std::to_string(_detid) + " tid: " + std::to_string(_tid) +
+               " vid: " + std::to_string(_vid) + " sector: " + std::to_string(_sector) + 
+               // output covmat as a 3x3 matrix
+                " covmat: \n" + std::to_string(_covmat(0,0)) + " " + std::to_string(_covmat(0,1)) + " " + std::to_string(_covmat(0,2)) + " \n" +
+                std::to_string(_covmat(1,0)) + " " + std::to_string(_covmat(1,1)) + " " + std::to_string(_covmat(1,2)) + " \n" +
+                std::to_string(_covmat(2,0)) + " " + std::to_string(_covmat(2,1)) + " " + std::to_string(_covmat(2,2));
+    }
+
     void setSector( int s ){ _sector = s; }
     int getTrackId() { return _tid;}
     int _tid; // aka ID truth

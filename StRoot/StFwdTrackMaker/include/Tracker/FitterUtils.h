@@ -33,6 +33,7 @@ class ConstFitSeeder : public FitSeedMaker {
         }
 };
 class GenericFitSeeder : public FitSeedMaker {
+    bool isValid = false;
     public:
         GenericFitSeeder() {}
         virtual ~GenericFitSeeder() {}
