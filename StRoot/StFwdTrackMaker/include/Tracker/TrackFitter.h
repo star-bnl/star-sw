@@ -319,13 +319,6 @@ class TrackFitter {
         LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(%f, %f, %f)", seedPos.X(), seedPos.Y(), seedPos.Z() ) << endm; 
         LOG_DEBUG << "Setting track fit seed momentum = " << TString::Format( "(%f, %f, %f)", seedMom.X(), seedMom.Y(), seedMom.Z() ) << endm;
 
-        if ( Debug() ){
-            for (auto h : trackSeed) {
-                auto fh = dynamic_cast<FwdHit*>(h);
-                LOG_DEBUG << fh->Print() << endm;
-            }
-        }
-
         LOG_DEBUG << "Setting track fit seed charge = " << seedQ << endm;
 
         if ( seedQ == 0 ) {
