@@ -35,6 +35,6 @@ class StGmtAlignmentMaker : public StMaker {
     Int_t    fMinNoHits;
     Double_t fpCut;
     const Char_t  *fOut;
-    ClassDef(StGmtAlignmentMaker,1)
+    ClassDef(StGmtAlignmentMaker,0)
 };
 #endif

@@ -1,9 +1,24 @@
-#include <assert.h>
+// ROOT headers
 #include "TH1.h"
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TF1.h"
+#include "TGeoMatrix.h"
+#include "TKey.h"
+#include "TDirectory.h"
+#include "TClass.h"
+#include "TRVector.h"
+#include "TRSymMatrix.h"
+
+// StRoot headers
+#include "StGmtHit.h"
+#include "StGmtHitCollection.h"
+#include "StGmtCollection.h"
+#include "StarRoot/THelixTrack.h"
+#include "EventT.h"
+#include "TrackT.h"
+#include "HitT.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "StEventInfo.h"
@@ -15,19 +30,11 @@
 #include "StTrackDetectorInfo.h"
 #include "StTrackGeometry.h"
 #include "StDcaGeometry.h"
-#include "TGeoMatrix.h"
-#include "StarRoot/THelixTrack.h"
-#include "EventT.h"
-#include "TrackT.h"
-#include "HitT.h"
-#include "TKey.h"
-#include "TDirectory.h"
-#include "TClass.h"
-#include "TRVector.h"
-#include "TRSymMatrix.h"
-#include "StGmtHit.h"
-#include "StGmtHitCollection.h"
-#include "StGmtCollection.h"
+#include "St_base/StMessMgr.h"
+
+// C++ headers
+#include <assert.h>
+
 #define __OnlyGlobal__
 
 TClonesArray *EventT::fgTracks = 0;
@@ -68,13 +75,13 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     if (! pEventT) return iok;
     StGmtCollection* GmtCollection = pEventT->gmtCollection();
     if (! GmtCollection) { 
-        std::cout << "No GMT Collections" << std::endl; 
+        LOG_INFO << "No GMT Collections" << endm; 
         return iok;
     }
     StSPtrVecTrackNode& theNodes = pEventT->trackNodes();
     UInt_t nnodes = theNodes.size();
     if (! nnodes) { 
-        std::cout << "No tracks" << std::endl; 
+        LOG_INFO << "No tracks" << endm; 
         return iok;
     }
     StEventInfo* info = pEventT->info();
@@ -136,8 +143,8 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
         StThreeVectorD xyzR = helixO.at(stepR);
         Double_t phiR = TMath::RadToDeg()*xyzR.phi();
         if (_debug) {
-        std::cout << "\t shR " << shR.first << "\t" << shR.second << "\tstepR " << stepR 
-                    << "\txyzR\t" << xyzR << "\tphiR\t" << phiR << std::endl;
+        LOG_INFO << "\t shR " << shR.first << "\t" << shR.second << "\tstepR " << stepR 
+                    << "\txyzR\t" << xyzR << "\tphiR\t" << phiR << endm;
         }
         Int_t NoHitPerTrack = 0;
         THashList *fRotList = RotMatrices();
@@ -157,7 +164,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
             UInt_t NoHits = hitvec.size();
             if (! NoHits) continue;
             if (_debug) {
-                std::cout << comb->GetName() << "\tmodule = " << module << std::endl;
+                LOG_INFO << comb->GetName() << "\tmodule = " << module << endm;
                 comb->Print();
             }
             static Double_t dz[2] = {50.00, 2.10};
@@ -170,30 +177,30 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
             StThreeVectorD normal(rot[2],      rot[5],      rot[8]);
             StThreeVectorD middle(tra);
             if (_debug) {
-                std::cout << "middle:" << middle << "\tnormal:" << normal << std::endl;
+                LOG_INFO << "middle:" << middle << "\tnormal:" << normal << endm;
             }
             comb->LocalToMaster(zero.xyz(),middle.xyz());
             comb->LocalToMasterVect(unit.xyz(), normal.xyz());
             if (_debug) {
-                std::cout << "middle:" << middle << "\tnormal:" << normal << std::endl;
+                LOG_INFO << "middle:" << middle << "\tnormal:" << normal << endm;
             }
             Double_t phiM = TMath::RadToDeg()*middle.phi();
             if (_debug) {
-                std::cout << "phiR = " << phiR << "\tphiM = " << phiM << std::endl;
+                LOG_INFO << "phiR = " << phiR << "\tphiM = " << phiM << endm;
             }
             Double_t dPhi = phiR - phiM; 
             if (dPhi >  360) dPhi -= 360;
             if (dPhi < -360) dPhi += 360;
             if (TMath::Abs(dPhi) > 15) continue;
             if (_debug) {
-                std::cout << "zR = " << xyzR.z() << "\tzM = " << tra[2] << std::endl;
+                LOG_INFO << "zR = " << xyzR.z() << "\tzM = " << tra[2] << endm;
             }
             if (TMath::Abs(xyzR.z() -  tra[2]) > 20) continue;
             Double_t sh = helixO.pathLength(middle, normal); 
             if (_debug) {
-                std::cout << "StHelix sh " << sh 
+                LOG_INFO << "StHelix sh " << sh 
                         << "\t shR " << shR.first << "\t" << shR.second
-                        << std::endl;
+                        << endm;
             }
             StThreeVectorD xyzG = helixO.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
             StThreeVectorD dR = xyzR - xyzG; if (_debug) cout << "dR\t" << dR << " dist = " << dR.magnitude() << endl;
@@ -201,10 +208,10 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
             if (sh < -5e2 || sh > 5e2) continue;
             if (_debug) { 
                 StThreeVectorD dX = xyzG - helixO.at(0); 
-                std::cout << "Qi: " << Track->geometry()->charge() 
+                LOG_INFO << "Qi: " << Track->geometry()->charge() 
                         << "\tQo: " << Track->outerGeometry()->charge()
-                        << "\tdX " << dX << std::endl;
-                std::cout << *dca << std::endl;
+                        << "\tdX " << dX << endm;
+                LOG_INFO << *dca << endm;
             }
             Double_t uvPred[3];
             comb->MasterToLocal(xyzG.xyz(),uvPred);
@@ -214,7 +221,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
             comb->MasterToLocalVect(dirGPred,dxyzL);
             Double_t tuvPred[2] = {dxyzL[1]/dxyzL[0], dxyzL[2]/dxyzL[0]};
             if (_debug) {
-                std::cout << "StHelix tU/tV =  " << tuvPred[0] << "\t" << tuvPred[1] << std::endl;
+                LOG_INFO << "StHelix tU/tV =  " << tuvPred[0] << "\t" << tuvPred[1] << endm;
             }
             if (TMath::Abs(uvPred[1]) > dx[k] + 1.0) continue;
             if (TMath::Abs(uvPred[2]) > dz[k] + 1.0) continue;
@@ -236,7 +243,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
                 if (hit) {
                     //if (hit->flag()>=4) continue;
                     //if (hit->flag()< 0) continu;
-                    //	std::cout << "hitFlag=" << hit->flag() << std::endl;
+                    //	LOG_INFO << "hitFlag=" << hit->flag() << endm;
                 
                     HitT *h = AddHitT();
                     h->SetHitLength(sh);
@@ -315,19 +322,19 @@ void EventT::SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field) {
 
 //___________________
 void EventT::Print(Option_t *opt) const {
-    std::cout << "Run/EventT\t" << fEvtHdr.GetRun() << "/" << fEvtHdr.GetEvtNum() << "\tDate " << fEvtHdr.GetDate() 
-                << "\tField " << fEvtHdr.GetField() << std::endl;
-    std::cout << "Total no. tracks " << GetTotalNoTracks() << "\tRecorded tracks " << GetNtrack() 
-                << "\tRecorded hits " << GetNhit() << std::endl;
+    LOG_INFO << "Run/EventT\t" << fEvtHdr.GetRun() << "/" << fEvtHdr.GetEvtNum() << "\tDate " << fEvtHdr.GetDate() 
+                << "\tField " << fEvtHdr.GetField() << endm;
+    LOG_INFO << "Total no. tracks " << GetTotalNoTracks() << "\tRecorded tracks " << GetNtrack() 
+                << "\tRecorded hits " << GetNhit() << endm;
     TRVector vertex(3,GetVertex());
     TRSymMatrix cov(3,GetCovMatrix());
-    std::cout << "Primary vertex " << vertex << std::endl;
-    std::cout << "Its cov. matrix " << cov << std::endl;
+    LOG_INFO << "Primary vertex " << vertex << endm;
+    LOG_INFO << "Its cov. matrix " << cov << endm;
     for (UInt_t i = 0; i < GetNtrack(); i++) {
-        std::cout << i << "\t"; GetTrackT(i)->Print();
+        LOG_INFO << i << "\t"; GetTrackT(i)->Print();
     }
     for (UInt_t i = 0; i < GetNhit(); i++) {
-        std::cout << i << "\t"; GetHitT(i)->Print();
+        LOG_INFO << i << "\t"; GetHitT(i)->Print();
     }
 }
 
@@ -377,7 +384,7 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
         h->SetXyzL(xyzLadder);
     } 
     else {
-        std::cout << Form("WL%s",comb->GetName()+1) << " has not been found" << std::endl;
+        LOG_INFO << Form("WL%s",comb->GetName()+1) << " has not been found" << endm;
         h->SetL(xyzLadder[0],xyzLadder[1],xyzLadder[2]);
         h->SetXyzL(xyzLadder);
     }
@@ -386,13 +393,13 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
 
 //___________________
 void TrackT::Print(Option_t *opt) const {
-    std::cout << "TrackT: InvpT " << fInvpT << "\tTanL " << fTanL 
+    LOG_INFO << "TrackT: InvpT " << fInvpT << "\tTanL " << fTanL 
               << "\tPhi " << fPhi << "\tRho " << fRho 
-              << "\tNpoint " << fNpoint << "\tNsp " << fNsp << std::endl;
+              << "\tNpoint " << fNpoint << "\tNsp " << fNsp << endm;
     for (UInt_t i = 0; i < fNsp; i++) {
-        std::cout << "\t" << fIdHitT[i];
+        LOG_INFO << "\t" << fIdHitT[i];
     }
-    std::cout << std::endl;
+    LOG_INFO << endm;
 }
 
 //___________________
@@ -402,11 +409,11 @@ void HitT::SetId(Int_t B, Int_t L, Int_t l, Int_t W, Int_t H) {
 
 //___________________
 void HitT::Print(Option_t *opt) const {
-    std::cout << "HitT: Id " << Id << "\tpT = " << pT << "\tmomentum " << pMom << std::endl;
+    LOG_INFO << "HitT: Id " << Id << "\tpT = " << pT << "\tmomentum " << pMom << endm;
     TRVector glob(3,&xG); 
-    std::cout << "Global :" << glob << std::endl;
-    std::cout << "Local      u/v/w " << u << "/ " << v << "/ " << w << std::endl;
-    std::cout << "Prediction uP/vP " << uP << "/ " << vP << "\ttuP/tvP " << tuP << "/ " << tvP << std::endl;
+    LOG_INFO << "Global :" << glob << endm;
+    LOG_INFO << "Local      u/v/w " << u << "/ " << v << "/ " << w << endm;
+    LOG_INFO << "Prediction uP/vP " << uP << "/ " << vP << "\ttuP/tvP " << tuP << "/ " << tvP << endm;
 }
 
 //___________________
@@ -516,11 +523,11 @@ void TBase::Loop(Int_t Nevents) {
         if (ientry < 0) break;
         nb = fChain->GetEntry(jentry);   nbytes += nb;
         if (! jentry%1000 || TreeNo != fChain->GetTreeNumber()) {
-            std::cout << "Read event \t" << jentry 
+            LOG_INFO << "Read event \t" << jentry 
                       << " so far, switch to file " << fChain->GetCurrentFile()->GetName() 
-                      << std::endl;
-            std::cout << " current TreeNo: " << TreeNo
-                      <<  " new TreeNo: " << fChain->GetTreeNumber() << std::endl;
+                      << endm;
+            LOG_INFO << " current TreeNo: " << TreeNo
+                      <<  " new TreeNo: " << fChain->GetTreeNumber() << endm;
             TreeNo = fChain->GetTreeNumber();
         } // for (Long64_t jentry=0; jentry<nentries;jentry++)
 
@@ -547,7 +554,7 @@ void TBase::Loop(Int_t Nevents) {
                 Int_t k = track->GetHitTId(hit) - 1;
                 //	 assert(k>=0);
                 HitT *hitT = (HitT *) fEvent->GetHitT(k);
-                if ( k < 0 ) std::cout <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< std::endl;
+                if ( k < 0 ) LOG_INFO <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< endm;
                 if ( k < 0 ) continue;
                 Int_t module  = hitT->Barrel();
                 Double32_t u = hitT->GetU();       

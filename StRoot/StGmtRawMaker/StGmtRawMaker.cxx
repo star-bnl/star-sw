@@ -4,24 +4,19 @@
 // based on StFgtRawMaker
 //
 
+// StRoot headers
 #include "St_base/StMessMgr.h"
 #include "St_base/Stypes.h"
-
 #include "StChain/StRtsTable.h"
 #include "StEvent/StEvent.h"
 #include "DAQ_FGT/daq_fgt.h"
 #include "DAQ_READER/daq_dta.h"
-// #include "DAQ_GMT/daq_gmt.h"
-// #include "DAQ_READER/daq_dta.h"
-
 #include "StEvent/StGmtCollection.h"
 #include "StEvent/StGmtStripCollection.h"
 #include "StEvent/StGmtStrip.h"
-// #include "StGmtDbMaker/StGmtDbMaker.h"
 #include "StGmtUtil/geometry/StGmtGeom.h"
 #include "St_base/StMessMgr.h"
 #include "St_base/Stypes.h"
-
 #include "StGmtRawMaker.h"
 
 const Int_t mChIdToSeqId[128] = {

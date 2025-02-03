@@ -4,16 +4,18 @@
 // \authors K.S. Engle and Richard Witt (witt@usna.edu)
 // based on StFgtClusterMaker
 
+// StRoot headers
 #include "StGmtClusterMaker.h"
-#include "StRoot/StEvent/StEvent.h"
-#include "StRoot/StEvent/StGmtCollection.h"
-//#include "StRoot/StEvent/StTpcHitCollection.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StGmtCollection.h"
 #include "StEvent/StGmtHit.h"
-#include "StRoot/StGmtUtil/geometry/StGmtGeom.h"
+#include "StGmtUtil/geometry/StGmtGeom.h"
+#include "StMessMgr.h"
+
+// ROOT headers
 #include "TSystem.h"
 #include "TSpectrum.h"
-#include "StMessMgr.h" 
-
+ 
 int StGmtClusterMaker::gmtStat = 0;
 const unsigned int CLUS_BINS = 128;
 const double       CLUS_MIN  = 0.0;

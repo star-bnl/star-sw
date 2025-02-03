@@ -1,9 +1,8 @@
 #ifndef __EVENT__
 #define __EVENT__
-#include <string.h>
+
+// ROOT headers
 #include "TObject.h"
-#include "HitT.h"
-#include "TrackT.h"
 #include "TClonesArray.h"
 #include "TRefArray.h"
 #include "TRef.h"
@@ -12,6 +11,13 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TTree.h"
+
+// StRoot headers
+#include "HitT.h"
+#include "TrackT.h"
+
+// C++ headers
+#include <string>
 
 //________________
 class TGeoHMatrix;

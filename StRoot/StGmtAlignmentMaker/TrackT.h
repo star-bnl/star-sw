@@ -1,10 +1,15 @@
 #ifndef __TRACK__
 #define __TRACK__
 #define NSP 1000
-#include <string.h>
+// ROOT headers
 #include "TObject.h"
 #include "TMath.h"
+
+// StRoot headers
 #include "HitT.h"
+
+// C++ headers
+#include <string>
 
 //________________
 class TrackT : public TObject {

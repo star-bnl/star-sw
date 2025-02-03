@@ -5,22 +5,27 @@
 // based on StFgtClusterMaker
 #ifndef STAR_StGmtClusterMaker_HH
 #define STAR_StGmtClusterMaker_HH
+
+// StRoot headers
 #include "StMaker.h"
+#include "StChain/StRTSBaseMaker.h"
+#include "Stypes.h"
+
+// ROOT headers
 #include "TH1.h"
 #include "TProfile.h"
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TPolyMarker.h"
-#include "StRoot/StChain/StRTSBaseMaker.h"
-#include "Stypes.h"
-#include "TSpectrum.h"
 #include "TF1.h"
 #include "TMath.h"
 #include "TVirtualFitter.h"
 
+// Forward declaration
 class StGmtStripCollection;
 class StGmtHitCollection;
 
+//_________________
 class StGmtClusterMaker :  public StRTSBaseMaker {
   //omitted assignment operator and copy constructor on purpose
  public:
@@ -39,6 +44,6 @@ class StGmtClusterMaker :  public StRTSBaseMaker {
   void ClusterBuilder(ULong_t events, UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& hits);
   TF1* FindPeaks(TH1F* hist);
 
-  ClassDef(StGmtClusterMaker,1)
+  ClassDef(StGmtClusterMaker,0)
 };
 #endif

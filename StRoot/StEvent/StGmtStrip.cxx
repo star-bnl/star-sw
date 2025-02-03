@@ -9,8 +9,9 @@
  * \author Grigory Nigmatkulov (nigmatkulov@gmail.com), Dec. 2020
  */
 
-// StGmtStrip header
+// StRoot headers
 #include "StGmtStrip.h"
+#include "St_base/StMessMgr.h"
 
 
 // Number of defult time bins.
@@ -92,13 +93,13 @@ StGmtStrip& StGmtStrip::operator=( const StGmtStrip& h) {
 
 //________________
 ostream&  operator<<(ostream& os, const StGmtStrip& v) {
-  return os << Form("GmtStrip gId %3i m %3i C %3i Y %1i C %1i p %8.3f",v.getGeoId(), v.getModule(), v.getCoordNum(), v.isY(), v.isC(), v.getPosition())
-	        << Form(" Rdo: %2i,Arm: %2i, Apv: %2i, cha: %3i",v.getRdo(), v.getArm(), v.getApv(), v.getChannel()); 
+    return os << Form("GmtStrip gId %3i m %3i C %3i Y %1i C %1i p %8.3f",v.getGeoId(), v.getModule(), v.getCoordNum(), v.isY(), v.isC(), v.getPosition())
+              << Form(" Rdo: %2i,Arm: %2i, Apv: %2i, cha: %3i",v.getRdo(), v.getArm(), v.getApv(), v.getChannel()); 
 }
 
 //________________
 void StGmtStrip::Print(Option_t *option) const {
-  std::cout << *this << std::endl;
+    LOG_INFO << *this std::endm;
 }
 
 
