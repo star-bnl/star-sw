@@ -13,7 +13,6 @@
 #include "StGmtStrip.h"
 #include "St_base/StMessMgr.h"
 
-
 // Number of defult time bins.
 // Was 2 for the FGT, RW 03/15/13
 int StGmtStrip::mDefaultTimeBin = 7;  
@@ -99,7 +98,7 @@ ostream&  operator<<(ostream& os, const StGmtStrip& v) {
 
 //________________
 void StGmtStrip::Print(Option_t *option) const {
-    LOG_INFO << *this std::endm;
+    LOG_INFO << *this << endm;
 }
 
 
