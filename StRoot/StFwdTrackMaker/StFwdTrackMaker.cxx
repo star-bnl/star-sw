@@ -997,7 +997,7 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
      * Add Primary Vertex to the track
      */
     St_g2t_vertex *g2t_vertex = (St_g2t_vertex *)GetDataSet("geant/g2t_vertex");
-    LOG_INFO << "Searching for Event Vertex from geant/g2t_vertex: " << g2t_vertex << endm;
+    LOG_DEBUG << "Searching for Event Vertex from geant/g2t_vertex: " << g2t_vertex << endm;
     if ( g2t_vertex != nullptr ) {
         // Set the MC Vertex for track fitting
         g2t_vertex_st *vert = (g2t_vertex_st*)g2t_vertex->At(0);
@@ -1021,7 +1021,7 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
 
     // or try the McEvent
     StMcEvent *stMcEvent = static_cast<StMcEvent *>(GetInputDS("StMcEvent"));
-    LOG_INFO << "Searching for Event Vertex from StMcEvent: " << stMcEvent << endm;
+    LOG_DEBUG << "Searching for Event Vertex from StMcEvent: " << stMcEvent << endm;
     if (stMcEvent && stMcEvent->primaryVertex() ) {
         StThreeVectorF vertex = stMcEvent->primaryVertex()->position();
         mEventVertex.SetXYZ( vertex.x(), vertex.y(), vertex.z() );
@@ -1037,17 +1037,7 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
     }
 
     StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
-    LOG_INFO << "Searching for Event Vertex from MuDstMaker: " << mMuDstMaker << endm;
-    if(mMuDstMaker){
-        LOG_INFO << "Searching for Event Vertex from MuDst: " << mMuDstMaker->muDst() << endm;
-        if (mMuDstMaker->muDst()){
-            LOG_INFO << "Searching for Event Vertex from MuDst Primary Vertex: " << mMuDstMaker->muDst()->primaryVertex() << endm;
-            if (mMuDstMaker->muDst()->primaryVertex()){
-                LOG_INFO << "Searching for Event Vertex from MuDst Primary Vertex Position: " << mMuDstMaker->muDst()->primaryVertex()->position() << endm;
-            }
-        }
-    }
-    if(mMuDstMaker && mMuDstMaker->muDst() && mMuDstMaker->muDst()->primaryVertex() ) {
+    if(mMuDstMaker && mMuDstMaker->muDst() && mMuDstMaker->muDst()->numberOfPrimaryVertices() > 0 && mMuDstMaker->muDst()->primaryVertex() ) {
         mEventVertex.SetX(mMuDstMaker->muDst()->primaryVertex()->position().x());
         mEventVertex.SetY(mMuDstMaker->muDst()->primaryVertex()->position().y());
         mEventVertex.SetZ(mMuDstMaker->muDst()->primaryVertex()->position().z());
