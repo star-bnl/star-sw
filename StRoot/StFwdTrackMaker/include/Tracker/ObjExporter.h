@@ -16,7 +16,7 @@ class ObjExporter {
 public:
 
     // extra output for info and debug
-    const static bool verbose = false;
+    const static bool verbose = true;
 
     // write a single vertex
     void vert( ofstream &of, float x, float y, float z ){
@@ -163,16 +163,26 @@ public:
 
     // Project a track to a given xyz-plane with a normal and return its position, momentum, and cov matrix
   static TVector3 trackPosition( genfit::Track * t, float* xyz, float* norm, float * cov, TVector3 &mom ){
-    
-    int iPoint = 0;
+    if (verbose){
+        LOG_INFO << "trackPosition(" << t << ", " << xyz << ", " << norm << ", " << cov << " )" << endm;
+        LOG_INFO << "Projecting to: " << xyz[0] << " " << xyz[1] << " " << xyz[2] << endm;
+        LOG_INFO << "Normal: " << norm[0] << " " << norm[1] << " " << norm[2] << endm;
+        LOG_INFO << "track has n points: " << t->getNumPointsWithMeasurement() << endm;
+    }
+    const int iPoint = 0;
+    // do not attempt projection if no points with measurements
+    // for some reason we can still get here even though we require convergence earlier
+    if ( t->getNumPointsWithMeasurement() == 0 ){
+        LOG_WARN << "Track has no points with measurement, cannot project" << endm;
+        return TVector3( -990, -990, -990 );
+    }
     try {
-      auto plane = genfit::SharedPlanePtr(
-					  // these normals make the planes face along z-axis
-					  new genfit::DetPlane(TVector3(xyz), TVector3(norm) )
-					  );
-      
-      genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
-      auto TCM = t->getCardinalRep()->get6DCov(tst);
+        auto plane = genfit::SharedPlanePtr(
+				new genfit::DetPlane(TVector3(xyz), TVector3(norm) )
+			);
+
+        genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
+        auto TCM = t->getCardinalRep()->get6DCov(tst);
       //  returns the track length if needed
       t->getCardinalRep()->extrapolateToPlane(tst, plane, false, true);
       
@@ -184,11 +194,13 @@ public:
       float _z = tst.getPos().Z();
 
       mom.SetXYZ( tst.getMom().X(), tst.getMom().Y(), tst.getMom().Z() );
-      
+      if (verbose){
+        LOG_INFO << "Projected to: " << x << " " << y << " " << _z << endm;
+      }
       if ( cov ){
-	cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
-	cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
-	cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
+        cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
+        cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
+        cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
       }
 
 

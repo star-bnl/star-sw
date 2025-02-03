@@ -308,7 +308,7 @@ class TrackFitter {
      * @param seedPos : seed position
      * @param Vertex : primary vertex
      */
-    void setupTrack(Seed_t trackSeed ) {
+    bool setupTrack(Seed_t trackSeed ) {
         
         // setup the track fit seed parameters
         GenericFitSeeder gfs;
@@ -318,12 +318,20 @@ class TrackFitter {
         gfs.makeSeed( trackSeed, seedPos, seedMom, seedQ );
         LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(%f, %f, %f)", seedPos.X(), seedPos.Y(), seedPos.Z() ) << endm; 
         LOG_DEBUG << "Setting track fit seed momentum = " << TString::Format( "(%f, %f, %f)", seedMom.X(), seedMom.Y(), seedMom.Z() ) << endm;
-        if ( seedMom.Perp() > 0.001 ){
-            // because ROOT has an assert in there :/
-            LOG_DEBUG << "Setting track fit seed momentum = (Pt,eta,phi)=" << TString::Format( "(%f, %f, %f)", seedMom.Pt(), seedMom.Eta(), seedMom.Phi() ) << endm;    
+
+        if ( Debug() ){
+            for (auto h : trackSeed) {
+                auto fh = dynamic_cast<FwdHit*>(h);
+                LOG_DEBUG << fh->Print() << endm;
+            }
         }
-        
+
         LOG_DEBUG << "Setting track fit seed charge = " << seedQ << endm;
+
+        if ( seedQ == 0 ) {
+            LOG_ERROR << "Seed charge is zero, skipping track -> usually means collinear points" << endm;
+            return false;
+        }
 
         // create the track representations
         // Note that multiple track reps differing only by charge results in a silent failure of GenFit
@@ -356,7 +364,7 @@ class TrackFitter {
             * If the Primary vertex is included
             ******************************************************************************************************************/
             if ( true ) {
-                LOG_INFO << "Treating hit as a spacepoint" << endm;
+                LOG_DEBUG << "Treating hit as a spacepoint" << endm;
                 if ( fh->isPV() ){
                     LOG_DEBUG << "Including primary vertex in fit" << endm;
                 }
@@ -384,8 +392,6 @@ class TrackFitter {
                 mFitTrack->insertPoint( tp );
                 continue;
             }
-
-            // if ( fh->isPV() ) continue;
 
             genfit::PlanarMeasurement *measurement = new genfit::PlanarMeasurement(hitCoords, CovMatPlane(h), fh->_detid, ++hitId, nullptr);
 
@@ -415,6 +421,7 @@ class TrackFitter {
                 LOG_WARN << "Z Mismatch h->z = " << h->getZ() << ", plane->z = "<< plane->getO().Z() <<", diff = " << abs(h->getZ() - plane->getO().Z()) << endm;
             }
         } // loop on trackSeed
+        return true;
     } // setupTrack
 
     /** @brief performs the fit on a track
@@ -490,7 +497,11 @@ class TrackFitter {
         /******************************************************************************************************************
 		 * Setup the track fit seed parameters and objects
 		 ******************************************************************************************************************/
-        setupTrack(trackSeed);
+        bool valid = setupTrack(trackSeed);
+        if ( !valid ){
+            LOG_ERROR << "Failed to setup track for fit" << endm;
+            return -1;
+        }
         LOG_DEBUG << "Ready to fit with " << mFitTrack->getNumPoints() << " track points" << endm;
 
         /******************************************************************************************************************
