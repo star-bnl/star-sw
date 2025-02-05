@@ -58,8 +58,12 @@ public:
     void setFourMomentum(float px, float py, float pz, float e) { mFourMomentumX = px; mFourMomentumY = py; mFourMomentumZ = pz; mFourMomentumT = e; }
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
 
+    // TODO: add user functions to rebuild reverse mapping to index of all matched Fwd tracks
+    // TODO: user functions for detId (3 bits) and mId (13 bits) from index
+
 protected:
-    UShort_t mIndex=0;         // Eventwise cluster Index (unique across all detectors)
+    UShort_t mIndex=0;         //! Eventwise cluster Index (unique across all detectors)
+    // pack these on disk
     UShort_t mId=0;             // Eventwise cluster ID
     UShort_t mDetectorId=0;   // Detector starts from 1
     Int_t mCategory=0;        // Category of cluster (see StMuFcsClusterCategory)
@@ -75,6 +79,8 @@ protected:
     Float_t mFourMomentumY=0.0;
     Float_t mFourMomentumZ=0.0;
     Float_t mFourMomentumT=0.0;
+
+    std::vector<UShort_t> mFwdTrackMatchIndex;//! do not save to disk (in memory only)
 
     ClassDef(StPicoFcsCluster, 2)
 };
