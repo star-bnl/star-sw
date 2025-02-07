@@ -993,6 +993,15 @@ Bfc_st BFC[] = { // standard chains
    "B2018a,ITTF,UseXgeom,BAna,VFMinuit,beamline3D,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
    ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
+  // 2018 updated chains
+  {"B2018c"  ,"","",
+   "ry2018c,in,tpcX,UseXgeom,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite","",""
+   ,                                                           "Base chain for run 2018 data (tpc)",kFALSE},
+
+  {"P2018c","" ,"",
+   "B2018c,ITTF,BAna,VFMinuit,beamline3D,btof,mtd,l3onl,emcDY2,epdHit,fpd,trgd,ZDCvtx,analysis"
+   ,                    "","","Base chain for year 2018 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
   // 2019 chains, BES
   {"B2019a" ,"","","ry2019a,in,tpcX,UseXgeom,iTpcIT,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite",
    "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
@@ -1001,6 +1010,14 @@ Bfc_st BFC[] = { // standard chains
    "B2019a,ITTF,BAna,iTpcIT,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2019 updated chains
+  {"B2019b" ,"","",
+   "ry2019b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2019 data (tpc)",kFALSE},
+
+  {"P2019b","" ,"",
+   "B2019b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2020 initial chains
   {"B2020a" ,"","",
@@ -1011,14 +1028,32 @@ Bfc_st BFC[] = { // standard chains
    "B2020a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2020 updated chains
+  {"B2020b" ,"","",
+   "ry2020b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
+
+  {"P2020b","" ,"",
+   "B2020b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
   // 2021 initial chains
   {"B2021a" ,"","",
    "ry2021a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-   "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
 
   {"P2021a","" ,"",
    "B2021a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
-   ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   ,    "","",        "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
+  // 2021 updated chains
+  {"B2021b" ,"","",
+   "ry2021b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
+
+  {"P2021b","" ,"",
+   "B2021b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2022 initial chains
   {"B2022"  ,"","",
@@ -1667,7 +1702,7 @@ Bfc_st BFC[] = { // standard chains
                                                                              "sTGC Point maker",    kFALSE},
   {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
-  {"FwdTrack","","","","StFwdTrackMaker",
+  {"FwdTrack","","","fcsDb","StFwdTrackMaker",
    "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
                                                                              "Forward Track Maker", kFALSE},
 

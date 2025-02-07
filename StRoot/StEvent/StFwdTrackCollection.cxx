@@ -15,6 +15,15 @@
 
 ClassImp(StFwdTrackCollection)
 
+StFwdTrackCollection::StFwdTrackCollection(){}
+
+StFwdTrackCollection::~StFwdTrackCollection(){
+	for (unsigned int i=0; i<mTracks.size(); i++) {
+		delete mTracks[i];
+		mTracks[i] = 0;
+	}
+}
+
 void StFwdTrackCollection::addTrack( StFwdTrack *track ) {
 	mTracks.push_back( track );
 }
