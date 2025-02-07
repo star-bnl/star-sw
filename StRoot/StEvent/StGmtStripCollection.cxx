@@ -96,7 +96,7 @@ void StGmtStripCollection::Clear( Option_t *opt ){
 //________________
 StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ) {  
     // using geoId now instead of elecId so now using more generic index name
-    StGmtStrip* &stripPtr = mStripGeoIdVec[Id]; 
+    StGmtStrip* stripPtr = mStripGeoIdVec[Id]; 
     if( !stripPtr ){
         stripPtr = new StGmtStrip();
         mStripVec.push_back( stripPtr );
@@ -107,7 +107,7 @@ StGmtStrip* StGmtStripCollection::getStrip( Int_t Id ) {
 //________________
 StGmtStrip* StGmtStripCollection::getSortedStrip( Int_t Id ) {  
     // using geoId now instead of elecId so now using more generic index name
-    StGmtStrip* &stripPtr = mStripVec[Id]; 
+    StGmtStrip* stripPtr = mStripVec[Id]; 
     if( !stripPtr ){
       LOG_ERROR << "StGmtStripCollection::getSortedStrip no such Id: " << Id << endm;
       return 0;
