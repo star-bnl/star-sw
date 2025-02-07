@@ -14,7 +14,7 @@
 // STAR headers
 #include "StGmtHit.h"
 #include "StGmtPoint.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "St_base/StMessMgr.h"
 
 //________________
 StGmtPoint::StGmtPoint() : StHit(), mHitLocalX(nullptr), mHitLocalY(nullptr), mKey(-999) { 

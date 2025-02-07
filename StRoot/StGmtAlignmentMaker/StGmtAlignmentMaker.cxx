@@ -15,7 +15,7 @@
 #include "TBranch.h"
 
 // C/C++ headers
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 
 //________________

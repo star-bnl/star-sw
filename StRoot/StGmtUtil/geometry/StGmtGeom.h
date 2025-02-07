@@ -9,7 +9,6 @@
 #ifndef _ST_GMT_GEOM_H_
 #define _ST_GMT_GEOM_H_
 
-//#include <assert.h>
 #include <TVector3.h>
 #include <string>
 #include <sstream>

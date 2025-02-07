@@ -33,7 +33,7 @@
 #include "St_base/StMessMgr.h"
 
 // C++ headers
-#include <assert.h>
+#include <cassert>
 
 #define __OnlyGlobal__
 

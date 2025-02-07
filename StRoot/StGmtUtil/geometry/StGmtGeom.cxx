@@ -7,7 +7,6 @@
  */
 
 #include <TMath.h>
-//#include <assert.h>
 #include <iostream>
 #include <algorithm>
 #include "StGmtGeom.h"
@@ -104,15 +103,6 @@ std::string StGmtGeom::encodeGeoName(Int_t module, Char_t layer, Int_t strip) {
 
 //________________
 Int_t StGmtGeom::decodeGeoName(const std::string &geoName, Short_t &module, Int_t &layer, Short_t &strip) {
-
-    // Char_t testS='S';
-    // Char_t testP='P';
-
-    // assert( geoName.size() == 6 );
-    // disc = geoName[0] - '1';
-    // quadrant = geoName[1] - 'A';
-    // layer = geoName[2];
-    // strip = std::atoi( (geoName.substr(3)).c_str() );
     module = geoName[0] - '1';
     layer = geoName[2];
     strip = std::atoi( (geoName.substr(3)).c_str() );

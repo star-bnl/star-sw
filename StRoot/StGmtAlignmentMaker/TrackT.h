@@ -78,6 +78,7 @@ class TrackT : public TObject {
     virtual void SetHitTId(UInt_t i) {fIdHitT[fNsp] = i+1; if ( fNsp < NSP) fNsp++;}
     virtual void SetdEdx(Double_t I70, Double_t L) {fdEdx = I70; fLength = L;}
     virtual void Print(Option_t *opt="") const;
-    ClassDef(TrackT,2)
+
+    ClassDef(TrackT, 1)
 };
 #endif

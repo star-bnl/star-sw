@@ -7,7 +7,7 @@
 #include "TObject.h"
 
 // C/C++ headers
-#include <string.h>
+#include <string>
 
 // Forward declarations
 class StHit;
