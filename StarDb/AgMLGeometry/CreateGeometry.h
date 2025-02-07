@@ -1,6 +1,7 @@
-#include <TGeoManager.h>
 
-#if !defined(__CINT__) || defined(__CLING__)
+
+#if !defined(__CINT__) || !defined(__CLING__)
+#include <TGeoManager.h>
 #include "StBFChain/StBFChain.h"
 #include "StarVMC/StarGeometry/StarGeo.h"
 #endif

@@ -15,7 +15,7 @@
 #include "TSystem.h"
 #include "TGeoManager.h"
 #include "StVMCApplication.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 #include "StMCStack.h"
 #include "StMCConstructGeometry.h"
 #include "StMCSimplePrimaryGenerator.h"
@@ -45,7 +45,7 @@ int  StMCInitApp::Fun()
 
   StVMCApplication  *app = (StVMCApplication*)TVirtualMCApplication::Instance();
   new TGeant3TGeo("C++ Interface to Geant3");
-  Info("Init","TGeant3TGeo has been created.");
+  Info("Init","TGeant3/TGeant3TGeo.has been created.");
 
   StMCConstructGeometry *geo = new StMCConstructGeometry(app->GetName());
   app->SetConstructGeometry(geo);
