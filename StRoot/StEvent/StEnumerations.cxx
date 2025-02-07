@@ -22,7 +22,9 @@ void detectorId(int *ids=0, char** cds=0)
  TString myPath("$STAR/StRoot/StEvent/StEnumerations.h");
  gSystem->ExpandPathName(myPath);
 
+#if ROOT_VERSION_CODE >= 393216 /*  ROOT_VERSION(6,0,0) */
  gROOT->ProcessLine("#include <StEnumerations.h>");
+#endif
 
  int notExi = gSystem->AccessPathName(myPath.Data(),kFileExists);
  if (notExi) {
