@@ -228,6 +228,7 @@ class StIstHitCollection;
 class StFstEvtCollection;
 class StFstHitCollection;
 class StFwdTrackCollection;
+class StGmtCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -318,6 +319,8 @@ public:
     const StTriggerIdCollection*        triggerIdCollection() const;
     StTriggerData*                      triggerData();
     const StTriggerData*                triggerData() const;
+    StGmtCollection*                    gmtCollection();
+    const StGmtCollection*              gmtCollection() const;
     
     StSPtrVecTrackDetectorInfo&         trackDetectorInfo();
     const StSPtrVecTrackDetectorInfo&   trackDetectorInfo() const;
@@ -412,6 +415,7 @@ public:
     void removePsd(StPsd*);
     void addHitCollection(StSPtrVecHit* p, const Char_t *name);
     void removeHitCollection(const Char_t *name);
+    void setGmtCollection(StGmtCollection*);
 
     virtual Bool_t Notify();
     

@@ -1429,6 +1429,13 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                "MTD hit maker",kFALSE},
   {"mtdTrkMask","","","db","StMtdTrackingMaskMaker"      ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},
 
+  // GMT
+  {"gmt",        "","","gmtDat,gmtClu",                                      "","","Gmt data Chain",kFALSE},
+  {"gmtDat",     "","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
+  {"gmtClu",     "","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
+  {"gmtCosmics", "","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
+  {"gmtClusTree","","","","","",                                                STAR_CHAIN_OBSOLETE,kFALSE},
+
   // EPD
   {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
 
@@ -1702,7 +1709,7 @@ Bfc_st BFC[] = { // standard chains
                                                                              "sTGC Point maker",    kFALSE},
   {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
-  {"FwdTrack","","","","StFwdTrackMaker",
+  {"FwdTrack","","","fcsDb","StFwdTrackMaker",
    "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
                                                                              "Forward Track Maker", kFALSE},
 
@@ -1964,6 +1971,8 @@ Bfc_st BFC[] = { // standard chains
    ,                              "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
+  // GMT
+  {"gmtAligner"    ,"","","detDb", "StGmtAlignmentMaker","StGmtAlignmentMaker","GMT cluster plotting",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
