@@ -2247,3 +2247,18 @@ Double_t StRefMultCorr::calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Doubl
                                           Double_t x2, Double_t x3, Double_t x4) const {
   return ( x0 + x1*(ntofmatch) + x2*pow(ntofmatch,2) + x3*pow(ntofmatch,3) + x4*pow(ntofmatch,4) );
 }
+ 
+//________________
+Bool_t StRefMultCorr::isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz, Double_t totnMIP) const {
+  if ((mRefX==6) || (mRefX==7)) {
+    // refMult6 and totnMIP require both refMult vs. nBTOFMatch and totnMIP vs. nBTOFMatch for pileup rejection
+    if (totnMIP < 0.) {
+      Error("StRefMultCorr::isPileUpEvent", "totnMIP<0");
+      return kTRUE;
+    } // if (totnMIP < 0.)
+    return !( passnTofMatchRefmultCut(refmult, ntofmatch, vz) && passnTofMatchTotnMIPCut(totnMIP, ntofmatch, vz) );
+  } // if ((mRefX==6) || (mRefX==7))
+  else { // other refMult
+    return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
+  }
+}

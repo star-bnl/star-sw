@@ -72,13 +72,7 @@ class StRefMultCorr {
   void initEvent(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate=0.0) ; // Set multiplicity, vz and zdc coincidence rate
 
   /// Check if pile-up event
-  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const {
-    return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
-  }
-  /// Check if pile-up event using both refMult vs nBTOFMatch and EPD's total nMIP vs nBTOFMatch
-  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz, Double_t totnMIP) const {
-    return !( passnTofMatchRefmultCut(refmult, ntofmatch, vz) && passnTofMatchTotnMIPCut(totnMIP, ntofmatch, vz) );
-  }
+  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0., Double_t totnMIP=-999.) const;
   /// Check if NOT pile-up event
   Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const;
   /// Check if NOT pile-up event using EPD's total nMIP versus nBTOFMatch
