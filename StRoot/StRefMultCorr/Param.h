@@ -624,10 +624,10 @@ const string mParamStr_ref5[nID_ref5][nSet_ref5] = {
   // Run 20 Au+Au 9.8 GeV (sqrt(s_NN)=4.5 GeV), Trigger ID = 740000
   {
     "2020:9.8:21029051,21030011:198,202",         // Year, energy, run start end, Vz range
-    "6,9,13,18,24,32,42,54,68,84,103,125,151,180,215,255",  // Multiplicity values for the centrality classes
-    "250",                        // Normalization start (of Glauber to the data)
+    "8,11,15,20,27,35,45,57,71,87,106,127,152,180,214,256",  // Multiplicity values for the centrality classes
+    "150",                        // Normalization start (of Glauber to the data)
     "0.,0.,0.,0.,0.,0.,0.,0.",    // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "0.8753,-0.0008417,-0.004184,0.01089,-0.2573,0,0.002644,-0.1143",   // Trigger efficiency
+    "0.8571,-0.002675,-0.002836,0.002825,-1.044,0,0.0001744,-1.941",   // Trigger efficiency
     "0.,0."                       // Luminosity correction
   },
   // mParameterIndex = 10
