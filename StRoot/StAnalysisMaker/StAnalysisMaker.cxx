@@ -1141,13 +1141,14 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (event->numberOfPsds()) {
     LOG_QA << "# PSDs:                " << event->numberOfPsds() << endm;
   }
-#ifdef _ST_GMT_HIT_H_
+
   if (event->gmtCollection() && event->gmtCollection()->getNumHits()) {
     LOG_QA << "# GMT hits:           " << event->gmtCollection()->getNumHits() 
-	   << " points: " << event->gmtCollection()->getNumPoints()
+	   << ", points: " << event->gmtCollection()->getNumPoints()
+     << ", strips: " << event->gmtCollection()->getNumStrips()
 	   << endm;
   }
-#endif /* _ST_GMT_HIT_H_ */
+
   if (event->rpsCollection()) {
     LOG_QA << "# RPS hits:            " << event->rpsCollection()->clusters().size() << endm;
   }
