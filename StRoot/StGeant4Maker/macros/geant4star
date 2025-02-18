@@ -1,0 +1,22 @@
+#!/bin/csh -f 
+
+# valgrind --num-callers=30 --suppressions=$ROOTSYS/etc/valgrind-root.supp root.exe -l -b -q myscript.C
+
+set ROOT=root.exe
+#set ROOT="valgrind --num-callers=30 --suppressions=$ROOTSYS/etc/valgrind-root.supp root.exe"
+#set ROOT="valgrind --leak-check=full --num-callers=30 --suppressions=$ROOTSYS/etc/valgrind-root.supp root.exe"
+
+setenv __G4STAR_MYSQL_DIR__ `mysql_config --variable=pkglibdir`
+
+if ( -e ./StRoot/StGeant4Maker/macros/geant4star.C ) then
+   setenv ROOT_INCLUDE_PATH ${STAR}:.:./StRoot:./StRoot/StStarLogger:./StRoot/StGeant4Maker:.:StRoot/StarGenerator/BASE:./StarVMC/StarAgmlLib/:./.sl73_x8664_gcc485/include/
+#   root.exe -l ./StRoot/StGeant4Maker/macros/initStar.C ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
+   ${ROOT} -l ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
+else
+  setenv ROOT_INCLUDE_PATH ${STAR}:${STAR}/StRoot:${STAR}/StRoot/StStarLogger:${STAR}/StRoot/StGeant4Maker:${STAR}:StRoot/StarGenerator/BASE:${STAR}/StarVMC/StarAgmlLib/:${STAR}/.sl73_x8664_gcc485/include/
+#   root.exe -l $STAR/StRoot/StGeant4Maker/macros/initStar.C $STAR/StRoot/StGeant4Maker/macros/geant4star.C $argv 
+   ${ROOT} -l $STAR/StRoot/StGeant4Maker/macros/geant4star.C $argv 
+endif
+
+
+
