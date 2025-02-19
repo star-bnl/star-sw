@@ -15,6 +15,7 @@
 #include "TRefArray.h"
 
 #include "StMuFcsCluster.h"
+#include <climits>
 
 
 class StFwdTrack;
@@ -155,6 +156,18 @@ public:
 
     TRefArray mEcalClusters;
     TRefArray mHcalClusters;
+
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
+    void setDCA( TVector3 dca ) { mDCA[0] = dca.X(); mDCA[1] = dca.Y(); mDCA[2] = dca.Z(); }
+    void setDCA( float dcaX, float dcaY, float dcaZ ) { mDCA[0] = dcaX; mDCA[1] = dcaY; mDCA[2] = dcaZ; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = vtxIndex; }
+
+
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
+    TVector3 dca() const { return TVector3( mDCA[0], mDCA[1], mDCA[2] ); }
+    UChar_t vertexIndex() const { return mVtxIndex; }
+    bool isPrimary() const { return mVtxIndex != UCHAR_MAX; }
     
 protected:
 
@@ -169,15 +182,11 @@ protected:
     float mPval;
     short mCharge;
     TVector3 mPrimaryMomentum;
-    
+    UShort_t mIdTruth; // MC track id
+    UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
-    // StPtrVecFcsCluster mEcalClusters;
-    // StPtrVecFcsCluster mHcalClusters;
-
-    /// MC track id
-    UShort_t mIdTruth;
-    /// MC track quality (percentage of hits coming from corresponding MC track)
-    UShort_t mQATruth;
+    float mDCA[3]; // DCA to the primary vertex
+    UChar_t mVtxIndex;
     
     ClassDef(StMuFwdTrack,3)
 

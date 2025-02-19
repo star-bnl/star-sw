@@ -42,6 +42,12 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
             StMuFwdTrackSeedPoint( TVector3( sp.mXYZ.x(), sp.mXYZ.y(), sp.mXYZ.z() ), sp.mSector, sp.mTrackId, sp.mCov )
         );
     }
+
+    setDCA(evTrack->dca().x(), evTrack->dca().y(), evTrack->dca().z());
+    mIdTruth = evTrack->idTruth();
+    mQATruth = evTrack->qaTruth();
+    mVtxIndex = evTrack->vertexIndex();
+
 }
 
 

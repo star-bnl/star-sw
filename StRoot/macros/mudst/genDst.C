@@ -144,17 +144,24 @@ void procGeoTag(TObjArray* optionTokens)
   }
 }
 
-bool findAndRemoveOption(const char* optionName, TObjArray* optionTokens)
+bool findAndRemoveOption(const char* optionName, TObjArray* optionTokens, bool doRemove=true)
 {
   TString optName = optionName;
   optName.ToLower();
   TObject* obj = optionTokens->FindObject(optName.Data());
   if (obj) {
-    optionTokens->Remove(obj);
-    optionTokens->Compress();
+    if (doRemove) {
+      optionTokens->Remove(obj);
+      optionTokens->Compress();
+    }
     return true;
   }
   return false;
+}
+
+bool findOption(const char* optionName, TObjArray* optionTokens)
+{
+   return findAndRemoveOption(optionName,optionTokens,false);
 }
 
 void genDst(unsigned int First,
@@ -197,6 +204,10 @@ void genDst(unsigned int First,
 
   // Determine database flavors
   TString flavors = "ofl"; // default flavor for offline
+
+  // FXT flavor
+  if (findOption("FXT",optionTokens))
+    flavors.Prepend("FXT+");
 
   // simulation flavors
   if (findAndRemoveOption("Simu",optionTokens) && ! findAndRemoveOption("NoSimuDb",optionTokens))
@@ -271,6 +282,10 @@ void genDst(unsigned int First,
       if (findAndRemoveOption("btofstartless",optionTokens)) {
         //Disable the VPD as start detector, BTOF calib maker will switch to the "start-less" algorithm.
         vpdCalib->setUseVpdStart(kFALSE);
+      }
+
+      if (findOption("FXT",optionTokens)) {
+        btofCalib->SetAttr("btofFXT", 1);
       }
 
     }
