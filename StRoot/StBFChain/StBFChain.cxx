@@ -399,21 +399,17 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("RpicoDst")) {
 // 	  NoMakersWithInput++;
 	  io = 2; // IoRead=2
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
-	  mk = new StPicoDstMaker(io,fInFile.Data());
-#else
-	  ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fInFile.Data()));
-#endif
-	} else {
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
-	  mk = new StPicoDstMaker(io,fFileOut.Data());
-#else
-	  ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fFileOut.Data()));
-#endif
 	}
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+#ifdef __TFG__VERSION__
+	mk = new StPicoDstMaker(io,fInFile.Data());
+#else /* ! __TFG__VERSION__ */
+	mk = new StPicoDstMaker((StPicoDstMaker::PicoIoMode) io,fInFile.Data());
+#endif /* __TFG__VERSION__ */
+#else /* ROOT <= 5 */
+	ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fInFile.Data()));
 	mk = GetMaker("PicoDst");
-#endif
+#endif /*  ROOT6 */
       } else {
 	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	else                          mk = New(fBFC[i].Maker);
