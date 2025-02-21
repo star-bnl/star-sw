@@ -18,6 +18,10 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StPicoDstMaker/StPicoDstMaker.h"
+#endif
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
