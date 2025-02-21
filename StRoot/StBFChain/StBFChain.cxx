@@ -392,22 +392,18 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
 	mk = GetMaker("MuDst");
 #endif
-// 	if (GetOption("RMuDst")) 
+// 	if (GetOption("RMuDstsrpico")) 
 // 	  NoMakersWithInput++;
       } else if (maker == "StPicoDstMaker") {
-	Int_t io = 1; // IoWrite=1
+	Int_t io = 1; // StPicoDstMaker::IoWrite;
 	if (GetOption("RpicoDst")) {
 // 	  NoMakersWithInput++;
-	  io = 2; // IoRead=2
+	  io = 2; // StPicoDstMaker::IoRead;
 	}
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
-#ifdef __TFG__VERSION__
-	mk = new StPicoDstMaker(io,fInFile.Data());
-#else /* ! __TFG__VERSION__ */
 	mk = new StPicoDstMaker((StPicoDstMaker::PicoIoMode) io,fInFile.Data());
-#endif /* __TFG__VERSION__ */
 #else /* ROOT <= 5 */
-	ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",io,fInFile.Data()));
+	ProcessLine(Form("new StPicoDstMaker(%i,\"%s\")",(int)io,fInFile.Data()));
 	mk = GetMaker("PicoDst");
 #endif /*  ROOT6 */
       } else {
