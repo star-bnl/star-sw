@@ -1,5 +1,4 @@
 // @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.670 2021/03/21 03:32:28 genevb Exp $
-
 #include "TROOT.h"
 #include "TPRegexp.h"
 #include "TString.h"
@@ -18,6 +17,8 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StPicoDstMaker/StPicoDstMaker.h"
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -218,6 +219,7 @@ Int_t StBFChain::Instantiate()
   if (! fNoChainOptions) return status;
   Long64_t maxsize = kMaxLong64;
   TTree::SetMaxTreeSize(maxsize);
+  if (GetOption("quiet")) gEnv->SetValue("quiet", 1); 
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     TString maker(fBFC[i].Maker);
@@ -380,14 +382,26 @@ Int_t StBFChain::Instantiate()
     // Special makers already created or action which
     // need to take place before 'maker' is created.
     if (! mk) {
-      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-      else                          mk = New(fBFC[i].Maker);
-      if (! mk) {
-	LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
-	assert(mk);
+      if (maker == "StMuDstMaker" && GetOption("RMuDst")) {
+	mk = new StMuDstMaker(0,0,".",fInFile.Data(),"st:MuDst.root",1e9);
+// 	if (GetOption("RMuDstsrpico")) 
+// 	  NoMakersWithInput++;
+      } else if (maker == "StPicoDstMaker") {
+	Int_t io = 1; // StPicoDstMaker::IoWrite;
+	if (GetOption("RpicoDst")) {
+// 	  NoMakersWithInput++;
+	  io = 2; // StPicoDstMaker::IoRead;
+	}
+	mk = new StPicoDstMaker((StPicoDstMaker::PicoIoMode) io,fInFile.Data());
+      } else {
+	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+	else                          mk = New(fBFC[i].Maker);
+	if (! mk) {
+	  LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
+	  assert(mk);
+	}
       }
     }
-
     {
       TString namec = mk->GetName();
       int len       = sizeof(fBFC[i].Name);

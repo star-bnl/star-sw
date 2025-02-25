@@ -102,6 +102,8 @@ class StPicoDstMaker : public StMaker {
   /// Constructor that takes most of pararmeters
   StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "",
 		 char const* name = "PicoDst");
+  StPicoDstMaker(Int_t ioMode, char const* fileName = "",
+		 char const* name = "PicoDst") : StPicoDstMaker((PicoIoMode) ioMode, fileName, name) {}
   /// Destructor
   virtual ~StPicoDstMaker();
 
@@ -138,6 +140,7 @@ class StPicoDstMaker : public StMaker {
   /// 9 is the higher compression level.
   void setCompression(int comp = 9);
 
+  static StPicoDstMaker *instance()     { return fgPicoDstMaker; }
 #if defined (__TFG__VERSION__)
   PicoVtxMode vtxMode()                 { return StMuDst::instance()->vtxMode(); }
   void setVtxMode(const PicoVtxMode vtxMode)
@@ -152,7 +155,6 @@ class StPicoDstMaker : public StMaker {
   void SetVxZrange(Double_t zmin = -70, Double_t zmax = 70.)
   { StMuDst::instance()->SetVxZrange(zmin, zmax); }
   void SetVxRmax(Double_t rmax = 2)     { StMuDst::instance()->SetVxRmax(rmax); }
-  static StPicoDstMaker *instance()     { return fgPicoDstMaker; }
   TClonesArray** picoArrays()           { return mPicoArrays; }
 #else /* ! __TFG__VERSION__ */
 
@@ -339,9 +341,7 @@ class StPicoDstMaker : public StMaker {
 
   /// FMS filler
   StPicoFmsFiller  mFmsFiller;
-#if defined (__TFG__VERSION__)
   static StPicoDstMaker *fgPicoDstMaker; //!
-#endif
 
   /// Get CVS status
   virtual const char *GetCVS() const {
