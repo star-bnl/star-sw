@@ -188,6 +188,7 @@ class StFwdTrackMaker : public StMaker {
     static std::string defaultConfigData;
     std::string defaultConfig;
     bool configLoaded = false;
+    TString mGeoCache;
 
     // Helper functions for modifying configuration
     // NOTE: to override configuration, call individual functions after setConfigForXXX
