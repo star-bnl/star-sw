@@ -1,4 +1,6 @@
 
+#ifndef __OBJEXPORTER_H__
+#define __OBJEXPORTER_H__
 #include "GenFit/FitStatus.h"
 #include "GenFit/GFRaveVertexFactory.h"
 #include <math.h>
@@ -14,7 +16,7 @@ class ObjExporter {
 public:
 
     // extra output for info and debug
-    const static bool verbose = false;
+    const static bool verbose = true;
 
     // write a single vertex
     void vert( ofstream &of, float x, float y, float z ){
@@ -51,20 +53,20 @@ public:
                 numVertices++;
             }
         }
-      
+
       //## OUTPUT FACES BETWEEN INTERMEDIATE POINTS:
-      
+
       for(p=1; p<nPitch-1; p++) {
         for(s=0; s<nLatitude; s++) {
           i = p*nLatitude + s;
           j = (s==nLatitude-1) ? i-nLatitude : i;
-          fout << TString::Format("f %d %d %d %d\n", 
+          fout << TString::Format("f %d %d %d %d\n",
                   (i+1-nLatitude)+fVert, (j+2-nLatitude)+fVert, (j+2)+fVert, (i+1)+fVert);
         }
       }
-      
+
       //## OUTPUT TRIANGULAR FACES CONNECTING TO TOP AND BOTTOM VERTEX:
-      
+
       int offLastVerts  = fVert + (nLatitude * (nLongitude-1));
       for(s=0; s<nLatitude; s++)
       {
@@ -76,12 +78,12 @@ public:
 
     // output a single face
     void face( ofstream &fout, int anchor, int v0, int v1, int v2 ){
-        fout << TString::Format("f %d %d %d\n", anchor+v0, anchor+v1, anchor+v2).Data(); 
+        fout << TString::Format("f %d %d %d\n", anchor+v0, anchor+v1, anchor+v2).Data();
     }
     void face( ofstream &fout, int anchor, int v0, int v1, int v2, int v3 ){
-        fout << TString::Format("f %d %d %d %d\n", anchor+v0, anchor+v1, anchor+v2, anchor+v3).Data(); 
+        fout << TString::Format("f %d %d %d %d\n", anchor+v0, anchor+v1, anchor+v2, anchor+v3).Data();
     }
-    // output a general prism 
+    // output a general prism
     void prism( ofstream &fout, TVector3 po, TVector3 ds ){
         int fVert = numVertices;    // Record the first vertex index for intermediate vertices.
         // x-y at z=0
@@ -96,7 +98,7 @@ public:
         vert( fout, po.X() + ds.X(), po.Y() + ds.Y(), po.Z() + ds.Z() ); // 7
         vert( fout, po.X(), po.Y() + ds.Y(), po.Z() + ds.Z() ); // 8
 
-        face( fout, fVert, 1, 2, 3, 4 ); // bottom face 
+        face( fout, fVert, 1, 2, 3, 4 ); // bottom face
         face( fout, fVert, 5, 6, 7, 8 ); // top face
         face( fout, fVert, 1, 2, 6, 5 ); // side 1
         face( fout, fVert, 2, 3, 7, 6 ); // side 2
@@ -131,16 +133,24 @@ public:
     }
 
     // Compute a track projection as a linear (straight) extrapolation from two points from full projections
-    static TVector3 projectAsStraightLine( genfit::Track * t, float z0, float z1, float zf, float * cov, TVector3 &mom ) {
-        TVector3 tv3A = trackPosition( t, z0, cov, mom );
-        TVector3 tv3B = trackPosition( t, z1, cov, mom );
+  static TVector3 projectAsStraightLine( genfit::Track * t, float* xyz0, float* xyz1, float* xyzf, float* planenorm_xyz, float * cov, TVector3 &mom ) {
+    TVector3 tv3A = trackPosition( t, xyz0, planenorm_xyz, cov, mom );
+    TVector3 tv3B = trackPosition( t, xyz1, planenorm_xyz, cov, mom );
 
-        if (verbose){
-            LOG_INFO << "Straight Line Projection using" << endm;
-            LOG_INFO << "A.x = " << tv3A.X() << endm;
-            LOG_INFO << "B.x = " << tv3B.X() << endm;
-        }
-
+    if (verbose){
+      LOG_INFO << "Straight Line Projection using" << endm;
+      LOG_INFO << "A.x = " << tv3A.X() << endm;
+      LOG_INFO << "B.x = " << tv3B.X() << endm;
+    }
+    //Assuming tv3A is starting point of line and tv3B is ending point of line and we are projecting to plane located at xyzf with normal planenorm_xyz
+    TVector3 projlinedir = tv3B-tv3A; //particle straight line direction
+    //Solution of intersection of line and plane where line has direction {xdir,ydir,zdir}*t and starts at {xorigin,yorigin,zorigin} and a plane that has some normal with a point on the plane; "t" is the free parameter in the parametric equation of the line.
+    double tintersection =
+      (planenorm_xyz[0]*(xyzf[0]-tv3A[0])+planenorm_xyz[1]*(xyzf[1]-tv3A[1])+planenorm_xyz[2]*(xyzf[2]-tv3A[2])) /
+      (planenorm_xyz[0]*projlinedir[0]+planenorm_xyz[1]*projlinedir[1]+planenorm_xyz[2]*projlinedir[2]);
+  
+    return TVector3( projlinedir[0]*tintersection+tv3A[0], projlinedir[1]*tintersection+tv3A[1], projlinedir[2]*tintersection+tv3A[2] );
+    /*
         double dxdz = ( tv3B.X() - tv3A.X() ) / ( tv3B.Z() - tv3A.Z() );
         double dydz = ( tv3B.Y() - tv3A.Y() ) / ( tv3B.Z() - tv3A.Z() );
 
@@ -148,61 +158,75 @@ public:
         double dy = dydz * ( zf - z1 );
         TVector3 r( tv3B.X() + dx, tv3B.Y() + dy, zf );
         return r;
+    */
     }
 
-    // Project a track to a given z-plane and return its position, momentum, and cov matrix
-    static TVector3 trackPosition( genfit::Track * t, float z, float * cov, TVector3 &mom ){
-
-        int iPoint = 0;
-        try {
-            auto plane = genfit::SharedPlanePtr(
-                // these normals make the planes face along z-axis
-                new genfit::DetPlane(TVector3(0, 0, z), TVector3(1, 0, 0), TVector3(0, 1, 0) )
-            );
-
-            genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
-            auto TCM = t->getCardinalRep()->get6DCov(tst);
-            //  returns the track length if needed
-            t->getCardinalRep()->extrapolateToPlane(tst, plane, false, true);
-
-            TCM = t->getCardinalRep()->get6DCov(tst);
-
-            // can get the projected positions if needed
-            float x = tst.getPos().X();
-            float y = tst.getPos().Y();
-            float _z = tst.getPos().Z();
-
-            mom.SetXYZ( tst.getMom().X(), tst.getMom().Y(), tst.getMom().Z() );
-
-            if ( cov ){
-                cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
-                cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
-                cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
-            }
-
-
-            return TVector3( x, y, _z );
-        } catch ( genfit::Exception e ){
-            LOG_INFO << "Track projection Failed from trackPoint " << iPoint  << " E: " << e.what() << endm;
-            return TVector3( -990, -990, -990 );
-        }
-        
-        
+    // Project a track to a given xyz-plane with a normal and return its position, momentum, and cov matrix
+  static TVector3 trackPosition( genfit::Track * t, float* xyz, float* norm, float * cov, TVector3 &mom ){
+    if (verbose){
+        LOG_INFO << "trackPosition(" << t << ", " << xyz << ", " << norm << ", " << cov << " )" << endm;
+        LOG_INFO << "Projecting to: " << xyz[0] << " " << xyz[1] << " " << xyz[2] << endm;
+        LOG_INFO << "Normal: " << norm[0] << " " << norm[1] << " " << norm[2] << endm;
+        LOG_INFO << "track has n points: " << t->getNumPointsWithMeasurement() << endm;
+    }
+    const int iPoint = 0;
+    // do not attempt projection if no points with measurements
+    // for some reason we can still get here even though we require convergence earlier
+    if ( t->getNumPointsWithMeasurement() == 0 ){
+        LOG_WARN << "Track has no points with measurement, cannot project" << endm;
         return TVector3( -990, -990, -990 );
     }
+    try {
+        auto plane = genfit::SharedPlanePtr(
+				new genfit::DetPlane(TVector3(xyz), TVector3(norm) )
+			);
+
+        genfit::MeasuredStateOnPlane tst = t->getFittedState(iPoint);
+        auto TCM = t->getCardinalRep()->get6DCov(tst);
+      //  returns the track length if needed
+      t->getCardinalRep()->extrapolateToPlane(tst, plane, false, true);
+      
+      TCM = t->getCardinalRep()->get6DCov(tst);
+      
+      // can get the projected positions if needed
+      float x = tst.getPos().X();
+      float y = tst.getPos().Y();
+      float _z = tst.getPos().Z();
+
+      mom.SetXYZ( tst.getMom().X(), tst.getMom().Y(), tst.getMom().Z() );
+      if (verbose){
+        LOG_INFO << "Projected to: " << x << " " << y << " " << _z << endm;
+      }
+      if ( cov ){
+        cov[0] = TCM(0,0); cov[1] = TCM(1,0); cov[2] = TCM(2,0);
+        cov[3] = TCM(0,1); cov[4] = TCM(1,1); cov[5] = TCM(2,1);
+        cov[6] = TCM(0,2); cov[7] = TCM(1,2); cov[8] = TCM(2,2);
+      }
+
+
+      return TVector3( x, y, _z );
+    } catch ( genfit::Exception &e ){
+      LOG_INFO << "Track projection Failed from trackPoint " << iPoint  << " E: " << e.what() << endm;
+      return TVector3( -990, -990, -990 );
+    }
+
+
+    return TVector3( -990, -990, -990 );
+  }
 
     // Utility method
     static TVector3 trackPosition( genfit::Track * t, float z ){
-        float cov[9];
-        TVector3 mom;
-        return trackPosition( t, z, cov, mom);
+      float cov[9] = {0}; //Force intialize array to 0 
+      TVector3 mom;
+      float detpos[3] = {0,0,z};
+      float detnorm[3] = {0,0,1};
+      return trackPosition( t, detpos, detnorm, cov, mom);
     }
 
     // Output the sTGC strips into a useful format for event display
-    void output_ftt_strips( 
-        ofstream &fout, 
+    void output_ftt_strips(
+        ofstream &fout,
         StEvent * event ){
-
         fout << "\n" << endl;
         fout << "o fttStrips" << endl;
         fout << "usemtl stgc_hits\n" << endl;
@@ -217,8 +241,8 @@ public:
             float dw = 0.05, dlh = 60.0, dlv = 60.0;
             float mx = 0.0, my = 0.0;
             float sx = 1.0, sy = 1.0;
-            
-            
+
+
             if ( c->quadrant() == kFttQuadrantA ){
                 mx = 0; my = 0;
                 sx = 1.0; sy = 1.0;
@@ -249,13 +273,13 @@ public:
             }
         }
     } // ftt_strips
-    
+
     // Output the event info into a useful format for event display
-    void output( std::string filename, 
+    void output( std::string filename,
             StEvent * event,
-            std::vector< Seed_t> seeds, 
-            std::vector< genfit::Track *> tracks, 
-            const std::vector< genfit::GFRaveVertex *> &vertices, 
+            std::vector< Seed_t> seeds,
+            std::vector< genfit::Track *> tracks,
+            const std::vector< genfit::GFRaveVertex *> &vertices,
             std::vector<TVector3> &fttHits,
             std::vector<TVector3> &fstHits,
             std::vector<TVector3> &fcsPreHits, // EPD = preshower
@@ -306,9 +330,9 @@ public:
             ofile << "o fstHits" << endl;
             ofile << "usemtl fst_hits\n" << endl;
             for ( auto p : fstHits ){
-             
-                float fstphi = TMath::ATan2( p.Y(), p.X() );
-                printf( "FST PHI: %f \n", fstphi );
+
+                // float fstphi = TMath::ATan2( p.Y(), p.X() );
+                // printf( "FST PHI: %f \n", fstphi );
                 // tri( ofile, TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.1f, 0.1f, 3.0f, fstphi );
                 sphere( TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.3, 10, 10, ofile );
             }
@@ -318,12 +342,12 @@ public:
         if (verbose){
             LOG_INFO << "Viz has " << fcsPreHits.size() << " EPD Hits" << endm;
         }
-        if ( fcsPreHits.size() > 0 ){ 
+        if ( fcsPreHits.size() > 0 ){
             ofile << "\n" << endl;
             ofile << "o epd" << endl;
             ofile << "usemtl fcs_hits\n" << endl;
             for ( auto p : fcsPreHits ){
-                
+
                 sphere( TVector3( p.X() * SCALE, p.Y() * SCALE, -p.Z() * SCALE ), 0.25, 10, 10, ofile );
             }
         }
@@ -331,7 +355,7 @@ public:
         if (verbose){
             LOG_INFO << "Viz has " << fcsClusters.size() << " FCS Hits" << endm;
         }
-        if ( fcsClusters.size() > 0 ){ 
+        if ( fcsClusters.size() > 0 ){
             ofile << "\n" << endl;
             ofile << "o fcs" << endl;
             ofile << "usemtl fcs_hits\n" << endl;
@@ -343,7 +367,7 @@ public:
                 i++;
             }
         }
-        
+
         // Write the track seeds
         if (verbose){
             LOG_INFO << "Viz has " << seeds.size() << " seeds" << endm;
@@ -362,7 +386,7 @@ public:
 
                 ofile << "l ";
                 for ( size_t i = vStart; i < numVertices; i++){
-                    ofile << i+1 << " "; 
+                    ofile << i+1 << " ";
                 }
                 ofile << endl;
             }
@@ -382,8 +406,8 @@ public:
             float zStep = 5.0; // cm
             for ( auto t : tracks ) {
                 size_t vStart = numVertices;
-    
-                
+
+
                 TVector3 lpoint;
                 for ( float z = startPos.Z(); z < 875; z += zStep ){
                     TVector3 point = trackPosition( t, z );
@@ -393,18 +417,21 @@ public:
                     vert( ofile, point.X() * SCALE, point.Y() * SCALE, -point.Z() * SCALE );
                     lpoint = point;
                 }
-                
+
                 ofile << "l ";
                 for ( size_t i = vStart; i < numVertices; i++){
-                    ofile << i+1 << " "; 
+                    ofile << i+1 << " ";
                 }
                 ofile << endl;
             } // for t in tracks
         } // if tracks.size() > 0
 
-        ofile.close();	
+        ofile.close();
     }
 
     size_t numVertices;
 
 };
+
+
+#endif

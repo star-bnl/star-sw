@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+nEvents=${1:-1000} #num events
+pid=${2:-5} # default muon
+
+echo "Usage:\n sim/gen <nEvents>"
+echo "nEvents=${nEvents}"
+
+strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+
+if [ -f "sim.fzd" ] ; then
+    echo "sim.fzd already exists, skipping"
+else
+    echo "strong random ${strongrandom}"
+    echo root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+    time root4star -b -q -l 'sim/gen.C( '"${nEvents}"','"${strongrandom}"')'
+fi

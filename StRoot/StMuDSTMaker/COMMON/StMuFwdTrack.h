@@ -179,7 +179,6 @@ protected:
     float mPval;
     short mCharge;
     TVector3 mPrimaryMomentum;
-
     UShort_t mIdTruth; // MC track id
     UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
