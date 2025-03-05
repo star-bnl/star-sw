@@ -18,7 +18,8 @@ const string getParamX( const int x, const int y1, const int y2 ) {
     case 3:  str = mParamStr_ref3[y1][y2]; break;
     case 4:  str = mParamStr_ref4[y1][y2]; break;
     case 5:  str = mParamStr_ref5[y1][y2]; break;
-    // case 6:  str = mParamStr_ref6[y1][y2]; break;
+    case 6:  str = mParamStr_ref6[y1][y2]; break;
+    case 7:  str = mParamStr_ref7[y1][y2]; break;
     default: str = "0";
   }
   return str;
