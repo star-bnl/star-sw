@@ -11,7 +11,7 @@
 #include "TString.h"
 #include "TRegexp.h"
 
-class TOBjArray;
+class TObjArray;
 class TDirIter
 {
 public:
@@ -19,7 +19,9 @@ public:
   ~TDirIter();
 void 	Reset  (const char *path, Int_t maxlev = 99);
 const char *NextFile();
-
+ const TNamed *NextFileName();
+Int_t NoFiles() const;
+ const TObjArray *Array() {return fArr;}
 private:
 TString 	MakeWild(const char *re);
 const char 	*NextFileQ();

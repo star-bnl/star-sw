@@ -214,6 +214,9 @@ class StTrackNode;
 class StTrackPidTraits;
 class StV0Vertex;
 class StXiVertex;
+class StGmtHit;
+class StGmtStrip;
+class StGmtPoint;
 
 StCollectionDef(BTofHit)
 StCollectionDef(BTofRawHit)
@@ -293,6 +296,9 @@ StCollectionDef(TrackNode)
 StCollectionDef(TrackPidTraits)
 StCollectionDef(V0Vertex)
 StCollectionDef(XiVertex)
+StCollectionDef(GmtHit)
+StCollectionDef(GmtStrip)
+StCollectionDef(GmtPoint)
 
 
 #endif

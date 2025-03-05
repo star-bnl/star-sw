@@ -1,0 +1,6 @@
+# $Id $
+# package KFParticlePerformance
+# author: 
+#Library:libKFParticlePerformance.so:LIBS +=   -lStChain  -lStDbBroker
+Library:libKFParticlePerformance.so:LIBS +=   -lKFParticle
+#Library:libKFParticlePerformance.so:LIBS +=   -lStChain  -lStDbBroker

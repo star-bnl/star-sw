@@ -198,6 +198,9 @@
 #include "StTrackPidTraits.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
+#include "StGmtHit.h"
+#include "StGmtPoint.h"
+#include "StGmtStrip.h"
 
 StCollectionImp(BTofHit)
 StCollectionImp(BTofRawHit)
@@ -277,3 +280,6 @@ StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
 StCollectionImp(V0Vertex)
 StCollectionImp(XiVertex)
+StCollectionImp(GmtHit)
+StCollectionImp(GmtStrip)
+StCollectionImp(GmtPoint)
