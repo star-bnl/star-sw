@@ -3,7 +3,7 @@
 
 #include "StEvent/StFwdTrack.h"
 
-StMuFwdTrack::StMuFwdTrack() {
+StMuFwdTrack::StMuFwdTrack() : mDidFitConverge(0),mDidFitConvergeFully(0),mNumberOfFailedPoints(0),mNumberOfSeedPoints(0),mNumberOfFitPoints(0),mChi2(0),mNDF(0),mPval(0),mCharge(0),mPrimaryMomentum(0,0,0),mIdTruth(0),mQATruth(0) {
 
 }
 
@@ -19,6 +19,9 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
     mCharge = evTrack->charge();
     mPrimaryMomentum = TVector3( evTrack->momentum().x(), evTrack->momentum().y(), evTrack->momentum().z() );
 
+    mIdTruth = evTrack->idTruth();
+    mQATruth = evTrack->qaTruth();
+    
     //copy the projections
     for ( auto proj : evTrack->mProjections ){
         mProjections.push_back(

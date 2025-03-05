@@ -1,4 +1,4 @@
-//usr/bin/env root4star -l -b -q  $0; exit $?
+//usr/bin/env root4star -l -b -q $0'('$1')'; exit $?
 // that is a valid shebang to run script as executable, but with only one arg
 
 
@@ -7,23 +7,29 @@
 
 TFile *output = 0;
 
-void fwd_tracking(      int n = 500,
-                const char *inFile =  "simu/seed.fzd",
-                std::string configFile = "simu/seed.xml",
-                const char *geom = "y2023") {
+void jpsi_ana( int n = 5, // nEvents to run
+                string outputName = "stFwdTrackMaker_ideal_jpsi.root",
+                bool useFstForSeedFinding = false, // use FTT (default) or FST for track finding
+                bool enableTrackRefit = true, // Enable track refit (default off)
+                bool realisticSim = false, // enables data-like mode, real track finding and fitting without MC seed
+                char *inFile =  "jpsi.fzd"
+            ) {
+    cout << "Running " << n << " events from " << inFile << endl;
+    const char *geom = "y2023";
     TString _geom = geom;
+
+    // Switches for common options 
     bool SiIneff = false;
     bool useConstBz = false;
     bool useFCS = true;
-
+    
+    
     // Setup the chain for reading an FZD
     TString _chain;
     if ( useFCS )
         _chain = Form("fzin %s sdt20211016 fstFastSim fcsSim fcsWFF fcsCluster fwdTrack MakeEvent StEvent ReverseField agml usexgeom bigbig  evout cmudst tree", _geom.Data());
     else 
         _chain = Form("fzin %s sdt20211016 MakeEvent StEvent ReverseField agml usexgeom bigbig fstFastSim fcsSim fwdTrack evout cmudst tree", _geom.Data());
-
-    //_chain = Form("fzin %s sdt20230202 MakeEvent StEvent ReverseField agml usexgeom bigbig evout cmudst tree", _geom.Data());
 
     gSystem->Load( "libStarRoot.so" );
     gROOT->SetMacroPath(".:/star-sw/StRoot/macros/:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/calib:./StRoot/macros/mudst:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/analysis:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/test:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/examples:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/html:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/qa:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/calib:/afs/rhic.bnl.gov/star/packages/DEV/StRoot/macros/mudst:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/macros:/afs/rhic.bnl.gov/star/ROOT/36/5.34.38/.sl73_x8664_gcc485/rootdeb/tutorials");
@@ -33,15 +39,10 @@ void fwd_tracking(      int n = 500,
     if ( useConstBz )
         StarMagField::setConstBz(true);
 
+    gSystem->Load( "libStFttSimMaker" );
+    gSystem->Load( "libStFcsTrackMatchMaker" );
 
-   gSystem->Load( "libStFttSimMaker" );
-
-   gSystem->Load( "libStFcsTrackMatchMaker" );
-//    StFttSlowSimMaker *fttSlowSim = new StFttSlowSimMaker();
-//     cout << "Adding StFttSlowSimMaker to chain" << endl;
-//    chain->AddMaker(fttSlowSim);
-//goto chain_loop;
-
+    // FCS setup, if included
     if (useFCS) {
 
         StFcsDbMaker* fcsdbmkr = (StFcsDbMaker*) chain->GetMaker("fcsDbMkr");  
@@ -62,10 +63,14 @@ void fwd_tracking(      int n = 500,
         fcsclu->setDebug(1);
     }
 
-    // Configure FTT FastSim
-        // StFttFastSimMaker *fttFastSim = (StFttFastSimMaker*) chain->GetMaker( "fttSim" );
-        // cout << "Adding StFttFastSimMaker to chain" << endl;
-        // chain->AddMaker(fttFastSim);
+    // {
+        gSystem->Load("StFwdUtils.so");
+    //     StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+    //     fwdJPsi->SetDebug();
+    //     chain->AddMaker(fwdJPsi);
+    //     goto chain_loop;
+    // }
+    
 
     // Configure FST FastSim
         TString qaoutname(gSystem->BaseName(inFile));
@@ -84,20 +89,37 @@ void fwd_tracking(      int n = 500,
     // Configure the Forward Tracker
         StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
         
-        // config file set here overides chain opt
-        cout << "Running FwdTracking with config: " << configFile << endl;
-        fwdTrack->SetConfigFile( configFile );
+        // config file set here for ideal simulation
+        if (!realisticSim){
+            cout << "Configured for ideal simulation (MC finding + MC mom seed)" << endl;
+            fwdTrack->setConfigForIdealSim( );
+        } else {
+            cout << "Configured for realistic simulation" << endl;
+            fwdTrack->setConfigForRealisticSim( );
+            cout << "Configured for realistic simulation DONE" << endl;
+        }
+
+        if (useFstForSeedFinding)
+            fwdTrack->setSeedFindingWithFst();
+        else
+            fwdTrack->setSeedFindingWithFtt();
+
+        fwdTrack->setTrackRefit( enableTrackRefit );
+        fwdTrack->setOutputFilename( outputName );
         fwdTrack->SetGenerateTree( true );
         fwdTrack->SetGenerateHistograms( true );
         fwdTrack->SetDebug();
 
-        gSystem->Load("StFwdUtils.so");
+        cout << "fwd tracker setup" << endl;
+
+        
         if (!useFCS){
             StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
             fwdAna->SetDebug();
             chain->AddAfter("fwdTrack", fwdAna);
         }
 
+    StMuDstMaker * muDstMaker = (StMuDstMaker*)chain->GetMaker( "MuDst" );
     if (useFCS) {
         // FwdTrack and FcsCluster assciation
         gSystem->Load("StFcsTrackMatchMaker");
@@ -110,10 +132,24 @@ void fwd_tracking(      int n = 500,
         StFwdAnalysisMaker *fwdAna = new StFwdAnalysisMaker();
         fwdAna->SetDebug();
         chain->AddAfter("FcsTrkMatch", fwdAna);
+
+        StFwdJPsiMaker *fwdJPsi = new StFwdJPsiMaker();
+        fwdJPsi->SetDebug();
+        chain->AddAfter("FcsTrkMatch", fwdJPsi);
+
+	gSystem->Load("StFcsDiLeptonMaker");
+        StFcsDiLeptonMaker *dilep = new StFcsDiLeptonMaker;
+	//TString dilepfile(outfile); dilepfile.ReplaceAll(".root",".dilep.root");                                                                  
+        dilep->setFileName("dilep.root");//dilepfile.Data());                                                                                       
+        //chain->AddAfter("FcsTrkMatch", dilep);            
+
+        // Produce MuDst output
+        chain->AddAfter( "FcsTrkMatch", muDstMaker );
+    } else {
+        chain->AddAfter( "fwdAna", muDstMaker );
     }
 
-    StMuDstMaker * muDstMaker = (StMuDstMaker*)chain->GetMaker( "MuDst" );
-    chain->AddAfter( "FcsTrkMatch", muDstMaker );
+    
 
 chain_loop:
 	chain->Init();
@@ -141,6 +177,5 @@ chain_loop:
         // }
 
         cout << "<---------- END EVENT" << endl;
-    }
-
+    } // event loop
 }

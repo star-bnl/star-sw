@@ -1,0 +1,2 @@
+nEvents=${1:-10} #num events
+root4star -b -q -l 'sim/sim.C('${nEvents}', "StFwdTrackMaker_real_sim_ftt_seed.root", false, true, true )' >& LOG_REAL_SIM_FTT_SEED.log

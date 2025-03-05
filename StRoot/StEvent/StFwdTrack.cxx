@@ -6,7 +6,6 @@ StFwdTrack::StFwdTrack() {}
 
 StFwdTrack::~StFwdTrack() {}
 
-
 /* momentum
  * get the track momentum at the first point (PV if included)
  */
