@@ -58,8 +58,6 @@ public:
     void setFourMomentum(float px, float py, float pz, float e) { mFourMomentumX = px; mFourMomentumY = py; mFourMomentumZ = pz; mFourMomentumT = e; }
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
 
-    // TODO: add user functions to rebuild reverse mapping to index of all matched Fwd tracks
-    // TODO: user functions for detId (3 bits) and mId (13 bits) from index
 
 protected:
     UShort_t mIndex=0;         //! Eventwise cluster Index (unique across all detectors)

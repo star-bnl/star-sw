@@ -30,6 +30,8 @@ public:
     Int_t   id() const              { return mId; }
     /// Return chi2 of the track
     Float_t chi2() const            { return mChi2 / 1000.f; }
+    /// Return p-value of the track
+    Float_t pVal() const            { return mPVal / 10000.f; }
     /// Return momentum (GeV/c)
     TVector3 momentum() const { return TVector3( mMomentumX, mMomentumY, mMomentumZ ); }
     /// Return charge of the track (encoded in nHitsFit as: nHitsFit * charge)
@@ -58,6 +60,7 @@ public:
     void setNumberOfSeedPoints( Int_t lNumberOfSeedPoints ) { mNumberOfSeedPoints = (UChar_t)lNumberOfSeedPoints;}
     void setNumberOfFitPoints( Int_t lNumberOfFitPoints ) { mNumberOfFitPoints = (Char_t)lNumberOfFitPoints;}
     void setChi2(Float_t chi2);
+    void setPVal(Float_t pval);
     void addEcalCluster( UChar_t index ) { mEcalMatchIndex.push_back(index); }
     void addHcalCluster( UChar_t index ) { mHcalMatchIndex.push_back(index); }
     /// Set index of the corresonding MC track
@@ -78,7 +81,7 @@ protected:
     Char_t mNumberOfFitPoints;
     /// Chi2 of the track (encoding = chi2*1000)
     UShort_t mChi2;
-
+    
     /// Px momentum (GeV/c)
     Float_t mMomentumX;
     /// Py momentum (GeV/c)
@@ -105,8 +108,11 @@ protected:
     UShort_t mIdTruth;
     /// MC track quality (percentage of hits coming from corresponding MC track)
     UShort_t mQATruth;
-    
-    ClassDef(StPicoFwdTrack,2)
+
+    /// p-value of the track fit (x10000)
+    UShort_t mPVal; 
+
+    ClassDef(StPicoFwdTrack,3)
 
 };
 
