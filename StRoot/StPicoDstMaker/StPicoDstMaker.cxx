@@ -2530,6 +2530,7 @@ void StPicoDstMaker::fillFwdTracks() {
 
       picoFwdTrack.setMcTruth( evTrack->idTruth(), evTrack->qaTruth() );
       picoFwdTrack.setVtxIndex( evTrack->vertexIndex() );
+      // picoFwdTrack.setGlobalTrackIndex( evTrack->index() );
 
       // fill matched ecal and hcal clusters for the track
       // ecal
@@ -2551,6 +2552,11 @@ void StPicoDstMaker::fillFwdTracks() {
         picoFwdTrack.addHcalCluster( index );
       }
 
+      // Now set the projections for ECal and HCal
+      StFwdTrackProjection ecalProj = evTrack->getProjectionFor(kFcsWcalId);
+      StFwdTrackProjection hcalProj = evTrack->getProjectionFor(kFcsHcalId);
+      picoFwdTrack.setECalProjection( ecalProj.mXYZ.x(), ecalProj.mXYZ.y(), ecalProj.mXYZ.z() );
+      picoFwdTrack.setHCalProjection( hcalProj.mXYZ.x(), hcalProj.mXYZ.y(), hcalProj.mXYZ.z() );
 
       int counter = mPicoArrays[StPicoArrays::FwdTrack]->GetEntries();
       picoFwdTrack.setId( counter );

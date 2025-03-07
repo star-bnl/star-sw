@@ -37,6 +37,11 @@ StPicoFwdTrack::StPicoFwdTrack(const StPicoFwdTrack &fwdTrack){
     mDCAZ = fwdTrack.mDCAZ;
     mVtxIndex = fwdTrack.mVtxIndex;
     mGlobalTrackIndex = fwdTrack.mGlobalTrackIndex;
+
+    mECalX = fwdTrack.mECalX;
+    mECalY = fwdTrack.mECalY;
+    mHCalX = fwdTrack.mHCalX;
+    mHCalY = fwdTrack.mHCalY;
 }
 
 StPicoFwdTrack::~StPicoFwdTrack(){

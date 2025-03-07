@@ -53,6 +53,11 @@ public:
     // Number of points used in the track seed step
     Int_t   numberOfSeedPoints() const { return mNumberOfSeedPoints; }
 
+    // Projected Projection at the ECal
+    TVector3 ecalProjection() const { return TVector3( ((float)mECalX)/100.f, ((float)mECalY)/100.f, ((float)mECalZ)/10.f ); }
+    // Projected Projection at the HCal
+    TVector3 hcalProjection() const { return TVector3( ((float)mHCalX)/100.f, ((float)mHCalY)/100.f, ((float)mHCalZ)/10.f ); }
+
     void setId( Int_t id) { mId = (UShort_t)id; }
     void setMomentum( TVector3 mom ) { mMomentumX = mom.X(); mMomentumY = mom.Y(); mMomentumZ = mom.Z(); }
     void setMomentum( double px, double py, double pz ) { mMomentumX = (Float_t)px; mMomentumY = (Float_t)py; mMomentumZ = (Float_t)pz; }
@@ -63,6 +68,8 @@ public:
     void setPVal(Float_t pval);
     void addEcalCluster( UChar_t index ) { mEcalMatchIndex.push_back(index); }
     void addHcalCluster( UChar_t index ) { mHcalMatchIndex.push_back(index); }
+    void setECalProjection( Float_t x, Float_t y, Float_t z ) { mECalX = (Short_t)(x*100.f); mECalY = (Short_t)(y*100.f); mECalZ = (Short_t)(z*10.f); }
+    void setHCalProjection( Float_t x, Float_t y, Float_t z ) { mHCalX = (Short_t)(x*100.f); mHCalY = (Short_t)(y*100.f); mHCalZ = (Short_t)(z*10.f); }
     /// Set index of the corresonding MC track
     void setMcTruth(Int_t index, Int_t qa)   { mIdTruth = (UShort_t)index; mQATruth = (UShort_t)qa; }
     void setDca( Float_t dcaX, Float_t dcaY, Float_t dcaZ ) { mDCAXY =sqrt(dcaX*dcaX + dcaY*dcaY); mDCAZ = dcaZ; }
@@ -111,6 +118,15 @@ protected:
 
     /// p-value of the track fit (x10000)
     UShort_t mPVal; 
+
+    /// ECal and HCal track projection positions
+    /// These are packed 
+    Short_t mECalX; 
+    Short_t mECalY;
+    Short_t mECalZ;
+    Short_t mHCalX;
+    Short_t mHCalY;
+    Short_t mHCalZ;
 
     ClassDef(StPicoFwdTrack,3)
 
