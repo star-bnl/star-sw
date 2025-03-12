@@ -63,6 +63,11 @@ int TAttr::SetAttr(const TAttr *att)
    return add;
 }
 //_____________________________________________________________________________
+void TAttr::SetAttr(const char *key, Bool_t val)
+{
+  TString ts; ts+=(char)val; SetAttr(key, ts.Data());
+}
+//_____________________________________________________________________________
 void TAttr::SetAttr(const char *key, Long_t val)
 {
    TString ts; ts+=val; SetAttr(key, ts.Data());
@@ -87,7 +92,7 @@ const char *TAttr::SAttr(const char *key) const
    if (att) { // we found the attribut
      int n = att->GetUniqueID();
      att->SetUniqueID(n+1);
-     if (n<13) Info("Found","%s = %s\n",att->GetName(),att->GetTitle());
+     if (n<13) Info("Found","%s = %s",att->GetName(),att->GetTitle());
    }
    return (att)? att->GetTitle():"";
 }   

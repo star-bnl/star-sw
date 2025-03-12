@@ -1,8 +1,8 @@
+//usr/bin/env root -l -b -q  $0'('$1')'; exit $?
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TTree.h"
-
 
 TFile * fData;
 TTree * fwd;
@@ -247,7 +247,7 @@ void viz_points(const char* name, const char* cmd, int color, int eventIndex, Pr
 //add function for seed finding-AGE
 void viz_seed( const char* name, const char* cmd, int eventIndex, ProjectionType projType = kRZSigned){
    
-    fwd->Draw( "reco.id", "", "goff", 1, eventIndex );
+    fwd->Draw( "reco.mChi2", "", "goff", 1, eventIndex );
     int nTrks = fwd->GetSelectedRows();
 
     TLine line;
@@ -256,7 +256,7 @@ void viz_seed( const char* name, const char* cmd, int eventIndex, ProjectionType
     TLine proj;
     for (int i = 0; i < nTrks; i++){        //loop over number of tracks
 
-        fwd->Draw( TString::Format("reco[%d].projs.mXYZ.fX:reco[%d].projs.mXYZ.fY:reco[%d].projs.mXYZ.fZ", i, i, i), "", "goff", 1, eventIndex );
+        fwd->Draw( TString::Format("reco[%d].mProjections.mXYZ.fX:reco[%d].mProjections.mXYZ.fY:reco[%d].mProjections.mXYZ.fZ", i, i, i), "", "goff", 1, eventIndex );
         auto nHits = fwd->GetSelectedRows();
         auto projX = fwd->GetV1();
         auto projY = fwd->GetV2();
@@ -290,7 +290,35 @@ void viz_seed( const char* name, const char* cmd, int eventIndex, ProjectionType
                 line.SetLineColor(1);
             }*/
 
-            line.DrawLine(x0, y0, x1, y1);
+
+void viz_tracks(int nTrk, int eventIndex, ProjectionType projType, bool seeds = false, int iTrack = -1, bool filter = false){
+    TLine ll;
+    ll.SetLineWidth(lineScale);
+
+    // ll.DrawLine( 150, 10, 250, 20 );
+    // Tracks
+    int NumTracksFound = 0;
+    for ( int i = 0; i < nTrk; i++ ){
+        if ( iTrack >= 0 && i != iTrack ) continue;
+
+        // fwd->Draw( TString::Format("reco[%d].projs.mXYZ.fX:reco[%d].projs.mXYZ.fY:reco[%d].projs.mXYZ.fZ", i, i, i), TString::Format("reco[%d].status>=1 && fabs(reco[%d].mChi2) > 0.5", i, i), "goff", 1, eventIndex );
+        fwd->Draw( TString::Format("reco[%d].mProjections.mXYZ.fX:reco[%d].mProjections.mXYZ.fY:reco[%d].mProjections.mXYZ.fZ:reco[%d].mChi2:reco[%d].mDidFitConverge:reco[%d].mCharge", i, i, i, i, i, i), "", "goff", 1, eventIndex );
+        // fwd->Draw( TString::Format("0:5:reco[%d].projs.mXYZ.fZ", i, i, i), "", "goff", 1, eventIndex );
+        auto trkX = fwd->GetV1();
+        auto trkY = fwd->GetV2();
+        auto trkZ = fwd->GetV3();
+        auto trkChi2 = fwd->GetV4();
+        auto trkConv = fwd->GetVal(4);
+        auto trkQ = fwd->GetVal(5);
+
+        TText text;
+        text.SetTextFont(43);
+        text.SetTextSize(36);
+        if (iTrack >= 0){
+            text.DrawTextNDC( 0.05, 0.7, TString::Format( "chi2=%f", trkChi2[0] ) );
+            text.DrawTextNDC( 0.05, 0.65, TString::Format( "converge=%d", trkConv[0] ) );
+        }else {
+            // if ( trkChi2[0] > 100 ) continue;
         }
 
     }
@@ -300,7 +328,7 @@ void viz_seed( const char* name, const char* cmd, int eventIndex, ProjectionType
 void viz_proj( int eventIndex, ProjectionType projType = kRZSigned, bool markers = false ){
 
     //get number of tracks
-    fwd->Draw( "reco.id", "", "goff", 1, eventIndex);   //check if this is correct data to use to get nTrks
+    fwd->Draw( "reco.mChi2", "", "goff", 1, eventIndex);   //check if this is correct data to use to get nTrks
     int nTrks = fwd->GetSelectedRows();
 
     //create line for track
@@ -351,26 +379,45 @@ void viz_proj( int eventIndex, ProjectionType projType = kRZSigned, bool markers
             }
         }
     }
-    if (markers){
-        //add marker to the legend
-        TText *t = new TText(.5,.5,"Hello World !");
-        t->SetTextColor(kBlack);
-        t->SetTextFont(43);
-        t->SetTextSize(20);
-        //make this more functional?
-        if ( projType == kRZSigned ){
-            LegendY = 5;
-        } else if (projType == kXY ){
-            LegendY = -15;
-        }
-        TMarker *mk1 = new TMarker( LegendX, LegendY, 23 ); 
-        mk1->SetMarkerSize( 2.5 );
-        mk1->SetMarkerColor( 2 );
-        mk1->Draw("same");
-        t->DrawText( LegendX + 2, LegendY - 0.5, TString::Format( "Projected Hits ") );
-    }
-    
-}  //end of fn
+
+    if (seeds == false) return;
+
+    for ( int i = 0; i < nTrk; i++ ){
+        if ( iTrack >= 0 && i != iTrack ) continue;
+
+        fwd->Draw( TString::Format("reco[%d].seeds.pos.fX:reco[%d].seeds.pos.fY:reco[%d].seeds.pos.fZ", i, i, i), TString::Format("reco[%d].mDidFitConverge!=0", i), "goff", 1, eventIndex );
+        auto seedX = fwd->GetV1();
+        auto seedY = fwd->GetV2();
+        auto seedZ = fwd->GetV3();
+
+        // printf( "Found %d seeds for track %d\n", fwd->GetSelectedRows(), i );
+        // int slc = TColor::GetColorPalette(i*100 % 255);
+        ll.SetLineColor(kGreen);
+
+        for ( int j = 0; j < fwd->GetSelectedRows()-1; j++  ){
+
+            float seedX1 = xx( seedX[j], seedY[j], seedZ[j], projType );
+            float seedY1 = yy( seedX[j], seedY[j], seedZ[j], projType );
+
+            // printf( "seed(x=%f, y=%f, z=%)->(xx=%f, yy=%f)\n", seedX[j], seedY[j], seedZ[j], seedX1, seedY1 );
+
+            float seedX2 = xx( seedX[j+1], seedY[j+1], seedZ[j+1], projType );
+            float seedY2 = yy( seedX[j+1], seedY[j+1], seedZ[j+1], projType );
+
+            // printf( "(%f, %f) -> (%f, %f)\n", seedX1, seedY1, seedX2, seedY2 );
+            ll.DrawLine( seedX1, seedY1, seedX2, seedY2 );
+            
+            TMarker *mk1 = new TMarker( seedX1, seedY1, 20 );
+            mk1->SetMarkerSize( 2.5 );
+            mk1->SetMarkerColor(kBlue);
+            mk1->Draw("same");
+
+            TMarker *mk2 = new TMarker( seedX2, seedY2, 20 );
+            mk2->SetMarkerSize( 2.5 );
+            mk2->SetMarkerColor(kBlue);
+            mk2->Draw("same");
+        } // end loop j
+    } // end loop i
 
 
 //add function to compare lines
@@ -395,7 +442,7 @@ void viz_stats( int eventIndex ){
     fwd->Draw( "fcsX:fcsY:fcsZ", "", "goff", 1, eventIndex );
     int numEpd = fwd->GetSelectedRows();*/
 
-    fwd->Draw( "reco.id", "", "goff", 1, eventIndex );
+    fwd->Draw( "reco.mChi2", "", "goff", 1, eventIndex );
     int numTracks = fwd->GetSelectedRows();
     fwd->Draw( "fst.pos.fX:fst.pos.fY:fst.pos.fZ", "", "goff", 1, eventIndex );
     int numFst = fwd->GetSelectedRows();
@@ -422,12 +469,21 @@ void viz_stats( int eventIndex ){
     text.DrawTextNDC( 0.05, statTextY, TString::Format("WCal Clusters : %d", numWcal) ); n();
     text.DrawTextNDC( 0.05, statTextY, TString::Format("HCal Clusters : %d", numHcal) ); n();
 
-    //print reco statistics
-    /*fwd->Draw( "reco.reco.projs.mXYZ:fX:reco.reco.projs.mXYZ:fY:reco.reco.projs.mXYZ:fZ", "", "goff", 1, eventIndex );
-    int numReco = fwd->GetSelectedRows();
-    statTextY = 0.92;
-    text.DrawTextNDC( 0.35, statTextY, TString::Format("Reco Hits : %d", numReco) ); n();*/
+    fwd->Draw( "reco.mPrimaryMomentum.fX", "", "goff", 1, eventIndex );
+    text.DrawTextNDC( 0.05, statTextY, TString::Format("#Tracks : %d", fwd->GetSelectedRows()) ); n();
 
+    fwd->Draw( "reco.mPrimaryMomentum.fX", "reco.mChi2<100", "goff", 1, eventIndex );
+    text.DrawTextNDC( 0.05, statTextY, TString::Format("#Tracks (good) : %d", fwd->GetSelectedRows()) ); n();
+
+    fwd->Draw( "reco.mPrimaryMomentum.fX", "reco.mChi2<100 && reco.mCharge==1", "goff", 1, eventIndex );
+    text.DrawTextNDC( 0.05, statTextY, TString::Format("#Pos Tracks (good) : %d", fwd->GetSelectedRows()) ); n();
+    fwd->Draw( "reco.mPrimaryMomentum.fX", "reco.mChi2<100 && reco.mCharge==-1", "goff", 1, eventIndex );
+    text.DrawTextNDC( 0.05, statTextY, TString::Format("#Neg Tracks (good) : %d", fwd->GetSelectedRows()) ); n();
+
+    // fwd->Draw( "seeds.trackId", "", "goff", 1, eventIndex );
+    // fwd->Draw( "nSeedTracks", "", "goff", 1, eventIndex );
+    // mTotalSeeds = fwd->GetV1()[0];
+    text.DrawTextNDC( 0.05, statTextY, TString::Format("#Seeds : %d", mTotalSeeds ) ); n();
 }
 
 
@@ -452,15 +508,17 @@ int viz_event( int eventIndex, ProjectionType projType = kRZSigned ){
 
     printf( "Visualizing Event %d \n", eventIndex );
 
-    fwd->Draw( "reco.id", "", "", 1, eventIndex );
-    int nTrk = fwd->GetSelectedRows();          //number of reco tracks
-    printf( "Event has %d Tracks \n", nTrk );   //changed from %lld to %d to eliminate an error that occurred-AGE
+    fwd->Draw( "reco.mPrimaryMomentum.fX", "", "goff", 1, eventIndex );
+    int nTrk = fwd->GetSelectedRows();
+    printf( "Event has %lld Tracks \n", nTrk );
 
 
     hFrame->Draw("colz");
 
-    //add detector locations
-    if (projType == kRZSigned){
+    viz_points( "FTT", "fttPoints.mXYZ.fX:fttPoints.mXYZ.fY:fttPoints.mXYZ.fZ", kRed, eventIndex, projType );
+    // viz_points( "FTC", "fttClusters.pos.fX:fttClusters.pos.fY:-fttClusters.pos.fZ", kGreen, eventIndex, projType, "fttClusters.mNStrips>2" );
+    viz_points( "FST", "fstHits.mXYZ.fX:fstHits.mXYZ.fY:fstHits.mXYZ.fZ", kRed, eventIndex, projType );
+    viz_points( "FCS", "wcalClusters.mXYZ.fX:wcalClusters.mXYZ.Y():wcalClusters.mXYZ.Z():wcalClusters.mClu.mEnergy", kGray, eventIndex, projType );
 
         TLine *fst1 = new TLine(151.75, -28.3, 151.75, 28.3);
         fst1->SetLineWidth(2);
@@ -475,22 +533,9 @@ int viz_event( int eventIndex, ProjectionType projType = kRZSigned ){
         fst3->SetLineColor(12);
         fst3->Draw("same");
 
-        TLine *ftt1 = new TLine(281, -60, 281, 60);
-        ftt1->SetLineWidth(2);
-        ftt1->SetLineColor(12);
-        ftt1->Draw("same");
-        TLine *ftt2 = new TLine(304, -60, 304, 60);
-        ftt2->SetLineWidth(2);
-        ftt2->SetLineColor(12);
-        ftt2->Draw("same");
-        TLine *ftt3 = new TLine(325, -60, 325, 60);
-        ftt3->SetLineWidth(2);
-        ftt3->SetLineColor(12);
-        ftt3->Draw("same");
-        TLine *ftt4 = new TLine(348, -60, 348, 60);
-        ftt4->SetLineWidth(2);
-        ftt4->SetLineColor(12);
-        ftt4->Draw("same");
+    
+    viz_tracks(nTrk, eventIndex, projType, false);
+    //viz_seeds(nTrk, eventIndex, projType);
 
         TLine *epd = new TLine(375, -130, 375, 130);
         epd->SetLineWidth(2);
@@ -510,15 +555,15 @@ int viz_event( int eventIndex, ProjectionType projType = kRZSigned ){
     //viz_points( "FST", "fstX:fstY:fstZ", kGray, eventIndex, projType/*, true*/ );
     //viz_points( "EPD", "epdX:epdY:epdZ:epdE", kBlue, eventIndex, projType/*, true*/ );   //epd hits (only in fwdtree2)-AGE
     //viz_points( "FCS", "fcsX:fcsY:fcsZ:fcsE", kGreen, eventIndex, projType/*, true*/ );
-    viz_points( "FST", "fst.pos.fX:fst.pos.fY:fst.pos.fZ", kGray, eventIndex, projType, true );
-    viz_points( "FTT", "ftt.pos.fX:ftt.pos.fY:ftt.pos.fZ", kRed, eventIndex, projType );
-    viz_points( "FTT Clusters", "fttClusters.pos.fX:fttClusters.pos.fY:fttClusters.pos.fZ", kRed, eventIndex, projType );
-    viz_points( "WCal Hits", "wcalHits.starXYZ.fX:wcalHits.starXYZ.fY:wcalHits.starXYZ.fZ+705:100*wcalHits.energy", kBlue, eventIndex, projType );
-    viz_points( "HCal Hits", "hcalHits.starXYZ.fX:hcalHits.starXYZ.fY:hcalHits.starXYZ.fZ+785:100*wcalClusters.mEnergy", kTeal, eventIndex, projType/*, true*/ );
-    viz_points( "WCal Clusters", "wcalClusters.pos.fX:wcalClusters.pos.fY:wcalClusters.pos.fZ+705:100*wcalClusters.mEnergy", kViolet, eventIndex, projType/*, true*/ );
-    viz_points( "HCal Clusters", "hcalClusters.pos.fX:hcalClusters.pos.fY:hcalClusters.pos.fZ+785:100*wcalClusters.mEnergy", kGreen, eventIndex, projType/*, true*/ );   //add fcs hits-AGE
+    viz_points( "FST", "fst.mXYZ.fX:fst.mXYZ.fY:fst.mXYZ.fZ", kGray, eventIndex, projType, true );
+    viz_points( "FTT", "ftt.mXYZ.fX:ftt.mXYZ.fY:ftt.mXYZ.fZ", kRed, eventIndex, projType );
+    // viz_points( "FTT Clusters", "fttClusters.pos.fX:fttClusters.pos.fY:fttClusters.pos.fZ", kRed, eventIndex, projType );
+    // viz_points( "WCal Hits", "wcalHits.starXYZ.fX:wcalHits.starXYZ.fY:wcalHits.starXYZ.fZ+705:100*wcalHits.energy", kBlue, eventIndex, projType );
+    // viz_points( "HCal Hits", "hcalHits.starXYZ.fX:hcalHits.starXYZ.fY:hcalHits.starXYZ.fZ+785:100*wcalClusters.mEnergy", kTeal, eventIndex, projType/*, true*/ );
+    // viz_points( "WCal Clusters", "wcalClusters.pos.fX:wcalClusters.pos.fY:wcalClusters.pos.fZ+705:100*wcalClusters.mEnergy", kViolet, eventIndex, projType/*, true*/ );
+    // viz_points( "HCal Clusters", "hcalClusters.pos.fX:hcalClusters.pos.fY:hcalClusters.pos.fZ+785:100*wcalClusters.mEnergy", kGreen, eventIndex, projType/*, true*/ );   //add fcs hits-AGE
 
-    viz_seed( "Seeds", "seeds.pos.fX:seeds.pos.fY:seeds.pos.fZ", eventIndex, projType );
+    // viz_seed( "Se-=[eds", "seeds.pos.fX:seeds.pos.fY:seeds.pos.fZ", eventIndex, projType );
     //viz_proj( eventIndex, projType, false);
     //viz_points( "Proj", "reco.reco.projs.mXYZ.fX:reco.reco.projs.mXYZ.fY:reco.reco.projs.mXYZ.fZ", kRed, eventIndex, projType);
     return nTrk;
@@ -526,9 +571,10 @@ int viz_event( int eventIndex, ProjectionType projType = kRZSigned ){
 
 
 //change to name of file being used-AGE 
-void viz( TString fn = "fwdtree5.root", int view = kXY) {
+void viz( int maxEvents = 10, TString fn = "fwdtree.root", int view = kXY) {
 
-    ProjectionType pjt = (ProjectionType)view;
+void viz( int mode = 0, int maxEvents = 10, TString fn = "fwdtree.root") {
+
     fData = new TFile( fn );
     fwd = (TTree*)fData->Get( "fwd" );
 
@@ -561,6 +607,7 @@ void viz( TString fn = "fwdtree5.root", int view = kXY) {
     // gPad->SetMargin(0.1, 0.05, 0.15, 0.05);
 
     int nEvents = fwd->GetEntries();
+    if (nEvents > maxEvents) nEvents = maxEvents;
     // nEvents = 1;
     for ( int iEvent = 0; iEvent < nEvents; iEvent ++ ){
 
@@ -581,7 +628,7 @@ void viz( TString fn = "fwdtree5.root", int view = kXY) {
 
             padStat->cd();
             padStat->Clear();
-            viz_stats( iEvent );  //changed to provide number of tracks as well-AGE
+            // viz_stats( iEvent );  //changed to provide number of tracks as well-AGE
             padStat->Update();
             gCan->Update();
             gCan->Print( TString::Format( "out_event%d.pdf", iEvent ) );
@@ -593,6 +640,39 @@ void viz( TString fn = "fwdtree5.root", int view = kXY) {
             // break;
 
         hFrame->Reset();
+    }
+
+    if ( mode != 1 ) return;
+    // visualize the event one track at a time
+    for ( int inEvent = 0; inEvent < nEvents; inEvent++ ){     
+        fwd->Draw( "reco.mPrimaryMomentum.fX", "", "goff", 1, inEvent );
+        int nTrk = fwd->GetSelectedRows();
+        printf( "Event %d has %lld Tracks \n", inEvent, nTrk );
+
+        for ( int iTrack = 0; iTrack < nTrk; iTrack ++ ){
+
+            printf( "Track: %d\n", iTrack );
+
+            padRZ->cd();
+            // int nTrk = viz_event( iEvent, kRZSigned );
+            viz_event( inEvent, kRZSigned, true );
+            viz_tracks(nTrk, inEvent, kRZSigned, true, iTrack);
+            padXY->cd();
+            viz_event( inEvent, kXY, true );
+            viz_tracks(nTrk, inEvent, kXY, true, iTrack);
+            if (nTrk > -1){
+                padRZ->Update();
+                padXY->Update();
+
+                padStat->cd();
+                padStat->Clear();
+                // viz_stats( iEvent );
+                padStat->Update();
+                gCan->Update();
+                gCan->Print( TString::Format( "out_event%d_track%d.pdf", inEvent, iTrack ) );
+            }
+            hFrame->Reset();
+        }
     }
 
 }

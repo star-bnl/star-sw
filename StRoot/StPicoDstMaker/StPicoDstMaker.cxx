@@ -106,8 +106,8 @@
 #include "TH1.h"
 #include "TH2.h"
 static Int_t _debug = 0;
-StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 #endif /* __TFG__VERSION__ */
+StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
 #include "StPicoDstMaker/StPicoUtilities.h"
 
 //_________________
@@ -135,9 +135,7 @@ mBField(0),
     createArrays();
     std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
     
-#if defined (__TFG__VERSION__)
     fgPicoDstMaker = this;
-#endif /* __TFG__VERSION__ */
 }
 
 //_________________
@@ -153,9 +151,7 @@ StPicoDstMaker::~StPicoDstMaker() {
   delete mChain;
   delete mPicoDst;
 
-#if defined (__TFG__VERSION__)
   fgPicoDstMaker = 0;
-#endif /* __TFG__VERSION__ */
 }
 
 //_________________
@@ -262,10 +258,8 @@ void StPicoDstMaker::createArrays() {
 //_________________
 Int_t StPicoDstMaker::Init() {
 
-#if defined (__TFG__VERSION__)
   TString file;
   Int_t l;
-#endif /* __TFG__VERSION__ */
   
   switch (StMaker::m_Mode) {
   case PicoIoMode::IoWrite:
@@ -294,24 +288,6 @@ Int_t StPicoDstMaker::Init() {
 	return kStFatal;
       }
 
-#if !defined (__TFG__VERSION__)
-
-      if (mInputFileName.Length() == 0) {
-	// No input file
-	mOutputFileName = GetChainOpt()->GetFileOut();
-	mOutputFileName.ReplaceAll(".root", ".picoDst.root");
-      }
-      else {
-	mInputFileName = gSystem->BaseName(mInputFileName);
-	mOutputFileName = mInputFileName;
-	mOutputFileName.ReplaceAll("MuDst.root", "picoDst.root");
-
-	if (mOutputFileName == mInputFileName) {
-	  LOG_ERROR << "Input file is not a MuDst ... " << endm;
-	  return kStFatal;
-	}
-      }
-#else /* __TFG__VERSION__ */
       if (mInputFileName.Length() == 0) mInputFileName = GetChainOpt()->GetFileOut();
       file = gSystem->BaseName(mInputFileName);
       l = file.Index(".");
@@ -319,7 +295,6 @@ Int_t StPicoDstMaker::Init() {
       mInputFileName = mInputFileName(mInputFileName.Index("st_"), mInputFileName.Length());
       mOutputFileName = TString(file.Data(),l);
       mOutputFileName += ".picoDst.root";
-#endif /* __TFG__VERSION__ */
 
       openWrite();
       initEmc();

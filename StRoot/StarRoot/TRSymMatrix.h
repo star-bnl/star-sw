@@ -17,7 +17,7 @@ class TRSymMatrix : public TRArray {
   TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop,const TRSymMatrix& S);
   TRSymMatrix(const TRSymMatrix& Q,ETRMatrixCreatorsOp kop,const TRSymMatrix& T);
   TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop);
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   TRSymMatrix (Int_t nrows, Double_t a0, ...);
 #endif
   virtual ~TRSymMatrix() {}
@@ -30,10 +30,12 @@ class TRSymMatrix : public TRArray {
   static  Int_t    spminv(Double_t *v, Double_t *b, Int_t n, 
 			  Int_t &nrank, Double_t *diag, Bool_t *flag);
   virtual void    Print(Option_t *opt="") const;
+  void            Print(Int_t I, Int_t N = -1) const;
   Double_t       &operator()(Int_t i)         {return TRArray::operator[](i);}
   Double_t        operator()(Int_t i) const   {return TRArray::operator[](i);}
-  Double_t       &operator()(Int_t i,Int_t j);
-  Double_t        operator()(Int_t i,Int_t j) const;
+  static Int_t    IJ(Int_t i, Int_t j) {return ( j<=i ) ? i*(i+1)/2+j :j*(j+1)/2+i;}
+  Double_t       &operator()(Int_t i,Int_t j) {return TRArray::operator[](IJ(i,j));}
+  Double_t        operator()(Int_t i,Int_t j) const {return TRArray::operator[](IJ(i,j));}
   void AddRow(const Double_t *row) {
     fNrows++; Set(fNrows*(fNrows+1)/2); memcpy(fArray+(fNrows-1)*fNrows/2, row, fNrows*sizeof(Double_t));
   }
@@ -50,45 +52,5 @@ class TRSymMatrix : public TRArray {
   ClassDef(TRSymMatrix,1)  // TRSymMatrix class (double precision)
 };
 std::ostream& operator<<(std::ostream& s,const TRSymMatrix &target);
-inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
-  //  assert(! (j < 0 || j >= fNrows));
-  if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
-	    j, fNrows, this); 
-    j = 0;
-    assert(0);
-  }
-  //  assert(! (i < 0 || i >= fNrows));
-  if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
-	    i, fNrows, this); 
-    i = 0;
-    assert(0);
-  }
-  Int_t m = i;
-  Int_t l = j;
-  if (i > j) {m = j; l = i;}
-  return TArrayD::operator[](m + (l+1)*l/2);
-}
-inline Double_t TRSymMatrix::operator()(Int_t i,Int_t j) const {
-  //  assert(! (j < 0 || j >= fNrows));
-  if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
-	    j, fNrows, this); 
-    j = 0;
-    assert(0);
-  }
-  //  assert(! (i < 0 || i >= fNrows));
-  if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
-	    i, fNrows, this); 
-    i = 0;
-    assert(0);
-  }
-  Int_t m = i;
-  Int_t l = j;
-  if (i > j) {m = j; l = i;}
-  return TArrayD::operator[](m + (l+1)*l/2);
-}
 #endif
 

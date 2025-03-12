@@ -2,7 +2,7 @@
 // that is a valid shebang to run script as executable
 
 
-void build_geom( TString geomtag = "dev2022", TString output="fGeom.root" ) {
+void build_geom( TString geomtag = "y2023", TString output="fGeom.root" ) {
 
     gSystem->Load( "libStarRoot.so" );
     
@@ -21,7 +21,8 @@ void build_geom( TString geomtag = "dev2022", TString output="fGeom.root" ) {
     if ( 0 == geom ) {
         AgModule::SetStacker( new StarTGeoStacker() );
         AgPosition::SetDebug(2);
-        StarGeometry::Construct("dev2022");
+        cout << "Building geometry for tag [" << geomtag.Data() << "]" << endl;
+        StarGeometry::Construct( geomtag.Data() );
 
         // Genfit requires the geometry is cached in a ROOT file
         gGeoManager->Export( output.Data() );

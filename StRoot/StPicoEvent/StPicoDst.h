@@ -41,15 +41,12 @@ class StPicoDst {
 
  public:
 
-#if defined (__TFG__VERSION__)
-  StPicoDst() { fgPicoDst = this;}
-  virtual ~StPicoDst() {fgPicoDst = 0;}
-  virtual Bool_t IsGoodTrigger() const;
-#else /* ! __TFG__VERSION__ */
   /// Default constructor
-  StPicoDst() { /* emtpy */}
+  StPicoDst() { fgPicoDst = this;}
   /// Destructor
-  ~StPicoDst() { /* empty*/ }
+  virtual ~StPicoDst() {fgPicoDst = 0;}
+#if defined (__TFG__VERSION__)
+  virtual Bool_t IsGoodTrigger() const;
 #endif
 
   /// Set the pointers to the TClonesArrays
@@ -174,18 +171,14 @@ class StPicoDst {
   /// Print MC track info
   static void printMcTracks();
 
-#if defined (__TFG__VERSION__)
   static StPicoDst *instance() {return fgPicoDst;}
-#endif /* __TFG__VERSION__ */
 
  private:
 
   /// Array of TClonesArrays
   static TClonesArray** picoArrays;
 
-#if defined (__TFG__VERSION__)
   static StPicoDst *fgPicoDst; //!
-#endif /* __TFG__VERSION__ */
 };
 
 #endif

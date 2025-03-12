@@ -1,0 +1,8 @@
+-xc++
+-std=c++11
+-march=native
+-Wall
+-Wextra
+-pedantic
+-Weffc++
+-Wsign-conversion

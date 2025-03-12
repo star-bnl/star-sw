@@ -95,10 +95,11 @@ TClonesArray** StMuDst::eztArrays            = 0;
 
 Int_t StMuDst::mCurrVertexId                 = -2;
 TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
+StMuDst *StMuDst::fgMuDst = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
-  /* no-op */
+  fgMuDst = this;
 }
 
 //-----------------------------------------------------------------------
