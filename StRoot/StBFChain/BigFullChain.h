@@ -1070,7 +1070,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2022a","" ,"",
    "B2022a,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-      "","","Production chain for year 2022 pp data - CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
+      "","","Production chain for year 2022 pp data, using CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
 
   // 2023 initial chains
   {"B2023a" ,"","",
@@ -1078,8 +1078,8 @@ Bfc_st BFC[] = { // standard chains
    "","",                                                      "Base chain for run 2023 data (tpc)",kFALSE},
 
   {"P2023a","" ,"",
-   "B2023a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2023 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "B2023a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2024 initial chains
   {"B2024a"  ,"","",
@@ -1088,11 +1088,20 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2024a","" ,"",
    "B2024a,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2024 pp data - CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
+   "","","Production chain for year 2024 pp data, using CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
 
   {"P2024a","" ,"",
-   "B2024a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2024 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "B2024a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
+  // 2025 initial chains
+  {"B2025"  ,"","",
+   "ry2025,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2025 data (tpc)",kFALSE},
+
+  {"P2025","" ,"",
+   "B2025,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2025 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
 
   // Other chains/Calibration
