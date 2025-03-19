@@ -916,22 +916,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	if ( defined($ENV{Vc_LIB_DIR}) ) { die("Vc_LIB_DIR is not supported anymore. Please use Vc_DIR."); }
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
-      }  elsif ( $pkg =~ m/KFParticle/ || $pkg =~ m/StMuMcAnalysisMaker/ || $pkg =~ m/^StKFParticleAnalysisMaker$/) {
-#        $CPPFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE";
-#        $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker" . 
-#        $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATrackerPerformance" . 
-#        $main::PATH_SEPARATOR . "#" . $Dir . "/../KFParticlePerformance";
-        $CPPPATH .=         $main::PATH_SEPARATOR . "#" . $Dir . "/../KFParticle" . 
-	  $main::PATH_SEPARATOR . "#" . $Dir . "/../KFParticle/KFPSimd";
-        my $extraCXXFLAGS = "";
-#	  " -DNVALGRIND -DSTAR_STANDALONE";# -W -Wall -Wswitch -Wformat -Wchar-subscripts";
-        if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
-        $extraCXXFLAGS .= " -DNDEBUG";
-        $CXXFLAGS .= $extraCXXFLAGS;
-#        $CXXFLAGS =~ s/mavx/msse4\.2/;
-	$CXXFLAGS .= " -msse4.2";
-#  print "========================================     TH => $CPPPATH \tCPPFLAGS => $CPPFLAGS\n";
-      }
+    }
     if ( $pkg =~ m/^Sti$/) {
       if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
 	$envNoDeb = $env->clone('DEBUG' => '-g');
@@ -990,7 +975,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #    print "pkg = $pkg FPPFLAGS = $FPPFLAGS\n";
     my $libpath = $LIBPATH;
     if (! $LIBS) {$libpath = "";}
-#  print "========================================     TH => $CPPPATH \tCPPFLAGS => $CPPFLAGS\n";
+#  print "CPPPATH => $CPPPATH \tCPPFLAGS => $CPPFLAGS\n";
     #print "DEBUG Passing $ROOTCINT_CPPFLAGS\n";
     $env2 = $env1->clone('Package'  => $pkg,
 			 'EXTRA_CPPFLAGS'    => $EXTRA_CPPFLAGS,

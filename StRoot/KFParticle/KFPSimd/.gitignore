@@ -1,7 +1,0 @@
-/*.exe
-/Tests/**/*.exe
-/Tests/**/*.log
-/Tests/**/*.out
-/Tests/**/*.s
-/Tests/**/*.o
-Extra/

@@ -8,14 +8,13 @@ on:
       - '!.github/workflows/**'
 
 concurrency:
-   group: ${{ github.workflow }}-x[${{ github.event.pull_request.number || github.ref }}
+   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
    cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         starenv: [root5, root6]
         compiler: [gcc485, gcc11]
