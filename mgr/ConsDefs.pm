@@ -801,7 +801,6 @@
 	# restore  
 	($CFLAGS,$CXXFLAGS) = @ARGS;        # <--- same order than above
     }
- $CXXFLAGS .= " -fdiagnostics-color=always";#  -Wno-pedantic -Wno-shadow -Wno-unused-parameter -Wno-extra -Wno-shadow";
 
 
 

@@ -1,5 +1,0 @@
-# $Id $
-# package StarRoot
-# author: 
-Library:libStarRoot.so:LIBS += -lTable  -lSt_base -lStarClassLibrary -lPhysics -lEG
-

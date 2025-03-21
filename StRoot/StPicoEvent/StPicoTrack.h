@@ -27,7 +27,9 @@
 #include "StarClassLibrary/PhysicalConstants.h"
 #endif
 
+#if defined (__TFG__VERSION__)
 #include "StPicoTrackCovMatrix.h"
+#endif /* __TFG__VERSION__ */
 
 //_________________
 class StPicoTrack : public TObject {
@@ -115,12 +117,14 @@ class StPicoTrack : public TObject {
   /// Return dE/dx error of the track (in GeV/cm)
   Float_t dEdxError() const              { return mDedxError; }
 
+#if defined (__TFG__VERSION__)
   Float_t dEdxPull(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t dEdxPullToF(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t dEdxPullPion()      const { return dEdxPull(0.13956995,1); }
   Float_t dEdxPullKaon()      const { return dEdxPull(0.493677,1); }
   Float_t dEdxPullProton()    const { return dEdxPull(0.93827231,1); }
   Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
+#endif
   /// Return dN/dx of the track
   Float_t dNdx() const              { return mDnDx; }
   /// Return dN/dx error of the track
