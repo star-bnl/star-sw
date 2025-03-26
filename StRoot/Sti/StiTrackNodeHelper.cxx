@@ -4,10 +4,17 @@
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTpcHitErrorMDF4.h"
+#include "StEvent/StTpcHit.h"
+#include "StEvent/StEnumerations.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #include "TSystem.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
 #include "TCernLib.h"
+#endif
 
 //#define __CHECKIT__ // Enable unused paramter and error checks
 
@@ -65,6 +72,10 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mParentNode = pNode;
   mTargetNode = sNode;
   mTargetHz = mTargetNode->getHz();
+assert(mTargetHz);
+ if (! sNode->fitPars().hz()) sNode->fitPars().hz() = mTargetHz;
+ //assert(sNode->fitPars().hz());
+assert(!pNode || pNode->fitPars().hz());
   mParentHz = mTargetHz;
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
@@ -77,7 +88,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
 #ifdef __CHECKIT__
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
 #endif
-    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
+    //yf    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
 
   mDetector   = mTargetNode->getDetector();
@@ -123,7 +134,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   }// end of rotation part
   ierr = rotPars.check(); // check parameter validity to continue
   if (ierr) return 1;
-  
+
 //  	Propagation 
   x1 = rotPars.x();
   int kase =  (mDetector) ? mDetector->getShape()->getShapeCode():0;
@@ -358,7 +369,7 @@ int StiTrackNodeHelper::makeFit(int smooth)
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
-    if (debug() & 8) { LOG_DEBUG << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
+    if (debug() & 8) { LOG_INFO << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
@@ -415,6 +426,7 @@ int StiTrackNodeHelper::join()
       case kNewFitd: 				// Old invalid & New Fitd
         mJoinPars = mFitdPars;
         mJoinErrs = mFitdErrs;
+        mJoinPars.hz() = mTargetHz;
         kase = -1; 
 	break;
 
@@ -465,16 +477,8 @@ int StiTrackNodeHelper::join()
        default: assert(0);
      }//end Switch
   } while(kase>=0);
-
-   if (std::fabs(mJoinPars.hz() - mTargetHz) > 1e-10)
-   {
-     LOG_WARN << "Expected |mJoinPars.hz() - mTargetHz| <= 1e-10 "
-              << "instead |" << mJoinPars.hz() << " - " << mTargetHz << "| = "
-              << std::fabs(mJoinPars.hz() - mTargetHz) << ". "
-              << "Will set mJoinPars.hz to " << mTargetHz << endm;
-     mJoinPars.hz() = mTargetHz;
-   }
-
+   mJoinPars.hz()=mTargetHz;//////////////////////???????????????????????????????????????????????????
+   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
@@ -509,10 +513,10 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   int nE2 = nP2*(nP2+1)/2;
   TArrayD ard(nE2*6);
   double *a = ard.GetArray();  
-  double *sumE 		= (a);
-  double *sumEI 	= (a+=nE2);
-  double *e1sumEIe1 	= (a+=nE2);
-  double *subP 		= (a+=nE2);
+  double *sumE                 = (a);
+  double *sumEI        = (a+=nE2);
+  double *e1sumEIe1    = (a+=nE2);
+  double *subP                 = (a+=nE2);
   double *sumEIsubP	= (a+=nE2);
   double chi2=3e33,p,q;
 
@@ -626,7 +630,7 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   enum {nP1=3,nE1=6,nP2=6,nE2=21};
 
   StiNodeErrs Ai=A;	//Inverted A
-  
+
   Ai._cXX=1;
   TCL::trsinv(Ai.G(),Ai.G(),nP2);
   Ai._cXX=0;
@@ -667,7 +671,9 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 //______________________________________________________________________________
 int StiTrackNodeHelper::save()
 {
+mPredPars.hz()=mTargetHz;///????????????????????????????
    assert(fabs(mPredPars.hz()-mTargetHz)<=1e-10);
+mFitdPars.hz()=mTargetHz;///???????????????????????????
    assert(fabs(mFitdPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
    
@@ -1009,8 +1015,12 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
       return -14;
     }  
   } //EndIf Not a primary	  
-  if (debug()) StiKalmanTrackNode::comment += Form(" chi2 = %6.2f",mChi2);
-  if (mTargetNode && debug()) {
+  if (mTargetNode && debug() & 8) {
+    if (mTargetNode->getDetector()) 
+      StiKalmanTrackNode::ResetComment(::Form("%40s ",mTargetNode->getDetector()->getName().c_str()));
+    else
+      StiKalmanTrackNode::ResetComment("Vx                            ");
+    StiKalmanTrackNode::comment += Form(" chi2 = %6.2f",mChi2);
     mTargetNode->PrintpT("U");
   }
   mState = StiTrackNode::kTNFitEnd;
@@ -1102,9 +1112,28 @@ int StiTrackNodeHelper::getHitErrors(const StiHit *hit,const StiNodePars *pars,S
 {
   hrr->reset();
   const StiDetector *det = hit->detector();
-  const StiHitErrorCalculator *calc = (det)? det->getHitErrorCalculator():0;
-  if (calc) {//calculate it
-     calc->calculateError(pars,hrr->hYY,hrr->hZZ);
+  const StiTpcHitErrorMDF4 *calcMDF4 = (det)? det->getHitErrorCalculatorMDF4() : 0;
+  const StiHitErrorCalculator  *calc = (det)? det->getHitErrorCalculator()     : 0;
+  if (calc || calcMDF4) {//calculate it
+    Double_t fudgeFactor = 1;
+    StTpcHit *tpcHit = (StTpcHit*) hit->stHit();
+    if (tpcHit) {
+      if ((tpcHit->detector() == kTpcId || tpcHit->detector() == kiTpcId)) {
+	if (tpcHit->flag() == 2) {
+	  fudgeFactor = 16.;
+	}
+      }
+    }
+    if (calcMDF4) {
+      Double_t Adc = tpcHit->adc();
+      Double_t AdcL = 5.5;
+      if (Adc > 0) AdcL = TMath::Log(Adc);
+      Double_t dZ = 0;
+      ((StiTpcHitErrorMDF4 *) calcMDF4)->calculateError(pars,hrr->hYY,hrr->hZZ, fudgeFactor, AdcL, &dZ);
+      ((StiHit *) hit)->setdZ(dZ);
+    } else {
+      calc->calculateError(pars,hrr->hYY,hrr->hZZ, fudgeFactor);
+    }
   } else    {//get from hit
     const float *ermx = hit->errMtx();    
     for (int i=0;i<6;i++){hrr->G()[i]=ermx[i];}
