@@ -61,48 +61,48 @@ typedef int Int_t;
 #endif
 
 #include "StHbtMaker/Infrastructure/StHbtManager.h"
-//class StHbtManager;
-
+// class StHbtManager;
 
 class StHbtMaker
-#ifdef __ROOT__ 
-: public StMaker 
+#ifdef __ROOT__
+    : public StMaker
 #endif
 {
- 
- private:
-  StHbtManager* mHbtManager;//! tells cint to skip it
 
-  int mDebug;
- public:
-  StHbtMaker(const char* name = "StHbt", const char* title = "StHbtTit");
-  virtual ~StHbtMaker();
-  virtual void  Clear(const char* opt="");
-  virtual Int_t Init();//!
-  virtual Int_t Make();
-  virtual Int_t Finish();//!
+  private:
+   StHbtManager* mHbtManager;  //! tells cint to skip it
 
-  int Debug() const;
-  void SetDebug(int);
+   int mDebug;
+
+  public:
+   StHbtMaker(const char* name = "StHbt", const char* title = "StHbtTit");
+   virtual ~StHbtMaker();
+   virtual void Clear(const char* opt = "");
+   virtual Int_t Init();  //!
+   virtual Int_t Make();
+   virtual Int_t Finish();  //!
+
+   int Debug() const;
+   void SetDebug(int);
 
 #ifdef __ROOT__
-  StMaker* currentChain;
+   StMaker* currentChain;
 #endif
-  //  StHbtManager* HbtManager();//! tells cint to skip that
-  StHbtManager* HbtManager();
+   //  StHbtManager* HbtManager();//! tells cint to skip that
+   StHbtManager* HbtManager();
 
-  
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.9 2014/08/06 11:43:19 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   virtual const char* GetCVS() const {
+      static const char cvs[] =
+          "Tag $Name:  $ $Id: StHbtMaker.h,v 1.9 2014/08/06 11:43:19 jeromel Exp $ built " __DATE__ " " __TIME__;
+      return cvs;
+   }
 #ifdef __ROOT__
-  ClassDef(StHbtMaker,0)
+   ClassDef(StHbtMaker, 0)
 #endif
 };
 
-inline StHbtManager* StHbtMaker::HbtManager(){return mHbtManager;}
-inline  int StHbtMaker::Debug() const {return mDebug;}
-inline  void StHbtMaker::SetDebug(int d){mDebug=d;}
-
-//this is test comment for testing cvs commit
+inline StHbtManager* StHbtMaker::HbtManager() { return mHbtManager; }
+inline int StHbtMaker::Debug() const { return mDebug; }
+inline void StHbtMaker::SetDebug(int d) { mDebug = d; }
 
 #endif
