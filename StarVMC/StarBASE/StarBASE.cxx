@@ -13,7 +13,7 @@
 #include "StMCStack.h"
 #include "StMessMgr.h"
 #include "TVirtualMC.h"
-#include "TGeant3TGeo.h"
+#include "TGeant3/TGeant3TGeo.h"
 #include "StMCInitApp.h"
 #include "StMCStepping.h"
 #include "StMCSimplePrimaryGenerator.h"

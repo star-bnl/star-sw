@@ -30,7 +30,7 @@ class StMessMgr;
 #include "Rtypes.h"
 #endif
 
-#if !defined(__CINT__) || defined(__CLING__)
+#if !(defined(__CINT__) || defined(__CLING__))
 // 'chain' is defined in StBFChain library (see StRoot/StBFChain.cxx)
 extern StBFChain* chain;
 #else
