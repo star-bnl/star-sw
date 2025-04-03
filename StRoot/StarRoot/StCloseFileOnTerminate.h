@@ -39,8 +39,8 @@ class StCloseFileOnTerminate : public TSignalHandler {
        //! Create an instance of the signal handler (Should be called at once  by code)
  public:
        static StCloseFileOnTerminate &Instantiate();
-       static bool Exists() {return fgCloseFileOnTerminate;}
  protected:
+       static bool Exists() {return fgCloseFileOnTerminate;}
        //! Close the open ROOT files upon SIGTERM sent by system to terminate the job
        virtual Bool_t Notify();
        ClassDef(StCloseFileOnTerminate,0)

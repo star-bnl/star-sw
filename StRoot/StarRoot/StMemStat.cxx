@@ -8,13 +8,10 @@
  *
  ***************************************************************************
  **************************************************************************/
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#ifndef __APPLE__
 #include <malloc.h>
-#endif
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
@@ -64,7 +61,7 @@ void StMemStat::Stop()
   Double_t dif = Used() - fLast;
 
   //printf("DEBUG >> time distance between two stops Used=%f Last=%f\n",Used(),fLast);
-  if ( TMath::Abs(dif) < LOWEST_VAL )  dif  = 0.0;
+  if ( fabs(dif) < LOWEST_VAL )  dif  = 0.0;
   if ( dif < fMin )        fMin = dif;
   if ( dif > fMax )        fMax = dif;
 
@@ -77,10 +74,10 @@ void StMemStat::Print(const char *) const
 {
   if (!fTally) return;
   Double_t aver = fAver/fTally;
-  Double_t rms  = ::sqrt(TMath::Abs(fRms/fTally - aver*aver));
+  Double_t rms  = ::sqrt(fabs(fRms/fTally - aver*aver));
 
   //printf("DEBUG :: %.10f %d %.10f %.10f\n",fAver,fTally,fRms,aver);
-  if ( TMath::Abs(aver) < LOWEST_VAL ) aver = 0.0;
+  if ( fabs(aver) < LOWEST_VAL ) aver = 0.0;
   if ( rms        < LOWEST_VAL ) rms  = 0.0;
 
   printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
@@ -112,7 +109,7 @@ void StMemStat::Summary()
     if (m->fMax > dmax) dmax=m->fMax;
     dmp = m->fAver/m->fTally;
     daver += dmp; 
-    drms  += TMath::Abs(m->fRms/m->fTally-dmp*dmp);
+    drms  += fabs(m->fRms/m->fTally-dmp*dmp);
     
   }
   if(!dtally) return;
@@ -121,7 +118,7 @@ void StMemStat::Summary()
   printf("\n");
 
   //VP daver /= dtally;
-  drms   = ::sqrt(TMath::Abs(drms));
+  drms   = ::sqrt(fabs(drms));
   printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
 	  "Total", (int)dtally, dmin, daver, dmax, drms);
 
@@ -144,24 +141,16 @@ void StMemStat::doPs(std::string who, std::string where)
 //______________________________________________________________________________
 Double_t StMemStat::Used()
 {
-#ifndef __APPLE__
   struct mallinfo info;
   info = mallinfo();
   return double(info.uordblks + info.usmblks)/1024/1024;
-#else
-  return 0;
-#endif
 }
 //______________________________________________________________________________
 Double_t StMemStat::Free()
 {
-#ifndef __APPLE__
   struct mallinfo info;
   info = mallinfo();
   return double(info.fordblks + info.fsmblks)/1024/1024;
-#else
-  return 0;
-#endif
 }
 
 //______________________________________________________________________________

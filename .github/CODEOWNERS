@@ -6,7 +6,6 @@
 /StRoot/PWGTools				                   @nigmatkulov	      @zsweger	   @marrbnl     @lbavinh
 /StRoot/RTS                                        @akioogawa         @jml985      @tonko-lj
 /StRoot/StAnalysisMaker                            @fisyak      @R-Witt        @iraklic
-/StRoot/*KFP*                                      @fisyak      @R-Witt        @iraklic
 /StRoot/StAnalysisUtilities/StHistUtil*            @genevb
 /StRoot/StAssociationMaker/EMC                     @kkauder           @rkunnawa    @Navagyan
 /StRoot/StBFChain                                  @genevb            @plexoos     @klendathu2k @fisyak      @R-Witt        @iraklic

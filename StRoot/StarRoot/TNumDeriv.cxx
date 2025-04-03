@@ -4,7 +4,7 @@
 
 #include "TNumDeriv.h"
 
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

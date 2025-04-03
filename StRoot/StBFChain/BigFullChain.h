@@ -1070,7 +1070,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2022a","" ,"",
    "B2022a,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-      "","","Production chain for year 2022 pp data - CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
+      "","","Production chain for year 2022 pp data, using CorrY (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
 
   // 2023 initial chains
   {"B2023a" ,"","",
@@ -1078,8 +1078,8 @@ Bfc_st BFC[] = { // standard chains
    "","",                                                      "Base chain for run 2023 data (tpc)",kFALSE},
 
   {"P2023a","" ,"",
-   "B2023a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2023 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "B2023a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2024 initial chains
   {"B2024a"  ,"","",
@@ -1088,11 +1088,20 @@ Bfc_st BFC[] = { // standard chains
 
   {"pp2024a","" ,"",
    "B2024a,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2024 pp data - CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
+   "","","Production chain for year 2024 pp data, using CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
 
   {"P2024a","" ,"",
-   "B2024a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2024 AA data - CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+   "B2024a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
+  // 2025 initial chains
+  {"B2025"  ,"","",
+   "ry2025,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2025 data (tpc)",kFALSE},
+
+  {"P2025","" ,"",
+   "B2025,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2025 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -1122,7 +1131,6 @@ Bfc_st BFC[] = { // standard chains
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
-  {"KFParticle"  ,""  ,"","","","KFParticle",                                     "Load KFParticle",kFALSE},
   {"StUtilities" ,""  ,"","","","StUtilities",                                   "Load StUtilities",kFALSE},
   {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
   {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
@@ -1312,7 +1320,6 @@ Bfc_st BFC[] = { // standard chains
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-  {"PicoDeps"    ,"","","MuDSTDeps",    "", "StPicoEvent,StPicoDstMaker","Load PicoDST dependences",kFALSE},
   {"picoEvt"    ,"","","StEvent,Stu","",            "StPicoEvent","Load picoEvent and dependencies",kFALSE},
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
@@ -1346,15 +1353,20 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
+   ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
+  {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
+   ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
+  {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
+  {"hijing"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
+   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"
+   ,                                                      "Load Hijing in starsim, set AuAu200 GeV",kFALSE},
   {"tdaq"        ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"miniDAQ"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
-  {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
-  {"RpicoDST"  ,"RPicoDst","","PicoDeps"                        ,"StPicoDstMaker","","read PicoDST",kFALSE},
-
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1391,15 +1403,7 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
-   ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
-  {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
-  {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
-  {"hijing"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,"StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,Hijing1_383"
-   ,                                                      "Load Hijing in starsim, set AuAu200 GeV",kFALSE},
- {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
+  {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
    ,                                                        "","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
    ,                                                             "Prepare kinematics for embedding",kFALSE},
@@ -1818,10 +1822,8 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"BeamBack" ,"","","StEvent"                                           ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
 #endif
-  {"LdEdxY2"  ,"","","tpcDb,StEvent,MuDSTDeps", "","libMinuit,StPicoEvent,StdEdxY2Maker"
-   ,                                                                              "Load dEdx Maker",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
-  {"dEdxCalib"    ,"","","dEdxY2,TTreeFile",""          ,"","switch on dEdx calibration histograms",kFALSE},
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
+   ,                                                                 "Bichsel method used for dEdx",kFALSE},
   {"CalcdNdx", "", "", "dEdxY2", "", "",              "Option for StdEdxY2Maker to calculate dN/dx",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
@@ -1938,6 +1940,8 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+  {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
+
   {"trgSimu"        ,"","",""       ,"StTriggerSimuMaker","StTriggerUtilities","trigger simu maker",kFALSE},
 
   {"picoWrite" ,"","PicoChain","trgSimu,picoDst","StPicoDstMaker",""       ,"Writes picoDST format",kFALSE},
@@ -1976,12 +1980,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
-  {"RefMult"     ,"","","",                                 "","StRefMultCorr","Load StRefMultCorr",kFALSE},
-  {"KFPInter"    ,"","","KFParticle,RefMult,picoDeps", "","KFParticle,KFParticlePerformance,"
-   "StKFParticleAnalysisMaker",                                         "STAR KFParticle interface",kFALSE},
-  {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
-  {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
-   ,                                    "KFParticlePerformance,StPicoAnalysisMaker","Pico Analysis",kFALSE},
   // GMT
   {"gmtAligner"    ,"","","detDb", "StGmtAlignmentMaker","StGmtAlignmentMaker","GMT cluster plotting",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
@@ -2015,7 +2013,6 @@ Bfc_st BFC[] = { // standard chains
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"NewTpcAlignment","","",""                           ,"","","Switch on new Tpc Alignment schema",kFALSE},
-  {"quiet","","","","","",                                                      "make chain quiet", kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}

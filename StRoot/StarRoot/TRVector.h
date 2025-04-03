@@ -28,7 +28,7 @@ class TRVector : public TRMatrix {
   friend TRVector operator+(Double_t scalar, const TRVector &source) {TRVector s(source); s += scalar; return s;}
   friend TRVector operator-(const TRVector &source, Double_t scalar) {TRVector s(source); s -= scalar; return s;}
   friend TRVector operator-(Double_t scalar, const TRVector &source) {TRVector s(source); s -= scalar; return s;}
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TRVector(Int_t nrows,Double_t a0, ...);
 #endif
   virtual ~TRVector(){}
