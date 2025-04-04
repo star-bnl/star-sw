@@ -1,5 +1,5 @@
-#include "TMath.h"
 #include "GtHash.h"
+#include "TString.h"
 
 class GtCradle : public TObject 
 {
@@ -38,7 +38,7 @@ ULong_t GtCradle::Hash() const
   UInt_t *me = (UInt_t *)fArray;
   UInt_t ret = fNWords;
 //VP  for (int i=0; i<fNWords; i++) ret ^= me[i];
-  ret = TMath::Hash(me,fNWords*sizeof(UInt_t));
+  ret = TString::Hash(me,fNWords*sizeof(UInt_t));
 
   return ret;
 }
