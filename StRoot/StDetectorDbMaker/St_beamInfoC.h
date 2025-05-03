@@ -51,6 +51,7 @@ class St_beamInfoC : public TChair {
   Float_t       Frequency();
   Float_t       SqrtS();
   Float_t       Ycms();
+  static Double_t BeamMass(Int_t MassNumber, const Char_t *Species, Int_t &A);
  protected:
   St_beamInfoC(St_beamInfo *table=0) : TChair(table) {}
   virtual ~St_beamInfoC() {fgInstance = 0;}
