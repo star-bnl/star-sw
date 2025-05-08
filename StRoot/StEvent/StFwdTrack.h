@@ -136,16 +136,21 @@ public:
     UShort_t idTruth() const { return mIdTruth; }
     UShort_t qaTruth() const { return mQATruth; }
     StThreeVectorD dca() const { return StThreeVectorD( mDCA[0], mDCA[1], mDCA[2] ); }
-    UChar_t vertexIndex() {
+    UChar_t vertexIndex() const {
         // extract bits 7…2:
         return (mVtxIndex >> 2) & 0x3F;
     }
-    UChar_t trackType() {
+    UChar_t trackType() const {
         // extract bits 1…0:
         return mVtxIndex & 0x03;
     }
-    UChar_t vertexIndexRaw() { return mVtxIndex; }
+    UChar_t vertexIndexRaw() const { return mVtxIndex; }
     UShort_t globalTrackIndex() const { return mGlobalTrackIndex; }
+
+    bool isGlobalTrack() const { return (trackType() == StFwdTrack::kGlobal); }
+    bool isBeamLineConstrainedTrack() const { return (trackType() == StFwdTrack::kBeamlineConstrained); }
+    bool isPrimaryTrack() const { return (trackType() == StFwdTrack::kPrimaryVertexConstrained); }
+    bool isFwdVertexConstrainedTrack() const { return (trackType() == StFwdTrack::kForwardVertexConstrained); }
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
