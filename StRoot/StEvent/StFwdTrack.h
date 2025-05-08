@@ -136,8 +136,16 @@ public:
     UShort_t idTruth() const { return mIdTruth; }
     UShort_t qaTruth() const { return mQATruth; }
     StThreeVectorD dca() const { return StThreeVectorD( mDCA[0], mDCA[1], mDCA[2] ); }
-    UChar_t vertexIndex() const { return mVtxIndex; }
-    bool isPrimary() const { return mVtxIndex != UCHAR_MAX; }
+    UChar_t vertexIndex() {
+        // extract bits 7…2:
+        return (mVtxIndex >> 2) & 0x3F;
+    }
+    UChar_t trackType() {
+        // extract bits 1…0:
+        return mVtxIndex & 0x03;
+    }
+    UChar_t vertexIndexRaw() { return mVtxIndex; }
+    UShort_t globalTrackIndex() const { return mGlobalTrackIndex; }
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
@@ -152,7 +160,10 @@ public:
     void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
     void setDCA( StThreeVectorD dca ) { mDCA[0] = dca.x(); mDCA[1] = dca.y(); mDCA[2] = dca.z(); }
     void setDCA( float dcaX, float dcaY, float dcaZ ) { mDCA[0] = dcaX; mDCA[1] = dcaY; mDCA[2] = dcaZ; }
-    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = vtxIndex; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = pack6and2( vtxIndex, trackType() ); }
+    void setTrackType( UChar_t trackType ) { mVtxIndex = pack6and2( vertexIndex(), trackType ); }
+    void setVtxIndexAndTrackType( UChar_t vtxIndex, UChar_t trackType ) { mVtxIndex = pack6and2( vtxIndex, trackType ); }
+    void setGlobalTrackIndex( UShort_t index ) { mGlobalTrackIndex = index; }
 
     // ECAL clusters
     StPtrVecFcsCluster& ecalClusters();
@@ -165,7 +176,19 @@ public:
     void addHcalCluster(StFcsCluster* p);
     void sortHcalClusterByET();
 
+    enum StFwdTrackType { kGlobal=0, kBeamlineConstrained=1, kPrimaryVertexConstrained=2, kForwardVertexConstrained=3 };
+
+    static unsigned char inline pack6and2(unsigned int A, unsigned int B) {
+        // mask to ensure they fit:
+        A &= 0x3F;       // 0x3F = 0b00111111
+        B &= 0x03;       // 0x03 = 0b00000011
+
+        // put A in the **high** 6 bits, B in the **low** 2 bits
+        return static_cast<unsigned char>((A << 2) | B);
+    }
+
 protected:
+
     // Track quality and convergence
     bool mDidFitConverge; // did the fit converge
     bool mDidFitConvergeFully; // did the fit converge fully (fwd and bkw)
@@ -184,9 +207,11 @@ protected:
     UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
     float mDCA[3]; // DCA to the primary vertex
+    // vtx index is used to pack the vertex index and the track type 
     UChar_t mVtxIndex;
+    UShort_t mGlobalTrackIndex;
     
-    ClassDef(StFwdTrack,3)
+    ClassDef(StFwdTrack,4)
 };
 
 #endif
