@@ -26,7 +26,6 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "TError.h"
-#include "TEnv.h"
 #if 0
 #include "THtml.h"
 #endif
@@ -187,9 +186,9 @@ ClassImp(StMaker)
 
 //_____________________________________________________________________________
 StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
-		                                m_Mode(0),m_Number(0), m_LastRun(-3),
+						m_Number(0), m_LastRun(-3),
 						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
-						fLogger(0),fLoggerHold(0)
+						fLogger(0),fLoggerHold(0),m_Mode(0)
 {
    m_Attr=0;
    m_Inputs = 0;
@@ -899,7 +898,7 @@ Int_t StMaker::Finish()
 Int_t StMaker::Make()
 {
    TURN_LOGGER(this);
-   Bool_t quiet = gEnv->GetValue("quiet", 0);
+
 //   Loop on all makers
    Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
@@ -938,7 +937,7 @@ Int_t StMaker::Make()
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
-     if (! quiet) {
+     
      if (Debug() || ret) {
 #ifdef STAR_LOGGER     
         LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
@@ -948,7 +947,6 @@ Int_t StMaker::Make()
         printf("*** %s::Make() == %s(%d) ***\n"
                         ,maker->ClassName(),RetCodeAsString(ret),ret);
 #endif     
-     }
      }
      maker->ResetBIT(kMakeBeg);
      StMkDeb::SetCurrent(curr);
@@ -1016,7 +1014,7 @@ void StMaker::PrintInfo()
    if (cvs && cvs[0]) built = strstr(cvs,"built");
    else cvs = "No CVS tag was defined";
 #ifdef STAR_LOGGER       
-   if (built > cvs) { LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,(int)(built-cvs),cvs)<< endm; }
+   if (built > cvs) { LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm; }
    else             { LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm; }
 #else   
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);

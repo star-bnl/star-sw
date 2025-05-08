@@ -39,7 +39,6 @@
 #include <stdio.h>
 #include "TROOT.h"
 #include "TError.h"
-#include "TEnv.h"
 #include "TBrowser.h"
 #include "TBenchmark.h"
 #include <sys/times.h>
@@ -140,7 +139,6 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   Double_t gTicks = (Double_t) sysconf(_SC_CLK_TCK);
   struct timespec ts;
   int jCur=0,iMake=0;
-  Bool_t quiet = gEnv->GetValue("quiet", 0);
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
 // Add a record to MySQL tracking Db     
@@ -211,7 +209,6 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      if (iMake%10 == kStEOF || iMake%10==kStFatal)	break;
      mNTotal++;
      evnt.Stop("QAInfo:");
-     if (! quiet) {
      //  evnt.Show("QAInfo:");
      times(&cpt);
      userCpuTime = ((Double_t) cpt.tms_utime) / gTicks - userCpuTime;
@@ -240,7 +237,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      LOG_QA << Form("QAInfo: Cpu Times: user / system / user children / system children = %8.2f / %8.2f / %8.2f / %8.2f seconds (tick = %8.2f, cps = %ld)",
                     userCpuTime,systemCpuTime,childUserCpuTime,childSystemCpuTime,gTicks,CLOCKS_PER_SEC) << endm;
      LOG_QA << Form("QAInfo: Cpu Times: all threads = %15.9f seconds",tv_diff) << endm;
-     }
+
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
   // Add a record to MySQL tracking Db     

@@ -5,8 +5,6 @@
 #include "TApplication.h"
 #include "TFile.h"
 #include "TError.h"
-#include "Riostream.h"
-#include <exception>
 StCloseFileOnTerminate *StCloseFileOnTerminate::fgCloseFileOnTerminate = 0;
 //_________________________________________________________
 StCloseFileOnTerminate:: StCloseFileOnTerminate() : TSignalHandler(kSigTermination, kFALSE)
@@ -20,7 +18,6 @@ StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
   if (! fgCloseFileOnTerminate ) {
      fgCloseFileOnTerminate = new StCloseFileOnTerminate;
      ::Warning("StCloseFileOnTerminate::Instantiate","Asynch signal handler has been created");
-     std::set_terminate([](){ std::cout << "Unhandled exception\n"; fgCloseFileOnTerminate->Notify(); std::abort();});
   }
   return *fgCloseFileOnTerminate;
 }
@@ -35,13 +32,13 @@ Bool_t StCloseFileOnTerminate::Notify() {
        TIter next(files);
        while( TFile *f = (TFile *) next() ) { 
 	 if ( f-> IsWritable() ) {
-	   //	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
+	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
 	   f->Write();
 	   f->Close(); ++count; 
 	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
 	 }
        }
-       //       files->Delete();
+       files->Delete();
    }
    if (count) Error(__FUNCTION__, "%d files have been closed", count);
    else Print(" There was no open file to close");

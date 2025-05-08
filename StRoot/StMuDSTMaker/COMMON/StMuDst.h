@@ -171,8 +171,6 @@ public:
   void fixTofTrackIndices();
   void fixETofTrackIndices();
   void fixMtdTrackIndices();
-  static StMuDst *instance() {return fgMuDst;}
-  void SetInstance() {fgMuDst = this;}
 
   void setMtdArray(StMtdCollection *mtd_coll); 
   
@@ -183,7 +181,6 @@ public:
 
 
  protected:
-  static StMuDst *fgMuDst; //!
   /// array of TClonesArrays
   static TClonesArray** arrays;
 #ifndef __NO_STRANGE_MUDST__
