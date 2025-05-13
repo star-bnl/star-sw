@@ -143,7 +143,7 @@ StMuFmsPoint* StMuFmsCollection::getPoint(int index) {
 StMuFmsInfo* StMuFmsCollection::getInfo() {
   if (!mInfo) return NULL;  
   if (mInfo->GetEntriesFast()>0) return static_cast<StMuFmsInfo*>(mInfo->At(0));
-  return NULL;
+  return nullptr;
 }
 
 Int_t StMuFmsCollection::fmsReconstructionFlag() {
