@@ -932,10 +932,10 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     ae->SetEngine( engineFromModule( mname.Data() ) );
 
-    //    if ( 0==ae->GetSensitive() ) {
-    //      LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
-    //      continue; 
-    //    }
+        if ( 0==ae->GetSensitive() ) {
+          //LOG_INFO << "Not sensitive = " << volume->GetName() << endm;
+          continue; 
+        }
 
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
