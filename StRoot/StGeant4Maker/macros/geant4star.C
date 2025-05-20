@@ -267,7 +267,8 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 
   };
 
-  //gROOT->ProcessLine( Form("TString __geometry_tag = \"%s\";", mytag.Data() ) );
+  gROOT->ProcessLine( Form("TString __geometry_tag = \"%s\";", mytag.Data() ) );
+
   for ( auto cmd : cmds ) {
     gROOT->ProcessLine( cmd );
   }
