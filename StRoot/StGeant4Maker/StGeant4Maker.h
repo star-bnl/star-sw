@@ -213,7 +213,7 @@ protected:
     StSensitiveDetector* sd = 0;
     for ( auto v : volumes ) {
       sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
-      if ( 0==sd ) { LOG_INFO << "no SD for " << v << endm; continue; } 
+      if ( 0==sd ) { /*LOG_INFO << "no SD for " << v << endm;*/ continue; } 
       nhits += sd->numberOfHits(); 
       break;
     }
