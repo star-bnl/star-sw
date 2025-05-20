@@ -101,7 +101,10 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
   TString module = mAgMLInfo->GetModuleName();
   module.ToLower();
 
-  if ( module.Contains("cal") ) {
+  if ( module.Contains("cal") ) {  // CALB ECAL WCAL HCAL
+    return DetectorType::kCalorimeter;
+  }
+  else if ( module.Contains("fpd") ) { // FPDM 
     return DetectorType::kCalorimeter;
   }
   else {
