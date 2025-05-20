@@ -52,6 +52,7 @@
 #include "g2t/St_g2t_tfr_Module.h"
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_vpd_Module.h"
+#include "g2t/St_g2t_fpd_Module.h"
 //________________________________________________________________________________________________
 #include <StHitCollection.h> 
 #include <cstring>
@@ -1170,6 +1171,8 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
   AddHits<St_g2t_hca_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_hca  ); // HCA should have its own copier
+
+  AddHits<St_g2t_emc_hit>( "FPDH", {"FLXF","FLGR","FPSC","FOSC"}, "g2t_fpd_hit", sd2table_emc ); // n.b. does not read out the flxf or flgr hit defined in the geom...
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
