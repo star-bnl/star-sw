@@ -209,35 +209,53 @@ protected:
   template<typename T, typename F>
   int AddHits( std::string name, std::vector<std::string> volumes, std::string gname, F sd2table ) {
 
+    // Need to move table creation inside of the loop.
+
+    // Count total number of hits in the SDs for this table
     int nhits = 0;
     StSensitiveDetector* sd = 0;
+    std::vector<StSensitiveDetector*> sds;
     for ( auto v : volumes ) {
       sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
       if ( 0==sd ) { /*LOG_INFO << "no SD for " << v << endm;*/ continue; } 
       nhits += sd->numberOfHits(); 
-      break;
+      sds.push_back(sd);
     }
-    if ( 0==sd ) return 0;
-
-    LOG_INFO << name << " adding number of hits = " << nhits << endm;
+    
+    // Create new table (possibly empty)
     auto* table     = new T( gname.c_str(), nhits );
+    // Get the track table
     auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
 
-    // Copy data from the sensitive detector to the table
-    sd2table( sd, table, g2t_track ); 
-                                    
-    AddData( table ); 
-    double sum = 0.0;
-    for ( auto hit : (*table) ) {
-      sum += hit.de;
-    }
-    mHitSum[ name ] += sum;
 
-    // Clear the sensitive detector
-    sd->Clear();
+
+    LOG_INFO << name << " adding number of hits = " << nhits << endm;
+    if ( nhits > 0 ) {
+
+      // Copy data from the sensitive detectors to the table
+      for ( auto* sd_ : sds ) {
+	sd2table( sd_, table, g2t_track ); 
+      }
+
+      // Register the table with the maker
+      AddData( table ); 
+      double sum = 0.0;
+
+      // Accumulate total energy deposition for QA later
+      for ( auto hit : (*table) ) {
+	sum += hit.de;
+      }
+      mHitSum[ name ] += sum;
+    
+    }
+
+    // Clear the sensitive detectors
+    for ( auto sd_ : sds) {
+      sd_->Clear();
+    }
 
     return nhits;
-  }
+  };
 
   int mDefaultEngine;
 
