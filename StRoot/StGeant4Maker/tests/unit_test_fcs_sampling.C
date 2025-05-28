@@ -9,16 +9,6 @@
 double _eta  = 0; 
 double _phid = 0;
 
-struct Cell {
-  int northSouth; 
-  int cellId;
-  double eta; 
-  double phi;
-  double x,y,z;
-  int volumeId; // expected Volume ID
-};
-
-
 void unit_test_fcs_sampling( const int nevents=1000 ) {
 
   gROOT->ProcessLine("initChain();");
