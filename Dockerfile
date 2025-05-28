@@ -19,16 +19,16 @@ ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV ROOT_INCLUDE_PATH=$STAR/.${STAR_HOST_SYS}/include
 
 WORKDIR ${STAR}
-COPY . ${STAR}
+#COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
 
-RUN <<EOF
-	set -e
-	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="-Werror" || EXTRA_CXXFLAGS=""
-	cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
-	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
-EOF
+#RUN <<EOF
+#	set -e
+#	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="-Werror" || EXTRA_CXXFLAGS=""
+#	cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
+#	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+#EOF
 
 COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh
 	#!/bin/bash -l
