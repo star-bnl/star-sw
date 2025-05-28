@@ -18,6 +18,10 @@
 #include <AgMLBTofVolumeId.h>
 #include <AgMLMtdVolumeId.h>
 #include <AgMLVpdVolumeId.h>
+#include <AgMLETofVolumeId.h>
+#include <AgMLMtdVolumeId.h>
+#include <AgMLBbcVolumeId.h>
+#include <AgMLVpdVolumeId.h>
 
 
 class AgMLVolumeIdFactory {
@@ -28,12 +32,12 @@ public:
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
 
+    AgMLExtension* agml = AgMLExtension::get( name );
+
     AgMLVolumeId* id = VolumeId[name];
     if ( 0==id ) {
-      if      ( name == "TPAD" && test==false )  
+      if      ( name == "TPAD" )  
 	id = new AgMLTpcVolumeId;
-      else if ( name == "TPAD" && test==true )
-	id = new AgMLTpcVolumeIdTest__;
       else if ( name == "FTUS" )
 	id = new AgMLFstVolumeId;
       else if ( name == "TGCG" )
@@ -52,6 +56,8 @@ public:
 	id = new AgMLEEmcVolumeId;
       else if ( name == "BRSG" ) 
 	id = new AgMLBtofVolumeId;
+      else if ( name == "ECEL" ) 
+	id = new AgMLEtofVolumeId;
       else if ( name == "MIGG" ) 
 	id = new AgMLMtdVolumeId;
       else if ( name == "VRAD" ) 
@@ -60,7 +66,15 @@ public:
 	id = new AgMLFmsVolumeId( "FLGR" );
       else if ( name == "FLXF" )
 	id = new AgMLFmsVolumeId( "FLXF" );
+      else if ( name == "MXSA" )
+	id = new AgMLMtdVolumeId();
+      else if ( name == "BPOL" )
+	id = new AgMLBbcVolumeId();
+      else if ( name == "VRAD" )
+	id = new AgMLVpdVolumeId();
+
       VolumeId[name] = id;
+
     }
     
     return id;
