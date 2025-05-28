@@ -17,6 +17,8 @@
 #define StiDefaultToolkit_H 1
 #include "Sti/StiToolkit.h"
 
+class StiTrackMerger;
+
 /** 
  * @class StiDefaultToolkit
  * @brief Definition of toolkit
