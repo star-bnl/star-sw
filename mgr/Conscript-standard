@@ -212,7 +212,8 @@ if ($pkg eq "StDAQMaker") {
 my ($i, $obj);
 my $LIBPKG = "";
 
-my @g77pkgs = qw(geometry gen sim tls minicern geant3);
+#$$$my @g77pkgs = qw(geometry gen sim tls minicern geant3);
+my @g77pkgs = qw(geometry gen sim tls minicern);
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
 
 
@@ -810,9 +811,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ /^xgeometry/ ){
 	$LIBS .= " -lStarMagFieldNoDict ";
 
-    } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
-	$CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
-	    . $main::PATH_SEPARATOR . $CPPPATH;
+    } elsif ($pkg =~ m/StarVMCApplication|StVMCMaker/) {
+	#$CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
+	#    . $main::PATH_SEPARATOR . $CPPPATH;
 
     } elsif ($pkg eq 'StarMiniCern') {
 	$FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
@@ -840,43 +841,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	if ($FC eq 'g77') {
 	    $LIBS .= " -lg2c";
 	}
-
-    } elsif ($pkg eq 'geant3') {
-	$SO_PKG = "lib" . $SO_PKG; $SO_PKG_lib = $SO_PKG;
-	$FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
-	$CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
-	$FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern" . $main::PATH_SEPARATOR . $INCLUDE .
-	    $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
-	$CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
-	my @dirs = qw (added gbase gcons geocad ggeom gheisha ghits ghrout ghutils
-		       giface giopa gkine gparal gphys gscan gstrag gtrak matx55 miface
-		       miguti neutron peanut fiface cgpack fluka block comad erdecks erpremc
-		       minicern gdraw TGeant3);
-	my $dirs = join '|', @dirs;
-	my @srcC = ();
-	foreach my $s (@src) {
-	    my $dirL = File::Basename::dirname($s);
-	    my $sdir = File::Basename::basename($dirL);
-	    #      print "s = $s dir = $dirL sdir = $sdir\n";
-	    next if $dirL !~ /$dirs/;
-	    next if $sdir eq 'hpxgs'; # hpux macos
-	    next if $sdir eq 'sungs'; # sun
-	    next if $sdir eq 'allgs';
-	    next if $sdir eq 'lnxgs';
-	    next if $sdir eq 'lnxppcgs';
-	    next if $sdir eq 'qutyinv';
-	    next if $sdir eq 'qutyz32';
-
-	    next if $s =~ /gtrak\/grndm.*\.F/;
-	    #      if ($s =~ /gevkev/) {print "==================================";}
-	    #      print "add $s\n";
-	    push @srcC, $s;
-	}
-	@src = @srcC;
-	push @src, "gcinit.F";
-
-    } elsif ( $Dir =~ m/StarVMC/ && $pkg =~ /ecal|Tpc|star/) {
-	$CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 
     } elsif ( $pkg =~ m/^StBFChain$/ && (! $IsRepo || $IsDotDev) ) {
 	my($cmd)="BFCOpt2Html.pl";
