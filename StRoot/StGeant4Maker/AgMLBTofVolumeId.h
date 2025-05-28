@@ -2,11 +2,12 @@
 #define __AgMLBtofVolumeId_h__
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
+#include <StarVMC/StarGeometry/StarGeo.h>
 #include <StMessMgr.h>
 
 class AgMLBtofVolumeId : public AgMLVolumeId {
 public:
-  
+
   AgMLBtofVolumeId(){}
   // Applies to btog.version = 8 with btog.choice =13 (run 13 onwards)
   
@@ -18,15 +19,18 @@ public:
     int layer  = numbv[3];
 
     // Adjust for GMT modules
-    if ( rileft==1 ) {
-      if ( sector== 8 )   module += 4;
-      if ( sector==23 )   module += 4;
-    }
-    else if ( rileft==2 ) {
-      if ( sector == 33 ) module += 4;
-      if ( sector == 48 ) module += 4;
-    }
 
+    if ( StarGeometry::HasDetector("BTOFv8") ) {
+      if ( rileft==1 ) {
+	if      ( sector== 8 )   module += 4;
+	else if ( sector==23 )   module += 4;
+      }
+      else if ( rileft==2 ) {
+	if      ( sector == 33 ) module += 4;
+	else if ( sector == 48 ) module += 4;
+      }
+    }
+      
     int _id = layer + 10 * (module + 100 * (sector+100*rileft) );
 
     return _id;
