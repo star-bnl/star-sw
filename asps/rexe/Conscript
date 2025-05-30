@@ -79,9 +79,7 @@ if ($FC =~ /^pgf/) {
 }
 $LIBS .= " -lgeant321 -lgcalor"; 
 $LIBS  .= " " . $env->{CERNLIBS};
-$LIBS  .= $env->{LDALL};
 $LIBS  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
-$LIBS  .= $env->{LDNONE};
 $LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;
 if ($STAR_SYS =~ /^sun4x_5.$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
