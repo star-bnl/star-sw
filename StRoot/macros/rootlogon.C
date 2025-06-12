@@ -1,35 +1,21 @@
 {
-  // ROOT and XROOTD
-  // some rootd default dummy stuff
-  TAuthenticate::SetGlobalUser("starlib");
-  TAuthenticate::SetGlobalPasswd("ROOT4STAR");
 
-  // This will help tracing failure on XrdOpen() if any
-  gEnv->SetValue("XNet.DebugTimestamp","1");
-  gEnv->SetValue("XNet.ReconnectTimeout","15");
-  gEnv->SetValue("XNet.RequestTimeout","90");
-
-  //  set FloatPointException trap
-  bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
-  const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
-
-  if (star_rootlogon_fpe_env) {
-    if (strcmp(star_rootlogon_fpe_env,"YES")==0) star_rootlogon_fpe=true;
-    if (strcmp(star_rootlogon_fpe_env,"NO" )==0) star_rootlogon_fpe=false;
-  }
-  if (star_rootlogon_fpe) {
-    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
-    printf("*** Floating Point Exception is ON ***\n");
-  } else {
-    printf("*** Floating Point Exception is OFF ***\n");
-  }
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,99,0)
+  std::cout << "This is root6" << std::endl;
+#pragma cling load("libStarClassLibrary.so")
+#pragma cling load("libGeom.so")
+#pragma cling load("libTable.so")
+#pragma cling load("libPhysics.so")
+#pragma cling load("libEG.so")
+#pragma cling load("libStarRoot.so")
+#else
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
   gSystem->Load("libPhysics");
   gSystem->Load("libEG");
   gSystem->Load("libStarRoot");
+#endif
 
   if (gSystem->GetLibraries("*libTable*"))
   {
