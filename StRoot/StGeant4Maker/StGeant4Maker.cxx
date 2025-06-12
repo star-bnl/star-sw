@@ -1,4 +1,5 @@
 #include "StGeant4Maker.h"
+#include "StChainOpt.h"
 //________________________________________________________________________________________________
 #include "StMessMgr.h"
 //________________________________________________________________________________________________
@@ -555,6 +556,9 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("hcal:engine", "G4", "Default engine for all volumes defined in HcalGeo" ); // Forward hcal defaults to G4
 
 
+  AddOption("embedding:mode",0,"Sets embedding mode.  Default=0 off."); // defaults to no embedding mode
+
+
     
   // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
@@ -729,8 +733,11 @@ int StGeant4Maker::InitRun( int /* run */ ){
   // Obtain pointer to the primary maker
   StarPrimaryMaker* primarymk   = dynamic_cast<StarPrimaryMaker*> (GetMaker("PrimaryMaker"));
   if (primarymk) { 
-    primarymk->SetVertex( DAttr("vertex:x"), DAttr("vertex:y"), DAttr("vertex:z") );
-    primarymk->SetSigma ( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
+    if ( 0==IAttr("embedding:mode") )
+      {
+	primarymk->SetVertex( DAttr("vertex:x"), DAttr("vertex:y"), DAttr("vertex:z") );
+	primarymk->SetSigma ( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
+      }
   }
   else {
     LOG_FATAL << "Primary event generator not registered" << endm;
@@ -752,11 +759,18 @@ void StarVMCApplication::ConstructGeometry(){
 int  StGeant4Maker::InitGeom() {
 
   const DbAlias_t *DbAlias = GetDbAliases();
-  if ( 0==gGeoManager ) {
+
+  // Running under the standard bfc macro
+  StBFChain* bfc = dynamic_cast<StBFChain*>(GetMaker("bfc"));
+  
+  // Running in a geant4star embedding macro
+  if ( 0==bfc ) {
+    bfc = dynamic_cast<StBFChain*>(GetMaker("physicssim"));
+  }
+
+  if ( (0==gGeoManager) && bfc ) {
   for (int i = 0; DbAlias[i].tag; i++) // iterate over DB aliases
     {
-      StBFChain *bfc = (StBFChain *)(GetTopChain());
-      if ( 0==bfc ) break; // nothing to do in this case...
 
       //
       // Look for BFC option of form y2019x or ry2019x
@@ -783,6 +797,9 @@ int  StGeant4Maker::InitGeom() {
       if (mac) delete [] mac;
     }
   }
+
+  // Last try before kaboom
+  if( !gGeoManager ) GetDataBase( "VmcGeometry" );
 
   assert(gGeoManager);
 
@@ -1492,7 +1509,7 @@ void StGeant4Maker::PushPrimaries() {
       TParticlePDG *pdgPart = particleData(pdg); 
 
       if ( 0 == pdgPart )
-	{ // Protect against unknown particle codes
+	{ // Special documentation entry
 	  continue;
 	}
 
