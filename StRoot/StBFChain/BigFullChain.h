@@ -1341,16 +1341,20 @@ Bfc_st BFC[] = { // standard chains
   {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #if ROOT_VERSION_CODE>=399366
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMCLibrary.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMCLibrary.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
 #else
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
 #endif
+  {"stargen:stubs",  "", "","stargen", "", "StarGeneratorStubs.so", "Dummy starsim callbacks", false },
+  {"stargen:mk",  "", "","stargen", "StarPrimaryMaker", "",      "Setup the primary event generator maker", false },
   {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
+  {"kinematics:mk"  ,"","","stargen:mk,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+
 
   {"fastjet"     ,"","",""       , "", "libfastjet.so",          "Load fast jet reconstruction algo", false},
 
@@ -1370,6 +1374,8 @@ Bfc_st BFC[] = { // standard chains
   {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
 #endif
   {"geant4mk",    "","", "stargen,geant4vmc,geant3vmc,geant4out",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
+
+  {"geant4mk:mk",    "","", "geant4mk",  "StGeant4Maker", "", "Load G4 VMC libs", false},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
