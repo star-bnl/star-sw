@@ -322,6 +322,10 @@ Int_t StarPrimaryMaker::Make()
     //
     if ( IAttr("FilterSkipRejects") ) return kStSKIP; 
 
+    if ( IAttr("verbose") ) {
+      event()->Print();
+    }
+
 
   }// infinite loop
 
@@ -364,7 +368,8 @@ void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
 {
   static Int_t id = 0;
   gener->mId = ++id;
-  AddMaker(gener);
+  LOG_INFO << "AddGenerator " << gener << " " << gener->GetName() << endm;
+  StMaker::AddMaker(gener);
 }
 
 void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
@@ -372,6 +377,14 @@ void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
   mFilter = filter;
   AddData( 0, ".filter" );
   mFilter -> Shunt( GetDataSet( ".filter" ) );
+}
+
+void StarPrimaryMaker::AddMaker( StMaker* mk ) {
+  LOG_INFO << "Registering " << mk->GetName() << " with primary maker" << endm;
+  auto* gen = dynamic_cast<StarGenerator*>(mk);
+  if ( gen ) AddGenerator(gen);
+  auto* filt= dynamic_cast<StarFilterMaker*>(mk);
+  if ( filt ) AddFilter( filt );
 }
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::PreGenerate()
@@ -407,6 +420,7 @@ Int_t StarPrimaryMaker::PreGenerate()
   StarGenerator *generator = 0;
   while ( (generator=(StarGenerator *)Next()) )
     {
+      if ( IAttr("debug") ) LOG_INFO << generator->GetName() << endm;
       generator -> PreGenerateHook();
     }
   
