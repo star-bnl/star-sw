@@ -228,16 +228,19 @@ Int_t StBFChain::Instantiate()
     StMaker *myChain = 0;
     StMaker *mk = 0;
     // Require only instance for the following named makers
-    if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
-	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || maker == "StSstDbMaker" ||
+    if (maker == "St_db_Maker"       || 
+	maker == "StTpcDbMaker"      ||
+	maker == "StSvtDbMaker"      || 
+	maker == "StSsdDbMaker"      || 
+	maker == "StSstDbMaker"      ||
 	maker == "StDetectorDbMaker" ||
-	maker == "StMagFMaker"    ||
-	maker == "StEEmcDbMaker"  ||
-	maker == "St_geant_Maker" ||
+	maker == "StMagFMaker"       ||
+	maker == "StEEmcDbMaker"     ||
+	maker == "St_geant_Maker"    ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
-	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
+	if (maker == "St_geant_Maker" || maker == "StVMCMaker" || maker == "StGeant4Maker" ) {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
 		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one." << endm;
 	  continue;
