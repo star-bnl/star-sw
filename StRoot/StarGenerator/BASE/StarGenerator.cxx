@@ -273,3 +273,9 @@ Int_t StarGenerator::PostGenerateHook()
   return stat;
 }
 
+
+
+
+void StarGenerator::Print(const char *opt) const {
+  mEvent->Print("head");
+};
