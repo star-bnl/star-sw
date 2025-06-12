@@ -1,19 +1,18 @@
 #ifndef __StarPrimaryMaker_h__
 #define __StarPrimaryMaker_h__
 
+#include "TEventList.h"
 #include "StMaker.h"
+#include "StarParticleStack.h"
+#include "StarGenerator/UTIL/StarParticleData.h"
+
+//#ifndef __CINT__
+#if !(defined __CINT__ || defined __CLING__)
 #include "TLorentzVector.h"
 #include "TVector3.h"
 #include "TClonesArray.h"
 #include "TDatabasePDG.h"
-#include "StarParticleStack.h"
 #include "StMessMgr.h"
-
-#include "StarGenerator/UTIL/StarParticleData.h"
-
-#include "TEventList.h"
-
-#ifndef __CINT__
 #include <functional>
 #include <map>
 #endif
@@ -122,6 +121,9 @@ class StarPrimaryMaker : public StMaker
   /// Add an event generator to the list of event generators.
   /// @param gener Is a pointer to the user's event generator
   void AddGenerator( StarGenerator *gener );
+
+  /// Override the addmaker method.  If it is a generator, add it as a generator.  A filter, add as a filter.
+  void AddMaker( StMaker* mk );
 
   /// Attach a filter to the primary generator
   /// @param filt Is a pointer to the filter maker
