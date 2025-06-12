@@ -159,6 +159,7 @@ class StarGenerator : public StMaker
   /// Create and retrieve end-of-run statistics
   virtual StarGenStats Stats() { return StarGenStats(); }
 
+  virtual void Print(const char *opt="") const;
 
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.6 2015/04/24 18:21:11 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
