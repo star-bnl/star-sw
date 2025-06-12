@@ -237,6 +237,7 @@ Int_t StBFChain::Instantiate()
 	maker == "StMagFMaker"       ||
 	maker == "StEEmcDbMaker"     ||
 	maker == "St_geant_Maker"    ||
+	maker == "StGeant4Maker"     ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
