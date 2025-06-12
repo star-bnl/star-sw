@@ -1015,9 +1015,10 @@ Int_t StBFChain::Init() {
 
     // force load of geometry for VMC and Sti
 
-    if (GetOption("Sti") || GetOption("StiCA") ||
-	GetOption("StiVMC") ||GetOption("VMC") ||
-	GetOption("VMCPassive")) {
+    if (GetOption("Sti")       || GetOption("StiCA") ||
+	GetOption("StiVMC")    || GetOption("VMC") ||
+	GetOption("VMCPassive" || GetMaker("geant4star") )) {
+
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
 	TString dbTag("r");
