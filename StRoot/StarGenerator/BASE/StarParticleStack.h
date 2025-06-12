@@ -1,13 +1,15 @@
 #ifndef __StarParticleStack_h__
 #define __StarParticleStack_h__
 
-#include "TObjArray.h"
+//#include "TObjArray.h"
 #include "StarCallf77.h"
 #include "TVirtualMCStack.h"
 #include "TDataSet.h"
 #include "TMCProcess.h"
 #include "TParticle.h"
+#ifndef __CLING__
 #include "TClonesArray.h"
+#endif
 #include <vector>
 #include <list>
 
@@ -95,14 +97,16 @@ class StarParticleStack : public TVirtualMCStack
   Int_t               mCurrent;
 
   Int_t               mArraySize;
+#ifndef __CLING__
   TClonesArray       *mArray; 
+#endif
 
   Int_t               mStackSize;
   std::list  <TParticle *> mStack;
   std::list  <Int_t>       mStackIdx;
 
 
-  ClassDef(StarParticleStack,1);
+  ClassDef(StarParticleStack,0);
     
 };
 
