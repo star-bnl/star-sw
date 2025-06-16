@@ -22,8 +22,6 @@
 #include <map>
 #include <string>
 
-// Tracks which shared libraries have been loaded via BFC / allows to ensure single load
-std::map<std::string,int> gSharedLibs;
 
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
@@ -208,9 +206,7 @@ Int_t StBFChain::Load()
 // Single point for loading shared libraries
 Int_t StBFChain::LoadSharedLibrary( const char* name ) {
   Int_t result=1; // 0=success,1=already loaded,-1=not found,-2=version mismatch
-  if ( 0==gSharedLibs[name] ) {
     result=gSystem->Load(name);
-    gSharedLibs[name]++;
   }
   return result;
 };
