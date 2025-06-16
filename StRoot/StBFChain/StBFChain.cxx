@@ -208,7 +208,7 @@ Int_t StBFChain::LoadSharedLibrary( const char* name ) {
     return gSystem->Load(name);
 #else
     TInterpreter::EErrorCode code;
-    gInterpreter->ProcessLine( Form("#pragma cling load(\"%s\"\)",name), &code );
+    gInterpreter->ProcessLine( Form("#pragma cling load(\"%s\")",name), &code );
     // code:
     // 0 = successful execution of the line
     // 1 = a recoverable failure, e.g. library not found.  Result maps to -1.
