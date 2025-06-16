@@ -18,6 +18,13 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+
+#include <map>
+#include <string>
+
+// Tracks which shared libraries have been loaded via BFC / allows to ensure single load
+std::map<std::string,int> gSharedLibs;
+
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -166,7 +173,7 @@ Int_t StBFChain::Load()
 	    //LOG_QA  << "Trying to load Library " << libL << endm;
 
 
-	    iok = gSystem->Load(libL);
+	    iok = LoadSharedLibrary(libL);
 	    if (iok < 0)  {
 
 	      LOG_FATAL  << "problem with loading of " << libL.Data() << endm;
@@ -197,6 +204,16 @@ Int_t StBFChain::Load()
   LoadedLibs.Delete();
   return status;
 }
+//_____________________________________________________________________________
+// Single point for loading shared libraries
+Int_t StBFChain::LoadSharedLibrary( const char* name ) {
+  Int_t result=1; // 0=success,1=already loaded,-1=not found,-2=version mismatch
+  if ( 0==gSharedLibs[name] ) {
+    result=gSystem->Load(name);
+    gSharedLibs[name]++;
+  }
+  return result;
+};
 
 //_____________________________________________________________________________
 /// Maker-instantiation handler.
@@ -564,12 +581,12 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
       if ( GetOption("VFPPVEv") ) {
-        gSystem->Load("StBTofUtil.so");
+	LoadSharedLibrary("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , kTRUE);
       } 
       else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
       if (GetOption("VFPPVEvNoBtof")){
-        gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
+        LoadSharedLibrary("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
       if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
