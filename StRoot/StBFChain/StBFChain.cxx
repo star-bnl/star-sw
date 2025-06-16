@@ -22,7 +22,6 @@
 #include <map>
 #include <string>
 
-
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -205,10 +204,18 @@ Int_t StBFChain::Load()
 //_____________________________________________________________________________
 // Single point for loading shared libraries
 Int_t StBFChain::LoadSharedLibrary( const char* name ) {
-  Int_t result=1; // 0=success,1=already loaded,-1=not found,-2=version mismatch
-    result=gSystem->Load(name);
-  }
-  return result;
+#if ROOT_VERSION_CODE <= ROOT_VERSION(5,99,0)
+    return gSystem->Load(name);
+#else
+    TInterpreter::EErrorCode code;
+    gInterpreter->ProcessLine( Form("#pragma cling load(\"%s\"\)",name), code );
+    // code:
+    // 0 = successful execution of the line
+    // 1 = a recoverable failure, e.g. library not found.  Result maps to -1.
+    // ... not sure what happens on mismatch ...
+    int result = code;
+    return -result;
+#endif
 };
 
 //_____________________________________________________________________________
