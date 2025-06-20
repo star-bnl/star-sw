@@ -34,6 +34,7 @@ class StPicoBEmcSmdPHit;
 class StPicoETofHit;
 class StPicoETofPidTraits;
 class StPicoFwdTrack;
+class StPicoFwdVertex;
 class StPicoFcsHit;
 class StPicoFcsCluster;
 class StPicoMcVertex;
@@ -44,12 +45,15 @@ class StPicoDst {
 
  public:
 
-  /// Default constructor
-  StPicoDst() { fgPicoDst = this;}
-  /// Destructor
-  virtual ~StPicoDst() {fgPicoDst = 0;}
 #if defined (__TFG__VERSION__)
+  StPicoDst() { fgPicoDst = this;}
+  virtual ~StPicoDst() {fgPicoDst = 0;}
   virtual Bool_t IsGoodTrigger() const;
+#else /* ! __TFG__VERSION__ */
+  /// Default constructor
+  StPicoDst() { /* emtpy */}
+  /// Destructor
+  ~StPicoDst() { /* empty*/ }
 #endif
 
   /// Set the pointers to the TClonesArrays
@@ -95,6 +99,8 @@ class StPicoDst {
   static StPicoETofHit* etofHit(Int_t i) { return (StPicoETofHit*)picoArrays[StPicoArrays::ETofHit]->UncheckedAt(i); }
   /// Return pointer to i-th fwd track
   static StPicoFwdTrack* fwdTrack(Int_t i) { return (StPicoFwdTrack*)picoArrays[StPicoArrays::FwdTrack]->UncheckedAt(i); }
+  /// Return pointer to i-th fwd vertex
+  static StPicoFwdVertex* fwdVertex(Int_t i) { return (StPicoFwdVertex*)picoArrays[StPicoArrays::FwdVertex]->UncheckedAt(i); }
   /// Return pointer to i-th fcs Hit
   static StPicoFcsHit* fcsHit(Int_t i) { return (StPicoFcsHit*)picoArrays[StPicoArrays::FcsHit]->UncheckedAt(i); }
   /// Return pointer to i-th fcs Cluster
@@ -188,14 +194,18 @@ class StPicoDst {
   /// Print MC track info
   static void printMcTracks();
 
+#if defined (__TFG__VERSION__)
   static StPicoDst *instance() {return fgPicoDst;}
+#endif /* __TFG__VERSION__ */
 
  private:
 
   /// Array of TClonesArrays
   static TClonesArray** picoArrays;
 
+#if defined (__TFG__VERSION__)
   static StPicoDst *fgPicoDst; //!
+#endif /* __TFG__VERSION__ */
 };
 
 #endif

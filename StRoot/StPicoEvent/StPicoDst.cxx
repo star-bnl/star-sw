@@ -20,12 +20,13 @@
 #include "StPicoETofHit.h"
 #include "StPicoETofPidTraits.h"
 #include "StPicoFwdTrack.h"
+#include "StPicoFwdVertex.h"
 #include "StPicoMcVertex.h"
 #include "StPicoMcTrack.h"
 #include "StPicoDst.h"          //MUST be the last one
 
 TClonesArray** StPicoDst::picoArrays = 0;
-StPicoDst *StPicoDst::fgPicoDst = 0;
+
 //_________________
 void StPicoDst::unset() {
   picoArrays = 0;

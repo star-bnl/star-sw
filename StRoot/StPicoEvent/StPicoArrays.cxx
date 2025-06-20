@@ -28,6 +28,7 @@ const char* StPicoArrays::picoArrayNames [NAllPicoArrays] = { "Event",
 							                                                "McVertex",
                                                               "McTrack",
                                                               "FwdTracks",
+                                                              "FwdVertices",
                                                               "FcsHits",
                                                               "FcsClusters"
 };
@@ -55,6 +56,7 @@ const char* StPicoArrays::picoArrayTypes [NAllPicoArrays] = { "StPicoEvent",
 							                                                "StPicoMcVertex",
                                                               "StPicoMcTrack",
                                                               "StPicoFwdTrack",
+                                                              "StPicoFwdVertex",
                                                               "StPicoFcsHit",
                                                               "StPicoFcsCluster"
 };
@@ -85,6 +87,7 @@ int StPicoArrays::picoArraySizes [NAllPicoArrays] = { 1,    // StPicoEvent
 						                                          10,   // StPicoMcVertex
                                                       1000,  // StPicoMcTrack
                                                       10,   // StPicoFwdTrack
+                                                      10,   // StPicoFwdVertex
                                                       200,  // StPicoFcsHit
                                                       100  // StPicoFcsCluster
 };

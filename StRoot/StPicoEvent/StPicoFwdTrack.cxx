@@ -40,8 +40,10 @@ StPicoFwdTrack::StPicoFwdTrack(const StPicoFwdTrack &fwdTrack){
 
     mECalX = fwdTrack.mECalX;
     mECalY = fwdTrack.mECalY;
+    mECalZ = fwdTrack.mECalZ;
     mHCalX = fwdTrack.mHCalX;
     mHCalY = fwdTrack.mHCalY;
+    mHCalZ = fwdTrack.mHCalZ;
 }
 
 StPicoFwdTrack::~StPicoFwdTrack(){
