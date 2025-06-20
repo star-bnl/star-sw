@@ -43,6 +43,7 @@
 #include "StEvent/StFwdTrackCollection.h"
 #include "StEvent/StFwdTrack.h"
 #include "StEvent/StFcsCluster.h"
+#include "StEvent/StPrimaryVertex.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -102,6 +103,7 @@
 #include "StPicoEvent/StPicoETofHit.h"
 #include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StPicoEvent/StPicoFwdTrack.h"
+#include "StPicoEvent/StPicoFwdVertex.h"
 #include "StPicoEvent/StPicoFcsHit.h"
 #include "StPicoEvent/StPicoFcsCluster.h"
 #include "StPicoEvent/StPicoMcVertex.h"
@@ -116,8 +118,8 @@
 #include "TH1.h"
 #include "TH2.h"
 static Int_t _debug = 0;
-#endif /* __TFG__VERSION__ */
 StPicoDstMaker *StPicoDstMaker::fgPicoDstMaker = 0;
+#endif /* __TFG__VERSION__ */
 #include "StPicoDstMaker/StPicoUtilities.h"
 
 //_________________
@@ -145,7 +147,9 @@ mBField(0),
     createArrays();
     std::fill_n(mStatusArrays, sizeof(mStatusArrays) / sizeof(mStatusArrays[0]), 1);
     
+#if defined (__TFG__VERSION__)
     fgPicoDstMaker = this;
+#endif /* __TFG__VERSION__ */
 }
 
 //_________________
@@ -161,7 +165,9 @@ StPicoDstMaker::~StPicoDstMaker() {
   delete mChain;
   delete mPicoDst;
 
+#if defined (__TFG__VERSION__)
   fgPicoDstMaker = 0;
+#endif /* __TFG__VERSION__ */
 }
 
 //_________________
@@ -252,6 +258,7 @@ void StPicoDstMaker::streamerOff() {
   StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoFwdTrack::Class()->IgnoreTObjectStreamer();
+  StPicoFwdVertex::Class()->IgnoreTObjectStreamer();
   StPicoFcsHit::Class()->IgnoreTObjectStreamer();
   StPicoFcsCluster::Class()->IgnoreTObjectStreamer();
   StPicoMcVertex::Class()->IgnoreTObjectStreamer();
@@ -271,8 +278,10 @@ void StPicoDstMaker::createArrays() {
 //_________________
 Int_t StPicoDstMaker::Init() {
 
+#if defined (__TFG__VERSION__)
   TString file;
   Int_t l;
+#endif /* __TFG__VERSION__ */
   
   switch (StMaker::m_Mode) {
   case PicoIoMode::IoWrite:
@@ -301,6 +310,24 @@ Int_t StPicoDstMaker::Init() {
 	return kStFatal;
       }
 
+#if !defined (__TFG__VERSION__)
+
+      if (mInputFileName.Length() == 0) {
+	// No input file
+	mOutputFileName = GetChainOpt()->GetFileOut();
+	mOutputFileName.ReplaceAll(".root", ".picoDst.root");
+      }
+      else {
+	mInputFileName = gSystem->BaseName(mInputFileName);
+	mOutputFileName = mInputFileName;
+	mOutputFileName.ReplaceAll("MuDst.root", "picoDst.root");
+
+	if (mOutputFileName == mInputFileName) {
+	  LOG_ERROR << "Input file is not a MuDst ... " << endm;
+	  return kStFatal;
+	}
+      }
+#else /* __TFG__VERSION__ */
       if (mInputFileName.Length() == 0) mInputFileName = GetChainOpt()->GetFileOut();
       file = gSystem->BaseName(mInputFileName);
       l = file.Index(".");
@@ -308,6 +335,7 @@ Int_t StPicoDstMaker::Init() {
       mInputFileName = mInputFileName(mInputFileName.Index("st_"), mInputFileName.Length());
       mOutputFileName = TString(file.Data(),l);
       mOutputFileName += ".picoDst.root";
+#endif /* __TFG__VERSION__ */
 
       openWrite();
       initEmc();
@@ -378,6 +406,11 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
     return kStOK;
   }
 #endif /* !__TFG__VERSION__ */
+  else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxless") == 0) {
+      setVtxMode( PicoVtxMode::Vtxless );
+      LOG_INFO << " PicoVtxless is being used " << endm;
+      return kStOK;
+    }
 
   return kStErr;
 }
@@ -895,7 +928,7 @@ Int_t StPicoDstMaker::MakeWrite() {
   mFmsFiller.fill(*mMuDst);
 
   if (Debug()) mPicoDst->printTracks();
-
+  
   mTTree->Fill();
   if ( isFromDaq ) {
 //    delete mEmcCollection;
@@ -1055,7 +1088,7 @@ void StPicoDstMaker::fillTracks() {
     }
 
 #if defined (__TFG__VERSION__)
-    if ( StMuDst::dca3Dmax()>0 ) {
+    if ( StMuDst::dca3Dmax()>0) {
       // Cut large Dca
       THelixTrack t = dcaG->thelix();
       StThreeVectorD V(mMuDst->primaryVertex()->position());
@@ -1182,7 +1215,7 @@ void StPicoDstMaker::fillTracks() {
 
     // Calculate global momentum and position at point of DCA to the pVtx
     // at it is done in MuDst
-    if( dcaG ) {
+    if( dcaG && mMuDst->primaryVertex() ) {
       const StThreeVectorF &pvert =  mMuDst->primaryVertex()->position();
       Double_t vtx[3] = {pvert[0],pvert[1],pvert[2]};
       THelixTrack thelix =  dcaG->thelix();
@@ -1194,7 +1227,7 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setGlobalMomentum( momAtDca[0], momAtDca[1], momAtDca[2] );
       picoTrk->setOrigin( pos[0], pos[1], pos[2] );
     }
-    else {
+    else if ( mMuDst->primaryVertex() ){
       StPhysicalHelixD gHelix = dcaG->helix();
       gHelix.moveOrigin( gHelix.pathLength( mMuDst->primaryVertex()->position() ) );
       StThreeVectorF globMom =  gHelix.momentum( mBField * kilogauss );
@@ -1918,7 +1951,7 @@ void StPicoDstMaker::fillEvent() {
   } //for(UInt_t iPMT=0; iPMT<bbc.numberOfPMTs(); ++iPMT)
 
     // Set bunch crossing ID
-  picoEvent->setBunchId( ev->l0Trigger().bunchCrossingId() );
+  picoEvent->setBunchId( ev->l0Trigger().bunchCrossingId7bit(ev->runNumber()) );
 }
 
 //_________________
@@ -2516,10 +2549,12 @@ void StPicoDstMaker::fillFwdTracks() {
     for ( size_t i = 0; i < evc->numberOfTracks(); i++ ){
       StFwdTrack * evTrack = evTracks[i];
       StPicoFwdTrack picoFwdTrack;
+      // Set the PicoDst attributes
       picoFwdTrack.setMomentum( evTrack->momentum().x(), evTrack->momentum().y(), evTrack->momentum().z() );
       picoFwdTrack.setNumberOfFitPoints( evTrack->numberOfFitPoints() * evTrack->charge() );
       picoFwdTrack.setNumberOfSeedPoints( evTrack->numberOfSeedPoints() );
       picoFwdTrack.setChi2( evTrack->chi2() );
+      picoFwdTrack.setPVal( evTrack->pval() );
       picoFwdTrack.setDca( evTrack->dca().x(), evTrack->dca().y(), evTrack->dca().z() );
       if ( evTrack->didFitConvergeFully())
         picoFwdTrack.setStatus( 2 );
@@ -2529,8 +2564,8 @@ void StPicoDstMaker::fillFwdTracks() {
         picoFwdTrack.setStatus( 0 );
 
       picoFwdTrack.setMcTruth( evTrack->idTruth(), evTrack->qaTruth() );
-      picoFwdTrack.setVtxIndex( evTrack->vertexIndex() );
-      // picoFwdTrack.setGlobalTrackIndex( evTrack->index() );
+      picoFwdTrack.setVtxIndexRaw( evTrack->vertexIndexRaw() );
+      picoFwdTrack.setGlobalTrackIndex( evTrack->globalTrackIndex() );
 
       // fill matched ecal and hcal clusters for the track
       // ecal
@@ -2555,8 +2590,14 @@ void StPicoDstMaker::fillFwdTracks() {
       // Now set the projections for ECal and HCal
       StFwdTrackProjection ecalProj = evTrack->getProjectionFor(kFcsWcalId);
       StFwdTrackProjection hcalProj = evTrack->getProjectionFor(kFcsHcalId);
-      picoFwdTrack.setECalProjection( ecalProj.mXYZ.x(), ecalProj.mXYZ.y(), ecalProj.mXYZ.z() );
-      picoFwdTrack.setHCalProjection( hcalProj.mXYZ.x(), hcalProj.mXYZ.y(), hcalProj.mXYZ.z() );
+      if ( !std::isnan( ecalProj.mXYZ.x() ) && !std::isnan( ecalProj.mXYZ.y() ) && !std::isnan( ecalProj.mXYZ.z() ) )
+        picoFwdTrack.setECalProjection( ecalProj.mXYZ.x(), ecalProj.mXYZ.y(), ecalProj.mXYZ.z() );
+      else 
+        picoFwdTrack.setECalProjection( -999., -999., -999. );
+      if ( !std::isnan( hcalProj.mXYZ.x() ) && !std::isnan( hcalProj.mXYZ.y() ) && !std::isnan( hcalProj.mXYZ.z() ) )
+        picoFwdTrack.setHCalProjection( hcalProj.mXYZ.x(), hcalProj.mXYZ.y(), hcalProj.mXYZ.z() );
+      else
+        picoFwdTrack.setHCalProjection( -999., -999., -999. );
 
       int counter = mPicoArrays[StPicoArrays::FwdTrack]->GetEntries();
       picoFwdTrack.setId( counter );
@@ -2565,6 +2606,23 @@ void StPicoDstMaker::fillFwdTracks() {
   } else {
     LOG_WARN << "Cannot get Fwd Tracks from StEvent" << endm;
   }
+
+  // Fill FwdVertex also
+  // get primary vertex from StEvent
+  LOG_DEBUG << "There are " << evt->numberOfPrimaryVertices() << " primary vertices from StEvent" << endm; 
+  for ( size_t i = 0; i < evt->numberOfPrimaryVertices(); i++ ){
+    StPrimaryVertex * evVertex = evt->primaryVertex(i);
+    if (!evVertex || !evVertex->isFwdVtx()) continue; // only save valid FwdVertex
+    StPicoFwdVertex picoFwdVertex;
+    // Set the PicoDst attributes
+    picoFwdVertex.setPosition( evVertex->position().x(), evVertex->position().y(), evVertex->position().z() );
+    LOG_INFO << "Adding StPicoFwdVertex from StPrimaryVertex" << endm;
+    picoFwdVertex.setChi2( evVertex->chiSquared() );
+    picoFwdVertex.setNumberOfTracks( evVertex->numTracksUsedInFinder() );
+    int counter = mPicoArrays[StPicoArrays::FwdVertex]->GetEntries();
+    new((*(mPicoArrays[StPicoArrays::FwdVertex]))[counter]) StPicoFwdVertex(picoFwdVertex);
+  } // for each primary vertex
+
 } //fillFwdTracks
 
 //_________________
@@ -2598,7 +2656,7 @@ void StPicoDstMaker::fillFcsClusters() {
     picoFcsCluster.setChi2Ndf1Photon(muCluster->chi2Ndf1Photon());
     picoFcsCluster.setChi2Ndf2Photon(muCluster->chi2Ndf2Photon());
     double zVertex=picoDst()->event()->primaryVertex().z();
-    StThreeVectorD xyz=fcsDb->getStarXYZ(muCluster->detectorId(), muCluster->x(), muCluster->y());    
+    StThreeVectorD xyz=fcsDb->getStarXYZfromColumnRow(muCluster->detectorId(), muCluster->x(), muCluster->y());    
     StLorentzVectorD lv = fcsDb->getLorentzVector(xyz, muCluster->energy(), zVertex);
     picoFcsCluster.setFourMomentum(lv.px(),lv.py(),lv.pz(),lv.e());
     new((*(mPicoArrays[StPicoArrays::FcsCluster]))[counter]) StPicoFcsCluster(picoFcsCluster);
@@ -2656,6 +2714,9 @@ bool StPicoDstMaker::selectVertex() {
   StMuPrimaryVertex* selectedVertex = nullptr;
 
   // Switch between modes: Default and Vpd (VpdOrDefault)
+  if ( mVtxMode == PicoVtxMode::Vtxless ) {
+    return true;
+  }
   // Default takes the first primary vertex, meanwhile
   // Vpd
   if ( mVtxMode == PicoVtxMode::Default ) {
