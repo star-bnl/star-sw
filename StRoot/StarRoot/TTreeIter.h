@@ -79,7 +79,7 @@ class TTreeIter : public TNamed{
   TChain   *Chain() {return fTree;}
   TTreeIterCast &operator() (const TString varname);
   void **Void(const TString varname);
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
   TTreeIterCast &operator() (const char   *varname);
   void **Void(const char   *varname);
 #endif

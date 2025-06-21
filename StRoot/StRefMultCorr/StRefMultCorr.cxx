@@ -740,15 +740,61 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
-    }    
+    }
+    else if (mParameterIndex == 9) { // Run 20 Au+Au 9.8 GeV (sqrt(s_NN)=4.5 GeV) TriggerID = 740000
+      b0=24.7124572851806;
+      b1=5.71868597816542;
+      b2=-0.00312345552143256;
+      b3=-0.00017256714660496;
+      b4=-6.34006022264486e-07;
+      c0=-32.7658746560952;
+      c1=2.70684190541053;
+      c2=0.00128464121679533;
+      c3=0.000470785124435377;
+      c4=-4.47307728635742e-06;
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);  
+    }
+    else if (mParameterIndex == 10) { // Run 20 Au+Au 9.8 GeV (sqrt(s_NN)=4.5 GeV) TriggerID = 740010
+      b0=35.02;
+      b1=3.586;
+      b2=0.1368;
+      b3=-2.578e-3;
+      b4=1.189e-5;
+      c0=-24.84;
+      c1=3.289;
+      c2=-0.05722;
+      c3=1.491e-3;
+      c4=-9.678e-6;
+
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+      if (ntofmatch >= 95 && refmult > 367) notPileUp = kFALSE;
+    }
     else {
       notPileUp = kTRUE;
     }
-  }
-
-  /*
+  } // else if ( mRefX == 5 ) { // fxtMult
   else if ( mRefX == 6 ) { // refMult6
-    if ( mParameterIndex==0 ) { // d+Au 200 GeV 2021
+    if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+      b0 = 10.805229670974072;
+      b1 = 4.222122255649001;
+      b2 = -0.059023457533258925;
+      b3 = 0.0007297279166792341;
+      b4 = -3.730248246986408e-06;
+      c0 = -22.14994423125864;
+      c1 = 2.295827717755825;
+      c2 = -0.007304309390513328;
+      c3 = 9.397986288422607e-05;
+      c4 = -9.080150075680224e-07;
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    } // if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+    else if ( mParameterIndex==1 ) { // d+Au 200 GeV 2021
       b0 =  2.4412914662443033;
       b1 =  5.523540420923605;
       b2 = -0.16458436958697667;
@@ -762,15 +808,120 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
       refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
       notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
-    }
+    } // else if ( mParameterIndex==1 ) { // d+Au 200 GeV 2021
     else {
       notPileUp = kTRUE;
     }  
-  }
-  */
+  } // else if ( mRefX == 6 ) { // refMult6
+  else if ( mRefX == 7 ) { // TotnMIP
+    if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+      b0 = 10.805229670974072;
+      b1 = 4.222122255649001;
+      b2 = -0.059023457533258925;
+      b3 = 0.0007297279166792341;
+      b4 = -3.730248246986408e-06;
+      c0 = -22.14994423125864;
+      c1 = 2.295827717755825;
+      c2 = -0.007304309390513328;
+      c3 = 9.397986288422607e-05;
+      c4 = -9.080150075680224e-07;
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+    } // if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+    else {
+      notPileUp = kTRUE;
+    }  
+  } // else if ( mRefX == 7 ) { // TotnMIP
+
 
   if (mVerbose) {
     std::cout << "\t notPileUp: ";
+    if (notPileUp) {
+      std::cout << "TRUE";
+    } 
+    else {
+      std::cout << "FALSE";
+    }
+    std::cout << "\t[DONE]\n";
+  }
+
+  return notPileUp;
+}
+
+//_________________
+Bool_t StRefMultCorr::passnTofMatchTotnMIPCut(Double_t totnMIP, Double_t ntofmatch, 
+                                              Double_t vz /* default = 0*/) const {
+
+
+  if (mVerbose) {
+    std::cout << "Pile up check using nBTOFMatch vs. totnMIP...";
+  }
+  Double_t b0{}, b1{}, b2{}, b3{}, b4{};
+  Double_t c0{}, c1{}, c2{}, c3{}, c4{};
+  Double_t totnMIPcutmax{};
+  Double_t totnMIPcutmin{};
+
+  Bool_t notPileUp = kFALSE;
+
+  if ( mRefX == 6 ) { // refMult6
+    if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+      b0 = 49.92964577941192;
+      b1 = 30.084027095279428;
+      b2 = -0.6414804471204509;
+      b3 = 0.006675174653594674;
+      b4 = -2.690799009087484e-05;
+      c0 = -114.51733250850462;
+      c1 = 2.2552394816896664;
+      c2 = 0.17302732482464722;
+      c3 = -0.002572787709722221;
+      c4 = 9.276963258195168e-06;
+      totnMIPcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      totnMIPcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(totnMIP, totnMIPcutmin, totnMIPcutmax);
+    } // if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+    else if ( mParameterIndex==1 ) { // d+Au 200 GeV 2021
+      b0 = 13.854308990154239;
+      b1 = 48.38889240643103;
+      b2 = -1.820427172052759;
+      b3 = 0.0313802142314363;
+      b4 = -0.00018680122215220316;
+      c0 = 7.022386992461804;
+      c1 = -3.747248801082249;
+      c2 = 0.36559511738864753;
+      c3 = -0.00836993562719528;
+      c4 = 7.050862326468557e-05;
+      totnMIPcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      totnMIPcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(totnMIP, totnMIPcutmin, totnMIPcutmax);
+    } // else if ( mParameterIndex==1 ) { // d+Au 200 GeV 2021
+    else {
+      notPileUp = kTRUE;
+    }  
+  } // if ( mRefX == 6 ) { // refMult6
+  else if ( mRefX == 7 ) { // TotnMIP
+    if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+      b0 = 49.92964577941192;
+      b1 = 30.084027095279428;
+      b2 = -0.6414804471204509;
+      b3 = 0.006675174653594674;
+      b4 = -2.690799009087484e-05;
+      c0 = -114.51733250850462;
+      c1 = 2.2552394816896664;
+      c2 = 0.17302732482464722;
+      c3 = -0.002572787709722221;
+      c4 = 9.276963258195168e-06;
+      totnMIPcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      totnMIPcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(totnMIP, totnMIPcutmin, totnMIPcutmax);
+    } // if ( mParameterIndex==0 ) { // O+O 200 GeV 2021
+    else {
+      notPileUp = kTRUE;
+    }  
+  } // else if ( mRefX == 7 ) { // TotnMIP
+
+  if (mVerbose) {
+    std::cout << "\t notPileUp using : ";
     if (notPileUp) {
       std::cout << "TRUE";
     } 
@@ -1056,25 +1207,45 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
   }
   Double_t vzCorr = 1.;
   if ( mParameterIndex < 38 ) {
-    // Old correction based on the 6th-order polynomial fit of the high-end point 
-    // fit of refMult for the given Vz range
+    if (mRefX == 6) { // refMult6
+      if ( mParameterIndex == 0 ) { // O+O 200 GeV 2021
+        // New Vz correction. All vz bins bins are normalize to that at the center
+        vzCorr = oo200_run21_vzCorr_refMult[ getVzWindowForVzDepCentDef() ];
+      } // if ( mParameterIndex == 0 ) { // O+O 200 GeV 2021
 
-    // par0 to par5 define the parameters of a polynomial to parametrize z_vertex dependence of RefMult
-    const Double_t par0 = mPar_z_vertex[0][mParameterIndex];
-    const Double_t par1 = mPar_z_vertex[1][mParameterIndex];
-    const Double_t par2 = mPar_z_vertex[2][mParameterIndex];
-    const Double_t par3 = mPar_z_vertex[3][mParameterIndex];
-    const Double_t par4 = mPar_z_vertex[4][mParameterIndex];
-    const Double_t par5 = mPar_z_vertex[5][mParameterIndex];
-    const Double_t par6 = mPar_z_vertex[6][mParameterIndex];
-    // This parameter is usually 0, it takes care for an additional efficiency, 
-    // usually difference between phase A and phase B parameter 0
-    const Double_t par7 = mPar_z_vertex[7][mParameterIndex]; 
+      else if ( mParameterIndex == 1 ) { // d+Au 200 GeV 2021
+        // New Vz correction. All vz bins bins are normalize to that at the center
+        vzCorr = dau200_run21_vzCorr_refMult[ getVzWindowForVzDepCentDef() ];
+      } // else if ( mParameterIndex == 1 ) { // d+Au 200 GeV 2021
 
-    const Double_t  RefMult_ref = par0; // Reference mean RefMult at z=0
-    const Double_t  RefMult_z   = par0 + par1*z + par2*z*z + par3*z*z*z + par4*z*z*z*z + par5*z*z*z*z*z + par6*z*z*z*z*z*z; // Parametrization of mean RefMult vs. z_vertex position
-    if(RefMult_z > 0.0) {
-      vzCorr = (RefMult_ref + par7)/RefMult_z;
+    } // if (mRefX == 6)
+    else if (mRefX == 7) { // totnMIP
+      if ( mParameterIndex == 0 ) { // O+O 200 GeV 2021
+        // New Vz correction. All vz bins bins are normalize to that at the center
+        vzCorr = oo200_run21_vzCorr_totnMIP[ getVzWindowForVzDepCentDef() ];
+      } // if ( mParameterIndex == 0 ) { // O+O 200 GeV 2021
+    }
+    else {
+      // Old correction based on the 6th-order polynomial fit of the high-end point 
+      // fit of refMult for the given Vz range
+      
+      // par0 to par5 define the parameters of a polynomial to parametrize z_vertex dependence of RefMult
+      const Double_t par0 = mPar_z_vertex[0][mParameterIndex];
+      const Double_t par1 = mPar_z_vertex[1][mParameterIndex];
+      const Double_t par2 = mPar_z_vertex[2][mParameterIndex];
+      const Double_t par3 = mPar_z_vertex[3][mParameterIndex];
+      const Double_t par4 = mPar_z_vertex[4][mParameterIndex];
+      const Double_t par5 = mPar_z_vertex[5][mParameterIndex];
+      const Double_t par6 = mPar_z_vertex[6][mParameterIndex];
+      // This parameter is usually 0, it takes care for an additional efficiency, 
+      // usually difference between phase A and phase B parameter 0
+      const Double_t par7 = mPar_z_vertex[7][mParameterIndex]; 
+      
+      const Double_t  RefMult_ref = par0; // Reference mean RefMult at z=0
+      const Double_t  RefMult_z   = par0 + par1*z + par2*z*z + par3*z*z*z + par4*z*z*z*z + par5*z*z*z*z*z + par6*z*z*z*z*z*z; // Parametrization of mean RefMult vs. z_vertex position
+      if(RefMult_z > 0.0) {
+        vzCorr = (RefMult_ref + par7)/RefMult_z;
+      }
     }
   }
   else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV Run 19
@@ -1451,18 +1622,38 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
     }
   }
 
-  /*
-  else if (mRefX == 6 && mParameterIndex == 0) { // d+Au 200 GeV 2021
+  else if (mRefX == 6 && mParameterIndex == 0) { // O+O 200 GeV 2021
 
-    if (iVzBinIndex < 0 || iVzBinIndex > dau200_run21_nVzBins) return 1.0;
+    if (iVzBinIndex < 0 || iVzBinIndex > oo200_run21_nVzBins) return 1.0;
 
-    weight = dau200_run21_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    weight = oo200_run21_shapeWeightArray_refMult[iVzBinIndex][TMath::Nint(mRefMult_corr)];
     // Handle bad weight
     if (weight == 0 || TMath::IsNaN(weight)) {
       weight = 1.;
     }
-  }
-  */
+  } // else if (mRefX == 6 && mParameterIndex == 0) { // O+O 200 GeV 2021
+
+  else if (mRefX == 7 && mParameterIndex == 0) { // O+O 200 GeV 2021
+
+    if (iVzBinIndex < 0 || iVzBinIndex > oo200_run21_nVzBins) return 1.0;
+
+    weight = oo200_run21_shapeWeightArray_totnMIP[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  } // else if (mRefX == 7 && mParameterIndex == 0) { // O+O 200 GeV 2021
+
+  else if (mRefX == 6 && mParameterIndex == 1) { // d+Au 200 GeV 2021
+
+    if (iVzBinIndex < 0 || iVzBinIndex > dau200_run21_nVzBins) return 1.0;
+
+    weight = dau200_run21_shapeWeightArray_refMult[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  } // else if (mRefX == 6 && mParameterIndex == 1) { // d+Au 200 GeV 2021
 
   else {
     weight = 1.0;
@@ -1520,6 +1711,9 @@ Double_t StRefMultCorr::triggerWeight() const {
       // Trigger efficiency correction does not exist. Temporarily set weight to 1
       weight = 1.;
     } // else if (mRefX == 5 && mParameterIndex == 0)
+    else if ((mRefX == 6 || mRefX == 7) && (mParameterIndex == 0 || mParameterIndex == 1)) { // O+O and d+Au 200 GeV 2021 
+      weight = 1. + par0 * TMath::Exp(par1*mRefMult_corr + par2);
+    } // else if ((mRefX == 6 || mRefX == 7) && (mParameterIndex == 0 || mParameterIndex == 1)) { // O+O and d+Au 200 GeV 2021 
     else {
       weight = ( par0 +
                 par1 / (par2 * mRefMult_corr + par3) +
@@ -1735,16 +1929,25 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       }
     } // for ( Int_t iVz=0; iVz<auau17_run21_nVzBins; iVz++ )
   } // else if ( mParameterIndex == 44 )
-  /*
-  else if ( mRefX == 6 && mParameterIndex == 0 ) {  // d+Au 200 GeV 2021
+
+  else if ( (mRefX == 6 || mRefX == 7) && mParameterIndex == 0 ) {  // O+O 200 GeV 2021
+    for ( Int_t iVz=0; iVz<oo200_run21_nVzBins; iVz++ ) {
+      if ( oo200_run21_vzRangeLimits[iVz][0] <= mVz && mVz < oo200_run21_vzRangeLimits[iVz][1] ) {
+        iBinVz = iVz;
+        break;
+      }
+    } // for ( Int_t iVz=0; iVz<oo200_run21_nVzBins; iVz++ )
+  } // else if ( (mRefX == 6 || mRefX == 7) && mParameterIndex == 0 ) {  // O+O 200 GeV 2021
+
+  else if ( mRefX == 6 && mParameterIndex == 1 ) {  // d+Au 200 GeV 2021
     for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ ) {
       if ( dau200_run21_vzRangeLimits[iVz][0] <= mVz && mVz < dau200_run21_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }
     } // for ( Int_t iVz=0; iVz<dau200_run21_nVzBins; iVz++ )
-  } // else if ( mRefX == 6 && mParameterIndex == 0 )
-  */
+  } // else if ( mRefX == 6 && mParameterIndex == 1 ) {  // d+Au 200 GeV 2021
+
   else {
     iBinVz = -1;
   }
@@ -1798,7 +2001,8 @@ const Int_t StRefMultCorr::getRefX() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return 3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return 4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return 5;
-  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return 6;
+  else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return 6;
+  else if ( mName.CompareTo("totnmip",  TString::kIgnoreCase) == 0 ) return 7;
   else return 9999;
 }
 
@@ -1810,7 +2014,8 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else if ( mName.CompareTo("refmult3", TString::kIgnoreCase) == 0 ) return nID_ref3; 
   else if ( mName.CompareTo("refmult4", TString::kIgnoreCase) == 0 ) return nID_ref4;
   else if ( mName.CompareTo("fxtmult",  TString::kIgnoreCase) == 0 ) return nID_ref5; 
-  // else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return nID_ref6;
+  else if ( mName.CompareTo("refmult6", TString::kIgnoreCase) == 0 ) return nID_ref6;
+  else if ( mName.CompareTo("totnmip",  TString::kIgnoreCase) == 0 ) return nID_ref7;
   else return 9999;
 }
 
@@ -2041,4 +2246,19 @@ std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, cons
 Double_t StRefMultCorr::calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Double_t x1, 
                                           Double_t x2, Double_t x3, Double_t x4) const {
   return ( x0 + x1*(ntofmatch) + x2*pow(ntofmatch,2) + x3*pow(ntofmatch,3) + x4*pow(ntofmatch,4) );
+}
+ 
+//________________
+Bool_t StRefMultCorr::isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz, Double_t totnMIP) const {
+  if ((mRefX==6) || (mRefX==7)) {
+    // refMult6 and totnMIP require both refMult vs. nBTOFMatch and totnMIP vs. nBTOFMatch for pileup rejection
+    if (totnMIP < 0.) {
+      Error("StRefMultCorr::isPileUpEvent", "totnMIP<0");
+      return kTRUE;
+    } // if (totnMIP < 0.)
+    return !( passnTofMatchRefmultCut(refmult, ntofmatch, vz) && passnTofMatchTotnMIPCut(totnMIP, ntofmatch, vz) );
+  } // if ((mRefX==6) || (mRefX==7))
+  else { // other refMult
+    return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
+  }
 }
