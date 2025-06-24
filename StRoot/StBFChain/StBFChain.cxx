@@ -19,9 +19,6 @@
 #include "TTree.h"
 #include "TEnv.h"
 
-#include <map>
-#include <string>
-
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
