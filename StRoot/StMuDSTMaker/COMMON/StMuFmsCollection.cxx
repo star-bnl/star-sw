@@ -141,14 +141,18 @@ StMuFmsPoint* StMuFmsCollection::getPoint(int index) {
 }
 
 StMuFmsInfo* StMuFmsCollection::getInfo() {
-  if (!mInfo) return NULL;
-  return static_cast<StMuFmsInfo*>(mInfo->At(0));
+  if (!mInfo) return nullptr;  
+  if (mInfo->GetEntriesFast()>0) return static_cast<StMuFmsInfo*>(mInfo->At(0));
+  return nullptr;
 }
-
 
 Int_t StMuFmsCollection::fmsReconstructionFlag() {
-  return getInfo()->fmsReconstructionFlag();
+  StMuFmsInfo* info=getInfo();
+  if(info) return info->fmsReconstructionFlag();
+  return 0;
 }
+
 void StMuFmsCollection::setFmsReconstructionFlag(Int_t v){ 
-  getInfo()->setFmsReconstructionFlag(v);
+  StMuFmsInfo* info=getInfo();
+  if(info) info->setFmsReconstructionFlag(v);
 }
