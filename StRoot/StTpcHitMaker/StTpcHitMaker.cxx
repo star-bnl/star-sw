@@ -679,6 +679,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	  if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
 	  StTpcHit *tpcHit = CreateTpcHit(*c,sector,row);
+	  if (! tpcHit) continue;
 	  Int_t iok = hitCollection->addHit(tpcHit);
 	  assert(iok);
 	}
@@ -715,6 +716,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
       if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
       StTpcHit *tpcHit = CreateTpcHit(*cld,sector,row);
+      if (! tpcHit) continue;
       Int_t iok = hitCollection->addHit(tpcHit);
       assert(iok);
     }
@@ -731,6 +733,14 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 
   Float_t pad  = cluster.p;
   Float_t time = cluster.t;
+  if (pad <= 0 || time <= 0) {
+    static Int_t iBreak = 0;
+    if (Debug() || iBreak < 13) {
+      LOG_ERROR << " Illegal cluster at pad = " << pad << " timebucket = " << time  << " in Sector : row " << sector << " : " << row << endm;
+    }
+    iBreak++;
+    return 0;
+  }
   if (kReaderType == kLegacyTpx) time += 22; // remove Tonko's offset
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;

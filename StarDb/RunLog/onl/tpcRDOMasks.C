@@ -1,4 +1,6 @@
+#ifndef __CINT__
 #include "tables/St_tpcRDOMasks_Table.h"
+#endif
 
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcRDOMasks")) return 0;
