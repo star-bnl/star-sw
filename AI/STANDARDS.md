@@ -1,12 +1,12 @@
 # STAR Coding Standards (Summary)
 
-Supported languages: c++11, FORtran 77, python 2.7, perl 5, XML.
+Supported: c++11, FORtran 77, python 2.7, perl 5, XML.
 
-Follow best practices for each language unless overridden below. Formatting style is not mandated except for fixed-format languages (FORtran77, python). Unit tests may deviate as needed.
+Follow best practices unless overridden below. Formatting style not mandated except for fixed-format (FORtran77, python). Unit tests may deviate.
 
 ## File Naming [c++]
 * Headers: `.h`, Implementations: `.cxx`
-* Each header: one class/struct or closely related group.
+* One class/struct or related group per header.
 
 ## Class Naming [c++]
 * Classes start with `St`
@@ -15,10 +15,10 @@ Follow best practices for each language unless overridden below. Formatting styl
 ## Headers [c++]
 * Each implementation has a header.
 * Use include guards: `__HEADER_BASE_NAME_H__`
-* Define functions in implementation files, except short `inline` methods after class declaration.
+* Define functions in implementation files, except short `inline` after class.
 * Avoid inlining virtuals.
-* Use angle brackets for external includes, quotes for project headers.
-* Minimize includes; use forward declarations where possible.
+* Use angle brackets for external, quotes for project headers.
+* Minimize includes; use forward declarations.
 
 ## Namespaces [c++]
 * Avoid namespaces; use file/class naming to prevent collisions.
@@ -28,20 +28,20 @@ Follow best practices for each language unless overridden below. Formatting styl
 * Prefer brace initialization (except single-arg assignment) [c++]
 * Never use brace init with `auto` [c++]
 * No global variables [c++]; static class/namespace vars discouraged.
-* If globals are used, initialize statically.
+* If globals, initialize statically.
 
 ## Classes [c++]
 * Default constructor required.
 * Initialize all data members.
 * Don't call virtuals in ctors/dtors.
-* Implement or delete assignment/copy constructors (compiler defaults OK if no heap).
+* Implement or delete assignment/copy ctors (compiler defaults OK if no heap).
 * Use delegating/inheriting ctors to avoid duplication.
-* Destructor required; base class destructor must be virtual if public.
+* Destructor required; base destructor must be virtual if public.
 * Use struct only for POD.
 * Only public inheritance.
 * Mark overrides as `override` or `final`.
 * Prefer composition over inheritance.
-* Only one concrete base class; others must be pure interfaces.
+* Only one concrete base; others must be pure interfaces.
 * No concrete methods in pure interfaces.
 * Preserve operator semantics.
 * Explicitly use public/protected/private; list public first.
@@ -49,7 +49,7 @@ Follow best practices for each language unless overridden below. Formatting styl
 * Avoid `friend`.
 
 ## ROOT [c++]
-* Prefer C++ types over ROOT types, except for persistent classes.
+* Prefer C++ types over ROOT types, except persistent classes.
 * Prefer `<cmath>` over ROOT math.
 
 ## Introspection [c++]
