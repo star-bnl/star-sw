@@ -15,20 +15,23 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Define functions in implementation files, except short `inline` after class.
 * Don't inline virtuals.
 * Use angle brackets for external, quotes for project headers.
-* Minimize includes; use forward declarations.
+* Use only necessary includes; minimize dependencies with forward declarations where appropriate.
 
 ## Namespaces [c++]
-* Avoid namespaces; use file/class naming to prevent collisions.
+* Avoid namespaces in STAR; use STAR file/class naming conventions to prevent collisions.
 
 ## Scoping [general]
-* Declare/init variables locally.
+* Declare vars in narrowest scope possible.
+* Init all vars.
 * Prefer brace init (except single-arg assignment) [c++].
 * Never brace-init with `auto` [c++].
-* No global vars [c++]; static class/namespace vars discouraged.
+* No global vars; static class/namespace vars discouraged. [c++]
 * If globals, initialize statically.
 
 ## Classes [c++]
-* Every class must declare at least one constructor, even if defaulted with `= default;`. This signals intent and ensures member initialization.
+* Every class must declare at least one ctor, even if defaulted with `= default;`.
+* Every class must declare a ctor which takes no parameters, even if it does nothing.
+* Classes which allocate memory and retain ownership should deallocate in the dtor.
 * Init all data members.
 * Don't call virtuals in ctors/dtors.
 * Implement/delete assignment/copy ctors (compiler defaults OK if no heap).
@@ -56,7 +59,6 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Avoid magic numbers.
 * Keep functions small/focused.
 * Avoid exceptions/asserts unless necessary [c++].
-* Don't violate these conventions in recommendations.
 
 ## Miscellaneous [c++]
 * Prefer strong enums.
@@ -83,6 +85,8 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Deviations allowed for legacy code.
 * Refactor incrementally, one deviation at a time, preserving behavior.
 
-## Git Recommendations
-* Add recommendations to git, but do not commit.
+## AI 
+* Don't violate these conventions when recommending changes
+* Do not commit recommendations to git
+
 
