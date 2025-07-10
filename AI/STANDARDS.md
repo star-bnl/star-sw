@@ -13,7 +13,7 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Each implementation has a header.
 * Use include guards: `__HEADER_BASE_NAME_H__`.
 * Define functions in implementation files, except short `inline` after class.
-* Avoid inlining virtuals.
+* Don't inline virtuals.
 * Use angle brackets for external, quotes for project headers.
 * Minimize includes; use forward declarations.
 
@@ -21,15 +21,15 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Avoid namespaces; use file/class naming to prevent collisions.
 
 ## Scoping [general]
-* Declare/initialize variables locally.
-* Prefer brace initialization (except single-arg assignment) [c++].
-* Never use brace init with `auto` [c++].
-* No global variables [c++]; static class/namespace vars discouraged.
+* Declare/init variables locally.
+* Prefer brace init (except single-arg assignment) [c++].
+* Never brace-init with `auto` [c++].
+* No global vars [c++]; static class/namespace vars discouraged.
 * If globals, initialize statically.
 
 ## Classes [c++]
 * Require default ctor/dtor (base dtor virtual if public).
-* Initialize all data members.
+* Init all data members.
 * Don't call virtuals in ctors/dtors.
 * Implement/delete assignment/copy ctors (compiler defaults OK if no heap).
 * Use delegating/inheriting ctors to avoid duplication.
