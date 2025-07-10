@@ -4,13 +4,10 @@ Supported: c++11, FORTRAN 77, python 2.7, perl 5, XML.
 
 Follow best practices unless overridden below. Formatting style not mandated except for fixed-format (FORTRAN77, python). Unit tests may deviate.
 
-## File Naming [c++]
+## File/Class Naming [c++]
 * `.h` for headers, `.cxx` for implementations.
 * One class/struct or related group per header.
-
-## Class Naming [c++]
-* Classes start with `St`.
-* Prefer CamelCase; legacy snake_case allowed.
+* Classes start with `St`, prefer CamelCase (legacy snake_case allowed).
 
 ## Headers [c++]
 * Each implementation has a header.
@@ -24,17 +21,17 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Avoid namespaces; use file/class naming to prevent collisions.
 
 ## Scoping [general]
-* Declare and initialize variables locally.
+* Declare/initialize variables locally.
 * Prefer brace initialization (except single-arg assignment) [c++].
 * Never use brace init with `auto` [c++].
 * No global variables [c++]; static class/namespace vars discouraged.
 * If globals, initialize statically.
 
 ## Classes [c++]
-* Require default constructor and destructor (base destructor virtual if public).
+* Require default ctor/dtor (base dtor virtual if public).
 * Initialize all data members.
 * Don't call virtuals in ctors/dtors.
-* Implement or delete assignment/copy ctors (compiler defaults OK if no heap).
+* Implement/delete assignment/copy ctors (compiler defaults OK if no heap).
 * Use delegating/inheriting ctors to avoid duplication.
 * Use struct only for POD.
 * Only public inheritance.
