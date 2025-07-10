@@ -28,7 +28,7 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * If globals, initialize statically.
 
 ## Classes [c++]
-* Require default ctor/dtor (base dtor virtual if public).
+* Every class must declare at least one constructor, even if defaulted with `= default;`. This signals intent and ensures member initialization.
 * Init all data members.
 * Don't call virtuals in ctors/dtors.
 * Implement/delete assignment/copy ctors (compiler defaults OK if no heap).
