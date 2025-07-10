@@ -63,7 +63,7 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 
 ## Miscellaneous [c++]
 * Prefer strong enums.
-* Lambdas: avoid for frequent calls or reference capture.
+* Avoid lambdas for frequent calls or reference capture.
 * Use `const` for logically constant objects; design const-correct interfaces.
 * Use `constexpr` for true constants or constant init.
 * Avoid smart pointers (ROOT ownership).
