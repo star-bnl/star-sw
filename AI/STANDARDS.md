@@ -1,20 +1,20 @@
 # STAR Coding Standards (Summary)
 
-Supported: c++11, FORtran 77, python 2.7, perl 5, XML.
+Supported: c++11, FORTRAN 77, python 2.7, perl 5, XML.
 
-Follow best practices unless overridden below. Formatting style not mandated except for fixed-format (FORtran77, python). Unit tests may deviate.
+Follow best practices unless overridden below. Formatting style not mandated except for fixed-format (FORTRAN77, python). Unit tests may deviate.
 
 ## File Naming [c++]
-* Headers: `.h`, Implementations: `.cxx`
+* `.h` for headers, `.cxx` for implementations.
 * One class/struct or related group per header.
 
 ## Class Naming [c++]
-* Classes start with `St`
+* Classes start with `St`.
 * Prefer CamelCase; legacy snake_case allowed.
 
 ## Headers [c++]
 * Each implementation has a header.
-* Use include guards: `__HEADER_BASE_NAME_H__`
+* Use include guards: `__HEADER_BASE_NAME_H__`.
 * Define functions in implementation files, except short `inline` after class.
 * Avoid inlining virtuals.
 * Use angle brackets for external, quotes for project headers.
@@ -24,25 +24,23 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Avoid namespaces; use file/class naming to prevent collisions.
 
 ## Scoping [general]
-* Declare variables locally and initialize.
-* Prefer brace initialization (except single-arg assignment) [c++]
-* Never use brace init with `auto` [c++]
+* Declare and initialize variables locally.
+* Prefer brace initialization (except single-arg assignment) [c++].
+* Never use brace init with `auto` [c++].
 * No global variables [c++]; static class/namespace vars discouraged.
 * If globals, initialize statically.
 
 ## Classes [c++]
-* Default constructor required.
+* Require default constructor and destructor (base destructor virtual if public).
 * Initialize all data members.
 * Don't call virtuals in ctors/dtors.
 * Implement or delete assignment/copy ctors (compiler defaults OK if no heap).
 * Use delegating/inheriting ctors to avoid duplication.
-* Destructor required; base destructor must be virtual if public.
 * Use struct only for POD.
 * Only public inheritance.
 * Mark overrides as `override` or `final`.
 * Prefer composition over inheritance.
-* Only one concrete base; others must be pure interfaces.
-* No concrete methods in pure interfaces.
+* Only one concrete base; others must be pure interfaces (no concrete methods).
 * Preserve operator semantics.
 * Explicitly use public/protected/private; list public first.
 * Hide internals; don't return handles to internal data.
