@@ -226,8 +226,8 @@ private:
   Int_t mTruncatePedSmear; /// Nsigma where ped smearing is truncated                           
 
   // Left unimplemented
-  StEEmcSlowMaker(const StEEmcSlowMaker &);
-  StEEmcSlowMaker &operator=(const StEEmcSlowMaker &);
+  StEEmcSlowMaker2(const StEEmcSlowMaker2 &);
+  StEEmcSlowMaker2 &operator=(const StEEmcSlowMaker2 &);
   
 public: 
 
