@@ -256,7 +256,7 @@ public:
   /// Smear the pedestal with sigma from DB
   void setSmearPed(Bool_t s = true) {mSmearPed = s;}
   /// Drop bad channels marked as "fail" in DB
-  void setDropBad(Bool_t d = true) {mDropBad = true;}
+  void setDropBad(Bool_t d = true) {mDropBad = d;}
 
   /// Overwrite the muDst values
   void setOverwrite(Bool_t o = true) {mOverwrite = o;}
