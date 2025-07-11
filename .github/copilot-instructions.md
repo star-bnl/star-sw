@@ -86,8 +86,9 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Deviations allowed for legacy code.
 * Refactor incrementally, one deviation at a time, preserving behavior.
 
-## Instructions for AI Code Reviews
+## Instructions Code Reviews
 * Do not violate these conventions when recommending changes
+* Review the entire set of files in the pull request, not just the proposed changes
 
 
 
