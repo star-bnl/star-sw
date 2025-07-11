@@ -28,6 +28,7 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * No global vars; static class/namespace vars discouraged. [c++]
 * If globals, initialize statically.
 
+
 ## Classes [c++]
 * Every class must declare at least one ctor, even if defaulted with `= default;`.
 * Every class must declare a ctor which takes no parameters, even if it does nothing.
@@ -85,8 +86,8 @@ Follow best practices unless overridden below. Formatting style not mandated exc
 * Deviations allowed for legacy code.
 * Refactor incrementally, one deviation at a time, preserving behavior.
 
-## AI 
-* Don't violate these conventions when recommending changes
-* Do not commit recommendations to git
+## Instructions for AI Code Reviews
+* Do not violate these conventions when recommending changes
+
 
 
