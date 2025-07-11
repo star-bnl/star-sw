@@ -322,7 +322,7 @@ public:
     return cvs;
   }
 
-  ClassDef(StEEmcSlowMaker, 3)
+  ClassDef(StEEmcSlowMaker2, 3)
 };
 
 #endif
