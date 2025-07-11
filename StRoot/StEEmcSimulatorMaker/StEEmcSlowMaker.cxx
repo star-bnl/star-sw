@@ -16,8 +16,6 @@
 #include "StEEmcFastMaker.h"
 #include "StEEmcSlowMaker.h"
 
-ClassImp(StEEmcSlowMaker)
-
 //________________________________________________
 StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
 : StMaker(name) {

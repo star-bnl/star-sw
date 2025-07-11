@@ -66,10 +66,8 @@ www.star.bnl.gov/STAR/eemc -->How To
 #ifndef STAR_StEEmcFastMaker
 #define STAR_StEEmcFastMaker
 
-
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
+
 class EEeventDst;
 class StEvent;
 class EEmcMCData;

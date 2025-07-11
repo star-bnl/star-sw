@@ -121,9 +121,7 @@
  * 
  */                                                                      
 
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
 
 class TObjArray;
 class StEEmcDb;

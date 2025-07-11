@@ -17,8 +17,6 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 
-ClassImp(StEEmcFastMaker)
-
 //--------------------------------------------
 void 
 StEEmcFastMaker::Clear(Option_t *) {
