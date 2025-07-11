@@ -232,7 +232,7 @@ private:
 public: 
 
   /// Class constructor
-  StEEmcSlowMaker(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
+  StEEmcSlowMaker2(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
   /// Class destructor
   virtual ~StEEmcSlowMaker2();
 
