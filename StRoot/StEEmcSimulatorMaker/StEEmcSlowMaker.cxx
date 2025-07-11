@@ -2,6 +2,8 @@
 // 
 // $Id: StEEmcSlowMaker.cxx,v 2.11 2010/09/07 22:24:52 stevens4 Exp $
 
+#include "StEEmcSlowMaker.h"
+
 #include <TFile.h>
 #include <TH2.h>
 #include <TRandom.h>
@@ -14,7 +16,6 @@
 #include "StEEmcUtil/database/StEEmcDb.h"
 
 #include "StEEmcFastMaker.h"
-#include "StEEmcSlowMaker.h"
 
 //________________________________________________
 StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)

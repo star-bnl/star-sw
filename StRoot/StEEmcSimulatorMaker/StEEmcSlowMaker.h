@@ -118,7 +118,9 @@
  * simulator in an analysis chain using the event.root files from the simulation
  * -# Pedestal smearing is truncated at N sigma (default is N=3)
  * -# Set thicknesses of pre-shower layers to 4.75 to match fixed geometry
- * 
+ *
+ * Minor code cleanups...
+ *
  */                                                                      
 
 #include "StMaker.h"

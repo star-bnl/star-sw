@@ -61,6 +61,8 @@ usage in bfc.C
 Example how to read back E-EMC data from StEvent:
 www.star.bnl.gov/STAR/eemc -->How To
 
+Minor code cleanups ...
+
 */
 
 #ifndef STAR_StEEmcFastMaker
