@@ -234,7 +234,7 @@ public:
   /// Class constructor
   StEEmcSlowMaker(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
   /// Class destructor
-  virtual ~StEEmcSlowMaker();
+  virtual ~StEEmcSlowMaker2();
 
   /// Initialization
   virtual Int_t Init();
