@@ -80,7 +80,7 @@ protected:
 
     std::vector<UShort_t> mFwdTrackMatchIndex;//! do not save to disk (in memory only)
 
-    ClassDef(StPicoFcsCluster, 2)
+    ClassDef(StPicoFcsCluster, 1)
 };
 
 #endif

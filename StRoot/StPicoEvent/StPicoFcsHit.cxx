@@ -1,11 +1,4 @@
 #include "StPicoFcsHit.h"
-#include <vector>
-#include "StPicoMessMgr.h"
-
-// ROOT headers
-#include "TMath.h"
-
-ClassImp(StPicoFcsHit)
 
 StPicoFcsHit::StPicoFcsHit() : TObject() {
 }

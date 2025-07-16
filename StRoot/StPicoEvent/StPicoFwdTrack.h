@@ -12,7 +12,6 @@
 #include <TObject.h>
 #include <vector>
 #include "TVector3.h"
-#include "TRefArray.h"
 #include <climits>
 
 
@@ -33,7 +32,7 @@ public:
     /// Return unique Id of the track
     Int_t   id() const              { return mId; }
     /// Return chi2 of the track
-    Float_t chi2() const            { return mChi2 / 1000.f; }
+    Float_t chi2() const            { return mChi2; }
     /// Return p-value of the track
     Float_t pVal() const            { return mPVal / 10000.f; }
     /// Return momentum (GeV/c)
@@ -94,7 +93,7 @@ public:
     void setStatus( UChar_t status ) { mStatus = status;}
     void setNumberOfSeedPoints( Int_t lNumberOfSeedPoints ) { mNumberOfSeedPoints = (UChar_t)lNumberOfSeedPoints;}
     void setNumberOfFitPoints( Int_t lNumberOfFitPoints ) { mNumberOfFitPoints = (Char_t)lNumberOfFitPoints;}
-    void setChi2(Float_t chi2);
+    void setChi2(Float_t chi2) { mChi2 = chi2; }
     void setPVal(Float_t pval);
     void addEcalCluster( UChar_t index ) { mEcalMatchIndex.push_back(index); }
     void addHcalCluster( UChar_t index ) { mHcalMatchIndex.push_back(index); }
@@ -162,7 +161,7 @@ protected:
     Short_t mHCalY;
     Short_t mHCalZ;
 
-    ClassDef(StPicoFwdTrack,5)
+    ClassDef(StPicoFwdTrack,1)
 
 };
 

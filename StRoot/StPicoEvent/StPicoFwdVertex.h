@@ -12,7 +12,6 @@
 #include <TObject.h>
 #include <vector>
 #include "TVector3.h"
-#include "TRefArray.h"
 #include <climits>
 
 class StPicoFwdVertex : public TObject {

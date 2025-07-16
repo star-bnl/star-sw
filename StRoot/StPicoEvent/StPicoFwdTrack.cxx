@@ -62,11 +62,6 @@ void StPicoFwdTrack::Print(const Char_t* option __attribute__((unused))) const {
 }
 
 //_________________
-void StPicoFwdTrack::setChi2(Float_t chi2) {
-  mChi2 = ( (chi2 * 1000.) > std::numeric_limits<unsigned short>::max() ?
-	    std::numeric_limits<unsigned short>::max() :
-	    (UShort_t)( TMath::Nint( chi2 * 1000. ) ) );
-}
 void StPicoFwdTrack::setPVal(Float_t pval) {
   mPVal = ( (pval * 10000.f) > std::numeric_limits<unsigned short>::max() ?
 	    std::numeric_limits<unsigned short>::max() :

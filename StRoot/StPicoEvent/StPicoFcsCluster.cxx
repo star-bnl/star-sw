@@ -1,11 +1,4 @@
 #include "StPicoFcsCluster.h"
-#include <vector>
-#include "StPicoMessMgr.h"
-
-// ROOT headers
-#include "TMath.h"
-
-ClassImp(StPicoFcsCluster)
 
 StPicoFcsCluster::StPicoFcsCluster() : TObject() {
     /* No Op*/
