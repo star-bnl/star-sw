@@ -36,12 +36,12 @@ public:
     void setFourMomentum(TLorentzVector p4) { mFourMomentumX = p4.X(); mFourMomentumY = p4.Y(); mFourMomentumZ = p4.Z(); mFourMomentumT = p4.T(); }
     
 protected:
-    UShort_t mDetectorId=0;      // DetectorId
-    UShort_t mId=0;              // Id of the hit winthin a detectorId
-    Float_t mFourMomentumX=0.0;  // Four momentum component X
-    Float_t mFourMomentumY=0.0;  // Four momentum component Y
-    Float_t mFourMomentumZ=0.0;  // Four momentum component Z
-    Float_t mFourMomentumT=0.0;  // Four momentum component T
+    UShort_t mDetectorId;      // DetectorId
+    UShort_t mId;              // Id of the hit winthin a detectorId
+    Float_t mFourMomentumX;  // Four momentum component X
+    Float_t mFourMomentumY;  // Four momentum component Y
+    Float_t mFourMomentumZ;  // Four momentum component Z
+    Float_t mFourMomentumT;  // Four momentum component T
 
     ClassDef(StPicoFcsHit, 1)
 };

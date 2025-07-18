@@ -60,23 +60,23 @@ public:
 
 
 protected:
-    UShort_t mIndex=0;         //! Eventwise cluster Index (unique across all detectors)
+    UShort_t mIndex;         //! Eventwise cluster Index (unique across all detectors)
     // pack these on disk
-    UShort_t mId=0;             // Eventwise cluster ID
-    UShort_t mDetectorId=0;   // Detector starts from 1
-    Int_t mCategory=0;        // Category of cluster (see StMuFcsClusterCategory)
-    UShort_t mNTowers=0;         // Number of non-zero-energy tower hits in the cluster
-    Float_t mX=0.0;  // Mean x ("center of gravity") in local grid coordinate (1st moment)
-    Float_t mY=0.0;  // Mean y ("center of gravity") in local grid coordinate (1st moment)
-    Float_t mSigmaMin=0.0;        // Minimum 2nd moment
-    Float_t mSigmaMax=0.0;        // Maximum 2nd moment (along major axis)
-    Float_t mTheta=0.0;           //Angle in x-y plane that defines the direction of least-2nd-sigma
-    Float_t mChi2Ndf1Photon=0.0;  // &chi;<sup>2</sup> / ndf for 1-photon fit
-    Float_t mChi2Ndf2Photon=0.0;  // &chi;<sup>2</sup> / ndf for 2-photon fit
-    Float_t mFourMomentumX=0.0;
-    Float_t mFourMomentumY=0.0;
-    Float_t mFourMomentumZ=0.0;
-    Float_t mFourMomentumT=0.0;
+    UShort_t mId;             // Eventwise cluster ID
+    UShort_t mDetectorId;   // Detector starts from 1
+    Int_t mCategory;        // Category of cluster (see StMuFcsClusterCategory)
+    UShort_t mNTowers;         // Number of non-zero-energy tower hits in the cluster
+    Float_t mX;  // Mean x ("center of gravity") in local grid coordinate (1st moment)
+    Float_t mY;  // Mean y ("center of gravity") in local grid coordinate (1st moment)
+    Float_t mSigmaMin;        // Minimum 2nd moment
+    Float_t mSigmaMax;        // Maximum 2nd moment (along major axis)
+    Float_t mTheta;           //Angle in x-y plane that defines the direction of least-2nd-sigma
+    Float_t mChi2Ndf1Photon;  // &chi;<sup>2</sup> / ndf for 1-photon fit
+    Float_t mChi2Ndf2Photon;  // &chi;<sup>2</sup> / ndf for 2-photon fit
+    Float_t mFourMomentumX;
+    Float_t mFourMomentumY;
+    Float_t mFourMomentumZ;
+    Float_t mFourMomentumT;
 
     std::vector<UShort_t> mFwdTrackMatchIndex;//! do not save to disk (in memory only)
 
