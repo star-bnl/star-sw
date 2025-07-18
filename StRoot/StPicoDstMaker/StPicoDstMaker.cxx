@@ -1037,7 +1037,10 @@ void StPicoDstMaker::fillTracks() {
   // don't use StMuTrack::primary(), it returns primary tracks associated with
   // all vertices
   std::unordered_map<unsigned int, unsigned int> index2Primary;
-
+  
+  if (mMuDst->primaryTracks() == nullptr) {
+    return;
+  }
   // Retrieve number of primary tracks
   Int_t nPrimarys = mMuDst->numberOfPrimaryTracks();
 
@@ -1805,14 +1808,15 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setFillId( ev->runInfo().beamFillNumber( blue ) );
   picoEvent->setBField( ev->magneticField() );
   picoEvent->setTime( ev->eventInfo().time() );
-
   // Set primary vertex information
-  picoEvent->setPrimaryVertexPosition( ev->primaryVertexPosition().x(),
-				       ev->primaryVertexPosition().y(),
-				       ev->primaryVertexPosition().z() );
-  picoEvent->setPrimaryVertexPositionError( ev->primaryVertexErrors().x(),
-					    ev->primaryVertexErrors().y(),
-					    ev->primaryVertexErrors().z() );
+  if ( mMuDst->numberOfPrimaryVertices() > 0 ) {
+    picoEvent->setPrimaryVertexPosition( ev->primaryVertexPosition().x(),
+                ev->primaryVertexPosition().y(),
+                ev->primaryVertexPosition().z() );
+    picoEvent->setPrimaryVertexPositionError( ev->primaryVertexErrors().x(),
+                ev->primaryVertexErrors().y(),
+                ev->primaryVertexErrors().z() );
+  }
 
   if( StMuPrimaryVertex *pv = mMuDst->primaryVertex() ) {
     picoEvent->setPrimaryVertexRanking( pv->ranking() );
@@ -1852,7 +1856,11 @@ void StPicoDstMaker::fillEvent() {
 
   picoEvent->setGRefMult( ev->grefmult() );
   picoEvent->setNumberOfGlobalTracks( mMuDst->numberOfGlobalTracks() );
-  picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
+  if (mMuDst->numberOfPrimaryVertices() > 0){ //calling mMudst->numberOfPrimaryTracks() will crash if there are no primary vertices
+    picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
+  } else {
+    picoEvent->setNumberOfPrimaryTracks( 0 );
+  }
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
   picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
   StMuETofHeader *header = mMuDst->etofHeader();
