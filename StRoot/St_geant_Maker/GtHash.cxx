@@ -1,6 +1,8 @@
 #include "TMath.h"
 #include "GtHash.h"
 
+ClassImp(GtHash)
+
 class GtCradle : public TObject 
 {
 public:

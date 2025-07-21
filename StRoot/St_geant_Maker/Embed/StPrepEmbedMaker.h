@@ -1,68 +1,20 @@
-/*!
- * \class  StPrepEmbedMaker
- * \brief  
- * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
- * \date   May 2007
+/**
+ * @class  StPrepEmbedMaker
+ * @brief  Prepares the St_geant_Maker for embedding simulations.
+ * @author A. Rose (LBL), Y. Fisyak (BNL), L. Barnby (U. Birmingham)
+ * @date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $
+ * This maker configures the St_geant_Maker for running simulations embedded
+ * into real data events. It ensures that the simulation environment matches
+ * the real data by setting parameters such as the primary vertex position,
+ * magnetic field, and detector geometry on an event-by-event basis, using
+ * information from the corresponding real data event's tags.
  *
- *
- * -------------------------------------------------------------------------
- * $Log: StPrepEmbedMaker.h,v $
- * Revision 1.9  2014/08/06 11:43:55  jeromel
- * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
- *
- * Revision 1.8  2012/06/03 06:34:39  zhux
- * Added a switch to cut on the ranking of primary vertex
- *
- * Revision 1.7  2012/05/13 06:36:59  zhux
- * Added switch to choose between the two kinematic variables: rapidty or pseudo-rapdity
- *
- * Revision 1.6  2012/04/23 23:52:54  zhux
- * Added a switch to cut on |VpdVz-Vz|
- *
- * Revision 1.5  2011/12/05 15:49:05  zhux
- * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
- * see tickets 2097 for details.
- *
- * Revision 1.4  2010/11/30 23:32:18  hmasui
- * Add fz file and a switch to enable writing fz file
- *
- * Revision 1.3  2010/11/07 23:28:33  hmasui
- * Added transverse vertex cut
- *
- * Revision 1.2  2010/05/26 03:22:52  hmasui
- * Set rapidity +/-10 in gkine/phasespace for spectrum option in order to avoid acceptance cuts
- *
- * Revision 1.1  2010/04/05 20:18:55  jeromel
- * Moved from one level up
- *
- * Revision 1.7  2010/04/02 20:14:50  didenko
- * StPrepEmbedMaker for Hiroshi
- *
- * Revision 1.6  2010/02/09 01:08:38  andrewar
- * Added default value for embedding mode for backward compatibility.
- *
- * Revision 1.5  2010/02/05 23:01:19  andrewar
- * Update with spectra embedding mode.
- *
- * Revision 1.4  2009/07/01 23:21:03  andrewar
- * Updated with Strangeness embedding code options, taken from Xianglei's
- * code, Feb 09.
- *
- * Revision 1.3  2008/08/15 15:10:41  lbarnby
- * Flag to skip embedding events without primary vertex with setter (default is to skip)
- *
- * Revision 1.2  2007/08/29 23:00:14  andrewar
- * Added calls for embedding particle parameters, Maker methods
- *
- * Revision 1.1  2007/07/12 20:34:35  fisyak
- * Add StPrepEmbedMaker
- *
- *
- * -------------------------------------------------------------------------
+ * This maker must be run before St_geant_Maker in the chain to ensure the
+ * simulation is correctly configured for each event. It provides options to
+ * control particle kinematics (pT, eta, phi), particle type, multiplicity,
+ * and event selection criteria based on triggers or vertex properties.
  */
-
 #ifndef StPrepEmbedMaker_hh     
 #define StPrepEmbedMaker_hh
 
@@ -83,10 +35,10 @@ class StPrepEmbedMaker : public StMaker {
   StPrepEmbedMaker(const Char_t *name="PrepEmbed");     // constructor
   ~StPrepEmbedMaker();                                 // destructor
   
-  Int_t  Init();                      // called once at the beginning of your job
-  Int_t  Make();                      // invoked for every event
-  Int_t  Finish();
-  Int_t  InitRun(const int runnum);
+  virtual Int_t  Init();                      // called once at the beginning of your job
+  virtual Int_t  Make();                      // invoked for every event
+  virtual Int_t  Finish();
+  virtual Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
@@ -104,7 +56,7 @@ class StPrepEmbedMaker : public StMaker {
   ///  NOTE: type is case insensitive, FlatPt, flatpt, FLATPT work
   void SetOpt(const Double_t ptlow, const Double_t pthigh,
 	      const Double_t etalow, const Double_t etahigh, const Double_t philow,
-	      const Double_t phihigh, const TString type="FlatPt");
+	      const Double_t phihigh, const char* type="FlatPt");
   void SetTemp(const double t);
   void SetTagFile(const Char_t *file) ;
   void SetSkipMode(const Bool_t flag=kTRUE) ;
