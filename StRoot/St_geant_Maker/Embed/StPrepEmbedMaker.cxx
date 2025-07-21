@@ -627,7 +627,7 @@ void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult)
 //____________________________________________________________________________________________________
 void StPrepEmbedMaker::SetOpt(const Double_t ptlow, const Double_t pthigh,
 			      const Double_t etalow, const Double_t etahigh, const Double_t philow,
-			      const Double_t phihigh, const TString type) 
+			      const Double_t phihigh, const char* type) 
 {
   mSettings->ptlow=ptlow;   mSettings->pthigh=pthigh; 
   mSettings->etalow=etalow; mSettings->etahigh=etahigh;
@@ -636,7 +636,7 @@ void StPrepEmbedMaker::SetOpt(const Double_t ptlow, const Double_t pthigh,
   LOG_INFO << "StPrepEmbedMaker::SetOpt ptlow = " << mSettings->ptlow << " pthigh = " << mSettings->pthigh
 	   << " etalow = " << mSettings->etalow << " etahigh = " << mSettings->etahigh
 	   << " philow = " << mSettings->philow << " phihigh = " << mSettings->phihigh
-	   <<" Mode: "<< type.Data() << endm;
+	   <<" Mode: "<< type << endm;
 }
 
 //____________________________________________________________________________________________________

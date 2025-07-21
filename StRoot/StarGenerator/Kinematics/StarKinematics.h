@@ -142,7 +142,9 @@ class StarKinematics : public StarGenerator
   void Clear( const Option_t *opts="" ){ /* nada */ };
 
   /// Initialize generator
-  Int_t Init(){ return kStOK; }
+  Int_t Init();
+
+  Int_t Make();
 
  private:
  protected:

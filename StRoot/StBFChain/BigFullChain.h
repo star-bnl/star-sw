@@ -25,6 +25,14 @@ ________________________________________________________________________________
  */
 #endif
 
+#include <RVersion.h>
+
+//#if ROOT_VERSION_CODE>=ROOT_VERSION(6,24,0)  // 399366
+//#define LIBVMC "libVMCLibrary.so"
+//#else
+//#define LIBVMC "libVMC.so"
+//#endif
+
 #define STAR_CHAIN_OBSOLETE "WARNING *** Option is OBSOLETE ***"
 
 //#define __NoStrangeMuDst__
@@ -1165,6 +1173,7 @@ Bfc_st BFC[] = { // standard chains
   {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+  {"Geant4Out"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu"        ,""  ,"","" ,"","","Simulated Data, force to use Db time stamp from used geometry",kFALSE},
   {"HitsBranch"  ,""  ,"",""  ,"","","take out points from dst branch and put them into HitsBranch",kFALSE},
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
@@ -1269,7 +1278,12 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
+#if ROOT_VERSION_CODE>=399366
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMCLibrary.so,libgeant321.so", "VMC geant3",kFALSE},
+#else
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMC.so,libgeant321.so", "VMC geant3",kFALSE},
+#endif
+
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
@@ -1327,28 +1341,50 @@ Bfc_st BFC[] = { // standard chains
 
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
+
+  {"geantTables","","","geomT,gen_T,sim_T","","geometry,Geom,St_db_Maker,St_g2t",    "Geant tables",kFALSE},
+
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
   {"flux"        ,"","","simu"                                           ,"","flux","Load flux lib",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+#if ROOT_VERSION_CODE>=399366
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMCLibrary.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
+#else
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
+#endif
+  {"stargen:stubs",  "", "","stargen", "", "StarGeneratorStubs.so", "Dummy starsim callbacks", false },
+  {"stargen:mk",  "", "","stargen", "StarPrimaryMaker", "",      "Setup the primary event generator maker", false },
+  {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
+  {"kinematics:mk"  ,"","","stargen:mk,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+
+
+  {"fastjet"     ,"","",""       , "", "libfastjet.so",          "Load fast jet reconstruction algo", false},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"GEANT4 Libs ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 
-  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  //  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  {"g4interfaces","", "", "",                     "", "libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
   {"g4physics",   "", "", "",                     "", "libG4materials.so,libG4graphics_reps.so,libG4geometry.so,libG4particles.so,libG4track.so,libG4zlib.so,libG4digits_hits.so,libG4processes.so,libG4tracking.so,libG4event.so,libG4run.so,libG4physicslists.so", "Load G4",false},
   {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
   {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
+#if ROOT_VERSION_CODE>=399366
+  {"geant4vmc",   "","", "geant4", "",                    "libVMCLibrary.so,libgeant4vmc.so", "Load G4 VMC libs", false},
+#else
+  {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
+#endif
+  {"geant4mk",    "","", "stargen,geant4vmc,geant3vmc,geant4out",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
 
+  {"geant4mk:mk",    "","", "geant4mk",  "StGeant4Maker", "", "Load G4 VMC libs", false},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},

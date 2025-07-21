@@ -46,10 +46,35 @@ StarKinematics::StarKinematics( const Char_t *name ) : StarGenerator(name)
 { 
   mEvent = new StarGenEvent("kine"); gEvent = mEvent;
   mUser  = new StarGenEvent("user"); gUser  = mUser;
+  SetAttr("type","nada"); // nothing by default
+  SetAttr("ntrack",0);
+  SetAttr("ptlow",0.0);
+  SetAttr("pthigh",500.0);
+  SetAttr("ylow",-10.0);
+  SetAttr("yhigh",+10.0);
+  SetAttr("philow",0.0);
+  SetAttr("phihigh",TMath::TwoPi());
 }
 // ----------------------------------------------------------------------------
 Int_t StarKinematics::PreGenerate()
 {
+
+  std::string type_ = SAttr("type");
+  int ntrack = IAttr("ntrack");
+  std::string particles = SAttr("particles");
+  double ptlow   = DAttr("ptlow");
+  double pthigh  = DAttr("pthigh");
+  double ylow    = DAttr("ylow"); 
+  double yhigh   = DAttr("yhigh");
+  double philow  = DAttr("philow");
+  double phihigh = DAttr("phihigh");
+
+  // Generate a flat PT distribution 
+  if ( type_ == "FlatPT" || type_ == "flatpt" ) {
+    Kine( ntrack, particles.c_str(), ptlow, pthigh, ylow, yhigh, philow, phihigh );
+  };
+
+
   return kStOK;
 }
 // ----------------------------------------------------------------------------
@@ -320,3 +345,13 @@ void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double 
     }
 }
 // ----------------------------------------------------------------------------
+Int_t StarKinematics::Make() {
+
+  return kStOK;
+
+};
+
+
+Int_t StarKinematics::Init() {
+  return kStOK;
+};
