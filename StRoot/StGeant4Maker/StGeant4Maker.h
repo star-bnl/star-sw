@@ -29,6 +29,14 @@ class St_g2t_track;
 class StEvtHddr;
 
 //______________________________________________________________________________________
+/**
+ * @class StarMagFieldAdaptor
+ * @brief An adaptor class to interface STAR's magnetic field with the VMC.
+ *
+ * This class inherits from TVirtualMagField and implements the `Field` method
+ * by calling the singleton `StarMagField::Instance()->BField()`. This allows
+ * the VMC framework to use the standard STAR magnetic field map.
+ */
 class StarMagFieldAdaptor : public TVirtualMagField {
 public:
   void Field( const double *x, double *B )
@@ -37,6 +45,16 @@ public:
   }
 };
 //______________________________________________________________________________________
+/**
+ * @class StarVMCApplication
+ * @brief The main user application for the Virtual Monte Carlo (VMC) simulation.
+ *
+ * This class orchestrates the simulation process by implementing the hooks
+ * provided by the TVirtualMCApplication interface. It manages the construction
+ * of geometry and sensitive detectors, generation of primary particles, and
+ * defines user actions for various stages of event and track processing.
+ * Most of the heavy lifting is delegated to the StGeant4Maker instance.
+ */
 class StarVMCApplication : public TVirtualMCApplication {
 public:
   StarVMCApplication( const char *name = "starsim", const char *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX, std::string engine="geant4", StMCParticleStack* stack = 0 );
@@ -111,6 +129,17 @@ protected:
 
 };
 //______________________________________________________________________________________
+/**
+ * @class StGeant4Maker
+ * @brief The primary STAR maker for running Geant4-based simulations.
+ *
+ * This class serves as the main entry point and controller for the Geant4
+ * simulation within the STAR software framework. It handles initialization
+ * of the geometry, physics engines (Geant4, Geant3, or a mix), and sensitive
+ * detectors. It processes events by calling the VMC, manages the particle
+ * stack, and fills the output g2t tables with simulation results (hits and
+ * truth information).
+ */
 class StGeant4Maker : public StMaker {
 
 public:

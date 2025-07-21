@@ -12,6 +12,16 @@
 #include <StMessMgr.h>
 
 // Implemented for FpdmGeo4
+/**
+ * @class AgMLFmsVolumeId
+ * @brief A volume identifier for the Forward Meson Spectrometer (FMS).
+ *
+ * This class calculates a unique integer identifier for each sensitive cell
+ * in the FMS, including its preshower and postshower detectors. The ID is
+ * constructed based on the detector side (east/west), north/south-top/bottom
+ * configuration, and cell number, with complex logic to map geometry numbers
+ * to the final channel ID.
+ */
 class AgMLFmsVolumeId : public AgMLVolumeId {
 
 public:

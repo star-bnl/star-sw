@@ -4,6 +4,13 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLWcaVolumeId
+ * @brief A volume identifier for the Wcal (forward hadron calorimeter).
+ *
+ * This class provides a unique integer identifier for each sensitive tower
+ * in the Wcal detector, based on its module and tower number.
+ */
 class AgMLWcaVolumeId : public AgMLVolumeId {
 public:
   

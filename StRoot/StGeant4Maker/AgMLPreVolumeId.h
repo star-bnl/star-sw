@@ -4,6 +4,13 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLPreVolumeId
+ * @brief A volume identifier for a preshower detector.
+ *
+ * This class provides a unique integer identifier for each sensitive slat
+ * in a preshower detector, based on its layer and slat number.
+ */
 class AgMLPreVolumeId : public AgMLVolumeId {
 public:
   

@@ -3,6 +3,14 @@
 
 #include "TVirtualMCApplication.h"
 
+/**
+ * @class StGeant4Application
+ * @brief An empty user Monte-Carlo application class.
+ *
+ * This class inherits from TVirtualMCApplication but its implementation is empty.
+ * All functionality is provided by the StGeant4Maker. This class is required by
+ * the TVirtualMC interface.
+ */
 class StGeant4Application : public TVirtualMCApplication {
 public:
   StGeant4Application( const char* name="g4application", const char* title="Geant4 Application" );

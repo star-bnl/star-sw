@@ -3,6 +3,14 @@
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 
+/**
+ * @class AgMLEtofVolumeId
+ * @brief A volume identifier for the Endcap Time-of-Flight (ETOF) detector.
+ *
+ * This class calculates a unique integer identifier for each sensitive cell
+ * in the ETOF detector. The ID is constructed from the plane, sector, counter,
+ * gas gap, and cell number, following the ETOF numbering scheme.
+ */
 class AgMLEtofVolumeId : public AgMLVolumeId {
   
 public:

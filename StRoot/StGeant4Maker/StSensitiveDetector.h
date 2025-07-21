@@ -13,6 +13,15 @@ class TVirtualMCStack;
 class AgMLExtension;
 class StHitCollection;
 
+/**
+ * @class DetectorHit
+ * @brief A base class for storing information about a simulated hit.
+ *
+ * This class provides the fundamental data members for a hit in a sensitive
+ * detector, including a unique ID, the truth track ID, the geometry path
+ * (`volu`, `copy`), a reduced volume ID (`numbv`), a final unique volume ID,
+ * and the number of Geant4 steps contributing to the hit.
+ */
 class DetectorHit {
 public:
 
@@ -36,6 +45,15 @@ public:
 
 };
 
+/**
+ * @class TrackerHit
+ * @brief A class for storing detailed information about a hit in a tracking detector.
+ *
+ * This class extends `DetectorHit` with information specific to trackers,
+ * such as the particle's position and momentum at the entry and exit points
+ * of the sensitive volume, the total energy deposited (`de`), the step length
+ * (`ds`), and the total track length.
+ */
 class TrackerHit : public DetectorHit {
 public:
 
@@ -56,6 +74,13 @@ public:
 
 };
 
+/**
+ * @class CalorimeterHit
+ * @brief A class for storing information about a hit in a calorimeter.
+ *
+ * This class extends `DetectorHit` for calorimeters, storing the entry
+ * position of the track and the total energy deposited (`de`).
+ */
 class CalorimeterHit : public DetectorHit {
 public:
 
@@ -67,6 +92,15 @@ public:
 
 };
 
+/**
+ * @class StSensitiveDetector
+ * @brief A VMC-compatible sensitive detector for STAR.
+ *
+ * This class implements the TVirtualMCSensitiveDetector interface. It is
+ * associated with one or more TGeoVolumes. When a particle traverses one of
+ * these volumes, this class's `ProcessHits` method is called. It creates
+ * and manages a corresponding `StHitCollection` to store the resulting hits.
+ */
 class StSensitiveDetector : public TVirtualMCSensitiveDetector {
 public:
   StSensitiveDetector( const char* sdname, const char* title );

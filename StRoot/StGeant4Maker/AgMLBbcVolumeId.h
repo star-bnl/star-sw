@@ -5,6 +5,13 @@
 #include <StarVMC/StarGeometry/StarGeo.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLBbcVolumeId
+ * @brief A volume identifier for the Beam-Beam Counter (BBC).
+ *
+ * This class calculates a unique integer identifier for each sensitive
+ * element in the BBC based on its hierarchical position in the geometry.
+ */
 class AgMLBbcVolumeId : public AgMLVolumeId {
 public:
 

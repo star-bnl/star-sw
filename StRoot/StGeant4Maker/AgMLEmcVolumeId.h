@@ -11,6 +11,15 @@
 #include <TString.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLEmcVolumeId
+ * @brief A volume identifier for the Barrel Electromagnetic Calorimeter (BEMC).
+ *
+ * This class provides a unique integer identifier for each sensitive volume
+ * in the BEMC, based on its position in the geometry hierarchy. The ID
+ * is calculated from the barrel side (east/west), module number, eta ring,
+ * phi sub-module, and superlayer.
+ */
 class AgMLEmcVolumeId : public AgMLVolumeId {
 
   const int    numberOfEtaRings = 20;

@@ -24,6 +24,15 @@
 #include <AgMLVpdVolumeId.h>
 
 
+/**
+ * @class AgMLVolumeIdFactory
+ * @brief A factory for creating detector-specific volume identifier objects.
+ *
+ * This class provides a static factory method, `Create`, which returns an
+ * appropriate AgMLVolumeId-derived object based on the family name of a
+ * sensitive volume. It manages a cache of created instances to avoid
+ * unnecessary object creation.
+ */
 class AgMLVolumeIdFactory {
 public:
 
