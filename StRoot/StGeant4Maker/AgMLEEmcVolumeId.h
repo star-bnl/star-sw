@@ -11,6 +11,15 @@
 #include <TString.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLEEmcVolumeId
+ * @brief A volume identifier for the Endcap Electromagnetic Calorimeter (EEMC).
+ *
+ * This class provides a unique integer identifier for each sensitive volume
+ * in the EEMC. The ID is calculated based on the detector wheel, section,
+ * sub-section, phi bin, and eta bin, mapping these to a standard STAR
+ * numbering scheme.
+ */
 class AgMLEEmcVolumeId : public AgMLVolumeId {
 
   const int onoff    = 1;

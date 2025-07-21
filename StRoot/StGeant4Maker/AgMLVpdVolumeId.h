@@ -5,6 +5,15 @@
 #include <StarVMC/StarGeometry/StarGeo.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLVpdVolumeId
+ * @brief A volume identifier for the Vertex Position Detector (VPD).
+ *
+ * This class calculates a unique integer identifier for each sensitive
+ * element in the VPD. It supports different geometry versions by checking
+ * for specific detector tags at construction time. The ID is based on
+ * the detector side (east/west), inner/outer ring, and sector number.
+ */
 class AgMLVpdVolumeId : public AgMLVolumeId {
 public:
   

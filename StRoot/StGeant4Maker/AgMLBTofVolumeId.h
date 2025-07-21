@@ -5,6 +5,16 @@
 #include <StarVMC/StarGeometry/StarGeo.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLBtofVolumeId
+ * @brief A volume identifier for the Barrel Time-of-Flight (BTOF) detector.
+ *
+ * This class computes a unique integer identifier for each sensitive volume
+ * in the BTOF detector. The ID is based on the tray, sector, module, and
+ * cell (layer) number. It includes special adjustments for GMT (Gas-Multi-gap
+ * Resistive Plate Chamber for the Muon Telescope Detector) modules present
+ * in some geometry versions.
+ */
 class AgMLBtofVolumeId : public AgMLVolumeId {
 public:
 

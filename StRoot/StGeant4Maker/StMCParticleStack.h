@@ -17,15 +17,23 @@ class DetectorHit;
 
 
 /**
-   \class StMCParticleStack
-   \author Jason C. Webb
-   \brief Implementation of the VMC particle stack for use in STAR
-
+ * @class StMCParticleStack
+ * @author Jason C. Webb
+ * @brief Implementation of the VMC particle stack for use in STAR
 */
 
 class StarMCParticle;
 class StarMCVertex;
 
+/**
+ * @class StarMCParticle
+ * @brief A container class for Geant4 Monte Carlo truth information for a particle.
+ *
+ * This class extends the information from a TParticle by linking it to its
+ * start, stop, and intermediate interaction vertices (`StarMCVertex`). It also
+ * maintains a list of detector hits (`DetectorHit`) associated with the particle.
+ * This class is a key component of the simulation's truth record.
+ */
 class StarMCParticle {
 
   // TODO: add primary, secondary flags
@@ -92,6 +100,15 @@ protected:
 
 };
 
+/**
+ * @class StarMCVertex
+ * @brief A container class for a particle interaction or decay vertex.
+ *
+ * This class stores information about a vertex in the simulation, including its
+ * position, time, the parent particle that created it, and the daughter
+ * particles produced. It also records the physics process, medium, and
+ * geometry volume where the vertex occurred.
+ */
 class StarMCVertex {
 public:
   StarMCVertex();
@@ -147,6 +164,16 @@ std::ostream&  operator<<(std::ostream& os,  const StarMCParticle& p);
 std::ostream&  operator<<(std::ostream& os,  const      TParticle& p);
 std::ostream&  operator<<(std::ostream& os,  const StarMCVertex&   v);
 
+/**
+ * @class StMCParticleStack
+ * @brief An implementation of the VMC particle stack for STAR simulations.
+ *
+ * This class manages the collection of particles to be transported by the
+ * simulation engine. It handles both the standard VMC `TParticle` stack
+ * and a parallel, persistent "truth" stack (`StarMCParticle`, `StarMCVertex`).
+ * The truth stack provides a complete history of particle interactions and
+ * is used to fill the final g2t output tables.
+ */
 class StMCParticleStack : public TVirtualMCStack
 {
  public:

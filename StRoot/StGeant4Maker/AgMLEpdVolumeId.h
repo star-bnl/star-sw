@@ -4,6 +4,15 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLEpdVolumeId
+ * @brief A volume identifier for the Event Plane Detector (EPD).
+ *
+ * This class calculates a unique integer identifier for each sensitive tile
+ * in the EPD. The ID is constructed from the detector side (east/west),
+ * position (clock-wise), and tile number, following the EPD's specific
+ * numbering scheme.
+ */
 class AgMLEpdVolumeId : public AgMLVolumeId {
 public:
   

@@ -5,6 +5,15 @@
 #include <StMessMgr.h>
 
 
+/**
+ * @class AgMLTpcVolumeId
+ * @brief A volume identifier for the Time Projection Chamber (TPC).
+ *
+ * This class computes a unique integer identifier for each TPC padrow based
+ * on its gas volume, super-sector, and raw padrow number. It supports multiple
+ * TPC geometries (pre-iTPC, iTPC sector 20 testbed, and full iTPC) by using
+ * different internal mappings.
+ */
 class AgMLTpcVolumeId  : public AgMLVolumeId { 
 public:
 

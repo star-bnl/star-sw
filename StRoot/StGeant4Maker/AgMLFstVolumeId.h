@@ -4,6 +4,14 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLFstVolumeId
+ * @brief A volume identifier for the Forward Silicon Tracker (FST).
+ *
+ * This class provides a unique integer identifier for each sensitive sensor
+ * in the FST, based on its disk, wedge, and sensor number. It includes
+ * a mapping to handle the specific sensor layout.
+ */
 class AgMLFstVolumeId : public AgMLVolumeId {
 public:
   

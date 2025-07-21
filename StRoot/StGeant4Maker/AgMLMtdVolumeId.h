@@ -5,6 +5,14 @@
 #include <StarVMC/StarGeometry/StarGeo.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLMtdVolumeId
+ * @brief A volume identifier for the Muon Telescope Detector (MTD).
+ *
+ * This class provides a unique integer identifier for each sensitive volume
+ * in the MTD, based on its sector, module, and layer number. It is applicable
+ * to geometry versions from Run 13 onwards.
+ */
 class AgMLMtdVolumeId : public AgMLVolumeId {
 public:
 

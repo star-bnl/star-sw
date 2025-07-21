@@ -4,6 +4,13 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <StMessMgr.h>
 
+/**
+ * @class AgMLHcaVolumeId
+ * @brief A volume identifier for the Hcal (forward hadron calorimeter).
+ *
+ * This class provides a unique integer identifier for each sensitive tower
+ * in the Hcal detector, based on its module and tower number.
+ */
 class AgMLHcaVolumeId : public AgMLVolumeId {
 public:
   
