@@ -60,7 +60,7 @@ class GenericFitSeeder : public FitSeedMaker {
 
             if (area == 0) {
                 std::cerr << "The points are collinear, curvature is undefined." << std::endl;
-                return -1; // Curvature is undefined for collinear points
+                return -1e-7; // Curvature is undefined for collinear points
             }
 
             // Calculate the radius of the circumcircle using the formula:
@@ -111,6 +111,7 @@ class GenericFitSeeder : public FitSeedMaker {
         }
         virtual void makeSeed(Seed_t seed, TVector3 &posSeed, TVector3 &momSeed, int &q ) {
             const double qc = averageCurvature(seed);
+            LOG_DEBUG << "GenericFitSeeder::makeSeed averageCurvature: " << qc << endm;
             posSeed.SetXYZ(0,0,0);
             momSeed.SetXYZ(0,0,10);
         
@@ -118,9 +119,9 @@ class GenericFitSeeder : public FitSeedMaker {
             const double C = 0.3 * BStrength; //C depends on the units used for momentum and Bfield (here GeV and Tesla)
             const double K = 0.00029979; // K depends on the units used for Bfield and momentum (here Gauss and GeV)
             double pt = fabs((K*5)/qc); // pT from average measured curv
-            
+            LOG_DEBUG << "GenericFitSeeder::makeSeed::pt = " << pt << endm;
             // set the momentum seed's transverse momentum
-            momSeed.SetPerp(pt);
+            momSeed.SetXYZ(pt/sqrt(2.0),pt/sqrt(2.0),10);
             // compute the seed's eta from seed points
             TVector3 p0 = TVector3(seed[0]->getX(), seed[0]->getY(), seed[0]->getZ());
             TVector3 p1 = TVector3(seed[1]->getX(), seed[1]->getY(), seed[1]->getZ());
@@ -136,6 +137,7 @@ class GenericFitSeeder : public FitSeedMaker {
 
             // momSeed.SetPhi(phi);
             // momSeed.SetTheta(theta);
+            momSeed.SetXYZ(pt * cos(phi), pt * sin(phi), pt / tan(theta));
             
             // assign charge based on sign of curvature
             q = sgn<double>(qc);
