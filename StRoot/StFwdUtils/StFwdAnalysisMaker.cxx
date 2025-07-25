@@ -28,13 +28,13 @@ StFwdAnalysisMaker::StFwdAnalysisMaker() : StMaker("fwdAna"){
 int StFwdAnalysisMaker::Finish() { 
     
     if ( mLocalOutputFile != "" ){
-        auto prevDir = gDirectory;
+        auto prevDir = TDirectory::CurrentDirectory();
         
         // output file name
         TFile *fOutput = new TFile(mLocalOutputFile, "RECREATE");
         fOutput->cd();
         for (auto nh : mHists) {
-            nh.second->SetDirectory(gDirectory);
+            nh.second->SetDirectory(TDirectory::CurrentDirectory());
             nh.second->Write();
         }
 
