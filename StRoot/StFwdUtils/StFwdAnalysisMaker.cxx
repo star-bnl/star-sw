@@ -39,7 +39,7 @@ int StFwdAnalysisMaker::Finish() {
         }
 
         // restore previous directory
-        gDirectory = prevDir;
+        prevDir->cd();
 
         LOG_INFO << "Done writing StFwdAnalysisMaker output to local file : " << mLocalOutputFile << endm;
     }

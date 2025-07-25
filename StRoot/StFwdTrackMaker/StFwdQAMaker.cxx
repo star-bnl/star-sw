@@ -193,7 +193,7 @@ int StFwdQAMaker::Finish() {
         }
 
         // restore previous directory
-        gDirectory = prevDir;
+        prevDir->cd();
 
         LOG_INFO << "Done writing StFwdQAMaker output to local file : " << mLocalOutputFile << endm;
     }//end new
