@@ -4,12 +4,15 @@
 #ifndef __CINT__
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #include "StFwdTrackMaker/include/Tracker/FwdDataSource.h"
+#elif 
+class FwdHit;
 #endif
 
 class StEvent;
 class StMuDstMaker;
 class St_g2t_fts_hit;
 class StFcsDb;
+
 
 class FstRasterizer {
   public:
@@ -45,14 +48,16 @@ class StFwdHitLoader {
     {}
     ~StFwdHitLoader() {}
     void clear() {
+      #if !defined (__CINT__)
         mFwdHitsFtt.clear();
         mFwdHitsFst.clear();
         mFwdHitsEpd.clear();
+      #endif
 
         // clear vectors for visualization OBJ hits
-        mFttSpacepoints.clear();
-        mFstSpacepoints.clear();
-        mEpdSpacepoints.clear();
+        mSpacepointsFtt.clear();
+        mSpacepointsFst.clear();
+        mSpacepointsEpd.clear();
     }
 
   #if !defined(__CINT__) && !defined(__CLING__)
@@ -112,20 +117,29 @@ class StFwdHitLoader {
     DataSource mEpdDataSource;
     float mEpdThreshold = 0.2;
 
-    #if !defined(__CINT__) && !defined(__CLING__)
     // Pointers to these are used by StFwdTrackMaker, clear the vectors after each event
+    #if !defined (__CINT__)
     vector<FwdHit> mFwdHitsFtt;
     vector<FwdHit> mFwdHitsFst;
     vector<FwdHit> mFwdHitsEpd;
+
+    // this disables logging at compile time
+    constexpr static int kLogVerbose = 10;
+    constexpr static int kLogInfo = 1;
+    constexpr static int kLogSilent = 0;
+    constexpr static int kLogLevel = kLogSilent;
     #endif
 
-    vector<TVector3> mFttSpacepoints;
-    vector<TVector3> mFstSpacepoints;
-    vector<TVector3> mEpdSpacepoints;
+    vector<TVector3> mSpacepointsFtt;
+    vector<TVector3> mSpacepointsFst;
+    vector<TVector3> mSpacepointsEpd;
 
+    /// Non-owning pointer: StEvent provided externally via `setStEvent`
     StEvent *mStEvent = nullptr; // pointer to StEvent
+    /// Non-owning pointer: StMuDstMaker provided externally via `setMuDstMaker`
     StMuDstMaker *mMuDstMaker = nullptr; // pointer to StMuDstMaker
 
+    /// Non-owning pointers to GEANT hits
     St_g2t_fts_hit *mGeantFtt = nullptr; // pointer to GEANT FTT hits
     St_g2t_fts_hit *mGeantFst = nullptr; // pointer to GEANT FST hits
     St_g2t_fts_hit *mGeantEpd = nullptr; // pointer to GEANT EPD hits
