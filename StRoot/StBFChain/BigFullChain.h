@@ -1949,6 +1949,7 @@ Bfc_st BFC[] = { // standard chains
   {"PicoVtxVpdOrDefault","","","-PicoVtxDefault"    ,"","","pico Vtx cut on Tof and VPD or default",kFALSE},
   {"PicoVtxFXT"     ,"","","-PicoVtxDefault"    ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
   {"PicoVtxMtd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx using MTD matching mode",kFALSE},
+  {"PicoVtxless"    ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx NOT required for FWD"   ,kFALSE},
   {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"PicoBEmcSmdSkip" ,"","",""                     ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
