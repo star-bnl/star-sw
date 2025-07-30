@@ -1707,6 +1707,8 @@ Bfc_st BFC[] = { // standard chains
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
   {"fcsPi0Libs","", "", "MuDst", "", "StFcsPi0FinderForEcal", "Libs for FCS Pi0 Finder",            kFALSE},
   // FTT
+  {"fttSim","fttChain","","StEvent,fttDb",
+   "StFttFastSimulatorMaker","StFttFastSimulatorMaker","Ftt Fast Simulator",                        kFALSE},
   {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain"        ,kFALSE}, 
   {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
@@ -1721,6 +1723,9 @@ Bfc_st BFC[] = { // standard chains
   {"FwdTrack","","","fcsDb","StFwdTrackMaker",
    "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
                                                                              "Forward Track Maker", kFALSE},
+  {"FcsTrackMatch","","","FwdTrack","StFcsTrackMatchMaker",
+  "StFcsTrackMatchMaker",
+                                                                "Forward Track to FCS Match Maker", kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
@@ -1951,6 +1956,7 @@ Bfc_st BFC[] = { // standard chains
   {"PicoVtxVpdOrDefault","","","-PicoVtxDefault"    ,"","","pico Vtx cut on Tof and VPD or default",kFALSE},
   {"PicoVtxFXT"     ,"","","-PicoVtxDefault"    ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
   {"PicoVtxMtd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx using MTD matching mode",kFALSE},
+  {"PicoVtxless"    ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx NOT required for FWD"   ,kFALSE},
   {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"PicoBEmcSmdSkip" ,"","",""                     ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
