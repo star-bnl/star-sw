@@ -1,0 +1,11 @@
+---
+BasedOnStyle: Google
+ColumnLimit: '120'
+IndentPPDirectives: None
+IndentWidth: '3'
+MaxEmptyLinesToKeep: '1'
+SpacesInParentheses: 'false'
+TabWidth: '3'
+UseTab: Never
+
+...
