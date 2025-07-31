@@ -24,7 +24,7 @@ jobs:
         cat changed_files.txt
 
     - name: Install clang-format
-      run: sudo apt-get install -y clang-format-13
+      run: sudo apt-get install -y clang-format-15
 
     - name: Run clang-format check
       run: |
@@ -34,7 +34,7 @@ jobs:
           # run clang-format in diff mode
           FAIL=0
           while read file; do
-            clang-format-13 --dry-run --Werror "$file" || FAIL=1
+            clang-format-15 --dry-run --Werror "$file" || FAIL=1
           done < changed_files.txt
           if [ "$FAIL" -ne 0 ]; then
             echo "clang-format check failed"
