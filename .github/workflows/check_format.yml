@@ -20,7 +20,7 @@ jobs:
       id: changed-files
       run: |
         git diff --diff-filter=ACMR --name-only upstream/main...HEAD \
-          | grep -E '\.(cpp|cc|cxx|c|h|hpp|hh|hxx)$' || true > changed_files.txt
+          | grep -E '\.(cpp|cc|cxx|c|h|hpp|hh|hxx)$' > changed_files.txt || true
         cat changed_files.txt
 
     - name: Install clang-format
