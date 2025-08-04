@@ -1,7 +1,7 @@
 // $Id: StEEmcSlowMaker.h,v 2.10 2014/08/06 11:43:04 jeromel Exp $
 
-#ifndef STAR_StEEmcSlowMaker
-#define STAR_StEEmcSlowMaker
+#ifndef STAR_StEEmcSlowMaker2
+#define STAR_StEEmcSlowMaker2
 
 /*!
  *                                                                     
@@ -226,15 +226,15 @@ private:
   Int_t mTruncatePedSmear; /// Nsigma where ped smearing is truncated                           
 
   // Left unimplemented
-  StEEmcSlowMaker(const StEEmcSlowMaker &);
-  StEEmcSlowMaker &operator=(const StEEmcSlowMaker &);
+  StEEmcSlowMaker2(const StEEmcSlowMaker2 &);
+  StEEmcSlowMaker2 &operator=(const StEEmcSlowMaker2 &);
   
 public: 
 
   /// Class constructor
-  StEEmcSlowMaker(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
+  StEEmcSlowMaker2(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
   /// Class destructor
-  virtual ~StEEmcSlowMaker();
+  virtual ~StEEmcSlowMaker2();
 
   /// Initialization
   virtual Int_t Init();
@@ -256,7 +256,7 @@ public:
   /// Smear the pedestal with sigma from DB
   void setSmearPed(Bool_t s = true) {mSmearPed = s;}
   /// Drop bad channels marked as "fail" in DB
-  void setDropBad(Bool_t d = true) {mDropBad = true;}
+  void setDropBad(Bool_t d = true) {mDropBad = d;}
 
   /// Overwrite the muDst values
   void setOverwrite(Bool_t o = true) {mOverwrite = o;}
@@ -322,7 +322,7 @@ public:
     return cvs;
   }
 
-  ClassDef(StEEmcSlowMaker, 3)
+  ClassDef(StEEmcSlowMaker2, 3)
 };
 
 #endif
