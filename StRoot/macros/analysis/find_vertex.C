@@ -123,6 +123,7 @@ void find_vertex(char * fname="high_053/st_physics_6053108_raw_2020002.event.roo
  
   // Load my makers
  
+  gSystem->Load("StDbUtilities");      // new addition 08/11/2024
   gSystem->Load("Sti");
   gSystem->Load("libStEEmcUtil");
   gSystem->Load("libMinuit");
