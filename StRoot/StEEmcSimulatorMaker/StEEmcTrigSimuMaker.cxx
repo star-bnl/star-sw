@@ -31,7 +31,7 @@
 //
 
 #ifdef __APPLE__
-#include <sys/types.h>
+  #include <sys/types.h>
 #endif
 #include <StMessMgr.h>
 

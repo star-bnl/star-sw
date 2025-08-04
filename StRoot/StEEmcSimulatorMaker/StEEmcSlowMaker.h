@@ -136,25 +136,106 @@ class StEmcCollection;
 
 class StEEmcSlowMaker : public StMaker {
 
-private: 
-  // parameters, fixed :                                                                                                                                     
-  Float_t mMip2ene; // conversion from mips to  energy in GeV                                                                                                   
-  Float_t mSig1pe; // width of the single photoelectron peak (in p.e.)                                                                                         
-  Float_t mMip2pe[MaxSmdStrips]; // conversion from mip to p.e. from ANL cosmic ray measurements for SMD strips                                                                                      
-  Float_t mPmip2ene[3]; // as above for pre- and post-shower elements                                                                                              
-  Float_t mPmip2pe; // as above for pre- and post-shower elements                                                                                               
+public: 
+  enum class StSource {kMuDst, kStEvent};
+  enum StPrePostLayer {kPre1=0, kPre2, kPost, kNumberOfPrepostLayers};
 
-  Float_t avgNumPePerMip(Int_t stripID); // avg # p.e. per mip                                                                      
+  /// Class constructor
+  StEEmcSlowMaker(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = nullptr);
+  /// Class destructor
+  virtual ~StEEmcSlowMaker() override;
 
-  enum Source_t {kMuDst, kStEvent};
-  Source_t mSource;
+  /// Initialization
+  virtual Int_t Init() override;
+  /// Processes a single event
+  virtual Int_t Make() override;
+  /// Sets all switches required to perform embedding
+  void setEmbeddingMode(Bool_t e = true);
 
-  StEEmcDb *mEeDb;
+  /// Disables slow simulator for the towers.  ADC values stored in the
+  /// MuDst/StEvent will reflect the values determined by the fast simulator.
+  void disableTower();
+  /// Disables slow simulator for the preshower and postshwoer detectors.
+  void disablePrePost();
+  /// Disables slow simulator for the SMD detectors.
+  void disableSMD();
 
-  Int_t mNInpEve; // private event counter
+  /// Add pedestal offsets from DB
+  void setAddPed(Bool_t a = true);
+  /// Smear the pedestal with sigma from DB
+  void setSmearPed(Bool_t s = true);
+  /// Drop bad channels marked as "fail" in DB
+  void setDropBad(Bool_t d = true);
 
-  enum {maxHist = 32};
-  TH1 *mHist[maxHist]; // some global (test) histograms  
+  /// Overwrite the muDst values
+  void setOverwrite(Bool_t o = true);
+
+  /// Set truncation of pedestal smearing    
+  void setTruncatePedSmear(Float_t nSigma);
+  
+  /// Set the energy lost by one MIP in an 
+  /// SMD strip [GeV].
+  void setMipElossSmd(Float_t e);
+  /// Set the number of photoelectrons per 
+  /// mip for the specified SMD strip [0..287]
+  void setNpePerMipSmd(Int_t strip, Float_t npe);
+  /// Sets the number of photoelectrons per mip 
+  /// for all SMD stips to the specified value
+  void setNpePerMipSmd(Float_t npe);
+
+  /// Set the energy lost by one MIP in a 
+  /// pre or postshower layer [GeV].
+  void setMipElossPre(Int_t layer, Float_t e);
+  /// Sets the number of photoelectrons per mip 
+  /// for the pre/postshower layers
+  void setNpePerMipPre(Float_t npe);
+
+  /// Set the resolution of the single photoelectron 
+  /// peak for the MAPMT's
+  void setSinglePeResolution(Float_t r);
+
+  /// Set the source of ADC. Can be "MuDst" (default) or "StEvent"
+  void setSource(const Char_t* name);
+
+  /// Sets the relative light yields for layers 1, 2 and 24 in the
+  /// calorimeter stack as measured.  The difference in thickness
+  /// between preshower and "normal" layers is accounted for internally
+  /// in the code.  Correction may be deactivated by calling setDoLightYield(false).
+  /// @param pre1 <N p.e.>/MIP for layer1 / <N p.e.>/MIP for layers 3-23 default=1.86
+  /// @param pre2 <N p.e.>/MIP for layer2 / <N p.e.>/MIP for layers 3-23 default=1.86
+  /// @param post <N p.e.>/MIP for layer24 / <N p.e.>/MIP for layers 3-23 default=0.94
+  void setRelativeLightYield(Float_t pre1, Float_t pre2, Float_t post);
+
+  /// Sets control flag which controls whether or not the light-yield
+  /// correction for the towers is performed.  Defaults to true.  If
+  /// set false, no light yield correction is made.
+  void setDoLightYield(Bool_t ly);
+
+  /// Changes the sampling fraction from the default in the fast simulator
+  void setSamplingFraction(Float_t f);
+
+  /// Defines a spread in the tower gains, generated gains will be between zero and mean + 1.0
+  void setTowerGainSpread(Float_t s, Float_t mean = 1.0);
+
+  /// Defines a spread in the SMD gains, generated gains will be between zero and mean + 1.0
+  void setSmdGainSpread(Float_t s, Int_t sector, Int_t uv, Int_t strip_index);
+  void setSmdGainSpread(Float_t s, Int_t strip_index);
+  void setSmdGainSpread(Float_t s);
+
+  /// Return MIP dE/dx used for SMD, Pre, Post
+  static Float_t mipdEdx(); 
+
+  /// Displayed on session exit, leave it as-is please ...
+  virtual const char *GetCVS() const override;
+
+  ClassDef(StEEmcSlowMaker, 3)
+
+private:
+  // Unimplemented
+  StEEmcSlowMaker(const StEEmcSlowMaker &);
+  StEEmcSlowMaker &operator=(const StEEmcSlowMaker &);
+
+  Float_t avgNumPePerMip(Int_t stripID); // avg # p.e. per mip
   void InitHisto();
 
   /// Process endcap tower and overwrite ADC values with
@@ -165,7 +246,7 @@ private:
   /// new values computed by the slow simulator
   Int_t MakePrePost(StMuEmcCollection *emc);
 
-  /// Process endcap smd strips [UV] and overwrite ADC values 
+  /// Process endcap smd strips [UV] and overwrite ADC values
   /// with new values computed by the slow simulator
   Int_t MakeSMD(StMuEmcCollection *emc);
 
@@ -177,7 +258,7 @@ private:
   /// new values computed by the slow simulator (StEvent version)
   Int_t MakePrePost(StEmcCollection* emc);
 
-  /// Process endcap smd strips [UV] and overwrite ADC values 
+  /// Process endcap smd strips [UV] and overwrite ADC values
   /// with new values computed by the slow simulator (StEvent version)
   Int_t MakeSMD(StEmcCollection* emc);
 
@@ -192,27 +273,42 @@ private:
 
   /// Zero out all ADC (StEvent version)
   void setZeroAdc(StEmcCollection* emc);
-  
+
+  static constexpr int MAX_HIST = 32;
+
+  // parameters, fixed :
+  Float_t mMip2ene; // conversion from mips to  energy in GeV
+  Float_t mSig1pe; // width of the single photoelectron peak (in p.e.)
+  Float_t mMip2pe[MaxSmdStrips]; // conversion from mip to p.e. from ANL cosmic ray measurements for SMD strips
+  Float_t mPmip2ene[kNumberOfPrepostLayers]; // as above for pre- and post-shower elements
+  Float_t mPmip2pe; // as above for pre- and post-shower elements
+
+  StSource mSource;
+
+  StEEmcDb *mEeDb;
+
+  Int_t mNInpEve; // private event counter
+
+  TH1 *mHist[MAX_HIST]; // some global (test) histograms
+
   Bool_t mEnableSMD;
   Bool_t mEnablePrePost;
   Bool_t mEnableTower;
 
-  // Offset by pedestal (default true)           
+  // Offset by pedestal (default true)
   Bool_t mAddPed;
-  // Smear the pedestals (default true)         
+  // Smear the pedestals (default true)
   Bool_t mSmearPed;
   // Drop bad channels (default false)
   Bool_t mDropBad;
   // Overwrite muDst values(default true)
   Bool_t mOverwrite;
 
-  Bool_t mIsEmbeddingMode;  
-  // set separate defaults for use in BFC      
-  Bool_t mIsBFC;                                
+  Bool_t mIsEmbeddingMode;
+  // set separate defaults for use in BFC
+  Bool_t mIsBFC;
 
-  enum {kPre1=0, kPre2, kPost, kNumberPrepost};
-
-  Float_t mRelativeLightYield[kNumberPrepost]; /* <N p.e.>/MIP for pre1, pre2 and post   */
+  Float_t mRelativeLightYield[kNumberOfPrepostLayers]; /* <N p.e.>/MIP for pre1, pre2 and post   */
   Float_t mSamplingFraction;                   /* sampling fraction from the fast simu   */
   Float_t mSamplingFractionUser;               /* user-specified sampling fraction       */
   Float_t mTowerGains[kEEmcNumSectors];        /* tower gains from the fast simu         */
@@ -223,109 +319,34 @@ private:
   Float_t mTowerGainFact[kEEmcNumSectors][kEEmcNumSubSectors][kEEmcNumEtas];
   Float_t mSmdGainFact[kEEmcNumSectors][kEEmcNumSmdUVs][kEEmcNumStrips];
 
-  Int_t mTruncatePedSmear; /// Nsigma where ped smearing is truncated                           
-
-  // Left unimplemented
-  StEEmcSlowMaker(const StEEmcSlowMaker &);
-  StEEmcSlowMaker &operator=(const StEEmcSlowMaker &);
-  
-public: 
-
-  /// Class constructor
-  StEEmcSlowMaker(const Char_t *name = "EEmcSlowSim", const Char_t *muDstMakerName = 0);
-  /// Class destructor
-  virtual ~StEEmcSlowMaker();
-
-  /// Initialization
-  virtual Int_t Init();
-  /// Processes a single event
-  virtual Int_t Make();
-  /// Sets all switches required to perform embedding
-  void setEmbeddingMode(Bool_t e = true) {mIsEmbeddingMode = e;}
-
-  /// Disables slow simulator for the towers.  ADC values stored in the
-  /// MuDst/StEvent will reflect the values determined by the fast simulator.
-  void disableTower() {mEnableTower = false;}
-  /// Disables slow simulator for the preshower and postshwoer detectors.
-  void disablePrePost() {mEnablePrePost = false;}
-  /// Disables slow simulator for the SMD detectors.
-  void disableSMD() {mEnableSMD = false;}
-
-  /// Add pedestal offsets from DB
-  void setAddPed(Bool_t a = true) {mAddPed = a;}
-  /// Smear the pedestal with sigma from DB
-  void setSmearPed(Bool_t s = true) {mSmearPed = s;}
-  /// Drop bad channels marked as "fail" in DB
-  void setDropBad(Bool_t d = true) {mDropBad = true;}
-
-  /// Overwrite the muDst values
-  void setOverwrite(Bool_t o = true) {mOverwrite = o;}
-
-  /// Set truncation of pedestal smearing    
-  void setTruncatePedSmear(Float_t nSigma) {mTruncatePedSmear = nSigma;}
-  
-  /// Set the energy lost by one MIP in an 
-  /// SMD strip [GeV].
-  void setMipElossSmd(Float_t e) {mMip2ene = e;}
-  /// Set the number of photoelectrons per 
-  /// mip for the specified SMD strip [0..287]
-  void setNpePerMipSmd(Int_t strip, Float_t npe) {mMip2pe[strip] = npe;}
-  /// Sets the number of photoelectrons per mip 
-  /// for all SMD stips to the specified value
-  void setNpePerMipSmd(Float_t npe) {for (Int_t i = 0;i < MaxSmdStrips;i++) mMip2pe[i] = npe;}
-
-  /// Set the energy lost by one MIP in a 
-  /// pre or postshower layer [GeV].
-  void setMipElossPre(Int_t layer, Float_t e) {mPmip2ene[layer] = e;}
-  /// Sets the number of photoelectrons per mip 
-  /// for the pre/postshower layers
-  void setNpePerMipPre(Float_t npe) {mPmip2pe = npe;}
-
-  /// Set the resolution of the single photoelectron 
-  /// peak for the MAPMT's
-  void setSinglePeResolution(Float_t r) {mSig1pe = r;}
-
-  /// Set the source of ADC. Can be "MuDst" (default) or "StEvent"
-  void setSource(const Char_t* name);
-
-  /// Sets the relative light yields for layers 1, 2 and 24 in the
-  /// calorimeter stack as measured.  The difference in thickness
-  /// between preshower and "normal" layers is accounted for internally
-  /// in the code.  Correction may be deactivated by calling setDoLightYield(false).
-  /// @param pre1 <N p.e.>/MIP for layer1 / <N p.e.>/MIP for layers 3-23 default=1.86
-  /// @param pre2 <N p.e.>/MIP for layer2 / <N p.e.>/MIP for layers 3-23 default=1.86
-  /// @param post <N p.e.>/MIP for layer24 / <N p.e.>/MIP for layers 3-23 default=0.94
-  void setRelativeLightYield(Float_t pre1, Float_t pre2, Float_t post) {mRelativeLightYield[kPre1] = pre1; mRelativeLightYield[kPre2] = pre2; mRelativeLightYield[kPost] = post;}
-
-  /// Sets control flag which controls whether or not the light-yield
-  /// correction for the towers is performed.  Defaults to true.  If
-  /// set false, no light yield correction is made.
-  void setDoLightYield(Bool_t ly) {mDoLightYield = ly;}
-
-  /// Changes the sampling fraction from the default in the fast simulator
-  void setSamplingFraction(Float_t f) {mSamplingFractionUser = f;}
-
-  /// Defines a spread in the tower gains, generated gains will be between zero and mean + 1.0
-  void setTowerGainSpread(Float_t s, Float_t mean = 1.0);
-
-  /// Defines a spread in the SMD gains, generated gains will be between zero and mean + 1.0
-  void setSmdGainSpread(Float_t s, Int_t sector, Int_t uv, Int_t strip_index);
-  void setSmdGainSpread(Float_t s, Int_t strip_index);
-  void setSmdGainSpread(Float_t s);
-
-  /// Return MIP dE/dx used for SMD, Pre, Post
-  static Float_t getMipdEdx(); 
-
-  /// Displayed on session exit, leave it as-is please ...
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.10 2014/08/06 11:43:04 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
-    return cvs;
-  }
-
-  ClassDef(StEEmcSlowMaker, 3)
+  Int_t mTruncatePedSmear; /// Nsigma where ped smearing is truncated
 };
 
 #endif
+
+inline void StEEmcSlowMaker::setEmbeddingMode(Bool_t e) {mIsEmbeddingMode = e;}
+inline void StEEmcSlowMaker::disableTower() {mEnableTower = false;}
+inline void StEEmcSlowMaker::disablePrePost() {mEnablePrePost = false;}
+inline void StEEmcSlowMaker::disableSMD() {mEnableSMD = false;}
+inline void StEEmcSlowMaker::setAddPed(Bool_t a) {mAddPed = a;}
+inline void StEEmcSlowMaker::setSmearPed(Bool_t s) {mSmearPed = s;}
+inline void StEEmcSlowMaker::setDropBad(Bool_t d) {mDropBad = true;}
+inline void StEEmcSlowMaker::setOverwrite(Bool_t o) {mOverwrite = o;}
+inline void StEEmcSlowMaker::setTruncatePedSmear(Float_t nSigma) {mTruncatePedSmear = nSigma;}
+inline void StEEmcSlowMaker::setMipElossSmd(Float_t e) {mMip2ene = e;}
+inline void StEEmcSlowMaker::setNpePerMipSmd(Int_t strip, Float_t npe) {mMip2pe[strip] = npe;}
+inline void StEEmcSlowMaker::setNpePerMipSmd(Float_t npe) {for (Int_t i = 0;i < MaxSmdStrips;i++) mMip2pe[i] = npe;}
+inline void StEEmcSlowMaker::setMipElossPre(Int_t layer, Float_t e) {mPmip2ene[layer] = e;}
+inline void StEEmcSlowMaker::setNpePerMipPre(Float_t npe) {mPmip2pe = npe;}
+inline void StEEmcSlowMaker::setSinglePeResolution(Float_t r) {mSig1pe = r;}
+inline void StEEmcSlowMaker::setRelativeLightYield(Float_t pre1, Float_t pre2, Float_t post) {mRelativeLightYield[kPre1] = pre1; mRelativeLightYield[kPre2] = pre2; mRelativeLightYield[kPost] = post;}
+inline void StEEmcSlowMaker::setDoLightYield(Bool_t ly) {mDoLightYield = ly;}
+inline void StEEmcSlowMaker::setSamplingFraction(Float_t f) {mSamplingFractionUser = f;}
+
+inline const char *StEEmcSlowMaker::GetCVS() const {
+  static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.10 2014/08/06 11:43:04 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+  return cvs;
+}
 
 // $Log: StEEmcSlowMaker.h,v $
 // Revision 2.10  2014/08/06 11:43:04  jeromel

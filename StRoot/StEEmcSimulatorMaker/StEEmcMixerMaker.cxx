@@ -1,3 +1,8 @@
+
+#include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
+#include "StEEmcSimulatorMaker/StEEmcSlowMaker.h"
+#include "StEEmcMixerMaker.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <TFile.h>
@@ -7,9 +12,7 @@
 #include <StEventTypes.h>
 #include <StEvent.h>
 
-#include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
-#include "StEEmcSimulatorMaker/StEEmcSlowMaker.h"
-#include "StEEmcMixerMaker.h"
+
 #include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/database/StEEmcDb.h"
 #include "StEEmcUtil/database/cstructs/eemcConstDB.hh" // def of status bits 
