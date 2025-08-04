@@ -1,9 +1,8 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.11 2010/09/07 22:24:52 stevens4 Exp $
+// $Id: StEEmcSlowMaker2.cxx,v 2.11 2010/09/07 22:24:52 stevens4 Exp $
 
-#include "StEEmcSlowMaker.h"
-#include "StEEmcFastMaker.h"
+#include "StEEmcSlowMaker2.h"
 
 #include <TFile.h>
 #include <TH2.h>
@@ -16,20 +15,19 @@
 #include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/database/StEEmcDb.h"
 
-
-
+#include "StEEmcFastMaker.h"
 
 //________________________________________________
-StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
+StEEmcSlowMaker2::StEEmcSlowMaker2(const Char_t *name, const Char_t*)
 : StMaker(name) {
-   mMip2ene = mipdEdx()*0.7; // This is the SMD thickness of 7 mm
+   mMip2ene = getMipdEdx()*0.7; // This is the SMD thickness of 7 mm
                             // times the minimum ionizing energy loss of
                             // 1.998 MeV/cm from the PDG book
    mSig1pe = 0.85;          // from info from S. Vigdor on MAPMT test results
    //set different thicknesses for pre and post layers (found in geometry debug by Jason et. al.)
-   mPmip2ene[0] = mipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
-   mPmip2ene[1] = mipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
-   mPmip2ene[2] = mipdEdx()*0.5;   // The post-shower tiles are only 5 mm thick.
+   mPmip2ene[0] = getMipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[1] = getMipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[2] = getMipdEdx()*0.5;   // The post-shower tiles are only 5 mm thick.
    mPmip2pe = 2.6*1.5;      // 2.6 mip/tower scint * 1.5 light yield
                             // in pre- and post-shower elements
    // loop to init  mMip2pe[] - this will eventually need to be
@@ -40,7 +38,7 @@ StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
      mMip2pe[i] = avgNumPePerMip(i);
    }
 
-  mEeDb=nullptr;
+  mEeDb=0;
   mNInpEve=0; 
   memset(mHist,0,sizeof(mHist));
 
@@ -60,7 +58,7 @@ StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
 
   mIsEmbeddingMode = false;
   /// By default, source is MuDst
-  mSource = StSource::kMuDst;
+  mSource = kMuDst;
 
   /// By default, truncate ped smearing at 3 sigma   
   mTruncatePedSmear = 3;
@@ -128,11 +126,11 @@ StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
 }
 
 //________________________________________________
-StEEmcSlowMaker::~StEEmcSlowMaker() {
+StEEmcSlowMaker2::~StEEmcSlowMaker2() {
 }
 
 //________________________________________________
-Float_t StEEmcSlowMaker::avgNumPePerMip(Int_t stripID) {                                                                                                           
+Float_t StEEmcSlowMaker2::avgNumPePerMip(Int_t stripID) {                                                                                                           
 //                                                                                                                                                          
 // A parameterization of the average number of photoelectrons                                                                                               
 // per mip for a given SMD strip.  See elog 457.                                                                                                            
@@ -155,7 +153,7 @@ Float_t StEEmcSlowMaker::avgNumPePerMip(Int_t stripID) {
 }                                                                                                                                                            
  
 //________________________________________________
-Int_t StEEmcSlowMaker::Init() {
+Int_t StEEmcSlowMaker2::Init() {
   LOG_INFO << "mIsEmbeddingMode=" << mIsEmbeddingMode << ", mIsBFC=" << mIsBFC << endm;          
 
   if (mIsEmbeddingMode) {
@@ -171,9 +169,7 @@ Int_t StEEmcSlowMaker::Init() {
     setOverwrite(1); // overwrite ADC values
     setSource("StEvent");             
   } else { //set defaults for running in analysis chain 
-    if (mSource == StSource::kMuDst) {
-        disableTower(); //don't change tower in analysis chain since only ADC is stored in MuDst
-    }
+    if (mSource == kMuDst) disableTower(); //don't change tower in analysis chain since only ADC is stored in MuDst  
   }                                   
     
   //print out full configuration in log file  
@@ -196,7 +192,7 @@ Int_t StEEmcSlowMaker::Init() {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::InitHisto() {
+void StEEmcSlowMaker2::InitHisto() {
   Char_t tt1[100], tt2[500];
 
   sprintf(tt1,"mm");
@@ -232,19 +228,19 @@ void StEEmcSlowMaker::InitHisto() {
   mHist[19]=new TH2F(tt1,tt2,60,0,300,100,0,200.);
 
   // add histos to the list (if provided)
-  for (Int_t i = 0; i < MAX_HIST; ++i) {
+  for (Int_t i = 0; i < maxHist; ++i) {
       if (mHist[i]) this->AddHist(mHist[i]);
   }
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::Make() {
+Int_t StEEmcSlowMaker2::Make() {
   Int_t result = StMaker::Make();
   mNInpEve++;
   LOG_DEBUG << "iEve " << mNInpEve << ", mSource = " << mSource << endm;
   
   switch (mSource) {
-  case StSource::kMuDst:
+  case kMuDst:
     /// Access to muDst .......................
     {
       if (!GetInputDS("MuDst")) {
@@ -269,14 +265,14 @@ Int_t StEEmcSlowMaker::Make() {
     }
     break;
 
-  case StSource::kStEvent:
+  case kStEvent:
     /// Acces to StEvent, automatic detection if in Embedding or BFC mode .....................
     {
 
-      StEmcCollection *emc = nullptr; 
+      StEmcCollection *emc =0; 
       if(mIsEmbeddingMode) {
 	StEEmcFastMaker *fast = (StEEmcFastMaker*)GetMakerInheritsFrom("StEEmcFastMaker");
-	if(fast==nullptr) {
+	if(fast==0) {
 	  LOG_WARN << GetName() << "::Make()  no EEmcFastSim in the chain, ignore Endcap"<< endm;
 	  return kStWarn;
 	}
@@ -329,7 +325,7 @@ Int_t StEEmcSlowMaker::Make() {
 //    of ADC+0.5 for the MuDst.
 //
 
-Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
+Int_t StEEmcSlowMaker2::MakeTower(StMuEmcCollection *emc) {
 
   /**************************************************************
    *
@@ -353,7 +349,7 @@ Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
       Int_t sec,sub,eta,pre;
       StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
       // range check on returned values
-      if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= kNumberOfPrepostLayers)) {
+      if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
 	LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
 	setZeroAdc(emc);
 	return kStErr;
@@ -368,7 +364,7 @@ Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
       // difference in thickness between pre/post and normal
       // layers, the factor of 0.8 is introduced to prevent us
       // from double correcting.
-      const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : nullptr;
+      const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
       if (!tower) {
 	LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
 	continue;
@@ -449,29 +445,25 @@ Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::MakePrePost(StMuEmcCollection *emc) {
+Int_t StEEmcSlowMaker2::MakePrePost(StMuEmcCollection *emc) {
   for (Int_t i = 0;i < emc->getNEndcapPrsHits();i++) {
     Int_t pre,sec,eta,sub;
     /// muDst ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
     StMuEmcHit *hit = emc->getEndcapPrsHit(i,sec,sub,eta,pre);
-    if (!hit) {
-        continue;
-    }
+    if (!hit) continue;
     
     // range check on returned values
-    if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= kNumberOfPrepostLayers)) {
+    if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
       LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
       setZeroAdc(emc);
       return kStErr;
     }
 
     /// tmp, for fasted analysis use only hits from sectors init in DB
-    if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) {
-        continue;
-    }
+    if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
      
     /// Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
-    const EEmcDbItem *x = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, pre-1+'P') : nullptr; 
+    const EEmcDbItem *x = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, pre-1+'P') : 0; 
     if (!x) {
 	LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
 	continue;
@@ -522,15 +514,13 @@ Int_t StEEmcSlowMaker::MakePrePost(StMuEmcCollection *emc) {
     ///
     /// If we've made it here, overwrite the muDst
     ///
-    if (mOverwrite) {
-        hit->setAdc(NUadc);
-    }
+    if (mOverwrite) hit->setAdc(NUadc);
   }
   return kStOk;
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::MakeSMD(StMuEmcCollection *emc) {
+Int_t StEEmcSlowMaker2::MakeSMD(StMuEmcCollection *emc) {
   Int_t iuv = 0;
   for (Char_t uv = 'U';uv <= 'V';uv++) {
     iuv++;
@@ -545,10 +535,8 @@ Int_t StEEmcSlowMaker::MakeSMD(StMuEmcCollection *emc) {
       }
       
       // tmp, for fasted analysis use only hits from sectors init in DB
-      if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) {
-          continue;
-      }
-      const EEmcDbItem *x = mEeDb ? mEeDb->getByStrip(sec,uv,strip) : nullptr;
+      if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
+      const EEmcDbItem *x = mEeDb ? mEeDb->getByStrip(sec,uv,strip) : 0;
       if (!x) {
 	LOG_ERROR << "Cannot find DB entry for ESMD: sec = " << sec << ", uv = " << uv << ", strip = " << strip << endm;
 	continue;
@@ -604,27 +592,25 @@ Int_t StEEmcSlowMaker::MakeSMD(StMuEmcCollection *emc) {
       ///
       /// If we've made it here, overwrite the muDst
       ///
-      if (mOverwrite) {
-          hit->setAdc(NUadc);
-      }
+      if (mOverwrite) hit->setAdc(NUadc);
     }// loop over 1 plane
   } // loop over U,V
   return kStOk;
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setSource(const Char_t* name) {
+void StEEmcSlowMaker2::setSource(const Char_t* name) {
   if (strcmp(name, "MuDst") == 0) {
-    mSource = StSource::kMuDst;
+    mSource = kMuDst;
   } else if (strcmp(name, "StEvent") == 0) {
-    mSource = StSource::kStEvent;
+    mSource = kStEvent;
   } else {
     LOG_WARN<<"::setSource()"<<"Source must be \"MuDst\" or \"StEvent\""<<endm;
   }
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
+Int_t StEEmcSlowMaker2::MakeTower(StEmcCollection* emc) {
   StEmcDetector *det = emc->detector(kEndcapEmcTowerId);
   if (!det) {
     LOG_DEBUG<<"No kEndcapEmcTowerId"<<endm;
@@ -648,7 +634,7 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
           const UInt_t eta = hit->eta();
           const UInt_t pre = (hit->sub()-1)/5+1;
           // range check on returned values
-	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= kNumberOfPrepostLayers)) {
+	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
 	    LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
     	    setZeroAdc(emc); 
 	    return kStErr;
@@ -662,7 +648,7 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
 	  // difference in thickness between pre/post and normal
 	  // layers, the factor of 0.8 is introduced to prevent us
 	  // from double correcting.
-          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : nullptr;
+          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
           if (!tower) {
 	    LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
 	    continue;
@@ -685,7 +671,7 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
 	  }
 
           // get DB entry for this tower
-          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : nullptr;
+          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
           if (!tower) {
 	    LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
 	    continue;
@@ -733,7 +719,7 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
+Int_t StEEmcSlowMaker2::MakePrePost(StEmcCollection* emc) {
   StEmcDetector* det = emc->detector(kEndcapEmcPreShowerId);
   if (!det) {
     LOG_WARN << "No kEndcapEmcPreShowerId" << endm;
@@ -754,14 +740,14 @@ Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
       const UInt_t ieta = hit->eta();
       const UInt_t ipre = (hit->sub()-1)/5+1;
       // range check on returned values
-      if (!(sector >= 1 && sector <= 12) || !(isub >= 1 && isub <= 5) || !(ieta >= 1 && ieta <= 12) || !(ipre >= 1 && ipre <= kNumberOfPrepostLayers)) {
+      if (!(sector >= 1 && sector <= 12) || !(isub >= 1 && isub <= 5) || !(ieta >= 1 && ieta <= 12) || !(ipre >= 1 && ipre <= 3)) {
 	LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sector << ", sub = " << isub << ", eta = " << ieta << ", pre = " << ipre << endm;
 	setZeroAdc(emc); 
 	return kStErr;
       }
       
       // Database ranges: sector=1-12, sub=A-E, eta=1-12, type=T,P-R; Slow method
-      const EEmcDbItem* x = mEeDb ? mEeDb->getTile(sector, sub, hit->eta(), layer) : nullptr;
+      const EEmcDbItem* x = mEeDb ? mEeDb->getTile(sector, sub, hit->eta(), layer) : 0;
       if (!x) {
         LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sector << ", sub = " << sub << ", eta = " << hit->eta() << ", pre = " << layer << endm;
 	continue;
@@ -812,20 +798,18 @@ Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
       ///
       /// If we've made it here, overwrite the muDst
       ///
-      if (mOverwrite) {
-          hit->setAdc(NUadc);
-      }
+      if (mOverwrite) hit->setAdc(NUadc);
     }
   }
   return kStOk;
 }
 
 //________________________________________________
-Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
+Int_t StEEmcSlowMaker2::MakeSMD(StEmcCollection* emc) {
   Int_t iuv = 0;
   for (Char_t plane = 'U'; plane <= 'V'; ++plane) {
     iuv++;
-    StEmcDetector* det = nullptr;
+    StEmcDetector* det = 0;
     switch (plane) {
     case 'U':
       det = emc->detector(kEndcapSmdUStripId);
@@ -843,9 +827,7 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
       break;
     }
 
-    if (!det) {
-        continue;
-    }
+    if (!det) continue;
 
     for (UInt_t sector = 1; sector <= det->numberOfModules();++sector) {
       StSPtrVecEmcRawHit& hits = det->module(sector)->hits();
@@ -861,7 +843,7 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
 	}
 
 	// Database ranges: sector=1-12, plane=U-V, strip=1-288
-	const EEmcDbItem* x = mEeDb ? mEeDb->getByStrip(sector, plane, strip) : nullptr;
+	const EEmcDbItem* x = mEeDb ? mEeDb->getByStrip(sector, plane, strip) : 0;
 	if (!x) {
 	  LOG_ERROR << "Cannot find DB entry for ESMD: sec = " << sector << ", uv = " << iuv-1+'U' << ", strip = " << strip << endm;
 	  continue;
@@ -911,9 +893,7 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
 	///
 	/// If we've made it here, overwrite the muDst
 	///
-	if (mOverwrite) {
-	    hit->setAdc(NUadc);
-	}
+	if (mOverwrite) hit->setAdc(NUadc);
       } // Loop over 1 plane
     }
   }
@@ -921,7 +901,7 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setTowerGainSpread(Float_t s, Float_t mean) {
+void StEEmcSlowMaker2::setTowerGainSpread(Float_t s, Float_t mean) {
   LOG_INFO << "setTowerGainSpread(): gain spread: " << s << "; gain mean value: " << mean << endm;
   // initialize tower gain factors to mean +/- spread
   for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ ) {
@@ -936,14 +916,14 @@ void StEEmcSlowMaker::setTowerGainSpread(Float_t s, Float_t mean) {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setSmdGainSpread(Float_t s) {
+void StEEmcSlowMaker2::setSmdGainSpread(Float_t s) {
   for (Int_t strip = 0;strip < kEEmcNumStrips;strip++) {
       setSmdGainSpread(s, strip);
   }
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t strip) {
+void StEEmcSlowMaker2::setSmdGainSpread(Float_t s, Int_t strip) {
   for (Int_t sec = 0;sec < kEEmcNumSectors;sec++) {
     for (Int_t uv = 0;uv < kEEmcNumSmdUVs;uv++) {
       setSmdGainSpread(s, sec, uv, strip);
@@ -952,7 +932,7 @@ void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t strip) {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t sec, Int_t uv, Int_t strip) {
+void StEEmcSlowMaker2::setSmdGainSpread(Float_t s, Int_t sec, Int_t uv, Int_t strip) {
   const Float_t mean = 1.0;
   Float_t f = -1.0E9;
   while (f <= -mean || f >= 1.0) f = gRandom->Gaus(0, s);
@@ -960,13 +940,13 @@ void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t sec, Int_t uv, Int_t str
 }
 
 //________________________________________________
-Bool_t StEEmcSlowMaker::checkDBped(const EEmcDbItem *x) {
+Bool_t StEEmcSlowMaker2::checkDBped(const EEmcDbItem *x) {
   //check that channels ped and pedSigma are all >= 0
   return (x && (x->ped >= 0) && (x->sigPed >= 0));
 }
 
 //________________________________________________
-Float_t StEEmcSlowMaker::getPedSmear(Float_t sigPed) {
+Float_t StEEmcSlowMaker2::getPedSmear(Float_t sigPed) {
   //get pedestal smearing from gaussian distribution truncated at N*sigma
   Float_t smear = 0;
   if (mTruncatePedSmear > 0) {
@@ -978,15 +958,13 @@ Float_t StEEmcSlowMaker::getPedSmear(Float_t sigPed) {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setZeroAdc(StEmcCollection* emc) {
+void StEEmcSlowMaker2::setZeroAdc(StEmcCollection* emc) {
   StDetectorId detId[4]={kEndcapEmcTowerId,kEndcapEmcPreShowerId,kEndcapSmdUStripId,kEndcapSmdVStripId};
-  StEmcDetector *det=nullptr;
+  StEmcDetector *det=0;
 
   for(int i=0; i<4; i++) {
     det = emc->detector(detId[i]);
-    if (!det) {
-        continue;
-    }
+    if (!det) continue;
     for (UInt_t sec = 1;sec <= det->numberOfModules();sec++) {
       StSPtrVecEmcRawHit &det_hits = det->module(sec)->hits();
       for (UInt_t ihit = 0;ihit < det_hits.size();ihit++) {
@@ -998,7 +976,7 @@ void StEEmcSlowMaker::setZeroAdc(StEmcCollection* emc) {
 }
 
 //________________________________________________
-void StEEmcSlowMaker::setZeroAdc(StMuEmcCollection *emc) {
+void StEEmcSlowMaker2::setZeroAdc(StMuEmcCollection *emc) {
   
   for (Int_t i = 0;i < emc->getNEndcapTowerADC();i++) 
     emc->setTowerADC( i+1, 0, eemc );
@@ -1019,13 +997,13 @@ void StEEmcSlowMaker::setZeroAdc(StMuEmcCollection *emc) {
 }
 
 //________________________________________________
-Float_t StEEmcSlowMaker::mipdEdx() {
+Float_t StEEmcSlowMaker2::getMipdEdx() {
   // Return MIP dE/dx = 1.998 MeV/cm from the PDG book
   // used to simulate SMD, Pre, Post ADC response
   return 0.001998;
 }
 
-// $Log: StEEmcSlowMaker.cxx,v $
+// $Log: StEEmcSlowMaker2.cxx,v $
 // Revision 2.11  2010/09/07 22:24:52  stevens4
 // give access to MIP dE/dx to other makers
 //
