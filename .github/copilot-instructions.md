@@ -1,6 +1,6 @@
 # Instructions for Code Reviews
 
-You will analyze the files which have been added and/or changed in this pull requst.  You will consider correctness,
+You will analyze the files which have been added and/or changed in this pull request.  You will consider correctness,
 best practice, and the Coding Standards provided below.  Where there are
 conflicts between best practice and the Coding Standards, you will use the Coding Standards.
 
