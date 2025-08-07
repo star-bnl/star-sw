@@ -8,8 +8,8 @@ These standards represent guidelines.  Deviations from them are permitted, if th
 justification provided in comments.  Such deviations should only be permitted if it makes the code
 easier to understand.
 
-You will diligently analyze each of the files which are touched by the pull request.  You will review each
-file in its entirety, not just the changes submitted since the last commit.
+You will diligently analyze each of the files which are touched by the pull request.  You will review the
+changes (diff hunks) submitted in the pull request, considering their correctness, best practice, and adherence to the Coding Standards.
 
 You will consider every bullet point in the Coding Standards.  You will note all discrepancies in your review.
 You will provide the minimal set of changes which will bring the code into compliance with best practice and
