@@ -15,7 +15,7 @@ You will consider every bullet point in the Coding Standards.  You will note all
 You will provide the minimal set of changes which will bring the code into compliance with best practice and
 the Coding Standards.  Your proposed changes should conform to best practice and the Coding Standards.
 
-For each change you propose, you should explain why you are proposing that change.  Be concise in your reponse.
+For each change you propose, you should explain why you are proposing that change.  Be concise in your response.
 
 You will create a table summarizing the code review.  For each file touched in the pull request, explicitly state the nature
 of the changes which were made, whether they conform to best practice, and whether they conform to the Coding
