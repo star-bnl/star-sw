@@ -2,10 +2,12 @@
 // 
 // $Id: StEEmcFastMaker.cxx,v 1.23 2010/08/05 21:23:45 stevens4 Exp $
 
+#include "StEEmcFastMaker.h"
+
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
 
-#include "StEEmcFastMaker.h"
+
 
 
 #include "StEEmcUtil/EEevent/EEeventDst.h"
@@ -16,8 +18,6 @@
 #include "StEEmcUtil/EEmcMC/EEmcMCData.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
-
-ClassImp(StEEmcFastMaker)
 
 //--------------------------------------------
 void 
