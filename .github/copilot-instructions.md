@@ -83,7 +83,7 @@ Unit tests may deviate from these conventions.
 
 ## ROOT [c++]
 * Prefer C++ types over ROOT types, except persistent classes.
-** e.g. prefer int, float, double, char, bool over Int_t, Float_t, Double_t, Char_t, Bool_t.
+  * e.g. prefer int, float, double, char, bool over Int_t, Float_t, Double_t, Char_t, Bool_t.
 * Prefer `<cmath>` over ROOT math (TMath::*).
 
 ## Introspection [c++]
