@@ -65,7 +65,7 @@ Unit tests may deviate from these conventions.
 
 ## Classes [c++]
 * Every class must declare at least one ctor, even if defaulted with `= default;`.
-* Every class must declare a ctor which can be called with no parameters.  A ctor with all default parameters is allowed.
+* Every class must declare a ctor which can be called with no parameters. A ctor with all default parameters is allowed.
 * Classes which allocate memory and retain ownership should deallocate memory in the dtor.
 * Initialize all data members.
 * Don't call virtuals in ctors/dtors.
