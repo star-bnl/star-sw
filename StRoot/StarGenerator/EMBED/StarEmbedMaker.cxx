@@ -1,18 +1,27 @@
 #include "StarEmbedMaker.h"
-
-#include "StGenericVertexMaker/StGenericVertexMaker.h"
-#include "StGenericVertexMaker/StFixedVertexFinder.h"
+#include "StarGenerator/EVENT/StarGenEvent.h"
 
 //_____________________________________________________________________________
-StarEmbedMaker::StarEmbedMaker() :  StarPrimaryMaker(), mFzdInput( true ), mFilename(),  mFile(0),  mTree(0),  mCurrentEntry(0), mRun(0),  mEvent(0), mVertexX(-9E9), mVertexY(-9E9), mVertexZ(-9E9), mSigmaX(-9E9), mSigmaY(-9E9), mSigmaZ(-9E9) {
+StarEmbedMaker::StarEmbedMaker(const char* name) :  StarPrimaryMaker(), mFzdInput(false), mFilename(),  mFile(0),  mTree(0),  mCurrentEntry(0), mRun(0),  mEvent(0), mVertexX(-9E9), mVertexY(-9E9), mVertexZ(-9E9), mSigmaX(-9E9), mSigmaY(-9E9), mSigmaZ(-9E9) {
+  SetName(name);
 }
 //_____________________________________________________________________________
 StarEmbedMaker::~StarEmbedMaker() {
 
 }
 //_____________________________________________________________________________
+int StarEmbedMaker::Init() {
+
+  if ( SAttr("tags") ) SetInputFile( SAttr("tags") );
+
+  StarPrimaryMaker::Init();
+  
+  return kStOK;
+}
+//_____________________________________________________________________________
 void StarEmbedMaker::SetInputFile(const char* filename){ 
   mFilename = filename; 
+  LOG_INFO << mFilename << endm;
   mFile     = TFile::Open(mFilename.c_str());                                    assert(mFile);
   mTree     = dynamic_cast<TTree*>( mFile->Get("Tag") );                         assert(mTree);
   mTree->SetBranchAddress( "EvtHddr.mRunNumber",       &mRun   );
@@ -60,14 +69,10 @@ int StarEmbedMaker::Make()
 
   }
 
-  // Now we set the vertex for the vertex finder
-  auto* vertexMaker  = dynamic_cast<StGenericVertexMaker *>( GetMaker("GenericVertex") );       assert(vertexMaker);
-  auto* vertexFinder = dynamic_cast<StFixedVertexFinder  *>( vertexMaker->GetGenericFinder() ); assert(vertexFinder);
-
-  vertexFinder->SetVertexPosition( mVertexX, mVertexY, mVertexZ );
-  vertexFinder->SetVertexError   ( mSigmaX,  mSigmaY,  mSigmaZ );
+  mPrimaryEvent->Print();
 
   return result;
 }
 // 
 //_____________________________________________________________________________
+

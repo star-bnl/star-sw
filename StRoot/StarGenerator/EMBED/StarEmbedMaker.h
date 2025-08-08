@@ -1,18 +1,21 @@
 #ifndef __StarEmbedMaker_h__
 #define __StarEmbedMaker_h__
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
+#include "TLorentzVector.h"
 #include <string>
 #include <TTree.h>
 #include <TFile.h>
 class StarEmbedMaker : public StarPrimaryMaker
 {
 public:
-  StarEmbedMaker();
+  StarEmbedMaker( const char* name="StarEmbed" );
  ~StarEmbedMaker();
 
   void SetInputFile( const char* filename );
 
   int Make();
+  int Init();
+
   void Clear( const Option_t* opts="" );
 
 private:
@@ -29,6 +32,7 @@ protected:
   int mEvent;
   double mVertexX, mVertexY, mVertexZ;
   double mSigmaX, mSigmaY, mSigmaZ;
+
 
   
   ClassDef(StarEmbedMaker,1);
