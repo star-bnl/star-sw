@@ -471,7 +471,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 { 
 
 
-  LOG_INFO << "Geant4Maker configuration" << endm;
+  LOG_INFO << "Geant4Maker configuration [" << nm << "]" << endm;
   LOG_INFO << "Each option can be overridden using --option=value" << endm;
 
 
@@ -548,7 +548,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("SYNC", 1, "Synchrotron radiation");
 
   // Application defaults to single engine mode with Geant4
-  AddOption("application:engine","multi","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
+  AddOption("application:engine","G4","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
 
   AddOption("all:engine",  "G3", "In multi-engine mode, selects the default engine for all subsystems" ); // default engine in multi-engine mode is G3
   //AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
@@ -707,6 +707,8 @@ int StGeant4Maker::Init() {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitRun( int /* run */ ){
 
+  LOG_INFO << "InitRun" << endm;
+
   auto result = kStOK;
 
   // Get magnetic field scale
@@ -731,7 +733,11 @@ int StGeant4Maker::InitRun( int /* run */ ){
   }
 
   // Obtain pointer to the primary maker
-  StarPrimaryMaker* primarymk   = dynamic_cast<StarPrimaryMaker*> (GetMaker("PrimaryMaker"));
+  StarPrimaryMaker* primarymk = nullptr;
+    
+  if ( 0 == IAttr("embedding:mode") ) primarymk = dynamic_cast<StarPrimaryMaker *>(                GetMaker("PrimaryMaker") );
+  else                                primarymk = dynamic_cast<StarPrimaryMaker *>( GetTopChain()->GetMaker("StarEmbed") );
+
   if (primarymk) { 
     if ( 0==IAttr("embedding:mode") )
       {
@@ -1494,8 +1500,11 @@ void StGeant4Maker::Stepping(){
 void StarVMCApplication::GeneratePrimaries() { _g4maker -> PushPrimaries(); }
 void StGeant4Maker::PushPrimaries() {
 
-  StMaker           *mymaker   = GetMaker("PrimaryMaker");
-  StarPrimaryMaker  *myprimary = (StarPrimaryMaker *)mymaker;
+  //  StMaker           *mymaker   = GetMaker("PrimaryMaker");
+  StarPrimaryMaker  *myprimary = nullptr;
+  if ( 0 == IAttr("embedding:mode") ) myprimary = dynamic_cast<StarPrimaryMaker *>(                GetMaker("PrimaryMaker") );
+  else                                myprimary = dynamic_cast<StarPrimaryMaker *>( GetTopChain()->GetMaker("StarEmbed") );
+
   StarParticleStack *mystack   = myprimary->stack();
   
   int ntrack = mystack -> GetNtrack();
