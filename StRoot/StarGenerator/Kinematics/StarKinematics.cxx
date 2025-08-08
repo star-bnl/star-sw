@@ -54,24 +54,35 @@ StarKinematics::StarKinematics( const Char_t *name ) : StarGenerator(name)
   SetAttr("yhigh",+10.0);
   SetAttr("philow",0.0);
   SetAttr("phihigh",TMath::TwoPi());
+
+  SetAttr("mode", "ParticlGun");
+
 }
 // ----------------------------------------------------------------------------
 Int_t StarKinematics::PreGenerate()
 {
 
-  std::string type_ = SAttr("type");
+  std::string type_ = SAttr("mode");
   int ntrack = IAttr("ntrack");
-  std::string particles = SAttr("particles");
+
+  std::string particles = SAttr("particles"); // particle list
+  if ( SAttr("pid") ) {                       // and/or single pid
+    int pid = IAttr("pid");
+    auto* part = data.GetParticleG3(pid);
+    particles += part->GetName();
+  }
   double ptlow   = DAttr("ptlow");
   double pthigh  = DAttr("pthigh");
-  double ylow    = DAttr("ylow"); 
-  double yhigh   = DAttr("yhigh");
+  double ylow    = DAttr("etalow"); 
+  double yhigh   = DAttr("etahigh");
   double philow  = DAttr("philow");
   double phihigh = DAttr("phihigh");
+  double temp    = DAttr("temp");
 
   // Generate a flat PT distribution 
   if ( type_ == "FlatPT" || type_ == "flatpt" ) {
     Kine( ntrack, particles.c_str(), ptlow, pthigh, ylow, yhigh, philow, phihigh );
+    mEvent->Print();
   };
 
 
