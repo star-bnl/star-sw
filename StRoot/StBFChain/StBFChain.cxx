@@ -18,6 +18,8 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+#include "TGeoManager.h"
+
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -1021,10 +1023,17 @@ Int_t StBFChain::Init() {
 
     // force load of geometry for VMC and Sti
 
-    if (GetOption("Sti")       || GetOption("StiCA") ||
-	GetOption("StiVMC")    || GetOption("VMC") ||
-	GetOption("VMCPassive" || GetMaker("geant4star") )) {
+    if ( (GetOption("Sti")        || 
+	  GetOption("StiCA")      ||
+	  GetOption("StiVMC")     || 
+	  GetOption("VMC")        ||
+	  GetOption("VMCPassive") || 
+	  GetOption("g4star:mk")) 
 
+	 && gGeoManager==0
+
+	 ) {
+		   
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
 	TString dbTag("r");
