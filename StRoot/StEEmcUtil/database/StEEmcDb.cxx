@@ -34,7 +34,7 @@ ClassImp(StEEmcDb)
 //________________________________________________________
 //________________________________________________________
 StEEmcDb::StEEmcDb(const Char_t *name) : TDataSet(name) {
-  LOG_DEBUG<<endm;
+  //  LOG_DEBUG<<endm;
   mfirstSecID=mlastSecID=mNSector=0;
 //  myTimeStampDay=0;
 //  myTimeStampUnix=0;
