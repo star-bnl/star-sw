@@ -2553,7 +2553,7 @@ void StPicoDstMaker::fillFwdTracks() {
     }
 
     const StSPtrVecFwdTrack& evTracks = evc->tracks();
-    LOG_INFO << "Adding " << evc->numberOfTracks() << " StFwdTracks from StEvent to PicoDst" << endm; 
+    LOG_DEBUG << "Adding " << evc->numberOfTracks() << " StFwdTracks from StEvent to PicoDst" << endm; 
     for ( size_t i = 0; i < evc->numberOfTracks(); i++ ){
       StFwdTrack * evTrack = evTracks[i];
       StPicoFwdTrack picoFwdTrack;
@@ -2612,7 +2612,7 @@ void StPicoDstMaker::fillFwdTracks() {
       new((*(mPicoArrays[StPicoArrays::FwdTrack]))[counter]) StPicoFwdTrack(picoFwdTrack);
     }
   } else {
-    LOG_WARN << "Cannot get Fwd Tracks from StEvent" << endm;
+    LOG_DEBUG << "Cannot get Fwd Tracks from StEvent" << endm;
   }
 
   // Fill FwdVertex also
@@ -2624,7 +2624,7 @@ void StPicoDstMaker::fillFwdTracks() {
     StPicoFwdVertex picoFwdVertex;
     // Set the PicoDst attributes
     picoFwdVertex.setPosition( evVertex->position().x(), evVertex->position().y(), evVertex->position().z() );
-    LOG_INFO << "Adding StPicoFwdVertex from StPrimaryVertex" << endm;
+    LOG_DEBUG << "Adding StPicoFwdVertex from StPrimaryVertex" << endm;
     picoFwdVertex.setChi2( evVertex->chiSquared() );
     picoFwdVertex.setNumberOfTracks( evVertex->numTracksUsedInFinder() );
     int counter = mPicoArrays[StPicoArrays::FwdVertex]->GetEntries();
