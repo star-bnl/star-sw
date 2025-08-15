@@ -62,6 +62,11 @@
 // Functors used to copy the hits from the sensitive detector hit collections into the g2t tables.
 // There's an explitive-load of boilerplate in these things
 
+//________________________________________________________________________________________________
+// Pointer to the maker so we can forward VMC calls there
+static StGeant4Maker* _g4maker = 0;
+
+
 struct SD2Table_TPC {
   void operator()( StSensitiveDetector* sd, St_g2t_tpc_hit* table, St_g2t_track* track ) {
     // Retrieve the hit collection 
@@ -84,6 +89,19 @@ struct SD2Table_TPC {
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       g2t_hit.length    = hit->length;
       g2t_hit.lgam      = hit->lgam;
+
+
+      if ( g2t_hit.lgam < -997 ) {
+	// Filter bad hits
+	if ( _g4maker->IAttr("tpchitaction")==1 ) {
+	  LOG_WARN << "remove g2t_hit id=" << g2t_hit.id << " volume=" << g2t_hit.volume_id << " p=" << g2t_hit.p[0] << " " << g2t_hit.p[1] << " " << g2t_hit.p[2] << " length=" << g2t_hit.length << " lgam=" <<g2t_hit.lgam << endm;
+	  continue;
+	}
+	if ( _g4maker->IAttr("tpchitaction")==2 ) {
+	  LOG_WARN << "terminate on g2t_hit id=" << g2t_hit.id << " volume=" << g2t_hit.volume_id << " p=" << g2t_hit.p[0] << " " << g2t_hit.p[1] << " " << g2t_hit.p[2] << " length=" << g2t_hit.length << " lgam=" <<g2t_hit.lgam << endm;
+	  assert(g2t_hit.lgam>-998);
+	}
+      }
 
       
 
@@ -410,9 +428,6 @@ TGeant3TGeo* gG3 = 0;
 // Function to process one event
 std::function<void(void)> trigger;
 
-//________________________________________________________________________________________________
-// Pointer to the maker so we can forward VMC calls there
-static StGeant4Maker* _g4maker = 0;
 //________________________________________________________________________________________________
 StarParticleData &particleData = StarParticleData::instance();
 //________________________________________________________________________________________________
