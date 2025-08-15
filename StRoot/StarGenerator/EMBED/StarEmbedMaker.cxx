@@ -1,6 +1,10 @@
 #include "StarEmbedMaker.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 
+//#include "StGenericVertexMaker/StGenericVertexMaker.h"
+//#include "StGenericVertexMaker/StFixedVertexFinder.h"
+
+
 //_____________________________________________________________________________
 StarEmbedMaker::StarEmbedMaker(const char* name) :  StarPrimaryMaker(), mFzdInput(false), mFilename(),  mFile(0),  mTree(0),  mCurrentEntry(0), mRun(0),  mEvent(0), mVertexX(-9E9), mVertexY(-9E9), mVertexZ(-9E9), mSigmaX(-9E9), mSigmaY(-9E9), mSigmaZ(-9E9) {
   SetName(name);
@@ -59,6 +63,9 @@ int StarEmbedMaker::Make()
 
   mTree -> GetEntry( mCurrentEntry++ );
 
+  LOG_INFO << "Setting vertex to " << mVertexX << " " << mVertexY << " " << mVertexZ << endm;
+  LOG_INFO << "Setting vsigma to " << mSigmaX << " " << mSigmaY << " " << mSigmaZ << endm;
+
   SetVertex( mVertexX, mVertexY, mVertexZ );
   SetSigma ( mSigmaX,  mSigmaY,  mSigmaZ  ); // smears the simulated vertex by the real vtx error... should be an option
 
@@ -70,6 +77,12 @@ int StarEmbedMaker::Make()
   }
 
   mPrimaryEvent->Print();
+
+  // Now we set the vertex for the vertex finder
+  //auto* vertexMaker  = dynamic_cast<StGenericVertexMaker *>( GetMaker("GenericVertex") );       assert(vertexMaker);
+  //auto* vertexFinder = dynamic_cast<StFixedVertexFinder  *>( vertexMaker->GetGenericFinder() ); assert(vertexFinder);
+  //vertexFinder->SetVertexPosition( mVertexX, mVertexY, mVertexZ );
+  //vertexFinder->SetVertexError   ( mSigmaX,  mSigmaY,  mSigmaZ );
 
   return result;
 }
