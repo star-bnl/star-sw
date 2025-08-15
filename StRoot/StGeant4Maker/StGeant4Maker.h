@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include "StMCParticleStack.h"
+#include "TGeoManager.h"
 
 #include <functional>
 
