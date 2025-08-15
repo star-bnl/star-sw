@@ -574,6 +574,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("embedding:mode",0,"Sets embedding mode.  Default=0 off."); // defaults to no embedding mode
 
 
+  AddOption("tpchitaction",1,"0: keep all hits, 1: filter bad hits, 2: assert on bad hits");
     
   // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
