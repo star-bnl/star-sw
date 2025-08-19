@@ -449,9 +449,9 @@ Int_t StMcEventMaker::Make()
     if (Debug()>=1) cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
     
-    const Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
+    const Char_t* geaTmp[]={"geant","event/geant/Event","bfcTree/geantBranch","geant4star"};
     St_DataSet* dsGeant = 0;
-    for(UInt_t i=0; i<3; i++){ 
+    for(UInt_t i=0; i<sizeof(geaTmp)/sizeof(char*); i++){ 
       dsGeant = GetDataSet(geaTmp[i]);
       if(!dsGeant || !dsGeant->GetList()) {
 	gMessMgr->Warning() << "Could not find dataset " << geaTmp[i] << endm;
