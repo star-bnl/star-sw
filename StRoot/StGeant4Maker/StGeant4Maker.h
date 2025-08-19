@@ -291,6 +291,9 @@ protected:
 
   std::vector< std::function<void()> > mPostSteppingActions;
 
+  TGeoManager* mGeometry;
+  TGeoManager* mGeometryG4;
+
   ClassDef(StGeant4Maker,0);
 
 public:

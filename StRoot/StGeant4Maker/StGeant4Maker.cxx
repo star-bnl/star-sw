@@ -482,7 +482,10 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mPreviousTrackingRegion(2),
   acurr(0),aprev(0),
   mEventHeader(0),
-  mDefaultEngine(0)
+  mDefaultEngine(0),
+  mPostSteppingActions(),
+  mGeometry(0),
+  mGeometryG4(0)
 { 
 
 
@@ -718,12 +721,17 @@ int StGeant4Maker::Init() {
  
   }
 
+  // Restore geometry
+  gGeoManager = mGeometry;
+
   return StMaker::Init();
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::InitRun( int /* run */ ){
 
   LOG_INFO << "InitRun" << endm;
+
+  gGeoManager = mGeometryG4;
 
   auto result = kStOK;
 
@@ -765,6 +773,8 @@ int StGeant4Maker::InitRun( int /* run */ ){
     LOG_FATAL << "Primary event generator not registered" << endm;
     result = kStFatal;
   }
+
+  gGeoManager = mGeometry;
   
   return result;
 }
@@ -826,8 +836,27 @@ int  StGeant4Maker::InitGeom() {
   assert(gGeoManager);
 
   LOG_INFO << "Geometry constructed." << endm;
-  TGeoVolume* top = gGeoManager->FindVolumeFast( SAttr("AgMLOpt:TopVolume") );
-  gGeoManager->SetTopVolume( top );
+  {
+    TGeoVolume* top = gGeoManager->FindVolumeFast( SAttr("AgMLOpt:TopVolume") );
+    gGeoManager->SetTopVolume( top );
+    AddObj(gGeoManager,".const");
+  }
+
+  // Stash the geometry
+  mGeometryG4 = gGeoManager;
+
+  // Clone the geometry for Sti and other STAR consumers
+  gGeoManager = 0;
+  mGeometry = dynamic_cast<TGeoManager*>( mGeometryG4->Clone("STIgeom") );
+  {
+    TGeoVolume* top = gGeoManager->FindVolumeFast( SAttr("AgMLOpt:TopVolume") );
+    gGeoManager->SetTopVolume( top );
+    AddObj(gGeoManager,".const");
+  }
+  
+
+  // Restore geometry for the duration of Init
+  gGeoManager = mGeometryG4;
 
   return kStOK;
 }
@@ -846,6 +875,8 @@ int StGeant4Maker::InitHits() {
 struct A { };
 struct B { };
 int StGeant4Maker::Make() {
+
+  gGeoManager = mGeometryG4;
 
   static int eventNumber  = 1;
   const  int runnumber   = IAttr("runnumber");
@@ -873,14 +904,19 @@ int StGeant4Maker::Make() {
   // Dump the  stack at the end of make
   //  mMCStack -> StackDump(); 
 
+  gGeoManager = mGeometry;
+
   return kStOK; 
 }
 //________________________________________________________________________________________________
 void StGeant4Maker::Clear( const Option_t* opts ){
 
+  gGeoManager = mGeometryG4;
+
   mMCStack -> Clear(); // Clear the MC stack
   acurr = aprev = 0;   // zero out pointers to the current and previous agml extensions
 
+  gGeoManager = mGeometry;
 
   StMaker::Clear();
 }
