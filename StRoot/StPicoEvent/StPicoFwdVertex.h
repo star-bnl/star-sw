@@ -32,7 +32,10 @@ public:
     /// Destructor
     virtual ~StPicoFwdVertex() {}
 
-    virtual void Print(const Char_t *option = "") const {}
+    virtual void Print(const Char_t *option = "") const {
+        printf("StPicoFwdVertex: Position = (%.3f, %.3f, %.3f) cm, Chi2 = %.3f, Number of Tracks = %u\n",
+               mPositionX, mPositionY, mPositionZ, mChi2, mNumberOfTracks);
+    }
     /// Return unique Id of the track
     Int_t   id() const              { return mId; }
     /// Return chi2 of the track
