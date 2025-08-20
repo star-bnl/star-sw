@@ -32,8 +32,11 @@ public:
     /// Destructor
     virtual ~StPicoFwdVertex() {}
 
-    virtual void Print(const Char_t *option = "") const {}
-    /// Return unique Id of the track
+    virtual void Print(const Char_t *option = "") const {
+        printf("StPicoFwdVertex: Position = (%.3f, %.3f, %.3f) cm, Chi2 = %.3f, Number of Tracks = %u\n",
+               mPositionX, mPositionY, mPositionZ, mChi2, mNumberOfTracks);
+    }
+    /// Return unique Id of the vertex
     Int_t   id() const              { return mId; }
     /// Return chi2 of the track
     Float_t chi2() const            { return mChi2; }
@@ -60,7 +63,7 @@ protected:
     // Track quality and convergence
     /// Unique track ID
     UShort_t mId;
-    /// Number of points used in seed
+    /// Number of tracks associated with the vertex
     UChar_t mNumberOfTracks;
     /// Chi2 of the track
     Float_t mChi2;

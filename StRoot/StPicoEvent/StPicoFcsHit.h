@@ -37,7 +37,7 @@ public:
     
 protected:
     UShort_t mDetectorId;      // DetectorId
-    UShort_t mId;              // Id of the hit winthin a detectorId
+    UShort_t mId;              // Id of the hit within a detectorId
     Float_t mFourMomentumX;  // Four momentum component X
     Float_t mFourMomentumY;  // Four momentum component Y
     Float_t mFourMomentumZ;  // Four momentum component Z
