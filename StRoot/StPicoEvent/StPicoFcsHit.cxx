@@ -17,4 +17,6 @@ StPicoFcsHit::~StPicoFcsHit(){
 }
 
 void StPicoFcsHit::Print(const Char_t* option __attribute__((unused))) const {
+    printf("StPicoFcsHit: DetectorId=%d, Id=%d, FourMomentum=(%.3f, %.3f, %.3f, %.3f)\n",
+           mDetectorId, mId, mFourMomentumX, mFourMomentumY, mFourMomentumZ, mFourMomentumT);
 }
