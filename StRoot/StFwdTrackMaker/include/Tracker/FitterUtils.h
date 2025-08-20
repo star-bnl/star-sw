@@ -12,7 +12,6 @@
 #include "GenFit/TGeoMaterialInterface.h"
 #include "GenFit/Track.h"
 #include "GenFit/TrackPoint.h"
-
 #include "TVector3.h"
 
 
@@ -60,6 +59,10 @@ class GenericFitSeeder : public FitSeedMaker {
 
             if (area == 0) {
                 std::cerr << "The points are collinear, curvature is undefined." << std::endl;
+                // Show each point:
+                std::cout << "p1 = " << p1.x << ", " << p1.y << std::endl;
+                std::cout << "p2 = " << p2.x << ", " << p2.y << std::endl;
+                std::cout << "p3 = " << p3.x << ", " << p3.y << std::endl;
                 return -1e-7; // Curvature is undefined for collinear points
             }
 
@@ -90,6 +93,13 @@ class GenericFitSeeder : public FitSeedMaker {
                         Point p1 = {points[j]->getX(), points[j]->getY()};
                         Point p2 = {points[k]->getX(), points[k]->getY()};
                         double curvature = computeSignedCurvature(p0, p1, p2);
+                        // printf("Curvature for points (%d, %d, %d): %f\n", i, j, k, curvature);
+                        if ( i != 0 || k != numPoints - 1 ) { // skip if not using the first and last point
+                            // This improves the seed charge estimate substantially for the beamline / primary tracks
+                            // momentum resolution also benefits somewhat
+                            // printf("Skipping non extreme points \n");
+                            continue;
+                        }
                         if (curvature != -1) {  // Exclude invalid (collinear) combinations
                             totalCurvature += curvature;
                             ++validCombinations;
@@ -111,15 +121,15 @@ class GenericFitSeeder : public FitSeedMaker {
         }
         virtual void makeSeed(Seed_t seed, TVector3 &posSeed, TVector3 &momSeed, int &q ) {
             const double qc = averageCurvature(seed);
-            LOG_DEBUG << "GenericFitSeeder::makeSeed averageCurvature: " << qc << endm;
-            posSeed.SetXYZ(0,0,0);
+            LOG_INFO << "GenericFitSeeder::makeSeed::Curvature: " << qc << endm;
+            // posSeed.SetXYZ(seed[0]->getX(), seed[0]->getY(), seed[0]->getZ());
             momSeed.SetXYZ(0,0,10);
         
-            const double BStrength = 0.5; // 0.5 T
-            const double C = 0.3 * BStrength; //C depends on the units used for momentum and Bfield (here GeV and Tesla)
+            // const double BStrength = 0.5; // 0.5 T = 5 Gauss
+            // const double C = 0.3 * BStrength; //C depends on the units used for momentum and Bfield (here GeV and Tesla)
             const double K = 0.00029979; // K depends on the units used for Bfield and momentum (here Gauss and GeV)
             double pt = fabs((K*5)/qc); // pT from average measured curv
-            LOG_DEBUG << "GenericFitSeeder::makeSeed::pt = " << pt << endm;
+            LOG_INFO << "GenericFitSeeder::makeSeed::pt = " << pt << endm;
             // set the momentum seed's transverse momentum
             momSeed.SetXYZ(pt/sqrt(2.0),pt/sqrt(2.0),10);
             // compute the seed's eta from seed points

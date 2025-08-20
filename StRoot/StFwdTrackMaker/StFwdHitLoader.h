@@ -4,7 +4,7 @@
 #ifndef __CINT__
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #include "StFwdTrackMaker/include/Tracker/FwdDataSource.h"
-#elif 
+#else
 class FwdHit;
 #endif
 

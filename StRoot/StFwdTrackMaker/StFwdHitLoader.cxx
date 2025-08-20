@@ -69,7 +69,7 @@ TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.00
     TMatrixDSym tamvoc(3);
     tamvoc( 0, 0 ) = cm(0, 0); tamvoc( 0, 1 ) = cm(0, 1); tamvoc( 0, 2 ) = 0.0;
     tamvoc( 1, 0 ) = cm(1, 0); tamvoc( 1, 1 ) = cm(1, 1); tamvoc( 1, 2 ) = 0.0;
-    tamvoc( 2, 0 ) = 0.0;      tamvoc( 2, 1 ) = 0.0; tamvoc( 2, 2 )      = 0.01*0.01;
+    tamvoc( 2, 0 ) = 0.0;      tamvoc( 2, 1 ) = 0.0; tamvoc( 2, 2 )      = 0.1*0.1;
 
 
     return tamvoc;
@@ -115,12 +115,17 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
         hitCov3(0, 0) = sigXY * sigXY;
         hitCov3(1, 1) = sigXY * sigXY;
         hitCov3(2, 2) = 4; // unused since they are loaded as points on plane
-        static const double mm_to_cm = 0.1;
         for ( auto point : col->points() ){
 
-            float xcm = point->xyz().x()*mm_to_cm;
-            float ycm = point->xyz().y()*mm_to_cm;
+            float xcm = point->xyz().x();
+            float ycm = point->xyz().y();
             float zcm = point->xyz().z();
+
+            // Not in StRoot yet...
+            // hitCov3(0, 0) = (double)point->cov()[0][0];
+            // hitCov3(0, 1) = (double)point->cov()[0][1];
+            // hitCov3(1, 0) = (double)point->cov()[1][0];
+            // hitCov3(1, 1) = (double)point->cov()[1][1];
 
             // get the track id
             int track_id = point->idTruth();

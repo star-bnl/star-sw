@@ -10,6 +10,7 @@
 #include <set>
 #include <string.h>
 #include <vector>
+#include <unordered_set>
 
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StFstConsts.h"
@@ -22,7 +23,7 @@ class FwdSystem : public KiTrack::ISectorSystem {
     static const int sNFttLayers = 4;
     static const int sNFstLayers = 3;
     FwdSystem(const int ndisks = FwdSystem::sNFwdLayers) : KiTrack::ISectorSystem(), mNDisks(ndisks){};
-    ~FwdSystem(){/* */};
+    ~FwdSystem() = default;
     virtual unsigned int getLayer(int diskid) const {
         return diskid;
     }
@@ -71,22 +72,10 @@ class McTrack {
 class FwdHit : public KiTrack::IHit {
   public:
   // Default ctor
-    FwdHit() : KiTrack::IHit() {
-        _id = 0;
-        _x = 0;
-        _y = 0;
-        _z = 0;
-        _detid = 0;
-        _tid = 0;
-        _vid = 0;
-        _sector = 0;
-        _mcTrack = nullptr;
-        _hit = 0;
-        _covmat.ResizeTo( 3, 3 );
-    };
+    FwdHit() = default;
     FwdHit(unsigned int id, float x, float y, float z, int vid, int detid, int tid,
-           TMatrixDSym covmat, std::shared_ptr<McTrack> mcTrack )
-        : KiTrack::IHit() {
+        const TMatrixDSym &covmat, std::shared_ptr<McTrack> mcTrack, StHit *hit = nullptr, unsigned int genfit_plane_index = 0)
+        : KiTrack::IHit(), _covmat(covmat) {
         _id = id;
         _x = x;
         _y = y;
@@ -95,15 +84,14 @@ class FwdHit : public KiTrack::IHit {
         _tid = tid;
         _vid = vid;
         _mcTrack = mcTrack;
-        _hit = 0;
-        _covmat.ResizeTo( 3, 3 );
-        _covmat = covmat;
+        _hit = hit;
+        _genfit_plane_index = genfit_plane_index;
 
         // these are the sector ids mapped to layers
-        int map[] = {0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7}; // ftsref6a
+        static const std::array<int,14> sector_map = {0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 5, 6, 7}; // ftsref6a
 
         if (vid > 0)
-            _sector = map[vid];
+            _sector = sector_map[vid];
         else {
             _sector = abs(vid); // set directly if you want
             // now set vid back so we retain info on the tru origin of the hit
@@ -135,7 +123,7 @@ class FwdHit : public KiTrack::IHit {
     bool isEpd() const { return _detid == kFcsPresId; } 
     bool isPV() const { return _detid == kTpcId; }
 
-    std::shared_ptr<McTrack> getMcTrack() { return _mcTrack; }
+    std::shared_ptr<McTrack> getMcTrack() const { return _mcTrack; }
 
     const KiTrack::ISectorSystem *getSectorSystem() const {
         return FwdSystem::sInstance;
@@ -153,16 +141,16 @@ class FwdHit : public KiTrack::IHit {
     }
 
     void setSector( int s ){ _sector = s; }
-    int getTrackId() { return _tid;}
-    int _tid; // aka ID truth
-    int _vid; // volume id
-    int _detid; // detector id
-    unsigned int _id; // just a unique id for each hit in this event.
+    int getTrackId() const { return _tid;}
+    int _tid = -1; // aka ID truth
+    int _vid = -1; // volume id
+    int _detid = -1; // detector id
+    unsigned int _id = 0; // just a unique id for each hit in this event.
     std::shared_ptr<McTrack> _mcTrack;
-    TMatrixDSym _covmat;
+    TMatrixDSym _covmat = TMatrixDSym(3);
 
-    StHit *_hit;
-    unsigned int _genfit_plane_index; //NOT used for isPV==True, since that is an abs measurement
+    StHit *_hit = nullptr;
+    unsigned int _genfit_plane_index = 0; //NOT used for isPV==True, since that is an abs measurement
 };
 
 // Track Seed typdef
@@ -172,7 +160,7 @@ class FwdConnector : public KiTrack::ISectorConnector {
   public:
     FwdConnector(unsigned int distance)
         : _distance(distance) {}
-    ~FwdConnector(){/**/};
+    ~FwdConnector() = default;
 
     // Return the possible sectors (layers) given current
     virtual std::set<int> getTargetSectors(int disk) {
@@ -201,27 +189,23 @@ class FwdConnector : public KiTrack::ISectorConnector {
 };                           // FwdConnector
 
 struct SeedQual {
-    inline double operator()(Seed_t s) { return double(s.size()) / FwdSystem::sNFttLayers ; } // seeds only use the 4 hits from Ftt
+    inline double operator()(Seed_t s) { return double(s.size()) / FwdSystem::sNFstLayers ; } // seeds only use the 3 hits from Fst
 };
 
-struct SeedCompare {
+struct SeedCompatible {
     inline bool operator()(Seed_t trackA, Seed_t trackB) {
-        std::map<unsigned int, unsigned int> hit_counts;
         // we are assuming that the same hit can never be used twice on a single
         // track!
 
+        std::unordered_set<unsigned int> ids;
         for (auto h : trackA) {
-            hit_counts[static_cast<FwdHit *>(h)->_id]++;
+            ids.insert(static_cast<FwdHit*>(h)->_id);
         }
 
         // now look at the other track and see if it has the same hits in it
-        for (auto h : trackB) {
-            hit_counts[static_cast<FwdHit *>(h)->_id]++;
-
-            // incompatible if they share a single hit
-            if (hit_counts[static_cast<FwdHit *>(h)->_id] >= 2) {
+        for (auto h : trackB){
+            if (ids.count(static_cast<FwdHit*>(h)->_id))
                 return false;
-            }
         }
 
         // no hits are shared, they are compatible

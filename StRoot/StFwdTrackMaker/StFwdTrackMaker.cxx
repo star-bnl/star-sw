@@ -1,10 +1,3 @@
-#include "StFwdTrackMaker/StFwdTrackMaker.h"
-#include "StFwdTrackMaker.h"
-#include "StFwdTrackMaker/include/Tracker/FwdHit.h"
-#include "StFwdTrackMaker/include/Tracker/FwdTracker.h"
-#include "StFwdTrackMaker/include/Tracker/TrackFitter.h"
-#include "StFwdTrackMaker/include/Tracker/FwdGeomUtils.h"
-#include "StFwdTrackMaker/include/Tracker/ObjExporter.h"
 
 #include "KiTrack/IHit.h"
 #include "GenFit/Track.h"
@@ -42,7 +35,7 @@
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcVertex.hh"
 
-#include "include/Tracker/GenfitTrackResult.h"
+
 #include "tables/St_g2t_fts_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -76,12 +69,28 @@
 #include "StMemStat.h"
 #include <malloc.h>
 
+// #define LOG_DEBUG if(false) std::cerr
+// #define LOG_INFO if(false) std::cerr
+
+#include "StFwdTrackMaker/StFwdTrackMaker.h"
+#include "StFwdTrackMaker/include/Tracker/FwdHit.h"
+#include "StFwdTrackMaker/include/Tracker/FwdTracker.h"
+#include "StFwdTrackMaker/include/Tracker/TrackFitter.h"
+#include "StFwdTrackMaker/include/Tracker/FwdGeomUtils.h"
+#include "StFwdTrackMaker/include/Tracker/ObjExporter.h"
+
 FwdSystem* FwdSystem::sInstance = nullptr;
 
 StMemStat stm;
 void printMEM(){
     stm.PrintMem();
 }
+
+
+#include <fstream>
+
+#include "StMemStat.h"  // Ensure this is available and correctly included
+
 
 //_______________________________________________________________________________________
 class GenfitUtils{
@@ -204,7 +213,6 @@ StFwdTrackMaker::StFwdTrackMaker() : StMaker("fwdTrack"), mEventVertex(0,0,0), m
 
     // set additional default configuration values
     setOutputFilename( "stfwdtrackmaker_data.root" );
-
     LOG_DEBUG << "Done with StFwdTrackMaker::StFwdTrackMaker()" << endm;  
 };
 
@@ -304,7 +312,6 @@ size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
     if (!g2t_track)
         return 0;
 
-    size_t nShowers = 0;
     LOG_DEBUG << g2t_track->GetNRows() << " mc tracks in geant/g2t_track " << endm;
 
     for (int irow = 0; irow < g2t_track->GetNRows(); irow++) {
@@ -314,11 +321,7 @@ size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
             continue;
 
         int track_id = track->id;
-        float pt2 = track->p[0] * track->p[0] + track->p[1] * track->p[1];
-        float pt = std::sqrt(pt2);
-        float eta = track->eta;
         TVector3 pp( track->p[0], track->p[1], track->p[2] );
-        float phi = std::atan2(track->p[1], track->p[0]); //track->phi;
         int q = track->charge;
         // sometimes the track->eta is wrong, pt, phi
         if (!mcTrackMap[track_id] )
@@ -425,10 +428,6 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
         return mEventVertex;
     }
 
-    int nEast = btofHeader->numberOfVpdHits( east );
-    int nWest = btofHeader->numberOfVpdHits( west );
-    int nTof = btofC->tofHits().size();
-
     if ( btofHeader->vpdVz() && fabs(btofHeader->vpdVz()) < 100 ){
         // default event vertex
         LOG_DEBUG << "FWD Tracking on event using VPD z vertex: (, 0, 0, " << btofHeader->vpdVz() << " )" << endm;
@@ -532,7 +531,7 @@ int StFwdTrackMaker::Make() {
     if (!mcTrackMap.empty()) {
         // Only print this if we have MC tracks
         LOG_INFO << "There are: " << Form( "%d with 0 FST, %d with 1 FST, %d with 2 FST, %d with 3 FST", nFstMcTracks[0], nFstMcTracks[1], nFstMcTracks[2], nFstMcTracks[3] ) << endm;
-        LOG_INFO << "There are: " << Form( "%d with 0 FTT, %d with 1 FTT, %d with 2 FTT, %d with 3 FTT, %d with 4 FTT", nFttMcTracks[0], nFttMcTracks[1], nFttMcTracks[2], nFttMcTracks[3], nFttMcTracks[3] ) << endm;
+        LOG_INFO << "There are: " << Form( "%d with 0 FTT, %d with 1 FTT, %d with 2 FTT, %d with 3 FTT, %d with 4 FTT, %d with 5 FTT, %d with 6 FTT, %d with 7 FTT, %d with 8 FTT", nFttMcTracks[0], nFttMcTracks[1], nFttMcTracks[2], nFttMcTracks[3], nFttMcTracks[4], nFttMcTracks[5], nFttMcTracks[6], nFttMcTracks[7], nFttMcTracks[8] ) << endm;
         LOG_INFO << "There are " << Form( "%d McTracks with > 2 FST hits (#of possible seeds)", idealNumberOfSeeds  ) << endm;
     }
 
@@ -541,6 +540,7 @@ int StFwdTrackMaker::Make() {
     LOG_DEBUG << ">>START Event Forward Tracking" << endm;
     LOG_INFO << "\tFinding FWD Track Seeds" << endm;
     mForwardTracker->findTrackSeeds();
+
     
     // Report the results of the seed finding, in the future we could provide more info about #hits etc.
     LOG_INFO << "<<Fwd Tracking Found : " << mForwardTracker -> getTrackSeeds().size() << " Track Seeds from " << fsiHitMap.size() << " FST hits and " << hitMap.size() << " sTGC hits"  << endm;
@@ -557,6 +557,7 @@ int StFwdTrackMaker::Make() {
     LOG_INFO << "<<Fwd Tracking Fit :" << mForwardTracker -> getTrackResults().size() << " GenFit Tracks" << endm;
     LOG_DEBUG << "<<FINISH Event Forward Tracking" << endm;
     /**********************************************************************/
+
 
     LOG_DEBUG << "Forward tracking on this event took " << (FwdTrackerUtils::nowNanoSecond() - itStart) * 1e-6 << " ms" << endm;
     if ( IAttr("fillEvent") ) {
@@ -611,52 +612,56 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     }
 
     // set total number of seed points
-    fwdTrack->setNumberOfSeedPoints( nSeedPoints );
+    fwdTrack->setNumberOfSeedPoints( nSeedPoints ); 
     int idt = 0;
     double qual = 0;
     idt = MCTruthUtils::dominantContribution(gtr.mSeed, qual);
     fwdTrack->setMc( idt, qual*100 ); // QAtruth stored as UChar_t
     LOG_DEBUG << "Dominant contribution: " << idt << " with quality " << qual << endm;
 
-    // Fit failed beyond use
-    if ( gtr.mTrack == nullptr || gtr.mStatus == nullptr || gtr.mTrack->getNumPoints() == 0 ){
-        // if num points == 0 then calling PVal seg faults :/
-        fwdTrack->setDidFitConverge( false );
-        fwdTrack->setDidFitConvergeFully( false );
-        fwdTrack->setNumberOfFailedPoints( 0 );
-        fwdTrack->setNumberOfFitPoints( 0 );
-        fwdTrack->setChi2( 0 );
-        fwdTrack->setNDF( 0 );
-        fwdTrack->setPval( 0 );
-        fwdTrack->setCharge( 0 );
-        fwdTrack->setVtxIndexAndTrackType( gtr.mVertexIndex, gtr.mTrackType );
-        gtr.Clear();
-        LOG_WARN << "Genfit track is null, has no points, or has no status" << endm;
-        return fwdTrack;
-    }
-    // Fill charge and quality info
-    fwdTrack->setDidFitConverge( gtr.mStatus->isFitConverged() );
-    fwdTrack->setDidFitConvergeFully( gtr.mStatus->isFitConvergedFully() );
-    fwdTrack->setNumberOfFailedPoints( gtr.mStatus->getNFailedPoints() );
 
-    fwdTrack->setNumberOfFitPoints( gtr.mTrack->getNumPoints() );
-    fwdTrack->setChi2( gtr.mStatus->getChi2() );
-    fwdTrack->setNDF( gtr.mStatus->getNdf() );
-    fwdTrack->setPval( gtr.mStatus->getPVal() );
-
-    // charge at first point
+    // for seed only, we save the seed charge and momentum computed from the seed points
     fwdTrack->setCharge( gtr.mCharge );
-    fwdTrack->setDCA( gtr.mDCA.X(), gtr.mDCA.Y(), gtr.mDCA.Z() );
     fwdTrack->setPrimaryMomentum( StThreeVectorD( gtr.mMomentum.X(), gtr.mMomentum.Y(), gtr.mMomentum.Z() ) );
     fwdTrack->setVtxIndexAndTrackType( gtr.mVertexIndex, gtr.mTrackType );
     fwdTrack->setGlobalTrackIndex( gtr.mGlobalTrackIndex);
 
+    // Fit failed beyond use
+    if ( !gtr.mIsFitConvergedPartially|| gtr.mNumFitPoints == 0 ){
+        // if num points == 0 then calling PVal seg faults :/
+        fwdTrack->setDidFitConverge( false );
+        fwdTrack->setDidFitConvergeFully( false );
+        fwdTrack->setNumberOfFailedPoints( 99 );
+        fwdTrack->setNumberOfFitPoints( 0 );
+        fwdTrack->setChi2( 0 );
+        fwdTrack->setNDF( 0 );
+        fwdTrack->setPval( 0 );
+
+        fwdTrack->setNumberOfFitPoints( 1 ); // setting this to 1 so that the charge is still saved as charge * n
+        
+        gtr.Clear();
+        return fwdTrack;
+    }
+    // Fill fit quality info
+    fwdTrack->setDidFitConverge( gtr.mIsFitConverged );
+    fwdTrack->setDidFitConvergeFully( gtr.mIsFitConvergedFully );
+    fwdTrack->setNumberOfFailedPoints( gtr.mNFailedPoints );
+
+    fwdTrack->setNumberOfFitPoints( gtr.mNumFitPoints );
+    fwdTrack->setChi2( gtr.mChi2 );
+    fwdTrack->setNDF( gtr.mNdf );
+    fwdTrack->setPval( gtr.mPval );
+
+    // DCA and fitted momentum
+    fwdTrack->setDCA( gtr.mDCA.X(), gtr.mDCA.Y(), gtr.mDCA.Z() );
+    fwdTrack->setPrimaryMomentum( StThreeVectorD( gtr.mMomentum.X(), gtr.mMomentum.Y(), gtr.mMomentum.Z() ) );
+
     /*******************************************************************************/
     // if the track did not converged, do not try to project it
-    if ( !gtr.mStatus->isFitConvergedFully() ){
+    if ( !gtr.mIsFitConvergedFully ){
         gtr.Clear();
         LOG_WARN << "Genfit track did not converge fully, skipping projections" << endm;
-        fwdTrack->setCharge( 0 ); // set charge to 0 if track did not converge
+
         return fwdTrack;
     }
 
@@ -685,7 +690,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
         float z = zp.second;
         tv3.SetXYZ(0, 0, 0);
         std::fill(std::begin(cov), std::end(cov), 0.0f);
-        LOG_INFO << "Projecting to: " << detIndex << " at z=" << z << endm;
+        LOG_DEBUG << "Projecting to: " << detIndex << " at z=" << z << endm;
         if ( detIndex != kFcsHcalId && detIndex != kFcsWcalId ){
             float detpos[3] = {0,0,z};
             float detnorm[3] = {0,0,1};
@@ -720,7 +725,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
             tv3 = ObjExporter::projectAsStraightLine( gtr.mTrack.get(), xyz0, xyz1, xyzdet, detnorm, cov, mom );
         }
         fwdTrack->mProjections.push_back( StFwdTrackProjection( detIndex, StThreeVectorF( tv3.X(), tv3.Y(), tv3.Z() ), StThreeVectorF( mom.X(), mom.Y(), mom.Z() ), cov) );
-        LOG_INFO << "Projection added for " << detIndex << " at z=" << z << endm;
+        // LOG_INFO << "Projection added for " << detIndex << " at z=" << z << endm;
         zIndex++;
     }
     /*******************************************************************************/
@@ -746,6 +751,7 @@ void StFwdTrackMaker::FillEvent() {
 
     size_t indexTrack = 0;
     for ( auto gtr : mForwardTracker->getTrackResults() ) {
+            LOG_INFO << "Processing GenfitTrackResult(type=" << gtr.mTrackType << "): " << indexTrack << " mIsFitConverged=" << gtr.mIsFitConverged << ", mIsFitConvergedPartially=" << gtr.mIsFitConvergedPartially << ", mNumFitPoints=" << gtr.mNumFitPoints << endm;
             StFwdTrack* fwdTrack = makeStFwdTrack( gtr, indexTrack );
             indexTrack++;
             if (nullptr == fwdTrack)
@@ -811,15 +817,15 @@ std::string StFwdTrackMaker::defaultConfig = R"(
             </SegmentBuilder>
 
             <ThreeHitSegments>
-				<Criteria name="Crit3_3DAngle" min="0" max="6" />
+				<Criteria name="Crit3_3DAngle" min="0" max="1" />
                 <!-- <Criteria name="Crit3_PT" min="0" max="100" /> -->
 				<!-- <Criteria name="Crit3_ChangeRZRatio" min="0.8" max="1.21" /> -->
-				<Criteria name="Crit3_2DAngle" min="0" max="6" />
+				<Criteria name="Crit3_2DAngle" min="0" max="1" />
             </ThreeHitSegments>
 
         </Iteration>
 
-        <Connector distance="2"/>
+        <Connector distance="1"/>
 
         <SubsetNN active="true" min-hits-on-track="3" >
             <!-- <InitialTemp>2.1</InitialTemp> -->
@@ -830,10 +836,6 @@ std::string StFwdTrackMaker::defaultConfig = R"(
 
         <HitRemover active="false" />
     </TrackFinder>
-
-	<TrackFitter refit="true" zeroB="false" active="true">
-        <Vertex sigmaXY="1" sigmaZ="10" includeInFit="true" smearMcVertex="false" />
-    </TrackFitter>
 </config>
 )";
 

@@ -7,6 +7,7 @@
 #include "GenFit/FieldManager.h"
 #include "GenFit/KalmanFitStatus.h"
 #include "GenFit/GblFitter.h"
+#include "GenFit/ProlateSpacepointMeasurement.h"
 
 #include "TDatabasePDG.h"
 #include "TGeoManager.h"
@@ -38,10 +39,13 @@ class TrackFitter {
 // Accessors and options
   public:
     std::shared_ptr<genfit::Track> getTrack() { return mFitTrack; }
+    int getCurrentSeedCharge() const { return mCurrentSeedCharge; }
+    TVector3 getCurrentSeedMomentum() const { return mCurrentSeedMomentum; }
+    TVector3 getCurrentSeedPosition() const { return mCurrentSeedPosition; }
 
     // this is used rarely for debugging purposes, especially to check/compare plane misalignment
-    static const bool kUseSpacePoints = true; // use spacepoints instead of planar measurements
-    static const int kVerbose = 0; // verbosity level for debugging
+    static constexpr bool kUseSpacePoints = true; // use spacepoints instead of planar measurements
+    static constexpr int kVerbose = 1; // verbosity level for debugging
 
     void clear(){
         LOG_DEBUG << "TrackFitter::clear() called" << endm;
@@ -116,7 +120,7 @@ class TrackFitter {
         // note, the pointer is still bound to the lifetime of the TackFitter
         genfit::FieldManager::getInstance()->init(mBField.get());
 
-        setupFitter();
+        setupGenfitKalmanFitter();
 
         // FwdGeomUtils looks into the loaded geometry and gets detector z locations if present
         FwdGeomUtils fwdGeoUtils( gMan );
@@ -150,9 +154,13 @@ class TrackFitter {
      *
      * This is called in the setup() method but could be called again to remake the fitter
      */
-    void setupFitter(){
+    void setupGenfitKalmanFitter(){
         // initialize the main mFitter using a KalmanFitter with reference tracks
-        mFitter = std::unique_ptr<genfit::AbsKalmanFitter>(new genfit::KalmanFitterRefTrack());
+        mFitter = std::unique_ptr<genfit::AbsKalmanFitter>(new genfit::KalmanFitterRefTrack(
+            4, 1e-3, 1e3, true /*sqrt Formalism, must be set in ctor*/
+        ));
+        // Note: sqrt formalism is very helpful/necessary in fwd region, to keep cov pos def. 
+        // We also benefit from the ref track implementation since FST seeds can be consistent with zero pT
 
         // Here we load several options from the config,
         // to customize the mFitter behavior
@@ -163,16 +171,35 @@ class TrackFitter {
 
         // Set the fit convergence paramters
         mFitter->setRelChi2Change( mConfig.get<double>("TrackFitter.KalmanFitterRefTrack:RelChi2Change", 1e-1) );
-        // mFitter->setAbsChi2Change( mConfig.get<double>("TrackFitter.KalmanFitterRefTrack:AbsChi2Change", 1e-1) );
         mFitter->setDeltaPval( mConfig.get<double>("TrackFitter.KalmanFitterRefTrack:DeltaPval", 1e-1) );
         mFitter->setBlowUpMaxVal( 1e9 );
         mFitter->setBlowUpFactor( mConfig.get<double>("TrackFitter.KalmanFitterRefTrack:BlowUpFactor", 1e9) );
 
+        double deltaChi2Ref = mConfig.get<double>("TrackFitter.KalmanFitterRefTrack:DeltaChi2Ref", 1e-1);
         if ( static_cast<genfit::KalmanFitterRefTrack*>(mFitter.get()) != nullptr ) {
             LOG_INFO << "Setting the KalmanFitterRefTrack to update ref track Chi2Ref" << endm;
-            static_cast<genfit::KalmanFitterRefTrack*>(mFitter.get())->setDeltaChi2Ref( 1e-5 );
+            static_cast<genfit::KalmanFitterRefTrack*>(mFitter.get())->setDeltaChi2Ref( 
+                deltaChi2Ref 
+            );
         }
-    }
+
+        // Report all the parameters
+        if (kVerbose > 0) {
+            LOG_INFO << "TrackFitter::setupGenfitKalmanFitter() called" << endm;
+            LOG_INFO << "\tMaxFailedHits: " << mFitter->getMaxFailedHits() << endm;
+            LOG_INFO << "\tMaxIterations: " << mFitter->getMaxIterations() << endm;
+            LOG_INFO << "\tMinIterations: " << mFitter->getMinIterations() << endm;
+            LOG_INFO << "\tRelChi2Change: " << mFitter->getRelChi2Change() << endm;
+            LOG_INFO << "\tDeltaPval: " << mFitter->getDeltaPval() << endm;
+            LOG_INFO << "\tBlowUpFactor: " << mFitter->getBlowUpFactor() << endm;
+            LOG_INFO << "\tBlowUpMaxVal: " << mFitter->getBlowUpMaxVal() << endm;
+            if ( static_cast<genfit::KalmanFitterRefTrack*>(mFitter.get()) != nullptr ) {
+                LOG_INFO << "Using **KalmanFitterRefTrack** with Chi2Ref update @ " << deltaChi2Ref << endm;
+            }
+        }
+
+
+    } // setupGenfitKalmanFitter
 
     /**
      * @brief Convert the 3x3 covmat to 2x2 by dropping z
@@ -299,7 +326,7 @@ class TrackFitter {
             for ( size_t i = 0; i < n; i++ ) {
                 // generate a random seed by sampling the hits
                 Seed_t seed;
-                for ( size_t j = 0; j < rand() % 7 + 3; j++ ) { // 2 - 9 hits per seed
+                for ( int j = 0; j < rand() % 7 + 3; j++ ) { // 2 - 9 hits per seed
                     size_t hitIndex = rand() % stressHits.size();
                     seed.push_back( &stressHits[hitIndex] );    
 
@@ -378,8 +405,33 @@ class TrackFitter {
         pv[2] = fh->getZ();
         LOG_DEBUG << "x = " << pv[0] << "+/- " << fh->_covmat(0,0) << ", y = " << pv[1] << " +/- " << fh->_covmat(1,1) << ", z = " << pv[2] << " +/- " << fh->_covmat(2,2) << endm;
 
+        // TMatrixDSym _covmat = TMatrixDSym(3);
+        // _covmat(0, 0) = 0.5;
+        // _covmat(1, 1) = 0.5;
+        // _covmat(2, 2) = 0.5;
+        // LOG_INFO << "FAKE COVARIANCE MATRIX: " << endm;
         auto tp = new genfit::TrackPoint();
-        genfit::SpacepointMeasurement *measurement = new genfit::SpacepointMeasurement(pv, fh->_covmat, fh->_detid, ++hitId, tp);
+
+        genfit::SpacepointMeasurement *measurement = nullptr;
+        if (fh->isFst() ){
+            // largest error direction is in the radial direction, compute from cartesian coordinates
+            TVector3 led( fh->getX(), fh->getY(), 0 );
+            led.SetMag(1.0);
+            measurement = new genfit::ProlateSpacepointMeasurement(pv, fh->_covmat, fh->_detid, ++hitId, tp);
+            static_cast<genfit::ProlateSpacepointMeasurement*>(measurement)->setLargestErrorDirection( led );
+        } else if (fh->isFtt() ){
+            // largest error direction is in the radial direction, compute from cartesian coordinates
+            TVector3 led( fh->getX(), fh->getY(), 0 );
+            if ( fh->_covmat(0,0) > fh->_covmat(1,1))
+                led.SetXYZ( 1.0, 0, 0 );
+            else 
+                led.SetXYZ( 0.0, 1.0, 0 );
+            measurement = new genfit::ProlateSpacepointMeasurement(pv, fh->_covmat, fh->_detid, ++hitId, tp);
+            static_cast<genfit::ProlateSpacepointMeasurement*>(measurement)->setLargestErrorDirection( led );
+        } else {
+            measurement = new genfit::SpacepointMeasurement(pv, fh->_covmat, fh->_detid, ++hitId, tp);
+        }
+        
         tp->addRawMeasurement(measurement);
         if ( fitTrack ){
             tp->setTrack(fitTrack.get());
@@ -405,7 +457,7 @@ class TrackFitter {
 
     void summarizeTrackReps() {
         LOG_INFO << "Track Reps: " << mFitTrack->getNumReps() << endm;
-        for (int i = 0; i < mFitTrack->getNumReps(); i++) {
+        for (size_t i = 0; i < mFitTrack->getNumReps(); i++) {
             auto tr = mFitTrack->getTrackRep(i);
             // LOG_INFO << "Track Rep " << i << ": " << tr->getName() << endm;
             LOG_INFO << "Track Rep " << i << " " << endm;
@@ -431,36 +483,42 @@ class TrackFitter {
         mCurrentTrackSeed = trackSeed;
         // setup the track fit seed parameters
         GenericFitSeeder gfs;
-        int seedQ = 1;
-        TVector3 seedPos(0, 0, 0);
-        TVector3 seedMom(0, 0, 10); // this default seed actually works better than a half-bad guess
-        // gfs.makeSeed( trackSeed, seedPos, seedMom, seedQ );
+        mCurrentSeedCharge = 0; // explicitly reset because a zero charge indicates a failed seed
+        gfs.makeSeed(   trackSeed, 
+                        mCurrentSeedPosition, 
+                        mCurrentSeedMomentum, 
+                        mCurrentSeedCharge 
+                    );
+        if ( mCurrentSeedMomentum.Perp() > 1000 ) {
+            LOG_WARN << "Seed momentum is too high, setting to (0,0,1)" << endm;
+            mCurrentSeedMomentum.SetXYZ(0, 0, 1);
+        }
 
         if ( externalSeedMom != nullptr ) {
             LOG_INFO << "Note: Using externally provided seed momentum" << endm;
-            seedMom = *externalSeedMom;
+            mCurrentSeedMomentum = *externalSeedMom;
         } else {
-            seedMom.SetXYZ(0, 0, 10);
+            // mCurrentSeedMomentum.SetXYZ(0, 0, 10);
         }
 
-        LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(px=%f, py=%f, pz=%f)", seedPos.X(), seedPos.Y(), seedPos.Z() )  << endm; 
-        LOG_DEBUG << "Setting track fit seed momentum = " << TString::Format( "(%f, %f, %f)", seedMom.X(), seedMom.Y(), seedMom.Z() ) << endm;
-        if ( seedMom.Perp() > 1e-5 && (seedMom.Perp() / seedMom.Pz()) > 1e-5 ) {
-            LOG_DEBUG << "\t" << TString::Format( "(pT=%f, eta=%f, phi=%f)", seedMom.Perp(), seedMom.Eta(), seedMom.Phi() ) << endm;
+        LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(px=%f, py=%f, pz=%f)", mCurrentSeedPosition.X(), mCurrentSeedPosition.Y(), mCurrentSeedPosition.Z() )  << endm; 
+        LOG_DEBUG << "Setting track fit seed momentum = " << TString::Format( "(%f, %f, %f)", mCurrentSeedMomentum.X(), mCurrentSeedMomentum.Y(), mCurrentSeedMomentum.Z() ) << endm;
+        if ( mCurrentSeedMomentum.Perp() > 1e-5 && (mCurrentSeedMomentum.Perp() / mCurrentSeedMomentum.Pz()) > 1e-5 ) {
+            LOG_DEBUG << "\t" << TString::Format( "(pT=%f, eta=%f, phi=%f)", mCurrentSeedMomentum.Perp(), mCurrentSeedMomentum.Eta(), mCurrentSeedMomentum.Phi() ) << endm;
         }
-        LOG_DEBUG << "Setting track fit seed charge = " << seedQ << endm;
+        LOG_DEBUG << "Setting track fit seed charge = " << mCurrentSeedCharge << endm;
 
-        if ( seedQ == 0 ) {
+        if ( mCurrentSeedCharge == 0 ) {
             LOG_ERROR << "Seed charge is zero, skipping track -> usually means collinear points" << endm;
             return false;
         }
 
         // create the track representations
         // Note that multiple track reps differing only by charge results in a silent failure of GenFit
-        auto pionRep = new genfit::RKTrackRep(mPdgPiPlus);
+        auto pionRep = new genfit::RKTrackRep(mPdgPiPlus * mCurrentSeedCharge);
 
         // Create the track
-        mFitTrack = std::make_shared<genfit::Track>(pionRep, seedPos, seedMom);
+        mFitTrack = std::make_shared<genfit::Track>(pionRep , mCurrentSeedPosition, mCurrentSeedMomentum);
         mFitTracks.push_back(mFitTrack);
         // now add the points to the track
 
@@ -545,17 +603,17 @@ class TrackFitter {
                 LOG_INFO << "Fit status:  " << status->isFitConverged() << endm;
                 LOG_INFO << "-Fit pvalue: " << status->getPVal() << endm;
                 LOG_INFO << "-Fit Chi2:   " << status->getChi2() << endm;
+                LOG_INFO << "-Fit Chi2:   " << status->getChi2() << endm;
             }
 
-            if ( status->isFitConverged() ){
+            if ( status->isFitConverged() && kVerbose > 0 ){
              
                 auto cr = trackPointer->getCardinalRep();
                 auto p = cr->getMom( trackPointer->getFittedState( 0, cr ));
-                int rcQ = status->getCharge(); 
-                if ( kVerbose > 0 ) { 
-                    LOG_INFO << "Fit momentum: " << p.X() << ", " << p.Y() << ", " << p.Z() << endm;
-                    LOG_INFO << "\tFit Pt: " << p.Pt() << ", eta: " << p.Eta() << ", phi: " << p.Phi() << endm;
-                }
+                
+                LOG_INFO << "Track fit charge: " << status->getCharge();
+                LOG_INFO << "Fit momentum: " << p.X() << ", " << p.Y() << ", " << p.Z() << endm;
+                LOG_INFO << "\tFit Pt: " << p.Pt() << ", eta: " << p.Eta() << ", phi: " << p.Phi() << endm;
             }
 
 
@@ -699,6 +757,9 @@ class TrackFitter {
     std::shared_ptr<genfit::Track> mFitTrack;
     vector<std::shared_ptr<genfit::Track>> mFitTracks; // save all genfitTracks to make sure we clear them properly
     Seed_t mCurrentTrackSeed;
+    int mCurrentSeedCharge = 0; // current seed charge, used for debugging
+    TVector3 mCurrentSeedMomentum = TVector3(0, 0, 10); // current seed momentum, used for debugging
+    TVector3 mCurrentSeedPosition = TVector3(0, 0, 0); // current seed position, used for debugging
 };
 
 

@@ -204,7 +204,7 @@ class StFwdTrackMaker : public StMaker {
     /** @brief Turn off track fitting
      * Useful if you want to speed up the run but dont need fitting (testing seed finding)
     */
-    void setTrackFittingOff() { mFwdConfig.set( "TrackFitter:active", "false" ); }
+    void setTrackFittingOff() { mFwdConfig.set<bool>( "TrackFitter:active", false ); }
     /** @brief Enable / disable material effects
      * Material effects in kalman filter
     */
