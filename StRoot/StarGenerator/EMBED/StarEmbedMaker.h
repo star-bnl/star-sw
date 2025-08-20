@@ -27,11 +27,16 @@ protected:
   TFile*      mFile;
   TTree*      mTree;
 
-  long long mCurrentEntry;
+  long long mCurrentEntry;            // TODO: Use the actual tags structure (GlobalTags.idl)
   int mRun;
   int mEvent;
   double mVertexX, mVertexY, mVertexZ;
   double mSigmaX, mSigmaY, mSigmaZ;
+
+  unsigned int mTriggerId[32]; 
+  unsigned int mNumberOfPrimaries;
+  short mPrimaryVertexFlag;
+  
 
 
   
