@@ -63,7 +63,7 @@ protected:
     // Track quality and convergence
     /// Unique track ID
     UShort_t mId;
-    /// Number of points used in seed
+    /// Number of tracks associated with the vertex
     UChar_t mNumberOfTracks;
     /// Chi2 of the track
     Float_t mChi2;
