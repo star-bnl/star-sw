@@ -182,7 +182,7 @@ int StFwdQAMaker::Finish() {
 
     //beginning new
     if ( mLocalOutputFile != "" ){
-        auto prevDir = TDirectory::CurrentDirectory();
+        TDirectory* prevDir = TDirectory::CurrentDirectory();
 
         // output file name
         TFile *fOutput = new TFile(mLocalOutputFile, "RECREATE");
