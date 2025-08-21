@@ -182,18 +182,18 @@ int StFwdQAMaker::Finish() {
 
     //beginning new
     if ( mLocalOutputFile != "" ){
-        auto prevDir = gDirectory;
+        TDirectory* prevDir = TDirectory::CurrentDirectory();
 
         // output file name
         TFile *fOutput = new TFile(mLocalOutputFile, "RECREATE");
         fOutput->cd();
         for (auto nh : mHists) {
-            nh.second->SetDirectory(gDirectory);
+            nh.second->SetDirectory(TDirectory::CurrentDirectory());
             nh.second->Write();
         }
 
         // restore previous directory
-        gDirectory = prevDir;
+        prevDir->cd();
 
         LOG_INFO << "Done writing StFwdQAMaker output to local file : " << mLocalOutputFile << endm;
     }//end new
