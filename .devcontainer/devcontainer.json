@@ -1,4 +1,5 @@
 {
     "name": "star-sw",
-    "image": "ghcr.io/star-bnl/star-sw:latest"
+    "image": "ghcr.io/star-bnl/star-sw:latest",
+    "remoteUser": "root"
 }
