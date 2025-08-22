@@ -1,5 +1,6 @@
 {
     "name": "star-sw",
     "image": "ghcr.io/star-bnl/star-sw:latest",
+    "postAttachCommand": "bash -l",
     "remoteUser": "root"
 }
