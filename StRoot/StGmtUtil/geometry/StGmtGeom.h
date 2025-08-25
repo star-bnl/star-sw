@@ -10,6 +10,7 @@
 #define _ST_GMT_GEOM_H_
 
 #include <TVector3.h>
+#include <TString.h>
 #include <string>
 #include <sstream>
 #include <cstdlib>
