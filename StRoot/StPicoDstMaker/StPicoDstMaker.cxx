@@ -4,6 +4,7 @@
 
 // C++ headers
 #include <algorithm>
+#include <cstddef>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -2577,22 +2578,30 @@ void StPicoDstMaker::fillFwdTracks() {
 
       // fill matched ecal and hcal clusters for the track
       // ecal
+      size_t nUnmatchedEcal = 0;
       for ( auto & cluster : evTrack->ecalClusters() ){
         if ( mMapFcsIdPairIndex.count( make_pair( cluster->detectorId(), cluster->id() ) ) == 0 ){
-          LOG_WARN << "No FCS cluster found for ecal cluster with id " << cluster->id() << " and detectorId " << cluster->detectorId() << endm;
+          nUnmatchedEcal++;
           continue;
         }
         int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
         picoFwdTrack.addEcalCluster( index );
       }
+      if ( nUnmatchedEcal > 0 ){
+        LOG_ERROR << "No FCS cluster found for " << nUnmatchedEcal << " ecal clusters" << endm;
+      }
       // hcal
+      size_t nUnmatchedHcal = 0;
       for ( auto & cluster : evTrack->hcalClusters() ){
         if ( mMapFcsIdPairIndex.count( make_pair( cluster->detectorId(), cluster->id() ) ) == 0 ){
-          LOG_WARN << "No FCS cluster found for hcal cluster with id " << cluster->id() << " and detectorId " << cluster->detectorId() << endm;
+          nUnmatchedHcal++;
           continue;
         }
         int index = mMapFcsIdPairIndex[ make_pair( cluster->detectorId(), cluster->id() ) ];
         picoFwdTrack.addHcalCluster( index );
+      }
+      if ( nUnmatchedHcal > 0 ){
+        LOG_ERROR << "No FCS cluster found for " << nUnmatchedHcal << " hcal clusters" << endm;
       }
 
       // Now set the projections for ECal and HCal
