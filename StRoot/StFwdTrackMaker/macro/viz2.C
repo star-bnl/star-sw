@@ -1,4 +1,4 @@
-//usr/bin/env root -l -b -q  $0'('$1')'; exit $?
+//usr/bin/env root -l -b -q  $0'("'$1'")'; exit $?
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
