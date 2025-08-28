@@ -1857,7 +1857,7 @@ void StPicoDstMaker::fillEvent() {
 
   picoEvent->setGRefMult( ev->grefmult() );
   picoEvent->setNumberOfGlobalTracks( mMuDst->numberOfGlobalTracks() );
-  if (mMuDst->numberOfPrimaryVertices() > 0 && mMuDst->primaryTracks() ){ //calling mMudst->numberOfPrimaryTracks() will crash if there are no primary vertices
+  if (mMuDst->primaryTracks() ){ //calling mMudst->numberOfPrimaryTracks() will crash if there are no primary vertices
     picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
   } else {
     picoEvent->setNumberOfPrimaryTracks( 0 );
