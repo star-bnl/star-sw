@@ -505,7 +505,7 @@ class ForwardTrackMaker {
 
         LOG_DEBUG << "--Setting seed on GenfitTrackResult, seed has " << seed.size() << " hits" << endm;
         // First, set the seed information
-        gtr.setSeed( seed ); // tODO: ADD momentum and charge
+        gtr.setSeed( seed ); // TODO: ADD momentum and charge
 
         // If we are using a provided momentum state
         if ( momentumSeedState ){
