@@ -1042,7 +1042,7 @@ void StPicoDstMaker::fillTracks() {
   
   // Retrieve number of primary tracks
   Int_t nPrimarys = 0;
-  if (mMuDst->primaryTracks() == nullptr) {
+  if (mMuDst->primaryTracks() != nullptr) {
     nPrimarys = mMuDst->numberOfPrimaryTracks();
   }
 
