@@ -1039,11 +1039,12 @@ void StPicoDstMaker::fillTracks() {
   // all vertices
   std::unordered_map<unsigned int, unsigned int> index2Primary;
   
-  if (mMuDst->primaryTracks() == nullptr) {
-    return;
-  }
+  
   // Retrieve number of primary tracks
-  Int_t nPrimarys = mMuDst->numberOfPrimaryTracks();
+  Int_t nPrimarys = 0;
+  if (mMuDst->primaryTracks() == nullptr) {
+    nPrimarys = mMuDst->numberOfPrimaryTracks();
+  }
 
   // Loop over primary trakcs
   for (int i = 0; i < nPrimarys; ++i) {
