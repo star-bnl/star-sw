@@ -1663,7 +1663,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                       "New simulator for BEMC",kFALSE},
   {"EEfs"     ,"eefs","","eemcDb,EEmcUtil,MuDst","StEEmcFastMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC fast simulator",kFALSE},
-  {"EEss"     ,"eess","","-eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
+  {"EEss"     ,"eess","","eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC slow simulator",kFALSE},
   {"BEmcMixer", "","","",                          "StEmcMixerMaker","StEmcMixerMaker","BEMC mixer",kFALSE},
   {"emcAtoE"  ,"bemcA2E","" ,"db","StEmcADCtoEMaker","StEmcADCtoEMaker"
