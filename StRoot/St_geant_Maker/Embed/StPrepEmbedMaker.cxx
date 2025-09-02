@@ -530,6 +530,14 @@ Int_t StPrepEmbedMaker::Make()
   if((vfinder) && (vfinder->IsFixed())){
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
      vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
+     LOG_INFO << "StPrepEmbedMaker::Make set vertex x/y/z= " 
+	      << xyz[0] << "/" 
+	      << xyz[1] <<"/" 
+	      << xyz[2] 
+	      << " sigma x/y/z=" 
+	      << xyzerr[0] << "/" 
+	      << xyzerr[1] <<"/" 
+	      << xyzerr[2] << endm;
   }
   else {
     LOG_WARN << "StPrepEmbedMaker::Make  a fixed vertex finder is not in the chain, vertex position and errors are not set!" << endm;
