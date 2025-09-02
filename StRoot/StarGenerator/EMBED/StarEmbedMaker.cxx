@@ -97,7 +97,7 @@ int StarEmbedMaker::Make()
   StEvtHddr* EvtHddr = (StEvtHddr*) GetDataSet("EvtHddr");
   if (! EvtHddr) {
     LOG_ERROR << "StarEmbedMaker::Make EvtHddr has not been found" << endm;
-    return kStErr;
+    return kStSKIP;
   }
 
   // Get the tags file entry from the current run and event number
@@ -105,7 +105,7 @@ int StarEmbedMaker::Make()
   if ( 1 != valid ) {
     LOG_ERROR << "StarEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber() 
 	      << " has been found in tag file" << valid << " times" <<  endm;
-    return kStErr;
+    return kStSKIP;
   }
 
   mCurrentEntry = (int)mTree->GetV1()[0];
@@ -128,7 +128,7 @@ int StarEmbedMaker::Make()
 
   if ( 0==mNumberOfPrimaries || mPrimaryVertexFlag ) {
     LOG_ERROR << "StarEmbedMaker::Make reject this event (no primaries||novertex)" << endm;
-    return kStErr;
+    return kStSKIP;
   }
 
 
@@ -233,9 +233,17 @@ int StarEmbedMaker::Make()
   if((vfinder) && (vfinder->IsFixed())){
     vfinder->SetVertexPosition(mVertexX,mVertexY,mVertexZ);
     vfinder->SetVertexError(mSigmaX,mSigmaY,mSigmaZ);
+    LOG_INFO << "StarEmbedMaker::Make set vertex x/y/z= " 
+	     << mVertexX << "/" 
+	     << mVertexY <<"/" 
+	     << mVertexZ 
+	     << " sigma x/y/z=" 
+	     << mSigmaX << "/" 
+	     << mSigmaY <<"/" 
+	     << mSigmaZ << endm;
   }
   else {
-    LOG_WARN << "StPrepEmbedMaker::Make  a fixed vertex finder is not in the chain, vertex position and errors are not set!" << endm;
+    LOG_WARN << "StarEmbedMaker::Make  a fixed vertex finder is not in the chain, vertex position and errors are not set!" << endm;
   }
 
   SetVertex( mVertexX, mVertexY, mVertexZ );
