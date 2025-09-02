@@ -10,17 +10,17 @@ std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeom
 std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,tpcrs     -ittf,-tpc_daq,nodefault stargen:embed kinematics:embed ry2021a g4star:mk ";
 //std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,     -ittf,-tpc_daq,nodefault stargen:embed kinematics:embed ry2021a g4star:mk ";
 //std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault  ry2021a  ";
+//$$$std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer MiniMcMk McAna useInTracker emcSim bemcMixer eefs eemcmixer nodefault";
 std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer MiniMcMk McAna useInTracker emcSim bemcMixer eefs eemcmixer nodefault";
 
 
 std::string   prepend = "";
 std::string   chain0opts = ( prepend + " " + chain1opts_ + chain2opts_ + " " + chain3opts_ + " " );
 
-std::string   chain1opts = chain1opts_ + " nooutput ";
-//$$$std::string   chain2opts = chain2opts_ + " noinput geant4out ";
-std::string chain2opts = chain2opts_ + " noinput nooutput ";
-std::string   chain3opts = chain3opts_ + " -in noinput ";
-//std::string   chain3opts = chain3opts_ + " -in noinput ";
+std::string   chain1opts = chain1opts_ + " nooutput " ;
+std::string   chain2opts = chain2opts_ + " noinput nooutput " ;
+std::string   chain3opts = chain3opts_ + " -in noinput " ;
+
 
 const bool runchains[] = { false, true, true, true };
 
@@ -60,7 +60,7 @@ StBFChain*  chain1 = 0;
 StBFChain*  chain2 = 0;
 StBFChain*  chain3 = 0;
 
-int    nevents=10;
+int    nevents=1;
 std::string  daqfile="/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22158015_raw_5000016.daq";
 std::string  tagfile="/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22158015_raw_5000016.tags.root";
 double pt_low=0.1;
@@ -72,13 +72,14 @@ double vzhigh = 150.0;
 double vr = 100.0;
 int pid=9;
 double mult=100;
-std::vector<int> triggers = {};
+std::vector<int> triggers = {870010};
 std::string prodName = "P23idAuAu17";
 std::string type = "FlatPT";
 
 
 
 void process( const char* line ){
+  std::cout << "]" << line << std::endl;
   gMessMgr->Info(line);
   gInterpreter->ProcessLine( Form("%s", line) );
 };
@@ -89,10 +90,9 @@ void SetTagFile( const char* tags ) {
   //  process( "auto* embmk = dynamic_cast<StPrepEmbedMaker*>( StMaker::GetTopChain()->Maker(\"PrepEmbed\") );");
   //  process( "assert(embmk);                                           ");
   //  process( Form( "embmk->SetTagFile(\"%s\");                         ", tags ) );
-
   process( "auto* stembed = dynamic_cast<StarEmbedMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );");
   process( Form("stembed->SetAttr(\"tags\",\"%s\");",tags) );
-  //process( Form("stembed->SetInputFile(\"%s\");", tags ) );
+  //  process( Form("stembed->SetInputFile(\"%s\");", tags ) );
 
 }
 void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx, const char* type_ ) {
@@ -184,7 +184,7 @@ void bfcMixer_TpxG4()
     chain3 -> SetFlags( chain3opts.c_str() );
     chain3 -> SetName("Three");
     TString outfile = gSystem->BaseName(daqfile.c_str());    
-    outfile.ReplaceAll(".daq",".root");
+    outfile.ReplaceAll(".daq","_G4.root");
     chain3->Set_IO_Files(nullptr, outfile);
   };
 
@@ -219,35 +219,33 @@ void bfcMixer_TpxG4()
     auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpcmixer);
     tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
     tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
+
+    auto*  eefs_ = chain3->Maker("eefs"); 
+    auto*  eess_ = chain3->Maker("eess"); 
+    if (eefs_) eefs_->SetAttr("embedding",1);
+    if (eess_) eess_->SetAttr("embedding",1);
+
+    //    auto*  mcmk_ = 
+
+    //    const char* setup_eemc = 
+    //      "auto*  eefs_ = StMaker::GetChain()->Maker(\"eefs\"); "
+    //      //      "if (0==eefs)      eefs = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcFastSim\"); "
+    //      "auto*  eess_ = StMaker::GetChain()->Maker(\"eess\"); "
+    //      //      "if (0==eess)      eess = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcSlowSim\"); "
+    //      //      "StEEmcMixerMaker* eemx = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcMixer\"); "
+    //      //      "StMaker*          mcev = StMaker::GetChain()->Maker(\"StMcEventMaker\"); "
+    //      "if ( eefs_ )       eefs_->SetAttr("
+    //      "if ( eess_ )       eess_->setEmbeddingMode(); "
+    //      //      "if ( eefs && eemx )       StMaker::GetChain()->AddBefore( eemx->GetName(), eefs ); "
+    //      //  "if ( eess && eemx )       StMaker::GetChain()->AddBefore( eemx->GetName(), eess ); "
+    //      // "if ( eemx && mcev )       StMaker::GetChain()->AddAfter( eemx->GetName(), mcev ); "      
+    //      ;
+
+    //    process(setup_eemc);
   }
-
-#if 1
-
-  if ( chain3 ) {
-    process("auto* eefs = (dynamic_cast<StEEmcFastMaker*>)StMaker::GetChain()->Maker(\"eefs\");  eefs=(eefs)?eefs:StMaker::GetChain()->Maker(\"EEmcFastSim\");");
-    process("auto* eess = (dynamic_cast<StEEmcSlowMaker*>)StMaker::GetChain()->Maker(\"eess\");");
-    process("auto* eemx = (dynamic_cast<StEEmcMixerMaker*>)StMaker::GetChain()->Maker(\"EEmcMixer\");");  
-    process("if ( eemx && eefs ) { eefs->SetEmbeddingMode(); StMaker::GetChain()->AddBefore( eemx->GetName(), eefs ); }");
-    process("if ( eemx && eess ) { eess->SetEmbeddingMode(); StMaker::GetChain()->AddBefore( eemx->GetName(), eess ); }");
-
-
-    //
-    // Make sure mcevent runs after the eemc mixer
-    //
-    //  auto* mcevent = chain3->Maker("StMcEventMaker");  assert(mcevent);
-    //  chain3->AddAfter( eemx->GetName(), mcevent );
-    process("StMaker* mcevent=StMaker::GetChain()->Maker(\"StMcEventMaker\");");
-    process("StMaker::GetChain()->AddAfter(eemx->GetName(), mcevent );");
-  }
-
-  //
-  // Configure prep embedding maker
-  //
-#endif
 
   top->cd();
 
-  process("StiDetectorBuilder::setDebug(10);");
 
 #if 1
   auto* g4star = chain2->Maker("geant4star");
@@ -255,6 +253,7 @@ void bfcMixer_TpxG4()
 
     process( "auto* primary_ = dynamic_cast<StarPrimaryMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );" );
     process( "auto* kine_    = dynamic_cast<StarKinematics*>( StMaker::GetTopChain()->Maker(\"StarKine\") );" );
+    process( "kine_->SetAttr(\"rapidity\",1);" );
     process( "primary_ -> AddGenerator( kine_ );");
     
     SetTagFile( tagfile.c_str() );
@@ -277,7 +276,7 @@ void bfcMixer_TpxG4()
   // Set privileges on makers
   //
   top->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
-  top->SetAttr(".Privilege",1,"StBFtop::*" ); 	//StBFtop is priviliged
+  top->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   top->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   //top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StGeant4Maker::*"); 	//It is also IO maker
@@ -286,6 +285,9 @@ void bfcMixer_TpxG4()
 
   top->Init();
   top->ls(10);
+
+  //  top->Maker("TpcRS")->SetDebug(999);
+  top->Maker("Sti")->SetDebug(999);
 
   // Disable FPE detection enabled by geant4
   gSystem->SetFPEMask( kNoneMask );
@@ -297,7 +299,7 @@ void bfcMixer_TpxG4()
 }
 
 
-#if 1
+
 void bfcMixer_TpxG4( 
 		    const int   nevents_ , 
 		    const char* daqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22158015_raw_5000016.daq"   , 
@@ -331,7 +333,46 @@ void bfcMixer_TpxG4(
   prodName = prodname;
   type     = kintype;
 
+  daqfile=daqfile_;
+  tagfile=tagfile_;
+
   bfcMixer_TpxG4();
 
 };
-#endif
+
+void bfcMixer_TpxG4( const char* dbg ) {
+
+  std::string dbg_ = dbg;
+
+  if ( dbg_ == "crash1" ) {
+
+    const int   nevents_ = 50; 
+    const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
+    bfcMixer_TpxG4( 50, mydaqfile_, mytagfile_ );
+
+  };
+
+  if ( dbg_ == "test1" ) {
+
+    const int   nevents_     = 1; 
+    const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
+    double myptmn_           = 5.0 - 0.0001  ; 
+    double myptmx_           = 5.0 + 0.0001  ;
+    double myetamn_          =  0.25 - 0.0001; 
+    double myetamx_          =  0.25 + 0.0001; 
+    double myvzmn_           =  -145.0       ; 
+    double myvzmx_           = 145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 14            ;
+    double mymult_           = 0.1           ; 
+    std::vector<int> mytriggers_  = {870010} ; 
+    const char* myprodname  = "P23idAuAu17" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+
+  };
+
+    
+};

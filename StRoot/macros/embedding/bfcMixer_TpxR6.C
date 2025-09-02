@@ -51,7 +51,7 @@ StBFChain*  chain1 = 0;
 StBFChain*  chain2 = 0;
 StBFChain*  chain3 = 0;
 
-int          nevents=10;
+int          nevents=1;
 std::string  daqfile="/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22158015_raw_5000016.daq";
 std::string  tagfile="/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22158015_raw_5000016.tags.root";
 
@@ -93,7 +93,7 @@ void SetPartOpt( int pid, int mult ) {
 }
 void SetTriggers( std::vector<int> triggers ) {
   for ( int t : triggers ) {
-    process( Form( "embmk->SetTriOpt(%i);",t ) );
+    process( Form( "embmk->SetTrgOpt(%i);",t ) );
   }
 }
 void SetZVertexCut( double vzmn, double vzmx, double vr=-1.0 ) {
@@ -149,7 +149,7 @@ void bfcMixer_TpxR6()
     chain3 -> SetFlags( chain3opts.c_str() );
     chain3 -> SetName("Three");
     TString outfile = gSystem->BaseName(daqfile.c_str());    
-    outfile.ReplaceAll(".daq",".root");
+    outfile.ReplaceAll(".daq","_R6.root");
     chain3->Set_IO_Files(nullptr, outfile);    
   }
 
@@ -171,6 +171,12 @@ void bfcMixer_TpxR6()
     auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpcmixer);
     tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
     tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
+
+    auto*  eefs_ = chain3->Maker("eefs"); 
+    auto*  eess_ = chain3->Maker("eess"); 
+    if (eefs_) eefs_->SetAttr("embedding",1);
+    if (eess_) eess_->SetAttr("embedding",1);
+
   }
 
 
@@ -216,14 +222,17 @@ void bfcMixer_TpxR6()
   // Set privileges on makers
   //
   top->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
-  top->SetAttr(".Privilege",1,"StBFtop::*" ); 	//StBFtop is priviliged
+  top->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   top->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+  top->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); 	//It is also IO maker
 
 
   top->Init();
-
   top -> ls(10);
+
+  //  top->Maker("TpcRS")->SetDebug(999);
+  chain3->Maker("Sti")->SetDebug(999);
 
   gSystem->SetFPEMask( kNoneMask );
   top->EventLoop(nevents, top->Maker("outputStream"));
@@ -267,6 +276,49 @@ void bfcMixer_TpxR6(
   prodName = prodname;
   type     = kintype;
 
+  daqfile=daqfile_;
+  tagfile=tagfile_;
+
+  std::cout << "daqfile=" << daqfile << " tagfile=" << tagfile << std::endl;
+
   bfcMixer_TpxR6();
 
 };
+
+void bfcMixer_TpxR6( const char* dbg ) {
+
+  std::string dbg_ = dbg;
+
+  if ( dbg_ == "crash1" ) {
+
+    const int   nevents_ = 50; 
+    const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
+    bfcMixer_TpxR6( 50, mydaqfile_, mytagfile_ );
+
+  };
+
+  if ( dbg_ == "test1" ) {
+
+    const int   nevents_     = 1; 
+    const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
+    double myptmn_           = 5.0 - 0.0001  ; 
+    double myptmx_           = 5.0 + 0.0001  ;
+    double myetamn_          =  0.25 - 0.0001; 
+    double myetamx_          =  0.25 + 0.0001; 
+    double myvzmn_           =  -145.0       ; 
+    double myvzmx_           = 145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 14            ;
+    double mymult_           = 0.1           ; 
+    std::vector<int> mytriggers_  = {870010} ; 
+    const char* myprodname  = "P23idAuAu17" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bfcMixer_TpxR6( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+
+  };
+
+    
+};
+
