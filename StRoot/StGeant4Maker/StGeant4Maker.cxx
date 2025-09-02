@@ -876,6 +876,14 @@ struct A { };
 struct B { };
 int StGeant4Maker::Make() {
 
+  int result = kStOK;
+
+  // Event information is (for the time being) zeroed out
+  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
+  g2t_event_st event;
+  event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
+  g2t_event->AddAt( &event );
+
   gGeoManager = mGeometryG4;
 
   static int eventNumber  = 1;
@@ -896,17 +904,32 @@ int StGeant4Maker::Make() {
   mEventHeader -> SetEventNumber( eventNumber );
   mEventHeader -> SetProdDateTime();
 
-  // SetDateTime();
- 
   // Increment event number
   eventNumber++;
 
-  // Dump the  stack at the end of make
-  //  mMCStack -> StackDump(); 
+  // If we are in embedding mode we are responsible for cycling the event loop when an event should
+  // be skipped.  This transpires when the embed maker has terminated early without generating any
+  // particles.  The simulation should have returned an empty g2t_vertex and g2t_track structure.
+  St_g2t_vertex  *g2t_vertex_table  =  (St_g2t_vertex  *) GetDataSet("g2t_vertex");
+  St_g2t_track   *g2t_track_table   =  (St_g2t_track   *) GetDataSet("g2t_track");  
+
+  assert(g2t_vertex_table);
+  assert(g2t_track_table);
+
+  int nv = g2t_vertex_table->GetNRows();
+  int nt = g2t_track_table->GetNRows();
+
+
+  if ( nv==0 || nt ==0 ) {
+    result = kStERR;
+  }
+
+  LOG_INFO << "N vertices = " << g2t_vertex_table->GetNRows() << endm;
+  LOG_INFO << "N tracks   = " << g2t_track_table->GetNRows() << endm;
 
   gGeoManager = mGeometry;
 
-  return kStOK; 
+  return result; 
 }
 //________________________________________________________________________________________________
 void StGeant4Maker::Clear( const Option_t* opts ){
@@ -1127,12 +1150,6 @@ void StGeant4Maker::BeginEvent(){
 //________________________________________________________________________________________________
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
-
-  // Event information is (for the time being) zeroed out
-  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
-  g2t_event_st event;
-  event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
-  g2t_event->AddAt( &event );
 
   // TODO: handle multi-engine 
   StMCParticleStack* stack    = mMCStack; // (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
