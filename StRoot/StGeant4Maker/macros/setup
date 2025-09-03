@@ -16,7 +16,8 @@ module load geant4-10.5.1-debug
 module load geant4-data-10.5.1-debug
 module load geant4-vmc-5-0-p5-root-6.24.06-debug
 
+# Ensure that we use StRoot/Table 
 module unload star-table-0.1.1-root-6.24.06
-module load star-table-0.1.1-root-6.24.06
+# module load star-table-0.1.1-root-6.24.06
 
 setenv STAR .
