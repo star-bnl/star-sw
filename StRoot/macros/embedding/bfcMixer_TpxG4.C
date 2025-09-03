@@ -11,7 +11,7 @@ std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,tpcrs     -ittf,-tpc_daq,no
 //std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,     -ittf,-tpc_daq,nodefault stargen:embed kinematics:embed ry2021a g4star:mk ";
 //std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault  ry2021a  ";
 //$$$std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer MiniMcMk McAna useInTracker emcSim bemcMixer eefs eemcmixer nodefault";
-std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer MiniMcMk McAna useInTracker emcSim bemcMixer eefs eemcmixer nodefault";
+std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer " " MiniMcMk McAna useInTracker " " emcSim bemcMixer eefs eemcmixer nodefault";
 
 
 std::string   prepend = "";
