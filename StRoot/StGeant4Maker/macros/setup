@@ -21,3 +21,5 @@ module unload star-table-0.1.1-root-6.24.06
 # module load star-table-0.1.1-root-6.24.06
 
 setenv STAR .
+
+setenv SKIP_DIRS "StEbyePool StEbyePool StHighptPool StAngleCorrMaker StSpinMaker StEbyeScaTagsMaker StEbye2ptMaker StDaqClfMaker StFtpcV0Maker StStrangePool GeoTestMaker StSpinPool StFgtPool PWGTools StShadowMaker"
