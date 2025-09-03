@@ -1,0 +1,22 @@
+# Setup group environment
+setenv GROUP_DIR /star/u/jeromel/work/STAR/group
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+setenv STAR .
+starver SL24x config/v0.3.0-rhel7-root6.24.06
+
+# STILL NEED TO STRIP ROOT5 From the environment
+setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
+
+module load clhep-2.4.5.1-debug
+module load vmc-1-0-p3-root-6.24.06-debug
+module load geant3-3-9-p1-root-6.24.06-debug
+module load geant4-10.5.1-debug
+module load geant4-data-10.5.1-debug
+module load geant4-vmc-5-0-p5-root-6.24.06-debug
+
+module unload star-table-0.1.1-root-6.24.06
+module load star-table-0.1.1-root-6.24.06
+
+setenv STAR .
