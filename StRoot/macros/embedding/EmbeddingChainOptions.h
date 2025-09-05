@@ -1,3 +1,6 @@
+#ifndef __EMBEDDING_CHAIN_OPTIONS_H__
+#define __EMBEDDING_CHAIN_OPTIONS_H__
+
 #include <string>
 #include <vector>
 #include <map>
@@ -174,3 +177,4 @@ EmbeddingChainOptions_t EmbeddingChainOptions( const std::string& prodName,
 }
 
 
+#endif
