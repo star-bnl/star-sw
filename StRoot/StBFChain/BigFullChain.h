@@ -1141,6 +1141,7 @@ Bfc_st BFC[] = { // standard chains
   {"NoLocalCintDb","" ,"",""                                      ,"","","Switch off local Cint Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoCintCalDb" ,""  ,"","NoLocalCintDb"                         ,"","","Switch off local Cint Db",kFALSE},
+  {"TFGDbTag",    ""  ,"",""                                 ,"","","Switch on TFG specific Db tag",kFALSE},
   {"dbSnapshot"  ,""  ,"",""                                         ,"","","Create?use dbSnapshot",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
@@ -1182,8 +1183,11 @@ Bfc_st BFC[] = { // standard chains
    ,                                                     "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2...",kFALSE},
   {"CorrX"       ,"" ,"","ExB,OShortR,OBmap,OPr13,OIFC,OSectorAlign,NewTpcAlignment"
    ",-AlignSectors,-OBmap2D,-OClock,-OTwist"                             ,"","","New Tpc Alignment",kFALSE},
-  {"CorrY"       ,"" ,"","ExB,OShortR,OBmap,OPr40,OIFC,OSectorAlign,NewTpcAlignment,OSpaceZ2,OGridLeakFull"
+  {"CorrY"       ,"" ,"","ExB,OShortR,OBmap,OPr40,-OPr13,OIFC,OSectorAlign,NewTpcAlignment,OSpaceZ2,OGridLeakFull"
    ",-AlignSectors,-OBmap2D,-OClock,-OTwist"                             ,"","","New Tpc Alignment",kFALSE},
+  {"Alignment2024","" ,"","NewTpcAlignment"                         ,"","","Turn on Alignment 2024",kFALSE},
+  {"CorrZ","" ,"","Alignment2024,TFGdbOpt,-CorrY,-CorrX,ExB,OShortR,OBmap,OPr40,-Opr13,OIFC,OSpaceZ2"
+   ",OGridLeakFull,-OBmap2D,-OClock,-OTwist,-OSectorAlign"              ,"","","Tpc Alignment 2024",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
@@ -1240,6 +1244,7 @@ Bfc_st BFC[] = { // standard chains
   {"useLDV" ,""  ,"","",""                                   ,"","... uses laserDV database flavor",kFALSE},
   {"useCDV" ,""  ,"","",""                                       ,"","... uses ofl database flavor",kFALSE},
   {"useNewLDV" ,""  ,"","",""                                    ,"","... uses ofl database flavor",kFALSE},
+  {"TFGdbOpt" ,""  ,"","",""                ,"","... uses TFG database flavor for alignemnt tables",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1780,7 +1785,7 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Sti/Stv chains
-  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,dbutil,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    ,                      "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCA"      ,"Sti","","Sti","StiMaker","TPCCATracker"                          ,"StiCA tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
@@ -1837,7 +1842,7 @@ Bfc_st BFC[] = { // standard chains
   {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
                                                                                     "ETOF QA maker",kFALSE},
 
-  {"ETofA",  "",    "","etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain options for data",  kFALSE},
+  {"ETofA",  "", "","etofdat,ETofCalib,etofhit,ETofMatch","","","... ETOF chain options for data",  kFALSE},
 
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
