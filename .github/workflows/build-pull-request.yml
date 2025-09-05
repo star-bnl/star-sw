@@ -67,7 +67,7 @@ jobs:
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
                sh -c "set -e; MALLOC_CHECK_=3 $TEST_CMD 2>&1 | tee log; grep 'Run completed' log"
 
-  ROOT5_test_doEvents:
+  test_doEvents:
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -75,8 +75,9 @@ jobs:
       matrix:
         test_id: [121, 122]
         compiler: [gcc485, gcc11]
+        starenv: [root5, root6]
     env:
-      STARENV: root5-${{ matrix.compiler }}
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -92,7 +93,7 @@ jobs:
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
                sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep '<StIOMaker::Finish> IO:' log"
 
-  ROOT5_test_find_vertex:
+  test_find_vertex:
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -100,8 +101,9 @@ jobs:
       matrix:
         test_id: [102, 121, 122]
         compiler: [gcc485, gcc11]
+        starenv: [root5, root6]
     env:
-      STARENV: root5-${{ matrix.compiler }}
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
