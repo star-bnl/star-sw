@@ -172,8 +172,30 @@ struct EmbeddingChains {
     std::cout << "CHAIN 1: " << chain1Opt.c_str() << std::endl;
     std::cout << "CHAIN 2: " << chain2Opt.c_str() << std::endl;
     std::cout << "CHAIN 3: " << chain3Opt.c_str() << std::endl;
-    
-    return { true, chain1Opt, chain2Opt, chain3Opt, "" };
+
+    std::transform(chain1Opt.begin(), chain1Opt.end(), chain1Opt.begin(),  [](unsigned char c){ return std::tolower(c); });
+    std::transform(chain2Opt.begin(), chain2Opt.end(), chain2Opt.begin(),  [](unsigned char c){ return std::tolower(c); });
+    std::transform(chain3Opt.begin(), chain3Opt.end(), chain3Opt.begin(),  [](unsigned char c){ return std::tolower(c); });
+
+    // replace all commas with whitespace
+    while ( replace( chain1Opt, ",", " " ) );
+    while ( replace( chain2Opt, ",", " " ) );
+    while ( replace( chain3Opt, ",", " " ) );
+
+    // replace all double whitespace with single whitespace
+    while ( replace( chain1Opt, "  ", " " ) );
+    while ( replace( chain2Opt, "  ", " " ) );
+    while ( replace( chain3Opt, "  ", " " ) );
+
+    std::string chain0Opt = " " + chain1Opt + " " + chain2Opt + " " + chain3Opt + " ";
+
+    // replace in, -in, noinput and noutput with nothing.  Careful b/c "in" appears in e.g. vfminuit
+    while ( replace( chain0Opt, "noinput", "" ) );
+    while ( replace( chain0Opt, "nooutput", "" ) );
+    while ( replace( chain0Opt, "-in", "" ) );
+    while ( replace( chain0Opt,  " in ", " " ) );
+
+    return { true, chain1Opt, chain2Opt, chain3Opt, chain0Opt };
 
   }
 
