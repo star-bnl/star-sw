@@ -4,6 +4,10 @@ class StMessMgr;
 #include <string>
 #include <TString.h>
 
+#include "EmbeddingChainOptions.h"
+
+// Functor for the embedding chain options
+EmbeddingChains<geant4star> getChainOptions;
 const int debuglevel = 1;
 
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry stargen:stubs "; // agml??
@@ -314,8 +318,9 @@ void bfcMixer_TpxG4(
 		    int pid_               = 14            ,
 		    double mult_           = 0.1           , 
 		    std::vector<int> triggers_  = {870010} , 
-		    const char* prodname  = "P23idAuAu17" , 
-		    const char* kintype   = "FlatPT"      ) {
+		    const char* prodname  = "P23idAuAu17"  , 
+		    const char* kintype   = "FlatPT"       ,
+		    bool simIn = false                     ) {
 
 
   nevents  = nevents_;
@@ -336,7 +341,27 @@ void bfcMixer_TpxG4(
   daqfile=daqfile_;
   tagfile=tagfile_;
 
-  bfcMixer_TpxG4();
+  auto opts = getChainOptions( prodName, simIn );
+
+  if ( opts.isValid ) {
+    
+    chain0opts = opts.loadopts;
+    chain1opts = opts.chain1;
+    chain2opts = opts.chain2;
+    chain3opts = opts.chain3;  
+
+    bfcMixer_TpxG4();
+
+  }
+
+  else {
+
+    std::cout << "Chain options are not setup properly for this production and/or simulation engine" << std::endl;
+
+  }
+
+
+  return;
 
 };
 
