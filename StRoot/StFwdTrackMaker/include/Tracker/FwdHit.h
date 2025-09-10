@@ -10,7 +10,6 @@
 #include <set>
 #include <string.h>
 #include <vector>
-#include <unordered_set>
 
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StFstConsts.h"

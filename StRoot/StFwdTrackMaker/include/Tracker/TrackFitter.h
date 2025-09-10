@@ -7,7 +7,6 @@
 #include "GenFit/FieldManager.h"
 #include "GenFit/KalmanFitStatus.h"
 #include "GenFit/GblFitter.h"
-#include "GenFit/ProlateSpacepointMeasurement.h"
 
 #include "TDatabasePDG.h"
 #include "TGeoManager.h"
@@ -351,7 +350,9 @@ class TrackFitter {
         StMemStat::PrintMem("TrackFitter::stressTest END (out of scope)");
         double memEndOutside = StMemStat::Used();
 
+#ifdef __GLIBC__
         malloc_trim(0);
+#endif
 
         StMemStat::PrintMem("TrackFitter::stressTest END (clear HEAP)");
         double memEndFinal= StMemStat::Used();
@@ -372,7 +373,10 @@ class TrackFitter {
     }
 
     genfit::TrackPoint* createTrackPointFromPlanarMeasurement(std::shared_ptr<genfit::Track> fitTrack, FwdHit *fh, int &hitId){
-        assert( fh != nullptr && "FwdHit pointer is null, cannot create planar measurement" );
+        if (fh == nullptr) {
+            LOG_ERROR << "FwdHit pointer is null, cannot create planar measurement" << endm;
+            return nullptr;
+        }
         TVectorD hitOnPlane(2);
         hitOnPlane[0] = fh->getX();
         hitOnPlane[1] = fh->getY();
@@ -397,7 +401,10 @@ class TrackFitter {
 
 
     genfit::TrackPoint* createTrackSpacepointFromMeasurement( std::shared_ptr<genfit::Track> fitTrack, FwdHit *fh, int &hitId ) {
-        assert( fh != nullptr && "FwdHit pointer is null, cannot create space point" );
+        if (fh == nullptr) {
+            LOG_ERROR << "FwdHit pointer is null, cannot create space point" << endm;
+            return nullptr;
+        }
 
         TVectorD pv(3);
         pv[0] = fh->getX();
@@ -578,7 +585,10 @@ class TrackFitter {
      *  @param t : track to fit
     */
     void performFit( genfit::Track* trackPointer ){
-        assert( trackPointer != nullptr && "Track pointer is null, cannot perform fit" );
+        if (trackPointer == nullptr) {
+            LOG_ERROR << "Track pointer is null, cannot perform fit" << endm;
+            return;
+        }
         /******************************************************************************************************************
 		 * Do the fit
 		 ******************************************************************************************************************/

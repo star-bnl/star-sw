@@ -67,7 +67,7 @@
 
 #include "sys/sysinfo.h"
 #include "StMemStat.h"
-#include <malloc.h>
+#include <cstdlib>
 
 // #define LOG_DEBUG if(false) std::cerr
 // #define LOG_INFO if(false) std::cerr
