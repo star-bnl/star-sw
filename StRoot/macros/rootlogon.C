@@ -1,4 +1,9 @@
 {
+  // This will help tracing failure on XrdOpen() if any
+  gEnv->SetValue("XNet.DebugTimestamp","1");
+  gEnv->SetValue("XNet.ReconnectTimeout","15");
+  gEnv->SetValue("XNet.RequestTimeout","90");
+
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
