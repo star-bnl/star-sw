@@ -7,6 +7,7 @@
 #include "GenFit/FieldManager.h"
 #include "GenFit/KalmanFitStatus.h"
 #include "GenFit/GblFitter.h"
+#include "GenFit/ProlateSpacepointMeasurement.h"
 
 #include "TDatabasePDG.h"
 #include "TGeoManager.h"
