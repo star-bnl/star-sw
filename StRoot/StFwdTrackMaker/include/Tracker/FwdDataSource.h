@@ -26,6 +26,9 @@ class FwdDataSource {
     HitMap_t &getFstHits() {
         return mFstHits;
     };
+    HitMap_t &getEpdHits() {
+        return mEpdHits;
+    };
     McTrackMap_t &getMcTracks() {
         return mMcTracks;
     };
@@ -35,6 +38,7 @@ class FwdDataSource {
         // Just empty our vectors, we dont own the memory
         mFttHits.clear();
         mFstHits.clear();
+        mEpdHits.clear();
         // the tracks are shared pointers, so they will be taken care of by clearing the map (below)
         mMcTracks.clear();
     }
@@ -42,6 +46,7 @@ class FwdDataSource {
     // TODO, protect and add interaface for pushing hits / tracks
     HitMap_t mFttHits;
     HitMap_t mFstHits;
+    HitMap_t mEpdHits;
     McTrackMap_t mMcTracks;
 };
 
