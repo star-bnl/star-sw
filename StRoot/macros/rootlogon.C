@@ -2,20 +2,24 @@
   //  set FloatPointException trap
   namespace rootlogon {
     int fpe=0;const char *env=0;
+
+  void init_fpe() {
+    rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+    rootlogon::env = gSystem->Getenv("STARFPE");
+    if (rootlogon::env) {
+      if (strcmp(rootlogon::env,"YES")==0) rootlogon::fpe=1;
+      if (strcmp(rootlogon::env,"NO" )==0) rootlogon::fpe=0;
+    }
+    if (rootlogon::fpe) {
+      gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
+      printf("*** Float Point Exception is ON ***\n");
+    } else {
+      printf("*** Float Point Exception is OFF ***\n");
+    }
+  }
   }
 
-  rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
-  rootlogon::env = gSystem->Getenv("STARFPE");
-  if (rootlogon::env) {
-    if (strcmp(rootlogon::env,"YES")==0) rootlogon::fpe=1;
-    if (strcmp(rootlogon::env,"NO" )==0) rootlogon::fpe=0;
-  }
-  if (rootlogon::fpe) {
-    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
-    printf("*** Float Point Exception is ON ***\n");
-  } else {
-    printf("*** Float Point Exception is OFF ***\n");
-  }
+  rootlogon::init_fpe();
 
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
