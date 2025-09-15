@@ -1,9 +1,9 @@
-//  set FloatPointException trap
-namespace rootlogon {
-  int fpe=0;const char *env=0;
-}
-
 {
+  //  set FloatPointException trap
+  namespace rootlogon {
+    int fpe=0;const char *env=0;
+  }
+
   rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
   rootlogon::env = gSystem->Getenv("STARFPE");
   if (rootlogon::env) {
