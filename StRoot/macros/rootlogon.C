@@ -1,6 +1,6 @@
 {
   //  set FloatPointException trap
-  const bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+  bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
   const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
 
   if (star_rootlogon_fpe_env) {
