@@ -1,13 +1,13 @@
 {
   //  set FloatPointException trap
-  rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
-  rootlogon_env = gSystem->Getenv("STARFPE");
+  const bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+  const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
 
-  if (rootlogon_env) {
-    if (strcmp(rootlogon_env,"YES")==0) rootlogon_fpe=1;
-    if (strcmp(rootlogon_env,"NO" )==0) rootlogon_fpe=0;
+  if (star_rootlogon_fpe_env) {
+    if (strcmp(star_rootlogon_fpe_env,"YES")==0) star_rootlogon_fpe=true;
+    if (strcmp(star_rootlogon_fpe_env,"NO" )==0) star_rootlogon_fpe=false;
   }
-  if (rootlogon_fpe) {
+  if (star_rootlogon_fpe) {
     gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
     printf("*** Float Point Exception is ON ***\n");
   } else {
