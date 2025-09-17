@@ -1,4 +1,9 @@
 {
+  // ROOT and XROOTD
+  // some rootd default dummy stuff
+  TAuthenticate::SetGlobalUser("starlib");
+  TAuthenticate::SetGlobalPasswd("ROOT4STAR");
+
   // This will help tracing failure on XrdOpen() if any
   gEnv->SetValue("XNet.DebugTimestamp","1");
   gEnv->SetValue("XNet.ReconnectTimeout","15");
