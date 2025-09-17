@@ -51,4 +51,11 @@
   gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
   gInterpreter->AddIncludePath("$STAR/StRoot");
   gInterpreter->AddIncludePath("/usr/include/mysql");
+
+  // Requested by users, allow loading a "complementary" local
+  // rootlogon if exists
+  if ( !gSystem->AccessPathName("./rootlogon.C", kFileExists ) ){
+    cout << "Found and loading local rootlogon.C" << endl;
+    gROOT->Macro("./rootlogon.C");
+  }
 }
