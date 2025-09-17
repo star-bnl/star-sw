@@ -1,4 +1,19 @@
 {
+  //  set FloatPointException trap
+  bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+  const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
+
+  if (star_rootlogon_fpe_env) {
+    if (strcmp(star_rootlogon_fpe_env,"YES")==0) star_rootlogon_fpe=true;
+    if (strcmp(star_rootlogon_fpe_env,"NO" )==0) star_rootlogon_fpe=false;
+  }
+  if (star_rootlogon_fpe) {
+    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
+    printf("*** Floating Point Exception is ON ***\n");
+  } else {
+    printf("*** Floating Point Exception is OFF ***\n");
+  }
+
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
