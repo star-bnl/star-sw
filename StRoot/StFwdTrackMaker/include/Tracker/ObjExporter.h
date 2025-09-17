@@ -16,7 +16,7 @@ class ObjExporter {
 public:
 
     // extra output for info and debug
-    const static bool verbose = true;
+    const static bool verbose = false;
 
     // write a single vertex
     void vert( ofstream &of, float x, float y, float z ){

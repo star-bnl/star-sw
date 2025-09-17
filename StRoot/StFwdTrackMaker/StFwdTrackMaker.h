@@ -6,11 +6,14 @@
 #ifndef __CINT__
 #include "GenFit/Track.h"
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
+#include "StFwdTrackMaker/include/Tracker/GenfitTrackResult.h"
 #endif
 
 #include "FwdTrackerConfig.h"
 #include "TVector3.h"
 #include "TMatrix.h"
+
+#include "StFwdTrackMaker/StFwdHitLoader.h"
 
 namespace KiTrack {
 class IHit;
@@ -67,16 +70,11 @@ class StFwdTrackMaker : public StMaker {
         LoadConfiguration();
     }
     void LoadConfiguration();
-    void SetVisualize( bool _viz ) { mVisualize = _viz; }
-
-    vector<StFwdTrack*> mFwdTracks;
-
-    vector<FwdHit> &GetFttHits() { return mFwdHitsFtt; }
-    vector<FwdHit> &GetFstHits() { return mFwdHitsFst; }
 
   #ifndef __CINT__
     // Get the FwdTracker object
     std::shared_ptr<ForwardTracker> GetForwardTracker() { return mForwardTracker; }
+    EventStats GetEventStats();
     const std::vector<Seed_t> &getTrackSeeds() const;
     const std::vector<GenfitTrackResult> &getFitResults() const;
   #endif
@@ -85,14 +83,8 @@ class StFwdTrackMaker : public StMaker {
   private:
   protected:
 
-  StFcsDb* mFcsDb = 0; // Pointer to fcs db object
-  
-    // Event Filters
-    float mEventFilterMinTofMult = 2;
-    bool  mEventFilterRequireEventVertex = false;
-    bool  mEventFilterRequireVpdVertex = true;
-    float mEventFilterMinVpdZ = -99;
-    float mEventFilterMaxVpdZ = 99;
+    StFwdHitLoader mFwdHitLoader; // loads hits from StEvent or GEANT
+    StFcsDb* mFcsDb = 0; // Pointer to fcs db object
 
     // for Wavefront OBJ export
     size_t eventIndex = 0; // counts up for processed events
@@ -100,15 +92,6 @@ class StFwdTrackMaker : public StMaker {
     TVector3 mEventVertex; // primary vertex used in fwd tracking this event
 
     std::string mConfigFile;
-
-    std::map<std::string, TH1 *> mHistograms;
-
-    bool mVisualize = false; // if true,write out a Wavefront OBJ to visualize the event in 3D
-    vector<TVector3> mFttHits;
-    vector<TVector3> mFstHits;
-    vector<TVector3> mFcsClusters;
-    vector<float> mFcsClusterEnergy;
-    vector<TVector3> mFcsPreHits;
 
     std::vector< genfit::GFRaveVertex * > mRaveVertices;
     vector<float> mFttZFromGeom, mFstZFromGeom;
@@ -126,28 +109,13 @@ class StFwdTrackMaker : public StMaker {
         TMatrixDSym mEventVertexCov; // covariance matrix for the primary vertex
         enum FwdVertexSource { kFwdVertexSourceUnknown, kFwdVertexSourceNone, kFwdVertexSourceTpc, kFwdVertexSourceMc, kFwdVertexSourceVpd }; // unknown means we havent looked yet
         FwdVertexSource mFwdVertexSource = StFwdTrackMaker::kFwdVertexSourceUnknown;
-        vector<FwdHit> mFwdHitsFtt;
-        vector<FwdHit> mFwdHitsFst;
-        std::shared_ptr<SiRasterizer> mSiRasterizer;
         FwdTrackerConfig mFwdConfig;
         std::shared_ptr<ForwardTracker> mForwardTracker;
         std::shared_ptr<FwdDataSource> mForwardData;
         size_t loadMcTracks( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap );
         void loadFcs();
-        void loadFttHits( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
-        void loadFttHitsFromStEvent( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
-        void loadFttHitsFromGEANT( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap, int count = 0 );
-
-        int loadFstHits( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
-        int loadFstHitsFromMuDst( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
-        int loadFstHitsFromGEANT( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
-        int loadFstHitsFromStEvent( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
-        int loadFstHitsFromStRnDHits( std::map<int, std::shared_ptr<McTrack>> &mcTrackMap, std::map<int, std::vector<KiTrack::IHit *>> &hitMap );
     #endif
-
-
-    /** @brief Fit the primary vertex using FWD tracks */
-    void FitVertex();
+    
 
     static std::string defaultConfig;
     bool configLoaded = false;
@@ -159,27 +127,26 @@ class StFwdTrackMaker : public StMaker {
      * @param fn : filename of output ROOT file
     */
     void setOutputFilename( std::string fn ) { mFwdConfig.set( "Output:url", fn ); }
+    
     /** @brief Set the data source for FTT hits
      *
-     * @param source : {DATA, GEANT}, DATA means read from StEvent, GEANT means read directly from the GEANT hits
+     * @param ds : { GEANT, STEVENT, MUDST}
     */
-    void setFttHitSource( std::string source ) { mFwdConfig.set( "Source:ftt", source ); }
+    void setFttHitSource( StFwdHitLoader::DataSource ds ) { mFwdHitLoader.setFttDataSource(ds); }
 
-    /** @brief Enable or disable the Fst Rasterizer
-     * @param use : if true, load FST hits from GEANT and raster them according to r, phi resolutions.
+    /** @brief Set the data source for FST hits
+     *
+     * @param ds : { GEANT, STEVENT, MUDST}
     */
-    void setUseFstRasteredGeantHits( bool use = true ){ mFwdConfig.set<bool>( "SiRasterizer:active", use ); }
-    /** @brief Set the resolution in R for rasterizing FST hits (from fast sim)
-     * Only used when the Rasterizer is enabled, which results from reading FST hits from GEANT
-     * @param r : resolution in r (cm)
-    */
-    void setFstRasterR( double r = 3.0 /*cm*/ ){ mFwdConfig.set<double>( "SiRasterizer:r", r ); }
+   void setFstHitSource( StFwdHitLoader::DataSource ds ) { mFwdHitLoader.setFstDataSource(ds); }
+
     /** @brief Set the resolution in phi for rasterizing FST hits (from fast sim)
      * Only used when the Rasterizer is enabled, which results from reading FST hits from GEANT
-     * @param phi : resolution in phi (rad)
+     * @param r : segmentation in r (cm)
+     * @param phi : segmentation in phi (rad)
     */
-    void setFstRasterPhi( double phi = 0.00409 /*2*pi/(12*128)*/ ){ mFwdConfig.set<double>( "SiRasterizer:phi", phi ); }
-
+    void setFstRasterRPhi( double r = 3.0 /*cm*/, double phi = 0.00409 /*2*pi/(12*128)*/ ){ mFwdHitLoader.mFstRasterizer.setRPhi( r, phi ); }
+    
     //Track Finding
     /** @brief Use FST and Ftt hits (sequentially) in the Seed Finding - then merge tracks
      *
@@ -197,6 +164,10 @@ class StFwdTrackMaker : public StMaker {
      *
     */
     void setSeedFindingWithFst() { mFwdConfig.set( "TrackFinder:source", "fst" ); }
+    /** @brief Use Fst hits in the Seed Finding
+     *
+    */
+    void setSeedFindingOff() { mFwdConfig.set( "TrackFinder:source", "NONE" ); }
     /** @brief Set the number of track finding iterations
      * @param n : number of iterations to run
     */
@@ -233,7 +204,7 @@ class StFwdTrackMaker : public StMaker {
     /** @brief Turn off track fitting
      * Useful if you want to speed up the run but dont need fitting (testing seed finding)
     */
-    void setTrackFittingOff() { mFwdConfig.set( "TrackFitter:active", "false" ); }
+    void setTrackFittingOff() { mFwdConfig.set<bool>( "TrackFitter:active", false ); }
     /** @brief Enable / disable material effects
      * Material effects in kalman filter
     */
@@ -285,6 +256,9 @@ class StFwdTrackMaker : public StMaker {
     */
     void setFitMinIterations( int n = 1) {mFwdConfig.set<int>("TrackFitter.KalmanFitterRefTrack:MinIterations", n); }
 
+    void setDeltaPval( double dPV ) { mFwdConfig.set<double>( "TrackFitter.KalmanFitterRefTrack:DeltaPval", dPV ); }
+    void setRelChi2Change( double dPV ) { mFwdConfig.set<double>( "TrackFitter.KalmanFitterRefTrack:RelChi2Change", dPV ); }
+
     /** @brief Enables smearing of the MC Primary Vertex according to sigmaXY,Z
      * @param pvs : if true, smear vertex
     */
@@ -304,6 +278,15 @@ class StFwdTrackMaker : public StMaker {
      */
     void setConfigKeyValue( std::string k, std::string v ){
       mFwdConfig.set( k, v );
+    }
+    void setConfigKeyValue( std::string k, int v ){
+      mFwdConfig.set<int>( k, v );
+    }
+    void setConfigKeyValue( std::string k, double v ){
+      mFwdConfig.set<double>( k, v );
+    }
+    void setConfigKeyValue( std::string k, bool v ){
+      mFwdConfig.set<bool>( k, v );
     }
 
     /** @brief Sets a criteria value in the config for 2-hit criteria
