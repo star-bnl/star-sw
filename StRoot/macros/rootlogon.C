@@ -9,9 +9,9 @@
   }
   if (star_rootlogon_fpe) {
     gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
-    printf("*** Float Point Exception is ON ***\n");
+    printf("*** Floating Point Exception is ON ***\n");
   } else {
-    printf("*** Float Point Exception is OFF ***\n");
+    printf("*** Floating Point Exception is OFF ***\n");
   }
 
   gSystem->Load("libStarClassLibrary");
