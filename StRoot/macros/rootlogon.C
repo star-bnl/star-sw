@@ -1,4 +1,14 @@
 {
+  // ROOT and XROOTD
+  // some rootd default dummy stuff
+  TAuthenticate::SetGlobalUser("starlib");
+  TAuthenticate::SetGlobalPasswd("ROOT4STAR");
+
+  // This will help tracing failure on XrdOpen() if any
+  gEnv->SetValue("XNet.DebugTimestamp","1");
+  gEnv->SetValue("XNet.ReconnectTimeout","15");
+  gEnv->SetValue("XNet.RequestTimeout","90");
+
   //  set FloatPointException trap
   bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
   const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
