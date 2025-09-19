@@ -800,6 +800,11 @@ int  StGeant4Maker::InitGeom() {
     bfc = dynamic_cast<StBFChain*>(GetMaker("physicssim"));
   }
 
+  if ( 0==bfc ) {
+    bfc = dynamic_cast<StBFChain*>( GetTopChain() );
+  }
+
+
   if ( (0==gGeoManager) && bfc ) {
   for (int i = 0; DbAlias[i].tag; i++) // iterate over DB aliases
     {
