@@ -43,7 +43,7 @@ std::string chainopts="nodefault y2021a sdt20210215 agml stargen:mk kinematics:m
 
 StMaker* g4star = 0;
 
-void particleGun( int nevents=100, 
+void particleGun( int nevents=1, 
 		  const char* outname="particleGun.geant.root",
 		  int ntracks=10,
 		  double ptmn=0.01,
@@ -58,7 +58,7 @@ void particleGun( int nevents=100,
   
   top->SetDebug(1);
   top->SetFlags(chainopts.c_str());
-  top->Set_IO_Files(0, "particleGun.root");
+  top->Set_IO_Files(0, outname);
   top->Load();
   top->Instantiate();
 
@@ -69,9 +69,33 @@ void particleGun( int nevents=100,
   //
   // Geant4STAR configuration
   //
+  //  const char* g4commands =
+  //    "/process/eLoss/maxKinEnergy 1000.0 GeV" 
+  //    ;
   g4star = top->Maker("geant4star");
   g4star->SetAttr("G4VmcOpt",physlist.c_str());
-  //g4star -> SetAttr("G4VmcOpt:Phys",  "FTFP_BERT");
+
+  g4star->SetAttr(
+      "G4UI:PREINIT", 
+      "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
+      "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+  );
+  g4star->SetAttr(
+      "G4UI:INIT",
+      "/mcCrossSection/setMinKinE 1 keV "       ";"
+      "/mcCrossSection/setMaxKinE 250 GeV "     ";"
+      "/mcCrossSection/setMinMomentum 10 keV "  ";"
+      "/mcCrossSection/setMaxMomentum 250 GeV " ";"
+  );
+
+  // g4star->SetAttr(
+  //      "G4UI:POSTTRIG",
+  //      "/mcPhysics/printGlobalCuts"
+  // );
+
+  //  g4star->SetAttr("G4UI:INIT",    "interactive"  );
+
+  //  g4star -> SetAttr("G4VmcOpt:Phys",  "FTFP_BERT");
   //  g4star -> SetAttr("G4VmcOpt:Phys",  "QGSP_BERT");
 
 
