@@ -421,9 +421,50 @@ struct SD2Table_MTD {
   } 
 } sd2table_mtd; 
 
+
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
 TGeant3TGeo* gG3 = 0;
+
+
+//________________________________________________________________________________________________
+namespace {
+  vector<std::string> tokenize(const std::string &s, const std::string &sep_chars=";")
+  {
+    std::string::size_type prev_pos = 0, pos = 0;
+    std::vector<std::string> result;
+    
+    if ( s.length() > 1 ) {
+      while ((pos = s.find_first_of(sep_chars, pos)) != std::string::npos) {
+	result.push_back(  ( s.substr(prev_pos, pos - prev_pos))  );
+	pos += 1;
+	prev_pos = pos;
+      }
+      result.push_back( (s.substr(prev_pos)));
+    }
+
+    return result;
+  }
+
+  void ApplyG4ui( const char* stage ) {
+    LOG_INFO << "APPLY G4UI " << stage << endm;
+    if ( 0==gG4 ) return;
+
+    if ( _g4maker->SAttr(stage) ) {
+      for ( auto s : tokenize(_g4maker->SAttr(stage),";") ) {
+	if ( s=="prompt" || s=="PROMPT" ) {		  
+	  gG4->StartGeantUI();  	
+	}
+	else { 
+	  LOG_INFO << "[" << stage << "] " << s << endm;
+	  gG4->ProcessGeantCommand( s.c_str() ); 
+	}
+      }
+    }
+  }
+
+}
+//________________________________________________________________________________________________
 
 // Function to process one event
 std::function<void(void)> trigger;
@@ -633,7 +674,9 @@ int StGeant4Maker::Init() {
   trigger = [](){ std::cout << "StGeant4Maker::trigger warning. No trigger function defined.  No events produced." << std::endl; } ;
   if ( gG3 || gG4 ) { 
     if ( 0==std::strcmp( SAttr("application:engine"), "G4" ) ) {
+      ApplyG4ui("G4UI:PRETRIG");
       trigger = []() { gG4->ProcessRun(1); }   ;
+      ApplyG4ui("G4UI:POSTTRIG");
     }
 
     else if ( 0==std::strcmp( SAttr("application:engine"), "G3" ) ) {
@@ -641,7 +684,9 @@ int StGeant4Maker::Init() {
     }
 
     else if ( 0==std::strcmp( SAttr("application:engine"), "multi" ) ) {
+      ApplyG4ui("G4UI:PRETRIG");
       trigger = [](){ TMCManager::Instance()->Run(1); }   ;
+      ApplyG4ui("G4UI:POSTTRIG");
     }
   }
 
@@ -702,14 +747,14 @@ int StGeant4Maker::Init() {
   
   // Geant4 standalone initialization
   if ( 0==std::strcmp( SAttr("application:engine"), "G4") ) {  
-  
     LOG_INFO << "Initialize Geant 4 standalone" << endm;
 
+    ApplyG4ui( "G4UI::PREINIT" );
     InitializeMC( gG4 );
-    
+    ApplyG4ui( "G4UI::INIT" );
+
     TG4RunManager* runManager = TG4RunManager::Instance();
     runManager->UseRootRandom(false);
-
   }
 
   // GEANT3 standalone initialization
