@@ -36,7 +36,7 @@ jobs:
           outputs: type=docker,dest=/tmp/star-sw-${{ env.STARENV }}.tar
 
       - name: Save built image for test jobs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp/star-sw-${{ env.STARENV }}.tar
