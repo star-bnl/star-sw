@@ -1379,9 +1379,14 @@ Bfc_st BFC[] = { // standard chains
   {"stargen:embed",  "", "","stargen", "StarEmbedMaker", "StarGeneratorEmbed.so",      "Setup the primary event generator (embedding) maker", false },
 
   {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
+  {"pythia6:mk",  "","","",        "StarPythia6", "",           "Create pythia8 maker", false },
+
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
+  {"pythia8:mk",  "","","",        "StarPythia8", "",           "Create pythia8 maker", false },
+
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
+  {"hijing:mk" ,"","","hijing1.383", "StarHijing", "",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
   {"kinematics:mk"  ,"","","stargen:mk,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"kinematics:embed"  ,"","","stargen:embed,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
