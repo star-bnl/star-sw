@@ -599,7 +599,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("HADR", 1, "Enable/disable hadronic interactions");
   AddOption("MUNU", 1, "Enable/disable muon-nucleus interactions");
   AddOption("DCAY", 1, "Enable/disable decays");
-  AddOption("LOSS", 2, "Energy loss mode" );
+  AddOption("LOSS", 1, "Energy loss mode" );
   AddOption("MULS", 1, "Multiple scattering");
   AddOption("CKOV", 1, "Cherenkov radiation");
   AddOption("RAYL", 1, "Rayleigh scattering");
@@ -674,9 +674,7 @@ int StGeant4Maker::Init() {
   trigger = [](){ std::cout << "StGeant4Maker::trigger warning. No trigger function defined.  No events produced." << std::endl; } ;
   if ( gG3 || gG4 ) { 
     if ( 0==std::strcmp( SAttr("application:engine"), "G4" ) ) {
-      ApplyG4ui("G4UI:PRETRIG");
       trigger = []() { gG4->ProcessRun(1); }   ;
-      ApplyG4ui("G4UI:POSTTRIG");
     }
 
     else if ( 0==std::strcmp( SAttr("application:engine"), "G3" ) ) {
@@ -684,9 +682,7 @@ int StGeant4Maker::Init() {
     }
 
     else if ( 0==std::strcmp( SAttr("application:engine"), "multi" ) ) {
-      ApplyG4ui("G4UI:PRETRIG");
       trigger = [](){ TMCManager::Instance()->Run(1); }   ;
-      ApplyG4ui("G4UI:POSTTRIG");
     }
   }
 
@@ -704,6 +700,9 @@ int StGeant4Maker::Init() {
     mc->SetCut( "DCUTM" , DAttr("dcutm") );
   };  
   auto SetDefaultProcesses = [this](TVirtualMC* mc) {
+    if ( IAttr("LOSS")==2 && IAttr("DRAY") ) {
+      LOG_WARN << "Complete energy loss fluctuations disables delta ray production" << endm;
+    }
     mc->SetProcess("PAIR",   IAttr("PAIR"));
     mc->SetProcess("COMP",   IAttr("COMP"));
     mc->SetProcess("PHOT",   IAttr("PHOT"));
@@ -946,7 +945,9 @@ int StGeant4Maker::Make() {
 
   }
 
+  ApplyG4ui("G4UI:PRETRIG");
   trigger();
+  ApplyG4ui("G4UI:POSTTRIG");
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
 
@@ -1176,7 +1177,11 @@ int  StGeant4Maker::ConfigureGeometry() {
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
     media[id] = id;
+   
     for ( auto kv : agmlExt->GetCuts() ) {
+
+      LOG_INFO << agmlExt->GetName() << " set " << kv.first.Data() << " to " << kv.second << endm;
+
       if ( 0==mgr ) {
 	TVirtualMC::GetMC()->Gstpar( id, kv.first, kv.second );
       }
