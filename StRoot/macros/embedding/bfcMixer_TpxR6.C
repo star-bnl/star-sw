@@ -12,7 +12,8 @@ const int debuglevel = 1;
 
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry ";
 std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault,noinput prepembed ry2021a ";
-std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer,GeantOut,MiniMcMk,McAna ,useInTracker,emcSim,bemcMixer,eefs,eemcmixer";
+//std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer,GeantOut,MiniMcMk,McAna ,useInTracker,emcSim,bemcMixer,eefs,eemcmixer nodefault";
+std::string     chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer Tpc23         GeantOut,MiniMcMk,McAna ,useInTracker emcsim bemcmixer eefs eemcmixer nodefault";
 
 std::string   chain0opts = ( chain1opts_ + " " + chain2opts_ + " " + chain3opts_ + " " );
 
@@ -91,7 +92,7 @@ void SetTagFile( const char* tags ) {
 void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx, const char* type_ ) {
   process( Form( "embmk->SetOpt( %f, %f, %f, %f, %f, %f, \"%s\" );   ", ptmn, ptmx, etamn, etamx, phimn, phimx, type_ ) );
 }
-void SetPartOpt( int pid, int mult ) {
+void SetPartOpt( int pid, double mult ) {
   process( Form( "embmk->SetPartOpt(%i,%i);", pid, mult ) );
   process( "embmk->SetSkipMode(true);" );
   process( "embmk->SetTemp(0.35);");
@@ -174,8 +175,10 @@ void bfcMixer_TpxR6()
   if ( chain3 ) {
     chain3->cd();
     auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpcmixer);
-    tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
-    tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
+    if ( tpxmixer ) {
+      tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
+      tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
+    };
 
     auto*  eefs_ = chain3->Maker("eefs"); 
     auto*  eess_ = chain3->Maker("eess"); 
@@ -183,34 +186,6 @@ void bfcMixer_TpxR6()
     if (eess_) eess_->SetAttr("embedding",1);
 
   }
-
-
-#if 0
-  if ( chain3 ) { 
-    process("StMaker* eefs = StMaker::GetChain()->Maker(\"eefs\");  eefs=(eefs)?eefs:StMaker::GetChain()->Maker(\"EEmcFastSim\");");
-    process("StMaker* eess = StMaker::GetChain()->Maker(\"eess\");");
-    process("StMaker* eemx = StMaker::GetChain()->Maker(\"EEmcMixer\");");  
-    process("if ( eemx && eefs ) { eefs->SetEmbeddingMode(); StMaker::GetChain()->AddBefore( eemx->GetName(), eefs ); }");
-    process("if ( eemx && eess ) { eess->SetEmbeddingMode(); StMaker::GetChain()->AddBefore( eemx->GetName(), eess ); }");
-
-
-    //
-    // Make sure mcevent runs after the eemc mixer
-    //
-    //  auto* mcevent = chain3->Maker("StMcEventMaker");  assert(mcevent);
-    //  chain3->AddAfter( eemx->GetName(), mcevent );
-    process("StMaker* mcevent=StMaker::GetChain()->Maker(\"StMcEventMaker\");");
-    process("StMaker::GetChain()->AddAfter(eemx->GetName(), mcevent );");
-
-  }
-
-    //
-    // Configure prep embedding maker
-    //
-#endif
-
-  process("StiDetectorBuilder::setDebug(10);");
-  process("StiVMCToolkit::SetDebug(10);");
 
   top->cd();
 
@@ -292,7 +267,7 @@ void bfcMixer_TpxR6(
     chain0opts = opts.loadopts;
     chain1opts = opts.chain1;
     chain2opts = opts.chain2;
-    chain3opts = opts.chain3;  
+    chain3opts = opts.chain3 + " Tpc23 ";  
 
     bfcMixer_TpxR6();
 

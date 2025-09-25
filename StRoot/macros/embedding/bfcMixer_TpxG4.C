@@ -74,7 +74,7 @@ double eta_low=-1.5;
 double eta_high=1.5;
 double vzlow = -150.0;
 double vzhigh = 150.0;
-double vr = 100.0;
+double vr = 2.0;
 int pid=9;
 double mult=100;
 std::vector<int> triggers = {870010};
@@ -111,13 +111,14 @@ void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn,
   kine->SetAttr("phihigh", phimx);
   kine->SetAttr("mode", "FlatPT" );
 }
-void SetPartOpt( int pid, int mult ) {
+void SetPartOpt( int pid, double mult ) {
   // Map PID onto particle name
   auto* kine = chain2->Maker("StarKine");
   kine->SetAttr("pid",int(pid));
   kine->SetAttr("ntrack", double(mult));
   if ( mult < 1.0 ) {
     auto* embed = chain2->Maker("StarEmbed");
+    LOG_INFO << "Setting eventmult=" << mult << endm;
     embed->SetAttr("eventmult",double(mult));
   }
 }
@@ -272,6 +273,23 @@ void bfcMixer_TpxG4()
     //
     g4star->SetAttr( "embedding:mode",1);
     g4star->SetAttr( "G4VmcOpt:Nav",   "geomRoot");
+
+    g4star->SetAttr(
+		    "G4UI:PREINIT", 
+		    "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
+		    "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+		    );
+    g4star->SetAttr(
+		    "G4UI:INIT",
+		    "/mcCrossSection/setMinKinE 1 keV "       ";"
+		    "/mcCrossSection/setMaxKinE 250 GeV "     ";"
+		    "/mcCrossSection/setMinMomentum 10 keV "  ";"
+		    "/mcCrossSection/setMaxMomentum 250 GeV " ";"
+		    );
+
+
+    
+
   }
 #endif
   
@@ -349,7 +367,7 @@ void bfcMixer_TpxG4(
     chain0opts = opts.loadopts;
     chain1opts = opts.chain1 + " nooutput ";
     chain2opts = opts.chain2 + " noinput nooutput ";
-    chain3opts = opts.chain3 + " -in noinput ";    
+    chain3opts = opts.chain3 + " -in noinput Tpc23 ";    
     bfcMixer_TpxG4();
 
   }
