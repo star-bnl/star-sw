@@ -1,0 +1,12 @@
+*** Begin of history file: Mon Sep 19 12:58:28 2022
+detp geom y2019a
+gexe $STAR_LIB/StarAgmlUtil.so
+gexe $STAR_LIB/xgeometry.so
+gexe .$STAR_HOST_SYS/lib/libagusumlif.so
+
+* AGUSER/GKINE NTRACK ID [ PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH option ]
+gkine 10 11 0.1 1.0 -1 1
+trig 1
+gprint vert
+exit
+*** End   of history file: Mon Sep 19 13:00:57 2022
