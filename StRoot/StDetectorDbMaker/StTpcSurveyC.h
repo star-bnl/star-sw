@@ -32,7 +32,32 @@ class StTpcSuperSectorPosition : public St_SurveyC {// Extra rotation for whole 
   ClassDef(StTpcSuperSectorPosition,1) //C++ TChair for TpcSuperSectorPosition
 };
 
-class StTpcHalfPosition : public St_SurveyC {// Extra rotation for half of Tpc  to Tpc
+class StTpcSuperSectorPositionD : public St_SurveyC {// Extra rotation for whole Super Sector to half Tpc, part depending on direction of Mag.field
+ public:
+  static StTpcSuperSectorPositionD* 	instance();
+  StTpcSuperSectorPositionD(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StTpcSuperSectorPositionD() {fgInstance = 0;}
+ private:
+  static StTpcSuperSectorPositionD* fgInstance;
+  ClassDef(StTpcSuperSectorPositionD,1) //C++ TChair for TpcSuperSectorPositionD
+};
+
+class StTpcWheelPosition : public St_SurveyC {// Extra rotation for Wheel  to Tpc (no drift)
+ public:
+  static StTpcWheelPosition* 	instance();
+  StTpcWheelPosition(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StTpcWheelPosition() {fgInstance = 0;}
+  const TGeoHMatrix  &GetEastMatrix() {return  GetMatrix(east);}
+  const TGeoHMatrix  &GetWestMatrix() {return  GetMatrix(west);}
+  const TGeoHMatrix  &GetEastMatrixR() {return  GetMatrixR(east);}
+  const TGeoHMatrix  &GetWestMatrixR() {return  GetMatrixR(west);}
+  static void Normalize(TGeoHMatrix &R) {}
+ private:
+  static StTpcWheelPosition* fgInstance;
+  ClassDef(StTpcWheelPosition,1) //C++ TChair for TpcWheelPosition
+};
+
+class StTpcHalfPosition : public St_SurveyC {// Extra rotation for half to Tpc
  public:
   static StTpcHalfPosition* 	instance();
   StTpcHalfPosition(St_Survey *table=0) : St_SurveyC(table) {}
