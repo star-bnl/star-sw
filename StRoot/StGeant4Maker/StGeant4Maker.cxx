@@ -422,6 +422,8 @@ struct SD2Table_MTD {
 } sd2table_mtd; 
 
 
+
+
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
 TGeant3TGeo* gG3 = 0;
@@ -792,6 +794,7 @@ int StGeant4Maker::InitRun( int /* run */ ){
 
   // Obtain a pointer to the event header
   mEventHeader = (StEvtHddr*) ( GetTopChain()->GetDataSet("EvtHddr") );
+  assert(mEventHeader);
 
   // If it does not exist, create and register
   if ( 0 == mEventHeader ) {
@@ -927,12 +930,6 @@ int StGeant4Maker::Make() {
 
   int result = kStOK;
 
-  // Event information is (for the time being) zeroed out
-  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
-  g2t_event_st event;
-  event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
-  g2t_event->AddAt( &event );
-
   gGeoManager = mGeometryG4;
 
   static int eventNumber  = 1;
@@ -945,18 +942,25 @@ int StGeant4Maker::Make() {
 
   }
 
+
+
   ApplyG4ui("G4UI:PRETRIG");
   trigger();
   ApplyG4ui("G4UI:POSTTRIG");
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
 
-  if ( runnumber != mEventHeader->GetRunNumber() ) mEventHeader -> SetRunNumber( runnumber );
-  mEventHeader -> SetEventNumber( eventNumber );
-  mEventHeader -> SetProdDateTime();
+  
+  if ( 0 == mEventHeader->GetRunNumber() ) {
+    mEventHeader -> SetRunNumber( runnumber );  
+    mEventHeader -> SetEventNumber( eventNumber );
+    mEventHeader -> SetProdDateTime();
+  }
 
-  // Increment event number
-  eventNumber++;
+
+  
+
+
 
   // If we are in embedding mode we are responsible for cycling the event loop when an event should
   // be skipped.  This transpires when the embed maker has terminated early without generating any
@@ -1274,10 +1278,12 @@ void StGeant4Maker::FinishEvent(){
   }
 
   itrack = 1; // track numbering starts from 1
+  int numprim = 0;
+  int numfins = 0;
   for ( auto t : particle ) {
 
     auto* pdgdata = particleData.GetParticle( t->GetPdg() );
-    
+
     // partial fill of track table _______________________
     g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
     mytrack.id       = itrack;
@@ -1298,15 +1304,45 @@ void StGeant4Maker::FinishEvent(){
     mytrack.rapidity = t->particle()->Y();
     // index of the start and stop vertices.
     // TODO: particle stop vertices need to be scored
-    mytrack.start_vertex_p = truthVertex[ t->start() ];
+    int iv = mytrack.start_vertex_p = truthVertex[ t->start() ];
     mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
     // next, track parent
     mytrack.next_parent_p = truthTrack[ t->start()->parent() ];    
+
+
+    // Count number of primary and final state generator tracks
+    auto* v = t->start();
+    if ( v ) {
+      if ( v->process() == 0 ) { // primary generation
+	if ( iv==1 ) numprim++;
+	numfins++;
+      }
+    }
+
     //__________________________________________ next track
     g2t_track->AddAt(&mytrack);
     itrack++;
   }
-  
+
+  // Event information is (for the time being) zeroed out
+  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
+  g2t_event_st event;
+  event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
+
+  // TODO: Fill event structure ala g2t_get_event.F and g2t_get_kine.F
+  event.n_event = mEventHeader->GetEventNumber();
+  event.n_run   = mEventHeader->GetRunNumber();
+  event.ge_rndm[0] = -1;
+  event.ge_rndm[1] = -1;
+  event.prim_vertex_p = 1;
+  event.time_offset   = 0;
+  event.n_track_eg_fs = numprim; // sic
+  event.n_track_prim  = numfins; // yes, these are reversed in g2t_get_event.F
+
+  g2t_event->AddAt( &event );
+
+  //  LOG_INFO << "numprim = " << numprim << " numfins=" << numfins << endm;
+    
   // Copy hits to tables
   AddHits<St_g2t_tpc_hit>( "TPCH", {"TPAD"}, "g2t_tpc_hit", sd2table_tpc  );
   AddHits<St_g2t_emc_hit>( "CALH", {"CSCI"}, "g2t_emc_hit", sd2table_emc  );
