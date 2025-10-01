@@ -2542,10 +2542,7 @@ void StPicoDstMaker::fillFwdTracks() {
   StEvent *evt = (StEvent *)GetDataSet("StEvent");
   if ( evt ){
     StFwdTrackCollection * evc = evt->fwdTrackCollection();
-    if ( !evc ){
-      LOG_ERROR << "null FwdTrackCollection" << endm;
-      return;
-    }
+    if ( !evc ) return;
 
     // fill a map of picodst FCS clusters between index and the cluster pointer
     map<UShort_t, StPicoFcsCluster*> fcsClusterMap;
