@@ -2682,15 +2682,12 @@ void StPicoDstMaker::fillFcsClusters() {
 
 //_________________
 void StPicoDstMaker::fillFcsHits() {
+  StMuFcsCollection * muFcs = mMuDst->muFcsCollection();
+  if ( !muFcs ) return;
   StFcsDb* fcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
   if( !fcsDb ) {
       LOG_ERROR << "Cannot get StFcsDb object" << endm;
       return;
-  }
-  StMuFcsCollection * muFcs = mMuDst->muFcsCollection();
-  if ( !muFcs ) {
-    LOG_ERROR << "Cannot get Fcs Collection from MuDst" << endm;
-    return;
   }
   TIter next(muFcs->getHitArray());
   StMuFcsHit* muHit(NULL);
