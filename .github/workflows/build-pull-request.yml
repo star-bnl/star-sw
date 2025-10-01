@@ -53,7 +53,7 @@ jobs:
       STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
@@ -78,7 +78,7 @@ jobs:
       STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
@@ -103,7 +103,7 @@ jobs:
       STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
