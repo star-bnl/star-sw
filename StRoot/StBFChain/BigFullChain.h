@@ -1379,7 +1379,7 @@ Bfc_st BFC[] = { // standard chains
   {"stargen:embed",  "", "","stargen", "StarEmbedMaker", "StarGeneratorEmbed.so",      "Setup the primary event generator (embedding) maker", false },
 
   {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
-  {"pythia6:mk",  "","","",        "StarPythia6", "",           "Create pythia8 maker", false },
+  {"pythia6:mk",  "","","",        "StarPythia6", "",           "Create pythia6 maker", false },
 
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
@@ -1391,6 +1391,7 @@ Bfc_st BFC[] = { // standard chains
   {"kinematics:mk"  ,"","","stargen:mk,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"kinematics:embed"  ,"","","stargen:embed,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+  {"genreader:mk","","","genreader", "StarGenEventReader","","StarGenerator Reader", false},
 
 
   {"fastjet"     ,"","",""       , "", "libfastjet.so",          "Load fast jet reconstruction algo", false},
