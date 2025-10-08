@@ -62,7 +62,6 @@ void particleGun( int nevents=1,
   top->Load();
   top->Instantiate();
 
-
   auto* prim = top->Maker("PrimaryMaker");
   auto* kine = top->Maker("StarKine");
 

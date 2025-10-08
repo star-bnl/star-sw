@@ -44,15 +44,7 @@ std::string chainopts="nodefault y2021a sdt20210215 agml stargen:mk pythia8.1.86
 StMaker* g4star = 0;
 
 void pythia8( int nevents=1, 
-		  const char* outname="particleGun.geant.root",
-		  int ntracks=10,
-		  double ptmn=0.01,
-		  double ptmx=6.0,
-		  double etamn=-1.35,
-		  double etamx=1.65,
-		  double phimn=0.0,
-		  double phimx=TMath::TwoPi(),
-		  std::string distribution="FlatPT",
+		  const char* outname="pythia8.geant.root",
 		  std::string physlist="FTFP_BERT"		  
 		  ) {
   
@@ -70,15 +62,10 @@ void pythia8( int nevents=1,
   //
   auto* pythia8 = top->Maker("Pythia8");
   pythia8->SetAttr("FRAME", "CMS");
-  pythia8->SetAttr("Ecms", 510.0);
+  pythia8->SetAttr("Ecms",  200.0);
   pythia8->SetAttr("BLUE", "proton");
   pythia8->SetAttr("YELL", "proton");
-  pythia8->SetAttr("SET",
-      "WeakSingleBoson:all=off"    ";"
-      "WeakSingleBoson:ffbar2W=on" ";"
-      "24:onMode=0"                ";" // switch off all W+/- decaus
-      "24:onIfAny 11 -11"             // switch on for decays to e+/-
-  );
+  pythia8->SetAttr("SET",  "HardQCD:all=on" );
   prim->AddMaker( pythia8 );
   prim->SetAttr("verbose",111);
 

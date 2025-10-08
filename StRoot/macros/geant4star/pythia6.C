@@ -39,12 +39,12 @@ extern StBFChain* chain;
 StBFChain* top = new StBFChain("physicssim");
 
 // Minimal setup to load libraries
-std::string chainopts="nodefault y2021a sdt20210215 agml stargen:mk hijing1.383 hijing:mk g4star:mk noinput geant4out ";
+std::string chainopts="nodefault y2021a sdt20210215 agml stargen:mk pythia6.4.28 pythia6:mk g4star:mk noinput geant4out ";
 
 StMaker* g4star = 0;
 
-void hijing( int nevents=1, 
-		  const char* outname="hijing.geant.root",
+void pythia6( int nevents=1, 
+		  const char* outname="pythia6.geant.root",
 		  std::string physlist="FTFP_BERT"		  
 		  ) {
   
@@ -54,16 +54,29 @@ void hijing( int nevents=1,
   top->Load();
   top->Instantiate();
 
-  LOG_WARN << "Macro is not functional b/c VMC library loads conflicting and incompatible pythia library" << endm;
+  LOG_WARN << "Macro is not functional b/c VMC library loads redundant pythia library" << endm;
   return;
 
   auto* prim = top->Maker("PrimaryMaker");
-  auto* hijing = top->Maker("Hijing");
-  hijing->SetAttr("FRAME", "CMS");
-  hijing->SetAttr("Ecms", 200.0);
-  hijing->SetAttr("BLUE", "Au");
-  hijing->SetAttr("YELL", "Au");
-  prim->AddMaker( hijing );
+
+  //
+  // Setup pythia8 for qqbar --> W --> e+/- nu(bar) production
+  //
+  auto* pythia6 = top->Maker("Pythia6");
+  pythia6->SetAttr("FRAME", "CMS");
+  pythia6->SetAttr("Ecms", 510.0);
+  pythia6->SetAttr("BLUE", "proton");
+  pythia6->SetAttr("YELL", "proton");
+  pythia6->SetAttr("SET",
+		   "MSEL=1;"
+		   );
+  //  pythia6->SetAttr("SET",
+  //      "WeakSingleBoson:all=off"    ";"
+  //      "WeakSingleBoson:ffbar2W=on" ";"
+  //      "24:onMode=0"                ";" // switch off all W+/- decaus
+  //      "24:onIfAny 11 -11"             // switch on for decays to e+/-
+  //  );
+  prim->AddMaker( pythia6 );
   prim->SetAttr("verbose",111);
 
 
@@ -80,32 +93,35 @@ void hijing( int nevents=1,
       "G4UI:PREINIT", 
       "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
       "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+      "/process/verbose" ";"
   );
-  g4star->SetAttr(
-      "G4UI:INIT",
-      "/mcCrossSection/setMinKinE 1 keV "       ";"
-      "/mcCrossSection/setMaxKinE 250 GeV "     ";"
-      "/mcCrossSection/setMinMomentum 10 keV "  ";"
-      "/mcCrossSection/setMaxMomentum 250 GeV " ";"
-  );
+  //  g4star->SetAttr(
+  //      "G4UI:INIT",
+  //      "/mcCrossSection/setMinKinE 1 keV "       ";"
+  //      "/mcCrossSection/setMaxKinE 250 GeV "     ";"
+  //      "/mcCrossSection/setMinMomentum 10 keV "  ";"
+  //      "/mcCrossSection/setMaxMomentum 250 GeV " ";"
+  //  );
 
-  // g4star->SetAttr(
-  //      "G4UI:POSTTRIG",
-  //      "/mcPhysics/printGlobalCuts"
-  // );
+  //  g4star->SetAttr(
+  //		  "G4UI:PRETRIG",
+  //		  "prompt"
+  //		  );
 
-  //  g4star->SetAttr("G4UI:INIT",    "interactive"  );
+  //  g4star->SetAttr(
+  //		  "G4UI:POSTTRIG",
+  //		  "prompt"
+  //		  );
+
 
   //  g4star -> SetAttr("G4VmcOpt:Phys",  "FTFP_BERT");
   //  g4star -> SetAttr("G4VmcOpt:Phys",  "QGSP_BERT");
 
 
 
-
   top->ls(5);
-
   
-
+  top->Init();
 
   gSystem->SetFPEMask( kNoneMask );
   top->EventLoop(nevents, top->Maker("outputStream"));
