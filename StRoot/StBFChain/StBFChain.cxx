@@ -552,6 +552,11 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,kTRUE);
       mk->PrintAttr();
     }
+
+    if (maker== "StGmtClusterMaker") {
+      if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  kTRUE);
+    }
+
     if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
@@ -693,6 +698,7 @@ Int_t StBFChain::Instantiate()
       else if ( GetOption("PicoVtxMtd"))      mk->SetAttr("PicoVtxMode", "PicoVtxMtd");
       else if ( GetOption("PicoVtxVpdOrDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxVpdOrDefault");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
+      else if ( GetOption("PicoVtxless"))      mk->SetAttr("PicoVtxMode", "PicoVtxless");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");

@@ -26,38 +26,27 @@ class FwdDataSource {
     HitMap_t &getFstHits() {
         return mFstHits;
     };
+    HitMap_t &getEpdHits() {
+        return mEpdHits;
+    };
     McTrackMap_t &getMcTracks() {
         return mMcTracks;
     };
 
     // Cleanup
     void clear() {
-
-      // delete the hits from the hitmap
-      for ( auto kv : mFttHits ){
-          for ( auto h : kv.second ){
-              delete h;
-          }
-          kv.second.clear();
-      }
-
-      for ( auto kv : mFstHits ){
-          for ( auto h : kv.second ){
-              delete h;
-          }
-          kv.second.clear();
-      }
-
-      // the tracks are shared pointers, so they will be taken care of by clearing the map (below)
-
-      mFttHits.clear();
-      mFstHits.clear();
-      mMcTracks.clear();
+        // Just empty our vectors, we dont own the memory
+        mFttHits.clear();
+        mFstHits.clear();
+        mEpdHits.clear();
+        // the tracks are shared pointers, so they will be taken care of by clearing the map (below)
+        mMcTracks.clear();
     }
 
     // TODO, protect and add interaface for pushing hits / tracks
     HitMap_t mFttHits;
     HitMap_t mFstHits;
+    HitMap_t mEpdHits;
     McTrackMap_t mMcTracks;
 };
 

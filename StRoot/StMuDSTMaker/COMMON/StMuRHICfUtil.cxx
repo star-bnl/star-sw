@@ -59,7 +59,7 @@ void StMuRHICfUtil::fillMuRHICf(StMuRHICfCollection* muColl, StRHICfCollection* 
   muRHICfRawHit -> setTriggerNumber(coll->getTriggerNumber());
   muRHICfRawHit -> setRunTime(0, coll->getRunTime(0));
   muRHICfRawHit -> setRunTime(1, coll->getRunTime(1));
-  muRHICfRawHit -> setRunTRGM(coll->getRunTRGM());
+  muRHICfRawHit -> setRunTRGM(coll->getRunTRGM());  
 
   fillMuRHICfRawHit(muRHICfRawHit, rhicfRawHit);
 
@@ -86,6 +86,9 @@ void StMuRHICfUtil::fillRHICf(StRHICfCollection* coll, StMuRHICfCollection* muCo
 
   StMuRHICfRawHit* muRHICfRawHit = muColl -> getRawHit();
   StRHICfRawHit* rhicfRawHit = coll -> rawHitCollection();
+
+  if(!muRHICfRawHit) return;
+  if(!rhicfRawHit) return;
 
   coll -> setRHICfRunNumber(muRHICfRawHit->getRHICfRunNumber());
   coll -> setRHICfEventNumber(muRHICfRawHit->getRHICfEventNumber());

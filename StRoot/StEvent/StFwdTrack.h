@@ -22,6 +22,7 @@
 #include <vector>
 #include "StThreeVectorD.hh"
 #include "StContainers.h"
+#include <climits>
 
 class StFcsCluster;
 
@@ -77,18 +78,21 @@ struct StFwdTrackProjection : public StObject {
 struct StFwdTrackSeedPoint : public StObject {
     StFwdTrackSeedPoint() {}
     StFwdTrackSeedPoint(    StThreeVectorD xyz, 
-                            short sec, 
+                            short detsec, 
                             unsigned short trackId, 
                             float cov[9] ){
         mXYZ = xyz;
-        mSector = sec;
+        mSector = detsec;
         mTrackId = trackId;
         memcpy( mCov, cov, sizeof( mCov ));
     }
+
+    short detectorId() const { return mSector / 10; }
+    short sector() const { return mSector % 10; }
     
     StThreeVectorD mXYZ;
     unsigned short mTrackId;
-    short mSector;
+    short mSector; // = detId * 10 + sector
     float mCov[9];
     
     ClassDef(StFwdTrackSeedPoint, 1)
@@ -98,6 +102,8 @@ class StFwdTrack : public StObject {
 
 public:
     StFwdTrack(  );
+    // dtor needed for releasing associations
+    ~StFwdTrack(  );
 
     vector<StFwdTrackProjection> mProjections;
     vector<StFwdTrackSeedPoint> mFTTPoints;
@@ -124,11 +130,27 @@ public:
 
     // Number of fit points used by GenFit
     short   numberOfFitPoints() const;
-    // unsigned int   numberOfPossibleFitPoints() const;
-
+    
     // Number of points used in the track seed step
     short   numberOfSeedPoints() const;
+    UShort_t idTruth() const { return mIdTruth; }
+    UShort_t qaTruth() const { return mQATruth; }
+    StThreeVectorD dca() const { return StThreeVectorD( mDCA[0], mDCA[1], mDCA[2] ); }
+    UChar_t vertexIndex() const {
+        // extract bits 7…2:
+        return (mVtxIndex >> 2) & 0x3F;
+    }
+    UChar_t trackType() const {
+        // extract bits 1…0:
+        return mVtxIndex & 0x03;
+    }
+    UChar_t vertexIndexRaw() const { return mVtxIndex; }
+    UShort_t globalTrackIndex() const { return mGlobalTrackIndex; }
 
+    bool isGlobalTrack() const { return (trackType() == StFwdTrack::kGlobal); }
+    bool isBeamLineConstrainedTrack() const { return (trackType() == StFwdTrack::kBeamlineConstrained); }
+    bool isPrimaryTrack() const { return (trackType() == StFwdTrack::kPrimaryVertexConstrained); }
+    bool isFwdVertexConstrainedTrack() const { return (trackType() == StFwdTrack::kForwardVertexConstrained); }
 
     void setPrimaryMomentum( StThreeVectorD mom ) { mPrimaryMomentum = mom; }
     void setDidFitConverge( bool lDidFitConverge ) { mDidFitConverge = lDidFitConverge; }
@@ -140,6 +162,13 @@ public:
     void setNDF( float lNDF ) { mNDF = lNDF;}
     void setPval( float lPval ) { mPval = lPval;}
     void setCharge( short  lCharge ) { mCharge = lCharge;}
+    void setMc( UShort_t idt, UShort_t qual ) { mIdTruth = idt; mQATruth = qual; }
+    void setDCA( StThreeVectorD dca ) { mDCA[0] = dca.x(); mDCA[1] = dca.y(); mDCA[2] = dca.z(); }
+    void setDCA( float dcaX, float dcaY, float dcaZ ) { mDCA[0] = dcaX; mDCA[1] = dcaY; mDCA[2] = dcaZ; }
+    void setVtxIndex( UChar_t vtxIndex ) { mVtxIndex = pack6and2( vtxIndex, trackType() ); }
+    void setTrackType( UChar_t trackType ) { mVtxIndex = pack6and2( vertexIndex(), trackType ); }
+    void setVtxIndexAndTrackType( UChar_t vtxIndex, UChar_t trackType ) { mVtxIndex = pack6and2( vtxIndex, trackType ); }
+    void setGlobalTrackIndex( UShort_t index ) { mGlobalTrackIndex = index; }
 
     // ECAL clusters
     StPtrVecFcsCluster& ecalClusters();
@@ -152,29 +181,42 @@ public:
     void addHcalCluster(StFcsCluster* p);
     void sortHcalClusterByET();
 
-    
+    enum StFwdTrackType { kGlobal=0, kBeamlineConstrained=1, kPrimaryVertexConstrained=2, kForwardVertexConstrained=3 };
+
+    static unsigned char inline pack6and2(unsigned int A, unsigned int B) {
+        // mask to ensure they fit:
+        A &= 0x3F;       // 0x3F = 0b00111111
+        B &= 0x03;       // 0x03 = 0b00000011
+
+        // put A in the **high** 6 bits, B in the **low** 2 bits
+        return static_cast<unsigned char>((A << 2) | B);
+    }
+
 protected:
 
-    
-
     // Track quality and convergence
-    bool mDidFitConverge;
-    bool mDidFitConvergeFully;
-    short mNumberOfFailedPoints;
-    short mNumberOfSeedPoints;
-    short mNumberOfFitPoints;
-    float mChi2;
-    float mNDF;
-    float mPval;
-    short mCharge;
-    StThreeVectorD mPrimaryMomentum;
+    bool mDidFitConverge; // did the fit converge
+    bool mDidFitConvergeFully; // did the fit converge fully (fwd and bkw)
+    short mNumberOfFailedPoints; // number of points that failed to converge
+    short mNumberOfSeedPoints; // number of points used in the seed step
+    short mNumberOfFitPoints; // number of points used in the fit (seed + vertex)
+    float mChi2; // chi2 of the fit
+    float mNDF; // number of degrees of freedom
+    float mPval; // p-value of the fit
+    short mCharge; // charge of the track
+    StThreeVectorD mPrimaryMomentum; // momentum at the primary vertex
+    StPtrVecFcsCluster mEcalClusters; // ECAL clusters
+    StPtrVecFcsCluster mHcalClusters; // HCAL clusters
     
+    UShort_t mIdTruth; // MC track id
+    UShort_t mQATruth; // MC track quality (percentage of hits coming from corresponding MC track)
 
-    StPtrVecFcsCluster mEcalClusters;
-    StPtrVecFcsCluster mHcalClusters;
+    float mDCA[3]; // DCA to the primary vertex
+    // vtx index is used to pack the vertex index and the track type 
+    UChar_t mVtxIndex;
+    UShort_t mGlobalTrackIndex;
     
-    ClassDef(StFwdTrack,2)
-
+    ClassDef(StFwdTrack,4)
 };
 
 #endif

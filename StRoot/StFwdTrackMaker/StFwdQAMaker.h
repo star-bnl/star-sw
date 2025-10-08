@@ -15,6 +15,8 @@
 #include "StEvent/StEnumerations.h"
 #include "StThreeVectorD.hh"
 
+#include <map>
+
 class StMuFwdTrack;
 class StMuFwdTrackProjection;
 class ForwardTracker;
@@ -198,6 +200,13 @@ class StFwdQAMaker : public StMaker {
     void FillTracks();
     void FillMcTracks();
 
+    void ProcessFwdTracks();
+    void ProcessFwdMuTracks();
+
+    void setMuDstInput() { mAnalyzeMuDst = true; }
+    void setLocalOutputFile( TString f ) { mLocalOutputFile = f; }
+    void setTreeFilename( TString f ) {mTreeFilename = f;}
+
   protected:
     TFile *mTreeFile = nullptr;
     TTree *mTree     = nullptr;
@@ -210,6 +219,32 @@ class StFwdQAMaker : public StMaker {
     StMuFcsCollection *mMuFcsCollection = nullptr;
     StFwdTrackMaker *mFwdTrackMaker = nullptr;
     StFcsDb *mFcsDb = nullptr;
+
+
+//========================================================= new stuff
+    std::map<TString, TH1*> mHists;
+
+    /**
+     * @brief Get the Hist object from the map
+     *  - Additional check and safety for missing histograms
+     * @param n Histogram name
+     * @return TH1* histogram if found, otherwise a 'nil' histogram with one bin
+     */
+    TH1* getHist( TString n ){
+      if (mHists.count(n))
+        return mHists[n];
+      LOG_ERROR << "Attempting to access non-existing histogram" << endm;
+      return new TH1F( "NULL", "NULL", 1, 0, 1 ); // returning nullptr can lead to seg fault, this fails softly
+    }
+
+    /**
+     * @brief Control whether the analysis uses StEvent (default) or MuDst as input
+     * 
+     */
+    bool mAnalyzeMuDst = false;
+    TString mLocalOutputFile;
+    TString mTreeFilename;
+//====================================================== end new stuff
 
 };
 
