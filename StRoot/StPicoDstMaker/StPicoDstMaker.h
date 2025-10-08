@@ -90,7 +90,8 @@ class StPicoDstMaker : public StMaker {
   /// \par 3 VpdOrDefault
   /// \par 4 Mtd
   /// \par 5 FXT
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
+  /// \par 6 VTXLess
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5, Vtxless=6};
 #endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
@@ -225,6 +226,12 @@ class StPicoDstMaker : public StMaker {
   void fillBbcHits();
   /// Fill ETOF information
   void fillETofHits();
+  /// Fill Fwd Track information
+  void fillFwdTracks();
+  /// Fill FcsHits information
+  void fillFcsHits();
+  /// Fill FcsClusters information
+  void fillFcsClusters();
   /// Fill MC vertex information
   void fillMcVertices();
   /// Fill MC track information
@@ -286,6 +293,9 @@ class StPicoDstMaker : public StMaker {
   StEmcGeom*       mEmcGeom[4];
   /// Pointer to the array of BEMC tower hits
   StEmcRawHit*     mEmcIndex[4800];
+
+  /// Map of StPicoFcsCluster detId + Id to index in the array for track matching
+  std::map<std::pair<int, int>, int> mMapFcsIdPairIndex;
 
   /// Magnetic field of the current event
   Float_t    mBField;
