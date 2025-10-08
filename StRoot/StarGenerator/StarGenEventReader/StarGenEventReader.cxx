@@ -3,6 +3,9 @@
 
 Int_t StarGenEventReader::Init()
 {
+  if ( SAttr("input") ) {
+    SetInputFile( SAttr("input"),"genevents","primaryEvent" );
+  }
   return kStOK;
 };
 
