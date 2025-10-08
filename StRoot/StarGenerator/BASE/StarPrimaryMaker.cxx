@@ -73,7 +73,6 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   SetAttr("FilterKeepHeader", int(1) );
 
-
   // Defaults to gaussian
   mVertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
   mVertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
@@ -119,6 +118,7 @@ Int_t StarPrimaryMaker::Init()
     mFileName = SAttr("output");
   }
 
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
   //
   // Initialize runtime flags
