@@ -115,6 +115,10 @@ Int_t StarPrimaryMaker::Init()
     AgStarReader::Instance().SetStack(mStack);
   }
 
+  if ( 0 != SAttr("output") ) {
+    mFileName = SAttr("output");
+  }
+
 
   //
   // Initialize runtime flags
