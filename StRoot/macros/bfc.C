@@ -18,6 +18,7 @@ class StMessMgr;
 #pragma cling load("StUtilities")
 #pragma cling load("StBFChain")
 #pragma cling load("liblog4cxx")
+#pragma cling add_include_path("$STAR/StRoot/StStarLogger")
 #pragma cling load("StStarLogger.so")
 #pragma cling load("StarClassLibrary.so")
 
