@@ -48,6 +48,9 @@ void ListStarSimOpts( const int mode=-1, bool attr=false ) {
 
   if ( mode==1 ) {
     std::cout << "# List of simulation productions" << std::endl;
+    for ( auto result : jobmap ) {
+      std::cout << "- Production tag " << result.first << std::endl;
+    }
   }
 
   for ( auto result : jobmap ) {
