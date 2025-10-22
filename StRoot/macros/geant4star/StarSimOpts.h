@@ -47,10 +47,12 @@ StarSimOpt_t GetStarSimOpts( std::string name ) {
 void ListStarSimOpts( const int mode=-1, bool attr=false ) {
 
   if ( mode==1 ) {
-    std::cout << "# List of simulation productions" << std::endl;
+    std::cout << "# List production jobs" << std::endl;
     for ( auto result : jobmap ) {
       std::cout << "- Production tag " << result.first << std::endl;
     }
+    std::cout << std::endl << std::endl;
+    std::cout << "# Production job chains and attributes" << std::endl;
   }
 
   for ( auto result : jobmap ) {
