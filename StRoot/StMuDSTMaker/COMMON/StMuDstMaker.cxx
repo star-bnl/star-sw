@@ -1904,9 +1904,15 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 #endif
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillMC() {
-  St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  if (!g2t_track)  return;
-  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); if (!g2t_vertex) return;
-  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
+  St_g2t_track  *g2t_track  = 0;
+  g2t_track = (St_g2t_track  *) GetDataSet("geant/g2t_track");  
+  if ( 0==g2t_track )  g2t_track = (St_g2t_track  *) GetDataSet("geant4star/g2t_track");   
+  if ( 0==g2t_track )  return;
+  St_g2t_vertex *g2t_vertex = 0;
+  g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); 
+  if ( 0==g2t_vertex )   g2t_track = (St_g2t_track  *) GetDataSet("geant4star/g2t_track");  
+  if ( 0==g2t_vertex ) return;
+  StG2TrackVertexMap::instance(g2t_track,g2t_vertex); 
   mStEvent->setIdTruth();
   StMuMcVertex *mcvx = 0;
   StMuMcTrack  *mctr = 0;
