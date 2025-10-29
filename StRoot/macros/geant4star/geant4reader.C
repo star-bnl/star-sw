@@ -15,7 +15,7 @@ class StMessMgr;
 #pragma cling load("StStarLogger.so")
 #pragma cling load("StarClassLibrary.so")
 #pragma cling load("libmysqlclient.so")
-#pragma cling load("libStarMiniCern.so")
+//#pragma cling load("libStarMiniCern.so")
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
 
@@ -39,15 +39,19 @@ extern StBFChain* chain;
 StBFChain* top = new StBFChain("physicssim");
 
 // Minimal setup to load libraries
-std::string chainopts="nodefault y2021a sdt20210215 agml stargen:mk genreader:mk g4star:mk noinput geant4out ";
+std::string chainopts="nodefault sdt20210215 agml stargen:mk genreader:mk g4star:mk noinput geant4out ";
 
 StMaker* g4star = 0;
 
 void geant4reader( int nevents=10, 
-	     const char* inpname="hijing.genevents.root",
-	     const char* outname="hijing.geant.root",
-	     std::string physlist="FTFP_BERT"		  
+             std::string geom="y2024a",
+	     const char* inpname="rcf25000_y2024a_pp200_G4_pythia8p2p35_minbias_v001_job0.genevents.root",
+	     const char* outname="pythia.geant.root",
+	     std::string engine="G4",
+	     std::string physlist="FTFP_BERT"
 	     ) {
+
+  chainopts += geom;
   
   top->SetDebug(1);
   top->SetFlags(chainopts.c_str());
@@ -71,8 +75,10 @@ void geant4reader( int nevents=10,
   //    "/process/eLoss/maxKinEnergy 1000.0 GeV" 
   //    ;
   g4star = top->Maker("geant4star");
-  g4star->SetAttr("G4VmcOpt",physlist.c_str());
+  g4star->SetAttr("application:engine", engine.c_str() );
 
+  // ignored if G3...
+  g4star->SetAttr("G4VmcOpt",physlist.c_str());
   g4star->SetAttr(
       "G4UI:PREINIT", 
       "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
