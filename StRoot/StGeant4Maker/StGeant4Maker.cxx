@@ -796,10 +796,11 @@ int StGeant4Maker::InitRun( int /* run */ ){
   mEventHeader = (StEvtHddr*) ( GetTopChain()->GetDataSet("EvtHddr") );
   assert(mEventHeader);
 
-  // If it does not exist, create and register
-  if ( 0 == mEventHeader ) {
+  // If we are not in embedding mode we will set the run and event number
+  if ( 0 == IAttr("embedding:mode") && mEventHeader->GetRunNumber()==-1 ) {
+    LOG_INFO << "Createing event header" << endm;
     mEventHeader = new StEvtHddr(GetConst());                                                                                                                                                                
-    mEventHeader->SetRunNumber(0);                
+    mEventHeader->SetRunNumber(IAttr("runnumber"));                
     SetOutput(mEventHeader);                      // Declare this event header for output
   }
 
@@ -951,11 +952,15 @@ int StGeant4Maker::Make() {
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
 
   
-  if ( 0 == mEventHeader->GetRunNumber() ) {
+  if ( 0 == IAttr("embedding:mode" ) ) {
+    LOG_INFO << "SetRunNumber:   " << runnumber << endm;
+    LOG_INFO << "SetEventNumber: " << eventNumber << endm;
     mEventHeader -> SetRunNumber( runnumber );  
     mEventHeader -> SetEventNumber( eventNumber );
     mEventHeader -> SetProdDateTime();
   }
+
+  eventNumber++;
 
 
   
@@ -976,6 +981,7 @@ int StGeant4Maker::Make() {
 
 
   if ( nv==0 || nt ==0 ) {
+    LOG_INFO << "No vertices || no tracks" << endm;
     result = kStERR;
   }
 
