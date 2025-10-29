@@ -44,7 +44,8 @@ StarSimOpt_t GetStarSimOpts( std::string name ) {
   return jobmap[name];
 };
 
-void ListStarSimOpts( const int mode=-1, bool attr=false ) {
+// Defaults to no printout
+void ListStarSimOpts( const int mode=999, bool attr=false ) {
 
   if ( mode==1 ) {
     std::cout << "# List production jobs" << std::endl;
@@ -103,9 +104,9 @@ void setupProductionJobs() {
 
   
   addjob({ 
-      "rcf25000:y2025a:AuAu200:G4:hijing1.383:minbias:v001",                                                               // name
-       "y2025a agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
-       "y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault ", 
+      "rcf25000:y2025:AuAu200:G4:hijing1.383:minbias:v001",                                                               // name
+       "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
+       "y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault ", 
 	// Sun Jun 15 02:14:13 EDT [ 2025-06-15 06:14:13 GMT ] 26166003
        { "sdt20250615" },
        { 26166003 },
@@ -123,12 +124,12 @@ void setupProductionJobs() {
 	},
 	{},
 	{},
-	"P2025a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
+	"P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
   });
 
   { // 2025 200 GeV pAu Hijing 
-    auto& job=addjob("rcf25000:y2025a:pAu200:G4:hijing1.383:minbias:v001");
-    job.genopts   = "y2025a agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault";
+    auto& job=addjob("rcf25000:y2025:pAu200:G4:hijing1.383:minbias:v001");
+    job.genopts   = "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault";
     job.generator = "Hijing";
     job.genSAttr={
 	  {"FRAME",  "CMS" },
@@ -139,18 +140,18 @@ void setupProductionJobs() {
     job.timestamps={{"sdt20250615"}};  // NOTE: need to update to correct timestamp and run numbers
     job.runnumbers={26166003};
 
-    job.simopts="y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simopts="y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G4" }
     };
 
-    job.recopts="P2025a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
   { // 2025 200 GeV pp pythia8
-    auto& job=addjob("rcf25000:y2025a:pp200:G4:pythia8.2.35:minbias:v001");
-    job.genopts   = "y2025a agml  stargen stargen:mk stargen stargen:stubs pythia8.2.35 pythia8:mk noinput nooutput nodefault";
+    auto& job=addjob("rcf25000:y2025:pp200:G4:pythia8.2.35:minbias:v001");
+    job.genopts   = "y2025 agml  stargen stargen:mk stargen stargen:stubs pythia8.2.35 pythia8:mk noinput nooutput nodefault";
     job.generator = "Pythia8";
     job.genSAttr={
 	  {"FRAME",  "CMS" },
@@ -163,12 +164,12 @@ void setupProductionJobs() {
     job.timestamps={{"sdt20250615"}};
     job.runnumbers={26166003};
 
-    job.simopts="y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simopts="y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G4" }
     };
 
-    job.recopts="P2025a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -247,9 +248,9 @@ void setupProductionJobs() {
 
   
   addjob({ 
-      "rcf25000:y2025a:AuAu200:G3:hijing1.383:minbias:v001",                                                               // name
-       "y2025a agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
-       "y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault ", 
+      "rcf25000:y2025:AuAu200:G3:hijing1.383:minbias:v001",                                                               // name
+       "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
+       "y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault ", 
        { "sdt20250615" },
        { 26166003 },
       "Hijing",
@@ -265,12 +266,12 @@ void setupProductionJobs() {
 	  {"application:engine", "G3"}
 	},
 	  {},{},
-	       "P2025a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
+	       "P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
   });
 
   { // 2025 200 GeV pAu Hijing 
-    auto& job=addjob("rcf25000:y2025a:pAu200:G3:hijing1.383:minbias:v001");
-    job.genopts   = "y2025a agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault";
+    auto& job=addjob("rcf25000:y2025:pAu200:G3:hijing1.383:minbias:v001");
+    job.genopts   = "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault";
     job.generator = "Hijing";
     job.genSAttr={
 	  {"FRAME",  "CMS" },
@@ -282,17 +283,17 @@ void setupProductionJobs() {
     job.timestamps={{"sdt20250615"}};
     job.runnumbers={26166003};
 
-    job.simopts="y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simopts="y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G3" }
     };
-    job.recopts="P2025a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
   { // 2025 200 GeV pp pythia8
-    auto& job=addjob("rcf25000:y2025a:pp200:G3:pythia8.2.35:minbias:v001");
-    job.genopts   = "y2025a agml  stargen stargen:mk stargen stargen:stubs pythia8.2.35 pythia8:mk noinput nooutput nodefault";
+    auto& job=addjob("rcf25000:y2025:pp200:G3:pythia8.2.35:minbias:v001");
+    job.genopts   = "y2025 agml  stargen stargen:mk stargen stargen:stubs pythia8.2.35 pythia8:mk noinput nooutput nodefault";
     job.generator = "Pythia8";
     job.genSAttr={
 	  {"FRAME",  "CMS" },
@@ -305,7 +306,7 @@ void setupProductionJobs() {
     job.timestamps={{"sdt20250615"}};
     job.runnumbers={26166003};
 
-    job.simopts="y2025a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simopts="y2025 agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G3" }
     };
@@ -389,7 +390,7 @@ void setupProductionJobs() {
    
 };  
 
-void StarSimOpts(const int mode=-1){ 
+void StarSimOpts(const int mode=9999){ 
   setupProductionJobs(); 
   ListStarSimOpts(mode); 
 }
