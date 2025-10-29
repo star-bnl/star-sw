@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<job name="&JOBNAME;" maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="false" nProcesses="&NJOBS;" >
+
+<command>
+
+<!--RNG seed is set to the JOBINDEX for reproducibility -->
+setenv GSL_RNG_SEED ${JOBINDEX}
+
+<!-- Load shared libraries -->
+# Setup group environment
+setenv GROUP_DIR &GROUPDIR;
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver &BASELIB; &OVERLAY;
+
+source $GROUP_DIR/star_cshrc.csh
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver &BASELIB; &OVERLAY;
+
+module load vmc-1-0-p3-root-6.24.06-debug
+module load geant3-3-9-p1-root-6.24.06-debug
+module load geant4-10.5.1-debug
+module load geant4-data-10.5.1-debug
+module load geant4-vmc-5-0-p5-root-6.24.06-debug
+module load clhep-2.4.5.1-debug
+module unload star-table-0.1.1-root-6.24.06
+module load star-table-0.1.1-root-6.24.06
+
+cp -R &WORKINGDIR;/.sl73_x8664_gcc485/ .
+cp -R &WORKINGDIR;/StRoot/ .
+cp -R &WORKINGDIR;/StarDb/ .
+cp -R &WORKINGDIR;/StDb/ .
+cp -R &WORKINGDIR;/StarVMC/ .
+
+setenv STAR .
+
+#ls -la . 
+#ls -la StRoot/ 
+#ls -la .sl*/lib/ 
+
+
+ls -l StRoot/macros/geant4star/
+
+
+  set tag=&TAG;
+
+
+  set logbase = `echo $tag | sed 's/:/_/g' | sed 's/\./p/g'`_job${JOBINDEX}
+
+  <!-- Run event generation -->
+  echo "______________________________________________________________________________________________"
+  echo "Running primary event generation"
+  root.exe -q -b StRoot/macros/geant4star/run_stargenerator.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.gener.log
+  echo "Finished" `date` &gt;&gt; ${logbase}.gener.log
+  echo "______________________________________________________________________________________________"
+  echo "Stage out log files"
+  cp ${logbase}*.log &LOGDIR;
+  echo "______________________________________________________________________________________________"
+  echo "Stage out root files"
+  cp *.root &OUTDIR;
+
+  echo "______________________________________________________________________________________________"
+  echo "Running geant simulation"
+  root.exe -q -b StRoot/macros/geant4star/run_geant4star.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.geant.log
+  echo "Finished" `date` &gt;&gt; ${logbase}.geant.log
+  echo "______________________________________________________________________________________________"
+  echo "Stage out log files"
+  cp ${logbase}*.log &LOGDIR;
+  echo "______________________________________________________________________________________________"
+  echo "Stage out root files"
+  cp *.root &OUTDIR;
+
+  echo "______________________________________________________________________________________________"
+  echo "Running event reconstruction"
+  root4star -q -b StRoot/macros/geant4star/run_reconstruction.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.reco.log
+  echo "Finished" `date` &gt;&gt; ${logbase}.reco.log
+  echo "______________________________________________________________________________________________"
+  echo "Stage out log files"
+  cp ${logbase}*.log &LOGDIR;
+  echo "______________________________________________________________________________________________"
+  echo "Stage out root files"
+  cp *.root &OUTDIR;
+
+
+
+ 
+
+</command>
+
+
+<!-- Define locations of ROOT files -->
+<!--
+  <output fromScratch="*.root" toURL="&OUTDIR;/"/>
+-->
+
+<!-- Define locations of log/elog files -->
+<stdout URL="file:&LOGDIR;/$JOBID.log"/>
+<stderr URL="file:&LOGDIR;/$JOBID.elog"/>
+
+<!-- Condor artifacts -->
+<Generator>
+  <Location>&JOBDIR;</Location>
+</Generator>
+
+<Action frequency="0" position="FIRST">
+  <Exec>
+    mkdir -p &LOGDIR;
+    mkdir -p &OUTDIR;
+    mkdir -p &JOBDIR;
+  </Exec>
+</Action>
+
+
+</job>
+
