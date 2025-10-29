@@ -6,14 +6,14 @@
 #pragma cling load("libGeom.so")
 #pragma cling load("libTable.so")
 #pragma cling load("libPhysics.so")
-#pragma cling load("libEG.so")
+  //#pragma cling load("libEG.so")
 #pragma cling load("libStarRoot.so")
 #else
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
   gSystem->Load("libPhysics");
-  gSystem->Load("libEG");
+  //  gSystem->Load("libEG");
   gSystem->Load("libStarRoot");
 #endif
 
