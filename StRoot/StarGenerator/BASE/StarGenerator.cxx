@@ -33,7 +33,8 @@ StarGenerator::StarGenerator( const Char_t *name )//, StarGenEvent *event )
     mIsPileup(false),
     mPileup(1.0),
     mParticleDb(0),
-    mLibrary("na")
+    mLibrary("na"),
+    mTreeEntries(0)
 {
 
   //  mEvent = (event)? event : new StarGenEvent("default");
@@ -163,6 +164,8 @@ void StarGenerator::SetInputFile( const Char_t *filename, const Char_t *treename
       return;
     }
   SetInputTree(tree, branchname);
+
+  mTreeEntries=tree->GetEntries();
 
 };
 // ----------------------------------------------------------------------------

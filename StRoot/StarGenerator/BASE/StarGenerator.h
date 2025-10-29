@@ -227,6 +227,8 @@ class StarGenerator : public StMaker
   /// Concrete event generator library
   TString mLibrary;
 
+  Long64_t mTreeEntries;
+
   friend class StarPrimaryMaker;
 
   ClassDef(StarGenerator,1);
