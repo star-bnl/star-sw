@@ -90,6 +90,17 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
+  SetAttr("PTMIN",     0.0); SetAttr("PTMAX",    -1.0);
+  SetAttr("ETAMIN",    0.0); SetAttr("ETAMAX",   -1.0);
+  SetAttr("PHIMIN",    0.0); SetAttr("PHIMAX",   -1.0);
+  SetAttr("ZMIN",   -999.0); SetAttr("ZMAX",    999.0);
+
+  SetAttr("XVERTEX", 0.0 ); SetAttr("YVERTEX", 0.0); SetAttr("ZVERTEX", 0.0);
+  SetAttr("XSIGMA",  0.01); SetAttr("YSIGMA", 0.01); SetAttr("ZSIGMA", 15.0);  SetAttr("XYSIGMA", 0.0);
+
+  SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
+  SetSigma( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX"),  DAttr("XYSIGMA") );
+
 }
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::~StarPrimaryMaker()
@@ -119,6 +130,14 @@ Int_t StarPrimaryMaker::Init()
   }
 
   mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
+
+  SetCuts( DAttr("PTMIN"),  DAttr("PTMAX"),
+	   DAttr("ETAMIN"), DAttr("ETAMAX"),
+	   DAttr("PHIMIN"), DAttr("PHIMAX"),
+	   DAttr("ZMIN"),   DAttr("ZMAX") );
+
+  SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
+  SetSigma( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX"),  DAttr("XYSIGMA") );
 
   //
   // Initialize runtime flags
@@ -152,6 +171,8 @@ Int_t StarPrimaryMaker::Init()
   }
 
   mFile = TFile::Open( mFileName, "recreate" );
+  LOG_INFO << "mFileName = " << mFileName.Data() << endm;
+  mFile->Print();
   if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
 
   mTree = new TTree( "genevents", "TTree containing event generator information" );
@@ -216,6 +237,8 @@ Int_t StarPrimaryMaker::Finish()
   if (mFile) 
     { 
 
+      mFile->cd();
+
       // Add the instance of the particle data so we have a record of
       // the particles used as input to the generator
       TObjArray particles = StarParticleData::instance().GetParticles();
@@ -243,6 +266,9 @@ Int_t StarPrimaryMaker::Finish()
 	  stats.Dump();
 	  stats.Write(); // write to fiel
 	}
+
+      LOG_INFO << "Write the ttree" << endm;
+      mTree -> Write();
 
       mFile -> Write();
       mFile -> Close();
@@ -345,7 +371,7 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
   
   mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
-  return StMaker::InitRun( runnumber );
+  return kStOK; //StMaker::InitRun( runnumber );
 }
 
 // --------------------------------------------------------------------------------------------------------------
