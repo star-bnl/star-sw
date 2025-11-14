@@ -82,7 +82,7 @@
  *  50   18   TPC row=43
  *  51   19   TPC row=44
  *  52   20   TPC row=45
- *  53   21   Mwpc
+ *  53   21   Mwpc / TPC prompt hit
  *  54   22   CTB
  *  55   23   ToF
  *  56   24   RICH
@@ -315,6 +315,66 @@ StTrackTopologyMap::hasHitInSsdLayer(unsigned int layer) const
         return bit(layer+5);
       else
         return bit(layer+6);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInMwpc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(53);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInCtb() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(54);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInToF() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(55);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInRich() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(56);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInBemc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(57);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInEemc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(58);
     }
 }
 

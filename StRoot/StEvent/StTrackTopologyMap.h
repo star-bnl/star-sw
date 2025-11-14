@@ -87,6 +87,13 @@ public:
     bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1   
     bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1   
     bool           hasHitInSstLayer(unsigned int) const;   
+    bool           hasHitInMwpc() const;
+    bool           hasHitInTpcPrompt() const { return histHitInMwpc(); }
+    bool           hasHitInCtb(unsigned int) const;
+    bool           hasHitInToF(unsigned int) const;
+    bool           hasHitInRich(unsigned int) const;
+    bool           hasHitInBemc(unsigned int) const;
+    bool           hasHitInEemc(unsigned int) const;
     
     bool           trackTpcOnly() const; 
     bool           trackSvtOnly() const;  
