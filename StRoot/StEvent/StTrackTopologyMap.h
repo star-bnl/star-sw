@@ -88,7 +88,7 @@ public:
     bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1   
     bool           hasHitInSstLayer(unsigned int) const;   
     bool           hasHitInMwpc() const;
-    bool           hasHitInTpcPrompt() const { return histHitInMwpc(); }
+    bool           hasHitInTpcPrompt() const;
     bool           hasHitInCtb() const;
     bool           hasHitInTof() const;
     bool           hasHitInRich() const;
@@ -126,6 +126,11 @@ ostream& operator<< (ostream&, const StTrackTopologyMap&);
 inline bool StTrackTopologyMap::hasHitInSstLayer(unsigned int val) const  
 {
     return hasHitInSsdLayer(val);
+}
+
+inline bool StTrackTopologyMap::hasHitInTpcPrompt() const
+{
+    return hasHitInMwpc();
 }
 
 #endif
