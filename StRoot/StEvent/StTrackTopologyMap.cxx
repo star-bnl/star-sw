@@ -339,7 +339,7 @@ StTrackTopologyMap::hasHitInCtb() const
 }
 
 bool
-StTrackTopologyMap::hasHitInToF() const
+StTrackTopologyMap::hasHitInTof() const
 {
     if(ftpcFormat())
         return false;
@@ -449,28 +449,28 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
             break;
         case kMwpcWestId:
         case kMwpcEastId:
-            if (bit(53)) n++;
+            if (hasHitInMwpc()) n++;
             break;
         case kCtbId:
-            if (bit(54)) n++;
+            if (hasHitInCtb()) n++;
             break;
         case kTofId:
-            if (bit(55)) n++;
+            if (hasHitInTof()) n++;
             break;
         case kRichId:
-            if (bit(56)) n++;
+            if (hasHitInRich()) n++;
             break;
         case kBarrelEmcTowerId:
         case kBarrelEmcPreShowerId:
         case kBarrelSmdEtaStripId:
         case kBarrelSmdPhiStripId:
-            if (bit(57)) n++;
+            if (hasHitInBemc()) n++;
             break;
         case kEndcapEmcTowerId:
         case kEndcapEmcPreShowerId:
         case kEndcapSmdUStripId:
         case kEndcapSmdVStripId:
-            if (bit(58)) n++;
+            if (hasHitInEemc()) n++;
             break;
         default:
             n = 0;

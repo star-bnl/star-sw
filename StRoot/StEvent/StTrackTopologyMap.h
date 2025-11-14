@@ -89,11 +89,11 @@ public:
     bool           hasHitInSstLayer(unsigned int) const;   
     bool           hasHitInMwpc() const;
     bool           hasHitInTpcPrompt() const { return histHitInMwpc(); }
-    bool           hasHitInCtb(unsigned int) const;
-    bool           hasHitInToF(unsigned int) const;
-    bool           hasHitInRich(unsigned int) const;
-    bool           hasHitInBemc(unsigned int) const;
-    bool           hasHitInEemc(unsigned int) const;
+    bool           hasHitInCtb() const;
+    bool           hasHitInTof() const;
+    bool           hasHitInRich() const;
+    bool           hasHitInBemc() const;
+    bool           hasHitInEemc() const;
     
     bool           trackTpcOnly() const; 
     bool           trackSvtOnly() const;  
