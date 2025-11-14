@@ -35,7 +35,7 @@
  *    map[1]   Bit number  Quantity                                  
  *    ------   ----------  --------                                  
  *                0-20     TPC, remaining 21 padrows                 
- *                21       Track extrapolates to MWC (no=0, yes=1)   
+ *                21       Track extrapolates to MWC (no=0, yes=1) (or has prompt hits)
  *                22       Track extrapolates to CTB (no=0, yes=1)   
  *                23       Track extrapolates to TOF (no=0, yes=1)   
  *                24       Track extrapolates to RCH (no=0, yes=1)   
@@ -141,6 +141,14 @@ bool StuFixTopoMap(StTrack* track)
         }
     }
     else {
+
+        // Tracks with hits on other detectors
+        if (track->isPromptTrack()) word2 |= 1U<<21; // Prompt hit is an MWPC hit
+        if (track->isCtbMatched()) word2 |= 1U<<22;
+        if (track->isToFMatched() ||
+            track->isBToFMatched()) word2 |= 1U<<23;
+        if (track->isBemcMatched()) word2 |= 1U<<25;
+        if (track->isEemcMatched()) word2 |= 1U<<26;
 
         // ???
         if (info->numberOfReferencedPoints(kPxlId) ||
