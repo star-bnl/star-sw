@@ -88,8 +88,8 @@
  *  56   24   RICH
  *  57   25   Barrel EMC/SMD
  *  58   26   Endcap EMC/SMD
- *  59   27
- *  60   28
+ *  59   27   Post-crossing track
+ *  60   28   Central-membrane crossing track
  *  61   29   HFT Format (case 3) - TPC tracks
  *  62   30   turn around flag  (flags that track spirals back)
  *  63   31   FTPC Format (flags TOC or FTPC)
@@ -375,6 +375,26 @@ StTrackTopologyMap::hasHitInEemc() const
         return false;
     else {
         return bit(58);
+    }
+}
+
+bool
+StTrackTopologyMap::postXTrack() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(59);
+    }
+}
+
+bool
+StTrackTopologyMap::membraneCrossingTrack() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(60);
     }
 }
 

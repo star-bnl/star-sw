@@ -41,7 +41,9 @@
  *                24       Track extrapolates to RCH (no=0, yes=1)   
  *                25       Track extrapolates to EMCB (no=0, yes=1)  
  *                26       Track extrapolates to EMCEC (no=0, yes=1) 
- *               27-29     reserved for future use                   
+ *                27       Track post-crossing (no=0, yes=1)
+ *                28       Track crosses TPC central membrane (no=0, yes=1)
+ *                29       reserved for future use                   
  *                30       Turn around flag, some elements used >1   
  *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
  *
@@ -68,7 +70,8 @@
  *                24       Track extrapolates to RCH (no=0, yes=1)
  *                25       Track extrapolates to EMCB (no=0, yes=1)
  *                26       Track extrapolates to EMCEC (no=0, yes=1)
- *               27-28     reserved for future use
+ *                27       Track post-crossing (no=0, yes=1)
+ *                28       Track crosses TPC central membrane (no=0, yes=1)
  *                29       HFT flag  (HFT=1, SVT/SSD=0)
  *                30       Turn around flag, some elements used >1
  *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
@@ -149,6 +152,10 @@ bool StuFixTopoMap(StTrack* track)
             track->isBToFMatched()) word2 |= 1U<<23;
         if (track->isBemcMatched()) word2 |= 1U<<25;
         if (track->isEemcMatched()) word2 |= 1U<<26;
+
+        // Tracks with helpful pile-up rejection flags
+        if (track->isPostXTrack()) word2 |= 1U<<27;
+        if (track->isMembraneCrossingTrack()) word2 |= 1U<<28;
 
         // ???
         if (info->numberOfReferencedPoints(kPxlId) ||
