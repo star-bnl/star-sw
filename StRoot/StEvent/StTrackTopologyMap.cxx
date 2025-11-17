@@ -82,7 +82,7 @@
  *  50   18   TPC row=43
  *  51   19   TPC row=44
  *  52   20   TPC row=45
- *  53   21   Mwpc
+ *  53   21   Mwpc / TPC prompt hit
  *  54   22   CTB
  *  55   23   ToF
  *  56   24   RICH
@@ -319,6 +319,66 @@ StTrackTopologyMap::hasHitInSsdLayer(unsigned int layer) const
 }
 
 bool
+StTrackTopologyMap::hasHitInMwpc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(53);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInCtb() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(54);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInTof() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(55);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInRich() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(56);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInBemc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(57);
+    }
+}
+
+bool
+StTrackTopologyMap::hasHitInEemc() const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+        return bit(58);
+    }
+}
+
+bool
 StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
 {
     switch (id) {
@@ -389,28 +449,28 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
             break;
         case kMwpcWestId:
         case kMwpcEastId:
-            if (bit(53)) n++;
+            if (hasHitInMwpc()) n++;
             break;
         case kCtbId:
-            if (bit(54)) n++;
+            if (hasHitInCtb()) n++;
             break;
         case kTofId:
-            if (bit(55)) n++;
+            if (hasHitInTof()) n++;
             break;
         case kRichId:
-            if (bit(56)) n++;
+            if (hasHitInRich()) n++;
             break;
         case kBarrelEmcTowerId:
         case kBarrelEmcPreShowerId:
         case kBarrelSmdEtaStripId:
         case kBarrelSmdPhiStripId:
-            if (bit(57)) n++;
+            if (hasHitInBemc()) n++;
             break;
         case kEndcapEmcTowerId:
         case kEndcapEmcPreShowerId:
         case kEndcapSmdUStripId:
         case kEndcapSmdVStripId:
-            if (bit(58)) n++;
+            if (hasHitInEemc()) n++;
             break;
         default:
             n = 0;
