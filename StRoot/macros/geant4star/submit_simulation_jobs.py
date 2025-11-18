@@ -47,7 +47,7 @@ def main():
 
     if ( argd.pop('list', False) ):
         root.LoadMacro("StRoot/macros/geant4star/StarSimOpts.h")
-        ROOT.StarSimOpts()
+        ROOT.StarSimOpts(-1)
         return
 
     # Pop the series selector
@@ -69,13 +69,15 @@ def main():
             entities.append(f"JOBNAME={k.replace(':','_')}-")
 
             command = f"star-submit-template -entities {','.join(entities)} -template submit_simulation_jobs.xml"
-            result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
 
-            submission=result_shell.stdout.split('\n')
-            resultmap[k]=submission
+            if 0:
+                result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
+                submission=result_shell.stdout.split('\n')
+                resultmap[k]=submission
+                print( f'[{k}] {submission[-2]} {submission[-3]}' )
 
-            print( f'[{k}] {submission[-2]} {submission[-3]}' )
-
+            else:
+                print(command)
 
     
 
