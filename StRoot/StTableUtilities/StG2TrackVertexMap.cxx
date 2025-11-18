@@ -27,9 +27,10 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
   static TVector3 Vx1;
   static TVector3 Vx2;
   // Loop over all tracks
+ next:
   for (int i = 0; i < Nt; i++) {
     int IdT = t[i].id - 1;                 assert(IdT >= 0 && IdT < Nt);
-    int IdV = t[i].start_vertex_p - 1;     assert(IdV >= 0 && IdV < NV);
+    int IdV = t[i].start_vertex_p - 1;     assert(IdV >= 0 && IdV < NV);    
     Vx1.SetXYZ( v[IdV].ge_x[0], v[IdV].ge_x[1], v[IdV].ge_x[2] );
     float tof1 = v[IdV].ge_tof;
     int IdP = v[IdV].parent_p - 1;         
@@ -40,8 +41,9 @@ void StG2TrackVertexMap::Reset(St_g2t_track *track, St_g2t_vertex *vertex) {
       // Merge short lived decays with any (grand) parent vertex 
       while ((Vx2.Mag() < 10e-4 && TMath::Abs(tof1-v[IdVxP].ge_tof) < 1e-9)) {
 	IdV = IdVxP;
-	IdP = v[IdV].parent_p - 1; if (IdP < 0) break;
-	IdVxP = t[IdP].start_vertex_p - 1;  if (IdVxP < 0) break;
+	IdP = v[IdV].parent_p - 1;          if ( IdP < 0      ) break;
+	IdVxP = t[IdP].start_vertex_p - 1;  if ( IdVxP < 0    ) break;
+                                            if ( IdV == IdVxP ) break; // poorly defined intermediate vertices
 	Vx2.SetXYZ( v[IdVxP].ge_x[0], v[IdVxP].ge_x[1], v[IdVxP].ge_x[2] );
 	Vx2 -= Vx1;
       }

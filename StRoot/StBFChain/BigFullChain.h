@@ -1377,6 +1377,7 @@ Bfc_st BFC[] = { // standard chains
   {"stargen:stubs",  "", "","stargen", "", "StarGeneratorStubs.so", "Dummy starsim callbacks", false },
   {"stargen:mk",  "", "","stargen", "StarPrimaryMaker", "",      "Setup the primary event generator maker", false },
   {"stargen:embed",  "", "","stargen", "StarEmbedMaker", "StarGeneratorEmbed.so",      "Setup the primary event generator (embedding) maker", false },
+  {"stargen:step",  "", "","stargen", "", "StarGeneratorStep.so",      "Setup the AgUStep stepper", false },
 
   {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
   {"pythia6:mk",  "","","",        "StarPythia6", "",           "Create pythia6 maker", false },
@@ -1678,7 +1679,7 @@ Bfc_st BFC[] = { // standard chains
   {"Epc"      ,"epc","","PreEcl,EmcUtil"             ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
   {"EEmcMixer", "","","",                    "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker",       "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
-  {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
+  {"eemCl"    ,"eemCl","","db,eemcA2E","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
 
   // BTOF related chains
   {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
