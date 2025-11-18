@@ -78,6 +78,28 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
 
 
   //
+  // Next create typical heavy ions used in beams at RHIC... "hid" is defined
+  // to help define PDG ids for the heavy ions.
+  //  hid(Z,A,l)
+
+  TParticlePDG *D     = pdg->AddParticle( "D",     "Deuteron", /* mass */ 1.876,  true,  0., 1.0, "heavyion",       hid(1,2,0),   -1, 45 );
+  TParticlePDG *He    = pdg->AddParticle( "alpha", "Alpha"   , /* mass */ 3.7273794118, true, 0.0, 2.0, "heavyion", hid(2,4,0),   -1, 47 );
+  TParticlePDG *He3   = pdg->AddParticle( "He3",   "Helium-3", /* mass */ 2.809,  true,  0., 2.0, "heavyion",       hid(2,3,0),   -1, 49 );
+  TParticlePDG *Cu    = pdg->AddParticle( "Cu",    "Copper",   /* mass */ 0.0,  true,  0., 29,  "heavyion",         hid(29,64,0),  0, 0 );
+  TParticlePDG *Au    = pdg->AddParticle( "Au",    "Gold",     /* mass */ 0.0,  true,  0., 79,  "heavyion",         hid(79,197,0), 0, 0 );
+  TParticlePDG *U     = pdg->AddParticle( "U",     "Uranium",  /* mass */ 0.0,  true,  0., 92,  "heavyion",         hid(92,238,0), 0, 0 );
+
+  //  AddParticle("D",   D);
+  //  AddParticle("He3", He3);
+  //  AddParticle("Cu",  Cu);
+  //  AddParticle("Au",  Au);
+  //  AddParticle("U",   U);
+
+
+
+
+
+  //
   // Iterate over all particles in the PDG database, and add them to the local list.
   // Set the tracking code according to the G3 standard.  TODO:  Allow user to select
   // differnt tracking code standard.
@@ -108,6 +130,9 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
       Int_t   anti = 0; if ( particle->AntiParticle() == particle ) anti = -code;
 
       Int_t g3id = G3ID( code );
+      if ( g3id == 0 ) {
+	g3id = particle->TrackingCode();
+      }
       
       TParticlePDG *myparticle = new TParticlePDG( name, title, mass, stable, width, charge, class_, code, anti, g3id );
       
@@ -134,23 +159,6 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
   AddAlias("positron",   "e+");
   AddAlias("p",    "proton");
   AddAlias("pbar", "antiproton");
-
-  //
-  // Next create typical heavy ions used in beams at RHIC... "hid" is defined
-  // to help define PDG ids for the heavy ions
-  //
-
-  TParticlePDG *D     = new TParticlePDG( "D",     "Deuteron", /* mass */ 0.0,  true,  0., 1.0, "heavyion", hid(1,2,0),   0, 45 );
-  TParticlePDG *He3   = new TParticlePDG( "He3",   "Helium-3", /* mass */ 0.0,  true,  0., 2.0, "heavyion", hid(2,1,0),   0, 49 );
-  TParticlePDG *Cu    = new TParticlePDG( "Cu",    "Copper",   /* mass */ 0.0,  true,  0., 29,  "heavyion", hid(29,64,0),  0, 0 );
-  TParticlePDG *Au    = new TParticlePDG( "Au",    "Gold",     /* mass */ 0.0,  true,  0., 79,  "heavyion", hid(79,197,0), 0, 0 );
-  TParticlePDG *U     = new TParticlePDG( "U",     "Uranium",  /* mass */ 0.0,  true,  0., 92,  "heavyion", hid(92,238,0), 0, 0 );
-
-  AddParticle("D",   D);
-  AddParticle("He3", He3);
-  AddParticle("Cu",  Cu);
-  AddParticle("Au",  Au);
-  AddParticle("U",   U);
 
   //
   // TODO: Add in the hypertriton and its antiparticles
@@ -191,7 +199,15 @@ void StarParticleData::AddParticle( const Char_t *name, TParticlePDG *particle )
   if ( mParticleIdMap[ code ] ) {    Warning( "AddParticle()", Form("Overwriting entry %i",code) );  }
   mParticleIdMap[code]     = particle;
   G3TrackingCode G3ID; 
-  mParticleG3IdMap[ G3ID(code) ] = particle;
+  int g3id = G3ID(code);
+  if ( g3id == 0 ) {
+    g3id = particle->TrackingCode();
+  }
+  mParticleG3IdMap[ g3id ] = particle;
+
+  std::cout << "AddParticle: " << name << " " << " w/ G3id = " << g3id << std::endl;
+  particle->Print() ;
+
   return;
 }
 // ---------------------------------------------------------------------------------------------
