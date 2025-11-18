@@ -2,6 +2,10 @@
 
 <job name="&JOBNAME;" maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="false" nProcesses="&NJOBS;" >
 
+  <shell>
+    singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02
+  </shell>
+
 <command>
 
 <!--RNG seed is set to the JOBINDEX for reproducibility -->
@@ -54,33 +58,39 @@ ls -l StRoot/macros/geant4star/
   <!-- Run event generation -->
   echo "______________________________________________________________________________________________"
   echo "Running primary event generation"
+perf record --output ${logbase}.gener.perfdata \
   root.exe -q -b StRoot/macros/geant4star/run_stargenerator.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.gener.log
   echo "Finished" `date` &gt;&gt; ${logbase}.gener.log
   echo "______________________________________________________________________________________________"
   echo "Stage out log files"
   cp ${logbase}*.log &LOGDIR;
+  cp ${logbase}*.perfdata &LOGDIR;
   echo "______________________________________________________________________________________________"
   echo "Stage out root files"
   cp *.root &OUTDIR;
 
   echo "______________________________________________________________________________________________"
   echo "Running geant simulation"
+perf record --output ${logbase}.geant.perfdata \
   root.exe -q -b StRoot/macros/geant4star/run_geant4star.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.geant.log
   echo "Finished" `date` &gt;&gt; ${logbase}.geant.log
   echo "______________________________________________________________________________________________"
   echo "Stage out log files"
   cp ${logbase}*.log &LOGDIR;
+  cp ${logbase}*.perfdata &LOGDIR;
   echo "______________________________________________________________________________________________"
   echo "Stage out root files"
   cp *.root &OUTDIR;
 
   echo "______________________________________________________________________________________________"
   echo "Running event reconstruction"
+perf record --output ${logbase}.reco.perfdata \
   root4star -q -b StRoot/macros/geant4star/run_reconstruction.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.reco.log
   echo "Finished" `date` &gt;&gt; ${logbase}.reco.log
   echo "______________________________________________________________________________________________"
   echo "Stage out log files"
   cp ${logbase}*.log &LOGDIR;
+  cp ${logbase}*.perfdata &LOGDIR;
   echo "______________________________________________________________________________________________"
   echo "Stage out root files"
   cp *.root &OUTDIR;
