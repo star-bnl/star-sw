@@ -1,3 +1,5 @@
+#pragma cling add_include_path("StRoot/macros/geant4star/")
+
 class StBFChain;        
 class StMessMgr;
 
@@ -55,7 +57,7 @@ std::map<std::string, double> primDAttr = {
 
 void run_stargenerator( 
 		       const int nevents=10, 
-		       std::string jobtag="rcf25000:y2025a:AuAu200:G4:hijing1.383:v001",
+		       std::string jobtag="rcf25000:y2025a:AuAu200:G3:hijing1.383:v001",
 		       const int index=0
 			) {
 
@@ -102,6 +104,7 @@ void run_stargenerator(
   for ( const auto dattr : primDAttr ) { prim->SetAttr( dattr.first.c_str(), dattr.second );  } // defaults
 
 
+
   // Configure event generator
   auto* generator = top->Maker( job.generator.c_str() );
 
@@ -110,6 +113,9 @@ void run_stargenerator(
 
   // Apply double attributes
   for ( const auto dattr : job.genDAttr ) { generator->SetAttr( dattr.first.c_str(), dattr.second );  }
+
+  // Apply int attributes
+  for ( const auto iattr : job.genIAttr ) { generator->SetAttr( iattr.first.c_str(), iattr.second );  }
 
   prim->AddMaker( generator );
   prim->SetAttr("verbose",111);
