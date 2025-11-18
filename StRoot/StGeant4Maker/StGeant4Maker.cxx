@@ -583,7 +583,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("Scoring:Rmax",450.0,  "Maxium secondary production radius to enter truth tables" );
   AddOption("Scoring:Zmax",2000.0, "Maximum secondary production z to enter truth tables");
   AddOption("Scoring:Emin",0.01,   "Minimum secondary energy to enter truth tables");
-  AddOption("Scoring:KeepItrmd", 1, "Keep intermediate vertices in the event record");
+  AddOption("Scoring:KeepItrmd", 0, "Keep intermediate vertices in the event record.  Default 0=off.");
 
   AddOption("vertex:x",0.0, "Primary vertex x [cm]");
   AddOption("vertex:y",0.0, "Primary vertex y [cm]");
