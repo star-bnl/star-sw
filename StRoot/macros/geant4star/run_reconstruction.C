@@ -15,7 +15,13 @@ void run_reconstruction( int nevents=0, const char* jobtag=0, int index=0, std::
   
   std::string chopts=jobmap[jobtag].recopts;
 
-  bfc(nevents,chopts.c_str(),(dir+inpname).c_str());
+  bfc(-1,chopts.c_str(),(dir+inpname).c_str());
+
+  gInterpreter->ProcessLine("{Geometry* __hack = new Geometry(); delete __hack;}");
+
+  chain->Init();
+
+  chain->EventLoop(nevents,chain->Maker("outputStream"));
 
   std::cout << jobtag << std::endl;
   std::cout << jobmap[jobtag].recopts.c_str() << std::endl;
