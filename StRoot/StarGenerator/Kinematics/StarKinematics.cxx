@@ -69,6 +69,7 @@ Int_t StarKinematics::PreGenerate()
   if ( SAttr("pid") ) {                       // and/or single pid
     int pid = IAttr("pid");
     auto* part = data.GetParticleG3(pid);
+    assert(part);
     particles += part->GetName();
   }
   double ptlow   = DAttr("ptlow");
@@ -80,6 +81,7 @@ Int_t StarKinematics::PreGenerate()
   double temp    = DAttr("temp");
 
   // Generate a flat PT distribution 
+  LOG_INFO << Form("ptlow=%f pthigh=%f ylow=%f yhigh=%f philow=%f phihigh=%f",ptlow,pthigh,ylow,yhigh,philow,phihigh) << endm;
   if ( type_ == "FlatPT" || type_ == "flatpt" ) {
     Kine( ntrack, particles.c_str(), ptlow, pthigh, ylow, yhigh, philow, phihigh );
     mEvent->Print();
