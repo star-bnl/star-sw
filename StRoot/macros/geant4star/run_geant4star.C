@@ -95,6 +95,12 @@ void run_geant4star( int nevents=10,
   prim->AddMaker( read );
   prim->SetAttr("debug",1);
 
+  assert(read);
+  assert(prim);
+
+  // Apply primary attributes
+  for ( const auto dattr : job.primDAttr ) { prim->SetAttr( dattr.first.c_str(), dattr.second );  } // defaults
+
   //
   // Geant4STAR configuration
   //
@@ -139,6 +145,9 @@ void run_geant4star( int nevents=10,
 
 
   top->ls(5);
+
+
+  gInterpreter->ProcessLine("{Geometry* __hack = new Geometry(); delete __hack;}");
 
   top->Init();
 
