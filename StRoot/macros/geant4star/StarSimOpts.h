@@ -17,6 +17,8 @@ struct StarSimOpt_t {
   std::string generator;                                  // name of the event generator
   std::map<std::string,std::string> genSAttr;             // attributes appied to the event generator
   std::map<std::string,double>      genDAttr;
+  std::map<std::string,double>      genIAttr;
+  std::map<std::string,double>      primDAttr;      // set on primary maker
   std::map<std::string,std::string> simSAttr;             // attributes applied to the simulation
   std::map<std::string,double>      simDAttr;
   std::map<std::string,double>      simIAttr;
@@ -74,7 +76,7 @@ void ListStarSimOpts( const int mode=999, bool attr=false ) {
 	std::cout << "       - " << attr.first << "=" << attr.second << std::endl;
       }
       std::cout << std::endl;
-      std::cout << "  - Simulation chain:  `" << result.second.genopts << "`" << std::endl;
+      std::cout << "  - Simulation chain:  `" << result.second.simopts << "`" << std::endl;
       std::cout << "  - Simulation attributes " << std::endl;
       for ( auto attr: result.second.simSAttr ) {
 	std::cout << "       - " << attr.first << "=" << attr.second << std::endl;
@@ -102,7 +104,7 @@ void ListStarSimOpts( const int mode=999, bool attr=false ) {
 void setupProductionJobs() {
   StarSimOpts__init = true;
 
-  
+#if 0  
   addjob({ 
       "rcf25000:y2025:AuAu200:G4:hijing1.383:minbias:v001",                                                               // name
        "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
@@ -126,6 +128,7 @@ void setupProductionJobs() {
 	{},
 	"P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
   });
+#endif
 
   { // 2025 200 GeV pAu Hijing 
     auto& job=addjob("rcf25000:y2025:pAu200:G4:hijing1.383:minbias:v001");
@@ -208,16 +211,17 @@ void setupProductionJobs() {
 	  {"SET",    "HardQCD:all=on" }
     };
     job.genDAttr={{ "Ecms", 200.0 }};
-    //  Sat May 18 01:23:53 EDT [ 2024-05-18 05:23:53 GMT ] 25139005
-    job.timestamps={{"sdt20240518"}};
-    job.runnumbers={25139005};
+    // Sat May 18 01:23:53 EDT [ 2024-05-18 05:23:53 GMT ] 25139005
+    // Sun May 12 04:52:56 EDT [ 2024-05-12 08:52:56 GMT ]
+    job.timestamps={{"sdt20240512"}};
+    job.runnumbers={25133015};
 
     job.simopts="y2024a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G4" }
     };
 
-    job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess epc  event nodefault";
 
   };
 
@@ -243,10 +247,17 @@ void setupProductionJobs() {
 
     job.recopts="P2023a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
+    // Version 2 will switch off itermediate vertices on tracks
+    StarSimOpt_t job2 = job;
+    job2.name = "rcf25000:y2023a:AuAu200:G4:hijing1.383:minbias:v002";
+    job2.simIAttr["Scoring:Vertex:KeepIntermediate"] = 0;
+    addjob(job2);
+
   };
 
 
-  
+
+#if 0  
   addjob({ 
       "rcf25000:y2025:AuAu200:G3:hijing1.383:minbias:v001",                                                               // name
        "y2025 agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault",    // event generator
@@ -268,6 +279,7 @@ void setupProductionJobs() {
 	  {},{},
 	       "P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault"
   });
+#endif
 
   { // 2025 200 GeV pAu Hijing 
     auto& job=addjob("rcf25000:y2025:pAu200:G3:hijing1.383:minbias:v001");
@@ -350,19 +362,18 @@ void setupProductionJobs() {
 	  {"SET",    "HardQCD:all=on" }
     };
     job.genDAttr={{ "Ecms", 200.0 }};
-    job.timestamps={{"sdt20240518"}};
-    job.runnumbers={25139005};
+    job.timestamps={{"sdt20240512"}};
+    job.runnumbers={25133015};
 
     job.simopts="y2024a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G3" }
     };
 
-    job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess epc  event nodefault";
 
   };
 
- 
   { // 2023 200 GeV AuAu Hijing 
     auto& job=addjob("rcf25000:y2023a:AuAu200:G3:hijing1.383:minbias:v001");
     job.genopts   = "y2023a agml  stargen stargen:mk stargen stargen:stubs hijing1.383 hijing:mk noinput nooutput nodefault";
@@ -384,7 +395,46 @@ void setupProductionJobs() {
 
     job.recopts="P2023a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
+    // Version 2 will switch off itermediate vertices on tracks
+    StarSimOpt_t job2 = job;
+    job2.name = "rcf25000:y2023a:AuAu200:G3:hijing1.383:minbias:v002";
+    job2.simIAttr["Scoring:Vertex:KeepIntermediate"] = 0;
+    addjob(job2);
+
   };
+
+
+  { // 2021 Gun Alphas eta 2.0 to 5.5 
+    auto& job=addjob("rcf25000:y2021a:alphas:G4:kinematics:mult10:eta2-5:pt9-11:v001");
+    job.genopts   = "y2021a agml  stargen stargen:mk stargen stargen:stubs kinematics:mk noinput nooutput nodefault";
+    job.generator = "StarKine";
+    job.genDAttr = {
+      { "ptlow", 9.0 },
+      { "pthigh", 11.0 },
+      { "etalow", 2.0 },
+      { "etahigh", 5.0 }
+    };
+    job.genIAttr = {
+      { "pid",    47 },
+      { "ntrack", 10 }
+    };
+    job.primDAttr = {
+      { "XVERTEX",  0.1 },   { "XSIGMA", 0.01 },
+      { "YVERTEX", -0.1 },   { "YSIGMA", 0.01 },
+      { "ZVERTEX",  0.0 },   { "ZSIGMA", 15.0 }
+    };
+    job.timestamps={{"sdt20210218"}};
+    //    job.runnumbers={25139005};
+
+    job.simopts="y2021a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simSAttr = {
+      { "application:engine", "G4" }
+    };
+
+    job.recopts="P2021a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+
+  };
+
 
 
    
@@ -392,6 +442,7 @@ void setupProductionJobs() {
 
 void StarSimOpts(const int mode=9999){ 
   setupProductionJobs(); 
+  //  setupDetectorJobs();
   ListStarSimOpts(mode); 
 }
   
