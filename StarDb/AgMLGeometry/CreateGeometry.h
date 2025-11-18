@@ -1,6 +1,7 @@
+#pragma cling add_include_path("$STAR/.$STAR_HOST_SYS/include")
+#pragma cling add_include_path(".$STAR_HOST_SYS/include")
 
-
-#if !defined(__CINT__) || !defined(__CLING__)
+#if !defined(__CINT__) 
 #include <TGeoManager.h>
 #include "StBFChain/StBFChain.h"
 #include "StarVMC/StarGeometry/StarGeo.h"
