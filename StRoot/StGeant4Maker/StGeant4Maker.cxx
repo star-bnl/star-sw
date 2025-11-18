@@ -15,6 +15,8 @@
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
+//#include "TG4ParticlesManager.h"
+
 #include "TString.h"
 #include "StSensitiveDetector.h"
 
@@ -38,6 +40,10 @@
 #include "TG4RunManager.h"
 #include "TG4RunConfiguration.h"
 #include "TGeant3/TGeant3TGeo.h"
+
+#include <G4ParticleTable.hh>
+#include <G4IonTable.hh>
+
 //________________________________________________________________________________________________
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -149,7 +155,7 @@ struct SD2Table_EPD {
 	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
 	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
       }
-      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+      g2t_hit.tof     = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       
       table -> AddAt( &g2t_hit );     
 
@@ -472,7 +478,9 @@ namespace {
 std::function<void(void)> trigger;
 
 //________________________________________________________________________________________________
-StarParticleData &particleData = StarParticleData::instance();
+StarParticleData& particleData = StarParticleData::instance();
+//TG4ParticlesManager* g4particleManager = TG4ParticlesManager::Instance();
+
 //________________________________________________________________________________________________
 StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title, double zmax, double rmax, std::string multi, StMCParticleStack* stack ) : 
   TVirtualMCApplication(name,title),mZmax(zmax),mRmax(rmax),mMulti( multi=="multi" )
@@ -488,6 +496,8 @@ StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title,
     fMCManager->SetUserStack(stack);
 
   }
+
+  //  g4particleManager->DefineParticles();
 
 }
 //________________________________________________________________________________________________
@@ -555,6 +565,14 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption( "Stepping:Punchout:Stop", 1, "Punchout action: 0=no action, 1=track stopped, 2=track stopped and re-injected" );
   AddOption( "Stepping:Punchout:Rmin", 223.49, "Min radius applied to punchout logic" );
   AddOption( "Stepping:Punchout:Zmin", 268.75, "Min Z applied to punchout logic" );
+
+  AddOption( "Stepping:verbose:Rmin",     0.0, "Min radius for verbosity" );
+  AddOption( "Stepping:verbose:Zmin", -2000.0, "Min Z for verbosity" );
+  AddOption( "Stepping:verbose:Rmax",  +400.0, "Max radius for verbosity" );
+  AddOption( "Stepping:verbose:Zmax", +2000.0, "Max Z for verbosity" );
+
+
+
   AddOption( "Random:G4", 12345,       "Sets the Random number seed"); 
   AddOption( "field", -5.0,            "Sets the STAR magnetic field [kG]" );
 
@@ -565,6 +583,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("Scoring:Rmax",450.0,  "Maxium secondary production radius to enter truth tables" );
   AddOption("Scoring:Zmax",2000.0, "Maximum secondary production z to enter truth tables");
   AddOption("Scoring:Emin",0.01,   "Minimum secondary energy to enter truth tables");
+  AddOption("Scoring:KeepItrmd", 1, "Keep intermediate vertices in the event record");
 
   AddOption("vertex:x",0.0, "Primary vertex x [cm]");
   AddOption("vertex:y",0.0, "Primary vertex y [cm]");
@@ -668,6 +687,13 @@ int StGeant4Maker::Init() {
       }
     }
   }
+
+  if ( IAttr("G4:ParticleTable:DumpTables") ) {
+    G4ParticleTable::GetParticleTable()->DumpTable();
+    G4ParticleTable::GetParticleTable()->GetIonTable()->DumpTable();
+  }
+
+
 
   //
   // Create the function which processes a single event
@@ -1246,6 +1272,7 @@ void StGeant4Maker::FinishEvent(){
   }
 
   ivertex = 1;
+  bool skip_itrmd = 0==IAttr("Scoring:KeepItrmd");
   for ( auto v : vertex ) {
 
     // partial fill of vertex table ________________________
@@ -1268,6 +1295,8 @@ void StGeant4Maker::FinishEvent(){
     myvertex.ge_medium = v->medium();
     myvertex.ge_proc   = v->process();
     myvertex.is_itrmd  = v->intermediate();
+
+    if ( myvertex.is_itrmd && skip_itrmd ) continue;
 
     // TODO: map ROOT mechanism to G3 names
 
@@ -1557,8 +1586,19 @@ void StGeant4Maker::Stepping(){
   };
 
   if ( IAttr("Stepping:verbose") > 0 ) {
-    //    truth->Print();
-    current->Print();
+    static double vRmin = DAttr("Stepping:verbose:Rmin");
+    static double vZmin = DAttr("Stepping:verbose:Zmin");    
+    static double vRmax = DAttr("Stepping:verbose:Rmax");
+    static double vZmax = DAttr("Stepping:verbose:Zmax");    
+    double x,y,z,r;
+    mc->TrackPosition( x, y, z );
+    r = TMath::Sqrt( x*x + y*y );
+    z = TMath::Abs(z);
+    if ( r >= vRmin && r<= vRmax &&
+	 z >= vZmin && z<= vZmax ) {
+      std::cout << truth->idTruth() << "| x=" << x << " y=" << y << " z=" << z << " |";
+      current->Print();
+    }
   }
 
   // Check if option to stop punchout tracks is enabled
@@ -1592,7 +1632,20 @@ void StGeant4Maker::Stepping(){
     mc->StopTrack();
     stopped = true;
 
-    if ( IAttr("Stepping:verbose") > 0 ) { std::cout << "Track is stopped" << std::endl; }
+    if ( IAttr("Stepping:verbose") > 0 ) { 
+      static double vRmin = DAttr("Stepping:verbose:Rmin");
+      static double vZmin = DAttr("Stepping:verbose:Zmin");    
+      static double vRmax = DAttr("Stepping:verbose:Rmax");
+      static double vZmax = DAttr("Stepping:verbose:Zmax");    
+      double x,y,z,r;
+      mc->TrackPosition( x, y, z );
+      r = TMath::Sqrt( x*x + y*y );
+      z = TMath::Abs(z);
+      if ( r >= vRmin && r<= vRmax &&
+	   z >= vZmin && z<= vZmax ) {
+	std::cout << "Track is stopped" << std::endl; 
+      }
+    }
     
   }
 
@@ -1653,8 +1706,23 @@ void StGeant4Maker::Stepping(){
   }
 
   if ( stopped || IAttr("Stepping:verbose") ) {
-    LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
-		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
+
+    static double vRmin = DAttr("Stepping:verbose:Rmin");
+    static double vZmin = DAttr("Stepping:verbose:Zmin");    
+    static double vRmax = DAttr("Stepping:verbose:Rmax");
+    static double vZmax = DAttr("Stepping:verbose:Zmax");    
+    double x,y,z,r;
+    mc->TrackPosition( x, y, z );
+    r = TMath::Sqrt( x*x + y*y );
+    z = TMath::Abs(z);
+    if ( r >= vRmin && r<= vRmax &&
+	 z >= vZmin && z<= vZmax ) {
+
+      LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+			vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
+
+    }
+
   }
 
   // Perform any post stepping actions
