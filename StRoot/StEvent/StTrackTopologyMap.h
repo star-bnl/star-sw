@@ -94,6 +94,8 @@ public:
     bool           hasHitInRich() const;
     bool           hasHitInBemc() const;
     bool           hasHitInEemc() const;
+    bool           postXTrack() const;
+    bool           membraneCrossingTrack() const;
     
     bool           trackTpcOnly() const; 
     bool           trackSvtOnly() const;  
