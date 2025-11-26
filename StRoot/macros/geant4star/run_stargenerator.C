@@ -57,15 +57,15 @@ std::map<std::string, double> primDAttr = {
 
 void run_stargenerator( 
 		       const int nevents=10, 
-		       std::string jobtag="rcf25000:y2025a:AuAu200:G3:hijing1.383:v001",
+		       std::string jobtag="rcf25000:y2023a:AuAu200:G4:hijing1.383:minbias:v002",
 		       const int index=0
 			) {
 
   std::mt19937 rng(index+1000); // Seed the Mersenne Twister engine
   setupProductionJobs();
 
-  if ( 0==nevents ) {
-    ListStarSimOpts();
+  if ( nevents<=0 ) {
+    ListStarSimOpts(nevents);
     return;
   };
 
@@ -73,9 +73,10 @@ void run_stargenerator(
   auto job = GetStarSimOpts( jobtag );
   chainopts = job.genopts;
 
-
-
   std::cout << "Chain opts = " << chainopts << std::endl;
+  if ( chainopts=="" ) {
+    return;
+  }
 
   std::string outname = jobtag;
   std::replace( outname.begin(), outname.end(), ':', '_' );
