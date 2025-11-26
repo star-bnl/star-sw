@@ -583,7 +583,6 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption("Scoring:Rmax",450.0,  "Maxium secondary production radius to enter truth tables" );
   AddOption("Scoring:Zmax",2000.0, "Maximum secondary production z to enter truth tables");
   AddOption("Scoring:Emin",0.01,   "Minimum secondary energy to enter truth tables");
-  AddOption("Scoring:KeepItrmd", 0, "Keep intermediate vertices in the event record.  Default 0=off.");
 
   AddOption("vertex:x",0.0, "Primary vertex x [cm]");
   AddOption("vertex:y",0.0, "Primary vertex y [cm]");
@@ -1011,7 +1010,17 @@ int StGeant4Maker::Make() {
     result = kStERR;
   }
 
-  LOG_INFO << "N vertices = " << g2t_vertex_table->GetNRows() << endm;
+  int startMax = 0;
+  int stopMax  = 0;
+  for ( auto it=0;it<nt;it++ ) {
+    g2t_track_st* track = (g2t_track_st*)(g2t_track_table->At(it));   assert(track);
+    int start = track->start_vertex_p;    
+    int stop  = track->stop_vertex_p;
+    if ( start > startMax ) startMax = start;
+    if ( stop  > stopMax  ) stopMax  = stop;
+  }
+
+  LOG_INFO << "N vertices = " << g2t_vertex_table->GetNRows() << " startMax=" << startMax << " stopMax=" << stopMax << endm;
   LOG_INFO << "N tracks   = " << g2t_track_table->GetNRows() << endm;
 
   gGeoManager = mGeometry;
@@ -1272,7 +1281,7 @@ void StGeant4Maker::FinishEvent(){
   }
 
   ivertex = 1;
-  bool skip_itrmd = 0==IAttr("Scoring:KeepItrmd");
+
   for ( auto v : vertex ) {
 
     // partial fill of vertex table ________________________
@@ -1284,28 +1293,38 @@ void StGeant4Maker::FinishEvent(){
     myvertex.eg_x[1] = myvertex.ge_x[1] = v->vy();
     myvertex.eg_x[2] = myvertex.ge_x[2] = v->vz();
     myvertex.eg_tof  = myvertex.ge_tof  = v->tof();
+
+    // Sets the number of daughters and the index of the first daughter in the linked list of tracks
     myvertex.n_daughter = v->daughters().size();
     if ( v->daughters().size() ) {
       myvertex.daughter_p = truthTrack[ v->daughters()[0] ];
     }
+
+    // If there is a parent track, set the index of the parent track.  However, if the vertex is
+    // intermediate ... do not set an infinite loop...
     if ( v->parent() ) {
       myvertex.n_parent = 1; // almost by definition
       myvertex.parent_p = truthTrack[ v->parent() ];
     }
     myvertex.ge_medium = v->medium();
     myvertex.ge_proc   = v->process();
-    myvertex.is_itrmd  = v->intermediate();
+    auto is_itrmd = myvertex.is_itrmd  = v->intermediate();
 
-    if ( myvertex.is_itrmd && skip_itrmd ) continue;
+    //
+    // Skip the "waypoint" intermediate vertices on the tracks which emit delta rays...
+    // A --> A' + b 
+    // Otherwise we have entries in the table with parent id == daughter id, leading to
+    // infinite loops during table iteration.
+    //
+    if ( myvertex.daughter_p == myvertex.parent_p ) {
+
+      if ( is_itrmd ) { continue; }
+      else            { LOG_WARN << "Invalid vertex skipped for track " << myvertex.daughter_p << endm; continue; }
+
+    }
 
     // TODO: map ROOT mechanism to G3 names
 
-    // An intermediate vertex with no daughters makes no
-    // sense (daughters must have been ranged out) so
-    // skip filling
-    //    if ( myvertex.is_itrmd && 0==myvertex.n_daughter ) continue;
-
-    
     //__________________________________________ next vertex
     g2t_vertex->AddAt( &myvertex );
     ivertex++;
