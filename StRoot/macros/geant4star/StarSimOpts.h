@@ -250,7 +250,6 @@ void setupProductionJobs() {
     // Version 2 will switch off itermediate vertices on tracks
     StarSimOpt_t job2 = job;
     job2.name = "rcf25000:y2023a:AuAu200:G4:hijing1.383:minbias:v002";
-    job2.simIAttr["Scoring:Vertex:KeepIntermediate"] = 0;
     addjob(job2);
 
   };
@@ -398,7 +397,6 @@ void setupProductionJobs() {
     // Version 2 will switch off itermediate vertices on tracks
     StarSimOpt_t job2 = job;
     job2.name = "rcf25000:y2023a:AuAu200:G3:hijing1.383:minbias:v002";
-    job2.simIAttr["Scoring:Vertex:KeepIntermediate"] = 0;
     addjob(job2);
 
   };
