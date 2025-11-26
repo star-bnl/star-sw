@@ -1,7 +1,7 @@
 #include "StRoot/macros/bfc.C"
 #include "StarSimOpts.h"
 
-void run_reconstruction( int nevents=0, const char* jobtag=0, int index=0, std::string dir="./" ) {
+void run_reconstruction( int nevents=1, const char* jobtag="rcf25000:y2023a:AuAu200:G4:hijing1.383:minbias:v002", int index=0, std::string dir="./" ) {
 
   setupProductionJobs();
 
