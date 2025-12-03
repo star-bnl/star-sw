@@ -16,6 +16,7 @@ public:
   void Clear(Option_t *option);
   int  Make();
   void setDbAccess(int v){mDbAccess=v;}
+  void loadDataWindows();
  
 private:
   StFttDb *mFttDb;

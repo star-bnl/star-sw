@@ -1,6 +1,6 @@
 /***************************************************************************
  * StFttDb.cxx
- * jdb Feb, 2022
+ * jdb & Zhen Feb, 2022
  ***************************************************************************
  * Description: This interface between FTT and the STAR database
  ***************************************************************************/
@@ -14,18 +14,43 @@
 #include <math.h>
 
 #include "tables/St_fttHardwareMap_Table.h"
-#include "tables/St_fttDataWindows_Table.h"
+#include "tables/St_fttDataWindowsB_Table.h"
 
 
 ClassImp(StFttDb)
 
 
+TString StFttDb::Direction_name[] = {"kFttHorizontal","kFttVertical","kFttDiagonalH","kFttDiagonalV","kFttUnknownOrientation"};
+
 double StFttDb::stripPitch = 3.2; // mm
+double StFttDb::gapPitch = 0.5; // mm
+double StFttDb::stripWidth = 2.7; // mm
 double StFttDb::rowLength = 180; // mm
 double StFttDb::lowerQuadOffsetX = 101.6; // mm
-double StFttDb::idealPlaneZLocations[] = { 280.90499, 303.70498, 326.60501, 349.40499 };
-
+// double StFttDb::idealPlaneZLocations[] = { 281.082,304.062,325.058,348.068 };//ideal position
+double StFttDb::idealPlaneZLocations[] = { 312.342,329.953,347.637,365.422 };//suvery data, cm or mm? now just use quad A's data
+double StFttDb::LocalStripZLocations[] = { 1.1    ,1.53   ,2.18   ,2.61    };// from yingying's measurement, cm ,
+double StFttDb::idealPlaneZLocations_QuadA[] = {312.342,329.953,347.637,365.422};//cm
+double StFttDb::idealPlaneZLocations_QuadB[] = {312.165,330.094,347.543,365.409};//cm
+double StFttDb::idealPlaneZLocations_QuadC[] = {312.317,329.723,347.346,365.311};//cm
+double StFttDb::idealPlaneZLocations_QuadD[] = {312.098,329.731,347.444,365.455};//cm
+ 
+double StFttDb::HVStripShift = 15.95;//mm
+double StFttDb::DiagStripShift = 19.42;//mm
+double StFttDb::FirstStripEdge[] = {14.6, 19.42};
 vector<string> StFttDb::orientationLabels = { "Horizontal", "Vertical", "DiagonalH", "DiagonalV", "Unknown" };
+double StFttDb::X_shift_QuadA[] = {8.09, 8.34, 6.62,7.54 };//mm 
+double StFttDb::X_shift_QuadB[] = {112.74, 112.14, 113.30, 113.49};//mm 
+double StFttDb::X_shift_QuadC[] = {-107.51, -108.22, -109.87, -108.91};//mm 
+double StFttDb::X_shift_QuadD[] = {-3.69, -4.96, -4.36, -3.75};//mm 
+double StFttDb::Y_shift_QuadA[] = {95.34, 94.33, 96.03, 95.01};//mm 
+double StFttDb::Y_shift_QuadB[] = {84.24, 83.37, 83.61, 83.81};//mm
+double StFttDb::Y_shift_QuadC[] = {83.60, 83.42, 84.37, 82.81};//mm
+double StFttDb::Y_shift_QuadD[] = {95.70, 94.40, 95.55, 94.16};//mm
+double StFttDb::YX_StripGroupEdge[] = {11.49, 172.29, 360.09};//mm 
+double StFttDb::D_StripGroupEdge[] = {11.49};//mm 
+double StFttDb::X_StripGroupEdge[] = {14.60, 172.29, 216.89, 315.4, 360.09, 410.9, 504.2, 548.7};//mm 
+double StFttDb::Y_StripGroupEdge[] = {14.60, 172.29, 216.89, 315.4, 360.09, 410.9, 504.2, 548.7};//mm 
 
 
 StFttDb::StFttDb(const char *name) : TDataSet(name) {}; 
@@ -66,11 +91,58 @@ size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) {
 
 size_t StFttDb::uuid( StFttCluster * c ) {
     // this UUID is not really universally unique
-    // it is unique up to the hardware location 
+    // it is unique up to the hardware location
 
     size_t _uuid = (size_t)c->orientation() + (nStripOrientations) * ( c->row() + nRowsPerQuad * ( c->quadrant() + nQuadPerPlane * c->plane() ) );
     return _uuid;
 }
+
+size_t StFttDb::vmmId( StFttRawHit * h ) {
+    // Calculate VMM hardware ID based on electronic readout structure
+    // VMM_ID = vmm + nVMMPerFob * (feb + nFobPerQuad * (quadrant + nQuadPerPlane * plane))
+    // Where: plane [0-3], quadrant [0-3], feb [0-5], vmm [0-3]
+    // Valid range: 0-383 (total of 384 VMMs)
+
+    u_char iPlane = h->sector() - 1;     // sector is 1-based
+    u_char iQuad  = h->rdo() - 1;        // rdo is 1-based
+    u_char iFeb   = h->feb();            // feb is 0-based
+    u_char iVmm   = h->vmm();            // vmm is 0-based
+
+    size_t vmm_id = iVmm + nVMMPerFob * ( iFeb + nFobPerQuad * ( iQuad + nQuadPerPlane * iPlane ) );
+
+    return vmm_id;
+}
+
+
+void StFttDb::getTimeCut( StFttRawHit * hit, int &mode, int &l, int &h ){
+        mode = mTimeCutMode;
+        l = mTimeCutLow;
+        h = mTimeCutHigh;
+        if (mUserDefinedTimeCut)
+            return;
+
+        // load calibrated data windows from DB
+        // NOTE: dwMap is indexed by VMM hardware ID, not geometric UUID
+        size_t hit_vmmid = vmmId( hit );
+
+        // Validate VMM ID is in expected range
+        if ( hit_vmmid >= nVMM ) {
+            LOG_WARN << "StFttDb::getTimeCut - VMM ID out of range: " << hit_vmmid
+                     << " (max=" << (nVMM-1) << ")" << endm;
+            LOG_WARN << "  Hit: plane=" << (int)plane(hit)
+                     << " quad=" << (int)quadrant(hit)
+                     << " feb=" << (int)hit->feb()
+                     << " vmm=" << (int)hit->vmm() << endm;
+            return;
+        }
+
+        if ( dwMap.count( hit_vmmid ) ){
+            mode = dwMap[ hit_vmmid ].mode;
+            l = dwMap[ hit_vmmid ].min;
+            h = dwMap[ hit_vmmid ].max;
+        }
+
+    }
 
 
 uint16_t StFttDb::packKey( int feb, int vmm, int ch ) const{
@@ -96,7 +168,7 @@ void StFttDb::unpackVal( int val, int &row, int &strip ) const{
     return;
 }
 
-void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
+void StFttDb::loadDataWindowsFromDb( St_fttDataWindowsB * dataset ) {
     if (dataset) {
         Int_t rows = dataset->GetNRows();
 
@@ -104,7 +176,7 @@ void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
 
         dwMap.clear();
 
-        fttDataWindows_st *table = dataset->GetTable();
+        fttDataWindowsB_st *table = dataset->GetTable();
         for (Int_t i = 0; i < rows; i++) {
             for ( int j = 0; j < StFttDb::nVMM; j++ ) {
                 // printf( "[feb=%d, vmm=%d, ch=%d] ==> [row=%d, strip%d]\n", table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j], table[i].row[j], table[i].strip[j] );
@@ -122,19 +194,16 @@ void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
                 fdw.anchor = table[i].anchor[j];
                 dwMap[ fdw.uuid ] = fdw;
 
-
                 // std::cout << (int)table[i].feb[j] << std::endl;
             }
             // sample output of first member variable
         }
     } else {
-        std::cout << "ERROR: dataset does not contain requested table" << std::endl;
+        LOG_ERROR << "dataset does not contain requested table" << endm;
     }
 }
 
 void StFttDb::loadDataWindowsFromFile( std::string fn ) {
-
-
 }
 
 
@@ -207,6 +276,318 @@ void StFttDb::loadHardwareMapFromFile( std::string fn ){
         }
     }
     inf.close();
+    LOG_INFO << "sTGC Hardware map loaded from File: " << fn << endm;
+}
+
+//read the strip center file to get the position information
+//for the local coordinate, zero point will be the pin hole, that may changed depends on survey result
+bool StFttDb::loadStripCenterFromFile( std::string fn ){
+    std::ifstream inf;
+    if (mDebug)
+        {
+            printf( "Opening file: %s \n", fn.c_str());
+        }
+    inf.open( fn.c_str() );
+    if ( !inf ) {
+        LOG_WARN << "Strip center file not found" << endm;
+        return kFALSE;
+    }
+    std::string st1 = "Row1";
+    std::string st2 = "Row4";
+
+    //check the input file, input file should be Row1 or Row4
+    //Row1 for H&V; Row4 for Diagonal
+    size_t idx1 = fn.find(st1);
+    size_t idx2 = fn.find(st2);
+    if( idx1 == string::npos && idx2 == string::npos )
+    {
+        cout<< "Wrong Input Strip Center File !!!!!!!!!!!" << endl;
+        return kFALSE;
+    }
+
+    if ( idx1 == string::npos ) // load the Row4(Diagonal)
+    {
+        scMapDiag.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripCenter;
+        inf >> nStrip >> StripCenter;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripCenter.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_center;
+        while (inf >> nStrip >> StripCenter)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_center = atof(StripCenter.c_str());
+
+            scMapDiag[n_strip] = pos_strip_center;
+        }
+
+    }
+
+    if ( idx2 == string::npos ) // load the Row1(H&V)
+    {
+        scMapXY.clear();
+
+        //File Header
+        std::string nStrip, StripCenter;
+        inf >> nStrip >> StripCenter;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripCenter.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_center;
+        while (inf >> nStrip >> StripCenter)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_center = atof(StripCenter.c_str());
+
+            scMapXY[n_strip] = pos_strip_center;
+        }
+
+    }
+
+    inf.close();
+    return kTRUE;
+}
+
+//read the strip edge file, it will be used for reject ghost hits
+//for the local coordinate, zero point will be the pin hole, that may changed depends on survey result
+bool StFttDb::loadStripEdgeFromFile( std::string fn ){
+    std::ifstream inf;
+    if (mDebug)
+        {
+            printf( "Opening file: %s \n", fn.c_str());
+        }
+    inf.open( fn.c_str() );
+    if ( !inf ) {
+        LOG_WARN << "sTGC Strip edge file not found" << endm;
+        return kFALSE;
+    }
+    std::string st1 = "Row4_edge";
+
+    //check the input file, input file should include Row4_edge
+    //Row4 for Diagonal
+    size_t idx1 = fn.find(st1);
+    if( idx1 == string::npos)
+    {
+        LOG_ERROR << "Wrong Input Strip Edge File !!!!!!!!!!!" << endm;
+        return kFALSE;
+    }
+
+    if ( idx1 != string::npos ) // load the Row4(Diagonal)
+    {
+        seMapDiagLeft.clear();
+        seMapDiagRight.clear();
+
+        //File Header
+        std::string nStrip, StripEdge_L, StripEdge_R;
+        inf >> nStrip >> StripEdge_L >> StripEdge_R;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s, %s", nStrip.c_str(), StripEdge_L.c_str(), StripEdge_R.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_edge_L, pos_strip_edge_R;
+        while (inf >> nStrip >> StripEdge_L >> StripEdge_R)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_edge_L = atof(StripEdge_L.c_str());
+            pos_strip_edge_R = atof(StripEdge_R.c_str());
+
+            seMapDiagLeft[n_strip] = pos_strip_edge_L;
+            seMapDiagRight[n_strip] = pos_strip_edge_R;
+        }
+
+    }
+
+    inf.close();
+    LOG_INFO << "sTGC Strip Edges loaded from File: " << fn << endm;
+    return kTRUE;
+}
+
+//load the strip length information from the files. this will be used to set as the sigma along the strip direction 
+bool StFttDb::loadStripLengthFromFile( std::string fn ){
+    std::ifstream inf;
+    if (mDebug)
+        {
+            printf( "Opening file: %s \n", fn.c_str());
+        }
+    inf.open( fn.c_str() );
+    if ( !inf ) {
+        LOG_WARN << "sTGC Stirp length file not found" << endm;
+        return kFALSE;
+    }
+    std::string st1 = "Row1";
+    std::string st2 = "Row2";
+    std::string st3 = "Row3";
+    std::string st4 = "Row4";
+    std::string st5 = "Row5";
+
+    //check the input file, input file should be Row1 or Row4
+    //Row1 for H&V; Row4 for Diagonal
+    size_t idx1 = fn.find(st1);
+    size_t idx2 = fn.find(st2);
+    size_t idx3 = fn.find(st3);
+    size_t idx4 = fn.find(st4);
+    size_t idx5 = fn.find(st5);
+    if( idx1 == string::npos && idx2 == string::npos  && idx3 == string::npos  && idx4 == string::npos  && idx5 == string::npos )
+    {
+        cout<< "Wrong Input Strip Length File !!!!!!!!!!!" << endl;
+        return kFALSE;
+    }
+
+    if ( idx1 != string::npos ) // load the Row1(H/V with most strips)
+    {
+        slMapRow1.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripLength;
+        inf >> nStrip >> StripLength;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_length;
+        while (inf >> nStrip >> StripLength)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_length = atof(StripLength.c_str());
+
+            if (mDebug)
+            {
+                LOG_INFO << "Strip " << n_strip << " with Length" << pos_strip_length << endm;
+            }
+            slMapRow1[n_strip] = pos_strip_length;
+        }
+    }
+
+    if ( idx2 != string::npos ) // load the Row2(H/V with second largest strip group)
+    {
+        slMapRow2.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripLength;
+        inf >> nStrip >> StripLength;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_length;
+        while (inf >> nStrip >> StripLength)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_length = atof(StripLength.c_str());
+
+            if (mDebug)
+            {
+                LOG_INFO << "Strip " << n_strip << " with Length" << pos_strip_length << endm;
+            }
+            slMapRow2[n_strip] = pos_strip_length;
+        }
+    }
+
+    if ( idx3 != string::npos ) // load the Row3(H/V with third largest strip group)
+    {
+        slMapRow3.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripLength;
+        inf >> nStrip >> StripLength;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_length;
+        while (inf >> nStrip >> StripLength)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_length = atof(StripLength.c_str());
+
+            if (mDebug)
+            {
+                LOG_INFO << "Strip " << n_strip << " with Length" << pos_strip_length << endm;
+            }
+            slMapRow3[n_strip] = pos_strip_length;
+        }
+    }
+
+    if ( idx4 != string::npos ) // load the Row4(digonal with largest strips)
+    {
+        slMapRow4.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripLength;
+        inf >> nStrip >> StripLength;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_length;
+        while (inf >> nStrip >> StripLength)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_length = atof(StripLength.c_str());
+
+            if (mDebug)
+            {
+                LOG_INFO << "Strip " << n_strip << " with Length" << pos_strip_length << endm;
+            }
+            slMapRow4[n_strip] = pos_strip_length;
+        }
+    }
+
+    if ( idx5 != string::npos ) // load the Row5(digonal with second largest strips)
+    {
+        slMapRow5.clear();
+
+        //File Header
+        std::string nStrip;
+        std::string StripLength;
+        inf >> nStrip >> StripLength;
+        if (mDebug)
+        {
+            printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
+        }
+
+        //read strip Center info
+        int n_strip; Float_t pos_strip_length;
+        while (inf >> nStrip >> StripLength)
+        {
+            n_strip = atoi(nStrip.c_str());
+            pos_strip_length = atof(StripLength.c_str());
+
+            if (mDebug)
+            {
+                LOG_INFO << "Strip " << n_strip << " with Length" << pos_strip_length << endm;
+            }
+            slMapRow5[n_strip] = pos_strip_length;
+        }
+    }
+
+    inf.close();
+    LOG_INFO << "sTGC Strip Edges loaded from File: " << fn << endm;
+    return kTRUE;
 }
 
 // same for all planes
@@ -224,7 +605,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
     }
 
     if ( rob % 2 == 0 ){ // even rob
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // odd
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalH;    
@@ -237,7 +618,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttVertical;
     } else { // odd rob
         
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // odd
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalV;
@@ -250,6 +631,9 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttHorizontal;
     }
     // should never get here!
+    if ( mDebug ) {
+        LOG_DEBUG << "kFttUnknownOrientation = " << kFttUnknownOrientation << endm;
+    }
     return kFttUnknownOrientation;
 }
 
@@ -292,11 +676,92 @@ bool StFttDb::hardwareMap( StFttRawHit * hit ) const{
 
         UChar_t orientation = getOrientation( rob, hit->feb()+1, hit->vmm()+1, row );
         hit->setMapping( iPlane, iQuad, row, strip, orientation );
+
+        // set strip info
+        Float_t stripCenter = -1;
+        Float_t stripLeftEdge = -1;
+        Float_t stripRightEdge = -1;
+        Float_t stripLength = -1;
+        if (orientation == kFttHorizontal || orientation == kFttVertical){
+            if ( scMapXY.count( strip ) > 0 )
+                stripCenter = scMapXY.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripCenter for " << strip << endm;
+            }
+            if ( slMapRow1.count( strip ) > 0 && row == 0)// for Strip Length infomation
+                stripLength = slMapRow1.at(strip);
+            else if (slMapRow2.count( strip ) > 0 && row == 1)
+            {
+                stripLength = slMapRow2.at(strip);
+            } else if (slMapRow3.count( strip ) > 0 && row == 2)
+            {
+                stripLength = slMapRow3.at(strip);
+            } else {
+                LOG_ERROR << "Cannot find StripLength for row " << row << " Strip " << strip << endm;
+            }
+        }
+        if (orientation == kFttDiagonalH || orientation == kFttDiagonalV) {
+            if ( scMapDiag.count(strip) > 0 )
+                stripCenter    = scMapDiag.at(strip);
+            else {
+                LOG_ERROR << "Cannot find StripCenter for Diag " << strip << endm;
+            }
+            if (seMapDiagLeft.count(strip) > 0)
+                stripLeftEdge  = seMapDiagLeft.at(strip)-gapPitch/2.;
+            else {
+                LOG_ERROR << "Cannot find StripLeftEdge for Diag " << strip << endm;
+            }
+            if (seMapDiagRight.count(strip) > 0)
+                stripRightEdge = seMapDiagRight.at(strip)+gapPitch/2.;
+            else {
+                LOG_ERROR << "Cannot find StripRightEdge for " << strip << endm;
+            }
+            if (slMapRow4.count(strip) > 0 && row == 3)// for Strip Length infomation
+                stripLength = slMapRow4.at(strip);
+            else if (slMapRow5.count(strip) > 0 && row == 4)
+            {
+                stripLength = slMapRow5.at(strip);
+            } else
+            {
+                LOG_ERROR << "Cannot find StripLength for row " << row << " Strip " << strip << endm;
+            }
+        }
+        hit->setStripEdges( stripCenter, stripLeftEdge, stripRightEdge );
+        hit->setStripLength(stripLength);
+
         return true;
     }
     return false;
 }
-
+//used to reversve the map, from the hardware to electronic map
+// plane, quad, row and strip can be calculated from the simulation maker
+// the key issue if to figure out which feb, row, and strip is for the selected channel
+bool StFttDb::reverseHardwareMap( int &rob, int &feb, int &vmm, int &ch, int plane, int quad, int row, int strip, UChar_t &orientation ) const {
+    // uint16_t key = packKey( feb, vmm, ch );
+    uint16_t val = packVal( row, strip );
+    if ( rMap.count( val ) ){
+        uint16_t key = rMap.at( val );
+        unpackKey( key, feb, vmm, ch );//get the feb, vmm and channel information
+        rob = quad + ( plane *nQuadPerPlane ) + 1;// input plane and quad should start from 0;
+        
+        orientation = getOrientation( rob, feb, vmm, row );
+        return true;
+    }
+    return false;
+}
+//used to reversve the map, from the hardware to electronic map
+// plane, quad, row and strip can be calculated from the simulation maker
+// the key issue if to figure out which feb, row, and strip is for the selected channel
+bool StFttDb::reverseHardwareMap( int &feb, int &vmm, int &ch, int row, int strip ) const{
+    // uint16_t key = packKey( feb, vmm, ch );
+    uint16_t val = packVal( row, strip );
+    if ( rMap.count( val ) ){
+        uint16_t key = rMap.at( val );
+        unpackKey( key, feb, vmm, ch );//get the feb, vmm and channel information
+        return true;
+    }
+    return false;
+}
 
 UChar_t StFttDb::plane( StFttRawHit * hit ){
     if ( hit->plane() < nPlane )
@@ -344,21 +809,68 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
     // shifts
     dx = 0.0;
-    dy = 0.0;
+    dy = 6.0;
+    dz = 0.0;
+
+    if ( plane < 4 )
+    {
+        // upper quadrants are not displace
+        // there have a issue, for the xy shift, the unit is mm, but for the z, the unit is cm 
+        // for Z location, suppose that z at the center of the chamber
+        if ( quad == 0 )
+        {dx = StFttDb::X_shift_QuadA[plane]; dy = StFttDb::Y_shift_QuadA[plane]; dz = StFttDb::idealPlaneZLocations_QuadA[plane]-(LocalStripZLocations[2]+LocalStripZLocations[3])/2.;} 
+        else if ( quad == 1 )
+        {dx = StFttDb::X_shift_QuadB[plane]; dy = StFttDb::Y_shift_QuadB[plane]; dz = StFttDb::idealPlaneZLocations_QuadB[plane]-(LocalStripZLocations[2]+LocalStripZLocations[3])/2.;} 
+        else if ( quad == 2 )
+        {dx = StFttDb::X_shift_QuadC[plane]; dy = StFttDb::Y_shift_QuadC[plane]; dz = StFttDb::idealPlaneZLocations_QuadC[plane]-(LocalStripZLocations[2]+LocalStripZLocations[3])/2.;} 
+        else if ( quad == 3 )
+        {dx = StFttDb::X_shift_QuadD[plane]; dy = StFttDb::Y_shift_QuadD[plane]; dz = StFttDb::idealPlaneZLocations_QuadD[plane]-(LocalStripZLocations[2]+LocalStripZLocations[3])/2.;} 
+    }
+        else dz = -999;
+
+
+    // these are the reflections of a pentagon into the symmetric shape for quadrants A, B, C, D
+    if ( quad == 1 )
+        sy = -1.0;
+    else if ( quad == 2 ){
+        sx = -1.0;
+        sy = -1.0;
+    } else if ( quad == 3 )
+        sx = -1.0;
+
+}
+
+void StFttDb::getGloablOffset_ClusterPoint( UChar_t plane, UChar_t quad, 
+                                float &dx, float &sx,
+                                float &dy, float &sy, 
+                                float &dz, float &sz ){
+    // TODO: connect to DB for calibrated positions. 
+    // for now we use the ideal positions (from simulated geometry)
+    // calibration will come later
+
+    // scale factors
+    sx = 1.0;
+    sy = 1.0;
+    sz = 1.0;
+
+    // shifts
+    dx = 0.0;
+    dy = 6.0;
     dz = 0.0;
 
     if ( plane < 4 )
         dz = StFttDb::idealPlaneZLocations[plane];
 
-    // upper quadrants are not displaced
+    // upper quadrants are not displace
+    // there have a issue, for the xy shift, the unit is mm, but for the z, the unit is cm 
     if ( quad == 0 )
-        dx = 0.0; 
+    {dx = StFttDb::X_shift_QuadA[plane]; dy = StFttDb::Y_shift_QuadA[plane]; dz = StFttDb::idealPlaneZLocations_QuadA[plane];} 
     else if ( quad == 1 )
-        dx = StFttDb::lowerQuadOffsetX;
+    {dx = StFttDb::X_shift_QuadB[plane]; dy = StFttDb::Y_shift_QuadB[plane]; dz = StFttDb::idealPlaneZLocations_QuadB[plane];} 
     else if ( quad == 2 )
-        dx = StFttDb::lowerQuadOffsetX;
+    {dx = StFttDb::X_shift_QuadC[plane]; dy = StFttDb::Y_shift_QuadC[plane]; dz = StFttDb::idealPlaneZLocations_QuadC[plane];} 
     else if ( quad == 3 )
-        dx = 0.0;
+    {dx = StFttDb::X_shift_QuadD[plane]; dy = StFttDb::Y_shift_QuadD[plane]; dz = StFttDb::idealPlaneZLocations_QuadD[plane];} 
 
     // these are the reflections of a pentagon into the symmetric shape for quadrants A, B, C, D
     if ( quad == 1 )
