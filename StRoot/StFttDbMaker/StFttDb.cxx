@@ -814,7 +814,7 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
     if ( plane < 4 )
     {
-        // upper quadrants are not displace
+        // upper quadrants are not displaced
         // there have a issue, for the xy shift, the unit is mm, but for the z, the unit is cm 
         // for Z location, suppose that z at the center of the chamber
         if ( quad == 0 )
