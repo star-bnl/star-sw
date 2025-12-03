@@ -458,7 +458,7 @@ bool StFttDb::loadStripLengthFromFile( std::string fn ){
             printf( "File Header: %s, %s", nStrip.c_str(), StripLength.c_str());
         }
 
-        //read strip Center info
+        //read strip Length info
         int n_strip; Float_t pos_strip_length;
         while (inf >> nStrip >> StripLength)
         {
