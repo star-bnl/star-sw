@@ -423,7 +423,7 @@ bool StFttDb::loadStripLengthFromFile( std::string fn ){
         }
     inf.open( fn.c_str() );
     if ( !inf ) {
-        LOG_WARN << "sTGC Stirp length file not found" << endm;
+        LOG_WARN << "sTGC Strip length file not found" << endm;
         return kFALSE;
     }
     std::string st1 = "Row1";
