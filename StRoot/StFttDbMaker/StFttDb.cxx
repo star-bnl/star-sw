@@ -268,7 +268,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
     }
 
     if ( rob % 2 == 0 ){ // even rob
-        if ( feb % 2 == 0 ) { // odd
+        if ( feb % 2 == 0 ) { // even feb
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalH;    
@@ -281,7 +281,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttVertical;
     } else { // odd rob
         
-        if ( feb % 2 == 0 ) { // odd
+        if ( feb % 2 == 0 ) { // even feb
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalV;
