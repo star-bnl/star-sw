@@ -688,7 +688,7 @@ bool StFttDb::hardwareMap( StFttRawHit * hit ) const{
             else {
                 LOG_ERROR << "Cannot find StripCenter for " << strip << endm;
             }
-            if ( slMapRow1.count( strip ) > 0 && row == 0)// for Strip Length infomation
+            if ( slMapRow1.count( strip ) > 0 && row == 0)// for Strip Length information
                 stripLength = slMapRow1.at(strip);
             else if (slMapRow2.count( strip ) > 0 && row == 1)
             {
