@@ -840,7 +840,7 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
 }
 
-void StFttDb::getGloablOffset_ClusterPoint( UChar_t plane, UChar_t quad, 
+void StFttDb::getGlobalOffset_ClusterPoint( UChar_t plane, UChar_t quad, 
                                 float &dx, float &sx,
                                 float &dy, float &sy, 
                                 float &dz, float &sz ){
