@@ -395,7 +395,7 @@ bool StFttDb::loadStripEdgeFromFile( std::string fn ){
             printf( "File Header: %s, %s, %s", nStrip.c_str(), StripEdge_L.c_str(), StripEdge_R.c_str());
         }
 
-        //read strip Center info
+        //read strip Edge info
         int n_strip; Float_t pos_strip_edge_L, pos_strip_edge_R;
         while (inf >> nStrip >> StripEdge_L >> StripEdge_R)
         {
