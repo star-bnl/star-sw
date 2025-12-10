@@ -1,4 +1,29 @@
 {
+  // ROOT and XROOTD
+  // some rootd default dummy stuff
+  TAuthenticate::SetGlobalUser("starlib");
+  TAuthenticate::SetGlobalPasswd("ROOT4STAR");
+
+  // This will help tracing failure on XrdOpen() if any
+  gEnv->SetValue("XNet.DebugTimestamp","1");
+  gEnv->SetValue("XNet.ReconnectTimeout","15");
+  gEnv->SetValue("XNet.RequestTimeout","90");
+
+  //  set FloatPointException trap
+  bool star_rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
+  const char* star_rootlogon_fpe_env = gSystem->Getenv("STARFPE");
+
+  if (star_rootlogon_fpe_env) {
+    if (strcmp(star_rootlogon_fpe_env,"YES")==0) star_rootlogon_fpe=true;
+    if (strcmp(star_rootlogon_fpe_env,"NO" )==0) star_rootlogon_fpe=false;
+  }
+  if (star_rootlogon_fpe) {
+    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
+    printf("*** Floating Point Exception is ON ***\n");
+  } else {
+    printf("*** Floating Point Exception is OFF ***\n");
+  }
+
   gSystem->Load("libStarClassLibrary");
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
@@ -36,4 +61,11 @@
   gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
   gInterpreter->AddIncludePath("$STAR/StRoot");
   gInterpreter->AddIncludePath("/usr/include/mysql");
+
+  // Requested by users, allow loading a "complementary" local
+  // rootlogon if exists
+  if ( !gSystem->AccessPathName("./rootlogon.C", kFileExists ) ){
+    cout << "Found and loading local rootlogon.C" << endl;
+    gROOT->Macro("./rootlogon.C");
+  }
 }
