@@ -2,9 +2,7 @@
 
 <job name="&JOBNAME;" maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="false" nProcesses="&NJOBS;" >
 
-  <shell>
-    singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02
-  </shell>
+  <shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
 
 <command>
 
