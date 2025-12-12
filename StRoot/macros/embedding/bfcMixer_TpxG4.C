@@ -183,6 +183,7 @@ void bfcMixer_TpxG4()
 
   top->cd();
 
+
   if ( runchains[3] ) {
     chain3 = new StBFChain("Three");
     chain3 -> cd();
@@ -197,28 +198,32 @@ void bfcMixer_TpxG4()
   chain0->cd();
   chain0->Load();
 
-
   if ( chain1 ) { chain1->cd();  chain1->Instantiate(); }
-  if ( chain2 ) { chain2->cd();  chain2->Instantiate(); }
+  if ( chain2 ) { chain2->cd();  chain2->Instantiate();
+    auto* prim=chain2->Maker("StarEmbed");
+    prim->SetAttr("output","genevents.root");
+  }
   if ( chain3 ) { chain3->cd();  chain3->Instantiate(); }
 
-
-
   top->cd();
+
 
   //
   // Set input DS for TpcRS
   //
   if ( chain2 ) {
     auto* tpcrs = chain2->Maker("TpcRS");
-    if ( tpcrs ) 
+    if ( tpcrs ) {
       tpcrs->SetAttr("inputds","geant4star");
+    }
   }
 
 
   //
   // Set inputs on TPC mixer
   //
+
+
 
   if ( chain3 ) { 
     chain3->cd();
@@ -231,23 +236,6 @@ void bfcMixer_TpxG4()
     if (eefs_) eefs_->SetAttr("embedding",1);
     if (eess_) eess_->SetAttr("embedding",1);
 
-    //    auto*  mcmk_ = 
-
-    //    const char* setup_eemc = 
-    //      "auto*  eefs_ = StMaker::GetChain()->Maker(\"eefs\"); "
-    //      //      "if (0==eefs)      eefs = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcFastSim\"); "
-    //      "auto*  eess_ = StMaker::GetChain()->Maker(\"eess\"); "
-    //      //      "if (0==eess)      eess = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcSlowSim\"); "
-    //      //      "StEEmcMixerMaker* eemx = dynamic_cast<StEEmcFastMaker*>( StMaker::GetChain()->Maker(\"EEmcMixer\"); "
-    //      //      "StMaker*          mcev = StMaker::GetChain()->Maker(\"StMcEventMaker\"); "
-    //      "if ( eefs_ )       eefs_->SetAttr("
-    //      "if ( eess_ )       eess_->setEmbeddingMode(); "
-    //      //      "if ( eefs && eemx )       StMaker::GetChain()->AddBefore( eemx->GetName(), eefs ); "
-    //      //  "if ( eess && eemx )       StMaker::GetChain()->AddBefore( eemx->GetName(), eess ); "
-    //      // "if ( eemx && mcev )       StMaker::GetChain()->AddAfter( eemx->GetName(), mcev ); "      
-    //      ;
-
-    //    process(setup_eemc);
   }
 
   top->cd();
@@ -306,11 +294,14 @@ void bfcMixer_TpxG4()
   top->SetAttr(".Privilege",1,"StarEmbedMaker::*"); 	//It is also IO maker
 
 
+  gInterpreter->ProcessLine("{Geometry* __hack = new Geometry(); delete __hack;}");
+
+
   top->Init();
   top->ls(10);
 
   //  top->Maker("TpcRS")->SetDebug(999);
-  top->Maker("Sti")->SetDebug(999);
+  //  top->Maker("Sti")->SetDebug(999);
 
   // Disable FPE detection enabled by geant4
   gSystem->SetFPEMask( kNoneMask );
