@@ -40,13 +40,8 @@ cp -R &WORKINGDIR;/StarVMC/ .
 
 setenv STAR .
 
-#ls -la . 
-#ls -la StRoot/ 
-#ls -la .sl*/lib/ 
-
-
-ls -l StRoot/macros/geant4star/
-
+# Ensure that any ROOT5 library is removed from the path
+setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
 
   set tag=&TAG;
 
