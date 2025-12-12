@@ -161,9 +161,10 @@ void bfcMixer_TpxR6()
 
   chain0->cd();
   chain0->Load();
+
   
   if ( chain1 ) { chain1->cd();  chain1->Instantiate(); }
-  if ( chain2 ) { chain2->cd();  chain2->Instantiate(); }
+  if ( chain2 ) { chain2->cd();  chain2->Instantiate();  }
   if ( chain3 ) { chain3->cd();  chain3->Instantiate(); }
 
   top->cd();
@@ -208,11 +209,11 @@ void bfcMixer_TpxR6()
   top->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); 	//It is also IO maker
 
 
+  gInterpreter->ProcessLine("{Geometry* __hack = new Geometry(); delete __hack;}");
+
+
   top->Init();
   top -> ls(10);
-
-  //  top->Maker("TpcRS")->SetDebug(999);
-  chain3->Maker("Sti")->SetDebug(999);
 
   gSystem->SetFPEMask( kNoneMask );
   top->EventLoop(nevents, top->Maker("outputStream"));
