@@ -123,7 +123,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt      MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt      MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -146,7 +146,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -171,7 +171,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -195,7 +195,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
+    job.recopts="P2024a stargen in -fzin emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
 
   };
 
@@ -221,7 +221,7 @@ void setupProductionJobs() {
 
 //  job.recopts="P2024a          mysql                 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess epc  event nodefault";
 //  job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
-    job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
+    job.recopts="P2024a stargen in -fzin emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt       MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
 
   };
 
@@ -245,7 +245,7 @@ void setupProductionJobs() {
       { "application:engine", "G4" }
     };
 
-    job.recopts="P2023a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2023a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
     // Version 2 will switch off itermediate vertices on tracks
     StarSimOpt_t job2 = job;
@@ -274,7 +274,7 @@ void setupProductionJobs() {
       { "application:engine", "G3" }
     };
 
-    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -297,7 +297,7 @@ void setupProductionJobs() {
     job.simSAttr = {
       { "application:engine", "G3" }
     };
-    job.recopts="P2025 mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2025 StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
@@ -322,7 +322,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
+    job.recopts="P2024a stargen in -fzin emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
 
   };
 
@@ -346,7 +346,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
-    job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
+    job.recopts="P2024a in -fzin emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
 
   };
 
@@ -371,7 +371,7 @@ void setupProductionJobs() {
     };
 
 //  job.recopts="P2024a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt Tpc23 MiniMcMk,McAna ,useInTracker emcsim eefs eess epc  event nodefault";
-    job.recopts="P2024a in -fzin mysql emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
+    job.recopts="P2024a stargen in -fzin emcy2 eefs eess StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk CMuDst -mtd -mtddat -mtdutil -mtdmatch nodefault  ";
 
   };
 
@@ -394,7 +394,7 @@ void setupProductionJobs() {
       { "application:engine", "G3" }
     };
 
-    job.recopts="P2023a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2023a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
     // Version 2 will switch off itermediate vertices on tracks
     StarSimOpt_t job2 = job;
@@ -418,20 +418,23 @@ void setupProductionJobs() {
       { "pid",    47 },
       { "ntrack", 10 }
     };
+    job.genSAttr = {
+      { "mode", "FlatPT" }
+    };
     job.primDAttr = {
       { "XVERTEX",  0.1 },   { "XSIGMA", 0.01 },
       { "YVERTEX", -0.1 },   { "YSIGMA", 0.01 },
       { "ZVERTEX",  0.0 },   { "ZSIGMA", 15.0 }
     };
     job.timestamps={{"sdt20210218"}};
-    //    job.runnumbers={25139005};
+    job.runnumbers={22139005};
 
     job.simopts="y2021a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
     job.simSAttr = {
       { "application:engine", "G4" }
     };
 
-    job.recopts="P2021a mysql StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
+    job.recopts="P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker emcsim eefs eess nodefault";
 
   };
 
