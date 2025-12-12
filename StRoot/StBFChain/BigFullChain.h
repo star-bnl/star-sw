@@ -71,9 +71,9 @@ Bfc_st BFC[] = { // standard chains
 #ifdef __AgMLonFly__
   {"ideal",       "",  "","",            "",           "",                       "Ideal Alignment", kFALSE},
   {"misalign",    "",  "","",            "","-AgMLideal",                    "Misaligned Geometry", kFALSE},
-  {"AgMLutil",    "",  "","",            "","StarAgmlUtil",                         "AgML support", kFALSE},
-  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib",             "AgML support", kFALSE},
-  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
+  {"AgMLutil",    "",  "","",            "","StarAgmlUtil,vmclib",                         "AgML support", kFALSE},
+  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib,vmclib",             "AgML support", kFALSE},
+  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry,vmclib"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
   {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
@@ -1300,8 +1300,10 @@ Bfc_st BFC[] = { // standard chains
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
 #if ROOT_VERSION_CODE>=399366
   {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMCLibrary.so,libgeant321.so", "VMC geant3",kFALSE},
+  {"vmclib"      ,"" ,"","","", "libVMCLibrary.so", "VMC",kFALSE},
 #else
   {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMC.so,libgeant321.so", "VMC geant3",kFALSE},
+  {"vmclib"      ,"" ,"","","", "libVMC.so", "VMC",kFALSE},
 #endif
 
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
