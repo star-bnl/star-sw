@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import argparse
@@ -11,7 +11,7 @@ import re
 PWD = os.getcwd()
 
 def main():
-    parser = argparse.ArgumentParser(description ='Submit simulation jobs')
+    parser = argparse.ArgumentParser(description ='Submit simulation jobs', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # WORKINGDIR
     parser.add_argument( '-w', '--workdir', dest='WORKINGDIR', default=PWD, help="Submission directory" )
     # LOGDIR
@@ -68,13 +68,15 @@ def main():
             entities.append(f"TAG={k}")
             entities.append(f"JOBNAME={k.replace(':','_')}-")
 
-            command = f"star-submit-template -entities {','.join(entities)} -template submit_simulation_jobs.xml"
+            command = f"star-submit-template-beta -entities {','.join(entities)} -template submit_simulation_jobs.xml"
 
-            if 0:
+            if 1:
                 result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
                 submission=result_shell.stdout.split('\n')
                 resultmap[k]=submission
                 print( f'[{k}] {submission[-2]} {submission[-3]}' )
+
+                #print(submission)
 
             else:
                 print(command)
