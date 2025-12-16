@@ -39,6 +39,10 @@ def main():
 
     parser.add_argument( '--list', dest="list", default=False, action="store_true", help="Lists available series and exists" )
 
+    parser.add_argument( '--verbose', dest="verbose", default=False, action="store_true", help="Full output from SUMS submission" )
+
+    parser.add_argument( '--no-submit', dest="submit", default=True, action="store_false", help="Print command to submit and exit." )        
+
     args = parser.parse_args()
 
 
@@ -70,13 +74,17 @@ def main():
 
             command = f"star-submit-template-beta -entities {','.join(entities)} -template submit_simulation_jobs.xml"
 
-            if 1:
+            if args.submit:
                 result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
                 submission=result_shell.stdout.split('\n')
                 resultmap[k]=submission
-                print( f'[{k}] {submission[-2]} {submission[-3]}' )
 
-                #print(submission)
+                if args.verbose:
+                    print(result_shell)
+                else:                
+                    print( f'[{k}] {submission[-2]} {submission[-3]}' )
+
+
 
             else:
                 print(command)
