@@ -426,7 +426,8 @@ void setupProductionJobs() {
       { "YVERTEX", -0.1 },   { "YSIGMA", 0.01 },
       { "ZVERTEX",  0.0 },   { "ZSIGMA", 15.0 }
     };
-    job.timestamps={{"sdt20210218"}};
+    //2021-05-19 06:24:57
+    job.timestamps={{"sdt20210519.063000"}};
     job.runnumbers={22139005};
 
     job.simopts="y2021a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
