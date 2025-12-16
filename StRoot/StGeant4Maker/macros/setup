@@ -3,7 +3,6 @@ setenv GROUP_DIR /star/u/jeromel/work/STAR/group
 
 # Setup 64 bit w/ spack overlay
 setup 64b
-setenv STAR .
 starver SL24x config/v0.3.0-rhel7-root6.24.06
 
 # STILL NEED TO STRIP ROOT5 From the environment
