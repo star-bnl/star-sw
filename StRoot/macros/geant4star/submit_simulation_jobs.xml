@@ -32,13 +32,16 @@ module load clhep-2.4.5.1-debug
 module unload star-table-0.1.1-root-6.24.06
 module load star-table-0.1.1-root-6.24.06
 
-cp -R &WORKINGDIR;/.sl73_x8664_gcc485/ .
-cp -R &WORKINGDIR;/StRoot/ .
-cp -R &WORKINGDIR;/StarDb/ .
-cp -R &WORKINGDIR;/StDb/ .
-cp -R &WORKINGDIR;/StarVMC/ .
+#cp -R &WORKINGDIR;/.sl73_x8664_gcc485/ .
+#cp -R &WORKINGDIR;/StRoot/ .
+#cp -R &WORKINGDIR;/StarDb/ .
+#cp -R &WORKINGDIR;/StDb/ .
+#cp -R &WORKINGDIR;/StarVMC/ .
 
-setenv STAR .
+#setenv STAR .
+
+mkdir StRoot
+cp -R $STAR/StRoot/macros StRoot/
 
 # Ensure that any ROOT5 library is removed from the path
 setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
@@ -51,7 +54,7 @@ setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ 
   <!-- Run event generation -->
   echo "______________________________________________________________________________________________"
   echo "Running primary event generation"
-perf record --output ${logbase}.gener.perfdata \
+#perf record --output ${logbase}.gener.perfdata \
   root.exe -q -b StRoot/macros/geant4star/run_stargenerator.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.gener.log
   echo "Finished" `date` &gt;&gt; ${logbase}.gener.log
   echo "______________________________________________________________________________________________"
@@ -64,7 +67,7 @@ perf record --output ${logbase}.gener.perfdata \
 
   echo "______________________________________________________________________________________________"
   echo "Running geant simulation"
-perf record --output ${logbase}.geant.perfdata \
+#perf record --output ${logbase}.geant.perfdata \
   root.exe -q -b StRoot/macros/geant4star/run_geant4star.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.geant.log
   echo "Finished" `date` &gt;&gt; ${logbase}.geant.log
   echo "______________________________________________________________________________________________"
@@ -77,7 +80,7 @@ perf record --output ${logbase}.geant.perfdata \
 
   echo "______________________________________________________________________________________________"
   echo "Running event reconstruction"
-perf record --output ${logbase}.reco.perfdata \
+#perf record --output ${logbase}.reco.perfdata \
   root4star -q -b StRoot/macros/geant4star/run_reconstruction.C\(&NEVENTS;,\"${tag}\",${JOBINDEX}\) &gt;&amp; ${logbase}.reco.log
   echo "Finished" `date` &gt;&gt; ${logbase}.reco.log
   echo "______________________________________________________________________________________________"
