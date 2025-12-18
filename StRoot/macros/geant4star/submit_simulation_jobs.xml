@@ -4,6 +4,10 @@
 
   <shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
 
+<ResourceUsage>
+<MinMemory>4096</MinMemory>
+</ResourceUsage>
+
 <command>
 
 <!--RNG seed is set to the JOBINDEX for reproducibility -->
