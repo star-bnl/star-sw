@@ -878,7 +878,7 @@ Int_t StMcEventMaker::Make()
 	{for (long itrk=0; itrk<NTracks; itrk++) {
 	    iStopVtxId = (trackTable[itrk].stop_vertex_p) - 1;
 		    		
-	    if (iStopVtxId >= 0) {
+	    if (iStopVtxId >= 0 && iStopVtxId < NVertices) {
 		if (vtemp[iStopVtxId].primaryFlag == 1) {
 		    
 		    nThrownTracks++;
@@ -902,7 +902,7 @@ Int_t StMcEventMaker::Make()
 	    
 	    // point track to its stop vertex,
 	    // and tell stop vertex that this is its parent
-	    if (iStopVtxId >= 0) {
+	    if (iStopVtxId >= 0 && iStopVtxId < NVertices) {
 		t->setStopVertex(vtemp[iStopVtxId].vtx);
 		vtemp[iStopVtxId].vtx->setParent(t);
 	    }
