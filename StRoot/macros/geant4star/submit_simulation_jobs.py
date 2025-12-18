@@ -72,7 +72,7 @@ def main():
             entities.append(f"TAG={k}")
             entities.append(f"JOBNAME={k.replace(':','_')}-")
 
-            command = f"star-submit-template-beta -entities {','.join(entities)} -template submit_simulation_jobs.xml"
+            command = f"star-submit-template-beta -entities {','.join(entities)} -template StRoot/macros/geant4star/submit_simulation_jobs.xml"
 
             if args.submit:
                 result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
