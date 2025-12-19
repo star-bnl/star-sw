@@ -4,10 +4,6 @@
 
   <shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
 
-<ResourceUsage>
-<MinMemory>4096</MinMemory>
-</ResourceUsage>
-
 <command>
 
 <!--RNG seed is set to the JOBINDEX for reproducibility -->
@@ -96,11 +92,15 @@ setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ 
   cp *.root &OUTDIR;
 
 
-
- 
-
 </command>
 
+     <ResourceUsage>
+       <Memory>
+	 <MinMemory>4096</MinMemory>
+	 <MaxMemory>10000</MaxMemory>
+       </Memory>
+     </ResourceUsage>
+ 
 
 <!-- Define locations of ROOT files -->
 <!--
