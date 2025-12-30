@@ -72,15 +72,20 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include <assert.h>
 #include "StTpcHit.h"
 #include "StTrack.h"
+#include "StDetectorDbMaker/St_tpcPadConfigC.h"
 static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.19 2011/10/17 00:13:49 fisyak Exp $";
-
+#ifdef __TFG__VERSION__
+TString StTpcHit::fgFMT("/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d");
+#endif /*  __TFG__VERSION__ */
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
 ClassImp(StTpcHit)
-
+//________________________________________________________________________________
 void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk) {
+  assert(cl_x > 0 && cl_t > 0); // && mAdc > 0); mAdc == 0 may come from StTpcFastSimMaker
   setPadTmbk(cl_x, cl_t);
   Short_t pad  = TMath::Nint(mMcl_x/64.);
   Short_t time = TMath::Nint(mMcl_t/64.);
@@ -89,14 +94,59 @@ void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxp
   mMintmbk = time - mntmbk;
   mMaxtmbk = mxtmbk - time;
 }
-
+//________________________________________________________________________________
 ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
 	      << *((StHit *)&v)
-	      << Form(" pmin/max %3i/%3i np %2i tmin/max %3i/%3i nt %2i tm %6.2f pad %6.2f adc %4i",
+	      << Form(" dX %5.2f",v.dX())
+	      << Form(" pmin/max %3i/%3i np %2i tmin/max %3i/%3i nt %2i tm %6.2f pad %6.2f adc %5i",
 		      (Int_t)  v.minPad(), (Int_t)  v.maxPad(),(Int_t) v.padsInHit(), 
 		      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),
 		      v.timeBucket(),v.pad(), v.adc());  
 }
+//________________________________________________________________________________
 void   StTpcHit::Print(Option_t *option) const {cout << *this << endl;}
+//________________________________________________________________________________
+#ifdef __TFG__VERSION__
+ const Char_t *StTpcHit::GetPath() const {
+  Int_t sec = sector();
+  Int_t half   = (sec  - 1)/12 + 1;
+  Int_t sectorVMC = (sec - 1)%12 + 1;
+  Int_t rowRC = padrow();
+  Int_t rowVMC = 0;
+  Int_t NoOfInnerRows = St_tpcPadConfigC::instance()->innerPadRows(sec);
+  Int_t NoOfRows = St_tpcPadConfigC::instance()->padRows(sec);
+  if (NoOfInnerRows == 13) {
+    if (rowRC <= NoOfInnerRows) {rowVMC = 3*(rowRC -  1) +  2;  }
+    else                        {rowVMC =   (rowRC - 14  + 41); }
+    if (rowVMC > 72)   rowVMC = 72;
+  } else {// iTPC
+    if (rowRC <= NoOfInnerRows) {
+      rowVMC = rowRC + 1; 
+      if (rowVMC <  2) rowVMC =  2; 
+      if (rowVMC > 41) rowVMC = 41;
+    } else {
+      rowVMC = rowRC + 3;
+      if (rowVMC < 44) rowVMC = 44;
+      if (rowRC > NoOfRows) rowRC = NoOfRows;
+    }
+  }
+  //  Int_t planeId = 100*sec + rowRC;
+  Int_t indx[3] = {half, sectorVMC, rowVMC};
+  static TString path;
+  path = FormPath(fgFMT,3,indx);
+  return path.Data();
+}
+#endif /*  __TFG__VERSION__ */
+//________________________________________________________________________________
+Int_t StTpcHit:: Compare(const TObject *obj) const {
+  StTpcHit *hit = (StTpcHit *) obj;
+  if      (sector() < hit->sector()) return -1;
+  else if (sector() > hit->sector()) return  1;
+  if      (padrow() < hit->padrow()) return -1;
+  else if (padrow() > hit->padrow()) return  1;
+  if      (TMath::Abs(position().z()) < TMath::Abs(hit->position().z())) return -1;
+  else if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return  1;
+  return 0;
+}

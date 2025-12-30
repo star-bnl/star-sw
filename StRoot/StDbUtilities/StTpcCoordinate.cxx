@@ -7,6 +7,7 @@
 #include "StTpcLocalSectorAlignedCoordinate.hh"
 #include "StTpcLocalSectorDirection.hh"
 #include "StTpcLocalSectorCoordinate.hh"
+#include "Stiostream.h"
 //________________________________________________________________________________
 StTpcLocalCoordinate::StTpcLocalCoordinate(double x, double y, double z) : StTpcCoordinate(x,y,z,0,0) {}
 //________________________________________________________________________________
@@ -20,6 +21,8 @@ StTpcLocalCoordinate::StTpcLocalCoordinate(const StThreeVector<double>& xyz) : S
 ostream& operator<<(ostream& os, const StTpcCoordinate& a) {
   return os << OS;
 }
+//________________________________________________________________________________
+void StTpcCoordinate::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 ostream& operator<<(ostream& os, const StTpcLocalDirection& a) {
   return os << "TPC_Local Direction( (" << OS;

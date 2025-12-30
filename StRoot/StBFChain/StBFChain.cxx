@@ -292,6 +292,8 @@ Int_t StBFChain::Instantiate()
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
 
+	  // TFG specific Db tag
+	  if (GetOption("TFGDbTag")) flavors += "+TFG";
 	  // fixed target flavor
 	  if (GetOption("FXT")) flavors.Prepend("FXT+");
 
@@ -768,6 +770,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
+      if ( GetOption("Alignment2024")     ) mk->SetAttr("Alignment2024",kTRUE);// uses new Alignment2024
+      if ( GetOption("Cosmics")   ) mk->SetAttr("Cosmics"    ,kTRUE);
       if ( GetOption("shadow")    ) mk->SetAttr("NoReset",kTRUE);// no resetting ExB
       if ( GetOption("ExB")){
 	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
@@ -1928,6 +1932,18 @@ void StBFChain::SetDbOptions(StMaker *mk){
     if (GetOption("NoSvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
     if (GetOption("NoSsdIt"))                         {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
     if (GetOption("NoSstIt"))                         {mk->SetAttr("blacklist", "sst");  gMessMgr->QAInfo() << "blacklist sst" << endm;}
+  }
+  if (GetOption("TFGdbOpt")) {
+    const Char_t *TFGTables[] = {"tpcSectorT0offset", "starTriggerDelay", 
+				 "TpcPosition", "TpcHalfPosition", "TpcWheelPosition", 
+				 "TpcSuperSectorPositionB", "TpcSuperSectorPositionD", 
+				 "TpcInnerSectorPositionB", "TpcOuterSectorPositionB", 
+				 "tpcBXT0CorrEPD", "tpcTimeBucketCor", 0};
+    LOG_INFO << "TFG version for TPC alignment parameters" << endm;
+    for (Int_t i = 0; TFGTables[i]; i++) {
+      LOG_INFO << "SetFlavor(\"TFG\",\"" << TFGTables[i] << "\"); // disable sim+ofl" << endm; 
+      mk->SetFlavor("TFG",TFGTables[i]);
+    }
   }
 }
 //_____________________________________________________________________

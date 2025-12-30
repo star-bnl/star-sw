@@ -13,6 +13,7 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 #include "Rtypes.h"
+#include "StDetectorDbMaker/StiTpcHitErrorMDF4.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
@@ -236,11 +237,17 @@ StiDetector* StiTpcDetectorBuilder::constructTpcPadrowDetector(StiLayer stiLayer
   pDetector->setShape(pShape);
   pDetector->setPlacement(pPlacement);
 
-  if (tpc_padrow_id <= nInnerPadrows)
+  if (tpc_padrow_id <= nInnerPadrows) {
+    if (StTpcDb::Alignment2024()) {
+      pDetector->setHitErrorCalculatorMDF4(StiTpcInnerHitErrorMDF4::instance());
+    }
     pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
-  else
+  } else {
+    if (StTpcDb::Alignment2024()) {
+      pDetector->setHitErrorCalculatorMDF4(StiTpcOuterHitErrorMDF4::instance());
+    }
     pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
-
+  }
   pDetector->setKey(1,stiLayer.sti_padrow_id);
   pDetector->setKey(2,stiLayer.sti_sector_id);
 

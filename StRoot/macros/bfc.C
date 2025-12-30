@@ -128,6 +128,7 @@ void Load(const Char_t *options)
     if(gSystem->Load("libStStarLogger.so") >= 0) {              //  StMemStat::PrintMem("load log4cxx");
       cout << " + libStStarLogger.so";
       gROOT->ProcessLine("StLoggerManager::StarLoggerInit();"); 
+      if (gROOT->IsBatch())  StLoggerManager::setColorEnabled(kFALSE);
     }
   }
   //  gSystem->Load("libHtml");
