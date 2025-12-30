@@ -1,8 +1,5 @@
 import os
-try:
-    from exceptions import Exception
-except ImportError:
-    from builtins   import Exception
+from exceptions import Exception
 
 
 from Dyson.Utils.Shapes  import listOfShapes

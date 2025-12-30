@@ -1130,7 +1130,7 @@ class Operator(Handler):
                 if value != None: out += '%s="%s" '%( key, value )
             except KeyError:
                 pass
-        for key,value in attr.items():
+        for key,value in attr.iteritems():
             if value != None: out += '%s="%s" '%( key, value )
         out = sanitize(out)
         out = '<%s '%( tag ) + out + ' />'
@@ -1162,7 +1162,7 @@ class Container(Handler):
                 if ( value != None ): out += '%s="%s" '%( key, value )
             except KeyError:
                 pass
-        for key,value in attr.items():
+        for key,value in attr.iteritems():
             if value != None: out += '%s="%s" '%( key, value )
         out = '<%s '%tag + sanitize(out) + ' >'
         #out += '>'
@@ -1205,7 +1205,7 @@ class SimplePrint:
             output += _prepend
             i+=1
         output += line
-        print(output)
+        print output
 
 
 # ====================================================================================================
@@ -1824,7 +1824,7 @@ class Material(Operator):
         # Perform %var --> material:var and ag_var --> material:var substitution
         #
         myattr = {}
-        for key,value in attr.items():
+        for key,value in attr.iteritems():
             myattr[key] = ag_variable( attr[key], 'material' )
         Operator.startElement(self,tag,myattr)
 
