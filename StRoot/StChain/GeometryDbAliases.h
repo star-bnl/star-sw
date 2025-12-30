@@ -170,7 +170,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
  { "y2024a",      20231210,     1, "y2024a",    "y2024a production geometry, AgML,xgeometry"},    
  { "y2024b",      20231210,     2, "y2024b",    "y2024b production geometry (FXT @ 200.0 cm), AgML,xgeometry"},    
 
- { "y2024",       20241210,     0, "y2024",    "y2024 first cut geometry, AgML,xgeometry"},    
+ { "y2025",       20241210,     0, "y2025",    "y2025 first cut geometry, AgML,xgeometry"},    
 
   {"dev2021",     21201210,     1, "dev2021",  "-deprecated- geometry for 2021+ forward program,AgML,xgeometry"},
   {"dev2022",     21211210,     1, "dev2022",  "development geometry for 2022+ forward program,AgML,xgeometry"},

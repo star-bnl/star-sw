@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+
+nEvents=${1:-10} #num events
+
+echo "Usage:\n sim/jpsi <nEvents>"
+echo "nEvents=${nEvents}"
+
+strongrandom=`od -vAn -N3 -tu4 < /dev/urandom | tr -d '[:space:]'`
+
+if [ -f "jpsi.fzd" ] ; then
+    echo "jpsi.fzd already exists, skipping"
+else 
+    echo "strong random ${strongrandom}"
+    echo root4star -b -q -l 'sim/jpsi.C( '"${nEvents}"','"${strongrandom}"')'
+    time root4star -b -q -l 'sim/jpsi.C( '"${nEvents}"','"${strongrandom}"')'
+fi
