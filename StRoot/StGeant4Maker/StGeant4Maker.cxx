@@ -1014,8 +1014,8 @@ int StGeant4Maker::Make() {
   int stopMax  = 0;
   for ( auto it=0;it<nt;it++ ) {
     g2t_track_st* track = (g2t_track_st*)(g2t_track_table->At(it));   assert(track);
-    int start = track->start_vertex_p;    
-    int stop  = track->stop_vertex_p;
+    int start = track->start_vertex_p;                                assert(start>0);
+    int stop  = track->stop_vertex_p;    
     if ( start > startMax ) startMax = start;
     if ( stop  > stopMax  ) stopMax  = stop;
   }
@@ -1271,12 +1271,30 @@ void StGeant4Maker::FinishEvent(){
   int ivertex = 1; // vertex numbering starts from 1
   for ( auto v : vertex ) {
     truthVertex[v] = ivertex;
+    //    std::cout << "ivertex=" << ivertex << ": " << *v << std::endl;
+    // There is a class of invalid vertices where the track is added 
+    // as its own daughter.  Fix and issue warning.
+    std::vector<StarMCParticle*> particles;
+    auto* parent = v->parent();
+    bool fixit=false;
+    for ( auto* d : v->daughters() ) {
+      if ( d==parent ) { fixit=true; continue; }
+      particles.push_back(d);
+    }
+    if ( fixit )  {
+      LOG_WARN << "Fixing invalid vertex id " << ivertex << endm;
+      v->clearDaughters();
+      for ( auto* d : particles ) {
+	v->addDaughter(d);
+      }
+    }
     ivertex++;
   }
 
   int itrack = 1; // track numbering starts from 1
   for ( auto t : particle ) {
     truthTrack[t] = itrack;
+    //    std::cout << "itrack=" << itrack << ": " << *t << std::endl;
     itrack++;
   }
 
@@ -1319,7 +1337,8 @@ void StGeant4Maker::FinishEvent(){
     if ( myvertex.daughter_p == myvertex.parent_p ) {
 
       if ( is_itrmd ) { continue; }
-      else            { LOG_WARN << "Invalid vertex skipped for track " << myvertex.daughter_p << endm; continue; }
+      else            { 
+	LOG_WARN << "invalid vertex skipped for track " << myvertex.daughter_p << endm; continue; }
 
     }
 
@@ -1359,7 +1378,7 @@ void StGeant4Maker::FinishEvent(){
     // index of the start and stop vertices.
     // TODO: particle stop vertices need to be scored
     int iv = mytrack.start_vertex_p = truthVertex[ t->start() ];
-    mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
+             mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
     // next, track parent
     mytrack.next_parent_p = truthTrack[ t->start()->parent() ];    
 
@@ -1713,7 +1732,8 @@ void StGeant4Maker::Stepping(){
 	vertex->setParent( truth );
 	vertex->setMedium( mc->CurrentMedium() );
 	vertex->setProcess( mc->ProdProcess(0) );
-	vertex->setIntermediate(true);
+
+	//$$$	vertex->setIntermediate(true); // do not flag as intermediate
 	
 	// this is an intermediate vertex on the truth track
 	truth->addIntermediateVertex( vertex );
