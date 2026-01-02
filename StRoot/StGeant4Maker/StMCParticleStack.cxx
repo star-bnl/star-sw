@@ -23,18 +23,33 @@ const int kDefaultStackSize = 400;
 const int kDefaultArraySize = 4000;
 
 ostream&  operator<<(ostream& os,  const StarMCVertex&   vert) {
-  os << Form("[StMCVertex %p] (%f,%f,%f)",
+  os << Form("[StMCVertex %p] [%s] (%f,%f,%f)",
 	     (void*)&vert,
+	     vert.volume().c_str(),
 	     vert.vx(),
 	     vert.vy(),
 	     vert.vz());
+
+  os << std::endl;
+  auto* parent = vert.parent();
+  if ( parent ) {
+    os << "  parent: " << parent << std::endl;
+  }
+  else {
+    os << "  parent: " << "primary" << std::endl;
+  }
+
+  for ( auto* d : vert.daughters() ) {
+    os << "  daughter: " << d << std::endl;
+  }
+
   return os;
 }
 ostream&  operator<<(ostream& os,  const StarMCParticle& part) {
-  os << Form("[StMcParticle %s %p] stat=%i pdg=%i p=(%f,%f,%f;%f) v=(%f,%f,%f)",part.GetName(),(void*)&part,
+  os << Form("[StMcParticle %s %p] stat=%i pdg=%i p=(%f,%f,%f;%f) v=(%f,%f,%f) nhits=%lld",part.GetName(),(void*)&part,
 	     part.GetStatus(), part.GetPdg(),
 	     part.px(),part.py(),part.pz(),part.E(),
-	     part.vx(),part.vy(),part.vz() 
+	     part.vx(),part.vy(),part.vz(),part.numberOfHits()
             );
 
   if ( part.start() ) {
@@ -183,7 +198,10 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     mStackToTable[ntr]->setIdStack( ntr ); 
 
     // add this particle as a daughter of the vertex
-    vertex->addDaughter( mParticleTable.back() );  
+    if ( vertex->parent() != mParticleTable.back() ) 
+      {
+	vertex->addDaughter( mParticleTable.back() );  
+      }
 
     auto* navigator = gGeoManager->GetCurrentNavigator();
     auto* volume    = navigator->GetCurrentVolume();
@@ -237,7 +255,11 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
   for ( auto vtx : mVertexTable ) {
     double dist = vtx->distance(vx,vy,vz);   
     if ( dist < eps ) {
-      if ( vtx->process() == proc ) {
+      if ( 
+	  vtx->process() == proc && // match process 
+	  0==vtx->intermediate()    // secondaries should create their own start vertex
+	   ) 
+	{
 	vertex=vtx;
 	break;
       }
