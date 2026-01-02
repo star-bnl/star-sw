@@ -78,7 +78,7 @@ public:
   //const long long numberOfHits(){ return mNumHits; } 
   //void  addHit(){ mNumHits++; } 
 
-  const long long numberOfHits(){ return mHits.size(); } 
+  const long long numberOfHits() const { return mHits.size(); } 
   void  addHit( DetectorHit* hit );//{ mHits.push_back(hit); } 
 
   std::vector<DetectorHit*>& hits(){ return mHits; }
@@ -131,6 +131,10 @@ public:
 
   void setParent  ( StarMCParticle* _parent   ){ mParent = _parent; } 
   void addDaughter( StarMCParticle* daughter ){ mDaughters.push_back( daughter ); } 
+  void clearDaughters(){ 
+    //    for ( auto* d : mDaughters ) if (d) delete d;
+    mDaughters.clear();
+  };
 
   const             StarMCParticle*   parent()    const { return mParent; } 
   const std::vector<StarMCParticle*>& daughters() const { return mDaughters; } 
