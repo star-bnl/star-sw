@@ -52,7 +52,7 @@ public:
       else if (section == 3) {type=1; offset = 75;}
       else {type=3; offset = 0;} // BSMDP
 
-
+#if 0
       LOG_INFO  << " rl=" << rl
                 << " phiMod=" << phiMod
                 << " type=" << type
@@ -62,7 +62,7 @@ public:
                 << " xlocal=" << xl[0] << "," << xl[1] << "," << xl[2]
                 << " eta=" << pseudoRapidity
                 << endm;
-
+#endif
 
       int finalStrip = strip + offset;
 
