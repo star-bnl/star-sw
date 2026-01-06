@@ -14,6 +14,8 @@
 #include <AgMLEpdVolumeId.h>
 #include <AgMLEmcVolumeId.h>
 #include <AgMLEEmcVolumeId.h>
+#include <AgMLBsmdVolumeId.h>
+#include <AgMLEsmdVolumeId.h>
 #include <AgMLFmsVolumeId.h>
 #include <AgMLBTofVolumeId.h>
 #include <AgMLMtdVolumeId.h>
@@ -63,6 +65,10 @@ public:
 	id = new AgMLEmcVolumeId;
       else if ( name == "ESCI" )
 	id = new AgMLEEmcVolumeId;
+      else if ( name == "CSHI" )  //here sensetive vol only
+	id = new AgMLBsmdVolumeId();//does not work the same
+      else if ( name == "EHMS" )  //as geant3
+	id = new AgMLEsmdVolumeId();
       else if ( name == "BRSG" ) 
 	id = new AgMLBtofVolumeId;
       else if ( name == "ECEL" ) 
