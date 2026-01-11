@@ -42,7 +42,7 @@ public:
   StarMCParticle( TParticle* particle=0, StarMCVertex* start=0 );
 //  StarMCParticle( const StarMCParticle& );
 //  StarMCParticle( const StarMCParticle&& ) = default; 
- ~StarMCParticle(){ /* nada */ };
+  ~StarMCParticle(){};
 
   const TParticle* particle() const { return mStacked; }
 
@@ -82,7 +82,6 @@ public:
   void  addHit( DetectorHit* hit );//{ mHits.push_back(hit); } 
 
   std::vector<DetectorHit*>& hits(){ return mHits; }
-  
 
 private:
 protected:
@@ -115,7 +114,7 @@ public:
   StarMCVertex( double vx, double vy, double vz, double vt, StarMCParticle* parent=0 );
 //  StarMCVertex( const StarMCVertex& );
 //  StarMCVertex( const StarMCVertex&& ) = default;
- ~StarMCVertex(){ /* nada */ };
+  ~StarMCVertex(){};
 
   double distance( double vx_, double vy_, double vz_ ){ 
     double vx2 = (vx_-mVertex[0])*(vx_-mVertex[0]);
@@ -134,6 +133,15 @@ public:
   void clearDaughters(){ 
     //    for ( auto* d : mDaughters ) if (d) delete d;
     mDaughters.clear();
+  };
+
+  bool hasDaughter( const StarMCParticle* p ) const {
+    bool result = false;
+    for ( auto* d : mDaughters ) {
+      result = ( d==p );
+      if (result) break;
+    }
+    return result;
   };
 
   const             StarMCParticle*   parent()    const { return mParent; } 
