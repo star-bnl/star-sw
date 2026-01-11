@@ -46,7 +46,8 @@ ostream&  operator<<(ostream& os,  const StarMCVertex&   vert) {
   return os;
 }
 ostream&  operator<<(ostream& os,  const StarMCParticle& part) {
-  os << Form("[StMcParticle %s %p] stat=%i pdg=%i p=(%f,%f,%f;%f) v=(%f,%f,%f) nhits=%lld",part.GetName(),(void*)&part,
+  os << Form("[StMcParticle %s %p %i] stat=%i pdg=%i p=(%f,%f,%f;%f) v=(%f,%f,%f) nhits=%lld",
+	     part.GetName(),(void*)&part,part.idTruth(),
 	     part.GetStatus(), part.GetPdg(),
 	     part.px(),part.py(),part.pz(),part.E(),
 	     part.vx(),part.vy(),part.vz(),part.numberOfHits()
@@ -187,7 +188,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
     auto* persistent = new StarMCParticle(particle,vertex);
     persistent->setIdTruth( mParticleTable.size() );
-    persistent->setStartVertex( vertex );
+    persistent->setStartVertex( vertex ); // ... redundant with the ctor ... harmless ...
     mParticleTable.push_back(persistent); // mParticleTable owns the pointer
     mPersistentTrack[mArraySize] = persistent;
 
@@ -414,7 +415,6 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   mNumHits(0),
   mHits()
 {
-  
 }
 //___________________________________________________________________________________________________________________						
 void StarMCParticle::addHit( DetectorHit* hit ) {
@@ -429,8 +429,6 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 		    mVolume("unkn"),
 		    mIntermediate(false)		    
 {
-
-
 }
 //___________________________________________________________________________________________________________________						
 StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCParticle* parent) : mVertex{x,y,z,t},
@@ -441,8 +439,6 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCPartic
 		    mVolume("unkn"),
 		    mIntermediate(false)
 {
-
-
 }
 //___________________________________________________________________________________________________________________						
 double StarMCParticle::vx() const { assert(mStartVertex); return mStartVertex->vx(); }
