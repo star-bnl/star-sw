@@ -245,11 +245,22 @@ protected:
     int nhits = 0;
     StSensitiveDetector* sd = 0;
     std::vector<StSensitiveDetector*> sds;
+    std::string report = "[AddHits ";
+    report += name;
+    report += "] ";
     for ( auto v : volumes ) {
       sd = dynamic_cast<StSensitiveDetector*>(TVirtualMC::GetMC()->GetSensitiveDetector( v.c_str() )); 
       if ( 0==sd ) { /*LOG_INFO << "no SD for " << v << endm;*/ continue; } 
       nhits += sd->numberOfHits(); 
+      report += sd->GetName();
+      report += " n=";
+      report += std::to_string(sd->numberOfHits());
+      report += " ";
       sds.push_back(sd);
+    }
+
+    if ( sds.size() > 0 ) {
+      LOG_INFO << report.c_str() << endm;
     }
     
     // Create new table (possibly empty)
@@ -259,7 +270,7 @@ protected:
 
 
 
-    LOG_INFO << name << " adding number of hits = " << nhits << endm;
+    //    LOG_INFO << name << " adding number of hits = " << nhits << endm;
     if ( nhits > 0 ) {
 
       // Copy data from the sensitive detectors to the table
