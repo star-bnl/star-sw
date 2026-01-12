@@ -72,6 +72,8 @@
 // Pointer to the maker so we can forward VMC calls there
 static StGeant4Maker* _g4maker = 0;
 
+std::vector<StSensitiveDetector *> _sdlist;
+
 
 struct SD2Table_TPC {
   void operator()( StSensitiveDetector* sd, St_g2t_tpc_hit* table, St_g2t_track* track ) {
@@ -968,14 +970,11 @@ int StGeant4Maker::Make() {
 
   }
 
-
-
   ApplyG4ui("G4UI:PRETRIG");
   trigger();
   ApplyG4ui("G4UI:POSTTRIG");
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
-
   
   if ( 0 == IAttr("embedding:mode" ) ) {
     LOG_INFO << "SetRunNumber:   " << runnumber << endm;
@@ -1145,6 +1144,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
       // add sensitive detector to local map
       sd = sdmap[fname] = new StSensitiveDetector( fname, mname );
       sd->SetUserStack( mMCStack );
+      _sdlist.push_back(sd);
     }
 
     // Register this volume to the sensitive detector
@@ -1282,11 +1282,11 @@ void StGeant4Maker::FinishEvent(){
       particles.push_back(d);
     }
     if ( fixit )  {
-      LOG_WARN << "Fixing invalid vertex id " << ivertex << endm;
       v->clearDaughters();
       for ( auto* d : particles ) {
 	v->addDaughter(d);
       }
+      LOG_WARN << "Fixing invalid vertex id " << ivertex << " " << *v << endm;
     }
     ivertex++;
   }
@@ -1436,6 +1436,20 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_emc_hit>( "CALH", {"CSDA", "CSME", "CSHI" }, "g2t_smd_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "ECAH", {"EXSE", "EHMS"}, "g2t_esm_hit", sd2table_emc );
+
+  AddHits<St_g2t_ctf_hit>( "ETOH", {"ECEL"}, "g2t_eto_hit", sd2table_ctf );
+  AddHits<St_g2t_ctf_hit>( "BBCH", {"BPOL"}, "g2t_bbc_hit", sd2table_ctf );
+
+  for ( auto* sd : _sdlist ) {
+
+    if ( sd->numberOfHits() ) {
+
+      LOG_INFO << "Sensitive detector " << sd->GetName() << " has not been read out.  Clearing." << endm;
+      sd->Clear();
+
+    }
+
+  }
 
   //  g2t_track->Print(0,10);
 
@@ -1635,9 +1649,9 @@ void StGeant4Maker::Stepping(){
     mc->TrackPosition( x, y, z );
     r = TMath::Sqrt( x*x + y*y );
     z = TMath::Abs(z);
-    if ( r >= vRmin && r<= vRmax &&
-	 z >= vZmin && z<= vZmax ) {
-      std::cout << truth->idTruth() << "| x=" << x << " y=" << y << " z=" << z << " |";
+    if ( r >= vRmin && r<= vRmax && z >= vZmin && z<= vZmax ) {
+      //      std::cout << truth->idTruth() << "| x=" << x << " y=" << y << " z=" << z << " |";
+      std::cout << *truth << std::endl;
       current->Print();
     }
   }
@@ -1703,8 +1717,10 @@ void StGeant4Maker::Stepping(){
       
       const StarMCVertex* vertex_ = truth->stop();
       if ( 0==vertex_ ) {
-	
+
 	auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
+
+	// Why do we set the truth track as the parent?
 	vertex->setParent( truth );
 	vertex->setMedium( mc->CurrentMedium() );
 	
@@ -1760,7 +1776,7 @@ void StGeant4Maker::Stepping(){
     if ( r >= vRmin && r<= vRmax &&
 	 z >= vZmin && z<= vZmax ) {
 
-      LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+      LOG_DEBUG << Form("track step x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 			vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
 
     }
