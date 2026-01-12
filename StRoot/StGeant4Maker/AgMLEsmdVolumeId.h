@@ -30,6 +30,8 @@ public:
 
     int volume_id = 1000000*rileft+10000*phi_30d+1000*depth+strip;
 
+    return volume_id;
+
   };
 };
 /*
