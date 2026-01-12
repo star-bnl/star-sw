@@ -38,14 +38,14 @@ public:
 
     // cd == ESCI
     int rileft = onoff;
-    int shift  = 0;
+//  int shift  = 0;
 
     int wheel   = numbv[0];  
     int section = numbv[1];
     int idx     = numbv[2];
     int phi30d  = sectormap[wheel-1][idx-1]; // sector number
     int subsec  = numbv[3]; // subsection (i.e. layer) within each section
-    int sublay  = numbv[4]; // ???
+//  int sublay  = numbv[4]; // layer depth, but it is unused in numbering scheme.
     int phi     = numbv[5]; // phibin in sector
     int eta     = numbv[6];
 
