@@ -20,7 +20,6 @@ public:
   virtual int id( int* numbv ) const { 
     
     int rileft = onoff;
-    int shift  = 1;
     
     int iWheel    = numbv[0];
     int depth     = numbv[1];
