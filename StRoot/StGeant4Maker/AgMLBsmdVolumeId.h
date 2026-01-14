@@ -1,7 +1,6 @@
 #ifndef __AgMLBsmdVolumeId_h__
 #define __AgMLBsmdVolumeId_h__
 
-#include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <TVirtualMC.h>
 #include <TVector3.h>
 #include <TLorentzVector.h>
@@ -51,18 +50,6 @@ public:
       if (section == 1) {type=1; offset = 0;}
       else if (section == 3) {type=1; offset = 75;}
       else {type=3; offset = 0;} // BSMDP
-
-#if 0
-      LOG_INFO  << " rl=" << rl
-                << " phiMod=" << phiMod
-                << " type=" << type
-                << " section=" << section
-                << " strip=" << strip
-                << " offset=" << offset
-                << " xlocal=" << xl[0] << "," << xl[1] << "," << xl[2]
-                << " eta=" << pseudoRapidity
-                << endm;
-#endif
 
       int finalStrip = strip + offset;
 

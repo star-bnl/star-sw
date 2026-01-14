@@ -4,7 +4,7 @@
 #include "TString.h"
 #include <map>
 
-#include <StarVMC/StarAgmlLib/AgMLExtension.h>
+//#include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <AgMLTpcVolumeId.h>
 #include <AgMLFstVolumeId.h>
 #include <AgMLStgVolumeId.h>
@@ -43,7 +43,7 @@ public:
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
 
-    AgMLExtension* agml = AgMLExtension::get( name );
+    //AgMLExtension* agml = AgMLExtension::get( name );
 
     AgMLVolumeId* id = VolumeId[name];
     if ( 0==id ) {
