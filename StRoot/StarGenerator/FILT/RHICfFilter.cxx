@@ -140,8 +140,8 @@ int RHICfFilter::InitRHICfGeometry()
     mRHICfPoly -> AddBin(4, x, y);
   }
 
-  if(!mRHICfPoly){return 0;}
-  return 1;
+  if(!mRHICfPoly){return kStErr;}
+  return kStOk;
 }
 
 int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e)
