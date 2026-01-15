@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "TH2Poly.h"
-
 /*!
   \class RHICfFilter
   \brief RHICf pi0 and Neutron events filter as RHICf Run type
@@ -36,7 +35,7 @@ private:
   double mRHICfTowerBoundary[2][4][2]; // [TS, TL][bound square][x, y]
   double mRHICfTowerCenterPos[2]; // [TS, TL] y pos
 
-  double mRHICfDetZ = 1780.; // [cm]
+  double mRHICfDetZ;// = 1780.; // [cm]
 
   ClassDef(RHICfFilter,0);
 };

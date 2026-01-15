@@ -5,14 +5,21 @@
 #include "StarGenerator/EVENT/StarGenParticle.h"
 
 RHICfFilter::RHICfFilter( const char* name ) 
-: StarFilterMaker(name), mRHICfRunType(-1), mHitMultiplicity(1)
+: StarFilterMaker(name), 
+  mRHICfRunType(-1),
+  mHitMultiplicity(1),
+  mRHICfPoly(nullptr),
+  mRHICfTowerBoundary({}),
+  mRHICfTowerCenterPos({}),
+  mRHICfDetZ(1780.0)
+  //mRHICfRunType(-1), mHitMultiplicity(1)
 {
   mRHICfPoly = 0; 
-  memset(mRHICfTowerBoundary, 0, sizeof(mRHICfTowerBoundary));
-  memset(mRHICfTowerCenterPos, 0, sizeof(mRHICfTowerCenterPos));
+  //  memset(mRHICfTowerBoundary, 0, sizeof(mRHICfTowerBoundary));
+  //  memset(mRHICfTowerCenterPos, 0, sizeof(mRHICfTowerCenterPos));
 }
 
-RHICfFilter::~RHICfFilter()
+RHICfFilter::~RHICfFilter() 
 {
   if(mRHICfPoly){
     delete mRHICfPoly;
