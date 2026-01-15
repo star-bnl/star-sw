@@ -95,7 +95,7 @@ int RHICfFilter::InitRHICfGeometry()
   double detBeamCenter = 0.; // [cm]
 
   if(mRHICfRunType < 0 || mRHICfRunType > 2){
-    cout << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not setted!!!" << endl;
+    cout << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not set!!!" << endl;
     return 0;
   }
   if(mRHICfRunType == 0){detBeamCenter = -4.74;} // TL
