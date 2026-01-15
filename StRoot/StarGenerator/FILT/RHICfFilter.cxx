@@ -29,8 +29,13 @@ void RHICfFilter::SetRHICfRunType(int type)
 
 void RHICfFilter::SetHitMultiplicity(int hit)
 {
+  // Allowed range for hit multiplicity is [0,4]. Values outside this range
+  // are reset to 0. This preserves existing behavior but may indicate a
+  // configuration issue at the call site.
   mHitMultiplicity = hit;
-  if(mHitMultiplicity < 0 || mHitMultiplicity > 4){
+  if (mHitMultiplicity < 0 || mHitMultiplicity > 4) {
+    LOG_WARN << "RHICfFilter::SetHitMultiplicity received out-of-range value "
+             << hit << ", resetting to 0." << endm;
     mHitMultiplicity = 0;
   }
 }
