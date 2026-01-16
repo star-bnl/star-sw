@@ -182,7 +182,7 @@ int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px
 bool RHICfFilter::IsNeutralParticle(int pid)
 {
   // only listed for final state particles
-  int pdg = abs(pid);
+  int pdg = TMath::Abs(pid);
   switch(pdg)
   {
     case 2212: return false; // p
