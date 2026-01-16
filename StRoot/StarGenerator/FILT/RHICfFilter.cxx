@@ -11,11 +11,8 @@ RHICfFilter::RHICfFilter( const char* name )
   mRHICfPoly(nullptr),
   mRHICfTowerBoundary({}),
   mRHICfTowerCenterPos({}),
-  mRHICfDetZ(1780.0)
-  //mRHICfRunType(-1), mHitMultiplicity(1)
 {
-  //  memset(mRHICfTowerBoundary, 0, sizeof(mRHICfTowerBoundary));
-  //  memset(mRHICfTowerCenterPos, 0, sizeof(mRHICfTowerCenterPos));
+  mRHICfPoly = 0; 
 }
 
 RHICfFilter::~RHICfFilter() 
