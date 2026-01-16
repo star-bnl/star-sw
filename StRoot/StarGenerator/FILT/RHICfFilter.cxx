@@ -148,7 +148,6 @@ int RHICfFilter::InitRHICfGeometry()
     mRHICfPoly -> AddBin(4, x, y);
   }
 
-  if(!mRHICfPoly){return kStErr;}
   return kStOk;
 }
 
