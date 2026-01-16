@@ -14,7 +14,6 @@ RHICfFilter::RHICfFilter( const char* name )
   mRHICfDetZ(1780.0)
   //mRHICfRunType(-1), mHitMultiplicity(1)
 {
-  mRHICfPoly = 0; 
   //  memset(mRHICfTowerBoundary, 0, sizeof(mRHICfTowerBoundary));
   //  memset(mRHICfTowerCenterPos, 0, sizeof(mRHICfTowerCenterPos));
 }
