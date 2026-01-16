@@ -195,5 +195,4 @@ bool RHICfFilter::IsNeutralParticle(int pid)
 
     default  : return false;
   }
-  return false;
 }
