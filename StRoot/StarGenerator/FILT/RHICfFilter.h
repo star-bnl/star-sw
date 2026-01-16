@@ -1,5 +1,5 @@
-#ifndef __RHICfFilter_h__
-#define __RHICfFilter_h__
+#ifndef RHICfFilter_h__
+#define RHICfFilter_h__
 
 #include <vector>
 #include "TH2Poly.h"
