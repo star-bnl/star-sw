@@ -74,7 +74,7 @@ int RHICfFilter::Filter( StarGenEvent *_event )
     double e = part -> GetEnergy();
 
     // neutrino particle cut
-    if(11 < abs(pid) && abs(pid) < 19 ){continue;}
+    if(11 < TMath::Abs(pid) && TMath::Abs(pid) < 19 ){continue;}
 
     bool isNeutral = IsNeutralParticle(pid);
     
