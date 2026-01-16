@@ -58,7 +58,7 @@ int RHICfFilter::Filter( StarGenEvent *_event )
   int hitTrackNum = 0;
   // Loop over tracks to find particles of interest
   int npart = event.GetNumberOfParticles();
-  for ( int ipart=1; ipart<npart; ipart++ ){
+  for ( int ipart=1; ipart<npart; ipart++ ){ // skip header
     part = event[ipart];
 
     if (TMath::Abs(part->GetId()) < 10){continue;}
