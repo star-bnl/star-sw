@@ -12,22 +12,23 @@ RHICfFilter::RHICfFilter( const char* name )
   mRHICfTowerBoundary{},
   mRHICfTowerCenterPos{}
 {
-  mRHICfPoly = 0; 
 }
 
 RHICfFilter::~RHICfFilter() 
 {
-  if(mRHICfPoly){
-    delete mRHICfPoly;
-    mRHICfPoly = 0;
-  }
+  if ( mRHICfPoly )
+    {
+      delete mRHICfPoly;
+      mRHICfPoly = nullptr;
+    }
 }
 
 void RHICfFilter::SetRHICfRunType(int type)
 {
-  if(0 <= type && type <= 2){
-    mRHICfRunType = type;
-  }
+  if (0 <= type && type <= 2) 
+    {
+      mRHICfRunType = type;
+    }
 }
 
 void RHICfFilter::SetHitMultiplicity(int hit)
