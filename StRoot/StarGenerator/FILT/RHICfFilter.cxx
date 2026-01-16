@@ -53,7 +53,7 @@ int RHICfFilter::Filter( StarGenEvent *_event )
 {
   // Get a reference to the current event
   StarGenEvent& event = (_event)? *_event : *mEvent;
-  StarGenParticle *part;
+  StarGenParticle* part;
 
   int hitTrackNum = 0;
   // Loop over tracks to find particles of interest
