@@ -9,8 +9,8 @@ RHICfFilter::RHICfFilter( const char* name )
   mRHICfRunType(-1),
   mHitMultiplicity(1),
   mRHICfPoly(nullptr),
-  mRHICfTowerBoundary({}),
-  mRHICfTowerCenterPos({}),
+  mRHICfTowerBoundary{},
+  mRHICfTowerCenterPos{}
 {
   mRHICfPoly = 0; 
 }
@@ -154,14 +154,16 @@ int RHICfFilter::InitRHICfGeometry()
 
 int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e)
 {
-  if(e < 1.){return -1;} // energy cut 1 GeV
+  if ( e  < 1. ) return -1; // energy cut 1 GeV
+  if ( pz < 0. ) return -1; // opposite side cut
+  if ( pz == 0 ) return -1; // ... to avoid possible divide by zero
+  
 
-  double momMag = sqrt(px*px + py*py + pz*pz);
+  double momMag = sqrt(px*px + py*py + pz*pz);    assert(momMag>0.0);
   double unitVecX = px/momMag;
   double unitVecY = py/momMag;
-  double unitVecZ = pz/momMag;
+  double unitVecZ = pz/momMag;                   
 
-  if(unitVecZ < 0){return -1;} // opposite side cut
 
   double z = mRHICfDetZ - posZ;
   if(z < 0.){return -1;} // create z-position cut
