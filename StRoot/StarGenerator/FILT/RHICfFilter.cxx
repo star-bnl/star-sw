@@ -75,7 +75,7 @@ int RHICfFilter::Filter( StarGenEvent *_event )
     double e = part -> GetEnergy();
 
     // neutrino particle cut
-    if(11 < abs(pid) && abs(pid) < 19 ){continue;}
+    if(11 < TMath::Abs(pid) && TMath::Abs(pid) < 19 ){continue;}
 
     bool isNeutral = IsNeutralParticle(pid);
     
@@ -104,7 +104,7 @@ int RHICfFilter::InitRHICfGeometry()
   double detBeamCenter = 0.; // [cm]
 
   if(mRHICfRunType < 0 || mRHICfRunType > 2){
-    cout << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not set!!!" << endl;
+    LOG_WARN << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not set!!!" << endm;
     return 0;
   }
   if(mRHICfRunType == 0){detBeamCenter = -4.74;} // TL
