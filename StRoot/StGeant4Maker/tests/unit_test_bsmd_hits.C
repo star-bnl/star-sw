@@ -130,7 +130,7 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   auto* kine = top->Maker("StarKine");
   auto* g4mk = top->Maker("geant4star");
 
-  pmk->SetAttr("application:engine", "G3");
+  pmk->SetAttr("application:engine", "G3"); 
   
   pmk->AddMaker( kine );
   pmk->SetAttr("verbose",111);
@@ -176,6 +176,7 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
     TDataSet *gds = g4mk->GetDataSet("g2t_smd_hit");
     TTable   *hitTable = (gds) ? (TTable*)gds : nullptr;
     bool matchFound = false;
+    bool energyDeposit = false;
     std::vector<int> foundVids;
 
     if (hitTable) {
@@ -189,6 +190,9 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
         
         if (currentVid == cell.volumeId) {
             matchFound = true;
+	    if ( hits[i].de > 0 ) {
+	      energyDeposit = true;
+	    }
         }
 
         int hitLayer = (currentVid / 100) % 10;
@@ -220,6 +224,7 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
     std::stringstream ssFound;
     if (matchFound) {
       ssFound << "MATCH ";
+      if ( energyDeposit ) ssFound << "EDEP ";
       for (size_t k = 0; k < foundVids.size(); ++k) {
         // if(k>1){ssFound << "+ others ";break;}
         ssFound << foundVids[k] << (k < foundVids.size()-1 ? " " : "");
