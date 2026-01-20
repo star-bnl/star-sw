@@ -130,7 +130,7 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   auto* kine = top->Maker("StarKine");
   auto* g4mk = top->Maker("geant4star");
 
-  pmk->SetAttr("application:engine", "G3"); 
+  g4mk->SetAttr("application:engine", "G3"); 
   
   pmk->AddMaker( kine );
   pmk->SetAttr("verbose",111);
