@@ -19,6 +19,13 @@ StRHICfSimGenerator::StRHICfSimGenerator(const char *name) : StarGenerator(name)
     SetYell("proton");  
 }
 
+StRHICfSimGenerator::~StRHICfSimGenerator()
+{
+    mGenFile -> Close();
+    delete mParticleArr;
+    delete mGenFile;
+}
+
 int StRHICfSimGenerator::Init()
 {
     mEvent = new StarGenPPEvent();
@@ -32,7 +39,7 @@ int StRHICfSimGenerator::Init()
 
 int StRHICfSimGenerator::Generate()
 { 
-    int eventNum = mEvent -> GetEventNumber();
+    // int eventNum = mEvent -> GetEventNumber();
     mGenTree -> GetEntry(mEventIdx);
 
     FillPP( mEvent );
@@ -105,7 +112,7 @@ int StRHICfSimGenerator::InitTree()
     mGenRunTree -> SetBranchAddress("ModelType", &genModelType);
     mGenRunTree -> GetEntry(0);
 
-    if(0 > genRunType || rTOPtype < genRunType){
+    if(kRHICfTL > genRunType || kRHICfTOP < genRunType){
         LOG_ERROR << "Invalid RHICf run type !!!" << endm;
         return kStFatal;
     }

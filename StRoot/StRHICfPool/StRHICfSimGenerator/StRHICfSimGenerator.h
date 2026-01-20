@@ -1,13 +1,17 @@
 #ifndef __StRHICfSimGenerator_h__
 #define __StRHICfSimGenerator_h__
 
+#include <fstream>
+#include <string>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
-#include "TSystem.h"
+#include "TClonesArray.h"
 #include "TParticle.h"
 
 #include "StarGenerator/BASE/StarGenerator.h"
+#include "StRHICfUtil/StRHICfFunction.h"
 
 class StarGenEvent;
 class StarGenPPEvent;
@@ -16,7 +20,7 @@ class StRHICfSimGenerator : public StarGenerator
 {
     public:
         StRHICfSimGenerator( const char *name="StRHICfSimGenerator" );
-        ~StRHICfSimGenerator(){};
+        ~StRHICfSimGenerator();
 
         int Init();
         int Generate();
