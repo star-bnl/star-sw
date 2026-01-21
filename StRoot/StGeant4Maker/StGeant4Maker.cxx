@@ -1578,6 +1578,8 @@ void StGeant4Maker::Stepping(){
   auto* mgr = TMCManager::Instance();
   auto* mc = TVirtualMC::GetMC(); 
 
+
+
   if ( mgr ) {
     
     mc = mgr->GetCurrentEngine();
@@ -1641,18 +1643,57 @@ void StGeant4Maker::Stepping(){
   };
 
   if ( IAttr("Stepping:verbose") > 0 ) {
+    auto* ext = getExtension( mCurrentVolume );
     static double vRmin = DAttr("Stepping:verbose:Rmin");
     static double vZmin = DAttr("Stepping:verbose:Zmin");    
     static double vRmax = DAttr("Stepping:verbose:Rmax");
     static double vZmax = DAttr("Stepping:verbose:Zmax");    
+    bool isNewTrack      = mc->IsNewTrack();
+    bool isTrackEntering = mc->IsTrackEntering();
+    bool isTrackExiting  = mc->IsTrackExiting();
+    bool isTrackInside   = mc->IsTrackInside();
+    bool isTrackOut      = mc->IsTrackOut();
+    bool isTrackStop     = mc->IsTrackStop();
+
+    std::string state = "[";
+    if ( isNewTrack ) state += " new ";
+    if ( isTrackEntering ) state += " enter ";
+    if ( isTrackExiting ) state += " exit ";
+    if ( isTrackInside ) state += " inside ";
+    if ( isTrackOut ) state += " out ";
+    if ( isTrackStop ) state += " stop ";
+    state += "]";
+
+    std::string extInfo="[none]";
+    if ( ext ) {
+      extInfo  = "[";
+      extInfo += ext->GetModuleName().Data();
+      extInfo += "|";
+      extInfo += ext->GetFamilyName().Data();
+      extInfo += "|";
+      extInfo += ext->GetVolumeName().Data();
+      extInfo += "|isvol=";
+      extInfo += std::to_string(ext->GetSensitive());
+      extInfo += "|tracking=";
+      extInfo += std::to_string(ext->GetTracking());
+      extInfo += "]";
+    }
+
     double x,y,z,r;
     mc->TrackPosition( x, y, z );
     r = TMath::Sqrt( x*x + y*y );
     z = TMath::Abs(z);
     if ( r >= vRmin && r<= vRmax && z >= vZmin && z<= vZmax ) {
-      //      std::cout << truth->idTruth() << "| x=" << x << " y=" << y << " z=" << z << " |";
-      std::cout << *truth << std::endl;
-      current->Print();
+      LOG_INFO << "STEP: " << truth->idTruth() << " " 
+	       << " | x=" << x 
+	       <<   " y=" << y 
+	       <<   " z=" << z << " | "
+	       << state.c_str() 
+	       << extInfo.c_str()
+	       << " dE=" << mc->Edep()
+	       << endm;
+	;
+
     }
   }
 
