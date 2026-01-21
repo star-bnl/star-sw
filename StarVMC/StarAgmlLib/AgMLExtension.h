@@ -33,7 +33,7 @@ public:
   void SetVolumeName( const char* name ){ mVolumeName = name; }
   void SetSensitive( bool flag ) { mSensitive = flag; }
   void SetTracking( short track ) { 
-    if ( mVolumeName == "CAVE" ) {
+    if ( mVolumeName == "CAVE" || mModuleName.Contains("Epdm") ) {
       mTracking = 2;
     }
     else { 
