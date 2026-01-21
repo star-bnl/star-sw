@@ -15,6 +15,8 @@
 
 #include <cassert>
 
+int verbose = 0;
+
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
 
@@ -150,14 +152,28 @@ void StTrackerHitCollection::ProcessHits() {
     LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
   }
 
-  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
-
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
   bool isTrackExiting  = mc->IsTrackExiting();
   bool isTrackInside   = mc->IsTrackInside();
   bool isTrackOut      = mc->IsTrackOut();
   bool isTrackStop     = mc->IsTrackStop();
+
+  if ( verbose > 0 ) {
+    LOG_INFO << "SCORE: truth=" << truth << " current tn=" << userstack->GetCurrentTrackNumber() << 
+      " " << current->GetName() << 
+      " state= " <<
+      std::to_string( (isNewTrack)?1:0      ) << 
+      std::to_string( (isTrackEntering)?1:0 ) <<
+      std::to_string( (isTrackExiting)?1:0  ) << 
+      std::to_string( (isTrackInside)?1:0   ) <<
+      std::to_string( (isTrackOut)?1:0      ) <<
+      std::to_string( (isTrackStop)?1:0     ) <<
+      " x=" << std::to_string(x) <<
+      " y=" << std::to_string(y) << 
+      " z=" << std::to_string(z) <<
+      endm;
+  }
 
   TrackerHit* hit = 0;
   
@@ -303,14 +319,28 @@ void StCalorimeterHitCollection::ProcessHits() {
     LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
   }
 
-  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
-
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
   bool isTrackExiting  = mc->IsTrackExiting();
   bool isTrackInside   = mc->IsTrackInside();
   bool isTrackOut      = mc->IsTrackOut();
   bool isTrackStop     = mc->IsTrackStop();
+
+  if ( verbose > 0 ) {
+    LOG_INFO << "SCORE: truth=" << truth << " current tn=" << userstack->GetCurrentTrackNumber() << 
+      " " << current->GetName() << 
+      " state= " <<
+      std::to_string( (isNewTrack)?1:0      ) << 
+      std::to_string( (isTrackEntering)?1:0 ) <<
+      std::to_string( (isTrackExiting)?1:0  ) << 
+      std::to_string( (isTrackInside)?1:0   ) <<
+      std::to_string( (isTrackOut)?1:0      ) <<
+      std::to_string( (isTrackStop)?1:0     ) <<
+      " x=" << std::to_string(x) <<
+      " y=" << std::to_string(y) << 
+      " z=" << std::to_string(z) <<
+      endm;
+  }
 
   CalorimeterHit* hit = 0;
   
