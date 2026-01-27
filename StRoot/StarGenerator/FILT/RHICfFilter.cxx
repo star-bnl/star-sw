@@ -75,7 +75,7 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
     double e = part -> GetEnergy();
 
     // cut the laptons 
-    int pid = abs(pid);
+    pid = abs(pid);
     if(10 < pid && pid < 19){continue;}
 
     bool isInterestedParticle = IsInterestedParticle(pid);
