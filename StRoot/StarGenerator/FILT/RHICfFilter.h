@@ -18,8 +18,8 @@ public:
   void SetRHICfRunType(int type); // [0=TS, 1=TL, 2=TOP]
   void SetHitMultiplicity(int hit); // default == 1
 
-  int Init();
-  int Filter( StarGenEvent *event = 0 );
+  Int_t Init() override;
+  Int_t Filter( StarGenEvent *event = 0 ) override;
 
 private:
   int InitRHICfGeometry();

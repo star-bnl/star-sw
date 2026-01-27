@@ -44,13 +44,13 @@ void RHICfFilter::SetHitMultiplicity(int hit)
   }
 }
 
-int RHICfFilter::Init()
+Int_t RHICfFilter::Init()
 {
   if (!InitRHICfGeometry()){return kStErr;}
   return kStOk;
 }
 
-int RHICfFilter::Filter( StarGenEvent *_event ) 
+Int_t RHICfFilter::Filter( StarGenEvent *_event ) 
 {
   // Get a reference to the current event
   StarGenEvent& event = (_event)? *_event : *mEvent;
