@@ -46,7 +46,7 @@ void RHICfFilter::SetHitMultiplicity(int hit)
 
 int RHICfFilter::Init()
 {
-  if(!InitRHICfGeometry()){return kStErr;}
+  if (!InitRHICfGeometry()){return kStErr;}
   return kStOk;
 }
 
