@@ -1,5 +1,4 @@
 #include "StRHICfSimGenerator.h"
-ClassImp(StRHICfSimGenerator);
 
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "TParticlePDG.h"
