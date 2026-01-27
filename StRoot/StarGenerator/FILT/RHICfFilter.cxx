@@ -178,7 +178,7 @@ int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px
   return type;
 } 
 
-bool RHICfFilter::isInterestedParticle(int pid)
+bool RHICfFilter::IsInterestedParticle(int pid)
 {
   // only listed for final state particles
   int pdg = abs(pid);
