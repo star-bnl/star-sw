@@ -108,7 +108,7 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
 //_____________________________________________________________________________________________
 StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed(name,title){ }
 //_____________________________________________________________________________________________
-StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits() { }
+StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title, bool local ) : StHitCollection(name,title), mHits(),mLocal(local) { }
 //_____________________________________________________________________________________________
 StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
 //_____________________________________________________________________________________________
@@ -138,6 +138,26 @@ void StTrackerHitCollection::ProcessHits() {
   double x, y, z, px, py, pz, etot;
   mc->TrackPosition( x, y, z );
   mc->TrackMomentum( px, py, pz, etot ); 
+  if ( mLocal ) {
+
+    //    LOG_INFO << "Transform to local coordinates" << endm;
+    //    LOG_INFO << "  initial: " << x << " " << y << " " << z << endm;
+
+    double ptot = TMath::Sqrt( px*px + py*py + pz*pz );
+
+    double xg[] = { x, y, z };
+    double xl[] = { 0, 0, 0 };
+    double cg[] = { px/ptot, py/ptot, pz/ptot };
+    double cl[] = { 0, 0, 0 };
+
+    mc->Gmtod( xg, xl, 1 );
+    mc->Gmtod( cg, cl, 2 );
+
+    x=xl[0]; y=xl[1]; z=xl[2];
+    px=cl[0]*ptot; py=cl[1]*ptot; pz=cl[2]*ptot;
+    //    LOG_INFO << "    final: " << x << " " << y << " " << z << endm;
+
+  }
 
   TVirtualMCStack* stack = (TVirtualMCStack *)mc->GetStack();
   
@@ -221,9 +241,21 @@ void StTrackerHitCollection::ProcessHits() {
 
 
     // Score entrance momentum and 
+#if 0
     mc->TrackMomentum( hit->momentum_in[0], hit->momentum_in[1],  hit->momentum_in[2],  hit->momentum_in[3] ); 
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );
     hit->position_in[3] = mc->TrackTime();
+#endif
+
+    hit->position_in[0] = x;
+    hit->position_in[1] = y;
+    hit->position_in[2] = z;
+    hit->position_in[3] = mc->TrackTime();
+
+    hit->momentum_in[0] = px;
+    hit->momentum_in[1] = py;
+    hit->momentum_in[2] = pz;
+    hit->momentum_in[3] = etot; //mc->TrackTime();
  
   } 
   
@@ -238,9 +270,22 @@ void StTrackerHitCollection::ProcessHits() {
   hit -> nsteps += 1; 
 
   // For all other tracking states, update the exit momentum and position 
+#if 0
   mc->TrackMomentum( hit->momentum_out[0], hit->momentum_out[1],  hit->momentum_out[2],  hit->momentum_out[3] ); 
   mc->TrackPosition( hit->position_out[0], hit->position_out[1],  hit->position_out[2] );
   hit->position_out[3] = mc->TrackTime();
+#endif
+
+  hit->position_out[0] = x;
+  hit->position_out[1] = y;
+  hit->position_out[2] = z;
+  hit->position_out[3] = mc->TrackTime();
+  
+  hit->momentum_out[0] = px;
+  hit->momentum_out[1] = py;
+  hit->momentum_out[2] = pz;
+  hit->momentum_out[3] = etot; //mc->TrackTime();
+
 
   // Increment the energy loss and step sums
   hit -> de += mc->Edep();

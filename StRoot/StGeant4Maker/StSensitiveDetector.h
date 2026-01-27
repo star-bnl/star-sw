@@ -118,7 +118,7 @@ public:
 
   StHitCollection* hits(){ return mCollection; } 
 
-  enum class DetectorType { kUninitialized, kCalorimeter, kTracker };
+  enum class DetectorType { kUninitialized, kCalorimeter, kTracker, kTrackerLocal };
 
   DetectorType detectorType();
 

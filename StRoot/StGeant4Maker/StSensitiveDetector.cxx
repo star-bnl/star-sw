@@ -43,6 +43,9 @@ void StSensitiveDetector::Initialize(){
 }
 //____________________________________________________________________________________________
 void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
+
+  LOG_INFO << "AddVolume: " << volume->GetName() << endm;
+
   if ( 0 == mVolumes.size() ) {
     mAgMLInfo = getExtension(volume);
 
@@ -52,13 +55,19 @@ void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
     if ( DetectorType::kTracker == detectorType() ) {
       mCollection = new StTrackerHitCollection(cname.Data(),ctitle.Data());
       mCollection->SetUserStack(mUserStack);
-      LOG_DEBUG << "Setting tracker collection" << endm;
+      LOG_INFO << "Setting tracker collection " << cname.Data() << " " << ctitle.Data() << endm;
+    }
+    if ( DetectorType::kTrackerLocal == detectorType() ) {
+      mCollection = new StTrackerHitCollection(cname.Data(),ctitle.Data(),true);
+      mCollection->SetUserStack(mUserStack);
+      LOG_INFO << "Setting tracker collection " << cname.Data() << " " << ctitle.Data() << endm;
     }
     if ( DetectorType::kCalorimeter == detectorType() ) {
       mCollection = new StCalorimeterHitCollection(cname.Data(),ctitle.Data());
       mCollection->SetUserStack(mUserStack);
-      LOG_DEBUG << "Setting calorimeter collection" << endm;
+      LOG_INFO << "Setting calorimeter collection" << cname.Data() << " " << ctitle.Data() << endm;
     }
+    
 
   }
 
@@ -106,6 +115,9 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
   }
   else if ( module.Contains("fpd") ) { // FPDM 
     return DetectorType::kCalorimeter;
+  }
+  else if ( module.Contains("tof") ) { // BTOF ETOF
+    return DetectorType::kTrackerLocal;    
   }
   else {
     return DetectorType::kTracker;    

@@ -57,7 +57,7 @@ protected:
 class StTrackerHitCollection : public StHitCollection {
 
 public:
-  StTrackerHitCollection( const char* name, const char* title );
+  StTrackerHitCollection( const char* name, const char* title, bool local=false );
  ~StTrackerHitCollection() { /* nada */ };
 
   virtual void Initialize();
@@ -73,6 +73,8 @@ private:
 protected:
 
   std::vector<TrackerHit*> mHits;
+
+  bool mLocal;
 
   ClassDef(StTrackerHitCollection,0);
 
