@@ -78,10 +78,10 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
     int pid = abs(pid);
     if(10 < pid && pid < 19){continue;}
 
-    bool isNeutral = IsNeutralParticle(pid);
+    bool isInterestedParticle = IsInterestedParticle(pid);
     
     // cut the final state charged particle generated Z-position before end of DX magnet
-    if(!isNeutral && posZ < 1500. && pz > 0){continue;}
+    if(!isInterestedParticle && posZ < 1500. && pz > 0){continue;}
 
     int hit = GetRHICfGeoHit(posX, posY, posZ, px, py, pz, e);
     if(hit < 0){continue;}
@@ -178,20 +178,17 @@ int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px
   return type;
 } 
 
-bool RHICfFilter::IsNeutralParticle(int pid)
+bool RHICfFilter::isInterestedParticle(int pid)
 {
   // only listed for final state particles
-  int pdg = TMath::Abs(pid);
+  int pdg = abs(pid);
   switch(pdg)
   {
-    case 2212: return false; // p
-    case 11  : return false; // e
-    case 321 : return false; // charged K
-    case 211 : return false; // charged pi
     case 2112: return true; // n
     case 130 : return true; // K0_L
     case 22  : return true; // gamma
 
-    default  : return false;
+    default  : return false; // other charged and uninterested particles
   }
+  return false;
 }

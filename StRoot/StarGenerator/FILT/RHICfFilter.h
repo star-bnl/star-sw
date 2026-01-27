@@ -25,7 +25,7 @@ private:
   int InitRHICfGeometry();
   int GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e);
 
-  bool IsNeutralParticle(int pid); 
+  bool IsInterestedParticle(int pid); 
 
   int mRHICfRunType; // [0=TL, 1=TS, 2=TOP]
   int mHitMultiplicity;
