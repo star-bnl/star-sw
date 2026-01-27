@@ -1,9 +1,6 @@
 #ifndef __StRHICfSimGenerator_h__
 #define __StRHICfSimGenerator_h__
 
-#include <fstream>
-#include <string>
-
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"

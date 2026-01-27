@@ -1,11 +1,12 @@
 #include "StRHICfSimGenerator.h"
 
-#include "StarGenerator/UTIL/StarParticleData.h"
 #include "TParticlePDG.h"
 
+#include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h" 
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenPPEvent.h"
+
 
 StRHICfSimGenerator::StRHICfSimGenerator(const char *name) : StarGenerator(name)
 {
