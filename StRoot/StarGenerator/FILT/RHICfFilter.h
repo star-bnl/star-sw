@@ -13,7 +13,7 @@ class RHICfFilter : public StarFilterMaker
 {
 public:
   RHICfFilter( const char* name = "rhicfFilter" );
-  virtual ~RHICfFilter();
+  ~RHICfFilter();
 
   void SetRHICfRunType(int type); // [0=TS, 1=TL, 2=TOP]
   void SetHitMultiplicity(int hit); // default == 1
