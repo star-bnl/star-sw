@@ -15,7 +15,7 @@ public:
   RHICfFilter( const char* name = "rhicfFilter" );
   ~RHICfFilter();
 
-  void SetRHICfRunType(int type); // [0=TS, 1=TL, 2=TOP]
+  void SetRHICfRunType(int type); // [0=TL, 1=TS, 2=TOP]
   void SetHitMultiplicity(int hit); // default == 1
 
   Int_t Init() override;
