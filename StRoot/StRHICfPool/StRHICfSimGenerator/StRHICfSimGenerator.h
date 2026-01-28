@@ -39,7 +39,6 @@ class StRHICfSimGenerator : public StarGenerator
         TFile* mGenFile;
         TTree* mGenRunTree;
         TTree* mGenTree;
-        Int_t mEventIdx;
         Int_t mSetEventNumber;
         Int_t mTotalEventNumber;
 

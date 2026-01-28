@@ -13,7 +13,6 @@ StRHICfSimGenerator::StRHICfSimGenerator(const char *name) : StarGenerator(name)
     mFileName = "";
     mSetEventNumber = -1;
     mTotalEventNumber = 0;
-    mEventIdx = 0;
 
     SetBlue("proton");
     SetYell("proton");  
@@ -39,14 +38,15 @@ int StRHICfSimGenerator::Init()
 
 int StRHICfSimGenerator::Generate()
 { 
-    // int eventNum = mEvent -> GetEventNumber();
-    mGenTree -> GetEntry(mEventIdx);
+    int eventNum = mEvent -> GetEventNumber();
+    if(mTotalEventNumber <= eventNum){return kStEOF;}
+    mGenTree -> GetEntry(eventNum);
 
     FillPP( mEvent );
 
     mNumberOfParticles = mParticleArr -> GetEntries();
 
-    LOG_INFO << "StRHICfSimGenerator::Generate() -- event: " << mEventIdx << ", number of particles: " << mNumberOfParticles << endl;
+    LOG_INFO << "StRHICfSimGenerator::Generate() -- event: " << eventNum << ", number of particles: " << mNumberOfParticles << endl;
 
     for(int idx=0; idx < mNumberOfParticles; idx++){
         mParticle = (TParticle*)mParticleArr -> At(idx);
@@ -68,8 +68,6 @@ int StRHICfSimGenerator::Generate()
 
         mEvent -> AddParticle( stat, id, mother1, mother2, daughter1, daughter2, px, py, pz, energy, mass, vx, vy, vz, vt );
     }
-
-    mEventIdx++;
     return kStOK;
 }
 
