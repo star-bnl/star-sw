@@ -31,10 +31,6 @@ private:
   int mHitMultiplicity;
 
   TH2Poly* mRHICfPoly; // only west
-  double mRHICfTowerBoundary[2][4][2]; // [TS, TL][bound square][x, y]
-  double mRHICfTowerCenterPos[2]; // [TS, TL] y pos
-
-  double mRHICfDetZ;// = 1780.; // [cm]
 
   ClassDef(RHICfFilter,0);
 };

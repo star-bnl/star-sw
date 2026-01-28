@@ -8,9 +8,7 @@ RHICfFilter::RHICfFilter( const char* name )
 : StarFilterMaker(name), 
   mRHICfRunType(-1),
   mHitMultiplicity(1),
-  mRHICfPoly(nullptr),
-  mRHICfTowerBoundary{},
-  mRHICfTowerCenterPos{}
+  mRHICfPoly(nullptr)
 {
 }
 
@@ -62,7 +60,7 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
   for ( int ipart=1; ipart<npart; ++ipart ){ // skip header
     part = event[ipart];
 
-    if (TMath::Abs(part->GetId()) < 10){continue;}
+    if (abs(part->GetId()) < 10){continue;}
     if(part -> GetStatus() != StarGenParticle::kFinal){continue;}
 
     int pid = part -> GetId();
@@ -74,14 +72,16 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
     double pz = part -> GetPz();
     double e = part -> GetEnergy();
 
-    // cut the laptons 
+    // Particle selections
     pid = abs(pid);
-    if(10 < pid && pid < 19){continue;}
+    if( 11 < pid && pid < 19 ){continue;} // lapton cut (except electron)
+    if ( e  < 1. ){continue;} // energy cut 1 GeV
+    if ( pz <= 0. ){continue;} // opposite side cut
 
     bool isInterestedParticle = IsInterestedParticle(pid);
     
-    // cut the final state charged particle generated Z-position before end of DX magnet
-    if(!isInterestedParticle && posZ < 1500. && pz > 0){continue;}
+    // cut the final state charged particle generated Z-position before DX magnet
+    if( !isInterestedParticle && posZ < 1500. ){continue;}
 
     int hit = GetRHICfGeoHit(posX, posY, posZ, px, py, pz, e);
     if(hit < 0){continue;}
@@ -112,26 +112,29 @@ int RHICfFilter::InitRHICfGeometry()
   if(mRHICfRunType == 1){detBeamCenter = 0.;} // TS
   if(mRHICfRunType == 2){detBeamCenter = 2.16;} // TOP
 
-  mRHICfTowerBoundary[0][0][0] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  mRHICfTowerBoundary[0][0][1] = 0.;
-  mRHICfTowerBoundary[0][1][0] = 0.; 
-  mRHICfTowerBoundary[0][1][1] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  mRHICfTowerBoundary[0][2][0] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  mRHICfTowerBoundary[0][2][1] = 0.; 
-  mRHICfTowerBoundary[0][3][0] = 0.; 
-  mRHICfTowerBoundary[0][3][1] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
+  double towerBoundary[2][4][2]; // [TS, TL][bound square][x, y]
+  double towerCenterPos[2]; // [TS, TL] y pos
 
-  mRHICfTowerBoundary[1][0][0] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  mRHICfTowerBoundary[1][0][1] = 0.;
-  mRHICfTowerBoundary[1][1][0] = 0.;
-  mRHICfTowerBoundary[1][1][1] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  mRHICfTowerBoundary[1][2][0] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  mRHICfTowerBoundary[1][2][1] = 0.;
-  mRHICfTowerBoundary[1][3][0] = 0.;
-  mRHICfTowerBoundary[1][3][1] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
+  towerBoundary[0][0][0] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
+  towerBoundary[0][0][1] = 0.;
+  towerBoundary[0][1][0] = 0.; 
+  towerBoundary[0][1][1] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
+  towerBoundary[0][2][0] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
+  towerBoundary[0][2][1] = 0.; 
+  towerBoundary[0][3][0] = 0.; 
+  towerBoundary[0][3][1] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
+
+  towerBoundary[1][0][0] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
+  towerBoundary[1][0][1] = 0.;
+  towerBoundary[1][1][0] = 0.;
+  towerBoundary[1][1][1] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
+  towerBoundary[1][2][0] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
+  towerBoundary[1][2][1] = 0.;
+  towerBoundary[1][3][0] = 0.;
+  towerBoundary[1][3][1] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
   
-  mRHICfTowerCenterPos[0] = detBeamCenter;
-  mRHICfTowerCenterPos[1] = distTStoTL + detBeamCenter;
+  towerCenterPos[0] = detBeamCenter;
+  towerCenterPos[1] = distTStoTL + detBeamCenter;
 
   mRHICfPoly = new TH2Poly();
   mRHICfPoly -> SetName("RHICfPoly");
@@ -142,8 +145,8 @@ int RHICfFilter::InitRHICfGeometry()
 
   for(int t=0; t<2; t++){
     for(int i=0; i<4; i++){
-      double xPos = mRHICfTowerBoundary[t][i][0];
-      double yPos = mRHICfTowerCenterPos[t] + mRHICfTowerBoundary[t][i][1];
+      double xPos = towerBoundary[t][i][0];
+      double yPos = towerCenterPos[t] + towerBoundary[t][i][1];
       x[i] = xPos;
       y[i] = yPos;
     }
@@ -155,18 +158,13 @@ int RHICfFilter::InitRHICfGeometry()
 
 int RHICfFilter::GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e)
 {
-  if ( e  < 1. ) return -1; // energy cut 1 GeV
-  if ( pz < 0. ) return -1; // opposite side cut
-  if ( pz == 0 ) return -1; // ... to avoid possible divide by zero
-  
-
   double momMag = sqrt(px*px + py*py + pz*pz);    assert(momMag>0.0);
   double unitVecX = px/momMag;
   double unitVecY = py/momMag;
   double unitVecZ = pz/momMag;                   
 
-
-  double z = mRHICfDetZ - posZ;
+  double detPosZ = 1780.; // [cm]
+  double z = detPosZ - posZ;
   if(z < 0.){return -1;} // create z-position cut
 
   double x = z * (unitVecX/unitVecZ) + posX;
