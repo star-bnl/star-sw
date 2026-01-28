@@ -1837,7 +1837,8 @@ Bfc_st BFC[] = { // standard chains
   {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
                                                                                     "ETOF QA maker",kFALSE},
 
-  {"ETofA",  "",    "","etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain options for data",  kFALSE},
+  {"ETofA",      "",     "",          "etofdat,ETofCalib,etofhit,ETofMatch",  "",  "",  
+                                                                "... ETOF chain options for data",  kFALSE},
 
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
