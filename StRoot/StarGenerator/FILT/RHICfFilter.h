@@ -18,9 +18,9 @@ public:
   void SetRHICfRunType(int type); // [0=TL, 1=TS, 2=TOP]
   void SetHitMultiplicity(int hit); // default == 1
 
-  Int_t Init() override;
-  Int_t Filter( StarGenEvent *event = 0 ) override;
-
+  virtual Int_t Init();
+  virtual Int_t Filter( StarGenEvent *event = 0 );
+  
 private:
   int InitRHICfGeometry();
   int GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e);
