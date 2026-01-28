@@ -74,7 +74,7 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
 
     // Particle selections
     pid = abs(pid);
-    if( 11 < pid && pid < 19 ){continue;} // lapton cut (except electron)
+    if( 11 < pid && pid < 19 ){continue;} // lepton cut (except electron)
     if ( e  < 1. ){continue;} // energy cut 1 GeV
     if ( pz <= 0. ){continue;} // opposite side cut
 
