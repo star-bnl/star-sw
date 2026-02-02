@@ -8,12 +8,10 @@
 #include "StarGenerator/EVENT/StarGenPPEvent.h"
 
 
-StRHICfSimGenerator::StRHICfSimGenerator(const char *name) : StarGenerator(name)
+StRHICfSimGenerator::StRHICfSimGenerator(const char *name) 
+: StarGenerator(name), mFileName(""), mSetEventNumber(-1), mTotalEventNumber(0),
+  mParticleData(&StarParticleData::instance())
 {
-    mFileName = "";
-    mSetEventNumber = -1;
-    mTotalEventNumber = 0;
-
     SetBlue("proton");
     SetYell("proton");  
 }
@@ -65,6 +63,9 @@ int StRHICfSimGenerator::Generate()
         double vy     = mParticle -> Vy(); // [mm]
         double vz     = mParticle -> Vz(); // [mm]
         double vt     = mParticle -> T();  // [mm/c]
+
+        TParticlePDG *pdg = mParticleData -> GetParticle(id);
+        if(!pdg){continue;}
 
         mEvent -> AddParticle( stat, id, mother1, mother2, daughter1, daughter2, px, py, pz, energy, mass, vx, vy, vz, vt );
     }

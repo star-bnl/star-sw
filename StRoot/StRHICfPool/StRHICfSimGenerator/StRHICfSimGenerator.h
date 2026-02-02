@@ -10,6 +10,7 @@
 #include "StarGenerator/BASE/StarGenerator.h"
 #include "StRHICfUtil/StRHICfFunction.h"
 
+class StarParticleData;
 class StarGenEvent;
 class StarGenPPEvent;
 
@@ -45,6 +46,7 @@ class StRHICfSimGenerator : public StarGenerator
         Int_t mProcessID;
         TClonesArray* mParticleArr;
         TParticle* mParticle;
+        StarParticleData *mParticleData; 
 
         ClassDef(StRHICfSimGenerator,0);
 };
