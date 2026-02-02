@@ -696,7 +696,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
         }
         @srcL = @src;
 
-        #print "DEBUG ".join(" ",@srcL)."\n";
+    } elsif ( $pkg =~ m/^UrQMD4_0_0/ and $Dir =~ m/StarGenerator/ ) {
+
+#	$FPPFLAGS .= " -mcmodel=medium -I StRoot/StarGenerator/UrQMD4_0_0 ";
+	if ($USE_64BITS) {
+	    $FPPFLAGS .= " -mcmodel=medium -I StRoot/StarGenerator/UrQMD4_0_0 ";
+	} else {
+	    $FPPFLAGS .= " -I StRoot/StarGenerator/UrQMD4_0_0 ";
+	}
 
     } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
 	$CPPPATH = "#" . $Dir;
