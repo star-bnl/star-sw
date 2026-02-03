@@ -442,6 +442,108 @@ void setupProductionJobs() {
 
     job.recopts="P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker btofsim  vpdsim emcsim eefs eess nodefault";
 
+
+    StarSimOpt_t job_alpha = job;
+    job_alpha.name = "rcf25000:y2021a:alphas:G4:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_alpha.genIAttr = {
+      { "pid",    47 },
+      { "ntrack",  1 }
+    };    addjob(job_alpha);
+
+
+    StarSimOpt_t job_mu = job;
+    job_mu.name = "rcf25000:y2021a:muons:G4:kinematics:mult10:eta2-5:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack", 10 }
+    };    addjob(job_mu);
+
+    job_mu.name = "rcf25000:y2021a:muons:G4:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack",  1 }
+    };    addjob(job_mu);
+
+    StarSimOpt_t job_n = job;
+    job_n.name = "rcf25000:y2021a:neutron:G4:kinematics:mult10:eta2-5:pt9-11:v001";
+    job_n.genIAttr = {
+      { "pid",    13 },
+      { "ntrack", 10 }
+    };    addjob(job_n);
+
+    job_n.name = "rcf25000:y2021a:neutron:G4:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_n.genIAttr = {
+      { "pid",    13 },
+      { "ntrack",  1 }
+    };    addjob(job_n);
+
+
+
+  };
+
+
+  { // 2021 Gun Alphas eta 2.0 to 5.5 
+    auto& job=addjob("rcf25000:y2021a:alphas:G3:kinematics:mult10:eta2-5:pt9-11:v001");
+    job.genopts   = "y2021a agml  stargen stargen:mk stargen stargen:stubs kinematics:mk noinput nooutput nodefault";
+    job.generator = "StarKine";
+    job.genDAttr = {
+      { "ptlow", 9.0 },
+      { "pthigh", 11.0 },
+      { "etalow", 2.0 },
+      { "etahigh", 5.0 }
+    };
+    job.genIAttr = {
+      { "pid",    47 },
+      { "ntrack", 10 }
+    };
+    job.genSAttr = {
+      { "mode", "FlatPT" }
+    };
+    job.primDAttr = {
+      { "XVERTEX",  0.1 },   { "XSIGMA", 0.01 },
+      { "YVERTEX", -0.1 },   { "YSIGMA", 0.01 },
+      { "ZVERTEX",  0.0 },   { "ZSIGMA", 15.0 }
+    };
+    //2021-05-19 06:24:57
+    job.timestamps={{"sdt20210519.063000"}};
+    job.runnumbers={22139005};
+
+    job.simopts="y2021a agml stargen:mk genreader:mk simu g4star:mk noinput geant4out nodefault";
+    job.simSAttr = {
+      { "application:engine", "G3" }
+    };
+
+    job.recopts="P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker btofsim  vpdsim emcsim eefs eess nodefault";
+
+
+    StarSimOpt_t job_alpha = job;
+    job_alpha.name = "rcf25000:y2021a:alphas:G3:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_alpha.genIAttr = {
+      { "pid",    47 },
+      { "ntrack",  1 }
+    };    addjob(job_alpha);
+
+    StarSimOpt_t job_mu = job;
+    job_mu.name = "rcf25000:y2021a:muons:G3:kinematics:mult10:eta2-5:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack", 10 }
+    };  addjob(job_mu);
+
+    job_mu.name = "rcf25000:y2021a:muons:G3:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack",  1 }
+    };  addjob(job_mu);
+
+    StarSimOpt_t job_n = job;
+    job_n.name = "rcf25000:y2021a:neutron:G3:kinematics:mult1:eta2-5:pt9-11:v001";
+    job_n.genIAttr = {
+      { "pid",    13 },
+      { "ntrack",  1 }
+    };  addjob(job_n);
+
+
   };
 
 
