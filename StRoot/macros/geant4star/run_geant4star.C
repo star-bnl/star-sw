@@ -116,6 +116,8 @@ void run_geant4star( int nevents=10,
       "G4UI:PREINIT", 
       "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
       "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+      "/process/eLoss/ls"                       ";"
+      "/process/em/ls"                          ";"
   );
   g4star->SetAttr(
       "G4UI:INIT",
@@ -142,6 +144,11 @@ void run_geant4star( int nevents=10,
   }  
 
   g4star->SetAttr("runnumber", job.runnumbers[0] );
+
+
+  g4star->SetAttr("calorimeters:hit:verbose",111);
+  g4star->SetAttr("trackers:hit:verbose",111);
+  g4star->SetAttr("stepping:verbose",111);
 
 
   top->ls(5);
