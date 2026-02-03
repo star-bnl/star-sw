@@ -110,18 +110,18 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
   TString module = mAgMLInfo->GetModuleName();
   module.ToLower();
 
+  StSensitiveDetector::DetectorType result = DetectorType::kTracker;    
   if ( module.Contains("cal") ) {  // CALB ECAL WCAL HCAL
-    return DetectorType::kCalorimeter;
+    result =  DetectorType::kCalorimeter;
   }
   else if ( module.Contains("fpd") ) { // FPDM 
-    return DetectorType::kCalorimeter;
+    result = DetectorType::kCalorimeter;
   }
   else if ( module.Contains("tof") ) { // BTOF ETOF
-    return DetectorType::kTrackerLocal;    
+    result = DetectorType::kTrackerLocal;    
   }
-  else {
-    return DetectorType::kTracker;    
-  }
+
+  return result;
 
 }
 //____________________________________________________________________________________________
