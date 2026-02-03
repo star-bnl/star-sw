@@ -2,6 +2,7 @@
 setenv GROUP_DIR /star/u/jeromel/work/STAR/group
 
 # Setup 64 bit w/ spack overlay
+setup debug
 setup 64b
 starver SL24x config/v0.3.0-rhel7-root6.24.06
 
