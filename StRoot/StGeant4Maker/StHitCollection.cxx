@@ -15,7 +15,9 @@
 
 #include <cassert>
 
-int verbose = 0;
+#include "StMaker.h"
+
+int verbose = 1;
 
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {
@@ -159,6 +161,8 @@ void StTrackerHitCollection::ProcessHits() {
 
   }
 
+  double step = mc->TrackStep();
+
   TVirtualMCStack* stack = (TVirtualMCStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
@@ -178,23 +182,7 @@ void StTrackerHitCollection::ProcessHits() {
   bool isTrackInside   = mc->IsTrackInside();
   bool isTrackOut      = mc->IsTrackOut();
   bool isTrackStop     = mc->IsTrackStop();
-
-  if ( verbose > 0 ) {
-    LOG_INFO << "SCORE: truth=" << truth << " current tn=" << userstack->GetCurrentTrackNumber() << 
-      " " << current->GetName() << 
-      " state= " <<
-      std::to_string( (isNewTrack)?1:0      ) << 
-      std::to_string( (isTrackEntering)?1:0 ) <<
-      std::to_string( (isTrackExiting)?1:0  ) << 
-      std::to_string( (isTrackInside)?1:0   ) <<
-      std::to_string( (isTrackOut)?1:0      ) <<
-      std::to_string( (isTrackStop)?1:0     ) <<
-      " x=" << std::to_string(x) <<
-      " y=" << std::to_string(y) << 
-      " z=" << std::to_string(z) <<
-      endm;
-  }
-
+  
   TrackerHit* hit = 0;
   
   // Track has entered this volume, create a new hit
@@ -301,7 +289,30 @@ void StTrackerHitCollection::ProcessHits() {
   if      ( mass <= 0 ) hit->lgam = -999;
   else if ( Ekin <= 0 ) hit->lgam = -998;
   else                  hit->lgam = TMath::Log10( Ekin/mass );
-  
+
+  verbose = StMaker::GetTopChain()->GetMaker("geant4star")->IAttr("trackers:hit:verbose");
+  if ( verbose > 0 ) {
+    LOG_INFO << "SCORE [T]: truth=" << truth 
+	     << " hit=" << hit 
+	     << " current tn=" 
+	     << userstack->GetCurrentTrackNumber() << " "
+	     << current->GetName() 
+	     << " state= " 
+	     << std::to_string( (isNewTrack)?1:0      ) 
+	     << std::to_string( (isTrackEntering)?1:0 ) 
+	     << std::to_string( (isTrackExiting)?1:0  ) 
+	     << std::to_string( (isTrackInside)?1:0   ) 
+	     << std::to_string( (isTrackOut)?1:0      ) 
+	     << std::to_string( (isTrackStop)?1:0     ) 
+	     << " x=" << std::to_string(x) 
+	     << " y=" << std::to_string(y) 
+	     << " z=" << std::to_string(z) 
+	     << " px=" << std::to_string(px) 
+	     << " py=" << std::to_string(py) 
+	     << " pz=" << std::to_string(pz) 
+	     << " step=" << step 
+	     << endm;
+  }
 
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = getExtension( current ); 
@@ -351,6 +362,8 @@ void StCalorimeterHitCollection::ProcessHits() {
   mc->TrackPosition( x, y, z );
   mc->TrackMomentum( px, py, pz, etot ); 
 
+  double step = mc->TrackStep();
+
   TVirtualMCStack* stack = (TVirtualMCStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
@@ -370,22 +383,6 @@ void StCalorimeterHitCollection::ProcessHits() {
   bool isTrackInside   = mc->IsTrackInside();
   bool isTrackOut      = mc->IsTrackOut();
   bool isTrackStop     = mc->IsTrackStop();
-
-  if ( verbose > 0 ) {
-    LOG_INFO << "SCORE: truth=" << truth << " current tn=" << userstack->GetCurrentTrackNumber() << 
-      " " << current->GetName() << 
-      " state= " <<
-      std::to_string( (isNewTrack)?1:0      ) << 
-      std::to_string( (isTrackEntering)?1:0 ) <<
-      std::to_string( (isTrackExiting)?1:0  ) << 
-      std::to_string( (isTrackInside)?1:0   ) <<
-      std::to_string( (isTrackOut)?1:0      ) <<
-      std::to_string( (isTrackStop)?1:0     ) <<
-      " x=" << std::to_string(x) <<
-      " y=" << std::to_string(y) << 
-      " z=" << std::to_string(z) <<
-      endm;
-  }
 
   CalorimeterHit* hit = 0;
   
@@ -455,6 +452,24 @@ void StCalorimeterHitCollection::ProcessHits() {
 
   // Hit energy will be the total energy deposition corrected by Birk's law
   hit -> de =   mEsum * mBirk[0] / ( 1.0 + mBirk[1]*mEsum + mBirk[2]*mEsum*mEsum );
+
+  verbose = StMaker::GetTopChain()->GetMaker("geant4star")->IAttr("calorimeters:hit:verbose");
+  if ( verbose > 0 ) {
+    LOG_INFO << "SCORE [C]: truth=" << truth << " hit=" << hit << " current tn=" << userstack->GetCurrentTrackNumber() << 
+      " " << current->GetName() << 
+      " state= " <<
+      std::to_string( (isNewTrack)?1:0      ) << 
+      std::to_string( (isTrackEntering)?1:0 ) <<
+      std::to_string( (isTrackExiting)?1:0  ) << 
+      std::to_string( (isTrackInside)?1:0   ) <<
+      std::to_string( (isTrackOut)?1:0      ) <<
+      std::to_string( (isTrackStop)?1:0     ) <<
+      " x=" << std::to_string(x) <<
+      " y=" << std::to_string(y) << 
+      " z=" << std::to_string(z) <<
+      " step=" << step <<
+      endm;
+  }
 
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = getExtension( current ); 
