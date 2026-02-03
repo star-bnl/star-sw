@@ -1221,6 +1221,9 @@ int  StGeant4Maker::ConfigureGeometry() {
     if ( media[id]>0 ) continue; // skip if medium already encountered
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
+    
+    agmlExt->Print();
+
     media[id] = id;
    
     for ( auto kv : agmlExt->GetCuts() ) {
@@ -1683,14 +1686,18 @@ void StGeant4Maker::Stepping(){
     mc->TrackPosition( x, y, z );
     r = TMath::Sqrt( x*x + y*y );
     z = TMath::Abs(z);
+    int nsec  = mc->NSecondaries();
     if ( r >= vRmin && r<= vRmax && z >= vZmin && z<= vZmax ) {
-      LOG_INFO << "STEP: " << truth->idTruth() << " " 
+      LOG_INFO << "STEP: idtruth=" 
+	       << std::to_string( truth->idTruth()  )
+	       << " idstack=" << std::to_string( truth->idStack() )
 	       << " | x=" << x 
 	       <<   " y=" << y 
 	       <<   " z=" << z << " | "
 	       << state.c_str() 
 	       << extInfo.c_str()
 	       << " dE=" << mc->Edep()
+	       << " nsec=" << std::to_string(nsec)
 	       << endm;
 	;
 
