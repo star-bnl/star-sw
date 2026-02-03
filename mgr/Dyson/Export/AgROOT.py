@@ -1051,7 +1051,14 @@ class Setup( Handler ):
 
         #output = "active=true;\n"
         output  = "AgModule* _module = New();\n"
-        output += "if (_module) _module->ConstructGeometry();\n"
+        output += "if (_module) {\n"
+        try:
+            value = self.flags['simu']
+            output += "    _module->SetTrackingFlag(%s);\n"%value
+        except KeyError:
+            output += "    _module->SetTrackingFlag(1);\n"
+        output += "    _module->ConstructGeometry();\n"
+        output += "}\n"
 
         if self.topvolume:
             output += 'TGeoVolume* _top = gGeoManager->FindVolumeFast("%s");\n'%self.topvolume
