@@ -58,7 +58,7 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
     part = event[ipart];
 
     if (abs(part->GetId()) < 10){continue;}
-    if(part -> GetStatus() != StarGenParticle::kFinal){continue;}
+    if (part -> GetStatus() != StarGenParticle::kFinal){continue;}
 
     int pid = part -> GetId();
     double posX = part -> GetVx();
@@ -71,17 +71,17 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
 
     // Particle selections
     pid = abs(pid);
-    if( 11 < pid && pid < 19 ){continue;} // lepton cut (except electron)
+    if ( 11 < pid && pid < 19 ){continue;} // lepton cut (except electron)
     if ( e  < 1. ){continue;} // energy cut 1 GeV
     if ( pz <= 0. ){continue;} // opposite side cut
 
     bool isInterestedParticle = IsInterestedParticle(pid);
     
     // cut the final state charged particle generated Z-position before DX magnet
-    if( !isInterestedParticle && posZ < 1500. ){continue;}
+    if ( !isInterestedParticle && posZ < 1500. ){continue;}
 
     int hit = GetRHICfGeoHit(posX, posY, posZ, px, py, pz, e);
-    if(hit < 0){continue;}
+    if (hit < 0){continue;}
 
     hitTrackNum++;
   }
@@ -94,58 +94,29 @@ Int_t RHICfFilter::Filter( StarGenEvent *_event )
 
 int RHICfFilter::InitRHICfGeometry()
 {
-  double tsDetSize = 2.; // [cm]
-  double tlDetSize = 4.; // [cm]
-  double detBoundCut = 0.0; // [cm]
-  double distTStoTL = 4.74; // [cm]
-
-  double detBeamCenter = 0.; // [cm]
-
   if(mRHICfRunType == RHICfRunType::NON){
     LOG_WARN << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not set!!!" << endm;
     return kStErr;
   }
-  if(mRHICfRunType == RHICfRunType::TL){detBeamCenter = -4.74;} // TL
-  if(mRHICfRunType == RHICfRunType::TS){detBeamCenter = 0.;} // TS
-  if(mRHICfRunType == RHICfRunType::TOP){detBeamCenter = 2.16;} // TOP
 
-  double towerBoundary[2][4][2]; // [TS, TL][bound square][x, y]
-  double towerCenterPos[2]; // [TS, TL] y pos
-
-  towerBoundary[0][0][0] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  towerBoundary[0][0][1] = 0.;
-  towerBoundary[0][1][0] = 0.; 
-  towerBoundary[0][1][1] = sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  towerBoundary[0][2][0] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-  towerBoundary[0][2][1] = 0.; 
-  towerBoundary[0][3][0] = 0.; 
-  towerBoundary[0][3][1] = -1.*sqrt(2)*((tsDetSize - detBoundCut*2.)/2.); 
-
-  towerBoundary[1][0][0] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  towerBoundary[1][0][1] = 0.;
-  towerBoundary[1][1][0] = 0.;
-  towerBoundary[1][1][1] = sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  towerBoundary[1][2][0] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  towerBoundary[1][2][1] = 0.;
-  towerBoundary[1][3][0] = 0.;
-  towerBoundary[1][3][1] = -1.*sqrt(2)*((tlDetSize - detBoundCut*2.)/2.);
-  
-  towerCenterPos[0] = detBeamCenter;
-  towerCenterPos[1] = distTStoTL + detBeamCenter;
+  double distTowersCenter = 4.74; // [cm], Distance between the center of small and large tower
+  double towerPosYByRun = 0.; // [cm], RHICf detector y-axis shift position by run types with respect to global coordinate
+  if(mRHICfRunType == RHICfRunType::TL){towerPosYByRun = -4.74;}
+  if(mRHICfRunType == RHICfRunType::TS){towerPosYByRun = 0.;}
+  if(mRHICfRunType == RHICfRunType::TOP){towerPosYByRun = 2.16;}
 
   mRHICfPoly = new TH2Poly();
   mRHICfPoly -> SetName("RHICfPoly");
   mRHICfPoly -> SetStats(0);
 
-  double x[4];
-  double y[4];
+  double x[4], y[4];
+  for(int tower=0; tower<2; tower++){
+    double towerGlobalPosY = towerPosYByRun;
+    if(tower == RHICfTower::LargeTower){towerGlobalPosY += distTowersCenter;}
 
-  for(int t=0; t<2; t++){
-    for(int i=0; i<4; i++){
-      double xPos = towerBoundary[t][i][0];
-      double yPos = towerCenterPos[t] + towerBoundary[t][i][1];
-      x[i] = xPos;
-      y[i] = yPos;
+    for(int boundary=0; boundary<4; boundary++){
+      x[boundary] = GetRHICfDetectorBoundary(tower, 0, boundary);
+      y[boundary] = towerGlobalPosY + GetRHICfDetectorBoundary(tower, 1, boundary);
     }
     mRHICfPoly -> AddBin(4, x, y);
   }
@@ -186,4 +157,30 @@ bool RHICfFilter::IsInterestedParticle(int pid)
     default  : return false; // other charged and uninterested particles
   }
   return false;
+}
+
+double RHICfFilter::GetRHICfDetectorBoundary(int towerIdx, int xyIdx, int boundaryIdx)
+{
+  const double SQRT2 = sqrt(2);
+  double detectorSize = 0.;
+  if(towerIdx == RHICfTower::SmallTower){detectorSize = 2.;} // [cm]
+  else if(towerIdx == RHICfTower::LargeTower){detectorSize = 4.;} // [cm]
+  else{return -999.;}
+
+  if(boundaryIdx < 0 || boundaryIdx > 3){return -999.;}
+  bool isEvenNumber = (boundaryIdx%2 == 0)? true : false;
+
+  double valueSign = (boundaryIdx < 2)? 1. : -1.;
+  double detectorBoundaryPoint = valueSign * SQRT2 * detectorSize/2.;
+
+  if(xyIdx == 0){ // x-axis
+    if(isEvenNumber){ return detectorBoundaryPoint; }// even number
+    else{ return 0.; }// odd number
+  }
+  else if(xyIdx == 1){ // y-axis
+    if(isEvenNumber){ return 0.; } // even number
+    else{ return detectorBoundaryPoint; }// odd number
+  }
+
+  return -999.;
 }

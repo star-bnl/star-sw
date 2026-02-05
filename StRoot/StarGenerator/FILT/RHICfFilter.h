@@ -26,6 +26,7 @@ private:
   int GetRHICfGeoHit(double posX, double posY, double posZ, double px, double py, double pz, double e);
 
   bool IsInterestedParticle(int pid); 
+  double GetRHICfDetectorBoundary(int towerIdx, int xyIdx, int boundaryIdx);
 
   int mRHICfRunType;
   int mHitMultiplicity;
@@ -38,6 +39,11 @@ private:
     TS = 1,
     TOP = 2,
     NON = -1
+  };
+  enum RHICfTower
+  {
+    SmallTower = 0,
+    LargeTower = 1
   };
 
   ClassDef(RHICfFilter,0);
