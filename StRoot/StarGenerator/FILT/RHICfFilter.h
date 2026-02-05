@@ -15,7 +15,7 @@ public:
   RHICfFilter( const char* name = "rhicfFilter" );
   ~RHICfFilter();
 
-  void SetRHICfRunType(int type); // [0=TL, 1=TS, 2=TOP]
+  void SetRHICfRunType(int type); 
   void SetHitMultiplicity(int hit); // default == 1
 
   virtual Int_t Init();
@@ -27,10 +27,18 @@ private:
 
   bool IsInterestedParticle(int pid); 
 
-  int mRHICfRunType; // [0=TL, 1=TS, 2=TOP]
+  int mRHICfRunType;
   int mHitMultiplicity;
 
   TH2Poly* mRHICfPoly; // only west
+
+  enum RHICfRunType
+  {
+    TL = 0,
+    TS = 1,
+    TOP = 2,
+    NON = -1
+  };
 
   ClassDef(RHICfFilter,0);
 };

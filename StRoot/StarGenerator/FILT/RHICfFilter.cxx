@@ -6,7 +6,7 @@
 
 RHICfFilter::RHICfFilter( const char* name ) 
 : StarFilterMaker(name), 
-  mRHICfRunType(-1),
+  mRHICfRunType(RHICfRunType::NON),
   mHitMultiplicity(1),
   mRHICfPoly(nullptr)
 {
@@ -20,7 +20,7 @@ RHICfFilter::~RHICfFilter()
 
 void RHICfFilter::SetRHICfRunType(int type)
 {
-  if (0 <= type && type <= 2) 
+  if (RHICfRunType::TL <= type && type <= RHICfRunType::TOP) 
     {
       mRHICfRunType = type;
     }
@@ -101,13 +101,13 @@ int RHICfFilter::InitRHICfGeometry()
 
   double detBeamCenter = 0.; // [cm]
 
-  if(mRHICfRunType < 0 || mRHICfRunType > 2){
+  if(mRHICfRunType == RHICfRunType::NON){
     LOG_WARN << "RHICfFilter::InitRHICfGeometry() warning!!! RHICf run type is not set!!!" << endm;
-    return 0;
+    return kStErr;
   }
-  if(mRHICfRunType == 0){detBeamCenter = -4.74;} // TL
-  if(mRHICfRunType == 1){detBeamCenter = 0.;} // TS
-  if(mRHICfRunType == 2){detBeamCenter = 2.16;} // TOP
+  if(mRHICfRunType == RHICfRunType::TL){detBeamCenter = -4.74;} // TL
+  if(mRHICfRunType == RHICfRunType::TS){detBeamCenter = 0.;} // TS
+  if(mRHICfRunType == RHICfRunType::TOP){detBeamCenter = 2.16;} // TOP
 
   double towerBoundary[2][4][2]; // [TS, TL][bound square][x, y]
   double towerCenterPos[2]; // [TS, TL] y pos
