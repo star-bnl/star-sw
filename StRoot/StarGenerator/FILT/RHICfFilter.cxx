@@ -14,11 +14,8 @@ RHICfFilter::RHICfFilter( const char* name )
 
 RHICfFilter::~RHICfFilter() 
 {
-  if ( mRHICfPoly )
-    {
-      delete mRHICfPoly;
-      mRHICfPoly = nullptr;
-    }
+  delete mRHICfPoly;
+  mRHICfPoly = nullptr;
 }
 
 void RHICfFilter::SetRHICfRunType(int type)
