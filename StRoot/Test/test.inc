@@ -1,0 +1,2 @@
+INTEGER i,j,k
+COMMON /TESTCOM/ i, j, k
