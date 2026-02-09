@@ -634,6 +634,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
         #print "DEBUG ".join(" ",@srcL)."\n";
 
+    } elsif ( $pkg =~ m/^UrQMD/ and $Dir =~ m/StarGenerator/ ){
+
+        $FCPATH   .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $F90PATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+
+	$FEXTEND = "-ffixed-line-length-72"
 
     } elsif ( $pkg =~ m/^HepMC/ and $Dir =~ m/StarGenerator/ ){
         # Append HepMC include path and define version
