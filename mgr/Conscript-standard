@@ -124,6 +124,14 @@ print "idlL = @idlL\n"   if $param::debug;
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
 
+# Initialize F90PATH with current directory for include files
+# Package-specific conditions below may override this
+if ($F90PATH) {
+    $F90PATH = "#" . $Dir . $main::PATH_SEPARATOR . $F90PATH;
+} else {
+    $F90PATH = "#" . $Dir;
+}
+
 if ($pkg eq "RTS") {
   if ($STAR_SYS =~ /^x86_darwin/) {}
   else {
