@@ -44,21 +44,26 @@ Both extensions are mapped to the `build::command::f90` builder in the cons syst
 
 To use Fortran 90 in your project:
 
-1. Create your Fortran 90 source files with `.f90` or `.F90` extensions
-2. Add them to your Conscript file as you would other source files
+1. Create your Fortran 90 source files with `.f90` or `.F90` extensions in your source directory
+2. The cons build system will automatically discover these files when scanning the directory
 3. The build system will automatically use the Fortran 90 compiler for these files
 
-Example:
-```perl
-# In your Conscript file
-my @src = qw(
-    mycode.cxx
-    myfortran.f
-    myfortran90.f90
-);
+**Note**: The build system uses the `find_sources` function to automatically discover source files. As of this update, the following Fortran file extensions are recognized:
+- `.f` - Fortran 77 fixed-form
+- `.F` - Fortran 77 fixed-form with preprocessing
+- `.f90` - Fortran 90 free-form
+- `.F90` - Fortran 90 free-form with preprocessing
 
-Library($env, 'MyLibrary', @src);
+Example directory structure:
 ```
+MyPackage/
+├── mycode.cxx
+├── myfortran.f        # Fortran 77
+├── myfortran90.f90    # Fortran 90
+└── preprocessed.F90   # Fortran 90 with preprocessing
+```
+
+The build system will automatically find all these files and compile them appropriately.
 
 ## Differences from Fortran 77
 
