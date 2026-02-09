@@ -189,7 +189,13 @@
 
     # Fortran 90 compiler settings (use same compiler as FC, typically gfortran)
     $F90           = $FC;
-    $F90FLAGS      = "$XMACHOPT -fno-second-underscore -fno-automatic -Wall -W -fPIC";
+    # F90FLAGS compatible with F77 flags but without -std=legacy (F77-specific)
+    if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
+        $F90FLAGS  = "$XMACHOPT -fd-lines-as-comments ";
+    } else {
+        $F90FLAGS  = "$XMACHOPT -fd-lines-as-code ";
+    }
+    $F90FLAGS .= " -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
     $F90DEBUG      = $FDEBUG;
     $F90PATH       = "";
     $EXTRA_F90PATH = "";

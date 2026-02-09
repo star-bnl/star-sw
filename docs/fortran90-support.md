@@ -25,11 +25,14 @@ The following build variables have been added to `ConsDefs.pm`:
 
 ### Default Compiler Flags
 
-The default F90FLAGS include:
+The default F90FLAGS are compatible with Fortran 77 flags and include:
+- `-fd-lines-as-comments` or `-fd-lines-as-code`: Handle debug lines (depending on NODEBUG setting)
 - `-fno-second-underscore`: Disable second underscore for symbol names
 - `-fno-automatic`: Variables are static by default
-- `-Wall -W`: Enable comprehensive warnings
+- `-Wall -W -Wsurprising`: Enable comprehensive warnings
 - `-fPIC`: Generate position-independent code for shared libraries
+
+Note: The `-std=legacy` flag used for Fortran 77 is intentionally excluded as it's F77-specific.
 
 ## File Extensions
 
