@@ -27,10 +27,9 @@ The following build variables have been added to `ConsDefs.pm`:
 
 The default F90FLAGS include:
 - `-fno-second-underscore`: Disable second underscore for symbol names
-- `-w`: Suppress warnings
 - `-fno-automatic`: Variables are static by default
 - `-Wall -W`: Enable comprehensive warnings
-- `-fPIC`: Generate position-independent code
+- `-fPIC`: Generate position-independent code for shared libraries
 
 ## File Extensions
 

@@ -189,7 +189,7 @@
 
     # Fortran 90 compiler settings (use same compiler as FC, typically gfortran)
     $F90           = $FC;
-    $F90FLAGS      = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -fPIC";
+    $F90FLAGS      = "$XMACHOPT -fno-second-underscore -fno-automatic -Wall -W -fPIC";
     $F90DEBUG      = $FDEBUG;
     $F90PATH       = "";
     $EXTRA_F90PATH = "";
