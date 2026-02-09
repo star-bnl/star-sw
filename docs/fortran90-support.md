@@ -48,19 +48,20 @@ To use Fortran 90 in your project:
 2. The cons build system will automatically discover these files when scanning the directory
 3. The build system will automatically use the Fortran 90 compiler for these files
 
-**Note**: The build system uses the `find_sources` function to automatically discover source files. As of this update, the following Fortran file extensions are recognized:
-- `.f` - Fortran 77 fixed-form
+**Note**: The build system uses the `find_sources` function to automatically discover source files. The following Fortran file extensions are recognized for automatic discovery:
 - `.F` - Fortran 77 fixed-form with preprocessing
 - `.f90` - Fortran 90 free-form
 - `.F90` - Fortran 90 free-form with preprocessing
+
+**Important**: `.f` files (Fortran 77 fixed-form without preprocessing) use a separate preprocessing compilation mechanism and are not included in automatic source file discovery. They are handled through a different build path.
 
 Example directory structure:
 ```
 MyPackage/
 ├── mycode.cxx
-├── myfortran.f        # Fortran 77
-├── myfortran90.f90    # Fortran 90
-└── preprocessed.F90   # Fortran 90 with preprocessing
+├── myfortran.F        # Fortran 77 with preprocessing (auto-discovered)
+├── myfortran90.f90    # Fortran 90 (auto-discovered)
+└── preprocessed.F90   # Fortran 90 with preprocessing (auto-discovered)
 ```
 
 The build system will automatically find all these files and compile them appropriately.

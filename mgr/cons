@@ -1264,11 +1264,10 @@ sub wanted {
       /^\w.*\.cpp$/   ||
       /^\w.*\.g$/     ||
       /^\w.*\.age$/   ||
-      /^\w.*\.f$/     ||
-      /^\w.*\.F$/     ||
       /^\w.*\.f90$/   ||
       /^\w.*\.F90$/   ||
-      /^\w.*\.cdf$/) {# print " $File::Find::name\n";
+      /^\w.*\.cdf$/   ||
+      /^\w.*\.F$/) {# print " $File::Find::name\n";
     push @main::search_files,  $File::Find::name;
   }
 }
