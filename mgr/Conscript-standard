@@ -85,6 +85,10 @@ my $FCPATH  = $env1->{FCPATH};
 my $FEXTEND = $env1->{FEXTEND};
 my $FPPFLAGS= $env1->{FPPFLAGS};
 my $FCCOM   = $env1->{FCCOM};
+my $F90     = $env1->{F90};
+my $F90FLAGS= $env1->{F90FLAGS};
+my $F90PATH = $env1->{F90PATH};
+my $F90COM  = $env1->{F90COM};
 my $LIBS    = $env1->{LIBS};
 my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
@@ -600,6 +604,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	my $py8ver = "Pythia8_1_86";
 
         $FCPATH   .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
+        $F90PATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
         $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg";
         $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
         $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/${py8ver}/include";
@@ -671,6 +676,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
         $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/HepMC2_06_09";
         $CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/Tauola1_1_5/include/Tauola";
         $FCPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
+        $F90PATH .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
         #$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/tauola-fortran/tauola-modified/new-currents/RChL-currents/rcht_3pi";
         $CXXFLAGS .= " -DTauola_version=\\\"$pkg\\\" ";
         $CPPFLAGS .= " -x c++";
@@ -776,6 +782,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $main::PATH_SEPARATOR . "#" . $Dir . "/../starsim/include" .
 	    $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" .
 	    $main::PATH_SEPARATOR . $env1->{FCPATH};
+	$F90PATH = $FCPATH;
 	$FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $FPPFLAGS = $env1->{Packages}->{CERNLIB}->{FPPFLAGS} . " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
@@ -786,6 +793,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 	$FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
+	$F90PATH = $FCPATH;
         # $FCPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
 
     } elsif ( $pkg =~ /^xgeometry/ ){
@@ -799,6 +807,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
 	$CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
 	$FCPATH = "#StarVMC/minicern" . $main::PATH_SEPARATOR . $INCLUDE;
+	$F90PATH = $FCPATH;
 	$CPPPATH .= $main::PATH_SEPARATOR . "#StarVMC/minicern";
 	my @srcC = ();
 	foreach my $s (@src) {
@@ -828,6 +837,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
 	$FCPATH = "#StarVMC/geant3" . $main::PATH_SEPARATOR . "#StarVMC/geant3/minicern" . $main::PATH_SEPARATOR . $INCLUDE .
 	    $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+	$F90PATH = $FCPATH;
 	$CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
 	my @dirs = qw (added gbase gcons geocad ggeom gheisha ghits ghrout ghutils
 		       giface giopa gkine gparal gphys gscan gstrag gtrak matx55 miface
@@ -990,6 +1000,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			 'FPPFLAGS' => $FPPFLAGS,
 			 'CPPFLAGS' => $CPPFLAGS,
 			 'FCCOM'    => $FCCOM,
+			 'F90'      => $F90,
+			 'F90FLAGS' => $F90FLAGS,
+			 'F90PATH'  => $F90PATH,
+			 'F90COM'   => $F90COM,
 			 'LIBS'     => $LIBS,
 			 'SOFLAGS'  => $SOFLAGS,
 			 'LIBPATH'  => $libpath,
