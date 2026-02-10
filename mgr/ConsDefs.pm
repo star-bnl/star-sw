@@ -187,6 +187,21 @@
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
 
+    # Fortran 90 compiler settings (use same compiler as FC, typically gfortran)
+    $F90           = $FC;
+    # F90FLAGS compatible with F77 flags but without -std=legacy (F77-specific)
+    if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
+        $F90FLAGS  = "$XMACHOPT -fd-lines-as-comments ";
+    } else {
+        $F90FLAGS  = "$XMACHOPT -fd-lines-as-code ";
+    }
+    $F90FLAGS .= " -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
+    $F90DEBUG      = $FDEBUG;
+    $F90PATH       = "";
+    $EXTRA_F90PATH = "";
+    $F90PPFLAGS    = "";
+    $EXTRA_F90PPFLAGS = "";
+
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
@@ -309,6 +324,9 @@
     $AGETOFCOM .= "%AGETOF %AGETOFLAGS %< -o %>:b.F &&";
     $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
     $AGETOFCOM .= " %>:b.F %Fout%>";
+
+ $F90COM = 
+ "%F90 %F90PPFLAGS %F90FLAGS %EXTRA_F90PPFLAGS %F90DEBUG %_IFLAGS %EXTRA_F90PATH -c %< %Fout%>";
 
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
@@ -1061,6 +1079,14 @@
 		  'AGETOFLAGS'     => $AGETOFLAGS,
 		  'AGETOFCOM'      => $AGETOFCOM,
 		  'FCviaAGETOFCOM' => $FCviaAGETOFCOM,
+		  'F90'            => $F90,
+		  'F90FLAGS'       => $F90FLAGS,
+		  'F90DEBUG'       => $F90DEBUG,
+		  'F90PATH'        => $F90PATH,
+		  'EXTRA_F90PATH'  => $EXTRA_F90PATH,
+		  'F90PPFLAGS'     => $F90PPFLAGS,
+		  'EXTRA_F90PPFLAGS' => $EXTRA_F90PPFLAGS,
+		  'F90COM'         => $F90COM,
 		  'CC'             => $CC,
 		  'CFLAGS'         => $CFLAGS,
 		  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
@@ -1117,6 +1143,8 @@
 		      '.age' => 'build::command::agetof',
 		      '.f'   => 'build::command::fc',
 		      '.F'   => 'build::command::fc',
+		      '.f90' => 'build::command::f90',
+		      '.F90' => 'build::command::f90',
 		      '.C'   => 'build::command::cxx',
 		      '.s'   => 'build::command::cc',
 		      '.S'   => 'build::command::cc',
