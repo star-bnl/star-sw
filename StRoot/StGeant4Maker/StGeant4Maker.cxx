@@ -578,7 +578,7 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   AddOption( "Random:G4", 12345,       "Sets the Random number seed"); 
   AddOption( "field", -5.0,            "Sets the STAR magnetic field [kG]" );
 
-  AddOption( "Application:Zmax", DBL_MAX, "Universe maximum z" );
+  AddOption( "Application:Zmax", 2000.0, "Universe maximum z" );
   AddOption( "Application:Rmax", DBL_MAX, "Universe maximum radius" );
 
   SetAttr("Scoring:Transit",0);
