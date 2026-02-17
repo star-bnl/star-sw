@@ -207,10 +207,16 @@ class ForwardTracker : public ForwardTrackMaker {
     void initialize( TString geoCache, bool genHistograms ) {
         nEvents = 1; // only process single event
 
-        // Create the forward system...
+        // Create the forward system, cleaning up any previous instance
+        if (FwdSystem::sInstance) {
+            delete FwdSystem::sInstance;
+        }
         FwdSystem::sInstance = new FwdSystem();
 
-        // initialize the track fitter
+        // initialize the track fitter, cleaning up any previous instance
+        if (mTrackFitter) {
+            delete mTrackFitter;
+        }
         mTrackFitter = new TrackFitter(mConfig, geoCache);
         mTrackFitter->setup();
 
