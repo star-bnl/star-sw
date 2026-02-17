@@ -710,24 +710,31 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     /*******************************************************************************/
     // compute projections to z-planes of various detectors
     // TODO: update FCS to use correct z + angle
-    map<int, float> mapDetectorToZPlane = {
-        { kTpcId, 0.0 },
-        { kFstId, mFstZFromGeom[0] },
-        { kFstId, mFstZFromGeom[1] },
-        { kFstId, mFstZFromGeom[2] },
-        { kFttId, mFttZFromGeom[0] },
-        { kFttId, mFttZFromGeom[1] },
-        { kFttId, mFttZFromGeom[2] },
-        { kFttId, mFttZFromGeom[3] },
-        { kFcsPresId, 375.0 },
-        { kFcsWcalId, 715.0 },
-        { kFcsHcalId, 807.0 }
-    };
+    // Use vector<pair> instead of map to allow multiple entries per detector
+    std::vector<std::pair<int, float>> detectorZPlanes;
+
+    // Add TPC projection
+    detectorZPlanes.push_back({ kTpcId, 0.0 });
+
+    // Add FST projections (check vector size first)
+    for (size_t i = 0; i < mFstZFromGeom.size() && i < 3; i++) {
+        detectorZPlanes.push_back({ kFstId, mFstZFromGeom[i] });
+    }
+
+    // Add FTT projections (check vector size first)
+    for (size_t i = 0; i < mFttZFromGeom.size() && i < 4; i++) {
+        detectorZPlanes.push_back({ kFttId, mFttZFromGeom[i] });
+    }
+
+    // Add FCS projections
+    detectorZPlanes.push_back({ kFcsPresId, 375.0 });
+    detectorZPlanes.push_back({ kFcsWcalId, 715.0 });
+    detectorZPlanes.push_back({ kFcsHcalId, 807.0 });
 
     size_t zIndex = 0;
     TVector3 mom(0, 0, 0);
     TVector3 tv3(0, 0, 0);
-    for ( auto zp : mapDetectorToZPlane ){
+    for ( auto zp : detectorZPlanes ){
         int detIndex = zp.first;
         float z = zp.second;
         tv3.SetXYZ(0, 0, 0);
