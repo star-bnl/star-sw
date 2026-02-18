@@ -1,0 +1,2066 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE gdml [ 
+<!ENTITY materials SYSTEM "materials.xml">
+]>
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GDML_3_1_4/schema/gdml.xsd">
+
+  <!-- ******************************* -->
+  <!-- *** Positions and Rotations *** -->
+  <!-- ******************************* -->
+  <define>
+    <!-- Tilt plates and fibers -->
+    <rotation name="Rot-45" unit="deg" x="45"/>
+    <rotation name="Rot-45r" unit="deg" x="-45"/>
+
+    <position name="Pos-Center" unit="mm" x="0" y="0" z="0"/>
+
+    <variable name="sin45" value="1./sqrt(2)"/>
+    <variable name="cos45" value="1./sqrt(2)"/>
+    <variable name="tan45" value="1."/>
+
+    <variable name="fib0" value="0.0"/>
+    <variable name="fib1" value="0.025"/>
+    <variable name="fib2" value="20.0"/>
+
+    <variable name="ipl0" value="5.0"/>
+    <variable name="ipl1" value="0.025"/>
+    <variable name="ipl2" value="20.0"/>
+
+    <variable name="wpl0" value="5.0"/>
+    <variable name="wpl1" value="0.213"/>
+    <variable name="wpl2" value="9.35"/>
+
+    <variable name="gap0" value="5.0"/>
+    <variable name="gap1" value="0.09"/>
+    <variable name="gap2" value="20.0"/>
+
+    <variable name="nlay" value="26"/>
+    <variable name="lmod" value="(2.0*ipl1+(nlay+1)*wpl1+nlay*gap1)/sin45"/>
+
+    <variable name="zdc0" value="5.0"/>
+    <variable name="zdc1" value="gap2*cos45+gap1*sin45"/>
+    <variable name="zdc2" value="gap2*sin45+gap1*cos45+lmod"/>
+ 
+    <variable name="smdg0" value="5.5"/>
+    <variable name="smdg1" value="gap2*cos45+gap1*sin45"/>
+    <variable name="smdg2" value="gap2*sin45+gap1*cos45+0.8/sin45"/>
+
+    <variable name="smd0" value="5.5"/>
+    <variable name="smd1" value="0.8"/>
+    <variable name="smd2" value="8.0*11.0/10.5"/>
+
+    <variable name="lsmd" value="0.8/sin45"/>
+
+    <variable name="smdh0" value="5.25"/>
+    <variable name="smdh1" value="0.4"/>
+    <variable name="smdh2" value="1.0"/>
+
+    <variable name="smdv0" value="0.75"/>
+    <variable name="smdv1" value="0.4"/>
+    <variable name="smdv2" value="8.0"/>
+
+    <variable name="fc0" value="5.080"/>
+    <variable name="fc1" value="12.065"/>
+    <variable name="fc2" value="0.3175"/>
+
+    <variable name="rc0" value="4.445"/>
+    <variable name="rc1" value="10.795"/>
+    <variable name="rc2" value="0.6350"/>
+
+    <variable name="al0" value="12.0"/>
+    <variable name="al1" value="3.0"/>
+    <variable name="al2" value="40.0"/>
+
+    <variable name="fe0" value="5.0"/>
+    <variable name="fe1" value="1.0"/>
+    <variable name="fe2" value="40.0"/>
+
+    <variable name="wcnt0" value="12.0"/>
+    <variable name="wcnt1" value="25.0"/>
+    <variable name="wcnt2" value="62.0"/>
+
+    <!-- WCNT -->
+    <position name="Pos-wcnt" unit="cm" x="0" y="0" z="0"/>
+    <position name="Pos-wcnt-sub1" unit="cm" x="5.08+wcnt0" y="-8.76+wcnt1" z="0"/>
+    <position name="Pos-wcnt-sub2" unit="cm" x="-5.08-wcnt0" y="-8.76+wcnt1" z="0"/>
+    <!-- Fiber in gap -->
+    <position name="Pos-fibr000" unit="cm" x="(2*000+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr001" unit="cm" x="(2*001+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr002" unit="cm" x="(2*002+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr003" unit="cm" x="(2*003+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr004" unit="cm" x="(2*004+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr005" unit="cm" x="(2*005+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr006" unit="cm" x="(2*006+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr007" unit="cm" x="(2*007+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr008" unit="cm" x="(2*008+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr009" unit="cm" x="(2*009+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr010" unit="cm" x="(2*010+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr011" unit="cm" x="(2*011+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr012" unit="cm" x="(2*012+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr013" unit="cm" x="(2*013+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr014" unit="cm" x="(2*014+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr015" unit="cm" x="(2*015+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr016" unit="cm" x="(2*016+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr017" unit="cm" x="(2*017+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr018" unit="cm" x="(2*018+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr019" unit="cm" x="(2*019+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr020" unit="cm" x="(2*020+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr021" unit="cm" x="(2*021+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr022" unit="cm" x="(2*022+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr023" unit="cm" x="(2*023+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr024" unit="cm" x="(2*024+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr025" unit="cm" x="(2*025+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr026" unit="cm" x="(2*026+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr027" unit="cm" x="(2*027+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr028" unit="cm" x="(2*028+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr029" unit="cm" x="(2*029+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr030" unit="cm" x="(2*030+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr031" unit="cm" x="(2*031+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr032" unit="cm" x="(2*032+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr033" unit="cm" x="(2*033+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr034" unit="cm" x="(2*034+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr035" unit="cm" x="(2*035+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr036" unit="cm" x="(2*036+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr037" unit="cm" x="(2*037+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr038" unit="cm" x="(2*038+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr039" unit="cm" x="(2*039+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr040" unit="cm" x="(2*040+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr041" unit="cm" x="(2*041+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr042" unit="cm" x="(2*042+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr043" unit="cm" x="(2*043+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr044" unit="cm" x="(2*044+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr045" unit="cm" x="(2*045+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr046" unit="cm" x="(2*046+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr047" unit="cm" x="(2*047+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr048" unit="cm" x="(2*048+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr049" unit="cm" x="(2*049+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr050" unit="cm" x="(2*050+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr051" unit="cm" x="(2*051+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr052" unit="cm" x="(2*052+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr053" unit="cm" x="(2*053+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr054" unit="cm" x="(2*054+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr055" unit="cm" x="(2*055+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr056" unit="cm" x="(2*056+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr057" unit="cm" x="(2*057+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr058" unit="cm" x="(2*058+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr059" unit="cm" x="(2*059+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr060" unit="cm" x="(2*060+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr061" unit="cm" x="(2*061+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr062" unit="cm" x="(2*062+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr063" unit="cm" x="(2*063+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr064" unit="cm" x="(2*064+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr065" unit="cm" x="(2*065+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr066" unit="cm" x="(2*066+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr067" unit="cm" x="(2*067+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr068" unit="cm" x="(2*068+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr069" unit="cm" x="(2*069+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr070" unit="cm" x="(2*070+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr071" unit="cm" x="(2*071+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr072" unit="cm" x="(2*072+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr073" unit="cm" x="(2*073+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr074" unit="cm" x="(2*074+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr075" unit="cm" x="(2*075+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr076" unit="cm" x="(2*076+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr077" unit="cm" x="(2*077+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr078" unit="cm" x="(2*078+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr079" unit="cm" x="(2*079+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr080" unit="cm" x="(2*080+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr081" unit="cm" x="(2*081+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr082" unit="cm" x="(2*082+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr083" unit="cm" x="(2*083+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr084" unit="cm" x="(2*084+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr085" unit="cm" x="(2*085+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr086" unit="cm" x="(2*086+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr087" unit="cm" x="(2*087+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr088" unit="cm" x="(2*088+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr089" unit="cm" x="(2*089+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr090" unit="cm" x="(2*090+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr091" unit="cm" x="(2*091+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr092" unit="cm" x="(2*092+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr093" unit="cm" x="(2*093+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr094" unit="cm" x="(2*094+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr095" unit="cm" x="(2*095+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr096" unit="cm" x="(2*096+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr097" unit="cm" x="(2*097+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr098" unit="cm" x="(2*098+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr099" unit="cm" x="(2*099+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr100" unit="cm" x="(2*100+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr101" unit="cm" x="(2*101+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr102" unit="cm" x="(2*102+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr103" unit="cm" x="(2*103+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr104" unit="cm" x="(2*104+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr105" unit="cm" x="(2*105+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr106" unit="cm" x="(2*106+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr107" unit="cm" x="(2*107+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr108" unit="cm" x="(2*108+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr109" unit="cm" x="(2*109+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr110" unit="cm" x="(2*110+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr111" unit="cm" x="(2*111+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr112" unit="cm" x="(2*112+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr113" unit="cm" x="(2*113+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr114" unit="cm" x="(2*114+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr115" unit="cm" x="(2*115+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr116" unit="cm" x="(2*116+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr117" unit="cm" x="(2*117+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr118" unit="cm" x="(2*118+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr119" unit="cm" x="(2*119+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr120" unit="cm" x="(2*120+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr121" unit="cm" x="(2*121+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr122" unit="cm" x="(2*122+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr123" unit="cm" x="(2*123+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr124" unit="cm" x="(2*124+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr125" unit="cm" x="(2*125+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr126" unit="cm" x="(2*126+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr127" unit="cm" x="(2*127+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr128" unit="cm" x="(2*128+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr129" unit="cm" x="(2*129+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr130" unit="cm" x="(2*130+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr131" unit="cm" x="(2*131+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr132" unit="cm" x="(2*132+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr133" unit="cm" x="(2*133+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr134" unit="cm" x="(2*134+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr135" unit="cm" x="(2*135+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr136" unit="cm" x="(2*136+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr137" unit="cm" x="(2*137+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr138" unit="cm" x="(2*138+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr139" unit="cm" x="(2*139+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr140" unit="cm" x="(2*140+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr141" unit="cm" x="(2*141+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr142" unit="cm" x="(2*142+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr143" unit="cm" x="(2*143+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr144" unit="cm" x="(2*144+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr145" unit="cm" x="(2*145+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr146" unit="cm" x="(2*146+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr147" unit="cm" x="(2*147+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr148" unit="cm" x="(2*148+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr149" unit="cm" x="(2*149+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr150" unit="cm" x="(2*150+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr151" unit="cm" x="(2*151+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr152" unit="cm" x="(2*152+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr153" unit="cm" x="(2*153+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr154" unit="cm" x="(2*154+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr155" unit="cm" x="(2*155+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr156" unit="cm" x="(2*156+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr157" unit="cm" x="(2*157+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr158" unit="cm" x="(2*158+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr159" unit="cm" x="(2*159+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr160" unit="cm" x="(2*160+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr161" unit="cm" x="(2*161+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr162" unit="cm" x="(2*162+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr163" unit="cm" x="(2*163+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr164" unit="cm" x="(2*164+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr165" unit="cm" x="(2*165+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr166" unit="cm" x="(2*166+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr167" unit="cm" x="(2*167+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr168" unit="cm" x="(2*168+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr169" unit="cm" x="(2*169+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr170" unit="cm" x="(2*170+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr171" unit="cm" x="(2*171+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr172" unit="cm" x="(2*172+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr173" unit="cm" x="(2*173+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr174" unit="cm" x="(2*174+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr175" unit="cm" x="(2*175+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr176" unit="cm" x="(2*176+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr177" unit="cm" x="(2*177+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr178" unit="cm" x="(2*178+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr179" unit="cm" x="(2*179+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr180" unit="cm" x="(2*180+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr181" unit="cm" x="(2*181+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr182" unit="cm" x="(2*182+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr183" unit="cm" x="(2*183+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr184" unit="cm" x="(2*184+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr185" unit="cm" x="(2*185+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr186" unit="cm" x="(2*186+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr187" unit="cm" x="(2*187+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr188" unit="cm" x="(2*188+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr189" unit="cm" x="(2*189+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr190" unit="cm" x="(2*190+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr191" unit="cm" x="(2*191+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr192" unit="cm" x="(2*192+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr193" unit="cm" x="(2*193+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr194" unit="cm" x="(2*194+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr195" unit="cm" x="(2*195+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr196" unit="cm" x="(2*196+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr197" unit="cm" x="(2*197+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr198" unit="cm" x="(2*198+1)*fib1-gap0" y="0" z="0"/>
+    <position name="Pos-fibr199" unit="cm" x="(2*199+1)*fib1-gap0" y="0" z="0"/>
+
+    <!-- Iron plate in front and back of the ZDC -->
+    <variable name="iply" value="-zdc1+(ipl1/tan45+ipl2)*cos45"/>
+    <variable name="iplz" value="lmod-ipl1/sin45"/>
+    <position name="Pos-ipl1" unit="cm" x="0" y="iply" z="-iplz+iply"/>
+    <position name="Pos-ipl2" unit="cm" x="0" y="iply" z="iplz+iply"/>
+
+    <!-- Gap with fibers -->
+    <variable name="interval" value="(gap1+wpl1)*2.0/sin45"/>
+    <variable name="gapfy" value="-zdc1+(gap1/tan45+gap2)*cos45"/>
+    <variable name="gapfz" value="iplz-(ipl1+wpl1*2.0+gap1)/sin45"/>
+    <position name="Pos-gapf-00" unit="cm" x="0" y="gapfy" z="gapfz-00*interval"/>
+    <position name="Pos-gapf-01" unit="cm" x="0" y="gapfy" z="gapfz-01*interval"/>
+    <position name="Pos-gapf-02" unit="cm" x="0" y="gapfy" z="gapfz-02*interval"/>
+    <position name="Pos-gapf-03" unit="cm" x="0" y="gapfy" z="gapfz-03*interval"/>
+    <position name="Pos-gapf-04" unit="cm" x="0" y="gapfy" z="gapfz-04*interval"/>
+    <position name="Pos-gapf-05" unit="cm" x="0" y="gapfy" z="gapfz-05*interval"/>
+    <position name="Pos-gapf-06" unit="cm" x="0" y="gapfy" z="gapfz-06*interval"/>
+    <position name="Pos-gapf-07" unit="cm" x="0" y="gapfy" z="gapfz-07*interval"/>
+    <position name="Pos-gapf-08" unit="cm" x="0" y="gapfy" z="gapfz-08*interval"/>
+    <position name="Pos-gapf-09" unit="cm" x="0" y="gapfy" z="gapfz-09*interval"/>
+    <position name="Pos-gapf-10" unit="cm" x="0" y="gapfy" z="gapfz-10*interval"/>
+    <position name="Pos-gapf-11" unit="cm" x="0" y="gapfy" z="gapfz-11*interval"/>
+    <position name="Pos-gapf-12" unit="cm" x="0" y="gapfy" z="gapfz-12*interval"/>
+    <position name="Pos-gapf-13" unit="cm" x="0" y="gapfy" z="gapfz-13*interval"/>
+    <position name="Pos-gapf-14" unit="cm" x="0" y="gapfy" z="gapfz-14*interval"/>
+    <position name="Pos-gapf-15" unit="cm" x="0" y="gapfy" z="gapfz-15*interval"/>
+    <position name="Pos-gapf-16" unit="cm" x="0" y="gapfy" z="gapfz-16*interval"/>
+    <position name="Pos-gapf-17" unit="cm" x="0" y="gapfy" z="gapfz-17*interval"/>
+    <position name="Pos-gapf-18" unit="cm" x="0" y="gapfy" z="gapfz-18*interval"/>
+    <position name="Pos-gapf-19" unit="cm" x="0" y="gapfy" z="gapfz-19*interval"/>
+    <position name="Pos-gapf-20" unit="cm" x="0" y="gapfy" z="gapfz-20*interval"/>
+    <position name="Pos-gapf-21" unit="cm" x="0" y="gapfy" z="gapfz-21*interval"/>
+    <position name="Pos-gapf-22" unit="cm" x="0" y="gapfy" z="gapfz-22*interval"/>
+    <position name="Pos-gapf-23" unit="cm" x="0" y="gapfy" z="gapfz-23*interval"/>
+    <position name="Pos-gapf-24" unit="cm" x="0" y="gapfy" z="gapfz-24*interval"/>
+    <position name="Pos-gapf-25" unit="cm" x="0" y="gapfy" z="gapfz-25*interval"/>
+
+    <!-- Tungsten plates -->
+    <variable name="wply" value="-zdc1+(wpl1/tan45+wpl2)*cos45"/>
+    <variable name="wplz" value="iplz-(ipl1+wpl1)/sin45+wply"/>
+    <position name="Pos-wpl-00" unit="cm" x="0" y="wply" z="wplz-00*interval"/>
+    <position name="Pos-wpl-01" unit="cm" x="0" y="wply" z="wplz-01*interval"/>
+    <position name="Pos-wpl-02" unit="cm" x="0" y="wply" z="wplz-02*interval"/>
+    <position name="Pos-wpl-03" unit="cm" x="0" y="wply" z="wplz-03*interval"/>
+    <position name="Pos-wpl-04" unit="cm" x="0" y="wply" z="wplz-04*interval"/>
+    <position name="Pos-wpl-05" unit="cm" x="0" y="wply" z="wplz-05*interval"/>
+    <position name="Pos-wpl-06" unit="cm" x="0" y="wply" z="wplz-06*interval"/>
+    <position name="Pos-wpl-07" unit="cm" x="0" y="wply" z="wplz-07*interval"/>
+    <position name="Pos-wpl-08" unit="cm" x="0" y="wply" z="wplz-08*interval"/>
+    <position name="Pos-wpl-09" unit="cm" x="0" y="wply" z="wplz-09*interval"/>
+    <position name="Pos-wpl-10" unit="cm" x="0" y="wply" z="wplz-10*interval"/>
+    <position name="Pos-wpl-11" unit="cm" x="0" y="wply" z="wplz-11*interval"/>
+    <position name="Pos-wpl-12" unit="cm" x="0" y="wply" z="wplz-12*interval"/>
+    <position name="Pos-wpl-13" unit="cm" x="0" y="wply" z="wplz-13*interval"/>
+    <position name="Pos-wpl-14" unit="cm" x="0" y="wply" z="wplz-14*interval"/>
+    <position name="Pos-wpl-15" unit="cm" x="0" y="wply" z="wplz-15*interval"/>
+    <position name="Pos-wpl-16" unit="cm" x="0" y="wply" z="wplz-16*interval"/>
+    <position name="Pos-wpl-17" unit="cm" x="0" y="wply" z="wplz-17*interval"/>
+    <position name="Pos-wpl-18" unit="cm" x="0" y="wply" z="wplz-18*interval"/>
+    <position name="Pos-wpl-19" unit="cm" x="0" y="wply" z="wplz-19*interval"/>
+    <position name="Pos-wpl-20" unit="cm" x="0" y="wply" z="wplz-20*interval"/>
+    <position name="Pos-wpl-21" unit="cm" x="0" y="wply" z="wplz-21*interval"/>
+    <position name="Pos-wpl-22" unit="cm" x="0" y="wply" z="wplz-22*interval"/>
+    <position name="Pos-wpl-23" unit="cm" x="0" y="wply" z="wplz-23*interval"/>
+    <position name="Pos-wpl-24" unit="cm" x="0" y="wply" z="wplz-24*interval"/>
+    <position name="Pos-wpl-25" unit="cm" x="0" y="wply" z="wplz-25*interval"/>
+    <position name="Pos-wpl-26" unit="cm" x="0" y="wply" z="wplz-26*interval"/>
+    <!-- ZDC and SMD modules -->
+    <variable name="zdcy" value="zdc1-wpl2*sin45-wpl1*cos45"/>
+    <variable name="zdcz" value="-zdcy/tan45"/>
+    <position name="Pos-smd-sub-0" unit="cm" x="0" y="-smdg1" z="smdg2"/>
+    <position name="Pos-smd-sub-1" unit="cm" x="0" y="smdg1" z="-smdg2"/>
+    <position name="Pos-smd" unit="cm" x="0" y="-smdg2+(smd2+smd1*3)*cos45" z="-smdg1+(smd2+smd1)*sin45"/>
+    <position name="Pos-zdc-sub-0" unit="cm" x="0" y="-zdc1" z="zdc2"/>
+    <position name="Pos-zdc-sub-1" unit="cm" x="0" y="zdc1" z="-zdc2"/>
+    <position name="Pos-zdc-1" unit="cm" x="0" y="zdcy" z="zdcz-lmod*2.0"/>
+    <position name="Pos-zdc-2" unit="cm" x="0" y="zdcy" z="zdcz+lsmd*2.0"/>
+    <position name="Pos-zdc-3" unit="cm" x="0" y="zdcy" z="zdcz+lmod*2.0+lsmd*2.0"/>
+    <position name="Pos-smd-gap" unit="cm" x="0" y="zdcy" z="zdcz-lmod+lsmd"/>
+    <!-- SMD -->
+    <position name="Pos-smdv" unit="mm" x="0" y="0" z="-4"/>
+
+    <rotation name="Rot-smdv-flip" unit="deg" x="0" y="180" z="0"/>
+    <position name="Pos-smdv-strip-sub-l" unit="mm" x="-5" y="0" z="3.5"/>
+    <rotation name="Rot-smdv-strip-sub-l" unit="rad" x="0" y="-atan(7/5)" z="0"/>
+    <position name="Pos-smdv-strip-sub-r" unit="mm" x="+5" y="0" z="3.5"/>
+    <rotation name="Rot-smdv-strip-sub-r" unit="rad" x="0" y="atan(7/5)" z="0"/>
+
+    <position name="Pos-smdv-strip-f-00" unit="mm" x="-50+10*00" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-01" unit="mm" x="-50+10*01" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-02" unit="mm" x="-50+10*02" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-03" unit="mm" x="-50+10*03" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-04" unit="mm" x="-50+10*04" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-05" unit="mm" x="-50+10*05" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-06" unit="mm" x="-50+10*06" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-07" unit="mm" x="-50+10*07" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-08" unit="mm" x="-50+10*08" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-09" unit="mm" x="-50+10*09" y="0" z="0"/>
+    <position name="Pos-smdv-strip-f-10" unit="mm" x="-50+10*10" y="0" z="0"/>
+
+    <position name="Pos-smdv-strip-b-00" unit="mm" x="-45+10*00" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-01" unit="mm" x="-45+10*01" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-02" unit="mm" x="-45+10*02" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-03" unit="mm" x="-45+10*03" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-04" unit="mm" x="-45+10*04" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-05" unit="mm" x="-45+10*05" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-06" unit="mm" x="-45+10*06" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-07" unit="mm" x="-45+10*07" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-08" unit="mm" x="-45+10*08" y="0" z="0"/>
+    <position name="Pos-smdv-strip-b-09" unit="mm" x="-45+10*09" y="0" z="0"/>
+
+    <position name="Pos-smdh" unit="mm" x="0" y="0" z="4"/>
+
+    <rotation name="Rot-smdh-flip" unit="deg" x="180" y="0" z="0"/>
+    <position name="Pos-smdh-strip-sub-l" unit="mm" x="0" y="-5" z="3.5"/>
+    <rotation name="Rot-smdh-strip-sub-l" unit="rad" x="-atan(5/7)" y="0" z="0"/>
+    <position name="Pos-smdh-strip-sub-r" unit="mm" x="0" y="+5" z="3.5"/>
+    <rotation name="Rot-smdh-strip-sub-r" unit="rad" x="atan(5/7)" y="0" z="0"/>
+
+    <position name="Pos-smdh-strip-f-00" unit="mm" x="0" y="-77.5+10*00" z="0"/>
+    <position name="Pos-smdh-strip-f-01" unit="mm" x="0" y="-77.5+10*01" z="0"/>
+    <position name="Pos-smdh-strip-f-02" unit="mm" x="0" y="-77.5+10*02" z="0"/>
+    <position name="Pos-smdh-strip-f-03" unit="mm" x="0" y="-77.5+10*03" z="0"/>
+    <position name="Pos-smdh-strip-f-04" unit="mm" x="0" y="-77.5+10*04" z="0"/>
+    <position name="Pos-smdh-strip-f-05" unit="mm" x="0" y="-77.5+10*05" z="0"/>
+    <position name="Pos-smdh-strip-f-06" unit="mm" x="0" y="-77.5+10*06" z="0"/>
+    <position name="Pos-smdh-strip-f-07" unit="mm" x="0" y="-77.5+10*07" z="0"/>
+    <position name="Pos-smdh-strip-f-08" unit="mm" x="0" y="-77.5+10*08" z="0"/>
+    <position name="Pos-smdh-strip-f-09" unit="mm" x="0" y="-77.5+10*09" z="0"/>
+    <position name="Pos-smdh-strip-f-10" unit="mm" x="0" y="-77.5+10*10" z="0"/>
+    <position name="Pos-smdh-strip-f-11" unit="mm" x="0" y="-77.5+10*11" z="0"/>
+    <position name="Pos-smdh-strip-f-12" unit="mm" x="0" y="-77.5+10*12" z="0"/>
+    <position name="Pos-smdh-strip-f-13" unit="mm" x="0" y="-77.5+10*13" z="0"/>
+    <position name="Pos-smdh-strip-f-14" unit="mm" x="0" y="-77.5+10*14" z="0"/>
+    <position name="Pos-smdh-strip-f-15" unit="mm" x="0" y="-77.5+10*15" z="0"/>
+
+    <position name="Pos-smdh-strip-b-00" unit="mm" x="0" y="-72.5+10*00" z="0"/>
+    <position name="Pos-smdh-strip-b-01" unit="mm" x="0" y="-72.5+10*01" z="0"/>
+    <position name="Pos-smdh-strip-b-02" unit="mm" x="0" y="-72.5+10*02" z="0"/>
+    <position name="Pos-smdh-strip-b-03" unit="mm" x="0" y="-72.5+10*03" z="0"/>
+    <position name="Pos-smdh-strip-b-04" unit="mm" x="0" y="-72.5+10*04" z="0"/>
+    <position name="Pos-smdh-strip-b-05" unit="mm" x="0" y="-72.5+10*05" z="0"/>
+    <position name="Pos-smdh-strip-b-06" unit="mm" x="0" y="-72.5+10*06" z="0"/>
+    <position name="Pos-smdh-strip-b-07" unit="mm" x="0" y="-72.5+10*07" z="0"/>
+    <position name="Pos-smdh-strip-b-08" unit="mm" x="0" y="-72.5+10*08" z="0"/>
+    <position name="Pos-smdh-strip-b-09" unit="mm" x="0" y="-72.5+10*09" z="0"/>
+    <position name="Pos-smdh-strip-b-10" unit="mm" x="0" y="-72.5+10*10" z="0"/>
+    <position name="Pos-smdh-strip-b-11" unit="mm" x="0" y="-72.5+10*11" z="0"/>
+    <position name="Pos-smdh-strip-b-12" unit="mm" x="0" y="-72.5+10*12" z="0"/>
+    <position name="Pos-smdh-strip-b-13" unit="mm" x="0" y="-72.5+10*13" z="0"/>
+    <position name="Pos-smdh-strip-b-14" unit="mm" x="0" y="-72.5+10*14" z="0"/>
+    <position name="Pos-smdh-strip-b-15" unit="mm" x="0" y="-72.5+10*15" z="0"/>
+
+    <!-- Iron & aluminium plates -->
+    <position name="Pos-fepl" unit="cm" x="0" y="-7.765" z="lmod*3+smd1/sin45+lmod*0.5-60."/>
+    <position name="Pos-alpl" unit="cm" x="0" y="-11.765" z="lmod*3+smd1/sin45+lmod*0.5-60."/>
+    <!-- Scintillator plates -->
+    <position name="Pos-fcsc" unit="cm" x="0" y="fc1-4/sin45" z="-lmod*3-smd1/sin45-lmod/2-19.05"/>
+    <position name="Pos-rcsc" unit="cm" x="0" y="rc1-4/sin45" z="lmod*3+lmod/2"/>
+
+    <!-- ZDCTruthCounter (Not real material and detector) -->
+    <position name="Pos-ZDCTruthCounter" unit="cm" x="0" y="iply+0.05" z="-iplz+iply-38.5"/>
+
+  </define>
+
+  <!-- the content of the materials.xml file will be included here -->
+  &materials; 
+
+  <!-- *********************** -->
+  <!-- *** Logical Volumes *** -->
+  <!-- *********************** -->
+  <solids>
+    <box name="WorldBox" lunit="cm" x="wcnt0*2.0" y="wcnt1*2.0" z="wcnt2*2.0"/>
+
+    <!-- WCNT: West counter -->
+    <box name="Log-wcnt-base" lunit="cm" x="wcnt0*2.0" y="wcnt1*2.0" z="wcnt2*2.0"/>
+    <subtraction name="Log-wcnt-0">
+      <first ref="Log-wcnt-base"/>
+      <second ref="Log-wcnt-base"/>
+      <positionref ref="Pos-wcnt-sub1"/>
+    </subtraction>
+    <subtraction name="Log-wcnt">
+      <first ref="Log-wcnt-0"/>
+      <second ref="Log-wcnt-base"/>
+      <positionref ref="Pos-wcnt-sub2"/>
+    </subtraction>
+
+
+    <!-- ZDC -->
+    <box name="Log-zdc-base" lunit="cm" x="zdc0*2.0" y="zdc1*2.0" z="zdc2*2.0"/>
+    <box name="Log-zdc-sub" lunit="cm" x="gap0*2.0+1" y="(gap1+gap2)*2.0" z="(gap1+gap2)*2.0"/>
+    <subtraction name="Log-zdc-0">
+      <first ref="Log-zdc-base"/>
+      <second ref="Log-zdc-sub"/>
+      <positionref ref="Pos-zdc-sub-0"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+    <subtraction name="Log-zdc">
+      <first ref="Log-zdc-0"/>
+      <second ref="Log-zdc-sub"/>
+      <positionref ref="Pos-zdc-sub-1"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+
+    <box name="Log-zdc-base2" lunit="cm" x="zdc0*2.0-1" y="zdc1*2.0" z="zdc2*2.0"/>
+    <subtraction name="Log-zdc2-0">
+      <first ref="Log-zdc-base2"/>
+      <second ref="Log-zdc-sub"/>
+      <positionref ref="Pos-zdc-sub-0"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+    <subtraction name="Log-zdc2">
+      <first ref="Log-zdc2-0"/>
+      <second ref="Log-zdc-sub"/>
+      <positionref ref="Pos-zdc-sub-1"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+
+    <!-- Iron plate -->
+    <box name="Log-ipl" lunit="cm" x="ipl0*2.0" y="ipl1*2.0" z="ipl2*2.0"/>
+    <!-- Tungsten plate -->
+    <box name="Log-wpl" lunit="cm" x="wpl0*2.0" y="wpl1*2.0" z="wpl2*2.0"/>
+    <!-- GAPF: gap which has fibers -->
+    <box name="Log-gapf" lunit="cm" x="gap0*2.0" y="gap1*2.0" z="gap2*2.0"/>
+    <!-- Half of PMMA fiber -->
+    <tube name="Log-fibr" rmin="fib0" rmax="fib1" z="fib2*2" deltaphi="360" startphi="0" aunit="deg" lunit="cm"/>
+
+    <!-- SMD -->
+    <box name="Log-smd-gap-base" lunit="cm" x="smdg0*2.0" y="smdg1*2.0" z="smdg2*2.0"/>
+    <box name="Log-smd-sub" lunit="cm" x="smdg0*2.0+1" y="(gap1+gap2)*2.0" z="(gap1+gap2)*2.0"/>
+    <subtraction name="Log-smd-0">
+      <first ref="Log-smd-gap-base"/>
+      <second ref="Log-smd-sub"/>
+      <positionref ref="Pos-smd-sub-0"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+    <subtraction name="Log-smd-gap">
+      <first ref="Log-smd-0"/>
+      <second ref="Log-smd-sub"/>
+      <positionref ref="Pos-smd-sub-1"/>
+      <rotationref ref="Rot-45"/>
+    </subtraction>
+    <box name="Log-smd" lunit="mm" x="110" y="165" z="16"/>
+    <!-- SMDH -->
+    <box name="Log-smdh" lunit="mm" x="110" y="165" z="8"/>
+    <box name="Log-smdh-strip-main" lunit="mm" x="110" y="10" z="7"/>
+    <box name="Log-smdh-strip-sub" lunit="mm" x="111" y="70/sqrt(74)" z="12"/>
+
+    <subtraction name="Log-smdh-strip-00">
+      <first ref="Log-smdh-strip-main"/>
+      <second ref="Log-smdh-strip-sub"/>
+      <positionref ref="Pos-smdh-strip-sub-l"/>
+      <rotationref ref="Rot-smdh-strip-sub-l"/>
+      <firstpositionref ref="Pos-Center"/>
+    </subtraction>
+    <subtraction name="Log-smdh-strip">
+      <first ref="Log-smdh-strip-00"/>
+      <second ref="Log-smdh-strip-sub"/>
+      <positionref ref="Pos-smdh-strip-sub-r"/>
+      <rotationref ref="Rot-smdh-strip-sub-r"/>
+      <firstpositionref ref="Pos-Center"/>
+    </subtraction>
+
+    <!-- SMDV -->
+    <box name="Log-smdv" lunit="mm" x="110" y="165" z="8"/>
+    <box name="Log-smdv-strip-main" lunit="mm" x="10" y="165" z="7"/>
+    <box name="Log-smdv-strip-sub" lunit="mm" x="12" y="166" z="70/sqrt(74)"/>
+
+    <subtraction name="Log-smdv-strip-00">
+      <first ref="Log-smdv-strip-main"/>
+      <second ref="Log-smdv-strip-sub"/>
+      <positionref ref="Pos-smdv-strip-sub-l"/>
+      <rotationref ref="Rot-smdv-strip-sub-l"/>
+      <firstpositionref ref="Pos-Center"/>
+    </subtraction>
+    <subtraction name="Log-smdv-strip">
+      <first ref="Log-smdv-strip-00"/>
+      <second ref="Log-smdv-strip-sub"/>
+      <positionref ref="Pos-smdv-strip-sub-r"/>
+      <rotationref ref="Rot-smdv-strip-sub-r"/>
+      <firstpositionref ref="Pos-Center"/>
+    </subtraction>
+
+    <!-- FEPL -->
+    <box name="Log-fepl" lunit="cm" x="fe0*2.0" y="fe1*2.0" z="fe2*2.0"/>
+    <!-- ALPL -->
+    <box name="Log-alpl" lunit="cm" x="al0*2.0" y="al1*2.0" z="al2*2.0"/>
+    <!-- Scintillator plates -->
+    <box name="Log-fcsc" lunit="cm" x="fc0*2.0" y="fc1*2.0" z="fc2*2.0"/>
+    <box name="Log-rcsc" lunit="cm" x="rc0*2.0" y="rc1*2.0" z="rc2*2.0"/>
+
+    <!-- ZDCTruthCounter (Not real material and detector) -->
+    <box name="Log-ZDCTruthCounter" lunit="cm" x="wpl0*2.0" y="wpl1*2.0" z="wpl2*2.0"/>
+  </solids>
+
+
+  <!-- ************************ -->
+  <!-- *** Physical Volumes *** -->
+  <!-- ************************ -->
+  <structure>
+    <volume name="Vol-ipl">
+      <materialref ref="Iron"/>
+      <solidref ref="Log-ipl"/>
+    </volume>
+
+    <volume name="Vol-wpl">
+      <materialref ref="Tungsten"/>
+      <solidref ref="Log-wpl"/>
+    </volume>
+    <volume name="Vol-fibr">
+      <materialref ref="PMMA"/>
+      <solidref ref="Log-fibr"/>
+      <auxiliary auxtype="SensDet" auxvalue="ZDC"/>
+    </volume>
+
+    <volume name="Vol-ZDCTruthCounter">
+      <materialref ref="Galactic"/>
+      <solidref ref="Log-ZDCTruthCounter"/>
+      <auxiliary auxtype="SensDet" auxvalue="ZDCTruthCounter"/>
+    </volume>
+
+    <volume name="Vol-gapf">
+      <materialref ref="Air"/>
+      <solidref ref="Log-gapf"/>
+      <!-- Fiber belt -->
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr000"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr001"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr002"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr003"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr004"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr005"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr006"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr007"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr008"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr009"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr010"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr011"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr012"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr013"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr014"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr015"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr016"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr017"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr018"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr019"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr020"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr021"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr022"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr023"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr024"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr025"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr026"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr027"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr028"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr029"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr030"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr031"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr032"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr033"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr034"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr035"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr036"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr037"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr038"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr039"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr040"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr041"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr042"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr043"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr044"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr045"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr046"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr047"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr048"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr049"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr050"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr051"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr052"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr053"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr054"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr055"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr056"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr057"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr058"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr059"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr060"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr061"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr062"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr063"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr064"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr065"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr066"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr067"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr068"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr069"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr070"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr071"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr072"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr073"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr074"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr075"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr076"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr077"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr078"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr079"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr080"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr081"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr082"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr083"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr084"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr085"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr086"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr087"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr088"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr089"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr090"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr091"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr092"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr093"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr094"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr095"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr096"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr097"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr098"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr099"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr100"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr101"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr102"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr103"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr104"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr105"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr106"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr107"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr108"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr109"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr110"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr111"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr112"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr113"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr114"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr115"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr116"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr117"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr118"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr119"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr120"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr121"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr122"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr123"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr124"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr125"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr126"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr127"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr128"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr129"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr130"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr131"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr132"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr133"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr134"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr135"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr136"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr137"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr138"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr139"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr140"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr141"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr142"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr143"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr144"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr145"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr146"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr147"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr148"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr149"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr150"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr151"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr152"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr153"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr154"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr155"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr156"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr157"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr158"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr159"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr160"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr161"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr162"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr163"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr164"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr165"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr166"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr167"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr168"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr169"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr170"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr171"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr172"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr173"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr174"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr175"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr176"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr177"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr178"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr179"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr180"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr181"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr182"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr183"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr184"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr185"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr186"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr187"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr188"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr189"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr190"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr191"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr192"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr193"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr194"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr195"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr196"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr197"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr198"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-fibr"/>
+        <positionref ref="Pos-fibr199"/>
+      </physvol>
+    </volume>
+
+<!--
+    <volume name="Vol-zdc2">
+      <materialref ref="Air"/>
+      <solidref ref="Log-zdc2"/>
+    </volume>
+-->
+    <volume name="Vol-zdc">
+      <materialref ref="Air"/>
+      <solidref ref="Log-zdc"/>
+<!--
+      <physvol>
+        <volumeref ref="Vol-zdc2"/>
+        <positionref ref="Pos-Center"/>
+      </physvol>
+-->
+      <physvol>
+        <volumeref ref="Vol-ipl"/>
+        <positionref ref="Pos-ipl1"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-ipl"/>
+        <positionref ref="Pos-ipl2"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-00"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-01"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-02"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-03"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-04"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-05"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-06"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-07"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-08"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-09"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-10"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-11"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-12"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-13"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-14"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-15"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-16"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-17"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-18"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-19"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-20"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-21"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-22"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-23"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-24"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-25"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-wpl"/>
+        <positionref ref="Pos-wpl-26"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-00"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-01"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-02"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-03"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-04"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-05"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-06"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-07"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-08"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-09"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-10"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-11"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-12"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-13"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-14"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-15"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-16"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-17"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-18"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-19"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-20"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-21"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-22"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-23"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-24"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gapf"/>
+        <positionref ref="Pos-gapf-25"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+    </volume>
+
+    <volume name="Vol-smdv-strip">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-smdv-strip"/>
+      <auxiliary auxtype="SensDet" auxvalue="SMD"/>
+    </volume>
+
+    <volume name="Vol-smdv">
+      <materialref ref="Air"/>
+      <solidref ref="Log-smdv"/>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-00"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-01"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-02"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-03"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-04"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-05"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-06"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-07"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-08"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-09"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-f-10"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-00"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-01"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-02"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-03"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-04"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-05"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-06"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-07"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-08"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdv-strip"/>
+        <positionref ref="Pos-smdv-strip-b-09"/>
+        <rotationref ref="Rot-smdv-flip"/>
+      </physvol>
+    </volume>
+
+    <volume name="Vol-smdh-strip">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-smdh-strip"/>
+      <auxiliary auxtype="SensDet" auxvalue="SMD"/>
+    </volume>
+
+    <volume name="Vol-smdh">
+      <materialref ref="Air"/>
+      <solidref ref="Log-smdh"/>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-00"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-01"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-02"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-03"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-04"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-05"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-06"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-07"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-08"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-09"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-10"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-11"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-12"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-13"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-14"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-f-15"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-00"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-01"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-02"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-03"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-04"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-05"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-06"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-07"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-08"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-09"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-10"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-11"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-12"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-13"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-14"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh-strip"/>
+        <positionref ref="Pos-smdh-strip-b-15"/>
+        <rotationref ref="Rot-smdh-flip"/>
+      </physvol>
+    </volume>
+    
+
+    <volume name="Vol-smd">
+      <materialref ref="Air"/>
+      <solidref ref="Log-smd"/>
+      <physvol>
+        <volumeref ref="Vol-smdv"/>
+        <positionref ref="Pos-smdv"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smdh"/>
+        <positionref ref="Pos-smdh"/>
+      </physvol>
+    </volume>
+    <volume name="Vol-smd-gap">
+      <materialref ref="Air"/>
+      <solidref ref="Log-smd-gap"/>
+      <physvol>
+        <volumeref ref="Vol-smd"/>
+        <positionref ref="Pos-smd"/>
+        <rotationref ref="Rot-45r"/>
+      </physvol>
+    </volume>
+
+    <volume name="Vol-fepl">
+      <materialref ref="Iron"/>
+      <solidref ref="Log-fepl"/>
+    </volume>
+    <volume name="Vol-alpl">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-alpl"/>
+    </volume>
+    <volume name="Vol-fcsc">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-fcsc"/>
+      <auxiliary auxtype="SensDet" auxvalue="Scin"/>
+    </volume>
+    <volume name="Vol-rcsc">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-rcsc"/>
+      <auxiliary auxtype="SensDet" auxvalue="Scin"/>
+    </volume>
+
+    <!-- ******************** -->
+    <!-- *** World Volume *** -->
+    <!-- ******************** -->
+    <volume name="Vol-wcnt">
+      <materialref ref="Air"/>
+      <solidref ref="Log-wcnt"/>
+      <physvol>
+        <volumeref ref="Vol-zdc"/>
+        <positionref ref="Pos-zdc-1"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-smd-gap"/>
+        <positionref ref="Pos-smd-gap"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-zdc"/>
+        <positionref ref="Pos-zdc-2"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-zdc"/>
+        <positionref ref="Pos-zdc-3"/>
+      </physvol>
+
+      <physvol>
+        <volumeref ref="Vol-fepl"/>
+        <positionref ref="Pos-fepl"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-alpl"/>
+        <positionref ref="Pos-alpl"/>
+      </physvol>
+<!--
+      <physvol>
+        <volumeref ref="Vol-fcsc"/>
+        <positionref ref="Pos-fcsc"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-rcsc"/>
+        <positionref ref="Pos-rcsc"/>
+      </physvol>
+-->
+
+      <!-- ZDCTruthCounter (Not real material and detector) -->
+      <physvol>
+        <volumeref ref="Vol-ZDCTruthCounter"/>
+        <positionref ref="Pos-ZDCTruthCounter"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+
+    </volume>
+  </structure>
+
+  <setup name="Default" version="1.0">
+    <world ref="Vol-wcnt"/>
+  </setup>
+</gdml>
