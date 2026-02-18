@@ -1263,7 +1263,9 @@ sub wanted {
       /^\w.*\.cxx$/   ||
       /^\w.*\.cpp$/   ||
       /^\w.*\.g$/     ||
-      /^\w.*\.age$/   || #for STAR      /^\w.*\.f$/       ||
+      /^\w.*\.age$/   ||
+      /^\w.*\.f90$/   ||
+      /^\w.*\.F90$/   ||
       /^\w.*\.cdf$/   ||
       /^\w.*\.F$/) {# print " $File::Find::name\n";
     push @main::search_files,  $File::Find::name;
@@ -2213,6 +2215,31 @@ sub find {
 }
 #________________________________________
 # Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for Fortran 90 files
+package build::command::f90;
+
+use vars qw( @ISA );
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+    $_[1]->{_f90} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{F90PATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
+	my($self) = find build::command($env, $env->{F90COM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_f90} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated scanner to get signature of included files.
 sub includes {
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
