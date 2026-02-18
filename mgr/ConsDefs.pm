@@ -196,7 +196,7 @@
         $F90FLAGS  = "$XMACHOPT -fd-lines-as-code ";
     }
     $F90FLAGS .= " -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
-    $F90DEBUG      = $FDEBUG;
+    *F90DEBUG      = *FDEBUG;
     $F90PATH       = "";
     $EXTRA_F90PATH = "";
     $F90PPFLAGS    = "";
