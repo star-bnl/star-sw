@@ -354,6 +354,9 @@ StParticleTable::StParticleTable()
        Geant2Pdg(10151,  333,  phi --> K+ K- );
        Geant2Pdg(11151,  333,  phi --> e+ e- );
 
+       Geant2Pdg( 11018, 3122, fast lambda --> p + pi- );
+       Geant2Pdg( 11026,-3122, fast lambdabar --> pbar + pi+ );
+
     Geant2Pdg(10011, 321,  Kaon+ --> mu+ nu );    // K+
     Geant2Pdg(10012, -321, Kaon- --> mu- nu );   // K-
 
