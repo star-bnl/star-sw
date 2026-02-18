@@ -1401,7 +1401,11 @@ void StBTofCalibMaker::processMuDst()
           int nPrimaryVertices = mMuDst->numberOfPrimaryVertices();
           for(int iVtx=0; iVtx<nPrimaryVertices; iVtx++){
             pVtx = mMuDst->primaryVertex(iVtx);
-            if(pVtx->position().z() > 198. && pVtx->position().z() < 202.) break;
+            if(pVtx->position().z() > 198. && pVtx->position().z() < 202.){
+              mMuDst->setVertexIndex(iVtx);
+              LOG_INFO << " Vertex " << iVtx << " has been selected as the primary vertex for this event!" << endm;
+              break;
+            }
             else if(iVtx == nPrimaryVertices - 1){
 	      LOG_WARN << " No FXT primary vertex within target ... bye-bye" <<endm;
 	      return;
