@@ -23,7 +23,13 @@ TClonesArray *fcsClusters = new TClonesArray("StPicoFcsCluster", 1000);
 TClonesArray *picoEvent   = new TClonesArray("StPicoEvent", 1);
 // StPicoEvent *picoEvent = new StPicoEvent();
 
-void data_lambda(){
+void data_lambda( TString glob = "/Users/brandenburg.89/star/data/Run22-pp-510GeV/*.picoDst.root", int tt = 0 ){
+
+    testTrackType = tt;
+    cout << "Analyzing Track Type: " << testTrackType << endl;
+
+    cout << "Loading from: \n " << glob << endl;
+
 
     TFile *fOutput = new TFile("lambda_analysis.root", "RECREATE");
     TH2F * hNumFstStgc = new TH2F("hNumFstStgc", "Number of FST and STGC hits; nFST; nSTGC", 15, 0, 15, 15, 0, 15);
@@ -50,7 +56,7 @@ void data_lambda(){
     TH1F * hFwdM3ls = new TH1F("hFwdM3ls", "Mass of all tracks", 1000, 1, 2);
 
     TChain *chain = new TChain("PicoDst");
-    chain->Add("/Users/brandenburg.89/star/ssw/data/forwardCrossSection_2022/*.picoDst.root");
+    chain->Add(glob);
 
     chain->SetBranchAddress("McTrack", &mcTracks);
     chain->SetBranchAddress("McVertex", &mcVertices);
@@ -61,8 +67,11 @@ void data_lambda(){
     chain->SetBranchAddress("Event", &picoEvent);
 
     size_t nEntries = chain->GetEntries();
+    cout << "Number of Files: " << chain->GetListOfFiles()->GetEntries() << endl;
     cout << "Number of events: " << nEntries << endl;
-    nEntries = 50000;
+    if (nEntries > 50000 )
+        nEntries = 50000;
+
     size_t nLambda = 0;
     for (size_t i = 0; i < nEntries; ++i) {
         mcTracks->Clear(); // Clear the TClonesArray for each entry
