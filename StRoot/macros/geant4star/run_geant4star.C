@@ -146,9 +146,9 @@ void run_geant4star( int nevents=10,
   g4star->SetAttr("runnumber", job.runnumbers[0] );
 
 
-  g4star->SetAttr("calorimeters:hit:verbose",111);
-  g4star->SetAttr("trackers:hit:verbose",111);
-  g4star->SetAttr("stepping:verbose",111);
+  //  g4star->SetAttr("calorimeters:hit:verbose",111);
+  //  g4star->SetAttr("trackers:hit:verbose",111);
+  //  g4star->SetAttr("stepping:verbose",111);
 
 
   top->ls(5);
