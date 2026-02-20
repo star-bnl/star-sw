@@ -33,7 +33,7 @@ StPicoEvent::StPicoEvent(): TObject(),
   mClosestVpdWHit(99999*1000), mLatestVpdEHit(-99999*1000), mLatestVpdWHit(-99999*1000),
   mZDCx(0), mBBCx(0), mBackgroundRate(0), mBbcBlueBackgroundRate(0), mBbcYellowBackgroundRate(0),
   mBbcEastRate(0), mBbcWestRate(0), mZdcEastRate(0), mZdcWestRate(0),
-  mZdcSumAdcEast(0), mZdcSumAdcWest(0),
+  mZdcSumAdcEast(0), mZdcSumAdcWest(0), mPastCorruption(0),mFutureCorruption(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
   mBbcAdcEast{}, mBbcAdcWest{}, mHighTowerThreshold{}, mJetPatchThreshold{},
   mETofHitMultiplicity(0), mETofDigiMultiplicity(0), mETofGoodEventFlag{}, mNumberOfPrimaryTracks(0), mZdcUnAttenuated{} {
@@ -140,6 +140,9 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
     mBbcAdcEast[iIter] = event.mBbcAdcEast[iIter];
     mBbcAdcWest[iIter] = event.mBbcAdcWest[iIter];
   }
+  
+  mPastCorruption=event.mPastCorruption;
+  mFutureCorruption=event.mFutureCorruption;
 
   // Tower and patch info
   for(int iIter=0; iIter<4; iIter++) {
