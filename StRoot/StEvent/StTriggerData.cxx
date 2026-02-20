@@ -379,3 +379,10 @@ int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}
 bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
 unsigned long long StTriggerData::l2sum() const {return 0;}  
 void StTriggerData::killFMS() {return;}
+
+const unsigned int*  StTriggerData::l1Result() const {return 0;}
+unsigned int StTriggerData::unixTimeLastFutureGuardian() const {return 0;}
+unsigned int StTriggerData::bunchCounterLastFutureGuardian() const {return 0;}
+unsigned int StTriggerData::pastCorruption() const {return 0;}
+unsigned int StTriggerData::futureCorruption() const {return 0;}
+unsigned int StTriggerData::futureGuardianCounter() const {return 0;}
