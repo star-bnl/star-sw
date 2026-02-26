@@ -216,6 +216,47 @@ class TrackFitter {
     }
 
     /**
+     * @brief Rotate the 3x3 global covmat into the plane's local (u,v) frame -> 2x2
+     *
+     * For a tilted plane the measurement covariance must be expressed in the
+     * same local basis that is used for the hit coordinates, otherwise the
+     * errors are inconsistent with the residuals GenFit computes.
+     *
+     * C_local = R * C_global * R^T   where R = [u^T; v^T] (2x3)
+     *
+     * @param h     : hit with 3x3 global covariance matrix
+     * @param plane : genfit DetPlane whose U/V axes define the local frame
+     * @return TMatrixDSym : 2x2 covariance in local (u,v) frame
+     */
+    TMatrixDSym CovMatPlaneLocal(KiTrack::IHit *h, genfit::SharedPlanePtr plane) {
+        auto fh = static_cast<FwdHit*>(h);
+        TVector3 u = plane->getU();
+        TVector3 v = plane->getV();
+
+        // 2x3 rotation matrix  R = [ u^T ]
+        //                           [ v^T ]
+        TMatrixD R(2, 3);
+        R(0, 0) = u.X();  R(0, 1) = u.Y();  R(0, 2) = u.Z();
+        R(1, 0) = v.X();  R(1, 1) = v.Y();  R(1, 2) = v.Z();
+
+        // Copy 3x3 global covariance
+        TMatrixD C(3, 3);
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                C(i, j) = fh->_covmat(i, j);
+
+        // C_local = R * C * R^T
+        TMatrixD Rt(TMatrixD::kTransposed, R);
+        TMatrixD Cl = R * C * Rt;
+
+        TMatrixDSym cm(2);
+        cm(0, 0) = Cl(0, 0);
+        cm(1, 1) = Cl(1, 1);
+        cm(0, 1) = Cl(0, 1);
+        return cm;
+    }
+
+    /**
      * @brief Get projection to a given plane
      *
      * @param fstPlane : plane index
@@ -373,12 +414,25 @@ class TrackFitter {
 
     genfit::TrackPoint* createTrackPointFromPlanarMeasurement(std::shared_ptr<genfit::Track> fitTrack, FwdHit *fh, int &hitId){
         assert( fh != nullptr && "FwdHit pointer is null, cannot create planar measurement" );
-        TVectorD hitOnPlane(2);
-        hitOnPlane[0] = fh->getX();
-        hitOnPlane[1] = fh->getY();
-        auto tp = new genfit::TrackPoint();
-        genfit::PlanarMeasurement *measurement = new genfit::PlanarMeasurement(hitOnPlane, CovMatPlane(fh), fh->_detid, ++hitId, tp);
+
+        // Must retrieve the plane first so we can express the hit in local (u,v) coords.
+        // Using the global (x,y) position directly would cause a double-rotation: once
+        // embedded in the global-coordinate hit and again by GenFit's plane transform.
         genfit::SharedPlanePtr plane = getPlaneFor( fh );
+        if (!plane) {
+            LOG_ERROR << "No plane for hit, cannot create planar measurement" << endm;
+            return nullptr;
+        }
+
+        // Project global hit position into the plane's local (u,v) frame
+        TVector3 globalPos(fh->getX(), fh->getY(), fh->getZ());
+        TVector2 localPos = plane->master2Plane(globalPos);
+        TVectorD hitOnPlane(2);
+        hitOnPlane[0] = localPos.X();
+        hitOnPlane[1] = localPos.Y();
+
+        auto tp = new genfit::TrackPoint();
+        genfit::PlanarMeasurement *measurement = new genfit::PlanarMeasurement(hitOnPlane, CovMatPlaneLocal(fh, plane), fh->_detid, ++hitId, tp);
         int planeId = fh->_genfit_plane_index;
         
         // I do this to make the planeId unique between FST and FTT

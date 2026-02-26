@@ -53,12 +53,13 @@ class ForwardTrackMaker {
     }
 
     const std::vector<GenfitTrackResult> &getTrackResults() const { return mTrackResults; }
+    std::vector<GenfitTrackResult> &getTrackResults() { return mTrackResults; }
     const std::vector<Seed_t> &getTrackSeeds() const { return mTrackSeeds; }
     const std::vector<genfit::GFRaveVertex*> &getVertices() const { return mFwdVertices; }
     const EventStats &getEventStats() const { return mEventStats; }
 
     void Clear(){
-        for ( auto gtr : mTrackResults ){
+        for ( auto &gtr : mTrackResults ){
             gtr.Clear();
         }
         mTrackResults.clear();
