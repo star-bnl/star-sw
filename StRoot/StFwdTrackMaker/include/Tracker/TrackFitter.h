@@ -424,12 +424,16 @@ class TrackFitter {
             return nullptr;
         }
 
-        // Project global hit position into the plane's local (u,v) frame
-        TVector3 globalPos(fh->getX(), fh->getY(), fh->getZ());
-        TVector2 localPos = plane->master2Plane(globalPos);
+        // Project global hit position into the plane's local (u,v) frame.
+        // Subtracting the plane origin removes the large global offset, and
+        // dotting with the plane's axes undoes the azimuthal rotation — the
+        // inverse of what GenFit's plane transform does.  Without this, the
+        // global (x,y) would be treated as local (u,v) and GenFit would apply
+        // the plane rotation a second time (double-rotation bug).
+        TVector3 diff = TVector3(fh->getX(), fh->getY(), fh->getZ()) - plane->getO();
         TVectorD hitOnPlane(2);
-        hitOnPlane[0] = localPos.X();
-        hitOnPlane[1] = localPos.Y();
+        hitOnPlane[0] = diff.Dot(plane->getU());
+        hitOnPlane[1] = diff.Dot(plane->getV());
 
         auto tp = new genfit::TrackPoint();
         genfit::PlanarMeasurement *measurement = new genfit::PlanarMeasurement(hitOnPlane, CovMatPlaneLocal(fh, plane), fh->_detid, ++hitId, tp);
