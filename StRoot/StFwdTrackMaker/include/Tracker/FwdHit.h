@@ -151,6 +151,13 @@ class FwdHit : public KiTrack::IHit {
 
     StHit *_hit = nullptr;
     unsigned int _genfit_plane_index = 0; //NOT used for isPV==True, since that is an abs measurement
+
+    // Strip-native local position for FST hits: (r [cm], phi_from_inner_edge [rad]).
+    // Derived directly from getMeanRStrip()/getMeanPhiStrip() — no global azimuthal
+    // rotation embedded, so it correctly handles sensor misalignment.
+    // Only valid for isFst() hits; initialized to {-1, -1} otherwise. 
+    // TODO: consider if similar is needed for FTT?
+    float _localPosition[2] = {-1.f, -1.f};
 };
 
 // Track Seed typdef

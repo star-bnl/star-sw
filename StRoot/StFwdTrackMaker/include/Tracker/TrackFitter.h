@@ -424,13 +424,38 @@ class TrackFitter {
             return nullptr;
         }
 
-        // Project global hit position into the plane's local (u,v) frame.
-        // Subtracting the plane origin removes the large global offset, and
-        // dotting with the plane's axes undoes the azimuthal rotation — the
-        // inverse of what GenFit's plane transform does.  Without this, the
-        // global (x,y) would be treated as local (u,v) and GenFit would apply
-        // the plane rotation a second time (double-rotation bug).
-        TVector3 diff = TVector3(fh->getX(), fh->getY(), fh->getZ()) - plane->getO();
+        // Express the hit in the plane's local (u,v) frame.
+        //
+        // For FST hits we use the strip-native local position (_localPosition[0]=r,
+        // _localPosition[1]=phi_from_inner_edge) stored at hit-loading time from
+        // getMeanRStrip()/getMeanPhiStrip().  These contain no global azimuthal
+        // rotation, so we can reconstruct the correct global position using the
+        // *realistic* plane origin (from GEANT) rather than the ideal geometry.
+        // This correctly handles arbitrary sensor misalignment.
+        //
+        // For FTT (or any hit without strip-native coords), fall back to projecting
+        // the stored global position — which still fixes the double-rotation bug
+        // relative to passing (x,y) directly, though it is only first-order correct
+        // for large misalignments.
+        TVector3 globalPos;
+        if (fh->isFst() && fh->_localPosition[0] >= 0.f) {
+            // Half-width of one FST wedge in phi (30 deg = pi/6, split symmetrically).
+            const float phi_half = 0.5f * kFstNumPhiSegPerWedge * kFstStripPitchPhi;
+            // Realistic azimuthal angle of the sensor centre from the GEANT plane.
+            float phi_center_real = TMath::ATan2(plane->getO().Y(), plane->getO().X());
+            // Inner edge of the sensor in the realistic geometry.
+            float phi_inner_real  = phi_center_real - phi_half;
+            // Absolute phi of this hit using the strip-local offset.
+            float phi_hit = phi_inner_real + fh->_localPosition[1];
+            float r       = fh->_localPosition[0];
+            globalPos.SetXYZ(r * TMath::Cos(phi_hit),
+                             r * TMath::Sin(phi_hit),
+                             plane->getO().Z());
+        } else {
+            globalPos.SetXYZ(fh->getX(), fh->getY(), fh->getZ());
+        }
+
+        TVector3 diff = globalPos - plane->getO();
         TVectorD hitOnPlane(2);
         hitOnPlane[0] = diff.Dot(plane->getU());
         hitOnPlane[1] = diff.Dot(plane->getV());

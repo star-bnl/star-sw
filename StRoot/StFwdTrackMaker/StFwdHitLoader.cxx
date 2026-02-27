@@ -335,6 +335,12 @@ int StFwdHitLoader::loadFstHitsFromMuDst( FwdDataSource::McTrackMap_t &mcTrackMa
             )
         );
         mFwdHitsFst.back()._genfit_plane_index = globalIndex;
+        // Store strip-native local position (no global azimuthal rotation).
+        {
+            int rStrip = (int)muFstHit->getMeanRStrip();
+            mFwdHitsFst.back()._localPosition[0] = kFstrStart[rStrip] + 0.5f * kFstStripPitchR;
+            mFwdHitsFst.back()._localPosition[1] = muFstHit->getMeanPhiStrip() * kFstStripPitchPhi;
+        }
     } // index
 
     // this has to be done AFTER because the vector reallocates mem when expanding, changing addresses
@@ -418,6 +424,14 @@ int StFwdHitLoader::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
                     // store a pointer to the original StFstHit
                     mFwdHitsFst.back()._hit = fsthits[ih];
                     mFwdHitsFst.back()._genfit_plane_index = globalIndex;
+                    // Store strip-native local position (no global azimuthal rotation).
+                    // kFstrStart[] gives the inner edge of each r-strip in cm; the half-pitch
+                    // centers the position within the strip.
+                    {
+                        int rStrip = (int)fsthits[ih]->getMeanRStrip();
+                        mFwdHitsFst.back()._localPosition[0] = kFstrStart[rStrip] + 0.5f * kFstStripPitchR;
+                        mFwdHitsFst.back()._localPosition[1] = fsthits[ih]->getMeanPhiStrip() * kFstStripPitchPhi;
+                    }
                 }
             } // loop is
         } // loop iw
