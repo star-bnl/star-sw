@@ -170,6 +170,7 @@ double StEpdEpInfo::WestRingPhiWeightedPsi(int order, int ring){return RingPhiWe
 //----- Simple method to put angles in a convenient range: (0,2pi/n) ----
 double StEpdEpInfo::Range(double psi,int order){
   if (ArgumentOutOfBounds(order)) return -999;
+  if (psi < -900.0) return -999.0; // invalid angle
   double wrap = 2.0*TMath::Pi()/(double)order;
   if (psi<0.0) psi += (1.0+(int)(fabs(psi)/wrap))*wrap;
   else{ if (psi>wrap) psi -= ((int)(psi/wrap))*wrap;}

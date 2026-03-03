@@ -327,6 +327,7 @@ StEpdEpInfo StEpdEpFinder::Results(TClonesArray* EpdHits, TVector3 primVertex, i
   for (int order=1; order<_EpOrderMax+1; order++){
     for (int ewFull=0; ewFull<3; ewFull++){  // 0,1,2 means East,West,Full
       result.PsiPhiWeightedAndShifted[ewFull][order-1] = result.PsiPhiWeighted[ewFull][order-1];
+      if (result.PsiPhiWeighted[ewFull][order-1] < -900.0) continue; // invalid angle, so skip shifting
       if (mEpdShiftInput_sin[ewFull][order-1] != 0){
 	for (int i=1; i<=_EpTermsMax; i++){
 	  double tmp = (double)(order*i);
