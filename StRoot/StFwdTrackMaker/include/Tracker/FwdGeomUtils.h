@@ -157,7 +157,7 @@ class FwdGeomUtils {
                 // point counterclockwise so that hitOnPlane[1] = r·sin(dphi) is consistent
                 // across all sensors.  Test: (U × V)·ẑ < 0 means V is clockwise.
                 if (u.Cross(v).Z() < 0) v = -v;
-                if ( _verbose > 1 ){
+                if ( _verbose ){
                     LOG_INFO << "FST Sensor " << index << " origin: " << x << ", " << y << ", " << z << endm;
                     LOG_INFO << "\tSensor " << index << " U = " << u.X() << ", " << u.Y() << ", " << u.Z() << endm;
                     LOG_INFO << "\tSensor " << index << " V = " << v.X() << ", " << v.Y() << ", " << v.Z() << endm;

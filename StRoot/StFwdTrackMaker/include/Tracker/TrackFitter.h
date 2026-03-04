@@ -421,7 +421,7 @@ class TrackFitter {
             return nullptr;
         }
 
-        if (kVerbose >= kLogLevel::kLogDebug) {
+        if (kVerbose >= 1) {
             LOG_INFO << "Plane for hit (detid=" << fh->_detid << ", planeIdx=" << fh->_genfit_plane_index << "):"
                  << " O=(" << plane->getO().X() << "," << plane->getO().Y() << "," << plane->getO().Z() << ")"
                  << " U=(" << plane->getU().X() << "," << plane->getU().Y() << "," << plane->getU().Z() << ")"
@@ -461,7 +461,7 @@ class TrackFitter {
         // with the global position GenFit derives from the local measurement on the
         // realistic GEANT plane.  Any difference reflects sensor misalignment.
         TVector3 measGlobal = plane->toLab(TVector2(hitOnPlane[0], hitOnPlane[1]));
-        if (kVerbose >= kLogLevel::kLogDebug) {
+        if (kVerbose >= 1) {
             LOG_INFO << "PlanarMeasurement pos check (detid=" << fh->_detid << "):"
                   << " FwdHit=(" << fh->getX() << "," << fh->getY() << "," << fh->getZ() << ")"
                   << " GenFit=(" << measGlobal.X() << "," << measGlobal.Y() << "," << measGlobal.Z() << ")"

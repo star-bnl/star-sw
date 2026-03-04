@@ -22,8 +22,8 @@ bool runPico = true;
 // bool runFitQa = true;
 
 // Minimal
-bool runDb = false;
-bool runFttChain = false;
+bool runDb = true;
+bool runFttChain = true;
 bool runFcsChain = false;
 bool runFwdChain = true;
 bool refillMuDst = false;
@@ -35,7 +35,7 @@ bool runPico = true;
 
 
 void loadLibs();
-void fwd_afterburner( 	const Char_t * fileList = "st_physics_23055058_raw_1500001.MuDst.root", 
+void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
 						size_t nEvents = 1000 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
@@ -87,6 +87,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23055058_raw_150000
 	/*******************************************************************************************/
 	// FTT chain
 	if (runFttChain){
+		gSystem->Load("libStFttDbMaker.so");
 		StFttDbMaker * fttDbMk = new StFttDbMaker();
 		StFttHitCalibMaker * ftthcm = new StFttHitCalibMaker();
 		StFttClusterMaker * fttclu = new StFttClusterMaker();
@@ -129,7 +130,8 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23055058_raw_150000
 
 		// fwdTrack->setSeedFindingOff();
 		// fwdTrack->setTrackFittingOff();
-		fwdTrack->setFttHitSource( 3 /* = IGNORE */);
+		fwdTrack->setFstHitSource( 2 /* = MUDST */);
+		fwdTrack->setFttHitSource( 1 /* = IGNORE */);
 
 
 		// fwdTrack->setConfigKeyValue("TrackFitter:doBeamlineTrackFitting", false);
@@ -298,6 +300,7 @@ void loadLibs(){
 	gSystem->Load( "StFttDbMaker" );
 	gSystem->Load( "StFttHitCalibMaker" );
 	gSystem->Load( "StFttClusterMaker" );
+	gSystem->Load( "StFttClusterPointMaker" );
 	gSystem->Load( "StFttPointMaker" );
     gSystem->Load("libStarGeneratorUtil.so");
     gSystem->Load("libgenfit2");
