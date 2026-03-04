@@ -148,7 +148,9 @@ void StFttClusterPointMaker::InjectTestData(){
 }
 
 void StFttClusterPointMaker::MakeLocalPoints(UChar_t Rob) {
-    LOG_INFO << "Making local points" << endm;
+    if (mDebug){
+         LOG_INFO << "Making local points for ROB " << (int)Rob << endm;
+    }
 
     //initialize
     StFttPoint* point;
