@@ -24,8 +24,9 @@
 StFttClusterPointMaker::StFttClusterPointMaker( const char* name )
 : StMaker( name ),
   mEvent( 0 ),          /// pointer to StEvent
-  mDebug( true ),       /// print out of all full messages for debugging
+  mDebug( false ),       /// print out of all full messages for debugging
   mUseTestData( false ),
+  mUseGeantData( false ),
   mFttDb( nullptr )
 {
     LOG_DEBUG << "StFttClusterPointMaker::ctor"  << endm;
@@ -64,7 +65,9 @@ StFttClusterPointMaker::Finish()
 }
 
 Int_t StFttClusterPointMaker::Make() {
-    LOG_DEBUG << "StFttClusterPointMaker::Make()" << endm;
+    if ( mDebug ){
+        LOG_INFO << "StFttClusterPointMaker::Make()" << endm;
+    }
 
     mEvent = (StEvent*)GetInputDS("StEvent"); //get the event from stevent and make sure it exists
     if(mEvent) {
@@ -95,7 +98,7 @@ Int_t StFttClusterPointMaker::Make() {
     mFttCollection=mEvent->fttCollection(); //get the ftt collection from the event and make sure it exists
     if(!mFttCollection) { return kStOk; }
 
-    mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb")); //get the ftt database
+    mFttDb = static_cast<StFttDb*>(GetDataSet("fttDbMkr")); //get the ftt database
     assert(mFttDb);
 
     //clear cluster vector

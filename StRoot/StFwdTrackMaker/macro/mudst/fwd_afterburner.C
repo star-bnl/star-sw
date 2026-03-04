@@ -36,7 +36,7 @@ bool runPico = true;
 
 void loadLibs();
 void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 1000 ){
+						size_t nEvents = 10 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
@@ -89,6 +89,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	if (runFttChain){
 		gSystem->Load("libStFttDbMaker.so");
 		StFttDbMaker * fttDbMk = new StFttDbMaker();
+		chain->AddMaker(fttDbMk);
 		StFttHitCalibMaker * ftthcm = new StFttHitCalibMaker();
 		StFttClusterMaker * fttclu = new StFttClusterMaker();
 		fttclu->SetTimeCut(1, -40, 40);
