@@ -24,7 +24,7 @@ bool runPico = true;
 // Minimal
 bool runDb = true;
 bool runFttChain = true;
-bool runFcsChain = false;
+bool runFcsChain = true;
 bool runFwdChain = true;
 bool refillMuDst = false;
 bool runFwdQa = false;
@@ -35,8 +35,8 @@ bool runPico = true;
 
 
 void loadLibs();
-void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 10 ){
+void fwd_afterburner( 	const Char_t * fileList = "/star/data41/reco/production_pp500_2022/ReversedFullField/P25ib/2022/037/23037043/st_physics_23037043_raw_7000075.MuDst.root", 
+						size_t nEvents = 100 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
@@ -119,7 +119,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 		fwdTrack->SetDebug(1);
 		fwdTrack->setGeoCache( "fGeom.root" );
 		fwdTrack->setSeedFindingWithFst();
-		// fwdTrack->setTrackRefit( false );
+		fwdTrack->setTrackRefit( true );
 
 		// Fitter Options
 		fwdTrack->setFitDebugLvl( 0 );
@@ -132,7 +132,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 		// fwdTrack->setSeedFindingOff();
 		// fwdTrack->setTrackFittingOff();
 		fwdTrack->setFstHitSource( 2 /* = MUDST */);
-		fwdTrack->setFttHitSource( 1 /* = IGNORE */);
+		fwdTrack->setFttHitSource( 1 /* = STEVENT */);
 
 
 		// fwdTrack->setConfigKeyValue("TrackFitter:doBeamlineTrackFitting", false);
