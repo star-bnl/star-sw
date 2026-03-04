@@ -286,6 +286,10 @@ int StFwdHitLoader::loadFstHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDat
 
 int StFwdHitLoader::loadFstHitsFromMuDst( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap){
     int count = 0;
+
+    if ( kLogLevel >= kLogVerbose ) {
+        LOG_INFO << "Loading FST hits from MuDst" << endm;
+    }
     if(!mMuDstMaker) {
         LOG_WARN << " No MuDstMaker ... bye-bye" << endm;
         return 0;
@@ -312,15 +316,17 @@ int StFwdHitLoader::loadFstHitsFromMuDst( FwdDataSource::McTrackMap_t &mcTrackMa
         float vPhi = muFstHit->localPosition(1);
         float vZ = muFstHit->localPosition(2);
 
-        int wedgeIndex  = muFstHit->getWedge();
-        int sensorIndex = muFstHit->getSensor();
-        int diskIndex   = muFstHit->getDisk();
+        int diskIndex   = muFstHit->getDisk() - 1;                                    // getDisk() is 1-indexed; convert to 0-indexed
+        int wedgeIndex  = (muFstHit->getWedge() - 1) % kFstNumWedgePerDisk;           // getWedge() is global 1-indexed (1-36); convert to per-disk 0-indexed (0-11)
+        int sensorIndex = muFstHit->getSensor();                                       // getSensor() is already 0-indexed
         int globalIndex = FwdHit::fstGlobalSensorIndex( diskIndex, wedgeIndex, sensorIndex );
+        if ( kLogLevel >= kLogVerbose ) {LOG_INFO << "wedgeIndex: " << wedgeIndex << ", sensorIndex: " << sensorIndex << ", diskIndex: " << diskIndex << ", globalIndex: " << globalIndex << endm;}
 
         float x0 = vR * cos( vPhi );
         float y0 = vR * sin( vPhi );
         hitCov3 = makeFstCovMat( TVector3( x0, y0, vZ ) );
         mSpacepointsFst.push_back( TVector3( x0, y0, vZ)  );
+        if ( kLogLevel >= kLogVerbose ) {LOG_INFO << TString::Format("FST local position: %f %f %f, global position: %f %f %f", vR, vPhi, vZ, x0, y0, vZ) << endm;}
 
         // we use d+4 so that both FTT and FST start at 4
         mFwdHitsFst.push_back(
@@ -373,7 +379,7 @@ int StFwdHitLoader::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
     if ( fstHitCollection && fstHitCollection->numberOfHits() > 0){
         // reuse this to store cov mat
         TMatrixDSym hitCov3(3);
-        if ( kLogLevel >= kLogVerbose ) {LOG_DEBUG << "StFstHitCollection is NOT NULL, loading hits" << endm;}
+        if ( kLogLevel >= kLogVerbose ) {LOG_DEBUG << "StFstHitCollection is NOT NULL, loading FST hits from StEvent" << endm;}
         for ( unsigned int iw = 0; iw < kFstNumWedges; iw++ ){
             StFstWedgeHitCollection * wc = fstHitCollection->wedge( iw );
             if ( !wc ) continue;
@@ -392,7 +398,7 @@ int StFwdHitLoader::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
                     int diskIndex   = iw / kFstNumWedgePerDisk;
                     int globalIndex = FwdHit::fstGlobalSensorIndex( diskIndex, wedgeIndex, sensorIndex );
 
-                    if ( kLogLevel >= kLogVerbose ) {LOG_DEBUG << "diskIndex = " << diskIndex << ", wedgeIndex = " << wedgeIndex << ", sensorIndex = " << sensorIndex << ", globalIndex = " << globalIndex << endm;}
+                    if ( kLogLevel >= kLogVerbose ) {LOG_INFO << "diskIndex = " << diskIndex << ", wedgeIndex = " << wedgeIndex << ", sensorIndex = " << sensorIndex << ", globalIndex = " << globalIndex << endm;}
                     float x0 = vR * cos( vPhi );
                     float y0 = vR * sin( vPhi );
                     hitCov3 = makeFstCovMat( TVector3( x0, y0, vZ ) );

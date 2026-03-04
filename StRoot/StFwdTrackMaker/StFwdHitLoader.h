@@ -127,7 +127,7 @@ class StFwdHitLoader {
     constexpr static int kLogVerbose = 10;
     constexpr static int kLogInfo = 1;
     constexpr static int kLogSilent = 0;
-    constexpr static int kLogLevel = kLogSilent;
+    constexpr static int kLogLevel = kLogVerbose;
     #endif
 
     vector<TVector3> mSpacepointsFtt;

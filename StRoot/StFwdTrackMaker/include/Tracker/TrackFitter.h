@@ -44,7 +44,7 @@ class TrackFitter {
     TVector3 getCurrentSeedPosition() const { return mCurrentSeedPosition; }
 
     // this is used rarely for debugging purposes, especially to check/compare plane misalignment
-    static constexpr bool kUseSpacePoints = true; // use spacepoints instead of planar measurements
+    static constexpr bool kUseSpacePoints = false; // use spacepoints instead of planar measurements
     static constexpr int kVerbose = 1; // verbosity level for debugging
 
     void clear(){
@@ -415,56 +415,64 @@ class TrackFitter {
     genfit::TrackPoint* createTrackPointFromPlanarMeasurement(std::shared_ptr<genfit::Track> fitTrack, FwdHit *fh, int &hitId){
         assert( fh != nullptr && "FwdHit pointer is null, cannot create planar measurement" );
 
-        // Must retrieve the plane first so we can express the hit in local (u,v) coords.
-        // Using the global (x,y) position directly would cause a double-rotation: once
-        // embedded in the global-coordinate hit and again by GenFit's plane transform.
         genfit::SharedPlanePtr plane = getPlaneFor( fh );
         if (!plane) {
             LOG_ERROR << "No plane for hit, cannot create planar measurement" << endm;
             return nullptr;
         }
 
-        // Express the hit in the plane's local (u,v) frame.
-        //
-        // For FST hits we use the strip-native local position (_localPosition[0]=r,
-        // _localPosition[1]=phi_from_inner_edge) stored at hit-loading time from
-        // getMeanRStrip()/getMeanPhiStrip().  These contain no global azimuthal
-        // rotation, so we can reconstruct the correct global position using the
-        // *realistic* plane origin (from GEANT) rather than the ideal geometry.
-        // This correctly handles arbitrary sensor misalignment.
-        //
-        // For FTT (or any hit without strip-native coords), fall back to projecting
-        // the stored global position — which still fixes the double-rotation bug
-        // relative to passing (x,y) directly, though it is only first-order correct
-        // for large misalignments.
-        TVector3 globalPos;
-        if (fh->isFst() && fh->_localPosition[0] >= 0.f) {
-            // Half-width of one FST wedge in phi (30 deg = pi/6, split symmetrically).
-            const float phi_half = 0.5f * kFstNumPhiSegPerWedge * kFstStripPitchPhi;
-            // Realistic azimuthal angle of the sensor centre from the GEANT plane.
-            float phi_center_real = TMath::ATan2(plane->getO().Y(), plane->getO().X());
-            // Inner edge of the sensor in the realistic geometry.
-            float phi_inner_real  = phi_center_real - phi_half;
-            // Absolute phi of this hit using the strip-local offset.
-            float phi_hit = phi_inner_real + fh->_localPosition[1];
-            float r       = fh->_localPosition[0];
-            globalPos.SetXYZ(r * TMath::Cos(phi_hit),
-                             r * TMath::Sin(phi_hit),
-                             plane->getO().Z());
-        } else {
-            globalPos.SetXYZ(fh->getX(), fh->getY(), fh->getZ());
+        if (kVerbose >= kLogLevel::kLogDebug) {
+            LOG_INFO << "Plane for hit (detid=" << fh->_detid << ", planeIdx=" << fh->_genfit_plane_index << "):"
+                 << " O=(" << plane->getO().X() << "," << plane->getO().Y() << "," << plane->getO().Z() << ")"
+                 << " U=(" << plane->getU().X() << "," << plane->getU().Y() << "," << plane->getU().Z() << ")"
+                 << " V=(" << plane->getV().X() << "," << plane->getV().Y() << "," << plane->getV().Z() << ")"
+                 << " FwdHit=(" << fh->getX() << "," << fh->getY() << "," << fh->getZ() << ")"
+                 << endm;
         }
 
-        TVector3 diff = globalPos - plane->getO();
+        // Compute the hit position in the plane's local (u,v) Cartesian frame.
+        // FST planes have U pointing radially and V pointing counterclockwise (increasing
+        // global phi), so with dphi = signed angular offset of the hit from the sensor centre:
+        //   hitOnPlane[0] = r·cos(dphi) − r_origin   (displacement along U, radial)
+        //   hitOnPlane[1] = r·sin(dphi)               (displacement along V, azimuthal CCW)
+        // _localPosition stores strip-native (r, phi_from_strip0_edge) with no embedded
+        // global rotation.  kFstzDirct[e] = +1 if strips count counterclockwise, -1 if
+        // clockwise, so dphi = kFstzDirct[e] * (strip_phi - phi_half) gives the correct
+        // signed angular offset in global phi.
+        // V is normalised to counterclockwise in getFstSensorOrigin, so no sign flip needed
+        // here for even vs odd GEANT wedges.
+        // For FTT, the stored global position is projected directly onto the plane.
         TVectorD hitOnPlane(2);
-        hitOnPlane[0] = diff.Dot(plane->getU());
-        hitOnPlane[1] = diff.Dot(plane->getV());
+        if (fh->isFst() && fh->_localPosition[0] >= 0.f) {
+            const float phi_half = 0.5f * kFstNumPhiSegPerWedge * kFstStripPitchPhi;
+            int   electronicWedge = (fh->_genfit_plane_index / 3) % 12;
+            float r        = fh->_localPosition[0];
+            float dphi     = kFstzDirct[electronicWedge] * (fh->_localPosition[1] - phi_half);
+            float r_origin = plane->getO().Perp();              // radial distance of plane origin
+            hitOnPlane[0]  = r * TMath::Cos(dphi) - r_origin;
+            hitOnPlane[1]  = r * TMath::Sin(dphi);
+        } else {
+            TVector3 diff = TVector3(fh->getX(), fh->getY(), fh->getZ()) - plane->getO();
+            hitOnPlane[0] = diff.Dot(plane->getU());
+            hitOnPlane[1] = diff.Dot(plane->getV());
+        }
+
+        // Debug: compare the FwdHit global position (from ideal geometry at hit loading)
+        // with the global position GenFit derives from the local measurement on the
+        // realistic GEANT plane.  Any difference reflects sensor misalignment.
+        TVector3 measGlobal = plane->toLab(TVector2(hitOnPlane[0], hitOnPlane[1]));
+        if (kVerbose >= kLogLevel::kLogDebug) {
+            LOG_INFO << "PlanarMeasurement pos check (detid=" << fh->_detid << "):"
+                  << " FwdHit=(" << fh->getX() << "," << fh->getY() << "," << fh->getZ() << ")"
+                  << " GenFit=(" << measGlobal.X() << "," << measGlobal.Y() << "," << measGlobal.Z() << ")"
+                  << " deltaPhi=" << (TMath::ATan2(fh->getY(), fh->getX()) * TMath::RadToDeg() - TMath::ATan2(fh->getY(), fh->getX()) * TMath::RadToDeg())
+                  << endm;
+        }
 
         auto tp = new genfit::TrackPoint();
         genfit::PlanarMeasurement *measurement = new genfit::PlanarMeasurement(hitOnPlane, CovMatPlaneLocal(fh, plane), fh->_detid, ++hitId, tp);
         int planeId = fh->_genfit_plane_index;
-        
-        // I do this to make the planeId unique between FST and FTT
+        // Offset FTT plane ids to keep them unique from FST plane ids
         if (fh->isFtt()) {
             planeId = kFstNumSensors + fh->_genfit_plane_index;
         }          
