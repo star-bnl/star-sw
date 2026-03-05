@@ -202,6 +202,34 @@ class TrackFitter {
     } // setupGenfitKalmanFitter
 
     /**
+     * @brief Check whether a covariance matrix is positive definite (Sylvester's criterion).
+     *        Returns false for any NaN/Inf entries or non-positive leading principal minors.
+     *        Call this before creating GenFit measurements to avoid matrix inversion failures
+     *        that would otherwise cause a fatal crash inside processTrack().
+     */
+    static bool isCovMatPositiveDefinite(const TMatrixDSym &cov) {
+        const int n = cov.GetNrows();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (!std::isfinite(cov(i, j))) return false;
+            }
+        }
+        // Check leading principal minors via Sylvester's criterion
+        if (n >= 1 && cov(0, 0) <= 0) return false;
+        if (n >= 2) {
+            double det2 = cov(0,0)*cov(1,1) - cov(0,1)*cov(0,1);
+            if (det2 <= 0) return false;
+        }
+        if (n >= 3) {
+            double det3 = cov(0,0)*(cov(1,1)*cov(2,2) - cov(1,2)*cov(1,2))
+                        - cov(0,1)*(cov(0,1)*cov(2,2) - cov(1,2)*cov(0,2))
+                        + cov(0,2)*(cov(0,1)*cov(1,2) - cov(1,1)*cov(0,2));
+            if (det3 <= 0) return false;
+        }
+        return true;
+    }
+
+    /**
      * @brief Convert the 3x3 covmat to 2x2 by dropping z
      *
      * @param h : hit with cov matrix
@@ -490,6 +518,12 @@ class TrackFitter {
     genfit::TrackPoint* createTrackSpacepointFromMeasurement( std::shared_ptr<genfit::Track> fitTrack, FwdHit *fh, int &hitId ) {
         assert( fh != nullptr && "FwdHit pointer is null, cannot create space point" );
 
+        if (!isCovMatPositiveDefinite(fh->_covmat)) {
+            LOG_WARN << "createTrackSpacepointFromMeasurement: skipping hit with non-positive-definite covariance matrix "
+                     << "(detid=" << fh->_detid << " x=" << fh->getX() << " y=" << fh->getY() << " z=" << fh->getZ() << ")" << endm;
+            return nullptr;
+        }
+
         TVectorD pv(3);
         pv[0] = fh->getX();
         pv[1] = fh->getY();
@@ -645,6 +679,10 @@ class TrackFitter {
             if ( kUseSpacePoints || fh->isPV() ) {
                 LOG_DEBUG << "Treating " << hitType << " hit as a spacepoint" << endm;
                 auto tp = createTrackSpacepointFromMeasurement( mFitTrack, fh, hitId );
+                if (tp == nullptr) {
+                    LOG_WARN << "Skipping hit with invalid covariance (detid=" << fh->_detid << ")" << endm;
+                    continue;
+                }
                 setSortingParameter(fh, tp, idxFtt, idxFst);
                 // add the spacepoint to the track
                 mFitTrack->insertPoint( tp );
@@ -712,7 +750,9 @@ class TrackFitter {
 
 
         } catch (genfit::Exception &e) {
-            LOG_ERROR << "Exception on fit update" << e.what() << endm;
+            LOG_ERROR << "Exception on fit update (genfit): " << e.what() << endm;
+        } catch (std::exception &e) {
+            LOG_ERROR << "Exception on fit update (std): " << e.what() << endm;
         }
         if ( kVerbose > 0 ) {
             LOG_INFO << "Track fit update complete!" << endm;

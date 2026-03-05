@@ -520,7 +520,25 @@ class ForwardTrackMaker {
         /*******************************************************/
         // Get the track from the fitter
         // and set the track in the GenfitTrackResult
-        if (mTrackFitter->getTrack() != nullptr && mTrackFitter->getTrack()->getFitStatus()->isFitConvergedPartially()) {
+        // getFitStatus() can throw genfit::Exception when the fit failed and left no status
+        // (e.g. matrix inversion failure in processTrack that was caught in performFit).
+        // Wrap the whole status-check + set block to prevent an uncaught exception from
+        // reaching std::terminate().
+        bool fitConvergedPartially = false;
+        try {
+            auto t = mTrackFitter->getTrack();
+            if (t != nullptr) {
+                auto fs = t->getFitStatus();
+                if (fs != nullptr)
+                    fitConvergedPartially = fs->isFitConvergedPartially();
+            }
+        } catch (genfit::Exception &e) {
+            LOG_ERROR << "FwdTracker::fitTrack - genfit exception checking fit status: " << e.what() << endm;
+        } catch (std::exception &e) {
+            LOG_ERROR << "FwdTracker::fitTrack - std exception checking fit status: " << e.what() << endm;
+        }
+
+        if (fitConvergedPartially) {
             LOG_DEBUG << "--FitTrack is valid, setting seed and track" << endm;
             gtr.set( seed, mTrackFitter->getTrack() );
 

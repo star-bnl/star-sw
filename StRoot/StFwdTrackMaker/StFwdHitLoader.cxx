@@ -126,6 +126,24 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             hitCov3(1, 0) = (double)point->cov()[1][0];
             hitCov3(1, 1) = (double)point->cov()[1][1];
 
+            LOG_INFO << "Loaded FTT point with local x: " << xcm << " y: " << ycm << " z: " << zcm << ", disk = " << (point->plane()) << endm;
+            LOG_INFO << "\t dx = " << sqrt(hitCov3(0, 0)) << " dy = " << sqrt(hitCov3(1, 1)) << endm;
+            if ( sqrt(hitCov3(0, 0)) != sqrt(hitCov3(0, 0)) ){
+                LOG_ERROR << "Covariance matrix has NaN entries, skipping this hit" << endm;
+                continue;
+            }
+            if ( sqrt(hitCov3(1, 1)) != sqrt(hitCov3(1, 1)) ){
+                LOG_ERROR << "Covariance matrix has NaN entries, skipping this hit" << endm;
+                continue;
+            }
+
+            // for now we skip diagonal strips
+            if ( sqrt(hitCov3(0, 0)) == sqrt(hitCov3(1, 1)) ){
+                LOG_ERROR << "EQUAL dx and dy, skipping" << endm;
+                continue;
+            }
+
+
             // get the track id
             int track_id = point->idTruth();
             shared_ptr<McTrack> mcTrack = nullptr;
