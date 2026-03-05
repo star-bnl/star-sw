@@ -1532,8 +1532,10 @@ class ForwardTrackMaker {
 
             // now look for Ftt hits near the specified state
             // hits_near_plane = findFttHitsNearProjectedState(hitmap[disk], msp);
+            LOG_INFO << "Looking for FTT strips near projected state on disk " << disk << endm;
+            LOG_INFO << "There are " << hitmap[disk].size() << " available FTT strips on this disk" << endm;
             hits_near_plane = findFttStripsNearProjectedState(hitmap[disk], msp);
-            LOG_DEBUG << " Found #FTT strips on plane #" << disk << TString::Format( " = [%ld]", hits_near_plane.size() ) << endm;
+            LOG_INFO << " Found #FTT strips on plane #" << disk << TString::Format( " = [%ld]", hits_near_plane.size() ) << endm;
         } catch (genfit::Exception &e) {
             // Failed to project
             LOG_WARN << "Unable to get Ftt projections: " << e.what() << endm;
@@ -1798,6 +1800,7 @@ class ForwardTrackMaker {
                 }
             } else {
                 LOG_WARN << "Hit with equal covariance in x and y, skipping" << endm;
+                LOG_WARN << "HSX = " << hsx << ", HSY = " << hsy << endm;
             }
 
         } // loop h

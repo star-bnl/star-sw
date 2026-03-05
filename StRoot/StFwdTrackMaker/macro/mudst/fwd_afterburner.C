@@ -35,8 +35,8 @@ bool runPico = true;
 
 
 void loadLibs();
-void fwd_afterburner( 	const Char_t * fileList = "/star/data41/reco/production_pp500_2022/ReversedFullField/P25ib/2022/037/23037043/st_physics_23037043_raw_7000075.MuDst.root", 
-						size_t nEvents = 100 ){
+void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
+						size_t nEvents = 10 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
