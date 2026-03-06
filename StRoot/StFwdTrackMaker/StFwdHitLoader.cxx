@@ -129,17 +129,18 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             LOG_INFO << "Loaded FTT point with local x: " << xcm << " y: " << ycm << " z: " << zcm << ", disk = " << (point->plane()) << endm;
             LOG_INFO << "\t dx = " << sqrt(hitCov3(0, 0)) << " dy = " << sqrt(hitCov3(1, 1)) << endm;
             if ( sqrt(hitCov3(0, 0)) != sqrt(hitCov3(0, 0)) ){
-                LOG_ERROR << "Covariance matrix has NaN entries, skipping this hit" << endm;
+                if ( kLogLevel >= kLogVerbose ) {LOG_INFO << "Covariance matrix has NaN entries, skipping this hit" << endm;}
                 continue;
             }
             if ( sqrt(hitCov3(1, 1)) != sqrt(hitCov3(1, 1)) ){
-                LOG_ERROR << "Covariance matrix has NaN entries, skipping this hit" << endm;
+                if ( kLogLevel >= kLogVerbose ) {LOG_INFO << "Covariance matrix has NaN entries, skipping this hit" << endm;}
                 continue;
             }
 
             // for now we skip diagonal strips
+            // We need to develop the matching algorithm in FwdTracker to be able to use these hits, 
+            // but for now we want to make sure they are not causing issues in the fitter
             if ( sqrt(hitCov3(0, 0)) == sqrt(hitCov3(1, 1)) ){
-                LOG_ERROR << "EQUAL dx and dy, skipping" << endm;
                 continue;
             }
 
