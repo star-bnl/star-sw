@@ -1559,15 +1559,15 @@ class ForwardTrackMaker {
             LOG_WARN << "Unable to get Ftt projections: " << e.what() << endm;
         }
 
-        LOG_DEBUG << "Found " << gtr.mSeed.size() << " existing seed points" << endm;
+        LOG_INFO << "Found " << gtr.mSeed.size() << " existing seed points" << endm;
 
         if ( hits_near_plane.size() > 0 ){
-            LOG_DEBUG << "Adding " << hits_near_plane.size() << " new FTT seed points" << endm;
+            LOG_INFO << "Adding " << hits_near_plane.size() << " new FTT seed points" << endm;
             // check to make sure we dont add duplicates
             std::set<KiTrack::IHit *> hitSet( gtr.mSeed.begin(), gtr.mSeed.end() );
             for ( auto h : hits_near_plane ){
                 if ( hitSet.find( h ) != hitSet.end() ){
-                    LOG_DEBUG << "Hit already in seed, skipping" << endm;
+                    LOG_INFO << "Hit already in seed, skipping" << endm;
                     continue;
                 } else {
                     gtr.mSeed.push_back( h );
@@ -1638,8 +1638,19 @@ class ForwardTrackMaker {
 
         if ( nearby_hits.size() > 0 ){
             LOG_DEBUG << "Adding " << nearby_hits.size() << " new FST seed points from disk " << disk << endm;
-            gtr.mSeed.insert( gtr.mSeed.end(), nearby_hits.begin(), nearby_hits.end() );
-            return nearby_hits.size();
+            // check to make sure we dont add duplicates (hits already on seed from a prior refit step)
+            std::set<KiTrack::IHit *> hitSet( gtr.mSeed.begin(), gtr.mSeed.end() );
+            int added = 0;
+            for ( auto h : nearby_hits ){
+                if ( hitSet.find( h ) != hitSet.end() ){
+                    LOG_DEBUG << "FST hit already in seed, skipping" << endm;
+                    continue;
+                } else {
+                    gtr.mSeed.push_back( h );
+                    added++;
+                }
+            }
+            return added;
         }
         return 0;
     } // addFstHits
@@ -1755,7 +1766,7 @@ class ForwardTrackMaker {
      *
      * @return compatible FTT hits
     */
-    Seed_t findFttStripsNearProjectedState(Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double thresholdPhi = 0.004 * 3 , double thresholdR = 30, double thresholdX = 7.5, double thresholdY = 7.5) {
+    Seed_t findFttStripsNearProjectedState(Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double thresholdPhi = 0.004 * 30 , double thresholdR = 30, double thresholdX = 7.5, double thresholdY = 7.5) {
 
         Seed_t found_hits;
         if (available_hits.size() == 0) {
@@ -1786,8 +1797,8 @@ class ForwardTrackMaker {
 
         for (auto h : available_hits) {
             
-            double hsx = dynamic_cast<FwdHit*>(h)->_covmat(0, 0);
-            double hsy = dynamic_cast<FwdHit*>(h)->_covmat(1, 1);
+            double hsx = sqrt(dynamic_cast<FwdHit*>(h)->_covmat(0, 0));
+            double hsy = sqrt(dynamic_cast<FwdHit*>(h)->_covmat(1, 1));
 
             lv2.SetPxPyPzE( h->getX(), h->getY(), 0, 1 );
             double sr = fabs(lv1.Pt() - lv2.Pt());
@@ -1795,9 +1806,18 @@ class ForwardTrackMaker {
             double sx = fabs(h->getX() - msp.getPos().X());
             double sy = fabs(h->getY() - msp.getPos().Y());
 
-            if (verbose){
+            // Show the comparison of the projected state to the hit position, including the hit covariances, for debugging
+            // if the hit is within 5x the thresholds in both phi and R, print out the details for debugging
+            if (verbose && sp < thresholdPhi && sr < thresholdR){
                 int tid = dynamic_cast<FwdHit*>(h)->_tid;
-                printf( "\t vs. hit@(%f+/-%f, %f+/-%f) => dx=%f, dy=%f, dR=%f, dPhi=%f (tid=%d)\n", h->getX(), hsx, h->getY(), hsy, sx, sy, sr, sp, tid );
+                printf( "\t vs. hit@(%f+/-%f, %f+/-%f) => dx=%f, dy=%f, dR=%f, dPhi=%f (tid=%d), strip=", h->getX(), hsx, h->getY(), hsy, sx, sy, sr, sp, tid );
+                if ( hsx > hsy ){
+                    printf( "horizontal\n" );
+                } else if ( hsy > hsx ){
+                    printf( "vertical\n" );
+                } else {
+                    printf( "unknown orientation\n" );
+                }
             }
     
             if ( hsx > hsy ){ // horizontal strip
@@ -1826,16 +1846,24 @@ class ForwardTrackMaker {
         // check threshold and add the closest horizontal strip hit
         if (  fabs(horizontalMin_dp) < thresholdPhi && fabs(horizontalMin_dr) < thresholdR && (horizontalMin_dx < thresholdX || horizontalMin_dy < thresholdY) ) {
             found_hits.push_back(horizontalClosest);
+            LOG_INFO << "Adding horizontal strip hit with dPhi = " << horizontalMin_dp << ", dR = " << horizontalMin_dr << ", dx = " << horizontalMin_dx << ", dy = " << horizontalMin_dy << endm;
         }
         
         // check threshold and add the closest vertical strip hit
         if (  fabs(verticalMin_dp) < thresholdPhi && fabs(verticalMin_dr) < thresholdR && (verticalMin_dx < thresholdX || verticalMin_dy < thresholdY) ) {
             found_hits.push_back(verticalClosest);
+            LOG_INFO << "Adding vertical strip hit with dPhi = " << verticalMin_dp << ", dR = " << verticalMin_dr << ", dx = " << verticalMin_dx << ", dy = " << verticalMin_dy << endm;
         }
         
 
-        LOG_INFO << "Closest horizontal FTT strip to FST state: " << Form( "dR=%f, dPhi=%f, dx=%f, dy=%f (tid=%d) ", verticalMin_dr, verticalMin_dp, verticalMin_dx, verticalMin_dy, dynamic_cast<FwdHit*>(verticalClosest)->_tid ) << endm;
-        LOG_INFO << "Closest vertical FTT strip to FST state: " << Form( "dR=%f, dPhi=%f, dx=%f, dy=%f (tid=%d) ", horizontalMin_dr, horizontalMin_dp, horizontalMin_dx, horizontalMin_dy, dynamic_cast<FwdHit*>(horizontalClosest)->_tid ) << endm;
+        if ( horizontalClosest )
+            LOG_INFO << "Closest horizontal FTT strip to FST state: " << Form( "dR=%f, dPhi=%f, dx=%f, dy=%f (tid=%d) ", horizontalMin_dr, horizontalMin_dp, horizontalMin_dx, horizontalMin_dy, dynamic_cast<FwdHit*>(horizontalClosest)->_tid ) << endm;
+        else
+            LOG_INFO << "No horizontal FTT strip found near projected state" << endm;
+        if ( verticalClosest )
+            LOG_INFO << "Closest vertical FTT strip to FST state: " << Form( "dR=%f, dPhi=%f, dx=%f, dy=%f (tid=%d) ", verticalMin_dr, verticalMin_dp, verticalMin_dx, verticalMin_dy, dynamic_cast<FwdHit*>(verticalClosest)->_tid ) << endm;
+        else
+            LOG_INFO << "No vertical FTT strip found near projected state" << endm;
 
         return found_hits;
     } // findFttStripsNearProjectedState

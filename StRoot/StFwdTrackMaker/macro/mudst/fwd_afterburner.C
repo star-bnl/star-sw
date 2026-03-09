@@ -2,6 +2,8 @@
 //usr/bin/env root4star -l -b -q $0'("'${1:-st_physics_23055058_raw_1500001.MuDst.root}'",'${2:-100}')'; exit $?
 // that is a valid shebang to run script as executable, but with only one arg
 
+#include <typeinfo.h>
+
 // For fast fwd tracking run with Db=false, fcs=false, FwdQa=false
 bool runDb = true;
 bool runFttChain = false;
@@ -21,22 +23,33 @@ bool runPico = true;
 // bool runFwdQa = false;
 // bool runFitQa = true;
 
-// Minimal
-bool runDb = true;
+// Fast tracking without FCS
+bool runDb = false;
 bool runFttChain = true;
-bool runFcsChain = true;
+bool runFcsChain = false;
 bool runFwdChain = true;
 bool refillMuDst = false;
 bool runFwdQa = false;
 bool runFitQa = false;
 bool runPico = true;
 
+
+// Memory Baseline
+// bool runDb = false;
+// bool runFttChain = true;
+// bool runFcsChain = false;
+// bool runFwdChain = false;
+// bool refillMuDst = false;
+// bool runFwdQa = false;
+// bool runFitQa = false;
+// bool runPico = true;
+
 #include "StMemStat.h"
 
 
 void loadLibs();
 void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 10 ){
+						size_t nEvents = 1000 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
@@ -185,6 +198,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	}
 	/*******************************************************************************************/
 
+	// gMessMgr->MemoryOff();
 
 	/*******************************************************************************************/
 	// Initialize chain
@@ -194,9 +208,9 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	cout << "CHAIN INIT DONE? (good==0): " << iInit << endl;
 	// ensure that the chain initializes
 
-	if ( iInit ) 
+	if ( iInit )
 		chain->Fatal(iInit,"on init");
-
+	
 	// print the chain status
 	chain->PrintInfo();
 
@@ -216,7 +230,8 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 		if (i > 0) // skip first event to make it consistent
 			stmem.Start();
 		chain->Clear();
-		fwdTrack->SetDebug(1);
+		if (fwdTrack)
+			fwdTrack->SetDebug(1);
 		
         if (kStOK != chain->Make())
             break;
@@ -310,6 +325,9 @@ void loadLibs(){
     gSystem->Load( "StFwdTrackMaker.so" );
 	gSystem->Load( "StFwdUtils.so" );
     gSystem->Load("libStEpdUtil.so");
+
+	gSystem->Load("StStarLogger.so");
+
 	/*******************************************************************************************/
 
 

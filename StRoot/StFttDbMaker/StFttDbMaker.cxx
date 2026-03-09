@@ -51,15 +51,19 @@ int StFttDbMaker::InitRun(int runNumber) {
     std::ifstream file("vmm_map.dat");
     if(file.is_open()){ // debugging / calibration only
         file.close();
-        std::cout << "Loading Hardware Map from FILE!!" << std::endl;
-        std::cout << "Remove / rename file to load from DB" << std::endl;
+        LOG_INFO << "Loading Hardware Map from FILE!!" << endm;
+        LOG_INFO << "Remove / rename file to load from DB" << endm;
         mFttDb->loadHardwareMapFromFile( "vmm_map.dat" );
         // mFttDb->loadHardwareMapFromFile( "/star/u/wangzhen/sTGC/Commissioning/ClusterFinder/PointMaker_building_test_0616/star-sw-1/StRoot/StFwdTrackMaker/macro/vmm_map.dat" );
     } else { // default
 
         TDataSet *mDbDataSet = GetDataBase("Geometry/ftt/fttHardwareMap");
-        St_fttHardwareMap *dataset = (St_fttHardwareMap*) mDbDataSet->Find("fttHardwareMap");
-        mFttDb->loadHardwareMapFromDb( dataset );
+        if (mDbDataSet){
+          St_fttHardwareMap *dataset = (St_fttHardwareMap*) mDbDataSet->Find("fttHardwareMap");
+          mFttDb->loadHardwareMapFromDb( dataset );
+        } else {
+          LOG_WARN << "Cannot access Geometry/ftt/fttHardwareMap and no local map given" << endm;
+        }
     }
 
     loadDataWindows();
@@ -71,6 +75,7 @@ void StFttDbMaker::loadDataWindows(){
   TDataSet *mDbDataSetDW = GetDataBase("Calibrations/ftt/fttDataWindowsB");
 
     if ( mDbDataSetDW ) {
+        LOG_INFO << "StFttDbMaker::loadDataWindows from database" << endm;
         St_fttDataWindowsB *dataset = (St_fttDataWindowsB*) mDbDataSetDW->Find("fttDataWindowsB");
         mFttDb->loadDataWindowsFromDb( dataset );
     } else {
