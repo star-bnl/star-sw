@@ -313,7 +313,9 @@ void StFttClusterPointMaker::MakeGlobalPoints() {
         mFttDb->getGloablOffset_ClusterPoint( p->plane(), p->quadrant(), dx, sx, dy, sy, dz, sz );
 
         StThreeVectorD global;
-        global.set( (x*sx)+dx, (y*sy)+dy, z+dz );
+        // Scale by 10 to convert from mm to cm, since the geometry is in mm but the points are in cm
+        // Z is already in cm since it is just the offset
+        global.set( ((x*sx)+dx)/10.0, ((y*sy)+dy)/10.0, z+dz );
 
         if (p->quadrant() == 1 || p->quadrant() == 3) {
             p->setSigmaXY(-p->sigmaXY());
