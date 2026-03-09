@@ -23,7 +23,7 @@ TClonesArray *fcsClusters = new TClonesArray("StPicoFcsCluster", 1000);
 TClonesArray *picoEvent   = new TClonesArray("StPicoEvent", 1);
 // StPicoEvent *picoEvent = new StPicoEvent();
 
-void data_lambda( TString glob = "/Users/brandenburg.89/star/data/Run22-pp-510GeV/*.picoDst.root", int tt = 0 ){
+void data_lambda( TString glob = "/Users/Nick/STAR/fwd_qa/*picoDst.root", int tt = 0 ){
 
     testTrackType = tt;
     cout << "Analyzing Track Type: " << testTrackType << endl;
