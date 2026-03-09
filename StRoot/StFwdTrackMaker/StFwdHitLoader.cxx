@@ -22,6 +22,9 @@
 #include "StMuDSTMaker/COMMON/StMuFstCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFstHit.h"
 
+#define LOG_DEBUG if(false) std::cerr
+#define LOG_INFO if(false) std::cerr
+
 TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.0040906154) {
     // we can calculate the CovMat since we know the det info, but in future we should probably keep this info in the hit itself
     // measurements on a plane only need 2x2
@@ -76,6 +79,7 @@ TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.00
 }
 
 int StFwdHitLoader::loadFttHits( FwdDataSource::McTrackMap_t &mcTrackMap, FwdDataSource::HitMap_t &hitMap){
+    // cout << "log4cxx NDC depth: " << log4cxx::NDC::getDepth() << endl;
     if ( mFttDataSource == StFwdHitLoader::DataSource::IGNORE ){
         // this is a warning because it should not be set during production
         // but it is useful for testing
@@ -126,8 +130,19 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             hitCov3(1, 0) = (double)point->cov()[1][0];
             hitCov3(1, 1) = (double)point->cov()[1][1];
 
-            LOG_INFO << "Loaded FTT point with local x: " << xcm << " y: " << ycm << " z: " << zcm << ", disk = " << (point->plane()) << endm;
-            LOG_INFO << "\t dx = " << sqrt(hitCov3(0, 0)) << " dy = " << sqrt(hitCov3(1, 1)) << endm;
+            LOG_INFO << "Loaded FTT point with local x: " << xcm << " y: " << ycm << " z: " << zcm << ", disk = " << ((int)point->plane()) << endm;
+            stringstream sstr;
+            sstr << "\t dx = " << sqrt(hitCov3(0, 0)) << " dy = " << sqrt(hitCov3(1, 1));
+            if ( sqrt(hitCov3(0, 0)) > sqrt(hitCov3(1, 1)) ){
+                sstr << " (horizontal strip)";
+            } else if ( sqrt(hitCov3(1, 1)) > sqrt(hitCov3(0, 0)) ){
+                sstr << " (vertical strip)";
+            } else {
+                sstr << " (unknown orientation)";
+            }
+            sstr << endm;
+            LOG_INFO << sstr.str() << endm;
+
             if ( sqrt(hitCov3(0, 0)) != sqrt(hitCov3(0, 0)) ){
                 if ( kLogLevel >= kLogVerbose ) {LOG_INFO << "Covariance matrix has NaN entries, skipping this hit" << endm;}
                 continue;
@@ -141,6 +156,9 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             // We need to develop the matching algorithm in FwdTracker to be able to use these hits, 
             // but for now we want to make sure they are not causing issues in the fitter
             if ( sqrt(hitCov3(0, 0)) == sqrt(hitCov3(1, 1)) ){
+                LOG_INFO << "Skipping FTT point with equal covariance (diagonal/combined): "
+                         << "dx=" << sqrt(hitCov3(0, 0)) << " dy=" << sqrt(hitCov3(1, 1))
+                         << " disk=" << ((int)point->plane()) << endm;
                 continue;
             }
 
