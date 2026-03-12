@@ -177,8 +177,9 @@ void StFttDb::loadDataWindowsFromDb( St_fttDataWindowsB * dataset ) {
         dwMap.clear();
 
         fttDataWindowsB_st *table = dataset->GetTable();
+        const int nEntries = sizeof(table[0].uuid) / sizeof(table[0].uuid[0]);
         for (Int_t i = 0; i < rows; i++) {
-            for ( int j = 0; j < StFttDb::nVMM; j++ ) {
+            for ( int j = 0; j < nEntries; j++ ) {
                 // printf( "[feb=%d, vmm=%d, ch=%d] ==> [row=%d, strip%d]\n", table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j], table[i].row[j], table[i].strip[j] );
 
 
@@ -218,8 +219,9 @@ void StFttDb::loadHardwareMapFromDb( St_fttHardwareMap * dataset ) {
         rMap.clear();
 
         fttHardwareMap_st *table = dataset->GetTable();
+        const int nEntries = sizeof(table[0].feb) / sizeof(table[0].feb[0]);
         for (Int_t i = 0; i < rows; i++) {
-            for ( int j = 0; j < 1250; j++ ) {
+            for ( int j = 0; j < nEntries; j++ ) {
                 uint16_t key = packKey( table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j] );
                 uint16_t val = packVal( table[i].row[j], table[i].strip[j] );
                 mMap[ key ] = val;
@@ -243,7 +245,7 @@ void StFttDb::loadHardwareMapFromFile( std::string fn ){
         return;
     }
 
-    mMap.clear();
+    rMap.clear();
     string hs0, hs1, hs2, hs3, hs4;
     // HEADER:
     // Row_num    FEB_num    VMM_num    VMM_ch         strip_ch

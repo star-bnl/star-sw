@@ -19,6 +19,7 @@ StFttHitCalibMaker::StFttHitCalibMaker(const char *name):
 StMaker("fttHitCalib",name), mHelper(nullptr)
 {                                            
     LOG_DEBUG << "StFttHitCalibMaker::ctor"  << endm;
+    this->mCalibMode = StFttHitCalibMaker::CalibMode::Production;
     mHelper = new HitCalibHelper();
 }
 //_____________________________________________________________                                                       
@@ -44,6 +45,7 @@ Int_t StFttHitCalibMaker::InitRun(Int_t runnumber)
 //_____________________________________________________________                                                       
 Int_t StFttHitCalibMaker::FinishRun(Int_t runnumber)
 { 
+    mHelper->clear();
     return kStOk;
 }
 

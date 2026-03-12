@@ -146,29 +146,36 @@ StFttClusterMaker::Make()
 
     size_t nClusters = 0;
     LOG_DEBUG << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
+
+    static const std::vector<StFttRawHit*> emptyHits;
+    auto getHits = [&]( const std::map<UChar_t, std::vector<StFttRawHit*>>& m, UChar_t key ) -> const std::vector<StFttRawHit*>& {
+        auto it = m.find( key );
+        return it != m.end() ? it->second : emptyHits;
+    };
+
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
 
-            auto hClusters = FindClusters( hStripsPerRob[iRob] );
-            // Add them to StEvent  
+            auto hClusters = FindClusters( getHits( hStripsPerRob, iRob ) );
+            // Add them to StEvent
             for ( StFttCluster * clu : hClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto vClusters = FindClusters( vStripsPerRob[iRob] );
-            // Add them to StEvent  
+            auto vClusters = FindClusters( getHits( vStripsPerRob, iRob ) );
+            // Add them to StEvent
             for ( StFttCluster * clu : vClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto hdClusters = FindClusters( dhStripsPerRob[iRob] );
-            // Add them to StEvent  
+            auto hdClusters = FindClusters( getHits( dhStripsPerRob, iRob ) );
+            // Add them to StEvent
             for ( StFttCluster * clu : hdClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto vdClusters = FindClusters( dvStripsPerRob[iRob] );
-            // Add them to StEvent  
+            auto vdClusters = FindClusters( getHits( dvStripsPerRob, iRob ) );
+            // Add them to StEvent
             for ( StFttCluster * clu : vdClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
@@ -257,7 +264,7 @@ bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
 } // PassTimeCut
 
 
-StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, size_t &pos ){
+StFttRawHit * StFttClusterMaker::FindMaxAdc( const std::vector<StFttRawHit *>& hits, size_t &pos ){
     auto itMax = std::max_element(hits.begin(),
                              hits.end(),
                              [](const StFttRawHit* a,const StFttRawHit* b) { return a->adc() < b->adc(); });
@@ -267,7 +274,7 @@ StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, si
     return *itMax;
 }
 
-void StFttClusterMaker::SearchClusterEdges( std::vector< StFttRawHit * > hits, 
+void StFttClusterMaker::SearchClusterEdges( const std::vector< StFttRawHit * >& hits, 
                                             size_t start, // start index at MaxADC
                                             size_t &left, size_t &right ){
     // set initial values
@@ -355,9 +362,14 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     // m2Sum = accumulated variance (2nd moment)
 
     clu->setSumAdc( m0Sum );
-    clu->setX( m1Sum / m0Sum );
-    float var = (m2Sum - m1Sum*m1Sum / m0Sum) / m0Sum;
-    clu->setSigma( sqrt( var ) );
+    if ( m0Sum > 0 ){
+        clu->setX( m1Sum / m0Sum );
+        float var = (m2Sum - m1Sum*m1Sum / m0Sum) / m0Sum;
+        clu->setSigma( sqrt( var ) );
+    } else {
+        clu->setX( -999 );
+        clu->setSigma( -999 );
+    }
 }
 
 
@@ -436,13 +448,15 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
             clu->addRawHit( hits[i] );
         }
 
+        // Take ownership before calling CalculateClusterInfo so clu is not leaked on throw
+        clusters.push_back( clu );
+
         // Compute cluster information from the added hits
         CalculateClusterInfo( clu );
 
         if (mDebug){
             LOG_INFO << *clu << endm;;
         }
-        clusters.push_back( clu );
 
         // Now erase all hits from this cluster so that we can move on to find the next one
         hits.erase( hits.begin() + left, hits.begin() + right + 1 );

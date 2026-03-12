@@ -370,6 +370,7 @@ void StFttClusterPointMaker::MakeGeantPoints() {
 
         if ( track_vol_count[ std::make_pair(track_id, volume_id) ] > 1 ) {
             printf( "Skipping hit on same track/vol \n" );
+            continue; // skip hits from the same track on the same volume, since we are treating them as clusters and don't want to double count
         }
         int plane_id = (volume_id - 1) / 100;           // from 1 - 16. four chambers per station
         // extract tens (10, 20, 30, 40) and units (0-9) from volume_id
@@ -422,7 +423,6 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         mFttCollection->addPoint(point);
 
     } // loop on hits
-    std::pair<int, int> p;
     
     // for ( auto kv : track_vol_count ){
     //     printf( "track=%d, vol=%d => count = %d\n", kv.first.first, kv.first.second, kv.second);

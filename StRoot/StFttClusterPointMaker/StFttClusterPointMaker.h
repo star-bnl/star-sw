@@ -41,7 +41,6 @@ private:
     Bool_t               mUseTestData;
     Bool_t               mUseGeantData; // if true, use the geant hits to make points
     StFttDb*             mFttDb;
-    std::vector<StFttPoint*> mFttPoint;
     std::vector<StFttCluster *> clustersPerRob[StFttDb::nRob][StFttDb::nStripOrientations]; //save the cluster for per quadrant
 
     inline bool is_Group1(int row_x, int row_y, double x, double y) const { return ( (14.60 <= x && x <= 172.29) && (14.60 <= y && y <= 172.29) && (row_x == 0) && (row_y == 0) ); }
