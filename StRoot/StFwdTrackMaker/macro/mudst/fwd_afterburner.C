@@ -4,15 +4,15 @@
 
 #include <typeinfo.h>
 
-// For fast fwd tracking run with Db=false, fcs=false, FwdQa=false
-bool runDb = true;
-bool runFttChain = false;
-bool runFcsChain = true;
-bool runFwdChain = true;
-bool refillMuDst = false;
-bool runFwdQa = false;
-bool runFitQa = false;
-bool runPico = true;
+// Fast fwd tracking without DB
+// bool runDb = false;
+// bool runFttChain = true;
+// bool runFcsChain = false; 
+// bool runFwdChain = true;
+// bool refillMuDst = false;
+// bool runFwdQa = false;
+// bool runFitQa = false;
+// bool runPico = true;
 
 // For EPD QA only
 // bool runDb = false;
@@ -23,10 +23,10 @@ bool runPico = true;
 // bool runFwdQa = false;
 // bool runFitQa = true;
 
-// Fast tracking without FCS
-bool runDb = false;
+// Tracking without FCS (but with DB)
+bool runDb = true;
 bool runFttChain = true;
-bool runFcsChain = false;
+bool runFcsChain = false; 
 bool runFwdChain = true;
 bool refillMuDst = false;
 bool runFwdQa = false;
@@ -49,7 +49,7 @@ bool runPico = true;
 
 void loadLibs();
 void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 1000 ){
+						size_t nEvents = 100 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
@@ -118,7 +118,8 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 		gSystem->Load("libStFcsClusterMaker.so");
 		
 		StFcsWaveformFitMaker *fcsWFF = new StFcsWaveformFitMaker();
-		fcsWFF->setEnergySelect(0);
+		// This should only be used for simulated data, for real data this done in the database
+		// fcsWFF->setEnergySelect(0);
 		StFcsClusterMaker *fcsclu = new StFcsClusterMaker();
 	}
 	/*******************************************************************************************/
