@@ -112,19 +112,40 @@ StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed
 //_____________________________________________________________________________________________
 StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title, bool local ) : StHitCollection(name,title), mHits(),mLocal(local) 
 { 
-  setVolumeNumbers = [=]( TrackerHit* hit ) -> AgMLExtension* {
-    bool result=true;
-    int inumbv = 0;
-    AgMLExtension* agmlext = 0;
-    for ( int ilvl=0; ilvl<gGeoManager->GetCurrentNavigator()->GetLevel()+1;ilvl++ ) {
-      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      agmlext = getExtension( volume ); 
-      if ( 0 == agmlext )                  continue; // but probably an error
-      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
-      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
-    }
-    return agmlext;
-  };
+  TString name_ = name;
+
+  if ( name_.Contains("BRSG") ) {
+    setVolumeNumbers = [=]( TrackerHit* hit ) -> AgMLExtension* {
+      bool result=true;
+      AgMLExtension* agmlext = 0;
+      int inumbv = 0;
+      for ( int ilvl=0; ilvl<gGeoManager->GetCurrentNavigator()->GetLevel()+1;ilvl++ ) {
+	TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+	agmlext = getExtension( volume ); 
+	if ( 0 == agmlext )                  continue; // but probably an error
+	if ( !(ilvl==4) && !(ilvl==5) && !(ilvl==10) && !(ilvl==12) ) continue;  // BTOF sensitive volume path at levels 4 5 10 and 12
+	hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+      }
+      return agmlext;
+    };
+
+  }
+  else {
+    setVolumeNumbers = [=]( TrackerHit* hit ) -> AgMLExtension* {
+      bool result=true;
+      AgMLExtension* agmlext = 0;
+      int inumbv = 0;
+      for ( int ilvl=0; ilvl<gGeoManager->GetCurrentNavigator()->GetLevel()+1;ilvl++ ) {
+	TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+	agmlext = getExtension( volume ); 
+	if ( 0 == agmlext )                  continue; // but probably an error
+	if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+	hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+      }
+      return agmlext;
+    };
+
+  }
 }
 //_____________________________________________________________________________________________
 StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) 
