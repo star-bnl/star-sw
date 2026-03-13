@@ -110,9 +110,43 @@ ostream&  operator<<(ostream& os,  const CalorimeterHit& hit) {
 //_____________________________________________________________________________________________
 StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed(name,title){ }
 //_____________________________________________________________________________________________
-StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title, bool local ) : StHitCollection(name,title), mHits(),mLocal(local) { }
+StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title, bool local ) : StHitCollection(name,title), mHits(),mLocal(local) 
+{ 
+  setVolumeNumbers = [=]( TrackerHit* hit ) -> bool {
+    bool result=true;
+    int inumbv = 0;
+    AgMLExtension* agmlext = 0;
+    for ( int ilvl=0; ilvl<gGeoManager->GetCurrentNavigator()->GetLevel()+1;ilvl++ ) {
+      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+      agmlext = getExtension( volume ); 
+      if ( 0 == agmlext )                  continue; // but probably an error
+      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+
+      result &= (hit->numbv[ inumbv++ ] == hit->copy[ilvl]);
+
+    }
+    return result;
+  };
+}
 //_____________________________________________________________________________________________
-StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) { }
+StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) 
+{ 
+  setVolumeNumbers = [=]( CalorimeterHit* hit ) -> bool {
+    bool result=true;
+    int inumbv = 0;
+    AgMLExtension* agmlext = 0;
+    for ( int ilvl=0; ilvl<gGeoManager->GetCurrentNavigator()->GetLevel()+1;ilvl++ ) {
+      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+      agmlext = getExtension( volume ); 
+      if ( 0 == agmlext )                  continue; // but probably an error
+      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+
+      result &= (hit->numbv[ inumbv++ ] == hit->copy[ilvl]);
+
+    }
+    return result;
+  };
+}
 //_____________________________________________________________________________________________
 
 
@@ -213,6 +247,7 @@ void StTrackerHitCollection::ProcessHits() {
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
+    assert( setVolumeNumbers( hit ) );
 
     // Set the volume unique ID
     assert(agmlext);
@@ -418,6 +453,8 @@ void StCalorimeterHitCollection::ProcessHits() {
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
+
+    assert( setVolumeNumbers( hit ) );
 
     // Set the volume unique ID
     assert(agmlext);

@@ -4,12 +4,14 @@
 class DetectorHit;
 class TrackerHit;
 class CalorimeterHit;
+class AgMLExtesion;
 
 #include <TNamed.h>
 #include <TVector.h>
 #include <vector>
 #include <map>
 #include <iostream>
+#include <functional>
 
 class TVirtualMCStack;
 
@@ -76,6 +78,8 @@ protected:
 
   bool mLocal;
 
+  std::function< bool( TrackerHit* hit ) > setVolumeNumbers;
+
   ClassDef(StTrackerHitCollection,0);
 
 };
@@ -111,6 +115,8 @@ protected:
   std::vector<CalorimeterHit*> mHits;
   double mBirk[3];
   double mEsum;
+
+  std::function< bool( CalorimeterHit* hit ) > setVolumeNumbers;
 
   ClassDef(StCalorimeterHitCollection,0);
 
