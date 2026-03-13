@@ -112,7 +112,7 @@ StHitCollection::StHitCollection( const char* name, const char* title ) : TNamed
 //_____________________________________________________________________________________________
 StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* title, bool local ) : StHitCollection(name,title), mHits(),mLocal(local) 
 { 
-  setVolumeNumbers = [=]( TrackerHit* hit ) -> bool {
+  setVolumeNumbers = [=]( TrackerHit* hit ) -> AgMLExtension* {
     bool result=true;
     int inumbv = 0;
     AgMLExtension* agmlext = 0;
@@ -121,17 +121,15 @@ StTrackerHitCollection::StTrackerHitCollection( const char* name, const char* ti
       agmlext = getExtension( volume ); 
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
-
-      result &= (hit->numbv[ inumbv++ ] == hit->copy[ilvl]);
-
+      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
-    return result;
+    return agmlext;
   };
 }
 //_____________________________________________________________________________________________
 StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const char* title ) : StHitCollection(name,title), mHits(), mBirk{1.0,0.0130,9.6E-6},mEsum(0) 
 { 
-  setVolumeNumbers = [=]( CalorimeterHit* hit ) -> bool {
+  setVolumeNumbers = [=]( CalorimeterHit* hit ) -> AgMLExtension* {
     bool result=true;
     int inumbv = 0;
     AgMLExtension* agmlext = 0;
@@ -140,11 +138,9 @@ StCalorimeterHitCollection::StCalorimeterHitCollection( const char* name, const 
       agmlext = getExtension( volume ); 
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
-
-      result &= (hit->numbv[ inumbv++ ] == hit->copy[ilvl]);
-
+      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
-    return result;
+    return agmlext;
   };
 }
 //_____________________________________________________________________________________________
@@ -238,16 +234,16 @@ void StTrackerHitCollection::ProcessHits() {
     // only writes to the current level, so if hit is not new or cleared, need to clear by hand.
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
 
-    int inumbv = 0;
-    AgMLExtension* agmlext = 0;
-    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
-      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      agmlext = getExtension( volume ); 
-      if ( 0 == agmlext )                  continue; // but probably an error
-      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
-      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
-    }
-    assert( setVolumeNumbers( hit ) );
+    //    int inumbv = 0;
+    //    AgMLExtension* agmlext = 0;
+    //    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
+    //      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+    //      agmlext = getExtension( volume ); 
+    //      if ( 0 == agmlext )                  continue; // but probably an error
+    //      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+    //      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+    //    }
+    auto* agmlext = setVolumeNumbers( hit );
 
     // Set the volume unique ID
     assert(agmlext);
@@ -444,17 +440,17 @@ void StCalorimeterHitCollection::ProcessHits() {
     gGeoManager->GetBranchNumbers( hit->copy, hit->volu );
 
     // Set reduced volume path
-    int inumbv = 0;
-    AgMLExtension* agmlext = 0;
-    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
-      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      agmlext = getExtension(volume);
-      if ( 0 == agmlext )                  continue; // but probably an error
-      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
-      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
-    }
+    //    int inumbv = 0;
+    //    AgMLExtension* agmlext = 0;
+    //    for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
+    //      TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
+    //      agmlext = getExtension(volume);
+    //      if ( 0 == agmlext )                  continue; // but probably an error
+    //      if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
+    //      hit->numbv[ inumbv++ ] = hit->copy[ilvl];
+    //    }
 
-    assert( setVolumeNumbers( hit ) );
+    auto* agmlext = setVolumeNumbers( hit );
 
     // Set the volume unique ID
     assert(agmlext);

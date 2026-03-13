@@ -4,7 +4,7 @@
 class DetectorHit;
 class TrackerHit;
 class CalorimeterHit;
-class AgMLExtesion;
+class AgMLExtension;
 
 #include <TNamed.h>
 #include <TVector.h>
@@ -78,7 +78,7 @@ protected:
 
   bool mLocal;
 
-  std::function< bool( TrackerHit* hit ) > setVolumeNumbers;
+  std::function< AgMLExtension*( TrackerHit* hit ) > setVolumeNumbers;
 
   ClassDef(StTrackerHitCollection,0);
 
@@ -116,7 +116,7 @@ protected:
   double mBirk[3];
   double mEsum;
 
-  std::function< bool( CalorimeterHit* hit ) > setVolumeNumbers;
+  std::function< AgMLExtension*( CalorimeterHit* hit ) > setVolumeNumbers;
 
   ClassDef(StCalorimeterHitCollection,0);
 
