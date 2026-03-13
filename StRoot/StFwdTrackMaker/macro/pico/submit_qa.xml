@@ -1,0 +1,31 @@
+<job name="fwdQA_Other" simulateSubmission="false" maxFilesPerProcess="1" fileListSyntax="paths">
+    <stdout URL="file:/gpfs01/star/pwg/nickjindal14/fwd_lambda/star-sw-fwd/StRoot/StFwdTrackMaker/macro/pico/batch_logs/log_$JOBID.log" />
+    <stderr URL="file:/gpfs01/star/pwg/nickjindal14/fwd_lambda/star-sw-fwd/StRoot/StFwdTrackMaker/macro/pico/batch_logs/err_$JOBID.err" />
+    <output fromScratch="*.root" toURL="file:/gpfs01/star/pwg/nickjindal14/fwd_lambda/star-sw-fwd/StRoot/StFwdTrackMaker/macro/pico/batch_output/" />
+    <input URL="filelist:/gpfs01/star/pwg/nickjindal14/fwd_lambda/star-sw-fwd/StRoot/StFwdTrackMaker/macro/pico/sorted_first_1000.list" />
+    <command>
+        echo "===== COMMAND SECTION STARTED ====="
+        setup 64b
+        starver dev
+        ln -s "$FILELIST" input.lis
+        ls -lh
+        root -l -b -q qa_master.C+\(3,\"input.lis\"\)
+        echo "===== ROOT MACRO COMPLETED ====="
+        ls -lh *.root
+    </command>
+    <SandBox>
+        <Package>
+            <File>file:./qa_master.C</File>
+            <File>file:./StPicoEvent.hpp</File>
+            <File>file:./StPicoFcsCluster.hpp</File>
+            <File>file:./StPicoFcsHit.hpp</File>
+            <File>file:./StPicoFwdTrack.hpp</File>
+            <File>file:./StPicoFwdVertex.hpp</File>
+            <File>file:./StPicoMcTrack.hpp</File>
+            <File>file:./StPicoMcVertex.hpp</File>
+        </Package>
+    </SandBox>
+    <Generator>
+        <Location>/gpfs01/star/pwg/nickjindal14/fwd_lambda/star-sw-fwd/StRoot/StFwdTrackMaker/macro/pico/batch_logs</Location>
+    </Generator>
+</job>
