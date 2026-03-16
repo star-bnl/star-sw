@@ -201,6 +201,11 @@
     $EXTRA_F90PATH = "";
     $F90PPFLAGS    = "";
     $EXTRA_F90PPFLAGS = "";
+    # gfortran: -J <dir> writes .mod files to <dir> and adds <dir> to the
+    # module search path.  Both effects are needed: output goes to the build
+    # OBJ directory (not the repo root) and subsequent compilations in the
+    # same package can find those modules.
+    $F90MODOUT     = "-J ";
 
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
@@ -326,7 +331,7 @@
     $AGETOFCOM .= " %>:b.F %Fout%>";
 
  $F90COM = 
- "%F90 %F90PPFLAGS %F90FLAGS %EXTRA_F90PPFLAGS %F90DEBUG %_IFLAGS %EXTRA_F90PATH -c %< %Fout%>";
+ "%F90 %F90PPFLAGS %F90FLAGS %EXTRA_F90PPFLAGS %F90DEBUG %_IFLAGS %EXTRA_F90PATH %F90MODOUT%>:d -c %< %Fout%>";
 
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
@@ -1086,6 +1091,7 @@
 		  'EXTRA_F90PATH'  => $EXTRA_F90PATH,
 		  'F90PPFLAGS'     => $F90PPFLAGS,
 		  'EXTRA_F90PPFLAGS' => $EXTRA_F90PPFLAGS,
+		  'F90MODOUT'      => $F90MODOUT,
 		  'F90COM'         => $F90COM,
 		  'CC'             => $CC,
 		  'CFLAGS'         => $CFLAGS,
