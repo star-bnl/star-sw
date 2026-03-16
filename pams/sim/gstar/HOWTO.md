@@ -113,8 +113,8 @@ mode = { 1409, }   ! proton(14) + pi-(09)
 **Three-body decay** — three daughters, six digits total:
 
 ```fortran
-mode = { 040803, }  ! pi0(04) + pi-(08) ... wait, actual:
-                    ! pi-(04=K0L, 08=pi+, 03=nu_e) -> K0L pi+ nu_e
+mode = { 040803, }  ! three daughters with GIDs 04, 08, and 03
+                     ! (concatenated as a single six-digit integer)
 ```
 
 **Multiple channels** — one entry per branching ratio:
