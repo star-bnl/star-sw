@@ -718,6 +718,7 @@ int StGeant4Maker::Init() {
   mMagfield = new StarMagFieldAdaptor(/*nada*/);  
 
   auto SetDefaultCuts      = [this](TVirtualMC* mc) {
+    LOG_INFO << "SetDefaultCuts " << endm;
     mc->SetCut( "CUTGAM", DAttr("cutgam") );
     mc->SetCut( "CUTELE", DAttr("cutele") );
     mc->SetCut( "CUTHAD", DAttr("cuthad") );
@@ -729,6 +730,7 @@ int StGeant4Maker::Init() {
     mc->SetCut( "DCUTM" , DAttr("dcutm") );
   };  
   auto SetDefaultProcesses = [this](TVirtualMC* mc) {
+    LOG_INFO << "SetDefaultProcesses" << endm;
     if ( IAttr("LOSS")==2 && IAttr("DRAY") ) {
       LOG_WARN << "Complete energy loss fluctuations disables delta ray production" << endm;
     }
@@ -1208,6 +1210,8 @@ void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) 
 //________________________________________________________________________________________________
 int  StGeant4Maker::ConfigureGeometry() {
 
+  LOG_INFO << "ConfigureGeometry" << endm;
+
   auto* mgr = TMCManager::Instance();
 
   // Iterate overall volumes and set volume specific tracking cuts
@@ -1228,14 +1232,16 @@ int  StGeant4Maker::ConfigureGeometry() {
    
     for ( auto kv : agmlExt->GetCuts() ) {
 
-      LOG_INFO << agmlExt->GetName() << " set " << kv.first.Data() << " to " << kv.second << endm;
+      // LOG_INFO << "[ mgr=" << mgr << "] " << agmlExt->GetName() << " " << agmlExt <<" set id=" << id << " cut=" << kv.first.Data() << " val=" << kv.second << endm;
+      TString parname = kv.first;
+      parname.ToUpper();
 
       if ( 0==mgr ) {
-	TVirtualMC::GetMC()->Gstpar( id, kv.first, kv.second );
+	TVirtualMC::GetMC()->Gstpar( id, parname.Data(), kv.second );
       }
       else {
-	mgr->Apply( [id,kv]( TVirtualMC* mc ) {
-	    mc->Gstpar( id, kv.first, kv.second );
+	mgr->Apply( [id,kv,parname]( TVirtualMC* mc ) {
+	    mc->Gstpar( id, parname.Data(), kv.second );
 	  });
       }
     }
