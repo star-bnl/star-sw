@@ -80,5 +80,5 @@ The key differences in how Fortran 90 files are handled:
 ## Notes
 
 - The same linker and libraries are used for both Fortran 77 and Fortran 90 code
-- Fortran 90 modules can be used from Fortran 77 code and vice versa
+- Fortran 90 modules can be used (via `USE`) from other Fortran 90 code; Fortran 77 code can call procedures compiled from Fortran 90 sources when interfaces are compatible, but cannot `USE` modules directly
 - The gfortran compiler supports mixing Fortran 77 and Fortran 90 code in the same project
