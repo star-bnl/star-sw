@@ -1,3 +1,22 @@
+# HOWTO run the code
+
+To run a simulation execute three macros.  The first runs an event generator.  The second runs the geant simualtion.  The third
+runs event reconstuction.
+
+Each of the macros takes two parameters as input.  The number of events (NEVENTS) to process,
+and a unique TAG which defines the job configuration.
+
+% root -q -b StRoot/macros/geant4star/run_stargenerator.C'(NEVENTS,"TAG")'
+% root -q -b StRoot/macros/geant4star/run_geant4star.C'(NEVENTS,"TAG")'
+% root -q -b StRoot/macros/geant4star/run_reconstruction.C'(NEVENTS,"TAG")'
+
+Tags are defined in StarSimOpts.h.
+
+For example, the tag "rcf25000:y2021a:muon:G3:kinematics:mult10:midrap:pt9-11:v001" is setup to generate muons in the y2021a geometry, using the GEANT 3 physics engine, 
+throwing the muons at midrapidiy (-1,1) over a pT range 9 to 11 GeV.  A track multpliicy of 10 tracks / event will be generated.
+
+The StarSimOpts.h header associates the single tag with the chain options and maker attributes needed to run the job.
+
 # geant4star production tags
 
 `StarSimOpts.h` defines production tags consumed by `run_stargenerator.C`, `run_geant4star.C`, and `run_reconstruction.C`. The generator macro uses `genopts` plus generator attributes, the simulation macro uses `simopts` plus `geant4star` attributes, and the reconstruction macro passes `recopts` to `bfc()`.
