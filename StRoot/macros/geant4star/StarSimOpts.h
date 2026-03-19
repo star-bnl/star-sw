@@ -478,6 +478,36 @@ void setupProductionJobs() {
     };    addjob(job_n);
 
 
+    // Central muons, pions
+    job_mu = job;
+    
+    job_mu.name = "rcf25000:y2021a:muon:G4:kinematics:mult10:midrap:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack", 10 }
+    };
+    job_mu.genDAttr = {
+      { "ptlow",   9.0 },
+      { "pthigh",  11.0 },
+      { "etalow",  -1.0 },
+      { "etahigh", 1.0 }
+    };
+    addjob(job_mu);
+
+    StarSimOpt_t job_pion = job;
+    job_pion.name = "rcf25000:y2021a:pions:G4:kinematics:mult10:midrap:pt9-11:v001";
+    job_pion.genIAttr = {
+      { "pid",     8 },
+      { "ntrack", 10 }
+    };
+    job_pion.genDAttr = {
+      { "ptlow",   9.0 },
+      { "pthigh",  11.0 },
+      { "etalow",  -1.0 },
+      { "etahigh", 1.0 }
+    };
+    addjob(job_pion);        
+
 
   };
 
@@ -543,9 +573,37 @@ void setupProductionJobs() {
       { "ntrack",  1 }
     };  addjob(job_n);
 
+    // Central muons, pions
+    job_mu = job;
+    
+    job_mu.name = "rcf25000:y2021a:muon:G3:kinematics:mult10:midrap:pt9-11:v001";
+    job_mu.genIAttr = {
+      { "pid",     6 },
+      { "ntrack", 10 }
+    };
+    job_mu.genDAttr = {
+      { "ptlow",   9.0 },
+      { "pthigh",  11.0 },
+      { "etalow",  -1.0 },
+      { "etahigh", 1.0 }
+    };
+    addjob(job_mu);
+
+    StarSimOpt_t job_pion = job;
+    job_pion.name = "rcf25000:y2021a:pions:G3:kinematics:mult10:midrap:pt9-11:v001";
+    job_pion.genIAttr = {
+      { "pid",     8 },
+      { "ntrack", 10 }
+    };
+    job_pion.genDAttr = {
+      { "ptlow",   9.0 },
+      { "pthigh",  11.0 },
+      { "etalow",  -1.0 },
+      { "etahigh", 1.0 }
+    };
+    addjob(job_pion);            
 
   };
-
 
 
    
