@@ -17,6 +17,17 @@ throwing the muons at midrapidiy (-1,1) over a pT range 9 to 11 GeV.  A track mu
 
 The StarSimOpts.h header associates the single tag with the chain options and maker attributes needed to run the job.
 
+The output at each stage will have a name which corresponds to the tag, e.g,
+
+rcf25000_y2021a_muon_G3_kinematics_mult10_midrap_pt9-11_v001.geant.root.
+
+# HOWTO submit jobs to the batch system
+
+For submitting jobs to the batch system see
+
+StRoot/macros/geant4star/submit_simulation_jobs.py --help
+
+
 # geant4star production tags
 
 `StarSimOpts.h` defines production tags consumed by `run_stargenerator.C`, `run_geant4star.C`, and `run_reconstruction.C`. The generator macro uses `genopts` plus generator attributes, the simulation macro uses `simopts` plus `geant4star` attributes, and the reconstruction macro passes `recopts` to `bfc()`.
