@@ -1081,6 +1081,14 @@ Bfc_st BFC[] = { // standard chains
    "B2023a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  {"B2023b" ,"","",
+   "ry2023b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2023 data (tpc)",kFALSE},
+
+  {"P2023b","" ,"",
+   "B2023b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
   // 2024 initial chains
   {"B2024a"  ,"","",
    "ry2024a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
@@ -1092,6 +1100,18 @@ Bfc_st BFC[] = { // standard chains
 
   {"P2024a","" ,"",
    "B2024a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
+           "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
+  {"B2024b"  ,"","",
+   "ry2024b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+    "","",                                                     "Base chain for run 2024 data (tpc)",kFALSE},
+
+  {"pp2024b","" ,"",
+   "B2024b,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
+   "","","Production chain for year 2024 pp data, using CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
+
+  {"P2024b","" ,"",
+   "B2024b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2025 initial chains
