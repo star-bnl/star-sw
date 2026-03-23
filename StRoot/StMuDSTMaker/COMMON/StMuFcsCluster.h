@@ -94,8 +94,8 @@ inline int StMuFcsCluster::id() const { return mId; } // Cluster ID
 inline unsigned short StMuFcsCluster::detectorId() const { return mDetectorId; }
 inline int StMuFcsCluster::category() const { return mCategory; }
 inline int StMuFcsCluster::nTowers() const { return mNTowers; }
-inline int StMuFcsCluster::nNeighbor() const { return mNeighbor.GetSize(); }
-inline int StMuFcsCluster::nPoints() const { return mPoints.GetSize(); }
+inline int StMuFcsCluster::nNeighbor() const { return mNeighbor.GetEntries(); }
+inline int StMuFcsCluster::nPoints() const { return mPoints.GetEntries(); }
 inline float StMuFcsCluster::energy() const { return mEnergy; }
 inline float StMuFcsCluster::x() const { return mX; } // Mean x ("center of gravity") in local grid coordinate (1st moment).
 inline float StMuFcsCluster::y() const { return mY; } // Mean y ("center of gravity") in local grid coordinate (1st moment).
