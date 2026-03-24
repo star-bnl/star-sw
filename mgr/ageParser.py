@@ -802,7 +802,7 @@ def OnInlinedComment( tokens ):
     post = tokens.get('post','')
     #comment = '! '+tokens.get('comment')
     #line1=comment
-    line2=pre+post
+    line2=str(pre)+str(post)
     #tryRules( line1.rstrip(';') )
     tryRules( line2.rstrip(';') )
     
