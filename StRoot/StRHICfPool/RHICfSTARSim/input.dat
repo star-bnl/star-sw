@@ -1,0 +1,32 @@
+Mode        = SingleGen
+RunType     = TL
+EventNum    = 7000
+OutPath     = /star/u/slee5/singleGenNeutron_zdc/
+OutputName  = n200GeV_4
+
+# For SingleGen mode: input to primary single particle information 
+PDG = 2112
+Energy = 200. # GeV
+
+
+#GeometryDir = /home/shlee/workspace/testRHICfSim/RHICfSim-v10/geometry # If GeometryDir is no set, dir path will be found autometically. 
+#TableDir    = /home/shlee/workspace/testRHICfSim/RHICfSim-v10/tables   # If TableDir is no set, dir path will be found autometically. 
+
+# Mode : STARSim (Star simulation input), SingleGen
+# RunType : TS, TL, TOP
+# EventNum : Specific event number or set to -1 (total event number in input file)
+# OutPath : Set the output file path
+# OutputName : output file name tag
+
+# -------- for Single particle generation mode commend ----- 
+# PDG : desired particle PDG encoding
+# Energy : desired particle energy 
+# Direction : particle direction, only avaliable "X", "Y", "Z" it will be updated
+# VertexX, VertexY, VertexZ : specific particle starting point
+# VertexRandomDist : "GAUS" or "UNIFORM" can avaliable
+# VertexRandomXY1 : mean/lower bound of vertex in XY plane
+# VertexRandomXY2 : sigma/upper bound of vertex in XY plane
+# VertexRandomZ1 : mean/lower bound of vertex in Z-direction
+# VertexRandomZ2 : sigma/upper bound of vertex in Z-direction
+
+# you can add additional options 

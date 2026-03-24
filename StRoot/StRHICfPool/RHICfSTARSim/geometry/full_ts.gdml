@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE gdml [ 
+<!ENTITY gwd "/direct/star+u/slee5/RHICfSTARSim/geometry">
+<!ENTITY materials SYSTEM "materials.xml">
+]>
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GDML_3_1_4/schema/gdml.xsd">
+
+  <!-- ******************************* -->
+  <!-- *** Positions and Rotations *** -->
+  <!-- ******************************* -->
+  <define>
+    <variable name="LHCfy" value="0"/>
+    <variable name="LHCfz" value="1783"/>
+    <variable name="ZDCz"  value="1811"/>
+
+    <position name="Pos-world" unit="cm" x="0" y="0" z="0"/>
+    <position name="Pos-LHCf" unit="cm" x="0" y="LHCfy+6.608416+sqrt(2)" z="LHCfz+14"/>
+    <position name="Pos-ZDC" unit="cm" x="0" y="1.162065" z="ZDCz+60"/>
+  </define>
+
+  <!-- the content of the materials.xml file will be included here -->
+  &materials;
+
+  <!-- *********************** -->
+  <!-- *** Logical Volumes *** -->
+  <!-- *********************** -->
+  <solids>
+    <box name="Log-world" lunit="m" x="2" y="2" z="50"/>
+  </solids>
+
+  <!-- ************************ -->
+  <!-- *** Physical Volumes *** -->
+  <!-- ************************ -->
+  <structure>
+    <volume name="Vol-world">
+      <materialref ref="Air"/>
+      <solidref ref="Log-world"/>
+      <physvol>
+        <file name="&gwd;/pipe_star.gdml"/>
+	<positionref ref="Pos-world"/>
+      </physvol>
+      <physvol>
+        <file name="&gwd;/arm1-fc.gdml"/>
+	<positionref ref="Pos-LHCf"/>
+      </physvol>
+      <physvol>
+        <file name="&gwd;/zdc_star.gdml"/>
+	<positionref ref="Pos-ZDC"/>
+      </physvol>
+    </volume>
+  </structure>
+
+  <setup name="Default" version="1.0">
+    <world ref="Vol-world"/>
+  </setup>
+</gdml>
