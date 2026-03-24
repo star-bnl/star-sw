@@ -1244,6 +1244,17 @@ const unsigned int* StTriggerData2022::l2Result() const
     return TrgSum->L2Result;
 }
 
+const unsigned int*  StTriggerData2022::l1Result() const
+{
+  return TrgSum->L1Result;
+}
+
+unsigned int StTriggerData2022::unixTimeLastFutureGuardian() const {return l1Result()[0];}
+unsigned int StTriggerData2022::bunchCounterLastFutureGuardian() const {return l1Result()[1];}
+unsigned int StTriggerData2022::pastCorruption() const {return l1Result()[2];}
+unsigned int StTriggerData2022::futureCorruption() const {return l1Result()[3];}
+unsigned int StTriggerData2022::futureGuardianCounter() const {return l1Result()[4];}
+
 unsigned long long StTriggerData2022::l2sum() const
 {
     //printf("L2sum0=%08o\n",TrgSum->L2Sum[0]);
