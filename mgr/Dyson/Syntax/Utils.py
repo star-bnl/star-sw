@@ -169,3 +169,37 @@ def matchRule( line, rule ):
     
 
 
+if __name__ == "__main__":
+
+    print ""
+    print "Floating point values:"
+    print "======================"
+    for fp in ["1.234", "1234.", "1.234E+56","3.14159265359"]:
+        print fp + " --> " + str( number_float.parseString( fp ) )
+    print ""
+    print "Integral values:"
+    print "================"
+    for iv in ["1234", "1234E+5", "1234E-5"]:
+        print iv + " --> " + str( number_int.parseString( iv ) )        
+    print ""
+    print "Lists of numbers:"
+    print "================="
+    for l in ["1,2,3,4","1.,2.,3.,4.","1,2.,3,4.","1.,2,3.,4"]:
+        print l + " --> " + str( number_list.parseString(l) )
+    print ""
+    print "Comments:"
+    print "========="
+    for comment in ["c is a comment line", "C is a comment line", "* is a comment line", "! is a comment line","    ! this is another ! comment","c.reate and position"]:
+        print comment + " --> " + str( comment_line.parseString( comment ) )
+    print ""
+    print "Variables:"
+    print "=========="
+    for var in ["abc", "ABC", "abc_test", "ABC_tEsT", "A13_x743__ttuU___", "z_____________" ]:
+        print var + " --> " + str( variable.parseString( var ) )
+    print ""
+    print "AgSTAR Names (i.e. blocks, structures, etc...):"
+    print "==============================================="
+    for name in ("BBCM", "BBCG", "HEXG"):
+        print name + " --> " + str( AgNAME.parseString(name) )
+    for var in ("BBCM_version", "BBCM_type", "bbcg_irad" ):
+        print var  + " --> " + str( AgSTRU.parseString(var) )
