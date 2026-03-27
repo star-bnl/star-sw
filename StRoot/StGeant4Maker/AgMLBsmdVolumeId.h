@@ -105,7 +105,7 @@ public:
 
       if( !nav ) {
         LOG_FATAL << "No Pointer to Navigator" << endm;
-        return kStFatal;
+        return -1;
       }
 
       // SAVE CURRENT NAVIGATOR STATE
