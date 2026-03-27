@@ -100,17 +100,30 @@ public:
       eta_bin = (global_strip - 1) / 15 + 1;
     }
     else { //smdp
-      
+
       TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+
+      if( !nav ) {
+        LOG_FATAL << "No Pointer to Navigator" << endm;
+        return kStFatal;
+      }
+
+      // SAVE CURRENT NAVIGATOR STATE
+      nav->PushPath();
+
       nav->CdUp();//go to csme
       nav->CdUp();//go to csda
+
       
       double masterPos[3] = {xg[0], xg[1], xg[2]}; //global hit position
       double localPos[3];
       //smdp is rotated 180 in phi 90 theta wrt tower
       //we have to un-rotate to get local coordinates
       nav->MasterToLocal(masterPos, localPos);
-      
+
+      // RESTORE NAVIGATOR STATE
+      nav->PopPath();
+
       double total_width {n_strip_phi * width_phi}; // ~22.4022
       double start_y     {  -total_width / 2.0   };
 
@@ -123,21 +136,6 @@ public:
                   + 1000      * phi_encoded
                   + 100       * forw_back
                   + strip;
-    // if(forw_back == 3)
-    // LOG_INFO << "BSMDP VolumeId: rileft=" << rileft
-    //          << ", phi_mod=" << phi_mod
-    //          << ", layer=" << layer
-    //          << ", xg[0]=" << xg[0]
-    //          << ", xg[1]=" << xg[1]
-    //          << ", xg[2]=" << xg[2]
-    //          << ", xl[0]=" << xl[0]
-    //          << ", xl[1]=" << xl[1]
-    //          << ", xl[2]=" << xl[2]
-    //          << ", strip=" << strip
-    //          << ", eta_bin=" << eta_bin
-    //          << ", volume_id=" << volume_id
-    //          << endm;
-
     return volume_id;
   };
 };
