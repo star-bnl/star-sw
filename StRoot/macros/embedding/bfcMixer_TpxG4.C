@@ -408,5 +408,51 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
   };
 
+
+
+  if ( dbg_ == "P21icAuAu19" ) {
+    //lrwxrwxrwx   1 jwebb rhstar     48 Mar 25 16:13 auau19_phys_chop150 -> /gpfs01/star/embed/daq/2019/auau19_phys_chop150/
+    //lrwxrwxrwx   1 jwebb rhstar     40 Mar 25 16:12 auau19_phys -> /gpfs01/star/embed/tags/2019/auau19_phys
+    //auau19_phys_chop150/st_physics_adc_20069061_raw_6500004.daq  auau19_phys/st_physics_adc_20069061_raw_6500004.tags.root
+    /*
+      root4star -b &gt;&gt;&amp; $SCRATCH/${FILEBASENAME}_${JOBID}.log &lt;&lt;EOF                                                                                                            
+      std::vector&lt;Int_t&gt; triggers;                                                                                                                                                    
+      triggers.push_back(640001);                                                                                                                                                           
+      triggers.push_back(640011);                                                                                                                                                           
+      triggers.push_back(640021);                                                                                                                                                           
+      triggers.push_back(640031);                                                                                                                                                           
+      triggers.push_back(640041);                                                                                                                                                           
+      triggers.push_back(640051);                                                                                                                                                           
+      .L StRoot/macros/embedding/bfcMixer_Tpx.C                                                                                                                                             
+      bfcMixer_Tpx(1060, "$INPUTFILE0", "$SCRATCH/tags/${FILEBASENAME}.tags.root", 0, 6.0, -1.0, 1.0, -145.0, 145.0, 2.0, 45, 0.05, triggers, "P21icAuAu19", "FlatPt", 0, "${FILEBASENAME}.$
+      .q                                                                                                                                                                                    
+      EOF            
+
+/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq
+/star/data03/daq/2019/076/20076023/st_physics_adc_20076023_raw_4000002.daq
+/star/data03/daq/2019/093/20093002/st_physics_adc_20093002_raw_6000012.daq
+
+
+     */
+
+    const int   nevents_     = 100; 
+    const char* mydaqfile_   = "/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq";
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2019/auau19_phys/st_physics_adc_20057049_raw_2000003.tags.root" ;
+    double myptmn_           = 0.0;
+    double myptmx_           = 6.0;
+    double myetamn_          = -1.0;
+    double myetamx_          = +1.0;
+    double myvzmn_           = -145.0       ; 
+    double myvzmx_           =  145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 45            ;
+    double mymult_           = 0.05           ; 
+    std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
+    const char* myprodname  = "P21icAuAu19" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+
+  };
+
     
 };
