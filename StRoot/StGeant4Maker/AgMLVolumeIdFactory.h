@@ -75,6 +75,10 @@ public:
 	id = new AgMLEtofVolumeId;
       else if ( name == "MIGG" ) 
 	id = new AgMLMtdVolumeId;
+      else if ( name == "MTTT" ) 
+	id = new AgMLMtdVolumeId;
+      else if ( name == "MTTF" ) 
+	id = new AgMLMtdVolumeId;
       else if ( name == "VRAD" ) 
 	id = new AgMLVpdVolumeId;
       else if ( name == "FLGR" )

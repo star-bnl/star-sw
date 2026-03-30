@@ -1441,7 +1441,7 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
-  AddHits<St_g2t_mtd_hit>( "MUTH", {"MIGG"}, "g2t_mtd_hit", sd2table_mtd  );
+  AddHits<St_g2t_mtd_hit>( "MUTH", {"MIGG","MTTT","MTTF"}, "g2t_mtd_hit", sd2table_mtd  );
 
   AddHits<St_g2t_emc_hit>( "CALH", {"CSDA", "CSME", "CSHI" }, "g2t_smd_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "ECAH", {"EXSE", "EHMS"}, "g2t_esm_hit", sd2table_emc );

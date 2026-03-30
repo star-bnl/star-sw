@@ -120,6 +120,24 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
   else if ( module.Contains("tof") ) { // BTOF ETOF
     result = DetectorType::kTrackerLocal;    
   }
+  else if ( module.Contains("mutd") ) { // MTD
+    result = DetectorType::kTracker;
+  }
+  else if ( module.Contains("stgc") ) {
+    result = DetectorType::kTracker;
+  }
+  else if ( module.Contains("fst") ) {
+    result = DetectorType::kTracker;
+  }
+  else if ( module.Contains("tpc") ) {
+    result = DetectorType::kTracker;
+  }
+  else if ( module.Contains("vpd") ) {
+    result = DetectorType::kTracker;
+  }
+  // all others default to tracker ...
+  
+
 
   return result;
 
