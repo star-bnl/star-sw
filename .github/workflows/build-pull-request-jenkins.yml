@@ -1,0 +1,84 @@
+name: Build Pull Request Jenkins
+
+on:
+  pull_request:
+    paths-ignore:
+      - '.github/**'
+      - 'docs/**'
+      - '!.github/workflows/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  jenkins-ci-docker:
+    runs-on: ubuntu-latest
+    env:
+      JENKINS_URL: ${{ vars.JENKINS_URL || 'https://starjenkins.sdcc.bnl.gov' }}
+      JENKINS_JOB: ${{ vars.JENKINS_JOB || 'star-sw-ci-pipeline' }}
+      JENKINS_USER: ${{ secrets.JENKINS_USER }}
+      JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+      BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+      GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
+      REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
+    steps:
+      - name: Validate Jenkins configuration
+        run: |
+          set -euo pipefail
+          for var in JENKINS_URL JENKINS_JOB JENKINS_USER JENKINS_TOKEN BRANCH_NAME GIT_COMMIT REPO_URL; do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::Missing required value for ${var}"
+              exit 1
+            fi
+          done
+
+      - name: Fetch Jenkins crumb
+        id: crumb
+        run: |
+          set -euo pipefail
+          curl_auth="${JENKINS_USER}:${JENKINS_TOKEN}"
+          crumb="$(curl --silent --show-error --fail --retry 3 --retry-all-errors --user "$curl_auth" \
+            "${JENKINS_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:%22,//crumb)")"
+          echo "::add-mask::$crumb"
+          echo "value=$crumb" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Jenkins docker job
+        env:
+          JENKINS_CRUMB: ${{ steps.crumb.outputs.value }}
+        run: |
+          set -euo pipefail
+          curl_auth="${JENKINS_USER}:${JENKINS_TOKEN}"
+          response_headers="$(mktemp)"
+
+          curl --silent --show-error --fail \
+            --request POST \
+            --retry 3 \
+            --retry-all-errors \
+            --user "$curl_auth" \
+            --header "$JENKINS_CRUMB" \
+            --data-urlencode "BRANCH_NAME=${BRANCH_NAME}" \
+            --data-urlencode "GIT_COMMIT=${GIT_COMMIT}" \
+            --data-urlencode "REPO_URL=${REPO_URL}" \
+            --dump-header "$response_headers" \
+            --output /dev/null \
+            "${JENKINS_URL}/job/${JENKINS_JOB}/buildWithParameters"
+
+          queue_url="$(awk 'BEGIN {IGNORECASE=1} /^Location:/ {print $2}' "$response_headers" | tr -d '\r')"
+
+          echo "Triggered Jenkins job ${JENKINS_JOB} for ${BRANCH_NAME}@${GIT_COMMIT}"
+          if [ -n "$queue_url" ]; then
+            echo "Queue item: ${queue_url}"
+            {
+              echo "### Jenkins Triggered"
+              echo
+              echo "- Job: \`${JENKINS_JOB}\`"
+              echo "- Branch: \`${BRANCH_NAME}\`"
+              echo "- Commit: \`${GIT_COMMIT}\`"
+              echo "- Queue item: ${queue_url}"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
