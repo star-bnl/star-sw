@@ -358,7 +358,7 @@ void bfcMixer_TpxG4(
     chain0opts = opts.loadopts;
     chain1opts = opts.chain1 + " nooutput ";
     chain2opts = opts.chain2 + " noinput nooutput ";
-    chain3opts = opts.chain3 + " -in noinput Tpc23 ";    
+    chain3opts = opts.chain3 + " -in noinput ";    
     bfcMixer_TpxG4();
 
   }
