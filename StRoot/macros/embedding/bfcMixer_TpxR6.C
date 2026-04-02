@@ -13,7 +13,7 @@ const int debuglevel = 1;
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry ";
 std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault,noinput prepembed ry2021a ";
 //std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer,GeantOut,MiniMcMk,McAna ,useInTracker,emcSim,bemcMixer,eefs,eemcmixer nodefault";
-std::string     chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer Tpc23         GeantOut,MiniMcMk,McAna ,useInTracker emcsim bemcmixer eefs eemcmixer nodefault";
+std::string     chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer         GeantOut,MiniMcMk,McAna ,useInTracker emcsim bemcmixer eefs eemcmixer nodefault";
 
 std::string   chain0opts = ( chain1opts_ + " " + chain2opts_ + " " + chain3opts_ + " " );
 
@@ -268,7 +268,7 @@ void bfcMixer_TpxR6(
     chain0opts = opts.loadopts;
     chain1opts = opts.chain1;
     chain2opts = opts.chain2;
-    chain3opts = opts.chain3 + " Tpc23 ";  
+    chain3opts = opts.chain3;
 
     bfcMixer_TpxR6();
 
