@@ -88,6 +88,7 @@ void RHICfRunAction::EndOfRunAction(const G4Run*)
 {
 	fOutSimDstFile -> cd();
 	fOutSimDstTree -> Write();
+	fOutSimDstFile -> Close();
 
     cout << "RHICfRunAction::EndOfRunAction() -- Number of event: " << fOutSimDstTree->GetEntries() << " done." << endl;
 }
