@@ -144,9 +144,9 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
     double mass = fParticle -> GetPDGMass()*0.001; // [GeV/c^2]
     double p = sqrt(e*e -mass*mass);
     if(e*e < mass*mass){p = e;}
-    double px = ux/p;
-    double py = uy/p;
-    double pz = uz/p;
+    double px = ux*p;
+    double py = uy*p;
+    double pz = uz*p;
 
     fSimDst -> Clear();
     fSimTrack = fSimDst -> GetSimTrack(fSimDst->GetSimTrackNum());
@@ -161,7 +161,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
     fSimTrack -> SetVertexStart(vx, vy, vz);
 
     fParticleGun -> SetParticleDefinition(fParticle);
-    fParticleGun -> SetParticleMomentumDirection(G4ThreeVector(px, py, pz));
+    fParticleGun -> SetParticleMomentumDirection(G4ThreeVector(ux, uy, uz));
     fParticleGun -> SetParticleEnergy(e *GeV);
     fParticleGun -> SetParticlePosition(G4ThreeVector(vx *cm, vy *cm, vz *cm));
     fParticleGun -> GeneratePrimaryVertex(anEvent);

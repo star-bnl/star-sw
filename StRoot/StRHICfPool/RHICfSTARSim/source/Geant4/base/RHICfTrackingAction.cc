@@ -85,8 +85,9 @@ void RHICfTrackingAction::PostUserTrackingAction(const G4Track* track)
             double energy = track -> GetVertexKineticEnergy()*0.001; // [GeV]
             double mass = particle -> GetPDGMass()*0.001; // [GeV/c^2]
             G4ThreeVector direction = track -> GetVertexMomentumDirection();
-            
-            double p = sqrt(energy*energy - mass*mass);
+            double totalE = energy+mass;
+            double p = sqrt(totalE*totalE - mass*mass);
+            if(totalE*totalE - mass*mass < 0){return;}
             double px = p*direction.x();
             double py = p*direction.y();
             double pz = p*direction.z();
