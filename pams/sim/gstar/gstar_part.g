@@ -344,6 +344,40 @@ MODULE gstar_part Is the STAR Particle Database
              mode    = {1508,}              ,
              trktyp  = kGtNEUT
 
+* --------------------------------------------------------------------------
+* Helper particles for d-hyperon decay chains (codes counting back from 94)
+* --------------------------------------------------------------------------
+
+* Sigma0 --> Lambda(constrained,98) + gamma  [100% BR]
+         PARTICLE _sigma0_to_lam_gamma_ code=94 ,
+              pdg     = 0                       ,
+              mass    = 0.1193E+01              ,
+              tlife   = 0.74000E-19             ,
+              charge  = 0                       ,
+              bratio  = {1.000,}                ,
+              mode    = {9801,}                 ,
+              trktyp  = kGtNEUT
+
+* Xi- --> Lambda(constrained,98) + pi-  [100% BR]
+         PARTICLE _xi_minus_to_lam_pi_ code=93 ,
+              pdg     = 0                      ,
+              mass    = 1.32171                ,
+              tlife   = 0.1639E-9              ,
+              charge  = -1                     ,
+              bratio  = {1.000,}               ,
+              mode    = {9809,}                ,
+              trktyp  = kGtHADR
+
+* Xi0 --> Lambda(constrained,98) + pi0  [100% BR]
+         PARTICLE _xi_zero_to_lam_pi0_ code=92 ,
+              pdg     = 0                      ,
+              mass    = 1.31486                ,
+              tlife   = 0.290E-9               ,
+              charge  = 0                      ,
+              bratio  = {1.000,}               ,
+              mode    = {9807,}                ,
+              trktyp  = kGtNEUT
+
 
 
   Particle XiMinus    code   = 40003     pdg   = 0         ,
@@ -743,6 +777,66 @@ Particle H_dibaryon               code      = 60001,
   Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife=0.89260E-10,
                      pdg=311  bratio= { 0.5, 0.5}    mode= { 809, 908 }
 
+
+
+***************************************************************************
+**
+** d-Hyperon pseudoparticles: loosely bound deuteron-hyperon states
+** IDs start at 60100.  Parent mass is set above the sum of daughter masses
+** so that decay products carry momentum in the final state.
+**
+*   Decay chains (Lambda always constrained to p+pi- via ID=98):
+*
+*   d_Lambda  (60100): d + Lambda              [sum of daughters = 1.876+1.115683 = 2.9917 GeV]
+*   d_Sigma0  (60101): d + Sigma0->Lambda+gamma [sum = 1.876+1.193 = 3.069 GeV]
+*   d_Xi_minus(60102): d + Xi-->Lambda+pi-      [sum = 1.876+1.32171 = 3.198 GeV]
+*   d_Xi_zero (60103): d + Xi0->Lambda+pi0      [sum = 1.876+1.31486 = 3.191 GeV]
+**
+***************************************************************************
+
+* d + Lambda --> d(45) + _lam_to_p_piminus_(98)
+* sum of daughters = 1.876 + 1.115683 = 2.9917 GeV
+  Particle d_Lambda                   code      = 60100       ,
+                                      mass      = 2.998        ,
+                                      charge    = 1            ,
+                                      tlife     = 1.0E-19      ,
+                                      pdg       = UNDEFINED    ,
+                                      trktyp    = kGtHADR      ,
+                                      bratio    = {1,}         ,
+                                      mode      = {4598,}
+
+* d + Sigma0 --> d(45) + _sigma0_to_lam_gamma_(94)
+* sum of daughters = 1.876 + 1.193 = 3.069 GeV
+  Particle d_Sigma0                   code      = 60101       ,
+                                      mass      = 3.074        ,
+                                      charge    = 1            ,
+                                      tlife     = 1.0E-19      ,
+                                      pdg       = UNDEFINED    ,
+                                      trktyp    = kGtHADR      ,
+                                      bratio    = {1,}         ,
+                                      mode      = {4594,}
+
+* d + Xi- --> d(45) + _xi_minus_to_lam_pi_(93)
+* sum of daughters = 1.876 + 1.32171 = 3.198 GeV
+  Particle d_Xi_minus                 code      = 60102       ,
+                                      mass      = 3.204        ,
+                                      charge    = 0            ,
+                                      tlife     = 1.0E-19      ,
+                                      pdg       = UNDEFINED    ,
+                                      trktyp    = kGtNEUT      ,
+                                      bratio    = {1,}         ,
+                                      mode      = {4593,}
+
+* d + Xi0 --> d(45) + _xi_zero_to_lam_pi0_(92)
+* sum of daughters = 1.876 + 1.31486 = 3.191 GeV
+  Particle d_Xi_zero                  code      = 60103       ,
+                                      mass      = 3.204        ,
+                                      charge    = 1            ,
+                                      tlife     = 1.0E-19      ,
+                                      pdg       = UNDEFINED    ,
+                                      trktyp    = kGtHADR      ,
+                                      bratio    = {1,}         ,
+                                      mode      = {4592,}
 
 ***************************************************************************
 **
