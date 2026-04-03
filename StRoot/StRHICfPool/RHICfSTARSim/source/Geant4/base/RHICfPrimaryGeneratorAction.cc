@@ -112,6 +112,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
         vz = 0.;
     }
 
+    e = 0.;
     if(fSimOpt->CheckOpt("Energy")){e = fSimOpt->GetOptDouble("Energy");}
 
     if(fSimOpt->CheckOpt("Direction")){
