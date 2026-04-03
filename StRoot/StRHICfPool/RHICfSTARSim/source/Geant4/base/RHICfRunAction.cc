@@ -35,7 +35,7 @@ void RHICfRunAction::BeginOfRunAction(const G4Run* aRun)
 	
 	if(fSimUtil->IsStarSimMode()){
 		fInSimDstFile = new TFile(inputFile, "READ");
-		if(!fInSimDstFile){
+		if(fInSimDstFile->IsZombie() || !fInSimDstFile->IsOpen()){
 			cout << "RHICfRunAction::BeginOfRunAction() -- Error: " << inputFile << " can not opend! "<< endl;
 			return;
 		}
