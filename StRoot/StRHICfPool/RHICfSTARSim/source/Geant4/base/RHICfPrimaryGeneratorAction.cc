@@ -76,7 +76,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
 
     int pid = fSimOpt -> GetOptInt("PDG");
     double vx, vy, vz;
-    double px, py, pz;
+    double ux, uy, uz;
     double e;
 
     if(fSimOpt->CheckOpt("VertexX")){
@@ -119,33 +119,34 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
         TString dir = fSimOpt->GetOptString("Direction");
         dir.ToUpper();
         if(dir == "X"){
-            px = 1.;
-            py = 0.;
-            pz = 0.;
+            ux = 1.;
+            uy = 0.;
+            uz = 0.;
         }
         else if(dir == "Y"){
-            px = 0.;
-            py = 1.;
-            pz = 0.;
+            ux = 0.;
+            uy = 1.;
+            uz = 0.;
         }
         else{
-            px = 0.;
-            py = 0.;
-            pz = 1.;
+            ux = 0.;
+            uy = 0.;
+            uz = 1.;
         }
     }
     else{
-        px = 0.;
-        py = 0.;
-        pz = 1.;
+        ux = 0.;
+        uy = 0.;
+        uz = 1.;
     }
 
     fParticle = fParTable -> FindParticle(pid);
     double mass = fParticle -> GetPDGMass()*0.001; // [GeV/c^2]
     double p = sqrt(e*e -mass*mass);
-    double p_x = px/p;
-    double p_y = py/p;
-    double p_z = pz/p;
+    if(e*e < mass*mass){p = e;}
+    double px = ux/p;
+    double py = uy/p;
+    double pz = uz/p;
 
     fSimDst -> Clear();
     fSimTrack = fSimDst -> GetSimTrack(fSimDst->GetSimTrackNum());
@@ -156,7 +157,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
     fSimTrack -> SetParentId(0);
     fSimTrack -> SetPid(pid);
     fSimTrack -> SetEnergy(e);
-    fSimTrack -> SetMomentum(p_x, p_y, p_z);
+    fSimTrack -> SetMomentum(px, py, pz);
     fSimTrack -> SetVertexStart(vx, vy, vz);
 
     fParticleGun -> SetParticleDefinition(fParticle);
@@ -167,7 +168,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
 
     fGenSimTrkID.push_back(0);
 
-    cout << "Generating particle [PDG:" <<pid << ", vertex(" <<  vx << " " << vy << " " << vz << "), direction(" << px << " " <<  py << " " << pz << "), E: " << e << " GeV]" << endl;
+    cout << "Generating particle [PDG:" <<pid << ", vertex(" <<  vx << " " << vy << " " << vz << "), direction(" << ux << " " <<  uy << " " << uz << "), E: " << e << " GeV]" << endl;
 }
 
 int RHICfPrimaryGeneratorAction::GetGenerateTrkNum()
