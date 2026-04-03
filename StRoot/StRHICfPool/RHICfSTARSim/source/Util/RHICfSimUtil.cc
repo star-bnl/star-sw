@@ -22,6 +22,9 @@ RHICfSimUtil::RHICfSimUtil(int num, char** par)
 
 RHICfSimUtil::~RHICfSimUtil()
 {
+    delete mSimOptions;
+    delete mRandom;
+    mInstance = nullptr;
 }
 
 Long_t RHICfSimUtil::GenSeed()
