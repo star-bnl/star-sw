@@ -112,7 +112,6 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
         vz = 0.;
     }
 
-    e = 0.;
     if(fSimOpt->CheckOpt("Energy")){e = fSimOpt->GetOptDouble("Energy");}
 
     if(fSimOpt->CheckOpt("Direction")){
@@ -165,7 +164,7 @@ void RHICfPrimaryGeneratorAction::CreateSingleGen(G4Event* anEvent)
     fParticleGun -> SetParticleEnergy(e *GeV);
     fParticleGun -> SetParticlePosition(G4ThreeVector(vx *cm, vy *cm, vz *cm));
     fParticleGun -> GeneratePrimaryVertex(anEvent);
-
+    
     fGenSimTrkID.push_back(0);
 
     cout << "Generating particle [PDG:" <<pid << ", vertex(" <<  vx << " " << vy << " " << vz << "), direction(" << ux << " " <<  uy << " " << uz << "), E: " << e << " GeV]" << endl;
