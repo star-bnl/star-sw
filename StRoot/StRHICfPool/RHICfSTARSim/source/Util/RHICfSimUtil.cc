@@ -96,7 +96,7 @@ TString RHICfSimUtil::GetProcessName(int procId)
     if(procId == 103 || procId == 104){return "SingleDiffraction";}
     if(procId == 105){return "DoubleDiffraction";}
     if(procId == 106){return "CentralDiffraction";}
-    if(procId == 102){return "Elestic";}
+    if(procId == 102){return "Elastic";}
     return "Non";
 }   
 
