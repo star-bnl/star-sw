@@ -88,10 +88,28 @@ if ( -e .sl44_gcc346 && ! -e .sl53_gcc432 ) then
     /bin/ln -s .sl44_gcc346 .sl53_gcc432 && echo "SL53 compatibility link created"
 endif
 
+# Shorter group for Alma - we should NOT support 32 bits
+set arch="_x8664_"
+set refos="a92"$arch"gcc11"
+foreach vers ( 95 96 97 )
+    set dir="a"$vers$arch"gcc11"
+    if ( ! -e .$dir && -e .$refos ) then
+       echo "  Backward compatibility assumed between $dir -> $refos "
+       /bin/ln -s .$refos .$dir
+    else
+        if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+    endif
+    if ( ! -e $dir && -e $refos ) then
+        echo "  Backward compatibility assumed between $dir -> $refos "
+      /bin/ln -s $refos $dir
+    else
+      if ( -e $refos && -e $dir )   echo " $dir exists"
+    endif
+end
 
 
 #
-# Scientific Linux, SL53, SL6
+# Scientific Linux, SL53, SL6-7
 #
 foreach arch ( _ _x8664_ )
     #+
