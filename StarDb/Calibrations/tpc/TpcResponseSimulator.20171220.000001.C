@@ -59,6 +59,7 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
+#endif
 
   /* Sigmas 
      Tpx inner = 0.395
