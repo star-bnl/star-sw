@@ -23,6 +23,7 @@ jobs:
       JENKINS_JOB: ${{ vars.JENKINS_JOB || 'star-sw-ci-pipeline' }}
       JENKINS_USER: ${{ secrets.JENKINS_USER }}
       JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
       BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
       GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
       REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
@@ -30,7 +31,7 @@ jobs:
       - name: Validate Jenkins configuration
         run: |
           set -euo pipefail
-          for var in JENKINS_URL JENKINS_JOB JENKINS_USER JENKINS_TOKEN BRANCH_NAME GIT_COMMIT REPO_URL; do
+          for var in JENKINS_URL JENKINS_JOB JENKINS_USER JENKINS_TOKEN PR_NUMBER BRANCH_NAME GIT_COMMIT REPO_URL; do
             if [ -z "${!var:-}" ]; then
               echo "::error::Missing required value for ${var}"
               exit 1
@@ -47,6 +48,76 @@ jobs:
           echo "::add-mask::$crumb"
           echo "value=$crumb" >> "$GITHUB_OUTPUT"
 
+      - name: Cancel older Jenkins builds for this PR
+        env:
+          JENKINS_CRUMB: ${{ steps.crumb.outputs.value }}
+        run: |
+          set -euo pipefail
+          curl_auth="${JENKINS_USER}:${JENKINS_TOKEN}"
+
+          build_api="${JENKINS_URL}/job/${JENKINS_JOB}/api/json?tree=builds[number,url,building,actions[parameters[name,value]]]"
+          queue_api="${JENKINS_URL}/queue/api/json?tree=items[id,task[name],actions[parameters[name,value]]]"
+
+          running_builds="$(
+            curl --globoff --silent --show-error --fail --retry 3 --retry-all-errors --user "$curl_auth" "$build_api" |
+              jq -r --arg pr "$PR_NUMBER" --arg branch "$BRANCH_NAME" --arg repo "$REPO_URL" '
+                def param($name): ([.actions[]?.parameters[]? | select(.name == $name) | (.value | tostring)][0] // "");
+                .builds[]?
+                | select(.building == true)
+                | select(
+                    (param("PR_NUMBER") != "" and param("PR_NUMBER") == $pr)
+                    or
+                    (param("PR_NUMBER") == "" and param("BRANCH_NAME") == $branch and param("REPO_URL") == $repo)
+                  )
+                | .url
+              '
+          )"
+
+          queued_items="$(
+            curl --globoff --silent --show-error --fail --retry 3 --retry-all-errors --user "$curl_auth" "$queue_api" |
+              jq -r --arg job "$JENKINS_JOB" --arg pr "$PR_NUMBER" --arg branch "$BRANCH_NAME" --arg repo "$REPO_URL" '
+                def param($name): ([.actions[]?.parameters[]? | select(.name == $name) | (.value | tostring)][0] // "");
+                .items[]?
+                | select(.task.name == $job)
+                | select(
+                    (param("PR_NUMBER") != "" and param("PR_NUMBER") == $pr)
+                    or
+                    (param("PR_NUMBER") == "" and param("BRANCH_NAME") == $branch and param("REPO_URL") == $repo)
+                  )
+                | .id
+              '
+          )"
+
+          if [ -n "$queued_items" ]; then
+            while IFS= read -r item_id; do
+              [ -n "$item_id" ] || continue
+              echo "Canceling queued Jenkins item ${item_id}"
+              curl --silent --show-error --fail \
+                --request POST \
+                --retry 3 \
+                --retry-all-errors \
+                --user "$curl_auth" \
+                --header "$JENKINS_CRUMB" \
+                --output /dev/null \
+                "${JENKINS_URL}/queue/cancelItem?id=${item_id}"
+            done <<< "$queued_items"
+          fi
+
+          if [ -n "$running_builds" ]; then
+            while IFS= read -r build_url; do
+              [ -n "$build_url" ] || continue
+              echo "Stopping running Jenkins build ${build_url}"
+              curl --silent --show-error --fail \
+                --request POST \
+                --retry 3 \
+                --retry-all-errors \
+                --user "$curl_auth" \
+                --header "$JENKINS_CRUMB" \
+                --output /dev/null \
+                "${build_url}stop"
+            done <<< "$running_builds"
+          fi
+
       - name: Trigger Jenkins docker job
         env:
           JENKINS_CRUMB: ${{ steps.crumb.outputs.value }}
@@ -61,6 +132,7 @@ jobs:
             --retry-all-errors \
             --user "$curl_auth" \
             --header "$JENKINS_CRUMB" \
+            --data-urlencode "PR_NUMBER=${PR_NUMBER}" \
             --data-urlencode "BRANCH_NAME=${BRANCH_NAME}" \
             --data-urlencode "GIT_COMMIT=${GIT_COMMIT}" \
             --data-urlencode "REPO_URL=${REPO_URL}" \
@@ -77,6 +149,7 @@ jobs:
               echo "### Jenkins Triggered"
               echo
               echo "- Job: \`${JENKINS_JOB}\`"
+              echo "- Pull request: \`${PR_NUMBER}\`"
               echo "- Branch: \`${BRANCH_NAME}\`"
               echo "- Commit: \`${GIT_COMMIT}\`"
               echo "- Queue item: ${queue_url}"

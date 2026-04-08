@@ -8,6 +8,7 @@ pipeline {
   }
 
   parameters {
+    string(name: 'PR_NUMBER', defaultValue: '', description: 'Pull request number, optional')
     string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
     string(name: 'GIT_COMMIT', defaultValue: '', description: 'Commit SHA to build, optional')
     string(name: 'REPO_URL', defaultValue: 'https://github.com/star-bnl/star-sw.git', description: 'Repository URL')
