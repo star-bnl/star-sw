@@ -53,7 +53,8 @@ void particleGun( int nevents=1,
 		  double phimn=0.0,
 		  double phimx=TMath::TwoPi(),
 		  std::string distribution="FlatPT",
-		  std::string physlist="FTFP_BERT"		  
+		  std::string physlist="FTFP_BERT",
+		  int pid=6
 		  ) {
   
   top->SetDebug(1);
@@ -108,8 +109,8 @@ void particleGun( int nevents=1,
   kine->SetAttr("etahigh", etamx    );
   kine->SetAttr("phimn",   phimn    );
   kine->SetAttr("phimx",   phimx    );
-  kine->SetAttr("pid",     14       );
-  kine->SetAttr("ntrack",  10       );
+  kine->SetAttr("pid",     pid      );
+  kine->SetAttr("ntrack",  ntracks  );
 
   top->ls(5);
   
