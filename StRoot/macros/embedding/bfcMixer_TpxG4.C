@@ -316,21 +316,23 @@ void bfcMixer_TpxG4()
 
 void bfcMixer_TpxG4( 
 		    const int   nevents_ , 
-		    const char* daqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22158015_raw_5000016.daq", 
-		    const char* tagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22158015_raw_5000016.tags.root" , 
+		    const char* daqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq", 
+		    const char* tagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" , 
 		    double ptmn_           = 0.0           , 
-		    double ptmx_           = 6.0           ,
-		    double etamn_          = -1.75         , 
-		    double etamx_          =  1.55         , 
-		    double vzmn_           =  -145.0       , 
-		    double vzmx_           = 145.0         , 
-		    double vr_             = 2.0           , 
-		    int pid_               = 14            ,
-		    double mult_           = 0.1           , 
-		    std::vector<int> triggers_  = {870010} , 
-		    const char* prodname  = "P23idAuAu17"  , 
+		    double ptmx_           = 20.0          ,
+		    double etamn_          = -1.0          , 
+		    double etamx_          =  1.0          , 
+		    double vzmn_           = -55.0         , 
+		    double vzmx_           = 55.0          , 
+		    double vr_             = 100.0         , 
+		    int pid_               = 7             ,
+		    double mult_           = 0.05          , 
+		    std::vector<int> triggers_  = {600213,600214,600231,600232} , 
+		    const char* prodname  = "P21idIsobar200"  , 
 		    const char* kintype   = "FlatPT"       ,
 		    bool simIn = false                     ) {
+
+
 
 
   nevents  = nevents_;
@@ -389,7 +391,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
   if ( dbg_ == "test1" ) {
 
-    const int   nevents_     = 1; 
+    const int   nevents_     = 10; 
     const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
     const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
     double myptmn_           = 5.0 - 0.0001  ; 
@@ -435,7 +437,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
      */
 
-    const int   nevents_     = 100; 
+    const int   nevents_     = 10; 
     const char* mydaqfile_   = "/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq";
     const char* mytagfile_   = "/gpfs01/star/embed/tags/2019/auau19_phys/st_physics_adc_20057049_raw_2000003.tags.root" ;
     double myptmn_           = 0.0;
@@ -453,6 +455,27 @@ void bfcMixer_TpxG4( const char* dbg ) {
     bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
 
   };
+
+  if ( dbg_ == "P21idIsobar200" ) {
+    const int   nevents_ = 10; 
+    const char* mydaqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq"; 
+    const char* mytagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" ; 
+    double myptmn_           = 0.0           ; 
+    double myptmx_           = 20.0          ;
+    double myetamn_          = -1.0          ; 
+    double myetamx_          =  1.0          ; 
+    double myvzmn_           = -55.0         ; 
+    double myvzmx_           = 55.0          ; 
+    double myvr_             = 100.0         ; 
+    int mypid_               = 7             ;
+    double mymult_           = 0.05          ; 
+    std::vector<int> mytriggers_  = {600213,600214,600231,600232} ; 
+    const char* myprodname  = "P21idIsobar200"  ; 
+    const char* mykintype   = "FlatPT"       ;
+    bool mysimIn = false                     ;
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+     
+  }
 
     
 };

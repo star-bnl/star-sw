@@ -13,7 +13,7 @@ const int debuglevel = 1;
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry ";
 std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault,noinput prepembed ry2021a ";
 //std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer,GeantOut,MiniMcMk,McAna ,useInTracker,emcSim,bemcMixer,eefs,eemcmixer nodefault";
-std::string     chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer         GeantOut,MiniMcMk,McAna ,useInTracker emcsim bemcmixer eefs eemcmixer nodefault";
+std::string     chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer Tpc23         GeantOut,MiniMcMk,McAna ,useInTracker emcsim bemcmixer eefs eemcmixer nodefault";
 
 std::string   chain0opts = ( chain1opts_ + " " + chain2opts_ + " " + chain3opts_ + " " );
 
@@ -93,7 +93,7 @@ void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn,
   process( Form( "embmk->SetOpt( %f, %f, %f, %f, %f, %f, \"%s\" );   ", ptmn, ptmx, etamn, etamx, phimn, phimx, type_ ) );
 }
 void SetPartOpt( int pid, double mult ) {
-  process( Form( "embmk->SetPartOpt(%i,%i);", pid, mult ) );
+  process( Form( "embmk->SetPartOpt(%i,%f);", pid, mult ) );
   process( "embmk->SetSkipMode(true);" );
   process( "embmk->SetTemp(0.35);");
 }
@@ -226,21 +226,21 @@ void bfcMixer_TpxR6()
 
 void bfcMixer_TpxR6( 
 		    const int   nevents_ , 
-		    const char* daqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22158015_raw_5000016.daq"   , 
-		    const char* tagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22158015_raw_5000016.tags.root" , 
+		    const char* daqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq", 
+		    const char* tagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" , 
 		    double ptmn_           = 0.0           , 
-		    double ptmx_           = 6.0           ,
-		    double etamn_          = -1.75         , 
-		    double etamx_          =  1.55         , 
-		    double vzmn_           =  -145.0       , 
-		    double vzmx_           = 145.0         , 
-		    double vr_             = 2.0           , 
-		    int pid_               = 14            ,
-		    double mult_           = 0.1           , 
-		    std::vector<int> triggers_  = {870010} , 
-		    const char* prodname  = "P23idAuAu17"  , 
-		    const char* kintype   = "FlatPT"       , 
-		    bool simIn            = false          ) {
+		    double ptmx_           = 20.0          ,
+		    double etamn_          = -1.0          , 
+		    double etamx_          =  1.0          , 
+		    double vzmn_           = -55.0         , 
+		    double vzmx_           = 55.0          , 
+		    double vr_             = 3.0           , 
+		    int pid_               = 7             ,
+		    double mult_           = 0.05          , 
+		    std::vector<int> triggers_  = {600213,600214,600231,600232} , 
+		    const char* prodname  = "P21idIsobar200"  , 
+		    const char* kintype   = "FlatPT"       ,
+		    bool simIn = false                     ) {
 
 
   nevents  = nevents_;
@@ -268,7 +268,7 @@ void bfcMixer_TpxR6(
     chain0opts = opts.loadopts;
     chain1opts = opts.chain1;
     chain2opts = opts.chain2;
-    chain3opts = opts.chain3;
+    chain3opts = opts.chain3 + " Tpc23 ";  
 
     bfcMixer_TpxR6();
 
@@ -324,6 +324,70 @@ void bfcMixer_TpxR6( const char* dbg ) {
 
   };
 
+  if ( dbg_ == "P21icAuAu19" ) {
+    //lrwxrwxrwx   1 jwebb rhstar     48 Mar 25 16:13 auau19_phys_chop150 -> /gpfs01/star/embed/daq/2019/auau19_phys_chop150/
+    //lrwxrwxrwx   1 jwebb rhstar     40 Mar 25 16:12 auau19_phys -> /gpfs01/star/embed/tags/2019/auau19_phys
+    //auau19_phys_chop150/st_physics_adc_20069061_raw_6500004.daq  auau19_phys/st_physics_adc_20069061_raw_6500004.tags.root
+    /*
+      root4star -b &gt;&gt;&amp; $SCRATCH/${FILEBASENAME}_${JOBID}.log &lt;&lt;EOF                                                                                                            
+      std::vector&lt;Int_t&gt; triggers;                                                                                                                                                    
+      triggers.push_back(640001);                                                                                                                                                           
+      triggers.push_back(640011);                                                                                                                                                           
+      triggers.push_back(640021);                                                                                                                                                           
+      triggers.push_back(640031);                                                                                                                                                           
+      triggers.push_back(640041);                                                                                                                                                           
+      triggers.push_back(640051);                                                                                                                                                           
+      .L StRoot/macros/embedding/bfcMixer_Tpx.C                                                                                                                                             
+      bfcMixer_Tpx(1060, "$INPUTFILE0", "$SCRATCH/tags/${FILEBASENAME}.tags.root", 0, 6.0, -1.0, 1.0, -145.0, 145.0, 2.0, 45, 0.05, triggers, "P21icAuAu19", "FlatPt", 0, "${FILEBASENAME}.$
+      .q                                                                                                                                                                                    
+      EOF            
+
+/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq
+/star/data03/daq/2019/076/20076023/st_physics_adc_20076023_raw_4000002.daq
+/star/data03/daq/2019/093/20093002/st_physics_adc_20093002_raw_6000012.daq
+
+
+     */
+
+    const int   nevents_     = 10; 
+    const char* mydaqfile_   = "/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq";
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2019/auau19_phys/st_physics_adc_20057049_raw_2000003.tags.root" ;
+    double myptmn_           = 0.0;
+    double myptmx_           = 6.0;
+    double myetamn_          = -1.0;
+    double myetamx_          = +1.0;
+    double myvzmn_           = -145.0       ; 
+    double myvzmx_           =  145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 45            ;
+    double mymult_           = 0.05           ; 
+    std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
+    const char* myprodname  = "P21icAuAu19" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bfcMixer_TpxR6( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+
+  };
+
+  if ( dbg_ == "P21idIsobar200" ) {
+    const int   nevents_ = 10; 
+    const char* mydaqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq"; 
+    const char* mytagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" ; 
+    double myptmn_           = 0.0           ; 
+    double myptmx_           = 20.0          ;
+    double myetamn_          = -1.0          ; 
+    double myetamx_          =  1.0          ; 
+    double myvzmn_           = -55.0         ; 
+    double myvzmx_           = 55.0          ; 
+    double myvr_             = 100.0         ; 
+    int mypid_               = 7             ;
+    double mymult_           = 0.05          ; 
+    std::vector<int> mytriggers_  = {600213,600214,600231,600232} ; 
+    const char* myprodname  = "P21idIsobar200"  ; 
+    const char* mykintype   = "FlatPT"       ;
+    bool mysimIn = false                     ;
+    bfcMixer_TpxR6( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+     
+  }
     
 };
 
