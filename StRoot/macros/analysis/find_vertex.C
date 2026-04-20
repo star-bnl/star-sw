@@ -13,18 +13,10 @@
 //          new vertices are added after the old one.
 // 
 
-//class StEmcDetector;
-class StChain;
-//class StEmcRawData;
-//class EEfeeDataBlock;
-//class Collection;
-//class StSPtrVecTrackNodeIterator ;
-//class StTriggerIdCollection;
-class StMinuitVertexFinder;
-class StGenericVertexFinder;
-class StGenericVertexMaker;
-class StEvent;
-class StPrimaryVertex;
+#include "StChain/StChain.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StPrimaryVertex.h"
 
 StChain *chain=0;
 TH1F *dca_z_h=0;
