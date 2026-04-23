@@ -787,17 +787,17 @@ Particle H_dibaryon               code      = 60001,
 **
 *   Decay chains (Lambda always constrained to p+pi- via ID=98):
 *
-*   d_Lambda  (60100): d + Lambda              [sum of daughters = 1.876+1.115683 = 2.9917 GeV]
 *   d_Sigma0  (60101): d + Sigma0->Lambda+gamma [sum = 1.876+1.193 = 3.069 GeV]
 *   d_Xi_minus(60102): d + Xi-->Lambda+pi-      [sum = 1.876+1.32171 = 3.198 GeV]
 *   d_Xi_zero (60103): d + Xi0->Lambda+pi0      [sum = 1.876+1.31486 = 3.191 GeV]
+*   d_Lambda  (60104): d + Lambda              [sum of daughters = 1.876+1.115683 = 2.9917 GeV]
 **
 ***************************************************************************
 
 * d + Lambda --> d(45) + _lam_to_p_piminus_(98)
 * sum of daughters = 1.876 + 1.115683 = 2.9917 GeV
-  Particle d_Lambda                   code      = 60100       ,
-                                      mass      = 2.998        ,
+  Particle d_Lambda                   code      = 60104       ,
+                                      mass      = 2.992        ,
                                       charge    = 1            ,
                                       tlife     = 1.0E-19      ,
                                       pdg       = UNDEFINED    ,
