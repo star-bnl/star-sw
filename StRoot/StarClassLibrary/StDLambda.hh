@@ -15,7 +15,7 @@
  *
  * Pseudoparticle representing a loosely bound deuteron + Lambda state.
  * Decays via d_Lambda --> deuteron(45) + Lambda(98, constrained to p+pi-).
- * GEANT3 ID: 60100.  STAR PDG encoding: kDLambda.
+ * GEANT3 ID: 60104.  STAR PDG encoding: kDLambda.
  *
  **************************************************************************/
 #ifndef StDLambda_hh
