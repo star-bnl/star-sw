@@ -40,7 +40,7 @@ const bool runchains[] = { false, true, true, true };
 #pragma cling load("StStarLogger.so")
 #pragma cling load("StarClassLibrary.so")
 #pragma cling load("libmysqlclient.so")
-#pragma cling load("libStarMiniCern.so")
+//#pragma cling load("libStarMiniCern.so")
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
 
