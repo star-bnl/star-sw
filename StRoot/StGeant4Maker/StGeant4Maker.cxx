@@ -417,12 +417,12 @@ struct SD2Table_MTD {
       g2t_hit.p[1]      = (hit->momentum_in[1] + hit->momentum_out[1]) * 0.5;
       g2t_hit.p[2]      = (hit->momentum_in[2] + hit->momentum_out[2]) * 0.5;
       g2t_hit.s_track   = hit->length;
-      
-      table -> AddAt( &g2t_hit );     
-
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
 
+      g2t_hit.next_tr_hit_p = trk->hit_mtd_p; // store next hit on the linked list
+      trk->hit_mtd_p = hit->id;               // this hit becomes the head of the linked list
+      table -> AddAt( &g2t_hit );
       trk->n_mtd_hit++;
       
     }
@@ -1439,7 +1439,7 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_emc_hit>( "FPDH", {"FLXF","FLGR","FPSC","FOSC"}, "g2t_fpd_hit", sd2table_emc ); // n.b. does not read out the flxf or flgr hit defined in the geom...
 
-  AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
+  AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG" , "GEMG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
   AddHits<St_g2t_mtd_hit>( "MUTH", {"MIGG","MTTT","MTTF"}, "g2t_mtd_hit", sd2table_mtd  );
 
@@ -1614,7 +1614,7 @@ void StGeant4Maker::Stepping(){
   TParticle* current = stack->GetCurrentTrack(); 
 
   // Get access to the current MC truth
-  StarMCParticle* truth = stack->GetParticleTable().back(); 
+  StarMCParticle* truth = stack->GetCurrentPersistentTrack(); 
 
   // Update the immediate track history
   UpdateHistory();

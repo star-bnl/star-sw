@@ -203,7 +203,15 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
       {
 	vertex->addDaughter( mParticleTable.back() );  
       }
-
+    // Set the vertex parent to the mother track's persistent particle
+    if ( !isPrimary ) {
+      int mother = particle->GetFirstMother();
+      if ( mother >= 0 && mother < mArraySize && mPersistentTrack[mother] ) {
+        if ( !vertex->parent() ) {
+          vertex->setParent( mPersistentTrack[mother] );
+        }
+      }
+    }
     auto* navigator = gGeoManager->GetCurrentNavigator();
     auto* volume    = navigator->GetCurrentVolume();
     auto* medium    = volume->GetMedium();
