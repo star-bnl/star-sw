@@ -649,6 +649,31 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
 }
 //________________________________________________________________________________________________
+
+bool CreateGeometry(const Char_t *name="y2011") {
+  if ( gGeoManager ) { 
+    cout << "AgML geometry:  Existing TGeoManager " << gGeoManager->GetName() 
+	 << " detected, ignoring request for " 
+	 << name << endl;
+    return false;
+  }
+
+  Geometry *build = new Geometry();  
+  build->InitAgML( "StarTGeoStacker" );
+
+  Long_t save = gErrorIgnoreLevel; gErrorIgnoreLevel = 9999;
+  build->ConstructGeometry(name);
+  gErrorIgnoreLevel = save;
+
+  if ( gGeoManager ) 
+    {
+      gGeoManager->CloseGeometry();
+    }
+
+  return gGeoManager;
+
+}
+
 int StGeant4Maker::Init() {
   return StMaker::Init();
 }
@@ -906,10 +931,9 @@ int  StGeant4Maker::InitGeom() {
       //
       // Load and execute
       //
-      LOG_INFO << "Load geometry file " << mac << endm;
-      gInterpreter->ProcessLine( Form( ".L %s", mac ) );
-      gInterpreter->ProcessLine( "CreateTable();" );
-      gInterpreter->ProcessLine( Form( ".U %s", mac ) );
+      //      StarGeometry::Construct( DbAlias[i].tag );
+      CreateGeometry( tag.Data() );
+
       //
       // Cleanup file
       // 
@@ -918,9 +942,10 @@ int  StGeant4Maker::InitGeom() {
   }
 
   // Last try before kaboom
+  assert(gGeoManager);
   if( !gGeoManager ) GetDataBase( "VmcGeometry" );
 
-  assert(gGeoManager);
+
 
   LOG_INFO << "Geometry constructed." << endm;
   {
