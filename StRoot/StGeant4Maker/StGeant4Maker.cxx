@@ -650,8 +650,6 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::Init() {
-  InitGeom();
-  InitVmcApp();
   return StMaker::Init();
 }
 int StGeant4Maker::InitVmcApp() {
@@ -807,7 +805,11 @@ int StGeant4Maker::InitVmcApp() {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitRun( int /* run */ ){
 
-  LOG_INFO << "InitRun" << endm;
+  // One time initialization of the application
+  if ( 0 == mVmcApplication ) {
+    InitGeom();
+    InitVmcApp();
+  }
 
   gGeoManager = mGeometryG4;
 
