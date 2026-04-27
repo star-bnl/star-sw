@@ -151,7 +151,8 @@ public:
   /// Initialize maker
   int Init();
   int  InitRun( int run );
-  int  InitGeom();
+  int    InitGeom();
+  int    InitVmcApp();
   int  InitHits();
   
   /// Perform runtime initialization of per-medium track propagation cuts, processes, etc...

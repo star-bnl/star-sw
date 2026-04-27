@@ -650,8 +650,11 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::Init() {
-
   InitGeom();
+  InitVmcApp();
+  return StMaker::Init();
+}
+int StGeant4Maker::InitVmcApp() {
 
   mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"), SAttr("application:engine"), mMCStack );
 
