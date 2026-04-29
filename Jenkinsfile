@@ -45,7 +45,6 @@ docker buildx build \
   .
 '''
 
-      archiveArtifacts artifacts: "artifacts/star-sw-${starBase}-${compiler}.tar", fingerprint: true
       stash name: "star-sw-${starBase}-${compiler}", includes: "artifacts/star-sw-${starBase}-${compiler}.tar"
     }
   }
