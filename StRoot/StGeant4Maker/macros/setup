@@ -4,7 +4,9 @@ setenv GROUP_DIR /star/u/jeromel/work/STAR/group
 # Setup 64 bit w/ spack overlay
 setup debug
 setup 64b
-starver SL24x config/v0.3.0-rhel7-root6.24.06
+
+# Maintain the STAR_VERSION, but overlay the root6 configuration
+starver ${STAR_VERSION} config/v0.3.0-rhel7-root6.24.06
 
 # STILL NEED TO STRIP ROOT5 From the environment
 setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
