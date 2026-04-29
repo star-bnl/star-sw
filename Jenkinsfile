@@ -122,6 +122,21 @@ def branchesFor(List values, Closure body) {
 pipeline {
   agent none
 
+  triggers {
+    GenericTrigger(
+      genericVariables: [
+        [key: 'ref', value: '$.ref', defaultValue: ''],
+        [key: 'action', value: '$.action', defaultValue: '']
+      ],
+      causeString: 'GitHub webhook: action=$action ref=$ref',
+      regexpFilterText: '$action:$ref',
+      regexpFilterExpression: '^(:refs/heads/(main|jenkins-ci-pipeline-webhook)|(opened|synchronize|reopened|ready_for_review):)$',
+      printContributedVariables: true,
+      printPostContent: false,
+      silentResponse: false
+    )
+  }
+
   options {
     timestamps()
     skipDefaultCheckout(true)
