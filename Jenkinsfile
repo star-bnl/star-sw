@@ -17,6 +17,75 @@ def safeName(String value) {
   return value.replaceAll(/[^A-Za-z0-9_.-]/, '-')
 }
 
+def jsonEscape(String value) {
+  return (value ?: '').replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+}
+
+def statusSha() {
+  def sha = env.pr_head_sha ?: env.after ?: env.GIT_COMMIT_SHA ?: env.GIT_COMMIT
+  if (sha?.trim()) {
+    return sha.trim()
+  }
+
+  try {
+    return sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+  } catch (ignored) {
+    return ''
+  }
+}
+
+def githubStatus(String context, String state, String description) {
+  def sha = statusSha()
+  if (!sha) {
+    echo "Skipping GitHub status '${context}': no commit SHA available"
+    return
+  }
+
+  def postStatus = {
+    withCredentials([string(credentialsId: 'github-status-token', variable: 'GITHUB_TOKEN')]) {
+      sh """#!/usr/bin/env bash
+set -euo pipefail
+curl -fsS -X POST \\
+  -H "Authorization: Bearer \${GITHUB_TOKEN}" \\
+  -H "Accept: application/vnd.github+json" \\
+  -H "X-GitHub-Api-Version: 2022-11-28" \\
+  "https://api.github.com/repos/star-bnl/star-sw/statuses/${sha}" \\
+  -d @- <<'EOF'
+{
+  "state": "${jsonEscape(state)}",
+  "target_url": "${jsonEscape(env.BUILD_URL ?: '')}",
+  "description": "${jsonEscape(description)}",
+  "context": "${jsonEscape(context)}"
+}
+EOF
+"""
+    }
+  }
+
+  try {
+    if (env.NODE_NAME?.trim()) {
+      postStatus()
+    } else {
+      node {
+        postStatus()
+      }
+    }
+  } catch (err) {
+    echo "Skipping GitHub status '${context}': ${err.getMessage()}"
+  }
+}
+
+def withGithubStatus(String context, String description, Closure body) {
+  githubStatus(context, 'pending', "${description} running")
+  try {
+    body()
+    githubStatus(context, 'success', "${description} passed")
+  } catch (err) {
+    githubStatus(context, 'failure', "${description} failed")
+    throw err
+  }
+}
+
 def buildImage(String starBase, String compiler) {
   node {
     checkedOut()
@@ -125,7 +194,9 @@ pipeline {
     GenericTrigger(
       genericVariables: [
         [key: 'ref', value: '$.ref', defaultValue: ''],
-        [key: 'action', value: '$.action', defaultValue: '']
+        [key: 'action', value: '$.action', defaultValue: ''],
+        [key: 'after', value: '$.after', defaultValue: ''],
+        [key: 'pr_head_sha', value: '$.pull_request.head.sha', defaultValue: '']
       ],
       causeString: 'GitHub webhook: action=$action ref=$ref',
       regexpFilterText: '$action:$ref',
@@ -152,9 +223,12 @@ pipeline {
     stage('Build Docker Images') {
       steps {
         script {
+          githubStatus('jenkins/star-sw-webhook', 'pending', 'Jenkins pipeline is running')
           def builds = branchesFor(['root5-gcc485', 'root5-gcc11', 'root6-gcc485', 'root6-gcc11']) { combo ->
             def parts = combo.split('-')
-            buildImage(parts[0], parts[1])
+            withGithubStatus("jenkins/star-sw-webhook/build/${combo}", "Docker build ${combo}") {
+              buildImage(parts[0], parts[1])
+            }
           }
           parallel builds
         }
@@ -165,17 +239,16 @@ pipeline {
       steps {
         script {
           def testIds = '10,11,22,23,24,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,59,60,76,77,78,90,91,92,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125'.split(',') as List
-          def combos = []
-          testIds.each { id ->
-            combos << "${id}-root5-gcc485"
-            combos << "${id}-root6-gcc485"
+          def testGroups = branchesFor(['root5-gcc485', 'root6-gcc485']) { envName ->
+            withGithubStatus("jenkins/star-sw-webhook/test/${envName}", "Test ${envName}") {
+              def parts = envName.split('-')
+              def tests = branchesFor(testIds) { testId ->
+                runExecutest(testId, parts[0], parts[1])
+              }
+              parallel tests
+            }
           }
-
-          def tests = branchesFor(combos) { combo ->
-            def parts = combo.split('-')
-            runExecutest(parts[0], parts[1], parts[2])
-          }
-          parallel tests
+          parallel testGroups
         }
       }
     }
@@ -185,13 +258,15 @@ pipeline {
         script {
           def tests = branchesFor(['121-gcc485', '121-gcc11', '122-gcc485', '122-gcc11']) { combo ->
             def parts = combo.split('-')
-            runRoot5MacroTest(
-              'doEvents',
-              parts[0],
-              parts[1],
-              'StRoot/macros/analysis/doEvents.C(100, "$TEST_FILE")',
-              '<StIOMaker::Finish> IO:'
-            )
+            withGithubStatus("jenkins/star-sw-webhook/root5-doEvents/${combo}", "ROOT5 doEvents ${combo}") {
+              runRoot5MacroTest(
+                'doEvents',
+                parts[0],
+                parts[1],
+                'StRoot/macros/analysis/doEvents.C(100, "$TEST_FILE")',
+                '<StIOMaker::Finish> IO:'
+              )
+            }
           }
           parallel tests
         }
@@ -203,13 +278,15 @@ pipeline {
         script {
           def tests = branchesFor(['102-gcc485', '102-gcc11', '121-gcc485', '121-gcc11', '122-gcc485', '122-gcc11']) { combo ->
             def parts = combo.split('-')
-            runRoot5MacroTest(
-              'find-vertex',
-              parts[0],
-              parts[1],
-              'StRoot/macros/analysis/find_vertex.C("$TEST_FILE")',
-              '<StIOMaker::Finish> StIO:'
-            )
+            withGithubStatus("jenkins/star-sw-webhook/root5-find-vertex/${combo}", "ROOT5 find vertex ${combo}") {
+              runRoot5MacroTest(
+                'find-vertex',
+                parts[0],
+                parts[1],
+                'StRoot/macros/analysis/find_vertex.C("$TEST_FILE")',
+                '<StIOMaker::Finish> StIO:'
+              )
+            }
           }
           parallel tests
         }
@@ -222,6 +299,11 @@ pipeline {
       echo "Build finished: ${currentBuild.currentResult}"
       echo "Branch: ${env.BRANCH_NAME ?: 'unknown'}"
       echo "Pull request: ${env.CHANGE_ID ?: 'none'}"
+      script {
+        def result = currentBuild.currentResult ?: 'SUCCESS'
+        def state = result == 'SUCCESS' ? 'success' : (result == 'ABORTED' ? 'error' : 'failure')
+        githubStatus('jenkins/star-sw-webhook', state, "Jenkins pipeline ${result.toLowerCase()}")
+      }
     }
   }
 }
