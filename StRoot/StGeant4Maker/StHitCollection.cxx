@@ -200,15 +200,16 @@ void StTrackerHitCollection::ProcessHits() {
 
     double xg[] = { x, y, z };
     double xl[] = { 0, 0, 0 };
-    double cg[] = { px/ptot, py/ptot, pz/ptot };
-    double cl[] = { 0, 0, 0 };
 
     mc->Gmtod( xg, xl, 1 );
-    mc->Gmtod( cg, cl, 2 );
-
     x=xl[0]; y=xl[1]; z=xl[2];
-    px=cl[0]*ptot; py=cl[1]*ptot; pz=cl[2]*ptot;
-    //    LOG_INFO << "    final: " << x << " " << y << " " << z << endm;
+
+    if ( ptot>0 ) {
+      double cg[] = { px/ptot, py/ptot, pz/ptot };
+      double cl[] = { 0, 0, 0 };
+      mc->Gmtod( cg, cl, 2 );
+      px=cl[0]*ptot; py=cl[1]*ptot; pz=cl[2]*ptot;
+    }
 
   }
 
