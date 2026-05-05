@@ -86,95 +86,86 @@ def withGithubStatus(String context, String description, Closure body) {
   }
 }
 
-def buildImage(String starBase, String compiler) {
-  node {
-    checkedOut()
-    bash '''
+def imageTag(String starBase, String compiler) {
+  return "${env.IMAGE_PREFIX}:${safeName("${env.BUILD_TAG}-${starBase}-${compiler}")}"
+}
+
+def prepareDocker() {
+  bash '''
 command -v docker
 docker --version
 docker buildx version
 docker buildx use default || true
 docker buildx inspect default --bootstrap || docker buildx inspect --bootstrap
 '''
+}
 
-    withEnv(["STAR_BASE=${starBase}", "COMPILER=${compiler}"]) {
-      bash '''
-starenv="${STAR_BASE}-${COMPILER}"
-image_tag="${IMAGE_PREFIX}-${starenv}"
-image_tar="${ARTIFACT_DIR}/star-sw-${starenv}.tar"
-
-mkdir -p "${ARTIFACT_DIR}"
-
+def buildImage(String starBase, String compiler) {
+  withEnv(["STAR_BASE=${starBase}", "COMPILER=${compiler}", "IMAGE_TAG=${imageTag(starBase, compiler)}"]) {
+    bash '''
 docker buildx build \
   --progress plain \
   --build-arg "starenv=${STAR_BASE}" \
   --build-arg "compiler=${COMPILER}" \
-  --tag "${image_tag}" \
-  --output "type=docker,dest=${image_tar}" \
+  --tag "${IMAGE_TAG}" \
+  --load \
   .
 '''
+  }
+}
 
-      stash name: "star-sw-${starBase}-${compiler}", includes: "artifacts/star-sw-${starBase}-${compiler}.tar"
-    }
+def removeImage(String starBase, String compiler) {
+  withEnv(["IMAGE_TAG=${imageTag(starBase, compiler)}"]) {
+    bash '''
+docker image rm "${IMAGE_TAG}" >/dev/null 2>&1 || true
+'''
   }
 }
 
 def runExecutest(String testId, String starBase, String compiler) {
-  node {
-    unstash "star-sw-${starBase}-${compiler}"
-    withEnv([
-      "TEST_ID=${testId}",
-      "STAR_BASE=${starBase}",
-      "COMPILER=${compiler}",
-      "DATA_CONTAINER=${safeName("${env.BUILD_TAG}-${starBase}-${compiler}-${testId}")}"
-    ]) {
-      bash '''
-starenv="${STAR_BASE}-${COMPILER}"
-image_tag="${IMAGE_PREFIX}-${starenv}"
-image_tar="${ARTIFACT_DIR}/star-sw-${starenv}.tar"
+  withEnv([
+    "TEST_ID=${testId}",
+    "STAR_BASE=${starBase}",
+    "COMPILER=${compiler}",
+    "IMAGE_TAG=${imageTag(starBase, compiler)}",
+    "DATA_CONTAINER=${safeName("${env.BUILD_TAG}-${starBase}-${compiler}-${testId}")}"
+  ]) {
+    bash '''
 data_container="star-test-data-${DATA_CONTAINER}"
 
-docker load --input "${image_tar}"
 docker rm -f "${data_container}" >/dev/null 2>&1 || true
 trap 'docker rm -f "${data_container}" >/dev/null 2>&1 || true' EXIT
 docker run --name "${data_container}" --volume /star "${TEST_DATA_IMAGE}"
 
-TEST_CMD="$(docker run --rm "${image_tag}" tests/executest.py -c "${TEST_ID}")"
-docker run --volumes-from "${data_container}" "${image_tag}" \
+TEST_CMD="$(docker run --rm "${IMAGE_TAG}" tests/executest.py -c "${TEST_ID}")"
+docker run --volumes-from "${data_container}" "${IMAGE_TAG}" \
   sh -c "set -e; MALLOC_CHECK_=3 ${TEST_CMD} 2>&1 | tee log; grep 'Run completed' log"
 '''
-    }
   }
 }
 
 def runRoot5MacroTest(String label, String testId, String compiler, String macroCall, String grepPattern) {
-  node {
-    unstash "star-sw-root5-${compiler}"
-    withEnv([
-      "TEST_ID=${testId}",
-      "COMPILER=${compiler}",
-      "MACRO_CALL=${macroCall}",
-      "GREP_PATTERN=${grepPattern}",
-      "DATA_CONTAINER=${safeName("${env.BUILD_TAG}-${label}-${compiler}-${testId}")}"
-    ]) {
-      bash '''
-starenv="root5-${COMPILER}"
-image_tag="${IMAGE_PREFIX}-${starenv}"
-image_tar="${ARTIFACT_DIR}/star-sw-${starenv}.tar"
+  withEnv([
+    "TEST_ID=${testId}",
+    "COMPILER=${compiler}",
+    "IMAGE_TAG=${imageTag('root5', compiler)}",
+    "MACRO_CALL=${macroCall}",
+    "GREP_PATTERN=${grepPattern}",
+    "DATA_CONTAINER=${safeName("${env.BUILD_TAG}-${label}-${compiler}-${testId}")}"
+  ]) {
+    bash '''
 data_container="star-test-data-${DATA_CONTAINER}"
 
-docker load --input "${image_tar}"
 docker rm -f "${data_container}" >/dev/null 2>&1 || true
 trap 'docker rm -f "${data_container}" >/dev/null 2>&1 || true' EXIT
 docker run --name "${data_container}" --volume /star "${TEST_DATA_IMAGE}"
 
-TEST_FILE="$(docker run --rm "${image_tag}" tests/executest.py "${TEST_ID}" -a fullpath | sed -E 's/\\.(daq|fzd)$/.event.root/')"
+TEST_FILE="$(docker run --rm "${IMAGE_TAG}" tests/executest.py "${TEST_ID}" -a fullpath | sed -E 's/\\.(daq|fzd)$/.event.root/')"
 TEST_CMD="root4star -b -q -l '${MACRO_CALL}'"
 TEST_CMD="${TEST_CMD//\\$TEST_FILE/${TEST_FILE}}"
-docker run --volumes-from "${data_container}" "${image_tag}" \
+docker run --volumes-from "${data_container}" "${IMAGE_TAG}" \
   sh -c "set -e; ${TEST_CMD} 2>&1 | tee log; grep '${GREP_PATTERN}' log"
 '''
-    }
   }
 }
 
@@ -188,7 +179,7 @@ def branchesFor(List values, Closure body) {
 }
 
 pipeline {
-  agent none
+  agent any
 
   triggers {
     GenericTrigger(
@@ -214,7 +205,6 @@ pipeline {
   }
 
   environment {
-    ARTIFACT_DIR = 'artifacts'
     IMAGE_PREFIX = 'ghcr.io/star-bnl/star-sw'
     TEST_DATA_IMAGE = 'ghcr.io/star-bnl/star-test-data:v7'
   }
@@ -224,6 +214,9 @@ pipeline {
       steps {
         script {
           githubStatus('jenkins/star-sw-webhook', 'pending', 'Jenkins pipeline is running')
+          checkedOut()
+          prepareDocker()
+
           def builds = branchesFor(['root5-gcc485', 'root5-gcc11', 'root6-gcc485', 'root6-gcc11']) { combo ->
             def parts = combo.split('-')
             withGithubStatus("jenkins/star-sw-webhook/build/${combo}", "Docker build ${combo}") {
@@ -303,6 +296,15 @@ pipeline {
         def result = currentBuild.currentResult ?: 'SUCCESS'
         def state = result == 'SUCCESS' ? 'success' : (result == 'ABORTED' ? 'error' : 'failure')
         githubStatus('jenkins/star-sw-webhook', state, "Jenkins pipeline ${result.toLowerCase()}")
+
+        ['root5-gcc485', 'root5-gcc11', 'root6-gcc485', 'root6-gcc11'].each { combo ->
+          def parts = combo.split('-')
+          removeImage(parts[0], parts[1])
+        }
+
+        echo "Build finished: ${currentBuild.currentResult}"
+        echo "Branch: ${env.BRANCH_NAME ?: 'unknown'}"
+        echo "Pull request: ${env.CHANGE_ID ?: 'none'}"
       }
     }
   }
