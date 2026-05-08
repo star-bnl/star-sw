@@ -21,7 +21,7 @@ def main():
     # JOBDIR
     parser.add_argument( '-j', '--jobdir', dest='JOBDIR', default='/star/simu/simu/g4star/.simulations/job/', help="Job directory" )    
     # BASELIB
-    parser.add_argument( '-b', '--baselib', dest='BASELIB', default='SL24x', help="Specify the library" )
+    parser.add_argument( '-b', '--baselib', dest='BASELIB', default='SL26x', help="Specify the library" )
     # OVERLAY
     parser.add_argument(      '--overlay', dest='OVERLAY', default='config/v0.3.0-rhel7-root6.24.06', help="Spack overlay on the environment" )
     # GROUPDIR
