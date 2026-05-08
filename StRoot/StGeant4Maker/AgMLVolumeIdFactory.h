@@ -24,7 +24,9 @@
 #include <AgMLMtdVolumeId.h>
 #include <AgMLBbcVolumeId.h>
 #include <AgMLVpdVolumeId.h>
-
+#include <AgMLPixVolumeId.h>
+#include <AgMLIstVolumeId.h>
+#include <AgMLSsdVolumeId.h>
 
 /**
  * @class AgMLVolumeIdFactory
@@ -91,6 +93,13 @@ public:
 	id = new AgMLBbcVolumeId();
       else if ( name == "VRAD" )
 	id = new AgMLVpdVolumeId();
+
+      else if ( name=="PLAC" ) 
+	id = new AgMLPixVolumeId();
+      else if ( name=="IBSS" ) 
+	id = new AgMLIstVolumeId();
+      else if ( name=="SFSD" ) 
+	id = new AgMLSsdVolumeId();
 
       VolumeId[name] = id;
 
