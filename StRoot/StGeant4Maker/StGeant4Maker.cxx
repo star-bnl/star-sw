@@ -60,6 +60,10 @@
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_vpd_Module.h"
 #include "g2t/St_g2t_fpd_Module.h"
+
+#include "g2t/St_g2t_pix_Module.h"
+#include "g2t/St_g2t_ist_Module.h"
+#include "g2t/St_g2t_ssd_Module.h"
 //________________________________________________________________________________________________
 #include <StHitCollection.h> 
 #include <cstring>
@@ -138,6 +142,9 @@ struct SD2Table_TPC {
     // TODO: increment hit count on track 
   } 
 } sd2table_tpc; 
+
+
+
 struct SD2Table_EPD {
   void operator()( StSensitiveDetector* sd, St_g2t_epd_hit* table, St_g2t_track* track ) {
     // Retrieve the hit collection 
@@ -235,6 +242,108 @@ struct SD2Table_FST {
     }
   } 
 } sd2table_fst; 
+
+struct SD2Table_PIX {
+  void operator()( StSensitiveDetector* sd, St_g2t_pix_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+     
+      int idtruth = hit->idtruth;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
+      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_fts_hit++;
+
+      table -> AddAt( &g2t_hit );     
+
+    }
+  } 
+} sd2table_pix; 
+
+struct SD2Table_IST {
+  void operator()( StSensitiveDetector* sd, St_g2t_ist_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+     
+      int idtruth = hit->idtruth;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
+      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_fts_hit++;
+
+      table -> AddAt( &g2t_hit );     
+
+    }
+  } 
+} sd2table_ist; 
+
+struct SD2Table_SSD {
+  void operator()( StSensitiveDetector* sd, St_g2t_ssd_hit* table, St_g2t_track* track ) {
+    // Retrieve the hit collection 
+    StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+      
+      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      g2t_hit.ds        = hit->ds;
+      for ( int i=0; i<3; i++ ) {
+	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
+	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+      }
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
+     
+      int idtruth = hit->idtruth;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
+      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_fts_hit++;
+
+      table -> AddAt( &g2t_hit );     
+
+    }
+  } 
+} sd2table_ssd; 
 
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
@@ -1482,6 +1591,10 @@ void StGeant4Maker::FinishEvent(){
 
   AddHits<St_g2t_ctf_hit>( "ETOH", {"ECEL"}, "g2t_eto_hit", sd2table_ctf );
   AddHits<St_g2t_ctf_hit>( "BBCH", {"BPOL"}, "g2t_bbc_hit", sd2table_ctf );
+
+  AddHits<St_g2t_pix_hit>( "PIXH", {"PLAC"}, "g2t_pix_hit", sd2table_pix );
+  AddHits<St_g2t_ist_hit>( "ISTH", {"IBSS"}, "g2t_ist_hit", sd2table_ist );
+  AddHits<St_g2t_ssd_hit>( "SSTH", {"SFSD"}, "g2t_ssd_hit", sd2table_ssd );
 
   for ( auto* sd : _sdlist ) {
 
