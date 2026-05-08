@@ -564,7 +564,11 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
   AddOption( "AgMLOpt:TopVolume", "HALL", "Name of the top-level volume" );
 
-  AddOption( "Stepping:Punchout:Stop", 1, "Punchout action: 0=no action, 1=track stopped, 2=track stopped and re-injected" );
+  //
+  // Default behavior for tracks punching out the back side of the magnet.  Track continues propagation
+  // with the ID truth of the track which entered the heavy material.
+  //
+  AddOption( "Stepping:Punchout:Stop", 0, "Punchout action: 0=no action, 1=track stopped, 2=track stopped and re-injected" );
   AddOption( "Stepping:Punchout:Rmin", 223.49, "Min radius applied to punchout logic" );
   AddOption( "Stepping:Punchout:Zmin", 268.75, "Min Z applied to punchout logic" );
 
