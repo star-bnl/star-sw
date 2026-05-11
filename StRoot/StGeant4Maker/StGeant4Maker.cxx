@@ -48,6 +48,7 @@
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_geant4star_Table.h"
 //________________________________________________________________________________________________
 #include "g2t/St_g2t_tpc_Module.h"
 #include "g2t/St_g2t_hca_Module.h"
@@ -996,6 +997,8 @@ int StGeant4Maker::InitRun( int /* run */ ){
 
   gGeoManager = mGeometry;
   
+  FillGeant4StarTable();
+  
   return result;
 }
 //________________________________________________________________________________________________
@@ -1095,6 +1098,18 @@ double StarVMCApplication::TrackingZmax() const {
 //________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
+}
+//________________________________________________________________________________________________
+void StGeant4Maker::FillGeant4StarTable(){
+  St_g2t_geant4star* g2t_g4cfg = new St_g2t_geant4star("g2t_geant4star", 1);
+  g2t_geant4star_st cfg;
+  memset(&cfg, 0, sizeof(g2t_geant4star_st));
+  
+  cfg.field = DAttr("field");
+
+  g2t_g4cfg->AddAt(&cfg);
+  AddData(g2t_g4cfg);
+  LOG_INFO << "Filled geant4star configuration in g2t_geant4star table" << endm;
 }
 //________________________________________________________________________________________________
 struct A { };

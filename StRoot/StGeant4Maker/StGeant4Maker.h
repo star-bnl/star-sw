@@ -198,6 +198,9 @@ public:
 
   void PrintOptions( const char* opts = 0 );
 
+
+  /// Fill g2t_geant4star table
+  void FillGeant4StarTable();
   
 private:
 protected:
