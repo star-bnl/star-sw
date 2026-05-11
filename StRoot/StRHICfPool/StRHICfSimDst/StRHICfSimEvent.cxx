@@ -13,6 +13,7 @@ StRHICfSimEvent::~StRHICfSimEvent()
 
 void StRHICfSimEvent::Clear(Option_t *option)
 {
+    mGenEventNumber = -999;
     mEventNumber = -999;
     mProcessId = -999;
     mRHICfRunType = -999;
@@ -44,6 +45,7 @@ void StRHICfSimEvent::Clear(Option_t *option)
     mPrimaryTrkNum = -999;
 }
 
+void StRHICfSimEvent::SetGenEventNumber(int idx){mGenEventNumber = idx;}
 void StRHICfSimEvent::SetEventNumber(int idx){mEventNumber = idx;}
 void StRHICfSimEvent::SetProcessId(int id){mProcessId = id;}
 void StRHICfSimEvent::SetRHICfRunType(int type){mRHICfRunType = type;}
@@ -74,6 +76,7 @@ void StRHICfSimEvent::SetGenFinalParNum(int num){mGenFinalParNum = num;}
 void StRHICfSimEvent::SetGenFinalChargedParNum(int num){mGenFinalChargedParNum = num;}
 void StRHICfSimEvent::SetPrimaryTrkNum(int num){mPrimaryTrkNum = num;}
 
+Int_t StRHICfSimEvent::GetGenEventNumber(){return mGenEventNumber;}
 Int_t StRHICfSimEvent::GetEventNumber(){return mEventNumber;}
 Int_t StRHICfSimEvent::GetProcessId(){return mProcessId;}
 Int_t StRHICfSimEvent::GetRHICfRunType(){return mRHICfRunType;}

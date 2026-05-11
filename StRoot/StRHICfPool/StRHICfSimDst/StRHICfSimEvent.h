@@ -13,6 +13,7 @@ class StRHICfSimEvent : public TObject
         void Clear(Option_t *option = "");
 
         // Event header
+        void SetGenEventNumber(int idx);
         void SetEventNumber(int idx);
         void SetProcessId(int id);
         void SetRHICfRunType(int type);
@@ -44,6 +45,7 @@ class StRHICfSimEvent : public TObject
         void SetGenFinalChargedParNum(int num);
         void SetPrimaryTrkNum(int num);
 
+        Int_t GetGenEventNumber();
         Int_t GetEventNumber();
         Int_t GetProcessId();
         Int_t GetRHICfRunType();
@@ -75,6 +77,7 @@ class StRHICfSimEvent : public TObject
         Int_t GetPrimaryTrkNum(); // MuMcTrack::IdVx() == 1 tracks number
 
     private:
+        Int_t mGenEventNumber;
         Int_t mEventNumber;
         Int_t mProcessId;
         Int_t mRHICfRunType;
