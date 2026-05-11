@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION TMPhis , TMPofl , TMPufl
+ 
+ 
+      COMMON /DTHIS2/ TMPhis(3,nhis,ndim) , TMPufl(nhis) , TMPofl(nhis)

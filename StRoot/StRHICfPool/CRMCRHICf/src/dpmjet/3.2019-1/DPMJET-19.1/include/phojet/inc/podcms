@@ -1,0 +1,8 @@
+
+ 
+ 
+      INTEGER NPOsd
+      DOUBLE PRECISION ECMd , PCMd , PMAssd , PVIrtd , GAMbed , SIDd , 
+     &                 CODd , SIFd , COFd , PDCms
+      COMMON /PODCMS/ ECMd , PCMd , PMAssd(2) , PVIrtd(2) , GAMbed(4) , 
+     &                SIDd , CODd , SIFd , COFd , PDCms(4,2) , NPOsd(2)

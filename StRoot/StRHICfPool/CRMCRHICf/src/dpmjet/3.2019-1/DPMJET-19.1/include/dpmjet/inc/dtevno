@@ -1,0 +1,5 @@
+
+      INTEGER ICAsca , NEVent
+ 
+ 
+      COMMON /DTEVNO/ NEVent , ICAsca

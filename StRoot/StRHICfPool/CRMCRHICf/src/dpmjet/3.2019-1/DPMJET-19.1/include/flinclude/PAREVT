@@ -1,0 +1,174 @@
+*$ CREATE PAREVT.ADD
+*COPY PAREVT
+*                                                                      *
+*=== parevt ===========================================================*
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1990-2010      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     Created on 28-march-90 by A. Ferrari, INFN - Milan               *
+*                                                                      *
+*     Last change  on  22-mar-10    by   Alfredo Ferrari               *
+*                                                                      *
+*           included in:                                               *
+*                                                                      *
+*               flukam                                                 *
+*               ancnuc                                                 *
+*               anncan                                                 *
+*               bdnopt                                                 *
+*               bimsel                                                 *
+*               bselsc                                                 *
+*               clbmjt                                                 *
+*               corevt                                                 *
+*               corrin                                                 *
+*               deflts                                                 *
+*               difevv                                                 *
+*               difpro                                                 *
+*               difevv                                                 *
+*               difpro                                                 *
+*               distnu                                                 *
+*               eldsev                                                 *
+*               epilog                                                 *
+*               eventv                                                 *
+*               evevap                                                 *
+*               evxtes                                                 *
+*               evvini                                                 *
+*               ferevv                                                 *
+*               ferhav                                                 *
+*               frmbrk                                                 *
+*               frbkjp                                                 *
+*               ferevv                                                 *
+*               ferhav                                                 *
+*               fiprou                                                 *
+*               frmbrk                                                 *
+*               frbkjp                                                 *
+*               geta                                                   *
+*               hdncin                                                 *
+*               hdncgl                                                 *
+*               hdncev                                                 *
+*               kaonuc                                                 *
+*               kbanuc                                                 *
+*               kbsnuc                                                 *
+*               kaskad                                                 *
+*               kasneu                                                 *
+*               incini                                                 *
+*               lpncln                                                 *
+*               muoabs                                                 *
+*               muprab                                                 *
+*               ncdtrd                                                 *
+*               nucdcy                                                 *
+*               nucnuc                                                 *
+*               nucevv                                                 *
+*               nuncln                                                 *
+*               nwisel                                                 *
+*               peaini                                                 *
+*               peanut                                                 *
+*               phnsch                                                 *
+*               phncev                                                 *
+*               phnvev                                                 *
+*               piabth                                                 *
+*               pioabs                                                 *
+*               pionuc                                                 *
+*               pmprab                                                 *
+*               pnansg                                                 *
+*               pnpisg                                                 *
+*               ponfin                                                 *
+*               precll                                                 *
+*               prepre                                                 *
+*               rcfset                                                 *
+*               rsncli                                                 *
+*               rstsel                                                 *
+*               seafsl                                                 *
+*               stglau                                                 *
+*               stprnc                                                 *
+*               umofin                                                 *
+*               usrsrn                                                 *
+*                                                                      *
+*           frdiff = fraction of the total number of events which are  *
+*                    diffractive ones (obsolete, no longer used)       *
+*           fsprd0 = asymptotic reduction factor for cascade particle  *
+*                    energy slope parameter                            *
+*           fshpfn = modifying factor for bamjet momentum sharing jet  *
+*                    function                                          *
+*           rn1gsc = correlation factor between shower and grey part-  *
+*                    ticle multiplicities                              *
+*           rn2gsc = correlation factor between shower and grey part-  *
+*                    ticle multiplicities                              *
+*           rnswtc = random particle id switch factor                  *
+*           dpower = power exponent used in the binomial distributions *
+*                    for grey particles                                *
+*           lpower = flag to signal if dpower is different from the    *
+*                    default option (dpower=2)                         *
+*           ldiffr = flag for particles undergoing diffractive events  *
+*           linctv = flag to switch on/off cascade nucleons and exci-  *
+*                    tation energy (it is important for testing the    *
+*                    generator                                         *
+*           levprt = flag for nuclear evaporation                      *
+*           ldeexg = flag for nuclear deexcitation gammas              *
+*           lgdhpr = flag for geometry dependent calculations in the   *
+*                    preequilibrium part                               *
+*           lpreex = flag for explicit treatment of the first inte-    *
+*                    ctions in the preequilibrium part                 *
+*           lhlfix = flag for "freezing" the hole depth of the holes   *
+*                    produced in the explicitly treated interactions   *
+*                    in the preequilibrium part                        *
+*           lprfix = flag for "freezing" the already sampled particle  *
+*                    exciton energy in the preequilibrium part         *
+*           lparwv = flag to apply the Heisenberg principle according  *
+*                    to the reduced DeBroglie wavelength in the calcu- *
+*                    lation of the impact parameter and in computing   *
+*                    the particle position after interactions          *
+*           lsngch = logical flag for allowing single chain events     *
+*           lschdf = logical flag for allowing single chain events     *
+*                    in diffractive interactions                       *
+*           lhadri = logical flag for indicating whether the resonance *
+*                    model was used or not for primary interactions    *
+*           lnucri = logical flag for indicating whether the Nucriv    *
+*                    model was used or not for the current interaction *
+*           lpeanu = logical flag for indicating whether the Peanut    *
+*                    model was used or not for the current interaction *
+*           levbme = logical flag for indicating whether the BME       *
+*                    model was used or not for the current interaction *
+*           lphdrc = logical flag for indicating whether a photonuc-   *
+*                    lear interaction is a "direct" one or not         *
+*           latmss = logical flag for indicating whether to use ato-   *
+*                    mic masses during evaporation                     *
+*           lismrs = logical flag for indicating whether isomer calcu- *
+*                    lations are possible                              *
+*           lchdcy = logical flag for charm particle decays            *
+*           lchdcr = logical flag for charm particle decays occured in *
+*                    the current collision                             *
+*           lmlccr = logical flag true when the current collisions is  *
+*                    a multiple (Glauber like) collision               *
+*           lrvkin = logical flag for interactions occuring in reverse *
+*                    kinematics                                        *
+*           lvp2xx = logical flag for interactions where vph2xx has    *
+*                    been called                                       *
+*           lv2xnw = logical flag for using vph2xx, set overall        *
+*           lnwv2x = logical flag for using vph2xx, set event-by-event *
+*           levfin = logical flag for event flag initialization        *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+*
+*  30% of events, randomly choosen, are diffractive events!!
+*  Now 20% (J. Ranft & A. Ferrari, 25-3-90)
+*  Actually it is no longer used!!
+      PARAMETER ( FRDIFF = 0.2D+00 )
+      PARAMETER ( ETHSEA = 1.0D+00 )
+*
+      LOGICAL LDIFFR, LINCTV, LEVPRT, LHEAVY, LDEEXG, LGDHPR, LPREEX,
+     &        LHLFIX, LPRFIX, LPARWV, LPOWER, LSNGCH, LSCHDF, LHADRI,
+     &        LNUCRI, LPEANU, LEVBME, LPHDRC, LATMSS, LISMRS, LCHDCY,
+     &        LCHDCR, LMLCCR, LRVKIN, LVP2XX, LV2XNW, LNWV2X, LEVFIN
+      COMMON / PAREVT / DPOWER, FSPRD0, FSHPFN, RN1GSC, RN2GSC, RNSWTC,
+     &                  LDIFFR (NALLWP),LPOWER, LINCTV, LEVPRT, LHEAVY,
+     &                  LDEEXG, LGDHPR, LPREEX, LHLFIX, LPRFIX, LPARWV,
+     &                  LSNGCH, LSCHDF, LHADRI, LNUCRI, LPEANU, LEVBME,
+     &                  LPHDRC, LATMSS, LISMRS, LCHDCY, LCHDCR, LMLCCR,
+     &                  LRVKIN, LVP2XX, LV2XNW, LNWV2X, LEVFIN
+      SAVE / PAREVT /
+

@@ -1,0 +1,10 @@
+
+      INTEGER IDPr , IDTr , IDXpr , IDXtr , IFPpo , IFTpo
+      DOUBLE PRECISION PPF , PPLm1 , PPLm2 , PPOm , PSC ,
+     &     PTF , PTLm1 , PTLm2 , XPH , XPPo , XTH , XTPo
+ 
+ 
+      COMMON /DTDIKI/ XPH(2) , XPPo(2) , XTH(2) , XTPo(2) , PPOm(4) , 
+     &                PSC(4) , PPF(4) , PTF(4) , PPLm1(4) , PPLm2(4) , 
+     &                PTLm1(4) , PTLm2(4) , IDPr , IDXpr , IDTr , 
+     &                IDXtr , IFPpo(2) , IFTpo(2)

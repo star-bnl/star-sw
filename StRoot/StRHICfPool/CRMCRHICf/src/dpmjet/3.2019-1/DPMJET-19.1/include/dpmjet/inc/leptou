@@ -1,0 +1,7 @@
+
+      INTEGER LST
+ 
+ 
+      DOUBLE PRECISION CUT , PARl , TMPx , TMPy , TMPw2 , TMPq2 , TMPu
+      COMMON /LEPTOU/ CUT(14) , LST(40) , PARl(30) , TMPx , TMPy , 
+     &                TMPw2 , TMPq2 , TMPu

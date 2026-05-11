@@ -1,0 +1,5 @@
+
+      INTEGER ICEvt , IEVhkk
+ 
+ 
+      COMMON /DTNORM/ ICEvt , IEVhkk

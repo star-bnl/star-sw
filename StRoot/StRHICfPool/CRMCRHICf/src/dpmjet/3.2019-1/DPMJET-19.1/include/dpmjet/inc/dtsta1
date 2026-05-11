@@ -1,0 +1,8 @@
+
+      INTEGER ICChai , ICCpro , ICDiff , ICDpr , ICDta , ICEvtg , 
+     &        ICRequ , ICRes , ICRjss , ICSamp , ICVv2s
+ 
+ 
+      COMMON /DTSTA1/ ICRequ , ICSamp , ICCpro , ICDpr , ICDta , 
+     &                ICRjss , ICVv2s , ICChai(2,9) , ICRes(9) , 
+     &                ICDiff(5) , ICEvtg(8,0:30)

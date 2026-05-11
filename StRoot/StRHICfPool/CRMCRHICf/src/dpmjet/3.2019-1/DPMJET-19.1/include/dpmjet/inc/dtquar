@@ -1,0 +1,8 @@
+
+      INTEGER IQBchr , IQCchr , IQEchr , IQIchr , IQSchr , IQTchr , 
+     &        IQUchr , MQUark
+ 
+ 
+      COMMON /DTQUAR/ IQEchr(-6:6) , IQBchr(-6:6) , IQIchr(-6:6) , 
+     &                IQSchr(-6:6) , IQCchr(-6:6) , IQUchr(-6:6) , 
+     &                IQTchr(-6:6) , MQUark(3,39)

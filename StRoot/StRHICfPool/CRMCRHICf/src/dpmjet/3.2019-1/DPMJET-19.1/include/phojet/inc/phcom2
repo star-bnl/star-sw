@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION ALM
+      INTEGER IORd
+      CHARACTER*4 CHPar
+ 
+      COMMON /PHCOM2/ ALM(maxp,0:maxs) , CHPar(maxp) , 
+     &                IORd(maxp,-maxs:maxs)

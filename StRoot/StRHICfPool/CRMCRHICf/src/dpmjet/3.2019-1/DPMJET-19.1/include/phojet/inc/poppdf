@@ -1,0 +1,9 @@
+
+ 
+ 
+      CHARACTER*8 PDFnam
+      INTEGER IPArid , IPAva , ITYpe , IGRp , ISEt , IEXt , NPAold
+      DOUBLE PRECISION PDFlam , PDFq2m
+      COMMON /POPPDF/ PDFlam(2) , PDFq2m(2) , PDFnam(2) , IPArid(2) , 
+     &                IPAva(2) , ITYpe(2) , IGRp(2) , ISEt(2) , IEXt(2)
+     &                , NPAold

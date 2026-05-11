@@ -1,0 +1,6 @@
+
+ 
+ 
+      DOUBLE PRECISION VMAs , GAMm , RMIn , RMAx , VMSl , VMFa
+      COMMON /POSVDM/ VMAs(4) , GAMm(4) , RMIn(4) , RMAx(4) , VMSl(4) , 
+     &                VMFa(4)

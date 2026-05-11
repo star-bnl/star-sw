@@ -1,0 +1,171 @@
+*$ CREATE FRBKCM.ADD
+*COPY FRBKCM
+*
+*=== frbkcm ===========================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1995-2012      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     FeRmi BreaKup CoMmon:                                            *
+*                                                                      *
+*     Created on 10 February 1995  by    Alfredo Ferrari & Paola Sala  *
+*                                                 Infn - Milan         *
+*                                                                      *
+*     Last change on  05-Feb-12    by    Alfredo Ferrari               *
+*                                                                      *
+*     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      *
+*     !!!!                                                   !!!!      *
+*     !!!!   Energy, momentum and mass units of the Fermi    !!!!      *
+*     !!!!   break-up algorithm are MeV, MeV/c, and MeV/c^2  !!!!      *
+*     !!!!   respectively                                    !!!!      *
+*     !!!!                                                   !!!!      *
+*     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      *
+*                                                                      *
+*              Lfrmbk = Logical flag for activating the Fermi Break-Up *
+*                       algorithm                                      *
+*              Amufbk = Atomic/Nuclear mass unit for the Fermi breakup *
+*                       algorithm (it must be consistent with Lncmss   *
+*                       and the recorded mas excesses)                 *
+*              Lncmss = Logical flag for nuclear (.true.) or atomic    *
+*                       masses                                         *
+*          Eexfbk (j) = excitation energy (MeV) of the jth particle    *
+*                       stable state                                   *
+*          Weifbk (j) = weight of the jth particle stable state        *
+*                       (used if a broad state is split into several   *
+*                        partial contributions)                        *
+*          Gamfbk (j) = width (MeV) of the jth particle stable state   *
+*                       (Gamma tau = hbar)                             *
+*          Amfrbk (j) = total atomic/nuclear mass of the jth particle  *
+*                       stable state                                   *
+*              Exmxfb = Maximum excess mass to be used to build the    *
+*                       break up channels                              *
+*              Nbufbk = The above restriction is used only if the total*
+*                       estimated number of break up channels is larger*
+*                       than Nbufbk                                    *
+*              R0frbk = R0 for the interaction volume                  *
+*              R0cfbk = R0 for the Coulomb potential among fragments   *
+*              C1cfbk = C1 for the Coulomb potential among fragments   *
+*              C2cfbk = C2 for the Coulomb potential among fragments   *
+*          Ifrbkn (j) = neutron number of the jth particle stable state*
+*          Ifrbkz (j) = atomic  number of the jth particle stable state*
+*          Ifbksp (j) = spin (in hbar/2 unit) of the jth particle      *
+*                       stable state                                   *
+*          Ifbkpr (j) = parity of the jth particle stable state        *
+*          Ifbkst (j) = stability index of the jth particle stable     *
+*                       state                                          *
+*          Ifbklv (j) = level number in the nuclear level database for *
+*                       the jth particle stable state                  *
+*    Ipsind (in,iz,1) = starting index of the particle stable states   *
+*                       with N=in and Z=iz                             *
+*    Ipsind (in,iz,2) = last index of the particle stable states with  *
+*                       N=in and Z=iz                                  *
+*         Jpsind (ia) = last index of the particle stable states with  *
+*                       A=ia                                           *
+*          Exfrbk (i) = total mass excess of the ith break-up          *
+*          Sdmfbk (i) = (global) spin, degeneracy and mass factor      *
+*                       of the ith break-up                            *
+*          Coufbk (i) = (global) Coulomb energy of the ith break-up    *
+*          Cenfbk (i) = (global) centrifugal barrier of the ith break  *
+*                       -up (to be multiplied by l(l+1) )              *
+*        Ifbcha (1,i) = N of the ith break up combination              *
+*        Ifbcha (2,i) = Z of the ith break up combination              *
+*        Ifbcha (3,i) = first  particle to be emitted                  *
+*        Ifbcha (4,i) = second particle to be emitted (if negative it  *
+*                       is a combination of particles of index=| |)    *
+*        Ifbcha (5,i) = (global) multiplicity of the ith break-up      *
+*        Ifbcha (6,i) = Minimum, (2)Jmin, and Maximum, (2)Jmax, angu-  *
+*                       lar momentum (2)J (in hbar/2 units) (for L=0   *
+*                       orbital momentum) of the ith break-up, encoded *
+*                       as: (2)Jmin + 1000 x (2)Jmax                   *
+*        Ifbcha (7,i) = Multiplicity of angular momentum J encoded as: *
+*                              m(Jmin) IB^0 + m(Jmin+1) IB^1 + ....    *
+*                       .... + m(Jmax-1) IB^(Jmax-Jmin-1)              *
+*                            + m(Jmax) IB^(Jmax-Jmin)                  *
+*                       J total multiplicity = (2J+1) x m(J)           *
+*                       where the base IB is given by the parameter    *
+*                       IBFRBK, if Jmax-Jmin > Jpwfbx an underflow     *
+*                       would result, therefore the remaining part is  *
+*                       endcoded into:                                 *
+*        Ifbcha (8,i) = Multiplicity of angular momentum J, 2nd part   *
+*                       .... + m(Jmax-1) IB^(Jmax-Jmin-Jpwfbx-2)       *
+*                            + m(Jmax) IB^(Jmax-Jmin-Jpwfbx-1)         *
+*                       The allowed maximum number of different J      *
+*                       values (Jmax-Jmin+1) is so 2*(Jpwfbx+1)        *
+*        Ifbcha (9,i) = Parity/(-1)^L (L orbital momentum) of the ith  *
+*                       break-up                                       *
+*    Ifbind (in,iz,1) = starting index of the break up combinations    *
+*                       with N=in and Z=iz                             *
+*    Ifbind (in,iz,2) = last index of the break up combinations with   *
+*                       N=in and Z=iz                                  *
+*         Jfbind (ia) = last index of the break up combinations with   *
+*                       A=ia                                           *
+*              Iposst = total number of possible particle stable states*
+*              Iposfb = total number of possible break up combinations *
+*              Ifbstf = flag for level of inclusion of stable levels   *
+*                       Ifbstf = i0 + i1 x 100                         *
+*              Ifbpsf = flag for parity-spin effects:                  *
+*                    -1 : no account                                   *
+*                     0 : L=0 fully accounted for, channels with L>=1  *
+*                         suppressed by FRBKLS^L (in practice they are *
+*                         retained only if no L=0 channel is available)*
+*                 0 < L': reasonable centrifugal barrier account up    *
+*                         to orbital momentum L=L', as above for L>L'  *
+*              Ifbpsi = flag for which initial configurations to       *
+*                       consider for parity-sping effects              *
+*                     0 : consider only initial configurations with    *
+*                         known spin/parity and no particle emitted    *
+*                     1 : consider only initial configurations with    *
+*                         known spin/parity                            *
+*                     2 : consider all  initial configurations maybe   *
+*                         performing some educated guess on spin/parity*
+*              Frbkls = suppression factor for L>Lmax to be cosidered  *
+*                       for orbital momentum barriers                  *
+*              Ifbfrb = (possible) forbidden "particle stable" state   *
+*              Ifbchn = (possible) forced break up channel             *
+*              Ifbnc1 = (possible) forbidden break up channel          *
+*              Ifbnc2 = (possible) forbidden break up channel          *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+*  Maximum number of fragments to be emitted:
+      PARAMETER ( MXFFBK =     6 )
+      PARAMETER ( MXZFBK =    10 )
+      PARAMETER ( MXNFBK =    12 )
+      PARAMETER ( MXAFBK =    16 )
+      PARAMETER ( MXASST =    25 )
+      PARAMETER ( NXAFBK = MXAFBK + 1 )
+
+      PARAMETER ( NXZFBK = INT(MXZFBK + MXFFBK / 3 + 
+     &   MXASST - NXAFBK) )
+      PARAMETER ( NXNFBK = INT(MXNFBK + MXFFBK / 3 + 
+     &    MXASST - NXAFBK) )
+      PARAMETER ( MXPSST =   700 )
+*  Maximum number of pre-computed break-up combinations
+      PARAMETER ( MXPPFB = 42500 )
+*  Maximum number of break-up combinations, including special
+*  run-time ones:
+      PARAMETER ( MXPSFB = 43000 )
+*  Base for J multiplicity encoding:
+      PARAMETER ( IBFRBK =    73 )
+*  Maximum Ibfrbk exponent to avoid overflow of I*4(roughly at 2.1x10^9)
+*  it must be (Ibfrbk-1) + (Ibfrbk-1)*Ibfrbk + (Ibfrbk-1)*Ibfrbk^2 + ...
+*  ... + (Ibfrbk-1)*Ibfrbk^Jpwfbx < 2100000000,
+*  --> Ibfrbk^(Jpwfbx+1) < 2100000000
+      PARAMETER ( JPWFBX =     4 )
+      LOGICAL LFRMBK, LNCMSS
+      COMMON / FRBKCM /  AMUFBK, EEXFBK (MXPSST), AMFRBK (MXPSST),
+     &          WEIFBK (MXPSST), GAMFBK (MXPSST), EXFRBK (MXPSFB),
+     &          SDMFBK (MXPSFB), COUFBK (MXPSFB), CENFBK (MXPSFB),
+     &          EXMXFB, R0FRBK, R0CFBK, C1CFBK, C2CFBK, FRBKLS,
+     &          IFRBKN (MXPSST), IFRBKZ (MXPSST), IFBKSP (MXPSST),
+     &          IFBKPR (MXPSST), IFBKST (MXPSST), IFBKLV (MXPSST),
+     &          IPSIND (0:NXNFBK,0:NXZFBK,2), JPSIND (0:MXASST),
+     &          IFBIND (0:NXNFBK,0:NXZFBK,2), JFBIND (0:NXAFBK),
+     &          IFBCHA (9,MXPSFB), IPOSST, IPOSFB, IFBSTF, IFBPSF,
+     &          IFBPSI, IFBFRB, IFBCHN, IFBNC1, IFBNC2, NBUFBK,
+     &          LFRMBK, LNCMSS
+      SAVE / FRBKCM /
+

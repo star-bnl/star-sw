@@ -1,0 +1,10 @@
+
+ 
+ 
+      INTEGER MXISR1 , MXISR2
+C**anfe Increased MXISR2 from 50 -> 1000
+      PARAMETER (MXISR1=150,MXISR2=1000)
+      INTEGER IFLisr , IPOisr , IMXisr
+      DOUBLE PRECISION PHIsr
+      COMMON /POPISR/ IFLisr(2,MXISR1) , PHIsr(2,4,MXISR1) , 
+     &                IPOisr(2,2,MXISR2) , IMXisr(2)

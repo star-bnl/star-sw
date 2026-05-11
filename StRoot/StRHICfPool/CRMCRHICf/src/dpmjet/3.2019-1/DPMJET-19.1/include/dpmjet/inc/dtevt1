@@ -1,0 +1,9 @@
+
+      INTEGER IDHkk , ISThkk , JDAhkk , JMOhkk , NEVhkk , NHKk , NMXHKK
+      DOUBLE PRECISION PHKk , VHKk , WHKk
+ 
+ 
+      PARAMETER (NMXHKK=250000)
+      COMMON /DTEVT1/ NHKk , NEVhkk , ISThkk(NMXHKK) , IDHkk(NMXHKK) , 
+     &                JMOhkk(2,NMXHKK) , JDAhkk(2,NMXHKK) , 
+     &                PHKk(5,NMXHKK) , VHKk(4,NMXHKK) , WHKk(4,NMXHKK)

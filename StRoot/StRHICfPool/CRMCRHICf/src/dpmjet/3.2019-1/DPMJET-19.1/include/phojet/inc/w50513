@@ -1,0 +1,5 @@
+
+      REAL Q2Max , Q2Min , XMAx , XMIn
+ 
+ 
+      COMMON /W50513/ XMIn , XMAx , Q2Min , Q2Max

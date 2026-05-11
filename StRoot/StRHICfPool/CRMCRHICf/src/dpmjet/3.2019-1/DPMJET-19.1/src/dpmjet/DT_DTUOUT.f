@@ -1,0 +1,12 @@
+
+      SUBROUTINE DT_DTUOUT
+ 
+      IMPLICIT NONE
+      DOUBLE PRECISION dum
+      SAVE 
+ 
+      CALL PHO_PHIST(3000,dum)
+ 
+      CALL DT_STATIS(2)
+ 
+      END SUBROUTINE

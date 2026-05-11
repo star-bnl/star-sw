@@ -1,0 +1,13 @@
+cc ------------ dpmjet3.4 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc -------- phojet1.12-40 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc                                                      - oct'13 -------
+cc ----------- pythia-6.4 - authors: Torbjorn Sjostrand, Lund'10 -------
+cc ---------------------------------------------------------------------
+cc                                  converted for use with FLUKA -------
+cc                                                      - oct'13 -------
+
+      PARAMETER (NMXHEP=10000)
+      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+      DOUBLE PRECISION PHEP,VHEP
+      SAVE /HEPEVT/

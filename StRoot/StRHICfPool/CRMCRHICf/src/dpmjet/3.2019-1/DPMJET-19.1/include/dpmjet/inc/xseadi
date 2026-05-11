@@ -1,0 +1,5 @@
+      
+      DOUBLE PRECISION XSEACU , UNON , UNOM , UNOSEA , CVQ , CDQ , 
+     &                 CSEA , SSMIMA , SSMIMQ , VVMTHR
+      COMMON /XSEADI/ XSEACU , UNON , UNOM , UNOSEA , CVQ , CDQ , 
+     &                CSEA , SSMIMA , SSMIMQ , VVMTHR

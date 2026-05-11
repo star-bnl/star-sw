@@ -1,0 +1,231 @@
+INSTALLATION:
+
+	- Install/setup Geant4 (if not yet done)
+
+		1) download geant4.10.01.p02.tar (or later version) from http://geant4.web.cern.ch/geant4/support/download.shtml
+
+		2) unpack geant4.10.01.p02.tar, for example in directory <myG4Path>.
+		
+		   $ cd <myG4Path>
+                   $ tar -zxf geant4.10.01.p02.tar
+
+		3) $ mkdir geant4.10.01-build
+
+		4) $ cd geant4.10.01-build
+
+		5) $ cmake -DCMAKE_INSTALL_PREFIX=<myG4Path>/geant4.10.01-install -DGEANT4_INSTALL_DATA=ON \\ 
+		           -DGEANT4_USE_GDML=ON -DGEANT4_USE_OPENGL_X11=ON -DGEANT4_INSTALL_EXAMPLES=ON -DGEANT4_USE_QT=ON \\
+		            <myG4Path>/geant4.10.01.p02
+
+		NOTE: -DGEANT4_USE_QT=ON  flag is optional (QT driver is convenient for visualizing the detector)
+		NOTE: -DGEANT4_BUILD_MULTITHREADED=ON  - optional, add this for multithread mode support
+
+		6) $ make -j2 (for duo-core machine)
+
+		7) $ make install
+
+		8) Setup geant4: 
+
+		   $ cd <myG4Path>/geant4.10.01-install/share/Geant4-10.4.2/geant4make
+		   $ source geant4make.sh 
+
+	 -  Install HEPMC (if not yet done)
+
+	 	See http://lcgapp.cern.ch/project/simu/HepMC/download/
+
+		- you can install it either from source, or using the compiled binary, 
+		  e.g. x86_64-slc6-gcc46-opt (or slc5, depending on your scientific linux version)
+
+		    
+		- Set up HEPC environment variable
+
+		   $ export HEPMC_PREFIX=/path/to/your/HEPMC/x86_64-slc6-gcc48-opt/ 
+
+		  ... (i.e. set HEPMC_PREFIX to the path of HEPMC installation, 
+		  the path where the 'lib' and 'include' directories of HEPMC are)
+
+
+	
+	 
+	-  Install CRMC
+
+		   $ git clone --single-branch --branch svn/geant4 git@gitlab.ikp.kit.edu:AirShowerPhysics/crmc.git
+		   $ mkdir crmc-geant4-build   /// (this is where  libraries and headers are installed)
+		   $ cd crmc-geant4-build  
+		   $ cmake ../crmc
+		   $ make install
+
+
+
+
+SETUP ENVIRONMENT
+
+	This should be done in every new console (e.g. in your ~/.bash_profile)
+
+	- Setup Geant4 (see step 8 in installation)
+
+		   $ cd <myG4Path>/geant4.10.01-install/share/Geant4-10.4.2/geant4make
+		   $ source geant4make.sh 
+
+
+	- Setup HEPMC (see also Installation section)
+
+		   $ export HEPMC_PREFIX=/path/to/your/HEPMC/x86_64-slc6-gcc48-opt/ 
+
+	- Setup CRMC
+		
+		   $ export CRMC_PREFIX=/PATH/TO/YOUR/CRMC/DISTRIBUTION
+
+		   $ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CRMC_PREFIX}/crmc-geant4-build/lib
+		   $ export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${CRMC_PREFIX}/crmc-geant4-build/lib
+		   $ export CPATH=${CPATH}:${CRMC_PREFIX}/crmc-geant4-build/src
+		   $ export CPATH=${CPATH}:${CRMC_PREFIX}/crmc/src
+		   $ export CRMC_CONFIG_FILE=${CRMC_PREFIX}/crmc-geant4-build/crmc.param
+		   $ export CRMC_LIB_PATH=${CRMC_PREFIX}/crmc-geant4-build/lib
+	
+
+
+EXAMPLE: USING CRMC IN GEANT4 PROGRAM
+
+
+	Based on the standard examples/extended/hadronic/Hadr01 
+ 
+	1) Get Hadr01 example
+
+		   $ cp -r $G4INSTALL/../examples/extended/hadronic/Hadr01 ./
+		   $ cd Hadr01
+		   $ make -j8
+
+
+	2) Create your run macro with high-energy protons:
+
+		   $ cp hadr01.in he.in
+
+	   Then, in he.in change :
+
+		   /gun/energy 3. GeV       to    /gun/energy 2000. TeV
+		   /testhadr/Physics QBBC   to   /testhadr/Physics  FTFP_BERT    
+
+
+		
+	3) (Optional) Try to run your high-energy macro using the standard hadronic model:
+	
+		   $ Hadr01 he.in
+
+
+			it should crash with the following error:
+
+			-------- EEEE ------- G4Exception-START -------- EEEE -------
+			*** G4Exception : had005
+			      issued by : G4HadronElasticProcess::PostStepDoIt
+			In /atlas/users/andrii/geant4/geant4.10.04.p02/source/processes/hadronic/management/src/G4EnergyRangeManager.cc, line 129:
+			===> GetHadronicInteraction: No Model found
+			Target element Al  Z= 13  A= 27
+			Unrecoverable error in the method ChooseHadronicInteraction of hadElastic
+			TrackID= 1  ParentID= 0  proton
+			Ekin(GeV)= 101000;  direction= (-3.6619e-08,-8.55468e-08,1)
+			Position(mm)= (1.2058e-06,-1.99217e-06,0.946377);  material G4_Al
+			PhysicalVolume  <Target>
+			 No HadronicInteraction found out
+			...
+			...
+			-------- EEEE ------- G4Exception-START -------- EEEE -------
+
+		And, this is normal! We can't generate 2 PeV protons using the standard Geant4 phsyics list (FTFP_BERT)
+		The purpose of this step is to make sure your Geant4 code is okay and running as expected.
+
+
+
+	4) Add CRMC "physics list" to your code
+	
+		  a) Modify GNUmakefile
+
+		     Adding the following two lines before  .PHONY: all  :
+
+			     LOADLIBS=$(CRMC_LIB_PATH)/libCrmc.so
+			     LOADLIBS+=$(CRMC_LIB_PATH)/libGeantCrmc.so
+
+
+		  b) Add CRMC physics list in your Geant4 physics list definition
+
+		     - Modify src/PhysicsList.cc :
+			
+			- add  
+			  #include "G4HadronPhysicsCRMC.hh"
+
+			- adding the following code inside 
+		     	  the method void PhysicsList::AddPhysicsList(const G4String& name):
+
+	
+			  // ********************************************
+			  else if (name == "FTFP_BERT_CRMC_EPOS199") {
+
+			    AddPhysicsList("FTFP_BERT");
+			    int crmc_model = 1;  
+			    // where 
+			    //   0 - EPOS LHC   1 - EPOS 1.99   12 - DPMJET3  
+			    //   see CRMC documentation for the complete list of 
+			    //   available models
+			    G4HadronPhysicsCRMC* crmc = new G4HadronPhysicsCRMC(crmc_model);
+			    crmc->SetEnergyThreshold(300.); // energy threshold in Gev, 
+			    // starting from which interactions (both primary and secondary) 
+			    // are handelled by CRMC model
+			    // In this example, and hadron-hadron (ion) interaction above 
+			    // 300 GeV is handeled by CRMC
+			    fHadronPhys.push_back( crmc );
+			  } 
+			  // ********************************************
+
+			- NOTE: the switch energy threshold corresponds to the Kinetic Energy Per Nucleon.
+			        For example, threshold energy of 300 GeV corresponds to: 
+				300  GeV Kinetic for proton particles
+			        1200 GeV Kinetic energy for Helium ion particle, etc.
+			        This threshold is set through SetMinEnergy method of a physics interaction code
+			        (see ll 75-85 https://gitlab.cern.ch/geant4/geant4/blob/master/
+			        source/processes/hadronic/management/src/G4EnergyRangeManager.cc)
+
+
+		  c) Recompile Hadr01 
+
+			   $ make -j8
+
+
+
+		  d) Copy CRMC config file in the directory where you run the code
+
+			   $ cp ${CRMC_CONFIG_FILE} ./
+
+
+	
+		  e) Set CRMC model in the Geant4 macro
+
+			   In he.in change :
+
+			   /testhadr/Physics FTFP_BERT   to   /testhadr/Physics  FTFP_BERT_CRMC_EPOS199
+
+
+		  f) Run the code again
+
+			   $ Hadr01 he.in
+
+
+
+			  THAT'S IT. YOU HAVE CONNECTED CRMC TO GEANT4! THE SIMULATION 
+			  SHOULD NOW RUN SUCCESSFULLY. YOU SHOULD BE ABLE TO SEE THE 
+			  FOLLOWING MESSAGE IN THE LOG:
+			  
+			    ..
+			    CRMC GEANT4 Interface physics initializeed
+			    ..
+
+
+	5) There are 2 options for switching between Geant4-CRMC hadronic models:
+			a) by energy threshold, so that in every hadronic interaction:
+				- if E<E_threshold Geant4 model is used
+				- if E>E_threshold CRMC model is used
+			b) by using energy interval where contribution of the models is changed smoothly:
+				probability of interaction by specific model changes linearly in this transition region
+			To set threshold one should use G4HadronPhysicsCRMC::SetEnergyThreshold(double),
+				for smooth transition G4HadronPhysicsCRMC::SetEnergyThreshold(double, double).
+			By default, if not specified otherwise, energy threshold of 300 GeV is used
+

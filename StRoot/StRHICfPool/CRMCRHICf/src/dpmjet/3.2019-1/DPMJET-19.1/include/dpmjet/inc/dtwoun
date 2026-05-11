@@ -1,0 +1,6 @@
+
+      INTEGER IPW , ITW , NPCw , NPW , NPW0 , NTCw , NTW , NTW0
+ 
+ 
+      COMMON /DTWOUN/ NPW , NPW0 , NPCw , NTW , NTW0 , NTCw , 
+     &                IPW(maxncl) , ITW(maxncl)

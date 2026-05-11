@@ -1,0 +1,6 @@
+
+      INTEGER IDXchn , MAXCHN , NCHain
+ 
+ 
+      PARAMETER (MAXCHN=10000)
+      COMMON /DTIXCH/ IDXchn(2,MAXCHN) , NCHain

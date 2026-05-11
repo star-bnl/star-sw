@@ -1,0 +1,6 @@
+
+      INTEGER IBProj , IBTarg , IJProj , IJTarg , IP , IPZ , IT , ITZ
+ 
+ 
+      COMMON /DTPRTA/ IT , ITZ , IP , IPZ , IJProj , IBProj , IJTarg , 
+     &                IBTarg

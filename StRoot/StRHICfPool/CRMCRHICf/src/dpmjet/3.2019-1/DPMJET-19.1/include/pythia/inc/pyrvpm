@@ -1,0 +1,12 @@
+cc ------------ dpmjet3.4 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc -------- phojet1.12-40 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc                                                      - oct'13 -------
+cc ----------- pythia-6.4 - authors: Torbjorn Sjostrand, Lund'10 -------
+cc ---------------------------------------------------------------------
+cc                                  converted for use with FLUKA -------
+cc                                                      - oct'13 -------
+
+      COMMON/PYRVPM/RM(0:3),A(2),B(2),RESM(2),RESW(2),MFLAG
+      DOUBLE PRECISION RM, A, B, RESM, RESW
+      LOGICAL MFLAG
+      SAVE /PYRVPM/

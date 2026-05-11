@@ -1,0 +1,8 @@
+
+      INTEGER MSTR
+      PARAMETER (MSTR=2000)
+      INTEGER NPOs , IPAr1 , IPAr2 , IPAr3 , IPAr4 , NNCh , 
+     &        IBHad, IStr, NCOde
+      COMMON /POSTRG/ NPOs(4,MSTR) , NCOde(MSTR) , IPAr1(MSTR) , 
+     &                IPAr2(MSTR) , IPAr3(MSTR) , IPAr4(MSTR) , 
+     &                NNCh(MSTR) , IBHad(MSTR) , ISTr

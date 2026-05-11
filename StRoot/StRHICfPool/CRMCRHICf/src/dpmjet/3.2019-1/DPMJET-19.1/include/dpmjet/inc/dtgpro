@@ -1,0 +1,7 @@
+
+      INTEGER IDIrec
+      DOUBLE PRECISION PGAmm , PLEpt0 , PLEpt1 , PNUcl , VIRt
+ 
+ 
+      COMMON /DTGPRO/ VIRt , PGAmm(4) , PLEpt0(4) , PLEpt1(4) , PNUcl(4)
+     &                , IDIrec

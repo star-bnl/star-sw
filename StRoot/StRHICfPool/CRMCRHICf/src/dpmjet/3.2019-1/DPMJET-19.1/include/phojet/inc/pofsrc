@@ -1,0 +1,10 @@
+
+ 
+ 
+      INTEGER IGHel , IDPsrc , IDBsrc
+      DOUBLE PRECISION PINi , PFIn , PGAm , GYY , GQ2 , GGEcm , GAImp , 
+     &                 PFThe , PFPhi , RADsrc , AMSrc , GAMsrc
+      COMMON /POFSRC/ PINi(5,2) , PFIn(5,2) , PGAm(5,2) , IGHel(2) , 
+     &                GYY(2) , GQ2(2) , GGEcm , GAImp(2) , PFThe(2) , 
+     &                PFPhi(2) , IDPsrc(2) , IDBsrc(2) , RADsrc(2) , 
+     &                AMSrc(2) , GAMsrc(2)

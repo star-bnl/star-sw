@@ -1,0 +1,14 @@
+
+ 
+ 
+      INTEGER IA , IB , IC , ID , IV1 , IV2 , MSPr , IREjsc
+      DOUBLE PRECISION PTWant , AS , AH , ALNs , ALNh , Z1Max , Z1Dif , 
+     &                 Z2Max , Z2Dif , PT , PTFin , ETAc , ETAd , X1 , 
+     &                 X2 , V , U , W , W1 , AXX , QQPd , QQAl , PDF1 , 
+     &                 PDF2 , WEIght , PHI1 , PHI2 , PHO1 , PHO2
+      COMMON /POCKIN/ PTWant , AS , AH , ALNs , ALNh , Z1Max , Z1Dif , 
+     &                Z2Max , Z2Dif , PT , PTFin , ETAc , ETAd , X1 , 
+     &                X2 , V , U , W , W1 , AXX , QQPd , QQAl , 
+     &                PDF1(-6:6) , PDF2(-6:6) , WEIght , PHI1(5) , 
+     &                PHI2(5) , PHO1(5) , PHO2(5) , IA , IB , IC , ID , 
+     &                IV1 , IV2 , MSPr , IREjsc

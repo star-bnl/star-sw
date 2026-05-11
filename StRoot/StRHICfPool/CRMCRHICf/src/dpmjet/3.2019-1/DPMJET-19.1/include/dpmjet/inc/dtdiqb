@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION CHAb1 , CHAb3 , CHAm1 , CHAm3 , DBRka , DBRkr
+ 
+ 
+      COMMON /DTDIQB/ DBRkr(3,8) , DBRka(3,8) , CHAm1 , CHAm3 , CHAb1 , 
+     &                CHAb3

@@ -1,0 +1,79 @@
+*$ CREATE NUCDAT.ADD
+*COPY NUCDAT
+*                                                                      *
+*=== nucdat ===========================================================*
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1990-2012      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     Include file Nucdat                                              *
+*                                                                      *
+*     Created on 20 April 1990  by            Alfredo Ferrari          *
+*                                               INFN Milan             *
+*                                                                      *
+*     Last change on 31-Mar-12                                         *
+*                                                                      *
+*     Included in the following routines:                              *
+*                                                                      *
+*            COREVT                                                    *
+*            CORRIN                                                    *
+*            DISTNU                                                    *
+*            DRES                                                      *
+*            EVDEEX                                                    *
+*            EVENTV                                                    *
+*            EVEVAP                                                    *
+*            FEREVV                                                    *
+*            FERHAV                                                    *
+*            FEFCAV                                                    *
+*            FEKFAV                                                    *
+*            FPFCAV                                                    *
+*            FPFRAV                                                    *
+*            FVCOUL                                                    *
+*            FVPESF                                                    *
+*            FVPOSF                                                    *
+*            FRBKIN                                                    *
+*            INCINI                                                    *
+*            NUCEVV                                                    *
+*            NUCRIV                                                    *
+*            PEANUT                                                    *
+*            RAKEKV                                                    *
+*            RBKEKV                                                    *
+*            WSTOAP                                                    *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      PARAMETER ( AMUAMU = AMUGEV )
+*     PARAMETER ( AMPROT = 0.9382796   D+00 )
+      PARAMETER ( AMPROT = AMPRTN )
+*     PARAMETER ( AMNEUT = 0.9395731   D+00 )
+      PARAMETER ( AMNEUT = AMNTRN )
+      PARAMETER ( R0NUCL = 1.12        D+00 )
+      PARAMETER ( RCCOUL = 1.7         D+00 )
+      PARAMETER ( COULPR = COUGFM )
+      PARAMETER ( AMHYDR = AMPRTN + AMELCT  )
+      PARAMETER ( AMHTON = AMHYDR - AMNTRN  )
+      PARAMETER ( AMNTOU = AMNTRN - AMUC12  )
+      PARAMETER ( AMUCSQ = AMUC12 * AMUC12 )
+      PARAMETER ( EBNDAV = HLFHLF * (AMPRTN + AMNTRN) - AMUC12 )
+*   Gammin : threshold for deexcitation gammas production, set to 1 keV
+*   (this means that up to 1 keV of energy unbalancing can occur
+*    during an event)
+      PARAMETER ( GAMMIN = 1.0D-06 )
+      PARAMETER ( GAMNSQ = 2.0D+00 * GAMMIN * GAMMIN )
+*   Tvepsi : "epsilon" for excitation energy, set to gammin / 100
+      PARAMETER ( TVEPSI = GAMMIN / 100.D+00 )
+*
+      COMMON /NUCDAT/ AV0WEL,     APFRMX,     AEFRMX,     AEFRMA,
+     &                RDSNUC,     V0WELL (2), PFRMMX (2), EFRMMX (2),
+     &                EFRMAV (2), AMNUCL (3), AMNUSQ (3), EBNDNG (2),
+     &                VEFFNU (2), ESLOPE (2), PKMNNU (2), EKMNNU (2),
+     &                PKMXNU (2), EKMXNU (2), EKMNAV (2), EKINAV (2),
+     &                EXMNAV (2), EKUPNU (2), EXMNNU (2), EXUPNU (2),
+     &                ERCLAV (2), ESWELL (2), FINCUP (2), AMRCAV    ,
+     &                AMRCSQ    , ATO1O3    , ZTO1O3    , FRMRFC    ,
+     &                ELBNDE (0:130)
+      SAVE / NUCDAT /
+

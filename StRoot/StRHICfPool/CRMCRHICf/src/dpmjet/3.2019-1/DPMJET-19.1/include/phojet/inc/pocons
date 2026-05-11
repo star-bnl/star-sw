@@ -1,0 +1,6 @@
+
+ 
+ 
+      DOUBLE PRECISION PI , PI2 , PI4 , GEV2mb , Q_Ch , Q_Ch2 , Q_Ch4
+      COMMON /POCONS/ PI , PI2 , PI4 , GEV2mb , Q_Ch(-6:6) , Q_Ch2(-6:6)
+     &                , Q_Ch4(-6:6)

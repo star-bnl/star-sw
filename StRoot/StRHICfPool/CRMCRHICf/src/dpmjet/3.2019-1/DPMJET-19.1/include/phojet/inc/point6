@@ -1,0 +1,12 @@
+
+ 
+ 
+      INTEGER MXISR3 , MXISR4
+C**anfe Increased MXISR4 from 100 -> 1000
+      PARAMETER (MXISR3=50,MXISR4=1000)
+      INTEGER IFL1 , IFL2 , IBRa , IFAno , ISH , NACc
+      DOUBLE PRECISION Q2Sh , PT2sh , XPSh , ZPSh , THSh , SHAt
+      COMMON /POINT6/ Q2Sh(2,MXISR3) , PT2sh(2,MXISR3) , XPSh(2,MXISR3)
+     &                , ZPSh(2,MXISR3) , THSh(2,MXISR3) , SHAt(MXISR3) , 
+     &                IFL1(2,MXISR3) , IFL2(2,MXISR3) , IBRa(2,MXISR4) , 
+     &                IFAno(2) , ISH(2) , NACc

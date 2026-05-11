@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION EWOund
+      INTEGER IDXinc , NOInc , NWOund
+ 
+ 
+      COMMON /DTPAUL/ EWOund(2,300) , NWOund(2) , IDXinc(2000) , NOInc

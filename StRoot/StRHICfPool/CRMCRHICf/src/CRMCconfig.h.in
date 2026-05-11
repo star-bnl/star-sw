@@ -1,0 +1,24 @@
+// the configured options and settings for crmc
+// variables will be filled by cmake
+#define CRMC_VERSION_MAJOR @CRMC_VERSION_MAJOR@
+#define CRMC_VERSION_MINOR @CRMC_VERSION_MINOR@
+#define CRMC_VERSION_PATCH @CRMC_VERSION_PATCH@
+
+#cmakedefine CRMC_STATIC
+
+#cmakedefine CRMC_EPOS
+#cmakedefine CRMC_SIBYLL
+#cmakedefine CRMC_QGSJET01
+#cmakedefine CRMC_GHEISHA
+#cmakedefine CRMC_PYTHIA
+#cmakedefine CRMC_PHOJET
+#cmakedefine CRMC_HIJING
+#cmakedefine CRMC_SIBYLL
+#cmakedefine CRMC_QGSJETII03
+#cmakedefine CRMC_QGSJETII04
+#cmakedefine CRMC_DPMJET06
+#cmakedefine CRMC_DPMJET17
+#cmakedefine CRMC_DPMJET19
+#cmakedefine CRMC_QGSJETIII
+
+#define HepMC_HEPEVT_SIZE @HepMC_HEPEVT_SIZE@

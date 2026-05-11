@@ -1,0 +1,8 @@
+
+      INTEGER IAMcin , IBAm2 , IBAm3 , IBAm4 , IBAm5 , IPDg2 , IPDg3 , 
+     &        IPDg4 , IPDg5
+ 
+ 
+      COMMON /DTHAIC/ IPDg2(2,7) , IBAm2(2,7) , IPDg3(2,22) , 
+     &                IBAm3(2,22) , IPDg4(2,29) , IBAm4(2,29) , 
+     &                IPDg5(2,19) , IBAm5(2,19) , IAMcin(210)

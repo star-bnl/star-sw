@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER IFPap , IFPab
+      DOUBLE PRECISION ECM , PCM , PMAss , PVIrt
+      COMMON /POGCMS/ ECM , PCM , PMAss(2) , PVIrt(2) , IFPap(2) , 
+     &                IFPab(2)

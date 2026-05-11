@@ -1,0 +1,5 @@
+
+ 
+      CHARACTER*1024 DATdir
+      INTEGER LI , LO , LPRi, LENdir
+      COMMON /POINOU/ LI , LO , LPRi, LENdir, DATdir

@@ -1,0 +1,10 @@
+
+      DOUBLE PRECISION EBIndn , EBIndp , EPOt , ETAcou , FERmod ,
+     &                 PFErmn , PFErmp  
+      INTEGER ICOul
+ 
+ 
+      LOGICAL LFErmi
+      COMMON /DTNPOT/ PFErmp(2) , PFErmn(2) , FERmod , EBIndp(2) , 
+     &                EBIndn(2) , EPOt(2,210) , ETAcou(2) , ICOul , 
+     &                LFErmi

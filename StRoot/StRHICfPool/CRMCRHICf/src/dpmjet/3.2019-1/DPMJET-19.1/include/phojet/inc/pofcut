@@ -1,0 +1,11 @@
+
+ 
+ 
+      DOUBLE PRECISION ECMin , ECMax , EEMin1 , EEMin2 , YMIn1 , YMAx1 , 
+     &                 YMIn2 , YMAx2 , Q2Min1 , Q2Max1 , Q2Min2 , 
+     &                 Q2Max2 , THMin1 , THMax1 , THMin2 , THMax2
+      INTEGER ITAg1 , ITAg2
+      COMMON /POFCUT/ ECMin , ECMax , EEMin1 , EEMin2 , YMIn1 , YMAx1 , 
+     &                YMIn2 , YMAx2 , Q2Min1 , Q2Max1 , Q2Min2 , 
+     &                Q2Max2 , THMin1 , THMax1 , THMin2 , THMax2 , 
+     &                ITAg1 , ITAg2

@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER IDEqp , IDEqb , IHFld , IHFls
+      DOUBLE PRECISION ECMn , PCMn , SECm , SPCm , XPSub , XTSub
+      COMMON /POHDFL/ ECMn , PCMn , SECm , SPCm , XPSub , XTSub , 
+     &                IDEqp(2) , IDEqb(2) , IHFld(2,2) , IHFls(2)

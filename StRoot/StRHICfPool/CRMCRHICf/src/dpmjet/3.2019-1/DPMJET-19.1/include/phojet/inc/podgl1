@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER NFSisr
+      DOUBLE PRECISION Q2Misr , PMIsr , ZMIsr , AL2isr
+      COMMON /PODGL1/ Q2Misr(2) , PMIsr(2) , ZMIsr(2) , AL2isr(2) , 
+     &                NFSisr

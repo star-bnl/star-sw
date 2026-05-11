@@ -1,0 +1,9 @@
+
+ 
+ 
+      INTEGER NPOsp , IDPdg1 , IDBam1 , IDPdg2 , IDBam2
+      DOUBLE PRECISION ECMp , PCMp , PMAssp , PVIrtp , GAMbep , SIDp , 
+     &                 CODp , SIFp , COFp
+      COMMON /POPCMS/ ECMp , PCMp , PMAssp(2) , PVIrtp(2) , GAMbep(4) , 
+     &                SIDp , CODp , SIFp , COFp , NPOsp(2) , IDPdg1 , 
+     &                IDBam1 , IDPdg2 , IDBam2

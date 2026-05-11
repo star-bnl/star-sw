@@ -1,0 +1,5 @@
+
+ 
+ 
+      CHARACTER*8 ANAmz , ZKNam4 , ZKNam5 , ZKNam6
+      COMMON /HNADDN/ ANAmz(16) , ZKNam4(9) , ZKNam5(90) , ZKNam6(54)

@@ -1,0 +1,6 @@
+
+      INTEGER IA08 , IA10 , IB08 , IB10 , IMPs , IMVe
+ 
+ 
+      COMMON /DTQ2ID/ IMPs(6,6) , IMVe(6,6) , IB08(6,21) , IB10(6,21) , 
+     &                IA08(6,21) , IA10(6,21)

@@ -1,0 +1,16 @@
+
+      INTEGER INTds1 , INTds2 , INTdv1 , INTdv2 , INTsd1 , INTsd2 , 
+     &        INTss1 , INTss2 , INTsv1 , INTsv2 , INTvd1 , INTvd2 , 
+     &        INTvs1 , INTvs2 , INTvv1 , INTvv2 , IXPs , IXPv , IXTs , 
+     &        IXTv
+      INTEGER NDS , NDV , NSD , NSS , NSV , NVD , 
+     &        NVS , NVV
+ 
+ 
+      COMMON /DTDPMI/ NVV , NSV , NVS , NSS , NDV , NVD , NDS , NSD , 
+     &                IXPv , IXPs , IXTv , IXTs , INTvv1(maxvqu) , 
+     &                INTvv2(maxvqu) , INTsv1(maxvqu) , INTsv2(maxvqu) , 
+     &                INTvs1(maxvqu) , INTvs2(maxvqu) , INTss1(maxsqu) , 
+     &                INTss2(maxsqu) , INTdv1(maxvqu) , INTdv2(maxvqu) , 
+     &                INTvd1(maxvqu) , INTvd2(maxvqu) , INTds1(maxsqu) , 
+     &                INTds2(maxsqu) , INTsd1(maxsqu) , INTsd2(maxsqu)

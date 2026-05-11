@@ -1,0 +1,67 @@
+*$ CREATE IOUNIT.ADD
+*COPY IOUNIT
+*                                                                      *
+*=== iounit ===========================================================*
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1990-2005      by  Alberto Fasso`, Alfredo Ferrari *
+*     All Rights Reserved.                   & Paola Sala              *
+*                                                                      *
+*                                                                      *
+*      Iounit: included in any routine                                 *
+*                                                                      *
+*     Created on   01 june 1990    by    Alfredo Ferrari, INFN -Milan  *
+*                                                                      *
+*     Last change on 20-jan-99     by    Alfredo Ferrari               *
+*                                                                      *
+*         lunin  = standard input unit                                 *
+*         lunout = standard output unit                                *
+*         lunerr = standard error unit                                 *
+*         lunber = input file for bertini nuclear data                 *
+*         lunech = echo file for pegs dat                              *
+*         lunflu = input file for photoelectric edges and X-ray fluo-  *
+*                  rescence data                                       *
+*         lungeo = scratch file for combinatorial geometry             *
+*         lunpmf = input file for pegs material data                   *
+*         lunran = output file for the final random number seed        *
+*         lunxsc = input file for low energy neutron cross sections    *
+*         lundet = output file for the detect option                   *
+*         lunray = output file for ray-tracing options                 *
+*         lunrdb = unit number for reading (extra) auxiliary external  *
+*                  files to be closed just after reading               *
+*         lunrd2 = unit number for reading (extra) auxiliary external  *
+*                  files to be closed just after reading               *
+*         lunscr = unit number to be used for temporary scratch files  *
+*         lunpgo = output file for plotgeom                            *
+*         lunpgs = store (formatted/unformatted) file for plotgeom     *
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+      PARAMETER ( LUNIN  =  5 )
+* Start_VAX_seq
+*     PARAMETER ( LUNOUT =  6 )
+* End_VAX_seq
+* Start_IBM_seq
+*     PARAMETER ( LUNOUT =  6 )
+* End_IBM_seq
+* Start_UNIX_seq
+      PARAMETER ( LUNOUT = 11 )
+* End_UNIX_seq
+      PARAMETER ( LUNERR = 15 )
+      PARAMETER ( LUNBER = 14 )
+      PARAMETER ( LUNECH =  8 )
+      PARAMETER ( LUNFLU = 13 )
+      PARAMETER ( LUNGEO = 16 )
+      PARAMETER ( LUNPMF = 12 )
+      PARAMETER ( LUNRAN =  2 )
+      PARAMETER ( LUNXSC =  9 )
+      PARAMETER ( LUNDET = 17 )
+      PARAMETER ( LUNRAY = 10 )
+      PARAMETER ( LUNRDB =  1 )
+      PARAMETER ( LUNRD2 = 18 )
+      PARAMETER ( LUNDPM = 19 )
+      PARAMETER ( LUNPGO =  7 )
+      PARAMETER ( LUNPGS =  4 )
+      PARAMETER ( LUNSCR =  3 )
+

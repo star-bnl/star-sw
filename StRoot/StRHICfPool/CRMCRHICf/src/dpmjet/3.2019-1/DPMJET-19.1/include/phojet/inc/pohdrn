@@ -1,0 +1,6 @@
+
+ 
+ 
+      INTEGER NFS
+      DOUBLE PRECISION QMAss , BET , PCOudi , PNOrm , VALprg
+      COMMON /POHDRN/ QMAss(6) , BET , PCOudi , PNOrm , VALprg(2) , NFS

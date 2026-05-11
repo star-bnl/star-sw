@@ -1,0 +1,6 @@
+
+      INTEGER INIt , IPAupr , IPCo , IPEv , IPHkk , IPPa , IPRi , ITOpd
+ 
+ 
+      COMMON /DPRIN / IPRi , IPEv , IPPa , IPCo , INIt , IPHkk , ITOpd , 
+     &                IPAupr

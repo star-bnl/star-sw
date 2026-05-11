@@ -1,0 +1,7 @@
+
+ 
+ 
+      DOUBLE PRECISION WG_sec_list
+      INTEGER IDEc_list , ISEc_list
+      COMMON /POPAR3/ WG_sec_list(500) , IDEc_list(3,300) , 
+     &                ISEc_list(3,500)

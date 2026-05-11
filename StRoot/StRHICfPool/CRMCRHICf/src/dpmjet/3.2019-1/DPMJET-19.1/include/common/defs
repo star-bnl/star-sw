@@ -1,0 +1,95 @@
+*----------------------------------------------------------------------*
+*WARNING!! COMMON block from FLUKA. Needs to be removed for standalone *
+* The stuff is probably not initialized properly in standalone         *
+*                                                                      *
+*     From (DIMPAR):                                                   *
+*          Idmaxp = number of particles/resonances defined in common   *
+*                   part                                               *
+*          Nallwp = number of allowed particles                        *
+*          Mxpabl = number of resonances inside Hadrin common blocks   *
+*                                                                      *
+*     From (PART):                                                     *
+*     Description of the common block(s) and variable(s)               *
+*                                                                      *
+*             Am = particle mass (GeV/c^2)                             *
+*             Ga = particle width (GeV)                                *
+*            Tau = particle mean life (s)                              *
+*         Amdisc = "effective" particle mass for energy balance (GeV)  *
+*         Zmnabs = lower width (adimensional unit) to be used during   *
+*                  particle decay to assure that at least one decay    *
+*                  channel is physically open                          *
+*         Atnmna = atan (Zmnabs)                                       *
+*            Ich = particle electric charge                            *
+*           Ibar = particle baryon number                              *
+*         Isosym = index of the isospin reversed (T_z --> -T_z)        *
+*                  particle (if any, if 0 no such particle is available*
+*                  in the part listing)                                *
+*         Ichcon = index of the charge conjugated (antiparticle)       *
+*                  particle (if any, if 0 no such particle is available*
+*                  in the part listing)                                *
+*             K1 = index of first decay channel                        *
+*             K2 = index of last  decay channel                        *
+*         Kptoip = conversion from part to paprop numbering            *
+*         Iptokp = conversion from paprop to part numbering            *
+*         Kptoia = conversion from part to abltis numbering            *
+*         Iatokp = conversion from abltis to part numbering            *
+*         Idcflg = decay flag                                          *
+*         Iptype = particle type                                       *
+*                  -1: heavy fragments                                 *
+*                   0: unknown particle or lepton                      *
+*                   1: nucleon                                         *
+*                   2: antinucleon                                     *
+*                   3: pion                                            *
+*                   4: K+/K0                                           *
+*                  -4: Kshrt/Klong                                     *
+*                   5: K-/K0bar                                        *
+*                   6: Lamda/Sigma   (strangeness -1 hyperon)          *
+*                   7: Xsi           (strangeness -2 hyperon)          *
+*                   8: Omega         (strangeness -3 hyperon)          *
+*                   9: ALamda/ASigma (strangeness +1 antihyperon)      *
+*                  10: AXsi          (strangeness +2 antihyperon)      *
+*                  11: AOmega        (strangeness +3 antihyperon)      *
+*                  12: D+/D0                                           *
+*                  13: D-/D0bar                                        *
+*                  14: D_s+/D_s-                                       *
+*                  15: Lambda_c+                                       *
+*                  16: Xsi_c+/Xsi_c0                                   *
+*                  17: Xsi'_c+/Xsi'_c0                                 *
+*                  18: Omega_c                                         *
+*                  19: ALambda_c+                                      *
+*                  20: AXsi_c-/AXsi_c0                                 *
+*                  21: AXsi'_c-/AXsi'_c0                               *
+*                  22: AOmega_c                                        *
+*          Aname = particle literal name                               *
+*                                                                      *
+*                                                                      *
+*           From (PAREVT)                                              *
+*           levprt = flag for nuclear evaporation                      *
+*----------------------------------------------------------------------*
+      DOUBLE PRECISION AM , AMDisc , ATMn14 , ATNmna , ATXn14 , GA ,  
+     &     RNRn14 , TAU , ZMNabs
+      INTEGER IATokp , IBAr , ICH , ICHcon , IDCflg , IPTokp , IPType
+     &        , ISOsym , K1 , K2 , KPToia , KPToip
+      
+      INTEGER IDMaxp, MXPabl, NALlwp
+      LOGICAL LEVprt
+
+      PARAMETER ( IDMaxp =  450 )
+      PARAMETER ( MXPABL =  120 )
+      PARAMETER ( NALlwp =   64 )
+      PARAMETER ( LEVprt =  .False. )
+      CHARACTER*8  ANAme
+      
+      COMMON / PART /  AM     (-6:IDMAXP), GA     (-6:IDMAXP),
+     &                 TAU    (-6:IDMAXP), AMDISC (-6:IDMAXP),
+     &                 ZMNABS (-6:IDMAXP), ATNMNA (-6:IDMAXP),
+     &                 ATXN14,     ATMN14, RNRN14    (-10:10),
+     &                 ICH    (-6:IDMAXP), IBAR   (-6:IDMAXP),
+     &                 ISOSYM (-6:IDMAXP), ICHCON (-6:IDMAXP),
+     &                 K1     (-6:IDMAXP), K2     (-6:IDMAXP),
+     &                 KPTOIP (-6:IDMAXP), IPTOKP (-6:NALLWP),
+     &                 KPTOIA (-6:IDMAXP), IATOKP (-6:MXPABL),
+     &                 IDCFLG (-6:NALLWP), IPTYPE (-6:NALLWP)
+      COMMON / CHPART / ANAme (-6:IDMAXP)
+      SAVE / PART /
+      SAVE / CHPART /

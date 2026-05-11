@@ -1,0 +1,5 @@
+
+ 
+ 
+      CHARACTER*8 BTYpe
+      COMMON /DTPAIN/ BTYpe(30)

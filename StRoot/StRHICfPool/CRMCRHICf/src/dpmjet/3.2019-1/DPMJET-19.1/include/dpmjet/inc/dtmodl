@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION ELOjet
+      INTEGER MCGene
+ 
+ 
+      CHARACTER*8 CMOdel
+      LOGICAL LPHoin
+      COMMON /DTMODL/ CMOdel(4) , ELOjet , MCGene , LPHoin

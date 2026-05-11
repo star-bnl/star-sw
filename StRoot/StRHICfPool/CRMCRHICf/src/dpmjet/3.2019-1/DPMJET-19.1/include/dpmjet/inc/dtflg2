@@ -1,0 +1,5 @@
+
+      INTEGER INTflg , IPOpo
+ 
+ 
+      COMMON /DTFLG2/ INTflg , IPOpo

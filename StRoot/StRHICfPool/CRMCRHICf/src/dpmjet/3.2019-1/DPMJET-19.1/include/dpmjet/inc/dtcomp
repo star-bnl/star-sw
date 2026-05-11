@@ -1,0 +1,11 @@
+
+      DOUBLE PRECISION EMUfra
+      INTEGER IEMuch , IEMul , IEMuma , KSITEB , NCOmpo , NCOMPX , NEB , 
+     &        NQB
+ 
+ 
+C*anfe for stand-alone run NEB can not be 1.
+      PARAMETER (NCOMPX=100,NEB=8,NQB=5,KSITEB=50)
+ 
+      COMMON /DTCOMP/ EMUfra(NCOMPX) , IEMuma(NCOMPX) , IEMuch(NCOMPX) , 
+     &                NCOmpo , IEMul

@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION PPA , PPG , PPL0 , PPL1
+ 
+ 
+      COMMON /DTLGVX/ PPL0(4) , PPL1(4) , PPG(4) , PPA(4)

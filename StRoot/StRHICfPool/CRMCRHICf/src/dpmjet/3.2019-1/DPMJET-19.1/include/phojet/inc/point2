@@ -1,0 +1,5 @@
+
+ 
+ 
+      DOUBLE PRECISION AVEri , AVErk , AVErl , AVErm , AVErn
+      COMMON /POINT2/ AVEri , AVErk , AVErl , AVErm , AVErn

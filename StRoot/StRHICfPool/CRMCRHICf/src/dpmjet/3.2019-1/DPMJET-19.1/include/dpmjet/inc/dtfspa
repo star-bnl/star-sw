@@ -1,0 +1,14 @@
+
+      DOUBLE PRECISION AMAss , BETa , COSthe , EECms , EKIn , 
+     &     ET , ETA , ETAcms , PE , PT , PTOt , PX , PY , PZ ,
+     &     PZCms , SINthe , THEcms , THEta , XF , XLAb
+      DOUBLE PRECISION YY , YYCms
+      INTEGER IBAry , ICHar , IDBjt , IDPdg , IST , MULdef
+ 
+ 
+      LOGICAL LFRag , LGRey , LBLack
+      COMMON /DTFSPA/ AMAss , PE , EECms , PX , PY , PZ , PZCms , 
+     &                PT ,  PTOt , ET , EKIn , SINthe , COSthe ,
+     &                THEta , THEcms , BETa , YY , YYCms , ETA , 
+     &                ETAcms , XLAb , XF , IST , IDPdg , IDBjt , 
+     &                IBAry , ICHar , MULdef , LFRag , LGRey , LBLack

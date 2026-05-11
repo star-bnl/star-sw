@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION C , CD , CM , U
+      INTEGER I , J
+ 
+ 
+      COMMON /DTRAND/ U(97) , C , CD , CM , I , J

@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER ID_pdg_list , ID_list , ID_pdg_max
+      CHARACTER*12 NAMe_list
+      COMMON /POPAR1/ ID_pdg_list(300) , ID_list(577) , NAMe_list(300) , 
+     &                ID_pdg_max

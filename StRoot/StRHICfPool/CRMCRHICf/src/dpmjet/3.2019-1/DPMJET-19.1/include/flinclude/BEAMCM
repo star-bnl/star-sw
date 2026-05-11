@@ -1,0 +1,110 @@
+*$ CREATE BEAMCM.ADD
+*COPY BEAMCM
+*
+*=== Beamcm ===========================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Partial (the additions wrt the original one)                     *
+*     Copyright (C) 1996-2010      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     BEAM properties CoMmon:                                          *
+*                                                                      *
+*     Version for Fluka9x/200x of the old BEAM common for Fluka87:     *
+*                                                                      *
+*     Created on    22 october 1993   by  Alfredo Ferrari & Paola Sala *
+*                                                INFN - Milan          *
+*                                                                      *
+*     Last change: on  22-Jun-2010    by       Alfredo Ferrari         *
+*                                                                      *
+*        Pbeam  = average beam particle momentum (GeV/c)               *
+*        Pbmmax = maximum momentum for which tabulations must be       *
+*                 generated (GeV/c)                                    *
+*        Dpbeam = beam momentum spread (GeV/c)                         *
+*        Divbm  = beam angular divergense (mrad)                       *
+*        Xspot  = beam width in (beam frame) x-direction (cm)          *
+*        Yspot  = beam width in (beam frame) y-direction (cm)          *
+*        Xbeam  = beam spot centre (geom frame) x-coordinate (cm)      *
+*        Ybeam  = beam spot centre (geom frame) y-coordinate (cm)      *
+*        Zbeam  = beam spot centre (geom frame) z-coordinate (cm)      *
+*        Ubeam  = beam direction cosine wrt the (beam frame) x-axis    *
+*        Vbeam  = beam direction cosine wrt the (beam frame) y-axis    *
+*        Wbeam  = beam direction cosine wrt the (beam frame) z-axis    *
+*        Ubmpol = beam polarization cosine wrt the (beam frame) x-axis *
+*        Vbmpol = beam polarization cosine wrt the (beam frame) y-axis *
+*        Wbmpol = beam polarization cosine wrt the (beam frame) z-axis *
+*        Polfra = polarization fraction                                *
+*        Rflood = emission radius for a uniform and isotropic source   *
+*                 or maximum radius for a cylindrical/spherical volume *
+*                 source                                               *
+*        Rvlmax = emission radius for a uniform and isotropic source   *
+*                 or maximum radius for a cylindrical/spherical volume *
+*                 source                                               *
+*        Rvlmin = minimum radius for a cylindrical/spherical volume    *
+*                 source                                               *
+*        Dxvlmx = maximum Dx for a cartesian volume source             *
+*                (particle emitted inside                              *
+*                     [Xbeam+Dxvlmn/2, Xbeam+Dxvlmx/2]                 *
+*                 and inside                                           *
+*                     [Xbeam-Dxvlmx/2, Xbeam-Dxvlmn/2] )               *
+*        Dxvlmn = minimum Dx for a cartesian volume source             *
+*        Dyvlmx = maximum Dy for a cartesian volume source             *
+*                (particle emitted inside                              *
+*                     [Ybeam+Dyvlmn/2, Ybeam+Dyvlmx/2]                 *
+*                 and inside                                           *
+*                     [Ybeam-Dyvlmx/2, Ybeam-Dyvlmn/2] )               *
+*        Dyvlmn = minimum Dy for a cartesian volume source             *
+*        Dzvlmx = maximum Dz for a cartesian/cylindrical volume source *
+*                (particle emitted inside                              *
+*                     [Zbeam+Dzvlmn/2, Zbeam+Dzvlmx/2]                 *
+*                 and inside                                           *
+*                     [Zbeam-Dzvlmx/2, Zbeam-Dzvlmn/2] )               *
+*        Dzvlmn = minimum Dz for a cartesian/cylindrical volume source *
+*        Ijbeam = beam particle type (see prname in /paprop/)          *
+*        Ijhion = heavy ion type if ijbeam = -2                        *
+*        Nucdbm = neutrino interaction codeword for a neutrino beam    *
+*        Isourc = Isourc_th special source routine invoked, if > 0     *
+*        Ldpgss = true for a gaussian momentum distribution of the     *
+*                 beam particles, false for a rectangular one          *
+*        Ldvgss = true for a gaussian angular divergence distribution  *
+*                 of the beam particles, false for a rectangular one   *
+*        Ldxgss = true for a gaussian spatial distribution of the beam *
+*                 spot in the x-direction, false for a rectangular one *
+*        Ldygss = true for a gaussian spatial distribution of the beam *
+*                 spot in the y-direction, false for a rectangular one *
+*        Beawei = weight of the beam particles                         *
+*        Lbeamc = flag for an annular beam                             *
+*        Lpperp = flag for polar. perp. to the beam direction          *
+*        Lpfrac = flag for interpreting the polar. fraction            *
+*   Bmaxis(j,i) = j_th component of the i_th axis used to define the   *
+*                 conventional x,y,z beam reference frame              *
+*        Lbaxis = logical flag for using a beam axis frame different   *
+*                 from the standard one                                *
+*        Lflood = logical flag for using a uniform and isotropic beam  *
+*                 source out of a sphere of radius Rflood              *
+*        Lvlcar = logical flag for using a cartesian   volume source   *
+*        Lvlcyl = logical flag for using a cylindrical volume source   *
+*        Lvlsph = logical flag for using a spherical   volume source   *
+*        Lsourc = logical flag for a user written source routine       *
+*        Lrdbea = logical flag for a radioactive isotope beam          *
+*        Lnufin = logical flag for (anti)neutrino (forced) interactions*
+*                 when used as primary beams                           *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      LOGICAL LBEAMC, LPPERP, LPFRAC, LDPGSS, LDVGSS, LDXGSS, LDYGSS,
+     &        LBAXIS, LFLOOD, LVLCAR, LVLCYL, LVLSPH, LSOURC, LRDBEA,
+     &        LNUFIN
+      COMMON / BEAMCM / PBEAM , DPBEAM, PBMMAX, DIVBM , XSPOT , YSPOT ,
+     &                  XBEAM , YBEAM , ZBEAM , UBEAM , VBEAM , WBEAM ,
+     &                  UBMPOL, VBMPOL, WBMPOL, POLFRA, BEAWEI,
+     &                  BMAXIS (3,3)  , RFLOOD, RVLMIN, RVLMAX, DXVLMN,
+     &                  DXVLMX, DYVLMN, DYVLMX, DZVLMN, DZVLMX,
+     &                  IJBEAM, IJHION, NUCDBM, ISOURC,
+     &                  LDPGSS, LDVGSS, LDXGSS, LDYGSS, LBEAMC, LPPERP,
+     &                  LPFRAC, LBAXIS, LFLOOD, LVLCAR, LVLCYL, LVLSPH,
+     &                  LSOURC, LRDBEA, LNUFIN
+      SAVE / BEAMCM /
+

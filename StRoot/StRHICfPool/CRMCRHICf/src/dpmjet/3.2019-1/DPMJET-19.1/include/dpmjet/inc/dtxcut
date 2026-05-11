@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION CDQ , CSEa , CVQ , SSMima , SSMimq , UNOm , 
+     &                 UNOn , UNOsea , VVMthr , XSEacu
+ 
+ 
+      COMMON /DTXCUT/ XSEacu , UNOn , UNOm , UNOsea , CVQ , CDQ ,
+     &                CSEa , SSMima , SSMimq , VVMthr

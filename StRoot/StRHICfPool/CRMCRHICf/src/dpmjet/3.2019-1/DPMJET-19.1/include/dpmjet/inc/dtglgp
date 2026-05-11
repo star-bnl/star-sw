@@ -1,0 +1,7 @@
+
+      INTEGER IOGlb , JBInsb , JSTatb
+ 
+ 
+      LOGICAL LPRod
+      CHARACTER*8 CGLb
+      COMMON /DTGLGP/ JSTatb , JBInsb , CGLb , IOGlb , LPRod

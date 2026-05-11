@@ -1,0 +1,9 @@
+
+ 
+ 
+      CHARACTER*8 MDLna
+      CHARACTER*1024 PARfn
+      INTEGER ISWmdl, IPAmdl
+      DOUBLE PRECISION PARmdl
+      COMMON /POMDLS/ MDLna(50) , ISWmdl(50) , PARmdl(400) , IPAmdl(400)
+     &                , PARfn

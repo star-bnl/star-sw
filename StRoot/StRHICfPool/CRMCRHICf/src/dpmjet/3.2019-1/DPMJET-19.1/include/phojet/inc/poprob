@@ -1,0 +1,8 @@
+
+      INTEGER IEETA1 , IIMAX , KKMAX
+C**anfe Increased KKMAX from 20 -> 500
+      PARAMETER (IEETA1=20,IIMAX=20,KKMAX=500)
+      INTEGER IEEmax , IMAx , KMAx
+      DOUBLE PRECISION EPTab , PROb
+      COMMON /POPROB/ PROb(IEETA1,0:IIMAX,0:KKMAX,4,mparmax) , 
+     &                EPTab(IEETA1,4,mparmax) , IEEmax , IMAx , KMAx

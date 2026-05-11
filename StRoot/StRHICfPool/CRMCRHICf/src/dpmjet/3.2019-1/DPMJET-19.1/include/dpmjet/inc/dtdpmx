@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION XPSaq , XPSq , XPVd , XPVq , XTSaq , XTSq , 
+     &                 XTVd , XTVq
+ 
+ 
+      COMMON /DTDPMX/ XPVq(maxvqu) , XPVd(maxvqu) , XTVq(maxvqu) , 
+     &                XTVd(maxvqu) , XPSq(maxsqu) , XPSaq(maxsqu) , 
+     &                XTSq(maxsqu) , XTSaq(maxsqu)

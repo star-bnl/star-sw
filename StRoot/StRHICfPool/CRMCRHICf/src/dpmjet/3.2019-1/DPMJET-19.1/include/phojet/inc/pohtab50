@@ -1,0 +1,19 @@
+
+      INTEGER MAX_TAB_E , MAX_TAB_Q2 , MAX_PRO_TAB
+      PARAMETER (MAX_TAB_E=50,MAX_TAB_Q2=10,MAX_PRO_TAB=16)
+      INTEGER IH_q2a_up , IH_q2b_up , IH_ecm_up
+      DOUBLE PRECISION HFAc_tab , HWGx_tab , HSIg_tab , HDPt_tab , 
+     &                 HQ2a_tab , HQ2b_tab , HECm_tab
+      COMMON /POHTAB/ HFAc_tab(-1:MAX_PRO_TAB,MAX_TAB_E,MAX_TAB_Q2,
+     &                MAX_TAB_Q2,0:4,mparmax) , 
+     &                HWGx_tab(-1:MAX_PRO_TAB,MAX_TAB_E,MAX_TAB_Q2,
+     &                MAX_TAB_Q2,0:4,mparmax) , 
+     &                HSIg_tab(-1:MAX_PRO_TAB,MAX_TAB_E,MAX_TAB_Q2,
+     &                MAX_TAB_Q2,0:4,mparmax) , 
+     &                HDPt_tab(-1:MAX_PRO_TAB,MAX_TAB_E,MAX_TAB_Q2,
+     &                MAX_TAB_Q2,0:4,mparmax) , 
+     &                HQ2a_tab(1:MAX_TAB_Q2,0:4,mparmax) , 
+     &                HQ2b_tab(1:MAX_TAB_Q2,0:4,mparmax) , 
+     &                HECm_tab(1:MAX_TAB_E,0:4,mparmax) , 
+     &                IH_q2a_up(0:4,mparmax) , IH_q2b_up(0:4,mparmax) , 
+     &                IH_ecm_up(0:4,mparmax)

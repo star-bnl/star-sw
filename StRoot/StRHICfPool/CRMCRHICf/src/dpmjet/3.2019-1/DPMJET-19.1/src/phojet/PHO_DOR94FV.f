@@ -1,0 +1,13 @@
+
+      DOUBLE PRECISION FUNCTION PHO_DOR94FV(X,N,Ak,Bk,A,B,C,D)
+C
+C...FUNCTIONAL FORMS OF THE PARAMETRIZATIONS :
+C
+      IMPLICIT NONE
+      DOUBLE PRECISION A , Ak , B , Bk , C , D , dx , N , X
+      SAVE 
+ 
+      dx = SQRT(X)
+      PHO_DOR94FV = N*X**Ak*(1.D0+A*X**Bk+X*(B+C*dx))*(1.D0-X)**D
+ 
+      END FUNCTION

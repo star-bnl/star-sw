@@ -1,0 +1,13 @@
+#ifndef FOR_CORSIKA
+
+      SUBROUTINE PHO_LHIST(I,X)
+ 
+C*
+ 
+      IMPLICIT NONE
+      INTEGER I
+      DOUBLE PRECISION X
+      SAVE 
+ 
+      END SUBROUTINE
+#endif

@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION EHAdhi , EHAdlo , EHAdth
+      INTEGER IDXta , INThad
+ 
+ 
+      COMMON /HNTHRE/ EHAdth , EHAdlo , EHAdhi , INThad , IDXta

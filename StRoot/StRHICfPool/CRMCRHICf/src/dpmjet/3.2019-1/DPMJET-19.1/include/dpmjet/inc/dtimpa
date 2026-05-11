@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION BIMax , BIMin , XSFrac
+      INTEGER ICEntr
+ 
+ 
+      COMMON /DTIMPA/ BIMin , BIMax , XSFrac , ICEntr

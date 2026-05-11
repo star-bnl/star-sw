@@ -1,0 +1,9 @@
+
+      INTEGER IDHkt , ISThkt , JDAhkt , JMOhkt , NEVhkt , NHKkt , NTMHKK
+      DOUBLE PRECISION PHKt , VHKt , WHKt
+ 
+ 
+      PARAMETER (NTMHKK=300)
+      COMMON /HKKTMP/ NHKkt , NEVhkt , ISThkt(NTMHKK) , IDHkt(NTMHKK) , 
+     &                JMOhkt(2,NTMHKK) , JDAhkt(2,NTMHKK) , 
+     &                PHKt(5,NTMHKK) , VHKt(4,NTMHKK) , WHKt(4,NTMHKK)

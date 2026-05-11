@@ -1,0 +1,16 @@
+
+      INTEGER MAX_PRO_2
+      PARAMETER (MAX_PRO_2=16)
+      INTEGER IHA_last , IHB_last , MH_pro_on , MH_tried , MH_acc_1 , 
+     &        MH_acc_2
+      DOUBLE PRECISION HFAc , HWGx , HSIg , HDPt , HECm_last , 
+     &                 HQ2a_last , HQ2b_last
+      COMMON /POHRCS/ HFAc(-1:MAX_PRO_2,mparmax) , 
+     &                HWGx(-1:MAX_PRO_2,mparmax) , 
+     &                HSIg(-1:MAX_PRO_2,mparmax) , 
+     &                HDPt(-1:MAX_PRO_2,mparmax) , HECm_last , 
+     &                HQ2a_last , HQ2b_last , IHA_last , IHB_last , 
+     &                MH_pro_on(-1:MAX_PRO_2,0:4,mparmax) , 
+     &                MH_tried(-1:MAX_PRO_2,0:4,mparmax) , 
+     &                MH_acc_1(-1:MAX_PRO_2,0:4,mparmax) , 
+     &                MH_acc_2(-1:MAX_PRO_2,0:4,mparmax)

@@ -1,0 +1,4 @@
+
+      INTEGER IMPart , IPHist , ICOlor
+      COMMON /POEVT2/ IMPart(nmxhep) , IPHist(2,nmxhep) , 
+     &                ICOlor(2,nmxhep)

@@ -1,0 +1,318 @@
+C*********************************************************************
+C*********************************************************************
+C*                                                                  **
+C*                                                       Dec 2012   **
+C*                                                                  **
+C*                       The Lund Monte Carlo                       **
+C*                                                                  **
+C*                        PYTHIA version 6.4                        **
+C*                                                                  **
+C*                        Torbjorn Sjostrand                        **
+C*                 Department of Theoretical Physics                **
+C*                         Lund University                          **
+C*               Solvegatan 14A, S-223 62 Lund, Sweden              **
+C*                    E-mail torbjorn@thep.lu.se                    **
+C*                                                                  **
+C*                  SUSY and Technicolor parts by                   **
+C*                         Stephen Mrenna                           **
+C*                       Computing Division                         ** 
+C*            Generators and Detector Simulation Group              **
+C*              Fermi National Accelerator Laboratory               **
+C*                 MS 234, Batavia, IL  60510, USA                  **
+C*                   phone + 1 - 630 - 840 - 2556                   **
+C*                      E-mail mrenna@fnal.gov                      **
+C*                                                                  **
+C*         New multiple interactions and more SUSY parts by         **
+C*                          Peter Skands                            **
+C*               CERN/PH, CH-1211 Geneva, Switzerland               **
+C*                    phone +41 - 22 - 767 2447                     **
+C*                   E-mail peter.skands@cern.ch                    **
+C*                                                                  **
+C*         Several parts are written by Hans-Uno Bengtsson          **
+C*          PYSHOW is written together with Mats Bengtsson          **
+C*               PYMAEL is written by Emanuel Norrbin               **
+C*     advanced popcorn baryon production written by Patrik Eden    **
+C*    code for virtual photons mainly written by Christer Friberg   **
+C*    code for low-mass strings mainly written by Emanuel Norrbin   **
+C*        Bose-Einstein code mainly written by Leif Lonnblad        **
+C*      CTEQ  parton distributions are by the CTEQ collaboration    **
+C*      GRV 94 parton distributions are by Glueck, Reya and Vogt    **
+C*   SaS photon parton distributions together with Gerhard Schuler  **
+C*     g + g and q + qbar -> t + tbar + H code by Zoltan Kunszt     **
+C*         MSSM Higgs mass calculation code by M. Carena,           **
+C*           J.R. Espinosa, M. Quiros and C.E.M. Wagner             **
+C*  UED implementation by M. Elkacimi, D. Goujdami, H. Przysiezniak **
+C*         PYGAUS adapted from CERN library (K.S. Kolbig)           **
+C*        NRQCD/colour octet production of onium by S. Wolf         **
+C*                                                                  **
+C*   The latest program version and documentation is found on WWW   **
+C*            http://www.thep.lu.se/~torbjorn/Pythia.html           **
+C*                                                                  **
+C*              Copyright Torbjorn Sjostrand, Lund 2010             **
+C*                                                                  **
+C*********************************************************************
+C*********************************************************************
+C                                                                    *
+C  List of subprograms in order of appearance, with main purpose     *
+C  (S = subroutine, F = function, B = block data)                    *
+C                                                                    *
+C  B   PYDATA   to contain all default values                        *
+C  S   PYCKBD   to check that BLOCK DATA has been correctly loaded   *
+C  S   PYTEST   to test the proper functioning of the package        *
+C  S   PYHEPC   to convert between /PYJETS/ and /HEPEVT/ records     *
+C                                                                    *
+C  S   PYINIT   to administer the initialization procedure           *
+C  S   PYEVNT   to administer the generation of an event             *
+C  S   PYEVNW   ditto, for new multiple interactions scenario        *
+C  S   PYSTAT   to print cross-section and other information         *
+C  S   PYUPEV   to administer the generation of an LHA hard process  *
+C  S   PYUPIN   to provide initialization needed for LHA input       *
+C  S   PYLHEF   to produce a Les Houches Event File from run         *
+C  S   PYINRE   to initialize treatment of resonances                *
+C  S   PYINBM   to read in beam, target and frame choices            *
+C  S   PYINKI   to initialize kinematics of incoming particles       *
+C  S   PYINPR   to set up the selection of included processes        *
+C  S   PYXTOT   to give total, elastic and diffractive cross-sect.   *
+C  S   PYMAXI   to find differential cross-section maxima            *
+C  S   PYPILE   to select multiplicity of pileup events              *
+C  S   PYSAVE   to save alternatives for gamma-p and gamma-gamma     *
+C  S   PYGAGA   to handle lepton -> lepton + gamma branchings        *
+C  S   PYRAND   to select subprocess and kinematics for event        *
+C  S   PYSCAT   to set up kinematics and colour flow of event        *
+C  S   PYEVOL   handler for pT-ordered ISR and multiple interactions *
+C  S   PYSSPA   to simulate initial state spacelike showers          *
+C  S   PYPTIS   to do pT-ordered initial state spacelike showers     *
+C  S   PYMEMX   auxiliary to PYSSPA/PYPTIS for ME correction maximum *
+C  S   PYMEWT   auxiliary to PYSSPA/.. for matrix element correction *
+C  S   PYPTMI   to do pT-ordered multiple interactions               *
+C  F   PYFCMP   to give companion quark x*f distribution             *
+C  F   PYPCMP   to calculate momentum integral for companion quarks  *
+C  S   PYUPRE   to rearranges contents of the HEPEUP commonblock     *
+C  S   PYADSH   to administrate sequential final-state showers       *
+C  S   PYVETO   to allow the generation of an event to be aborted    *
+C  S   PYRESD   to perform resonance decays                          *
+C  S   PYMULT   to generate multiple interactions - old scheme       *
+C  S   PYREMN   to add on target remnants - old scheme               *
+C  S   PYMIGN   to generate multiple interactions - new scheme       *
+C  S   PYMIHK   to connect colours in mult. int. - new scheme        *
+C  S   PYCTTR   to translate PYTHIA colour information to LHA1 tags  *
+C  S   PYMIHG   to collapse two pairs of LHA1 colour tags.           *
+C  S   PYMIRM   to add on target remnants in mult. int.- new scheme  *
+C  S   PYFSCR   to perform final state colour reconnections - -"-    *
+C  S   PYDIFF   to set up kinematics for diffractive events          *
+C  S   PYDISG   to set up kinematics, remnant and showers for DIS    *
+C  S   PYDOCU   to compute cross-sections and handle documentation   *
+C  S   PYFRAM   to perform boosts between different frames           *
+C  S   PYWIDT   to calculate full and partial widths of resonances   *
+C  S   PYOFSH   to calculate partial width into off-shell channels   *
+C  S   PYRECO   to handle colour reconnection in W+W- events         *
+C  S   PYKLIM   to calculate borders of allowed kinematical region   *
+C  S   PYKMAP   to construct value of kinematical variable           *
+C  S   PYSIGH   to calculate differential cross-sections             *
+C  S   PYSGQC   auxiliary to PYSIGH for QCD processes                *
+C  S   PYSGHF   auxiliary to PYSIGH for heavy flavour processes      *
+C  S   PYSGWZ   auxiliary to PYSIGH for W and Z processes            *
+C  S   PYSGHG   auxiliary to PYSIGH for Higgs processes              *
+C  S   PYSGSU   auxiliary to PYSIGH for supersymmetry processes      *
+C  S   PYSGTC   auxiliary to PYSIGH for technicolor processes        *
+C  S   PYSGEX   auxiliary to PYSIGH for various exotic processes     *
+C  S   PYPDFU   to evaluate parton distributions                     *
+C  S   PYPDFL   to evaluate parton distributions at low x and Q^2    *
+C  S   PYPDEL   to evaluate electron parton distributions            *
+C  S   PYPDGA   to evaluate photon parton distributions (generic)    *
+C  S   PYGGAM   to evaluate photon parton distributions (SaS sets)   *
+C  S   PYGVMD   to evaluate VMD part of photon parton distributions  *
+C  S   PYGANO   to evaluate anomalous part of photon PDFs            *
+C  S   PYGBEH   to evaluate Bethe-Heitler part of photon PDFs        *
+C  S   PYGDIR   to evaluate direct contribution to photon PDFs       *
+C  S   PYPDPI   to evaluate pion parton distributions                *
+C  S   PYPDPR   to evaluate proton parton distributions              *
+C  F   PYCTEQ   to evaluate the CTEQ 3 proton parton distributions   *
+C  S   PYGRVL   to evaluate the GRV 94L proton parton distributions  *
+C  S   PYGRVM   to evaluate the GRV 94M proton parton distributions  *
+C  S   PYGRVD   to evaluate the GRV 94D proton parton distributions  *
+C  F   PYGRVV   auxiliary to the PYGRV* routines                     *
+C  F   PYGRVW   auxiliary to the PYGRV* routines                     *
+C  F   PYGRVS   auxiliary to the PYGRV* routines                     *
+C  F   PYCT5L   to evaluate the CTEQ 5L proton parton distributions  *
+C  F   PYCT5M   to evaluate the CTEQ 5M1 proton parton distributions *
+C  S   PYPDPO   to evaluate old proton parton distributions          *
+C  F   PYHFTH   to evaluate threshold factor for heavy flavour       *
+C  S   PYSPLI   to find flavours left in hadron when one removed     *
+C  F   PYGAMM   to evaluate ordinary Gamma function Gamma(x)         *
+C  S   PYWAUX   to evaluate auxiliary functions W1(s) and W2(s)      *
+C  S   PYI3AU   to evaluate auxiliary function I3(s,t,u,v)           *
+C  F   PYSPEN   to evaluate Spence (dilogarithm) function Sp(x)      *
+C  S   PYQQBH   to evaluate matrix element for g + g -> Q + Qbar + H *
+C  S   PYSTBH   to evaluate matrix element for t + b + H processes   *
+C  S   PYTBHB   auxiliary to PYSTBH                                  *
+C  S   PYTBHG   auxiliary to PYSTBH                                  *
+C  S   PYTBHQ   auxiliary to PYSTBH                                  *
+C  F   PYTBHS   auxiliary to PYSTBH                                  *
+C                                                                    *
+C  S   PYMSIN   to initialize the supersymmetry simulation           *
+C  S   PYSLHA   to interface to SUSY spectrum and decay calculators  *
+C  S   PYAPPS   to determine MSSM parameters from SUGRA input        *
+C  S   PYSUGI   to determine MSSM parameters using ISASUSY           *
+C  S   PYFEYN   to determine MSSM Higgs parameters using FEYNHIGGS   *
+C  F   PYRNMQ   to determine running squark masses                   *
+C  S   PYTHRG   to calculate sfermion third-gen. mass eigenstates    *
+C  S   PYINOM   to calculate neutralino/chargino mass eigenstates    *
+C  F   PYRNM3   to determine running M3, gluino mass                 *
+C  S   PYEIG4   to calculate eigenvalues and -vectors in 4*4 matrix  *
+C  S   PYHGGM   to determine Higgs mass spectrum                     *
+C  S   PYSUBH   to determine Higgs masses in the MSSM                *
+C  S   PYPOLE   to determine Higgs masses in the MSSM                *
+C  S   PYRGHM   auxiliary to PYPOLE                                  *
+C  S   PYGFXX   auxiliary to PYRGHM                                  *
+C  F   PYFINT   auxiliary to PYPOLE                                  *
+C  F   PYFISB   auxiliary to PYFINT                                  *
+C  S   PYSFDC   to calculate sfermion decay partial widths           *
+C  S   PYGLUI   to calculate gluino decay partial widths             *
+C  S   PYTBBN   to calculate 3-body decay of gluino to neutralino    *
+C  S   PYTBBC   to calculate 3-body decay of gluino to chargino      *
+C  S   PYNJDC   to calculate neutralino decay partial widths         *
+C  S   PYCJDC   to calculate chargino decay partial widths           *
+C  F   PYXXZ6   auxiliary for ino 3-body decays                      *
+C  F   PYXXGA   auxiliary for ino -> ino + gamma decay               *
+C  F   PYX2XG   auxiliary for ino -> ino + gauge boson decay         *
+C  F   PYX2XH   auxiliary for ino -> ino + Higgs decay               *
+C  S   PYHEXT   to calculate non-SM Higgs decay partial widths       *
+C  F   PYH2XX   auxiliary for H -> ino + ino decay                   *
+C  F   PYGAUS   to perform Gaussian integration                      *
+C  F   PYGAU2   copy of PYGAUS to allow two-dimensional integration  *
+C  F   PYSIMP   to perform Simpson integration                       *
+C  F   PYLAMF   to evaluate the lambda kinematics function           *
+C  S   PYTBDY   to perform 3-body decay of gauginos                  *
+C  S   PYTECM   to calculate techni_rho/omega masses                 *
+C  S   PYXDIN   to initialize Universal Extra Dimensions             *
+C  S   PYUEDC   to compute UED mass radiative corrections            *
+C  S   PYXUED   to compute UED cross sections                        *
+C  S   PYGRAM   to generate UED G* (excited graviton) mass spectrum  *
+C  F   PYGRAW   to compute UED partial widths to G*                  *
+C  F   PYWDKK   to compute UED differential partial widths to G*     *
+C  S   PYEICG   to calculate eigenvalues of a 4*4 complex matrix     *
+C  S   PYCMQR   auxiliary to PYEICG                                  *
+C  S   PYCMQ2   auxiliary to PYEICG                                  *
+C  S   PYCDIV   auxiliary to PYCMQR                                  *
+C  S   PYCSRT   auxiliary to PYCMQR                                  *
+C  S   PYTHAG   auxiliary to PYCMQR                                  *
+C  S   PYCBAL   auxiliary to PYEICG                                  *
+C  S   PYCBA2   auxiliary to PYEICG                                  *
+C  S   PYCRTH   auxiliary to PYEICG                                  *
+C  S   PYLDCM   auxiliary to PYSIGH, for technicolor in QCD 2 -> 2   *
+C  S   PYBKSB   auxiliary to PYSIGH, for technicolor in QCD 2 -> 2   *
+C  S   PYWIDX   to calculate decay widths from within PYWIDT         *
+C  S   PYRVSF   to calculate R-violating sfermion decay widths       *
+C  S   PYRVNE   to calculate R-violating neutralino decay widths     *
+C  S   PYRVCH   to calculate R-violating chargino decay widths       *
+C  S   PYRVGL   to calculate R-violating gluino decay widths         *
+C  F   PYRVSB   auxiliary to PYRVSF                                  *
+C  S   PYRVGW   to calculate R-Violating 3-body widths               *
+C  F   PYRVI1   auxiliary to PYRVGW, to do PS integration for res.   *
+C  F   PYRVI2   auxiliary to PYRVGW, to do PS integration for LR-int.*
+C  F   PYRVI3   auxiliary to PYRVGW, to do PS X integral for int.    *
+C  F   PYRVG1   auxiliary to PYRVI1, general matrix element, res.    *
+C  F   PYRVG2   auxiliary to PYRVI2, general matrix element, LR-int. *
+C  F   PYRVG3   auxiliary to PYRVI3, to do PS Y integral for int.    *
+C  F   PYRVG4   auxiliary to PYRVG3, general matrix element, int.    *
+C  F   PYRVR    auxiliary to PYRVG1, Breit-Wigner                    *
+C  F   PYRVS    auxiliary to PYRVG2 & PYRVG4                         *
+C                                                                    *
+C  S   PY1ENT   to fill one entry (= parton or particle)             *
+C  S   PY2ENT   to fill two entries                                  *
+C  S   PY3ENT   to fill three entries                                *
+C  S   PY4ENT   to fill four entries                                 *
+C  S   PY2FRM   to interface to generic two-fermion generator        *
+C  S   PY4FRM   to interface to generic four-fermion generator       *
+C  S   PY6FRM   to interface to generic six-fermion generator        *
+C  S   PY4JET   to generate a shower from a given 4-parton config    *
+C  S   PY4JTW   to evaluate the weight od a shower history for above *
+C  S   PY4JTS   to set up the parton configuration for above         *
+C  S   PYJOIN   to connect entries with colour flow information      *
+C  S   PYGIVE   to fill (or query) commonblock variables             *
+C  S   PYONOF   to allow easy control of particle decay modes        *
+C  S   PYTUNE   to select a predefined 'tune' for min-bias and UE    *
+C  S   PYEXEC   to administrate fragmentation and decay chain        *
+C  S   PYPREP   to rearrange showered partons along strings          *
+C  S   PYSTRF   to do string fragmentation of jet system             *
+C  S   PYJURF   to find boost to string junction rest frame          *
+C  S   PYINDF   to do independent fragmentation of one or many jets  *
+C  S   PYDECY   to do the decay of a particle                        *
+C  S   PYDCYK   to select parton and hadron flavours in decays       *
+C  S   PYKFDI   to select parton and hadron flavours in fragm        *
+C  S   PYNMES   to select number of popcorn mesons                   *
+C  S   PYKFIN   to calculate falvour prod. ratios from input params. *
+C  S   PYPTDI   to select transverse momenta in fragm                *
+C  S   PYZDIS   to select longitudinal scaling variable in fragm     *
+C  S   PYSHOW   to do m-ordered timelike parton shower evolution     *
+C  S   PYPTFS   to do pT-ordered timelike parton shower evolution    *
+C  F   PYMAEL   auxiliary to PYSHOW & PYPTFS: gluon emission ME's    *
+C  S   PYBOEI   to include Bose-Einstein effects (crudely)           *
+C  S   PYBESQ   auxiliary to PYBOEI                                  *
+C  F   PYMASS   to give the mass of a particle or parton             *
+C  F   PYMRUN   to give the running MSbar mass of a quark            *
+C  S   PYNAME   to give the name of a particle or parton             *
+C  F   PYCHGE   to give three times the electric charge              *
+C  F   PYCOMP   to compress standard KF flavour code to internal KC  *
+C  S   PYERRM   to write error messages and abort faulty run         *
+C  F   PYALEM   to give the alpha_electromagnetic value              *
+C  F   PYALPS   to give the alpha_strong value                       *
+C  F   PYANGL   to give the angle from known x and y components      *
+C  F   PYR      to provide a random number generator                 *
+C  S   PYRGET   to save the state of the random number generator     *
+C  S   PYRSET   to set the state of the random number generator      *
+C  S   PYROBO   to rotate and/or boost an event                      *
+C  S   PYEDIT   to remove unwanted entries from record               *
+C  S   PYLIST   to list event record or particle data                *
+C  S   PYLOGO   to write a logo                                      *
+C  S   PYUPDA   to update particle data                              *
+C  F   PYK      to provide integer-valued event information          *
+C  F   PYP      to provide real-valued event information             *
+C  S   PYSPHE   to perform sphericity analysis                       *
+C  S   PYTHRU   to perform thrust analysis                           *
+C  S   PYCLUS   to perform three-dimensional cluster analysis        *
+C  S   PYCELL   to perform cluster analysis in (eta, phi, E_T)       *
+C  S   PYJMAS   to give high and low jet mass of event               *
+C  S   PYFOWO   to give Fox-Wolfram moments                          *
+C  S   PYTABU   to analyze events, with tabular output               *
+C                                                                    *
+C  S   PYEEVT   to administrate the generation of an e+e- event      *
+C  S   PYXTEE   to give the total cross-section at given CM energy   *
+C  S   PYRADK   to generate initial state photon radiation           *
+C  S   PYXKFL   to select flavour of primary qqbar pair              *
+C  S   PYXJET   to select (matrix element) jet multiplicity          *
+C  S   PYX3JT   to select kinematics of three-jet event              *
+C  S   PYX4JT   to select kinematics of four-jet event               *
+C  S   PYXDIF   to select angular orientation of event               *
+C  S   PYONIA   to perform generation of onium decay to gluons       *
+C                                                                    *
+C  S   PYBOOK   to book a histogram                                  *
+C  S   PYFILL   to fill an entry in a histogram                      *
+C  S   PYFACT   to multiply histogram contents by a factor           *
+C  S   PYOPER   to perform operations between histograms             *
+C  S   PYHIST   to print and reset all histograms                    *
+C  S   PYPLOT   to print a single histogram                          *
+C  S   PYNULL   to reset contents of a single histogram              *
+C  S   PYDUMP   to dump histogram contents onto a file               *
+C                                                                    *
+C  S   PYSTOP   routine to handle Fortran STOP condition             *
+C                                                                    *
+C  S   PYKCUT   dummy routine for user kinematical cuts              *
+C  S   PYEVWT   dummy routine for weighting events                   *
+C  S   UPINIT   dummy routine to initialize user processes           *
+C  S   UPEVNT   dummy routine to generate a user process event       *
+C  S   UPVETO   dummy routine to abort event at parton level         *
+C  S   PDFSET   dummy routine to be removed when using PDFLIB        *
+C  S   STRUCTM  dummy routine to be removed when using PDFLIB        *
+C  S   STRUCTP  dummy routine to be removed when using PDFLIB        *
+C  S   SUGRA    dummy routine to be removed when linking with ISAJET *
+C  F   VISAJE   dummy functn. to be removed when linking with ISAJET *
+C  S   SSMSSM   dummy routine to be removed when linking with ISAJET *
+C  S   FHSETFLAGS  dummy routine          -"-              FEYNHIGGS *
+C  S   FHSETPARA   dummy routine          -"-              FEYNHIGGS *
+C  S   FHHIGGSCORR dummy routine          -"-              FEYNHIGGS *
+C  S   PYTAUD   dummy routine for interface to tau decay libraries   *
+C  S   PYTIME   dummy routine for giving date and time               *
+C                                                                    *
+C*********************************************************************

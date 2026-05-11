@@ -1,0 +1,10 @@
+
+      SUBROUTINE DT_XHOINI
+C     SUBROUTINE DT_PHOINI
+ 
+      IMPLICIT NONE
+      SAVE 
+ 
+      INCLUDE 'inc/dtflka'
+ 
+      END SUBROUTINE

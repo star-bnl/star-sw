@@ -1,0 +1,9 @@
+
+      DOUBLE PRECISION EML , EMLsq , EMN , EMN1 , EMN1sq , EMN2 , 
+     &                 EMN2sq , EMNeut , EMNeutsq , EMNsq , EMProt , 
+     &                 EMProtsq , ETQe
+ 
+ 
+      COMMON /QNMASS/ EML(6) , EMLsq(6) , EMN1(6) , EMN2(6) , ETQe(6) , 
+     &                EMN1sq(6) , EMN2sq(6) , EMProt , EMNeut , EMN , 
+     &                EMProtsq , EMNeutsq , EMNsq

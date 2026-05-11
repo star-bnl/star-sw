@@ -1,0 +1,11 @@
+cc ------------ dpmjet3.4 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc -------- phojet1.12-40 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc                                                      - oct'13 -------
+cc ----------- pythia-6.4 - authors: Torbjorn Sjostrand, Lund'10 -------
+cc ---------------------------------------------------------------------
+cc                                  converted for use with FLUKA -------
+cc                                                      - oct'13 -------
+
+      COMMON/PYDAT4/CHAF(500,2)
+      CHARACTER CHAF*16
+      SAVE /PYDAT4/

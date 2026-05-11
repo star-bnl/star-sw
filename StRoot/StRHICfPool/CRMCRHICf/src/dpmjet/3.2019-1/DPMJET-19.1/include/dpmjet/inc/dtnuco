@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION PKOo , TKOo
+ 
+ 
+      COMMON /DTNUCO/ PKOo(3,maxncl) , TKOo(3,maxncl)

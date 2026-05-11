@@ -1,0 +1,9 @@
+
+      INTEGER IFLow , IFRag , IFRame , IFUsion , IMShl , IOUlev , 
+     &        IREsco , IREsrj , ITRspt
+ 
+ 
+      LOGICAL LEMcck , LHAdro , LSEadi , LEVapo
+      COMMON /DTFLG1/ IFRag(2) , IREsco , IMShl , IREsrj , IOUlev(6) , 
+     &                LEMcck , LHAdro(0:9) , LSEadi , LEVapo , IFRame , 
+     &                ITRspt , IFUsion , IFLow

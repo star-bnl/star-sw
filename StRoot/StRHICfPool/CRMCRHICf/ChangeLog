@@ -1,0 +1,104 @@
+-------------------------------------------------------------------------------
+	CRMC version 2.2.0 (02.2025)
+-------------------------------------------------------------------------------
+
+	Replace EPOS (1.99)LHC by EPOS LHC-R (with and without hadronic rescattering)
+	Update Sibyll to version 2.3e
+
+-------------------------------------------------------------------------------
+	CRMC version 2.1.0 (01.2025)
+-------------------------------------------------------------------------------
+
+	Add model QGSJET-III-01
+
+-------------------------------------------------------------------------------
+	CRMC version 2.0.1 (08.2021)
+-------------------------------------------------------------------------------
+
+	Updated Zenodo data.
+
+-------------------------------------------------------------------------------
+	CRMC version 2.0.0 (08.2021)
+-------------------------------------------------------------------------------
+
+	Add compatibility with HEPMC3 and direct link to RIVET.
+	New interface to link CRMC with GEANT4.
+	Improve precision of energy rescaling to avoid energy violation in lab frame at low energy from nuclear fragments for all models when necessary
+	Correct Hijing and DPMJET interface.
+	Improve build system.
+
+-------------------------------------------------------------------------------
+	CRMC version 1.8.0 (01.2021)
+-------------------------------------------------------------------------------
+
+	Update DPMJETIII versions (3.06, 3-17.1 and 3-19.1) and limit mass range to light nuclei to avoid problems with old DPMJET 3.0-6.
+	Update Sibyll to version 2.3d
+	Add a test on pz conservation and extend array size for cluster in EPOS to avoid stops.
+
+-------------------------------------------------------------------------------
+	CRMC version 1.7.1 (10.2019)
+-------------------------------------------------------------------------------
+
+	Extend array in EPOS for safe central heavy ion collisions (some stop otherwise)
+	Add possibility of sexaquark production in EPOS.
+
+-------------------------------------------------------------------------------
+	CRMC version 1.7.0 (03.2018)
+-------------------------------------------------------------------------------
+
+	added small tool to produce cross section tables
+	update to Sibyll2.3c
+	update to DPMJETIII-17.1
+	fix phi particle width in EPOS
+
+-------------------------------------------------------------------------------
+	CRMC version 1.6.0 (04.2016)
+-------------------------------------------------------------------------------
+
+	Update Sibyll to version 2.3  including charm production now.
+	keep original mass of QII to have correct energy conservation (since particles are put on-shell in double precision in crmc now, previous problems with mass in QII are probably solved now)
+	use the same cross-section in hepmc file and in screen output (sigine in hp and sigineaa in pA/AB)
+	updated event type definition for sibyll
+	correct bug in DPMJET interface (impact parameter problem)
+
+-------------------------------------------------------------------------------
+	CRMC version 1.5.7 (04.2016)
+-------------------------------------------------------------------------------
+
+	Same as v1.6.0 but with Sibyll 2.1
+
+-------------------------------------------------------------------------------
+	CRMC version 1.5.6 (10.2015)
+-------------------------------------------------------------------------------
+
+	Made ROOT-output work again
+	New option ("-S") to give centre-of-mass energy as input
+	When compiling, cmake automatically tries to use c++11
+	For DPMJET, some produced particles could make the program stop during decay
+
+-------------------------------------------------------------------------------
+	CRMC version 1.5.5 (09.2015)
+-------------------------------------------------------------------------------
+
+	Restored compatibility with f77 compiler (unsupported trim function)
+	ROOT dependency is now optional
+	New option ("-x") to only display cross section for model with set energy and exit
+	When "ibreit" option is used (for decays with Breit-Wigner masses) the energy rescaling is done after smearing of the energy
+	Energy balance corrected for QGSJetII (<1 GeV after using original particle masses)
+	For QGSJetII input energy given as E_lab not E_kin
+	Functionality for running HIJING model
+
+-------------------------------------------------------------------------------
+	CRMC version 1.5.3   (07.2014)
+-------------------------------------------------------------------------------
+
+	HepMC signal vertex propely set
+	When running DPMJET, use EPOS for decays that have a known Breit-Wigner width to obtain mother/daughter information
+	Bug correction, DPMJET used impact parameter of first event, always
+
+-------------------------------------------------------------------------------
+	CRMC version 1.4   (10.2013)
+-------------------------------------------------------------------------------
+
+	PYTHIA (and models depending on it) now use decay definition as set in crmc
+	Mother/daughter information can be adjusted for EPOS. istmax=0 only final state, istmax=1 all particles saved

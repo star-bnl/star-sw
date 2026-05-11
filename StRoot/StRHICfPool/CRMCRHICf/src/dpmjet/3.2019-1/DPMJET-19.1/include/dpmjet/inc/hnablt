@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION AMH , GAH , TAUh
+      INTEGER IBArh , ICHh , K1H , K2H
+ 
+ 
+      COMMON /HNABLT/ AMH(110) , GAH(110) , TAUh(110) , ICHh(110) , 
+     &                IBArh(110) , K1H(110) , K2H(110)

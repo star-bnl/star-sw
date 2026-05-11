@@ -1,0 +1,6 @@
+
+      INTEGER NZKi
+      DOUBLE PRECISION WTI
+ 
+ 
+      COMMON /HNSPLI/ WTI(460) , NZKi(460,3)

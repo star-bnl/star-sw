@@ -1,0 +1,8 @@
+
+ 
+ 
+      INTEGER NMXJ
+      PARAMETER (NMXJ=60)
+      CHARACTER*10 REJtit
+      INTEGER IFAil
+      COMMON /POLOOP/ IFAil(NMXJ) , REJtit(NMXJ)

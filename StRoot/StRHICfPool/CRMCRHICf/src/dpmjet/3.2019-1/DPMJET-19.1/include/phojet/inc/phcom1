@@ -1,0 +1,7 @@
+
+      INTEGER maxp , maxs , NFL , NSEt
+      REAL Q2Lim , XLIm
+ 
+      PARAMETER (MAXS=6,MAXP=10)
+      COMMON /PHCOM1/ XLIm(maxp,0:maxs,2) , Q2Lim(maxp,0:maxs,2) , 
+     &                NSEt(maxp,2) , NFL(maxp)

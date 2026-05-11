@@ -1,0 +1,120 @@
+*$ CREATE DIMPAR.ADD
+*COPY DIMPAR
+*                                                                      *
+*=== dimpar ===========================================================*
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1989-2012      by  Alberto Fasso`, Alfredo Ferrari *
+*     All Rights Reserved.                   & Paola Sala              *
+*                                                                      *
+*                                                                      *
+*     DIMension PARameters:                                            *
+*                                                                      *
+*     Last change on  27-Feb-12    by    Alfredo Ferrari               *
+*                                                                      *
+*                                                                      *
+*      DIMPAR: included in any routine                                 *
+*                                                                      *
+*          Mxxrgn = maximum number of regions                          *
+*          Mxxmdf = maximum number of media in Fluka                   *
+*          Mxxmde = maximum number of media in Emf                     *
+*          Mfstck = stack dimension in Fluka                           *
+*          Mestck = stack dimension in Emf                             *
+*          Mostck = stack dimension for optical photons                *
+*          Mxprsn = secondary stack dimension for resonance generator  *
+*          Mxpdpm = secondary stack dimension for DPM generators       *
+*          Mxpscs = secondary stack dimension overall                  *
+*          Mxfrag = maximum number of pre-fragments                    *
+*          Mxglwn = maximum neutron group number                       *
+*          Mxoutu = maximum number of output units                     *
+*          Mxknwc = number of "known" compounds                        *
+*          Mxeshl = maximum number of electronic shells                *
+*          Mxgnpr = maximum number of generalized particles            *
+*          Kxheav = maximum number of heavy fragment types             *
+*          Nallwp = number of allowed particles                        *
+*          Nelemx = number of maximum allowed elements of a compound   *
+*                   or mixture                                         *
+*          Mpdpdx = number of particle types for which EM dE/dx pro-   *
+*                   cesses (ion,pair,bremss) have to be computed       *
+*          Mxhttr = maximum number of (hit) target nucleons for a      *
+*                   given collision generation                         *
+*          Mxseax = maximum number of sea components of a projectile   *
+*                  /target nucleon                                     *
+*          Icomax = maximum number of materials for compounds/mixtures *
+*                  (equal to the sum of the number of materials for    *
+*                   every compound/mixture)                            *
+*          Ichmax = maximum number of harmonic oscillator levels for   *
+*                   compounds/mixtures (equal to the sum of the number *
+*                   of harmonic oscillator levels for every compound   *
+*                   /mixture)                                          *
+*          Nstbis = number of stable isotopes recorded in common iso-  *
+*                   top                                                *
+*          Nqstis = number of "quasi" stable isotopes which are not    *
+*                   in the standard isotopic composition of a given    *
+*                   element, but for which special data (like GDR data)*
+*                   are anyway available                               *
+*          Ntstis = total number of stable ans "quasi" stable isotopes *
+*          Mxpabl = number of resonances inside Hadrin common blocks   *
+*          Idmaxp = number of particles/resonances defined in common   *
+*                   part                                               *
+*          Idmxdc = number of particles/resonances decay channels      *
+*                   defined in common decayc                           *
+*          Ihypmx = maximum number of hyperons in a hypernucleus       *
+*          Mkbmx1 = dimension for KWB real spare array in Fluka Stack  *
+*          Mkbmx2 = dimension for KWB int. spare array in Fluka Stack  *
+*          Mxirrd = maximum number of irradiation sub-intervals        *
+*          Mxtrdc = maximum number of decay (cooling) times            *
+*          Nktl   = overall dimension parameter for EMF bremsstrahlung *
+*          Nblnmx = blank common dimension in real*8 units!            *
+*                                                                      *
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+      PARAMETER ( MXXRGN =20000 )
+      PARAMETER ( MXXMDF =  710 )
+      PARAMETER ( MXXMDE =  702 )
+      PARAMETER ( MFSTCK =70000 )
+      PARAMETER ( MESTCK =  100 )
+      PARAMETER ( MOSTCK = 2000 )
+      PARAMETER ( MXPRSN =  100 )
+      PARAMETER ( MXPDPM =  800 )
+      PARAMETER ( MXPSCS =60000 )
+      PARAMETER ( MXFRAG =   20 )
+      PARAMETER ( MXGLWN =  300 )
+      PARAMETER ( MXOUTU =   50 )
+      PARAMETER ( MXKNWC =   13 )
+      PARAMETER ( MXESHL =   32 )
+      PARAMETER ( MXGNPR =   60 )
+      PARAMETER ( KXHEAV =   30 )
+      PARAMETER ( NALLWP =   64 )
+      PARAMETER ( NELEMX =   80 )
+      PARAMETER ( MPDPDX =   33 )
+      PARAMETER ( MXHTTR =  260 )
+      PARAMETER ( MXSEAX =   30 )
+      PARAMETER ( MXHTNC = MXSEAX + 1 )
+      PARAMETER ( ICOMAX = 2400 )
+      PARAMETER ( ICHMAX = ICOMAX + MXXMDF )
+      PARAMETER ( NSTBIS =  304 )
+      PARAMETER ( NQSTIS =   46 )
+      PARAMETER ( NTSTIS = NSTBIS + NQSTIS )
+* Till 3-aug-99:
+*     PARAMETER ( MXPABL =  110 )
+      PARAMETER ( MXPABL =  120 )
+      PARAMETER ( IDMAXP =  450 )
+      PARAMETER ( IDMXDC = 2000 )
+      PARAMETER ( MXMCIN =  410 )
+      PARAMETER ( IHYPMX =    4 )
+* Till 19-jul-2000:
+*     PARAMETER ( MKBMX1 =    9 )
+*     PARAMETER ( MKBMX2 =    3 )
+      PARAMETER ( MKBMX1 =   11 )
+      PARAMETER ( MKBMX2 =   11 )
+      PARAMETER ( MXIRRD = 2500 )
+      PARAMETER ( MXTRDC = 1500 )
+      PARAMETER ( NKTL   =   17 )
+      PARAMETER ( MXNBLN = 55000000 )
+* Start_G77_seq
+      PARAMETER ( NBLNMX = MXNBLN )
+* End_G77_seq
+

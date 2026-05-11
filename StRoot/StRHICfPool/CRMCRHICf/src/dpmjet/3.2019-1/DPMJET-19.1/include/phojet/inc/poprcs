@@ -1,0 +1,6 @@
+
+ 
+ 
+      INTEGER IPRoce , IDNodf , IDIfr1 , IDIfr2 , IDDpom , IPRon
+      COMMON /POPRCS/ IPRoce , IDNodf , IDIfr1 , IDIfr2 , IDDpom , 
+     &                IPRon(15,4)

@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER NQQal , NQQali , NQQalf , NQQpd
+      DOUBLE PRECISION AQQal , AQQali , AQQalf , AQQpd
+      COMMON /POHSCL/ AQQal , AQQali , AQQalf , AQQpd , NQQal , NQQali , 
+     &                NQQalf , NQQpd

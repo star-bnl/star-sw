@@ -1,0 +1,9 @@
+
+      DOUBLE PRECISION ECMax , ECMhi , ECMin , ECMli , EGMax , 
+     &     EGMin , ELMin , Q2Hi , Q2Li , Q2Max , Q2Min , THMax ,
+     &     THMin , XBJmin , YMAx , YMIn
+ 
+ 
+      COMMON /DTLCUT/ ECMin , ECMax , XBJmin , ELMin , EGMin , EGMax , 
+     &                YMIn , YMAx , Q2Min , Q2Max , THMin , THMax , 
+     &                Q2Li , Q2Hi , ECMli , ECMhi

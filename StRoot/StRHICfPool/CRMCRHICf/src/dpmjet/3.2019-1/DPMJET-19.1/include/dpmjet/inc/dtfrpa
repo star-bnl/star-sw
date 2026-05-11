@@ -1,0 +1,10 @@
+
+      INTEGER IMStj , IMStu , IPArj , IPAru , IPI0 , ISIg0 , MSTjx , 
+     &        MSTux , NMStj , NMStu , NPArj , NPAru
+      DOUBLE PRECISION PARjx , PARux , PDB , PDBsea
+      LOGICAL OVwtdc
+ 
+      COMMON /DTFRPA/ MSTux(20) , PARux(20) , MSTjx(20) , PARjx(20) , 
+     &                IMStu(20) , IPAru(20) , IMStj(20) , IPArj(20) , 
+     &                NMStu , NPAru , NMStj , NPArj , PDB , PDBsea(3) , 
+     &                ISIg0 , IPI0 , OVwtdc

@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION AMRcl0 , EEXc , EEXcfi
+      INTEGER NH , NHPos , NN , NPRo , NPRofi , NQ , NTOt , NTOtfi
+ 
+ 
+      COMMON /DTRNU2/ AMRcl0(2) , EEXc(2) , EEXcfi(2) , NTOt(2) , 
+     &                NPRo(2) , NN(2) , NH(2) , NHPos(2) , NQ(2) , 
+     &                NTOtfi(2) , NPRofi(2)

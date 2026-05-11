@@ -1,0 +1,79 @@
+*$ CREATE FHEAVY.ADD
+*COPY FHEAVY
+*
+*=== fheavy ===========================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1990-2011       by       Alfredo Ferrari           *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     include file: fheavy                                             *
+*                                                                      *
+*     Created  on   5 April 1990    by       Alfredo Ferrari           *
+*                                               INFN Milan             *
+*                                                                      *
+*     Last change on   08-May-11    by       Alfredo Ferrari           *
+*                                                                      *
+*     included in the following subroutines or functions: not updated  *
+*                                                                      *
+*     description of the common block(s) and variable(s)               *
+*                                                                      *
+*     /fheavy/ is the storage for heavy secondaries created in the     *
+*              nuclear evaporation                                     *
+*        npheav     = number of secondaries                            *
+*        kheavy(ip) = type of the secondary ip                         *
+*                   ( 3 = deuteron, 4 = 3-H, 5 = 3-He, 6 = 4-He,       *
+*                     7-12 = "Heavy" fragment specified by Ibheav and  *
+*                     Icheav )                                         *
+*        infhea(ip) = possible extra infos for the ip_th secondary     *
+*        cxheav(ip) = direction cosine of the secondary ip             *
+*                     with respect to x-axis                           *
+*        cyheav(ip) = direction cosine of the secondary ip             *
+*                     with respect to y-axis                           *
+*        czheav(ip) = direction cosine of the secondary ip             *
+*                     with respect to z-axis                           *
+*        tkheav(ip) = kinetic energy of secondary ip                   *
+*        pheavy(ip) = momentum of the secondary ip                     *
+*        wheavy(ip) = weight of the secondary ip                       *
+*        agheav(ip) = "age" of the secondary ip with respect to the    *
+*                     interaction time                                 *
+*        amheav(kp) = atomic masses of the twelve types of evaporated  *
+*                     or fragmented or fissioned particles             *
+*        amnhea(kp) = nuclear masses of the twelve types of evaporated *
+*                     or fragmented or fissioned particles             *
+*     bhheav(jp,kp) = (nuclear) binding energy of the jp_th hyperon of *
+*                     the kp-type heavy particle                       *
+*        anheav(kp) = name of the kp-type heavy particle               *
+*        icheav(kp) = charge of the kp-type heavy particle             *
+*        ibheav(kp) = mass number of the kp-type heavy particle        *
+*        imheav(kp) = isomeric state of the kp-type heavy particle     *
+*        ihheav(kp) = number of hyperons of the kp-type heavy particle *
+*     khheav(jp,kp) = id of the jp_th hyperon of the kp-type heavy     *
+*                     particle                                         *
+*                                                                      *
+*   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   *
+*   !!! There is now the possibility to produce up to 24 "heavy"!!!!   *
+*   !!! fragments besides the residual nucleus recorded in      !!!!   *
+*   !!! Resnuc: they are identified by indeces 7-30, of course  !!!!   *
+*   !!! the corresponding physical properties (Z,A,m..) must be !!!!   *
+*   !!! updated every time they are produced                    !!!!   *
+*   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      PARAMETER ( MXHEAV = 100 )
+      CHARACTER*8 ANHEAV
+      COMMON / FHEAVY / CXHEAV (MXHEAV), CYHEAV (MXHEAV),
+     &                  CZHEAV (MXHEAV), TKHEAV (MXHEAV),
+     &                  PHEAVY (MXHEAV), WHEAVY (MXHEAV),
+     &                  AGHEAV (MXHEAV), BHHEAV (IHYPMX,KXHEAV),
+     &                  AMHEAV (KXHEAV), AMNHEA (KXHEAV),
+     &                  KHEAVY (MXHEAV), INFHEA (MXHEAV),
+     &                  ICHEAV (KXHEAV), IBHEAV (KXHEAV),
+     &                  IMHEAV (KXHEAV), IHHEAV (KXHEAV),
+     &                  KHHEAV (IHYPMX,KXHEAV), NPHEAV
+      COMMON / FHEAVC / ANHEAV (KXHEAV)
+      SAVE / FHEAVY /, / FHEAVC /
+

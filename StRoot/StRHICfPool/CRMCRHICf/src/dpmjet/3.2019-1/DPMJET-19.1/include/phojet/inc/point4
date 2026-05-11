@@ -1,0 +1,7 @@
+
+ 
+ 
+      COMPLEX*16 AMPel , AMPvm , AMPsof , AMPhar , AMLmsd , AMHmsd , 
+     &           AMLmdd , AMHmdd , AMPdp
+      COMMON /POINT4/ AMPel , AMPvm(4,4) , AMPsof , AMPhar , AMLmsd(2) , 
+     &                AMHmsd(2) , AMLmdd , AMHmdd , AMPdp(4)
