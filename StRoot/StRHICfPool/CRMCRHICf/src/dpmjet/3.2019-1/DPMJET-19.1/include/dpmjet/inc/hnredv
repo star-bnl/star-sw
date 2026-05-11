@@ -1,0 +1,6 @@
+
+      INTEGER IEIi , IKIi , IRIi
+      DOUBLE PRECISION THResh
+ 
+ 
+      COMMON /HNREDV/ THResh(268) , IRIi(17) , IKIi(17) , IEIi(17)

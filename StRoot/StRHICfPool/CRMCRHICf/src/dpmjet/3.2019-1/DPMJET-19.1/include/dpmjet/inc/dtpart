@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION AAM , GA , TAU
+      INTEGER IIBar , IICh , K1 , K2
+ 
+ 
+      CHARACTER*8 ANAme
+      COMMON /DTPART/ ANAme(210) , AAM(210) , GA(210) , TAU(210) , 
+     &                IICh(210) , IIBar(210) , K1(210) , K2(210)

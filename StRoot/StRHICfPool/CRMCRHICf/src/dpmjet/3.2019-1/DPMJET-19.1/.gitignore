@@ -1,0 +1,5 @@
+*.o
+*.so
+*.pyd
+*.a
+bin/*.exe

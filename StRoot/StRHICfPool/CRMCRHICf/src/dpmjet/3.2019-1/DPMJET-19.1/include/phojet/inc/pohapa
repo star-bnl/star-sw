@@ -1,0 +1,6 @@
+
+ 
+ 
+      INTEGER NFBeta , NF
+      DOUBLE PRECISION ALQcd2 , BQCd
+      COMMON /POHAPA/ ALQcd2(3,4) , BQCd(4) , NFBeta , NF

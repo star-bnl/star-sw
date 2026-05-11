@@ -1,0 +1,24 @@
+************************************************************
+*      input file      PHOJET v1.0
+************************************************************
+*
+*  all processes on
+*
+PROCESS       1  1  1  1  1  1  1  1
+*
+*  electron taggers
+*
+E-TAG1        0.0   1.e-10   0.9999   0.0  5.0   0.0   3.15
+*
+*  gamma-gamma energy range
+*
+ECMS-CUT      5.0    100000.0
+*
+*  generate 10000 events
+*
+BEAMST      250.0  -1.0  845.e-6  18.9e-6  0.5  3.8e+10   10000
+*
+*  that's all
+*
+ENDINPUT
+

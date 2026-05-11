@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION P1 , P2
+ 
+ 
+      COMMON /DTBEAM/ P1(4) , P2(4)

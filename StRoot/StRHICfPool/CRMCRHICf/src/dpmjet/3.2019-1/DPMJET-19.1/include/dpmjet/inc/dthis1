@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION DENtry , HISt , OVErf , UNDerf
+      INTEGER IBIns , IHIsl , ISWi , NDIM , NHIS
+ 
+ 
+      PARAMETER (NHIS=10,NDIM=250)
+      COMMON /DTHIS1/ HISt(7,NHIS,NDIM) , DENtry(2,NHIS) , OVErf(NHIS) , 
+     &                UNDerf(NHIS) , IBIns(NHIS) , ISWi(NHIS) , IHIsl

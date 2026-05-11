@@ -1,0 +1,8 @@
+
+      INTEGER IRChki , IRCron , IRDiff , IREvt , IRExci , IRFrag , 
+     &        IRHha , IRInc , IRPt , IRRes , LOBres , LOMres
+ 
+ 
+      COMMON /DTREJC/ IRPt , IRHha , IRRes(2) , LOMres , LOBres , 
+     &                IRChki(2) , IRFrag , IRCron(3) , IREvt , IRExci(3)
+     &                , IRDiff(2) , IRInc

@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION AMM , AMO , REDu
+ 
+ 
+      COMMON /HNGAMR/ REDu , AMO , AMM(15)

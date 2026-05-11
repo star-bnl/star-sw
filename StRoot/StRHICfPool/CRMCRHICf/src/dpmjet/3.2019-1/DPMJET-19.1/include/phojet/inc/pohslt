@@ -1,0 +1,17 @@
+
+ 
+ 
+      INTEGER MSCAHD
+C**anfe Increased MSCAHD from 50 -> 1000
+      PARAMETER (MSCAHD=1000)
+      INTEGER LSCahd , LSC1hd , LSIdx , NINhd , N0Inhd , NIVal , 
+     &        N0Ival , NOUthd , NBRahd , NPRohd
+      DOUBLE PRECISION PPH , PTHd , ETAhd , Q2Sca , PDFva , XHD , VHD , 
+     &                 X0Hd
+      COMMON /POHSLT/ LSCahd , LSC1hd , LSIdx(MSCAHD) , PPH(8*MSCAHD,2)
+     &                , PTHd(MSCAHD) , ETAhd(MSCAHD,2) , Q2Sca(MSCAHD,2)
+     &                , PDFva(MSCAHD,2) , XHD(MSCAHD,2) , VHD(MSCAHD) , 
+     &                X0Hd(MSCAHD,2) , NINhd(MSCAHD,2) , 
+     &                N0Inhd(MSCAHD,2) , NIVal(MSCAHD,2) , 
+     &                N0Ival(MSCAHD,2) , NOUthd(MSCAHD,2) , 
+     &                NBRahd(MSCAHD,2) , NPRohd(MSCAHD)

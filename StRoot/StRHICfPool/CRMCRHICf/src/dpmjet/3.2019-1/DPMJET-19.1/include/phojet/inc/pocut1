@@ -1,0 +1,6 @@
+
+ 
+ 
+      DOUBLE PRECISION PTCut , PTAno , FPS , FPH , PSOmin , XSOmin
+      COMMON /POCUT1/ PTCut(4) , PTAno(4) , FPS(4) , FPH(4) , PSOmin , 
+     &                XSOmin

@@ -1,0 +1,11 @@
+
+ 
+ 
+      INTEGER NMAXD
+      PARAMETER (NMAXD=100)
+      INTEGER IDEb , KSPom , KHPom , KSReg , KHDir , KACcep , KSTrg , 
+     &        KHTrg , KSLoo , KHLoo , KSDpo , KHDpo , KEVent , KSOft , 
+     &        KHArd
+      COMMON /PODEBG/ IDEb(NMAXD) , KSPom , KHPom , KSReg , KHDir , 
+     &                KACcep , KSTrg , KHTrg , KSLoo , KHLoo , KSDpo , 
+     &                KHDpo , KEVent , KSOft , KHArd

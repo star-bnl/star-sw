@@ -1,0 +1,8 @@
+
+ 
+ 
+      INTEGER IPOwgc , ISWcut , IVWght
+      DOUBLE PRECISION SIGgen , HSWght , HSWcut , EVWght
+      COMMON /POWGHT/ SIGgen(4) , HSWght(0:10) , HSWcut(20) , 
+     &                EVWght(0:10) , IPOwgc(0:10) , ISWcut(20) , 
+     &                IVWght(0:10)

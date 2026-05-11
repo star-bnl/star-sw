@@ -1,0 +1,5 @@
+
+      INTEGER IHIspp , IHIsxs , IXStbl
+ 
+ 
+      COMMON /DTHIS3/ IHIspp(50) , IHIsxs(50) , IXStbl

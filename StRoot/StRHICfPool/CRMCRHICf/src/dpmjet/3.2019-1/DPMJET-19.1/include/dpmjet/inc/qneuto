@@ -1,0 +1,6 @@
+
+      DOUBLE PRECISION DSIgmc , DSIgsu
+      INTEGER NDSig , NEUdec , NEUtyp
+ 
+ 
+      COMMON /QNEUTO/ DSIgsu , DSIgmc , NDSig , NEUtyp , NEUdec

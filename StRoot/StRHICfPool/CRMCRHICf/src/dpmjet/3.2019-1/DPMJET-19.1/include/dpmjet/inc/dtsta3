@@ -1,0 +1,7 @@
+
+      INTEGER ICIg , ICWp , ICWpg , ICWt , ICWtg , IPGlb , ITGlb , 
+     &        NCSy , NGLb
+ 
+ 
+      COMMON /DTSTA3/ ICWp , ICWt , NCSy , ICWpg , ICWtg , ICIg , 
+     &                IPGlb , ITGlb , NGLb

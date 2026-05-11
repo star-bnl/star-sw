@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION CXRh , CYRh , CZRh , ELRh , PLRh
+      INTEGER IRH , ITRh , MAXFIN
+ 
+ 
+      PARAMETER (MAXFIN=10)
+      COMMON /HNFSPA/ ITRh(MAXFIN) , CXRh(MAXFIN) , CYRh(MAXFIN) , 
+     &                CZRh(MAXFIN) , ELRh(MAXFIN) , PLRh(MAXFIN) , IRH

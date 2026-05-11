@@ -1,0 +1,5 @@
+
+ 
+ 
+      DOUBLE PRECISION ECM , PCM , COD , COF , SIF
+      COMMON /PO3DCY/ ECM(3) , PCM(3) , COD(3) , COF(3) , SIF(3)

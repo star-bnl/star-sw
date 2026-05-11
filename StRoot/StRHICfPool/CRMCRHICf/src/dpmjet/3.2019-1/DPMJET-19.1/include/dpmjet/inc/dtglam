@@ -1,0 +1,9 @@
+
+      DOUBLE PRECISION BMAx , BSIte , BSTep , GSH , RASh , RBSh , 
+     &                 ROSh , SIGsh
+      INTEGER NSIteb , NSTatb
+ 
+ 
+      COMMON /DTGLAM/ RASh(ncompx) , RBSh(ncompx) , BMAx(ncompx) , 
+     &                BSTep(ncompx) , SIGsh , ROSh , GSH , 
+     &                BSIte(0:neb,nqb,ncompx,ksiteb) , NSIteb , NSTatb

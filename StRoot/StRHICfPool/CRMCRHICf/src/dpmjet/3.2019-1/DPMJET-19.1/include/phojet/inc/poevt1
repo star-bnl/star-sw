@@ -1,0 +1,10 @@
+
+ 
+ 
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=8000)
+      INTEGER NEVhep , NHEp , ISThep , IDHep , JMOhep , JDAhep
+      DOUBLE PRECISION PHEp , VHEp
+      COMMON /POEVT1/ NEVhep , NHEp , ISThep(NMXHEP) , IDHep(NMXHEP) , 
+     &                JMOhep(2,NMXHEP) , JDAhep(2,NMXHEP) , 
+     &                PHEp(5,NMXHEP) , VHEp(4,NMXHEP)

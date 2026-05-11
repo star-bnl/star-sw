@@ -1,0 +1,22 @@
+************************************************************                   
+*      input file      PHOJET v1.0                                             
+************************************************************                   
+*
+*  switch non-diff and elastic processes off
+*
+PROCESS     0 0 0 1 1 1 1 1
+*
+*  define particles
+*
+PARTICLE1   -2212    0.0
+PARTICLE2   2212    0.0
+*
+*  debug events
+* DEBUG       190   1   35
+* TRACE     72  10
+*
+*  generate 10000 events in CMS system
+*
+EVENT-CMS   2000.0 10000
+*
+ENDINPUT

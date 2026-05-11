@@ -1,0 +1,6 @@
+
+      REAL VXPanh , VXPanl , VXPdgm , VXPvmd
+ 
+ 
+      COMMON /SASVAL/ VXPvmd(-6:6) , VXPanl(-6:6) , VXPanh(-6:6) , 
+     &                VXPdgm(-6:6)

@@ -1,0 +1,10 @@
+
+      DOUBLE PRECISION FUNCTION PHO_RNDM(Dummy)
+ 
+      IMPLICIT NONE
+      DOUBLE PRECISION DT_RNDM , Dummy
+      SAVE 
+ 
+ 
+      PHO_RNDM = DT_RNDM(Dummy)
+      END FUNCTION

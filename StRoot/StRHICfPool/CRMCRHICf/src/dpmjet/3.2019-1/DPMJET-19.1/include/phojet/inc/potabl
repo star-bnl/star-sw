@@ -1,0 +1,8 @@
+
+      INTEGER IEETA2
+      PARAMETER (IEETA2=20)
+      INTEGER ISImax
+      DOUBLE PRECISION SIGtab , SIGecm , ECMf
+      COMMON /POTABL/ SIGtab(80,IEETA2,4,mparmax) , 
+     &                SIGecm(IEETA2,4,mparmax) , ECMf(4,mparmax) , 
+     &                ISImax(mparmax)

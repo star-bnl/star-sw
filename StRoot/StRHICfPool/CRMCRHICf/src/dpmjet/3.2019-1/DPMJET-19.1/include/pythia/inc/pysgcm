@@ -1,0 +1,13 @@
+cc ------------ dpmjet3.4 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc -------- phojet1.12-40 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc                                                      - oct'13 -------
+cc ----------- pythia-6.4 - authors: Torbjorn Sjostrand, Lund'10 -------
+cc ---------------------------------------------------------------------
+cc                                  converted for use with FLUKA -------
+cc                                                      - oct'13 -------
+
+      COMMON/PYSGCM/ISUB,ISUBSV,MMIN1,MMAX1,MMIN2,MMAX2,MMINA,MMAXA,
+     &KFAC(2,-40:40),COMFAC,FACK,FACA,SH,TH,UH,SH2,TH2,UH2,SQM3,SQM4,
+     &SHR,SQPTH,TAUP,BE34,CTH,X(2),SQMZ,SQMW,GMMZ,GMMW,
+     &AEM,AS,XW,XW1,XWC,XWV,POLL,POLR,POLLL,POLRR
+      SAVE /PYSGCM/

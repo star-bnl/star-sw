@@ -1,0 +1,8 @@
+
+ 
+ 
+      INTEGER MAXIPX
+      PARAMETER (MAXIPX=500)
+      INTEGER IPOpos , IPOres , IPOix1 , IPOix2 , IPOix3
+      COMMON /PORECU/ IPOpos(2,MAXIPX) , IPOres(MAXIPX) , IPOix1 , 
+     &                IPOix2 , IPOix3

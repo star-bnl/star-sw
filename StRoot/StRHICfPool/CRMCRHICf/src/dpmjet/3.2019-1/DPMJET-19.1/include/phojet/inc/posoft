@@ -1,0 +1,10 @@
+
+ 
+ 
+      INTEGER MAXSOF
+C**anfe Increased MXISR2 from 50 -> 2000
+      PARAMETER (MAXSOF=2000)
+      INTEGER IJSi2 , IJSi1
+      DOUBLE PRECISION XS1 , XS2 , PSOft1 , PSOft2
+      COMMON /POSOFT/ XS1(MAXSOF) , XS2(MAXSOF) , PSOft1(4,MAXSOF) , 
+     &                PSOft2(4,MAXSOF) , IJSi1(MAXSOF) , IJSi2(MAXSOF)

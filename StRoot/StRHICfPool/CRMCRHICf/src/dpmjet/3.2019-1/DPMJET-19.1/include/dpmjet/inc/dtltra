@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION BGCms , BGLab , BLAb , EPRoj , GACms ,
+     &     GALab , PPCm , PPRoj , UMO
+ 
+ 
+      COMMON /DTLTRA/ GACms(2) , BGCms(2) , GALab , BGLab , 
+     &                BLAb , UMO , PPCm , EPRoj , PPRoj

@@ -1,0 +1,15 @@
+
+C  information about currently active beam-target configuration
+      INTEGER IDXmpar , MPARMAX , MPArconf , NMPar
+      INTEGER MPMapp , MAXMAPPS , NMApp , MPAr
+      DOUBLE PRECISION SQSglobmax
+
+C #ifdef FOR_FLUKA
+      PARAMETER (MPARMAX=40)
+      PARAMETER (MAXMAPPS=40)
+C #else
+C       PARAMETER (MPARMAX=20)
+C       PARAMETER (MAXMAPPS=20)
+C #endif 
+      COMMON /POBEAM/ MPArconf(2,MPARMAX) , MPMapp(2,MAXMAPPS) , MPAr(2)
+     &                , SQSglobmax , NMPar , IDXmpar , NMApp

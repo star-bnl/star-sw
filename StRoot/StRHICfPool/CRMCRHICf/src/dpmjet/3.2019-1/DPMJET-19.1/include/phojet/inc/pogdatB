@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION B , Y
+      INTEGER LTAb
+ 
+ 
+ 
+      COMMON /POGDAT/ B(273) , Y(273) , LTAb(96)

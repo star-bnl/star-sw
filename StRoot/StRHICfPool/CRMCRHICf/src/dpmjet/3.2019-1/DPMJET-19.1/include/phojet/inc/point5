@@ -1,0 +1,14 @@
+
+ 
+ 
+      DOUBLE PRECISION ZXP , BXP , ZXR , BXR , ZXH , BXH , ZXD , BXD , 
+     &                 ZXT1a , BXT1a , ZXT1b , BXT1b , ZXT2a , BXT2a , 
+     &                 ZXT2b , BXT2b , ZXDpe , BXDpe , ZXDpa , BXDpa , 
+     &                 ZXDpb , BXDpb , ZXDpd , BXDpd , ZXL , BXL
+      COMMON /POINT5/ ZXP(4,4) , BXP(4,4) , ZXR(4,4) , BXR(4,4) , 
+     &                ZXH(4,4) , BXH(4,4) , ZXD(4,4) , BXD(4,4) , 
+     &                ZXT1a(4,4) , BXT1a(4,4) , ZXT1b(4,4) , BXT1b(4,4)
+     &                , ZXT2a(4,4) , BXT2a(4,4) , ZXT2b(4,4) , 
+     &                BXT2b(4,4) , ZXDpe(4,4) , BXDpe(4,4) , ZXDpa(4,4)
+     &                , BXDpa(4,4) , ZXDpb(4,4) , BXDpb(4,4) , 
+     &                ZXDpd(4,4) , BXDpd(4,4) , ZXL(4,4) , BXL(4,4)

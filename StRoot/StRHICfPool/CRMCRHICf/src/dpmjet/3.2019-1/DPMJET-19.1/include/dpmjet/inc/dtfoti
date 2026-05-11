@@ -1,0 +1,7 @@
+
+      INTEGER INCmod , ITAuve , KTAuge
+      DOUBLE PRECISION TAUfor
+ 
+ 
+      LOGICAL LPAuli
+      COMMON /DTFOTI/ TAUfor , KTAuge , ITAuve , INCmod , LPAuli

@@ -1,0 +1,12 @@
+
+      INTEGER IPPv1 , IPPv2 , IPSaq , IPSaq2 , IPSq , IPSq2 , IPVq , 
+     &        ITSaq , ITSaq2 , ITSq , ITSq2 , ITTv1 , ITTv2 , ITVq , 
+     &        KKProj , KKTarg
+ 
+ 
+      COMMON /DTDPMF/ IPVq(maxvqu) , IPPv1(maxvqu) , IPPv2(maxvqu) , 
+     &                ITVq(maxvqu) , ITTv1(maxvqu) , ITTv2(maxvqu) , 
+     &                IPSq(maxsqu) , IPSq2(maxsqu) , IPSaq(maxsqu) , 
+     &                IPSaq2(maxsqu) , ITSq(maxsqu) , ITSq2(maxsqu) , 
+     &                ITSaq(maxsqu) , ITSaq2(maxsqu) , KKProj(maxvqu) , 
+     &                KKTarg(maxvqu)

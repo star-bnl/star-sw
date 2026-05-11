@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION BBB , BBM , SM
+ 
+ 
+      COMMON /HNSLOP/ SM(25) , BBM(25) , BBB(25)

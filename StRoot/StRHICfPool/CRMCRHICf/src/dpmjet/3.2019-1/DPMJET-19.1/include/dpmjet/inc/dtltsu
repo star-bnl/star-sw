@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION BGX , BGY , BGZ , GAM
+ 
+ 
+      COMMON /DTLTSU/ BGX , BGY , BGZ , GAM

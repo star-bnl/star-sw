@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION CROnco , CUTof , SEAsq
+      INTEGER IREcom , ISIcha , MKCron
+ 
+ 
+      LOGICAL LCO2cr , LINtpt
+      COMMON /DTCHAI/ SEAsq , CROnco , CUTof , MKCron , ISIcha , 
+     &                IREcom , LCO2cr , LINtpt

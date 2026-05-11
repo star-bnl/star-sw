@@ -1,0 +1,65 @@
+*$ CREATE GENSTK.ADD
+*COPY GENSTK
+*
+*=== Genstk ===========================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Partial (the additions wrt the original one)                     *
+*     Copyright (C) 1990-2006      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     hadron GENerator STacK for FLUKA: (new version of old Finuc of   *
+*     FLUKA86 by J.Ranft)                                              *
+*                                                                      *
+*     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      *
+*     !!!!     S E E   A L S O   I N C L U D E   F I L E     !!!!      *
+*     !!!!                 G E N S T K 2                     !!!!      *
+*     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      *
+*                                                                      *
+*     Created on  20 january 1996  by    Alfredo Ferrari & Paola Sala  *
+*                                                   Infn - Milan       *
+*                                                                      *
+*     Last change on 02-mar-06     by    Alfredo Ferrari               *
+*                                                                      *
+*                                                                      *
+*     /Genstk/ is the storage for secondaries created in hadronic      *
+*              events                                                  *
+*        Np        = total number of secondaries                       *
+*       Kpart (ip) = (Paprop) id of the ip_th secondary                *
+*      Infext (ip) = possible extra infos for the ip_th secondary      *
+*         Cxr (ip) = x-axis direction cosine of the ip_th secondary    *
+*         Cyr (ip) = y-axis direction cosine of the ip_th secondary    *
+*         Czr (ip) = z-axis direction cosine of the ip_th secondary    *
+*      Cxrpol (ip) = x-axis direction cosine of the ip_th secondary    *
+*                    polarization vector (rest frame when applicable)  *
+*      Cyrpol (ip) = y-axis direction cosine of the ip_th secondary    *
+*                    polarization vector (rest frame when applicable)  *
+*      Czrpol (ip) = z-axis direction cosine of the ip_th secondary    *
+*                    polarization vector (rest frame when applicable)  *
+*         Tki (ip) = laboratory kinetic energy of ip_th secondary (GeV)*
+*         Plr (ip) = laboratory momentum of the ip_th secondary (GeV/c)*
+*         Wei (ip) = statistical weight of the ip_th secondary         *
+*      Agesec (ip) = "age" of the ip_th secondary with respect to the  *
+*                    interaction time                                  *
+*        Tv        = excitation energy (GeV)                           *
+*        Tvcms     = actual excitation energy of the residual nucleus  *
+*        Tvrecl    = recoil kinetic energy of the residual nucleus     *
+*        Tvheav    = recoil kinetic energies of heavy (2-H, 3-H, 3-He, *
+*                    4-He) fragments after evaporation                 *
+*        Tvbind    = approximate energy wasted in nuclear binding      *
+*                    effects (not yet operational)                     *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      PARAMETER ( MXP = MXPSCS )
+*
+      COMMON / GENSTK /                CXR    (MXPSCS), CYR    (MXPSCS),
+     &                CZR    (MXPSCS), CXRPOL (MXPSCS), CYRPOL (MXPSCS),
+     &                CZRPOL (MXPSCS), TKI    (MXPSCS), PLR    (MXPSCS),
+     &                WEI    (MXPSCS), AGESEC (MXPSCS), TV    , TVCMS  ,
+     &                TVRECL,  TVHEAV, TVBIND,
+     &                KPART  (MXPSCS), INFEXT (MXPSCS), NP0   , NP
+      SAVE / GENSTK /
+

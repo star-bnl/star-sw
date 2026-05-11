@@ -1,0 +1,7 @@
+
+ 
+ 
+      INTEGER MAX_PRO_1
+      PARAMETER (MAX_PRO_1=16)
+      CHARACTER*18 PROc
+      COMMON /POHPRO/ PROc(0:MAX_PRO_1)

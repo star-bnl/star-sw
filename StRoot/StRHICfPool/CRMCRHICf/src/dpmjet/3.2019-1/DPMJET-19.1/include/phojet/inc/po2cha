@@ -1,0 +1,6 @@
+
+ 
+ 
+      DOUBLE PRECISION PHIsup , RMAss , VAR , AMPfac , ELAfac , VFAc
+      COMMON /PO2CHA/ PHIsup(2) , RMAss(2) , VAR , AMPfac(4) , ELAfac(4)
+     &                , VFAc

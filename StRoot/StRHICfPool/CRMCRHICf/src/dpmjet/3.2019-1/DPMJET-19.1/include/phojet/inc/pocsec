@@ -1,0 +1,17 @@
+
+ 
+ 
+      INTEGER IPFil , IFAfil , IFBfil
+      DOUBLE PRECISION SIGtot , SIGela , SIGvm , SIGine , SIGndf , 
+     &                 SIGdir , SIGlsd , SIGhsd , SIGldd , SIGhdd , 
+     &                 SIGcdf , SIGpom , SIGreg , SIGhar , SIGtr1 , 
+     &                 SIGtr2 , SIGloo , SIGdpo , SIG1so , SIG1ha , 
+     &                 SLOel , SLOvm , SIGcor , FSUp , FSUd , FSUh , 
+     &                 ECMfil , P2Afil , P2Bfil
+      COMMON /POCSEC/ SIGtot , SIGela , SIGvm(0:4,0:4) , SIGine , 
+     &                SIGndf , SIGdir , SIGlsd(2) , SIGhsd(2) , SIGldd , 
+     &                SIGhdd , SIGcdf(0:4) , SIGpom , SIGreg , SIGhar , 
+     &                SIGtr1(2) , SIGtr2(2) , SIGloo , SIGdpo(4) , 
+     &                SIG1so , SIG1ha , SLOel , SLOvm(4,4) , SIGcor , 
+     &                FSUp(2) , FSUd(2) , FSUh(2) , ECMfil , P2Afil , 
+     &                P2Bfil , IPFil , IFAfil , IFBfil

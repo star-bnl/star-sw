@@ -1,0 +1,5 @@
+
+ 
+ 
+      INTEGER NGAup1 , NGAup2 , NGAuet , NGAuin , NGAuso
+      COMMON /POGAUP/ NGAup1 , NGAup2 , NGAuet , NGAuin , NGAuso

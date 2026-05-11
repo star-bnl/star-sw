@@ -1,0 +1,5 @@
+
+      REAL QCDl4 , QCDl5
+ 
+ 
+      COMMON /W50512/ QCDl4 , QCDl5

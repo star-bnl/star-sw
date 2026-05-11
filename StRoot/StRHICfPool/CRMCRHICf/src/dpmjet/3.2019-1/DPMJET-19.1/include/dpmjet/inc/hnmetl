@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION CXS , CYS , CZS , ELS , PLS
+      INTEGER IS , ITS
+ 
+ 
+      COMMON /HNMETL/ CXS(149) , CYS(149) , CZS(149) , ELS(149) , 
+     &                PLS(149) , ITS(149) , IS

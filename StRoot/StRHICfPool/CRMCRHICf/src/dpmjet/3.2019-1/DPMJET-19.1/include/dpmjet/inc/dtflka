@@ -1,0 +1,5 @@
+
+      INTEGER LDAt , LINp , LOUt , LPRi
+ 
+ 
+      COMMON /DTFLKA/ LINp , LOUt , LDAt , LPRi

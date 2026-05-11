@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION A , X
+      INTEGER KTAb
+ 
+ 
+ 
+      COMMON /POGDAT/ A(273) , X(273) , KTAb(96)

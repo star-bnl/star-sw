@@ -1,0 +1,7 @@
+
+      INTEGER NRK , NURe
+      DOUBLE PRECISION PLAbf , SIIn , UMO , WK
+ 
+ 
+      COMMON /HNREAC/ UMO(296) , PLAbf(296) , SIIn(296) , WK(5184) , 
+     &                NRK(2,268) , NURe(30,2)

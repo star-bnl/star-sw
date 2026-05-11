@@ -1,0 +1,7 @@
+
+ 
+ 
+      DOUBLE PRECISION SIGs , DSIghp , SIGh , FS , FH , BETas , AAS , 
+     &                 PTCon
+      COMMON /POINT3/ SIGs , DSIghp , SIGh , FS , FH , BETas(3) , AAS , 
+     &                PTCon

@@ -1,0 +1,9 @@
+
+ 
+ 
+      DOUBLE PRECISION ALPom , ALPomp , GP , B0Pom , ALReg , ALRegp , 
+     &                 GR , B0Reg , GPPp , GPPr , B0Ppp , B0Ppr , 
+     &                 VDMfac , VDMq2f , B0Har , AKFac
+      COMMON /POPREG/ ALPom , ALPomp , GP(2) , B0Pom(2) , ALReg , 
+     &                ALRegp , GR(2) , B0Reg(2) , GPPp , GPPr , B0Ppp , 
+     &                B0Ppr , VDMfac(4) , VDMq2f(4) , B0Har , AKFac

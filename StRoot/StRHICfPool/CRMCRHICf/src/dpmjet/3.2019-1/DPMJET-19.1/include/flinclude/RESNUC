@@ -1,0 +1,132 @@
+*$ CREATE RESNUC.ADD
+*COPY RESNUC
+*                                                                      *
+*=== resnuc ===========================================================*
+*                                                                      *
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1993-2012      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     Include file Resnuc                                              *
+*                                                                      *
+*     Created on 20 April 1990  by            Alfredo Ferrari          *
+*                                               INFN Milan             *
+*                                                                      *
+*     Last change on  06-Feb-12 by  Alfredo Ferrari, INFN - Milan      *
+*                                                                      *
+*     Included in the following routines:                              *
+*                                                                      *
+*            ANCNUC                                                    *
+*            ANNCAN                                                    *
+*            BDNOPT                                                    *
+*            BIMSEL                                                    *
+*            BSELSC                                                    *
+*            CLSCST                                                    *
+*            COREVT                                                    *
+*            CORRIN                                                    *
+*            DEUSTR                                                    *
+*            DISTNU                                                    *
+*            EVDEEX                                                    *
+*            EVENTV                                                    *
+*            EVEVAP                                                    *
+*            EVXTES                                                    *
+*            FEREVV                                                    *
+*            FERHAV                                                    *
+*            FKBIRK                                                    *
+*            FNCRST                                                    *
+*            FVCOUL                                                    *
+*            HDNCGL                                                    *
+*            HDNCIN                                                    *
+*            HVFREV                                                    *
+*            ICLSSF                                                    *
+*            KAONUC                                                    *
+*            KBANUC                                                    *
+*            KBSNUC                                                    *
+*            KASKAD                                                    *
+*            KASHEA                                                    *
+*            KASNEU                                                    *
+*            LOWRES                                                    *
+*            LPNCLN                                                    *
+*            MUOABS                                                    *
+*            MUPRAB                                                    *
+*            NCDCYI                                                    *
+*            NUCDCY                                                    *
+*            NUCEVV                                                    *
+*            NUCNUC                                                    *
+*            NUCREL                                                    *
+*            NUCRIV                                                    *
+*            NUNCLN                                                    *
+*            NUSCTI                                                    *
+*            NWISEL                                                    *
+*            PEANUT                                                    *
+*            PHNCEV                                                    *
+*            PHNVEV                                                    *
+*            PIABTH                                                    *
+*            PIOABS                                                    *
+*            PIONUC                                                    *
+*            PMPRAB                                                    *
+*            PNOTIN                                                    *
+*            PONFIN                                                    *
+*            PPHCHO                                                    *
+*            PREPRE                                                    *
+*            RAKEKV                                                    *
+*            RSTSEL                                                    *
+*            ST2PAR                                                    *
+*            UMFNST                                                    *
+*            UMOFIN                                                    *
+*            USRSRN                                                    *
+*            WSTOAP                                                    *
+*            VPOAHY                                                    *
+*            VPOANC                                                    *
+*            VPOKAO                                                    *
+*            VPOKBA                                                    *
+*            VPOHYP                                                    *
+*            VPOPIO                                                    *
+*            XSNUNA                                                    *
+*                                                                      *
+*     Description of variables (incomplete):                           *
+*                                                                      *
+*             Icres = residual nucleus atomic number                   *
+*             Ibres = residual nucleus mass   number                   *
+*            Istres = residual nucleus stable   level index            *
+*            Ismres = residual nucleus isomeric state index            *
+*            Ihyres = residual nucleus hyperon number                  *
+*            Jspres = residual nucleus 2 x spin (hbar/2 units)         *
+*            Jprres = residual nucleus parity                          *
+*            Amnres = residual nucleus nuclear mass                    *
+*            Ammres = residual nucleus atomic  mass                    *
+*              Eres = residual nucleus total   energy                  *
+*             Ekres = residual nucleus kinetic energy                  *
+*         Px,y,zres = residual nucleus momentum components             *
+*            Ptres2 = residual nucleus squared momentum                *
+*            Angres = residual nucleus angular momentum (GeV/c fm)     *
+*        Anx,y,zres = residual nucleus angular momentum components     *
+*        Khyres(jp) = id of the jp_th hyperon in the residual nucleus  *
+*        Bhyres(jp) = (nuclear) binding energy of the jp_th hyperon    *
+*                     in the residual nucleus                          *
+*            Icestr = residual nucleus atomic number before evaporation*
+*            Ibestr = residual nucleus mass   number before evaporation*
+*            Tvestr = residual nucleus exc.   energy before evaporation*
+*            Anestr = residual nucleus ang. momentum before evaporation*
+*            Ichbln = charge balance counter                           *
+*                                                                      *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      LOGICAL LRNFSS, LFRAGM
+      COMMON /RESNUC/  AMNTAR, AMMTAR, AMNZM1, AMMZM1, AMNNM1, AMMNM1,
+     &                   ANOW,   ZNOW, ANCOLL, ZNCOLL, AMMLFT, AMNLFT,
+     &                   ERES,  EKRES, AMNRES, AMMRES,  PTRES,  PXRES,
+     &                  PYRES,  PZRES, PTRES2, ANGRES, ANXRES, ANYRES,
+     &                 ANZRES, TVESTR, ANESTR, BHYRES (IHYPMX),
+     &                  KTARP,  KTARN, IGREYP, IGREYN, IPDPM0, IPDPM1,
+     &                 IPREEH, IPRDEU, IPRTRI, IPR3HE, IPR4HE,  ICRES,
+     &                  IBRES, ISTRES, ISMRES, IHYRES, JSPRES, JPTRES,
+     &                 IEVAPL, IEVAPH, IEVPHO, IEVNEU, IEVPRO, IEVDEU,
+     &                 IEVTRI, IEV3HE, IEV4HE, IDEEXG,  IBTAR, ICHTAR,
+     &                 IBLEFT, ICLEFT, ICHBLN, ICESTR, IBESTR, IOTHER,
+     &                 KHYRES (IHYPMX), LRNFSS, LFRAGM
+      SAVE / RESNUC /
+

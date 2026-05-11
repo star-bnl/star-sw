@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION FLUixx
+      INTEGER IFLuct , NBINS
+ 
+ 
+      PARAMETER (NBINS=1000)
+      COMMON /DTXSFL/ FLUixx(NBINS) , IFLuct

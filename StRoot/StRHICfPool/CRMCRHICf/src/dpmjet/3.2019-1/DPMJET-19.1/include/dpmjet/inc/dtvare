@@ -1,0 +1,5 @@
+
+      DOUBLE PRECISION VARchi , VARclo , VARehi , VARelo
+ 
+ 
+      COMMON /DTVARE/ VARelo , VARehi , VARclo , VARchi

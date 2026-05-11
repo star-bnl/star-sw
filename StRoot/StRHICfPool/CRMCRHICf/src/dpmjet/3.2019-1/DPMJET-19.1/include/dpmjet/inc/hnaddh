@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION AMZ , GAZ , TAUz , WTZ
+      INTEGER IBArz , ICHz , II22 , K1Z , K2Z , NZK1 , NZK2 , NZK3
+ 
+ 
+      COMMON /HNADDH/ AMZ(16) , GAZ(16) , TAUz(16) , ICHz(16) , 
+     &                IBArz(16) , K1Z(16) , K2Z(16) , WTZ(153) , II22 , 
+     &                NZK1(153) , NZK2(153) , NZK3(153)

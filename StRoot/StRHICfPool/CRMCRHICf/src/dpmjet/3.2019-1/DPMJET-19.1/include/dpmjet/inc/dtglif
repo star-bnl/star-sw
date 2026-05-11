@@ -1,0 +1,6 @@
+
+      INTEGER INTer1 , INTer2 , JSSh , JTSh
+ 
+ 
+      COMMON /DTGLIF/ JSSh(maxncl) , JTSh(maxncl) , INTer1(maxint) , 
+     &                INTer2(maxint)

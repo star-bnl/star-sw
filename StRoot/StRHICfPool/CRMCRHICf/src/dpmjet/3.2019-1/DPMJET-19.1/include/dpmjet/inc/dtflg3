@@ -1,0 +1,5 @@
+
+      INTEGER IDIff , IDOubd , IFLagd , ISIngd
+ 
+ 
+      COMMON /DTFLG3/ ISIngd , IDOubd , IFLagd , IDIff

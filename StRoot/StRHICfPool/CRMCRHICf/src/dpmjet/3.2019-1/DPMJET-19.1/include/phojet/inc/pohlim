@@ -1,0 +1,6 @@
+
+ 
+ 
+      DOUBLE PRECISION ETAmi , ETAma , XXMi , XXMa
+      COMMON /POHLIM/ ETAmi(2,15) , ETAma(2,15) , XXMi(2,15) , 
+     &                XXMa(2,15)

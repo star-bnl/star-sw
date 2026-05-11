@@ -1,0 +1,7 @@
+
+      DOUBLE PRECISION EPSpol , RL2
+      INTEGER IDPdf , INTrge , ISHad , MODega
+ 
+ 
+      COMMON /DTVDMP/ RL2 , EPSpol , INTrge(2) , IDPdf , MODega , 
+     &                ISHad(3)

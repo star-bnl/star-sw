@@ -1,0 +1,8 @@
+
+ 
+ 
+      DOUBLE PRECISION SBOpom , SBOreg , SBOhar , SBOhad , SBOtr1 , 
+     &                 SBOtr2 , SBOlpo , SBOdpo
+      COMMON /POINT1/ SBOpom(0:4) , SBOreg(0:4) , SBOhar(0:4) , 
+     &                SBOhad(0:4) , SBOtr1(0:4,2) , SBOtr2(0:4,2) , 
+     &                SBOlpo(0:4) , SBOdpo(0:4,4)

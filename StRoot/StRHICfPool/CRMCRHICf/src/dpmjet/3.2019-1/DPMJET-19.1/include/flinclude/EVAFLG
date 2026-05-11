@@ -1,0 +1,185 @@
+*$ CREATE EVAFLG.ADD
+*COPY EVAFLG
+*
+*=== Evaflg ===========================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Copyright (C) 1996-2011      by    Alfredo Ferrari & Paola Sala  *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     EVAporation FLaGs:                                               *
+*                                                                      *
+*     Created on 04 november 1996  by    Alfredo Ferrari & Paola Sala  *
+*                                                   Infn - Milan       *
+*                                                                      *
+*     Last change on 01-Apr-11     by    Alfredo Ferrari               *
+*                                                                      *
+*                                                                      *
+*          Fdscst = multiplication factor for discrete state width     *
+*          Ilvmod = 1st level density model flag (T=0)                 *
+*          Jlvmod = 2nd level density model flag (T=oo)                *
+*          Loldev = logical flag for indicating for using the old      *
+*                   evaporation model rather than the new one          *
+*          Llvmod = logical flag for using Cook's modified pairing     *
+*                   energies                                           *
+*          Jsipfl = spin/parity effect flag                            *
+*          Imssfr = flag for selecting the empirical mass formula to   *
+*                   be used                                            *
+*          Jmssfr = flag for selecting the pairing correction inside   *
+*                   eexlvl                                             *
+*          Ievfss = flag for selecting the (high energy) fission model *
+*          Lufull = flag for full level density vs excitation energy   *
+*                   treatment                                          *
+*          Lnwlow = flag for flag for new low excitation treatment     *
+*          Lgmcmp = flag for activating gamma competition              *
+*          Lgdrft = flag for using the general GDR fit for gamma widths*
+*          Ldsclv = flag for activating approximate discrete level     *
+*                   widths for (massive) particle emission             *
+*          Ldscgm = flag for activating approximate discrete level     *
+*                   widths for gamma emission                          *
+*          Lasmen = flag for rejection against level density variations*
+*                   with energy, when possible                         *
+*          Lndsld = flag for neutron discrete level "sigma_inv" like   *
+*                   factor: .true. (Neutron DiScrete oLD way) => not   *
+*                   used                                               *
+*          Lmnjpr = flag for using minimal spin/parity information     *
+*                   (if available) even for jsipfl = 0                 *
+*          !!! Please note that the only spin/parity effects when   !!!*
+*          !!! Jsipfl=0 are those related with "ad hoc" assignments !!!*
+*          !!! which depend on spin/parity                          !!!*
+*          Lbrpen = flag for barrier penetrability                     *
+*          Lnwbrp = flag for new charged particle inverse cross        *
+*                   sections with reasonable subbarrier part           *
+*          Lifkey = flag for a last loop with the pairing zeroed       *
+*          Lflkco = flag for penetrability factors                     *
+*          Lnaipr = flag for naive (12/sqrt(A)) pairing                *
+*          Lguspr = flag for including the pairing or not when setting *
+*                   the U scale                                        *
+*          Loldsm = flag for old ("a la Dres") emission energy sampling*
+*          Lhvevp = flag for "heavy" evaporation                       *
+*          Lhvecn = flag for "heavy" evaporation into continuum        *
+*          Lhvcal = flag for alternative Coulomb barrier for heavies   *
+*          Lhvral = flag for alternative r0 for heavy inverse cross    *
+*                   sections                                           *
+*          Lhvsgf = flag for heavy inverse cross section using         *
+*                   r1^2 + r2^2                                        *
+*          Ltmcrr = flag for nuclear temperature corrections to barrier*
+*                   and inverse cross sections                         *
+*          Lbzzcr = flag for Coulomb barrier correction (lowering) as  *
+*                   a function of Z1 Z2 / Z^2                          *
+*          Lqcskp = flag for "quick" skipping of heavy evaporation when*
+*                   below threshold                                    *
+*          Lpexlv = flag for using experimental nuclear level informa- *
+*                   tions during cascade/preequilibrium stages         *
+*          Leexlv = flag for using experimental nuclear level informa- *
+*                   tions during evaporation                           *
+*          Lgexlv = flag for using experimental nuclear level informa- *
+*                   tions during gamma deexcitation                    *
+*          Mxahev = maximum A to be used for heavy evaporation if act- *
+*                   ivated                                             *
+*          Mxzhev = maximum Z to be used for heavy evaporation if act- *
+*                   ivated                                             *
+*                                                                      *
+*          Mpmode = flag for pairing:                                  *
+*                   Mpmode > 0 forces to use the same pairing used in  *
+*                            Geta and not the one coming from Eexlvl   *
+*         |Mpmode| =   0:   standard "old" Cameron pairing (CAM4, CAM5)*
+*         |Mpmode| = 1,2:   standard "old" Cameron pairing (CAM4, CAM5)*
+*         |Mpmode| = 3,4:   original Gilbert Cameron pairing           *
+*                          (Pngica,Pzgica)                             *
+*         |Mpmode| = 5,6:   Cook's modified Gilbert Cameron pairing    *
+*                          (Pncook,Pzcook)                             *
+*         |Mpmode| = 7,8:   new Gilbert Cameron pairing (Pnginw,Pzginw)*
+*                           from refitted mass formula                 *
+*         |Mpmode| =9,10:   new Gilbert Cameron pairing (Pngiex,Pzgiex)*
+*                           from refitted mass formula using the Eexlvl*
+*                           pairings when available                    *
+*         |Mpmode| =  11:   Standard 12/Sqrt(A) pairing                *
+*         |Mpmode| =  12:   Myers & Swiatecki pairing                  *
+*                                                                      *
+*          Msmode = flag for shell corrections:                        *
+*           Msmode =   0:   Cook's modified Gilbert Cameron shell      *
+*                           corrections (Szcook,Sncook)                *
+*           Msmode =   1:   standard "old" Cameron shell corr.         *
+*                          (Cmpspp-Cmppae,Cmnspp-Cmnpae)               *
+*           Msmode =   2:   shell corrections from the "old" Cameron   *
+*                           mass formula versus the actual mass        *
+*           Msmode =   3:   original Gilbert Cameron shell corrections *
+*                          (Szgica,Sngica)                             *
+*           Msmode =   4:   shell corrections from the original Gilbert*
+*                           and Cameron mass formula versus the actual *
+*                           mass                                       *
+*           Msmode =   5:   Cook's modified Gilbert Cameron shell      *
+*                           corrections (Szcook,Sncook)                *
+*           Msmode =   6:   shell corrections from the Cook's modified *
+*                           Gilbert and Cameron refitted mass formula  *
+*                           versus the actual mass                     *
+*           Msmode =   7:   new refitted Gilbert Cameron shell         *
+*                           corrections (Szginw,Snginw)                *
+*           Msmode =   8:   shell corrections from new Gilbert and     *
+*                           Cameron refitted mass formula versus the   *
+*                           actual mass                                *
+*           Msmode =   9:   new Gilbert Cameron shell corrections      *
+*                           from refitted mass formula using the Eexlvl*
+*                           pairings when available (Szgiex,Sngiex)    *
+*           Msmode =  10:   shell corrections from the Gilbert and     *
+*                           Cameron refitted mass formula using the    *
+*                           Eexlvl pairings versus the actual mass     *
+*           Msmode =  11:   new refitted Myers & Swiatecki shell corr- *
+*                           ections  (Szmysw,Snmysw)                   *
+*           Msmode =  12:   shell corrections from new Myers & Swiat-  *
+*                           ecki refitted mass formula versus the act- *
+*                           ual mass                                   *
+*           Msmode =  13:   Moller, Nix, Myers, Swiatecki shell correc-*
+*                           tions (Shllmn)                             *
+*           Msmode =  14:   Moller, Nix, Myers, Swiatecki shell correc-*
+*                           tions versus the actual mass               *
+*          Mumode = flag for self-consistent pairing in shell corr-    *
+*                   ections it makes sense only for Msmode=2,4,6,8,10, *
+*                   12,14                                              *
+*           Mumode =   0: no self-consistent pairing                   *
+*           Mumode =   1: self-consistent pairing (note that in some   *
+*                         situations, i.e. for Msmode = |Mpmode|)      *
+*          Mfmode = flag for fission (saddle point) level density      *
+*                   approach                                           *
+*          Memode = flag for fission (saddle point) pairing approach   *
+*          Mrmode = flag for fission fragment selection/production     *
+*          Itmcrr = i0 + i1*100                                        *
+*                   i0 = temperature correction type                   *
+*                   i1 = apply combined temperature and assymetry      *
+*                        corrections flag                              *
+*          Iasycr = asymmetry correction type (0=no correction)        *
+*          Ifsbcr = flag for correcting IMF emission barries so that   *
+*                   to blend them with fission barriers (0=no corr.)   *
+*          Ifssbr = flag for the fission barrier type of calculation   *
+*                   if0 + if1*100 + if2*10000                          *
+*                   if0 = 0: old, Atchinson like, fission barrier, not *
+*                            valid for Z > 88                          *
+*                       > 0: Myers and Swiatecki Thomas-Fermi fission  *
+*                            barrier                                   *
+*                   if1 = 0: no barrier transmission calculation       *
+*                       > 0: barrier transmission calculated           *
+*                   if2 = 0: no centrifugal barrier                    *
+*                       > 0: centrifugal barrier accounted for         *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      LOGICAL LOLDEV, LUFULL, LNWLOW, LASMEN, LGMCMP, LGDRFT, LDSCLV,
+     &        LDSCGM, LNDSLD, LMNJPR, LBRPEN, LNWBRP, LIFKEY, LOLDSM,
+     &        LNAIPR, LGUSPR, LFLKCO, LLVMOD, LHVEVP, LHVECN, LHVCAL,
+     &        LHVRAL, LHVSGF, LTMCRR, LBZZCR, LQCSKP, LPEXLV, LEEXLV,
+     &        LGEXLV
+      COMMON / EVAFLG /     BRPNFR (0:2), EBRPFR (0:2), EMVBRP (0:2),
+     &        FDSCST,
+     &        ILVMOD, JLVMOD, JSIPFL, IMSSFR, JMSSFR, IEVFSS, MXAHEV,
+     &        MXZHEV, IFHVFL, IFKYMX, IGMCMP, MPMODE, MSMODE, MUMODE,
+     &        MFMODE, MEMODE, MRMODE, ITMCRR, IASYCR, IFSBCR, IFSSBR,
+     &        LOLDEV, LUFULL, LNWLOW, LASMEN, LGMCMP, LGDRFT, LDSCLV,
+     &        LDSCGM, LNDSLD, LMNJPR, LBRPEN, LNWBRP, LIFKEY, LOLDSM,
+     &        LNAIPR, LGUSPR, LFLKCO, LLVMOD, LHVEVP, LHVECN, LHVCAL,
+     &        LHVRAL, LHVSGF, LTMCRR, LBZZCR, LQCSKP, LPEXLV, LEEXLV,
+     &        LGEXLV
+      SAVE / EVAFLG /
+

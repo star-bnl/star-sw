@@ -1,0 +1,10 @@
+
+ 
+ 
+      INTEGER MAX_PRO_3
+      PARAMETER (MAX_PRO_3=16)
+      COMPLEX*16 SIGp , SIGr , SIGhd , SIGhr , SIGt1 , SIGt2 , SIGl , 
+     &           SIGdp , SIGd1 , SIGd2 , DSIgh
+      COMMON /POSBRN/ SIGp , SIGr , SIGhd , SIGhr , SIGt1(2) , SIGt2(2)
+     &                , SIGl , SIGdp(4) , SIGd1(2) , SIGd2(2) , 
+     &                DSIgh(0:MAX_PRO_3)

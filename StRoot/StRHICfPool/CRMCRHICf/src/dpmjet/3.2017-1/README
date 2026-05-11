@@ -1,0 +1,27 @@
+
+                        DPMJET version 3.2017.1 (Apr. 2017) 
+                       ________________________________
+
+
+ This directory contains the following files:
+
+   dpmjet.f           DPMJET-III code version 2017.1 without interface to FLUKA
+   phojet.f           PHOJET code version 1.20
+   pythia-6427_cors.f PYTHIA code version 6.427
+   build.f            complementary code
+                    
+   dpmCT14LL.pds, glaubint.glb , glaubtar.glb      
+   dpmjpar.dat         data-files read by the program during initialization
+                    
+   License2.txt       license conditions
+
+ Please note:
+
+ All parts of the program code should be used only in the framework of
+ DPMJET. Any separate use of parts requires the agreement of the authors.
+
+ Please send suggestions / bug reports /questions to
+
+               anatoli.fedynitch@desy.de
+
+ The use of the software is subject to the enclosed license.

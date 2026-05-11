@@ -1,0 +1,8 @@
+
+      DOUBLE PRECISION PINipr , PINita , PRClpr , PRClta , 
+     &                 TRClpr , TRClta
+ 
+ 
+      LOGICAL LRClpr , LRClta
+      COMMON /DTRNU1/ PINipr(5) , PINita(5) , PRClpr(5) , PRClta(5) , 
+     &                TRClpr(5) , TRClta(5) , LRClpr , LRClta

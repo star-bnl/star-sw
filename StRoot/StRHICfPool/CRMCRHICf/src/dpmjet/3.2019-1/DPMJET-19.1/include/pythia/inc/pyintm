@@ -1,0 +1,12 @@
+cc ------------ dpmjet3.4 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc -------- phojet1.12-40 - authors: S.Roesler, R.Engel, J.Ranft -------
+cc                                                      - oct'13 -------
+cc ----------- pythia-6.4 - authors: Torbjorn Sjostrand, Lund'10 -------
+cc ---------------------------------------------------------------------
+cc                                  converted for use with FLUKA -------
+cc                                                      - oct'13 -------
+
+      COMMON/PYINTM/KFIVAL(2,3),NMI(2),IMI(2,800,2),NVC(2,-6:6),
+     &     XASSOC(2,-6:6,240),XPSVC(-6:6,-1:240),PVCTOT(2,-1:1),
+     &     XMI(2,240),PT2MI(240),IMISEP(0:240)
+      SAVE /PYINTM/

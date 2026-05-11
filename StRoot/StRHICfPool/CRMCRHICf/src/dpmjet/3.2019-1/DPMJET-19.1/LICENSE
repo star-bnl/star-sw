@@ -1,0 +1,92 @@
+This package consists of three individual codes: DPMJET, PHOJET and PYTHIA6.
+
+DPMJET and PHOJET
+-----------------
+
+BSD 3-Clause License
+
+Copyright (c) 2015-2019, Anatoli Fedynitch, Stefan Roesler and Ralph Engel
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Copyright information for Pythia 6:
+
+*********************************************************************
+*********************************************************************
+*                                                                  **
+*                                                       Dec 2012   **
+*                                                                  **
+*                       The Lund Monte Carlo                       **
+*                                                                  **
+*                        PYTHIA version 6.4                        **
+*                                                                  **
+*                        Torbjorn Sjostrand                        **
+*                 Department of Theoretical Physics                **
+*                         Lund University                          **
+*               Solvegatan 14A, S-223 62 Lund, Sweden              **
+*                    E-mail torbjorn@thep.lu.se                    **
+*                                                                  **
+*                  SUSY and Technicolor parts by                   **
+*                         Stephen Mrenna                           **
+*                       Computing Division                         ** 
+*            Generators and Detector Simulation Group              **
+*              Fermi National Accelerator Laboratory               **
+*                 MS 234, Batavia, IL  60510, USA                  **
+*                   phone + 1 - 630 - 840 - 2556                   **
+*                      E-mail mrenna@fnal.gov                      **
+*                                                                  **
+*         New multiple interactions and more SUSY parts by         **
+*                          Peter Skands                            **
+*               CERN/PH, CH-1211 Geneva, Switzerland               **
+*                    phone +41 - 22 - 767 2447                     **
+*                   E-mail peter.skands@cern.ch                    **
+*                                                                  **
+*         Several parts are written by Hans-Uno Bengtsson          **
+*          PYSHOW is written together with Mats Bengtsson          **
+*               PYMAEL is written by Emanuel Norrbin               **
+*     advanced popcorn baryon production written by Patrik Eden    **
+*    code for virtual photons mainly written by Christer Friberg   **
+*    code for low-mass strings mainly written by Emanuel Norrbin   **
+*        Bose-Einstein code mainly written by Leif Lonnblad        **
+*      CTEQ  parton distributions are by the CTEQ collaboration    **
+*      GRV 94 parton distributions are by Glueck, Reya and Vogt    **
+*   SaS photon parton distributions together with Gerhard Schuler  **
+*     g + g and q + qbar -> t + tbar + H code by Zoltan Kunszt     **
+*         MSSM Higgs mass calculation code by M. Carena,           **
+*           J.R. Espinosa, M. Quiros and C.E.M. Wagner             **
+*  UED implementation by M. Elkacimi, D. Goujdami, H. Przysiezniak **
+*         PYGAUS adapted from CERN library (K.S. Kolbig)           **
+*        NRQCD/colour octet production of onium by S. Wolf         **
+*                                                                  **
+*   The latest program version and documentation is found on WWW   **
+*            http://www.thep.lu.se/~torbjorn/Pythia.html           **
+*                                                                  **
+*              Copyright Torbjorn Sjostrand, Lund 2010             **
+*                                                                  **
+*********************************************************************
+********************************************************************* 

@@ -1,0 +1,19 @@
+
+      DOUBLE PRECISION BSLope , ECMnn , ECMnow , Q2 , Q2G , 
+     &     XEDel , XEDqe , XEEla , 
+     &     XEPro , XEQe2 , XEQep , XEQet , XETot , XSDel , XSDqe , 
+     &     XSEla , XSPro , XSQe2 , XSQep , XSQet
+      DOUBLE PRECISION XSTot
+      INTEGER NEBini , NQBini
+ 
+ 
+      COMMON /DTGLXS/ ECMnn(neb) , Q2G(nqb) , ECMnow , Q2 , 
+     &                XSTot(neb,nqb,ncompx) , XSEla(neb,nqb,ncompx) , 
+     &                XSQep(neb,nqb,ncompx) , XSQet(neb,nqb,ncompx) , 
+     &                XSQe2(neb,nqb,ncompx) , XSPro(neb,nqb,ncompx) , 
+     &                XSDel(neb,nqb,ncompx) , XSDqe(neb,nqb,ncompx) , 
+     &                XETot(neb,nqb,ncompx) , XEEla(neb,nqb,ncompx) , 
+     &                XEQep(neb,nqb,ncompx) , XEQet(neb,nqb,ncompx) , 
+     &                XEQe2(neb,nqb,ncompx) , XEPro(neb,nqb,ncompx) , 
+     &                XEDel(neb,nqb,ncompx) , XEDqe(neb,nqb,ncompx) , 
+     &                BSLope , NEBini , NQBini

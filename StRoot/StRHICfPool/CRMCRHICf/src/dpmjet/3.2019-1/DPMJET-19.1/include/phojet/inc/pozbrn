@@ -1,0 +1,10 @@
+
+ 
+ 
+      COMPLEX*16 ZIGp , ZIGr , ZIGhd , ZIGhr , ZIGt1 , ZIGt2 , ZIGl , 
+     &           ZIGdp , ZIGd1 , ZIGd2 , BPOm , BREg , BHAr , BHAd , 
+     &           BTR1 , BTR2 , BLOo , BDP , BD1 , BD2
+      COMMON /POZBRN/ ZIGp , ZIGr , ZIGhd , ZIGhr , ZIGt1(2) , ZIGt2(2)
+     &                , ZIGl , ZIGdp(4) , ZIGd1(2) , ZIGd2(2) , BPOm , 
+     &                BREg , BHAr , BHAd , BTR1(2) , BTR2(2) , BLOo , 
+     &                BDP(4) , BD1(2) , BD2(2)

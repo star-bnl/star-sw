@@ -1,0 +1,16 @@
+
+C Reggeon phenomenology parameters
+      DOUBLE PRECISION SALpom , SALpomp , SGP , SB0pom , SALreg , 
+     &                 SALregp , SGR , SB0reg , SGPpp , SGPpr , SB0ppp , 
+     &                 SB0ppr , SVDmfac , SVDmq2f , SB0har , SAKfac , 
+     &                 SPHisup , SRMass
+ 
+      COMMON /POSPRE/ SALpom(mparmax) , SALpomp(mparmax) , 
+     &                SGP(2,mparmax) , SB0pom(2,mparmax) , 
+     &                SALreg(mparmax) , SALregp(mparmax) , 
+     &                SGR(2,mparmax) , SB0reg(2,mparmax) , 
+     &                SGPpp(mparmax) , SGPpr(mparmax) , SB0ppp(mparmax)
+     &                , SB0ppr(mparmax) , SVDmfac(4,mparmax) , 
+     &                SVDmq2f(4,mparmax) , SB0har(mparmax) , 
+     &                SAKfac(mparmax) , SPHisup(2,mparmax) , 
+     &                SRMass(2,mparmax)

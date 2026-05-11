@@ -1,0 +1,6 @@
+
+      INTEGER INTer , LEPin
+ 
+ 
+      DOUBLE PRECISION RPPn
+      COMMON /LEPTOI/ RPPn , LEPin , INTer

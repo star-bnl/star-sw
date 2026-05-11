@@ -1,0 +1,13 @@
+
+      DOUBLE PRECISION EXCdpm , EXCeva
+      INTEGER NEVa , NEVafi , NEVaga , NEVaht , NEVahy , NINcco , 
+     &        NINcev , NINcge , NINchr , NINcst , NINcwo , NREsba , 
+     &        NREsch , NREsev , NREsnu , NREspb , NREspr , NREsto
+ 
+ 
+      COMMON /DTSTA2/ EXCdpm(4) , EXCeva(2) , NINcge , NINcco(2,3) , 
+     &                NINchr(2,2) , NINcwo(2) , NINcst(2,4) , NINcev(2)
+     &                , NREsto(2) , NREspr(2) , NREsnu(2) , NREsba(2) , 
+     &                NREspb(2) , NREsch(2) , NREsev(4) , NEVa(2,6) , 
+     &                NEVaga(2) , NEVaht(2) , NEVahy(2,2,240) , 
+     &                NEVafi(2,2)

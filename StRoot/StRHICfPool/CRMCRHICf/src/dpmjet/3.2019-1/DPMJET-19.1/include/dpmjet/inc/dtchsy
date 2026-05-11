@@ -1,0 +1,5 @@
+
+      INTEGER IPOsp , IPOst , ISKpch
+ 
+ 
+      COMMON /DTCHSY/ ISKpch(8,maxint) , IPOsp(maxncl) , IPOst(maxncl)

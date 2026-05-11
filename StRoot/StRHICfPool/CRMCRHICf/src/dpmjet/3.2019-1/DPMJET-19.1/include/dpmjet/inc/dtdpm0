@@ -1,0 +1,6 @@
+
+      INTEGER IFRosp , IFRost , IFRovp , IFRovt , ITOvp , ITOvt
+ 
+ 
+      COMMON /DTDPM0/ IFRovp(maxvqu) , ITOvp(maxvqu) , IFRosp(maxsqu) , 
+     &                IFRovt(maxvqu) , ITOvt(maxvqu) , IFRost(maxsqu)

@@ -1,0 +1,6 @@
+
+      REAL XPAnh , XPAnl , XPBeh , XPDir , XPVmd
+ 
+ 
+      COMMON /SASCOM/ XPVmd(-6:6) , XPAnl(-6:6) , XPAnh(-6:6) , 
+     &                XPBeh(-6:6) , XPDir(-6:6)

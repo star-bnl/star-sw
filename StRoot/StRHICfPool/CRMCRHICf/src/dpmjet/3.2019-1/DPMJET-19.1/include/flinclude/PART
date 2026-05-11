@@ -1,0 +1,125 @@
+*$ CREATE PART.ADD
+*COPY PART
+*
+*=== part =============================================================*
+*
+*----------------------------------------------------------------------*
+*                                                                      *
+*     Partial (extensions to the original one by the Leipzig group)    *
+*     Copyright (C) 1996-2011      by Alfredo Ferrari & Johannes Ranft *
+*     All Rights Reserved.                                             *
+*                                                                      *
+*                                                                      *
+*     Include file: part            Revised on 20-Aug-96 by A. Ferrari *
+*                                                                      *
+*     Last change   on   15-Mar-11     by       Alfredo Ferrari        *
+*                                                                      *
+*     Included in the following subroutines or functions:              *
+*                                                                      *
+*     W A R N I N G !!!! check also part2 for any change!!!            *
+*                                                                      *
+*     Description of the common block(s) and variable(s)               *
+*                                                                      *
+*             Am = particle mass (GeV/c^2)                             *
+*             Ga = particle width (GeV)                                *
+*            Tau = particle mean life (s)                              *
+*         Amdisc = "effective" particle mass for energy balance (GeV)  *
+*         Zmnabs = lower width (adimensional unit) to be used during   *
+*                  particle decay to assure that at least one decay    *
+*                  channel is physically open                          *
+*         Atnmna = atan (Zmnabs)                                       *
+*            Ich = particle electric charge                            *
+*           Ibar = particle baryon number                              *
+*         Isosym = index of the isospin reversed (T_z --> -T_z)        *
+*                  particle (if any, if 0 no such particle is available*
+*                  in the part listing)                                *
+*         Ichcon = index of the charge conjugated (antiparticle)       *
+*                  particle (if any, if 0 no such particle is available*
+*                  in the part listing)                                *
+*             K1 = index of first decay channel                        *
+*             K2 = index of last  decay channel                        *
+*         Kptoip = conversion from part to paprop numbering            *
+*         Iptokp = conversion from paprop to part numbering            *
+*         Kptoia = conversion from part to abltis numbering            *
+*         Iatokp = conversion from abltis to part numbering            *
+*         Idcflg = decay flag                                          *
+*         Iptype = particle type                                       *
+*                  -1: heavy fragments                                 *
+*                   0: unknown particle or lepton                      *
+*                   1: nucleon                                         *
+*                   2: antinucleon                                     *
+*                   3: pion                                            *
+*                   4: K+/K0                                           *
+*                  -4: Kshrt/Klong                                     *
+*                   5: K-/K0bar                                        *
+*                   6: Lamda/Sigma   (strangeness -1 hyperon)          *
+*                   7: Xsi           (strangeness -2 hyperon)          *
+*                   8: Omega         (strangeness -3 hyperon)          *
+*                   9: ALamda/ASigma (strangeness +1 antihyperon)      *
+*                  10: AXsi          (strangeness +2 antihyperon)      *
+*                  11: AOmega        (strangeness +3 antihyperon)      *
+*                  12: D+/D0                                           *
+*                  13: D-/D0bar                                        *
+*                  14: D_s+/D_s-                                       *
+*                  15: Lambda_c+                                       *
+*                  16: Xsi_c+/Xsi_c0                                   *
+*                  17: Xsi'_c+/Xsi'_c0                                 *
+*                  18: Omega_c                                         *
+*                  19: ALambda_c+                                      *
+*                  20: AXsi_c-/AXsi_c0                                 *
+*                  21: AXsi'_c-/AXsi'_c0                               *
+*                  22: AOmega_c                                        *
+*          Aname = particle literal name                               *
+*                                                                      *
+*----------------------------------------------------------------------*
+*
+      PARAMETER ( KPETA0 =  31 )
+      PARAMETER ( KPRHOP =  32 )
+      PARAMETER ( KPRHO0 =  33 )
+      PARAMETER ( KPRHOM =  34 )
+      PARAMETER ( KPOME0 =  35 )
+      PARAMETER ( KPPHI0 =  96 )
+      PARAMETER ( KPDEPP =  53 )
+      PARAMETER ( KPDELP =  54 )
+      PARAMETER ( KPDEL0 =  55 )
+      PARAMETER ( KPDELM =  56 )
+      PARAMETER ( KPN14P = 208 )
+      PARAMETER ( KPN140 = 209 )
+      PARAMETER ( KPK89P =  36 )
+      PARAMETER ( KPK890 =  37 )
+      PARAMETER ( KPK89M =  38 )
+      PARAMETER ( KPAK89 =  39 )
+      PARAMETER ( KPS13P = 104 )
+      PARAMETER ( KPS130 = 105 )
+      PARAMETER ( KPS13M = 106 )
+      PARAMETER ( KPXSI0 =  97 )
+      PARAMETER ( KPXSIM =  98 )
+*  Low mass diffraction partners:
+      PARAMETER ( KDETA0 =   0 )
+      PARAMETER ( KDRHOP =   0 )
+      PARAMETER ( KDRHO0 = 210 )
+      PARAMETER ( KDRHOM =   0 )
+      PARAMETER ( KDOME0 = 210 )
+      PARAMETER ( KDPHI0 = 210 )
+      PARAMETER ( KDDEPP =   0 )
+      PARAMETER ( KDDELP =   0 )
+      PARAMETER ( KDDEL0 =   0 )
+      PARAMETER ( KDDELM =   0 )
+      PARAMETER ( KDN14P =   0 )
+      PARAMETER ( KDN140 =   0 )
+*
+      CHARACTER*8  ANAME
+      COMMON / PART /  AM     (-6:IDMAXP), GA     (-6:IDMAXP),
+     &                 TAU    (-6:IDMAXP), AMDISC (-6:IDMAXP),
+     &                 ZMNABS (-6:IDMAXP), ATNMNA (-6:IDMAXP),
+     &                 ATXN14,     ATMN14, RNRN14    (-10:10),
+     &                 ICH    (-6:IDMAXP), IBAR   (-6:IDMAXP),
+     &                 ISOSYM (-6:IDMAXP), ICHCON (-6:IDMAXP),
+     &                 K1     (-6:IDMAXP), K2     (-6:IDMAXP),
+     &                 KPTOIP (-6:IDMAXP), IPTOKP (-6:NALLWP),
+     &                 KPTOIA (-6:IDMAXP), IATOKP (-6:MXPABL),
+     &                 IDCFLG (-6:NALLWP), IPTYPE (-6:NALLWP)
+      COMMON / CHPART / ANAME (-6:IDMAXP)
+      SAVE / PART /
+      SAVE / CHPART /
+

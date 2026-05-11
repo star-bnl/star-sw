@@ -1,0 +1,8 @@
+
+      INTEGER IDBam , IDCh , IDRes , IDXres , IHIst , NOBam , 
+     &        NPOint
+ 
+ 
+      COMMON /DTEVT2/ IDRes(nmxhkk) , IDXres(nmxhkk) , NOBam(nmxhkk) , 
+     &                IDBam(nmxhkk) , IDCh(nmxhkk) , NPOint(10) , 
+     &                IHIst(2,nmxhkk)

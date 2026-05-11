@@ -1,0 +1,15 @@
+
+ 
+ 
+      DOUBLE PRECISION XM_list , TAU_list , GAM_list , XM_psm2_list , 
+     &                 XM_vem2_list , XM_b82_list , XM_b102_list , 
+     &                 XM_bb82_list , XM_bb102_list
+      INTEGER ICH3_list , IBA3_list , IQ_list , ID_psm_list , 
+     &        ID_vem_list , ID_b8_list , ID_b10_list
+      COMMON /POPAR2/ XM_list(300) , TAU_list(300) , GAM_list(300) , 
+     &                XM_psm2_list(6,6) , XM_vem2_list(6,6) , 
+     &                XM_b82_list(6,6,6) , XM_b102_list(6,6,6) , 
+     &                XM_bb82_list(6,6,6,6) , XM_bb102_list(6,6,6,6) , 
+     &                ICH3_list(300) , IBA3_list(300) , IQ_list(3,300) , 
+     &                ID_psm_list(6,6) , ID_vem_list(6,6) , 
+     &                ID_b8_list(6,6,6) , ID_b10_list(6,6,6)
