@@ -1105,8 +1105,88 @@ void StGeant4Maker::FillGeant4StarTable(){
   g2t_geant4star_st cfg;
   memset(&cfg, 0, sizeof(g2t_geant4star_st));
   
+  cfg.is_geant4star = 1;
+  TString engineMode = SAttr("application:engine");
+  cfg.is_geant3_mode = (engineMode == "G3") ? 1 : 0;
+  cfg.is_multi_engine = (engineMode == "multi") ? 1 : 0;
+  strncpy(cfg.physics_list, SAttr("G4VmcOpt:Phys"), 31);
+  cfg.physics_list[31] = '\0';
+  strncpy(cfg.engine_mode, engineMode.Data(), 7);
+  cfg.engine_mode[7] = '\0';
+
+  // Physics cuts
+  cfg.cutgam = DAttr("cutgam");
+  cfg.cutele = DAttr("cutele");
+  cfg.cuthad = DAttr("cuthad");
+  cfg.cutneu = DAttr("cutneu");
+  cfg.cutmuo = DAttr("cutmuo");
+  cfg.bcute  = DAttr("bcute");
+  cfg.bcutm  = DAttr("bcutm");
+  cfg.dcute  = DAttr("dcute");
+  cfg.dcutm  = DAttr("dcutm");
+  cfg.ppcutm = DAttr("ppcutm");
+  cfg.tofmax = DAttr("tofmax");
+
+  // Physics process flags
+  cfg.pair = IAttr("pair");
+  cfg.comp = IAttr("comp");
+  cfg.phot = IAttr("phot");
+  cfg.pfis = IAttr("pfis");
+  cfg.dray = IAttr("dray");
+  cfg.anni = IAttr("anni");
+  cfg.brem = IAttr("brem");
+  cfg.hadr = IAttr("hadr");
+  cfg.munu = IAttr("munu");
+  cfg.dcay = IAttr("dcay");
+  cfg.loss = IAttr("loss");
+  cfg.muls = IAttr("muls");
+  cfg.ckov = IAttr("ckov");
+  cfg.rayl = IAttr("rayl");
+  cfg.labs = IAttr("labs");
+  cfg.sync = IAttr("sync");
+
+  // Magnetic field
   cfg.field = DAttr("field");
 
+  // Random seed
+  cfg.random_seed = IAttr("random:g4");
+
+  // Application limits
+  cfg.zmax = DAttr("application:zmax");
+  cfg.rmax = DAttr("application:rmax");
+
+  // Primary vertex
+  cfg.vertex_x      = DAttr("vertex:x");
+  cfg.vertex_y      = DAttr("vertex:y");
+  cfg.vertex_z      = DAttr("vertex:z");
+  cfg.vertex_sigmax = DAttr("vertex:sigmax");
+  cfg.vertex_sigmay = DAttr("vertex:sigmay");
+  cfg.vertex_sigmaz = DAttr("vertex:sigmaz");
+
+  // Stepping/Punchout options
+  cfg.punchout_stop = IAttr("stepping:punchout:stop");
+  cfg.punchout_rmin = DAttr("stepping:punchout:rmin");
+  cfg.punchout_zmin = DAttr("stepping:punchout:zmin");
+
+  // Scoring limits
+  cfg.scoring_rmax = DAttr("scoring:rmax");
+  cfg.scoring_zmax = DAttr("scoring:zmax");
+  cfg.scoring_emin = DAttr("scoring:emin");
+
+  // Multi-engine settings
+  strncpy(cfg.default_engine, SAttr("all:engine"), 3);
+  cfg.default_engine[3] = '\0';
+  strncpy(cfg.wcal_engine, SAttr("wcal:engine"), 3);
+  cfg.wcal_engine[3] = '\0';
+  strncpy(cfg.hcal_engine, SAttr("hcal:engine"), 3);
+  cfg.hcal_engine[3] = '\0';
+
+  // Embedding mode
+  cfg.embedding_mode = IAttr("embedding:mode");
+
+  // Run number
+  cfg.run_number = IAttr("runnumber");
+ 
   g2t_g4cfg->AddAt(&cfg);
   AddData(g2t_g4cfg);   
   LOG_INFO << "Filled geant4star configuration in g2t_geant4star table" << endm;

@@ -1,4 +1,79 @@
 struct g2t_geant4star {
-    /* test */
-    float     field; 
+    /* Physics engine and mode */
+    long      is_geant4star;       /* Always = 1 to indicate geant4star simulation */
+    long      is_geant3_mode;      /* 1 if running in G3 mode, 0 otherwise */
+    long      is_multi_engine;     /* 1 if running multi-engine G3/G4 mode */
+    char      physics_list[32];    /* Geant4 physics list name (e.g., "FTFP_BERT") */
+    char      engine_mode[8];      /* "G3", "G4", or "multi" */
+ 
+    /* Physics cuts (energy in GeV) */
+    float     cutgam;              /* Minimum photon energy for track propagation         */
+    float     cutele;              /* Minimum electron energy for track propagation       */
+    float     cuthad;              /* Minimum charged hadron energy for track propagation */
+    float     cutneu;              /* Minimum neutral hadron energy for track propagation */
+    float     cutmuo;              /* Minimum muon energy for track propagation           */
+    float     bcute;               /* Cut for electron brem             */
+    float     bcutm;               /* Cut for muon brem                 */
+    float     dcute;               /* Cut for electron delta rays       */
+    float     dcutm;               /* Cut for muon delta rays           */
+    float     ppcutm;              /* Cut for e+e- production by muons  */
+    float     tofmax;              /* Maximum time-of-flight for tracks */
+ 
+    /* Physics process flags (1=enabled, 0=disabled) */
+    long      pair;                       /* Enable/disable pair production           */
+    long      comp;                       /* Enable/disable compton scattering        */
+    long      phot;                       /* Enable/diable photoelectric effect       */
+    long      pfis;                       /* Enable/disable photo fission"            */
+    long      dray;                       /* Enable/disable delta rays                */
+    long      anni;                       /* Enable/disable positron annihilation     */
+    long      brem;                       /* Enable/disable bremstrahlung             */
+    long      hadr;                       /* Enable/disable hadronic interactions     */
+    long      munu;                       /* Enable/disable muon-nucleus interactions */
+    long      dcay;                       /* Enable/disable decays                    */
+    long      loss;                       /* Energy loss mode"                        */
+    long      muls;                       /* Multiple scattering                      */
+    long      ckov;                       /* Cherenkov radiation                      */
+    long      rayl;                       /* Rayleigh scattering                      */
+    long      labs;                       /* Absorption of ckov photons               */
+    long      sync;                       /* Synchrotron radiation                    */
+       
+    /* Magnetic field */
+    float     field;                      /* Magnetic field strength [kG] */
+ 
+    /* Random number seed */
+    long      random_seed;                /* RNG IS LISTNING */
+ 
+    /* Application limits (in cm) */
+    float     zmax;                /* Universe maximum z */
+    float     rmax;                /* Universe maximum radius */
+ 
+    /* Primary vertex */
+    float     vertex_x;            /* Primary vertex x [cm]     */
+    float     vertex_y;            /* Primary vertex y [cm]     */
+    float     vertex_z;            /* Primary vertex z [cm]     */
+    float     vertex_sigmax;       /* Primary vertex width [cm] */    
+    float     vertex_sigmay;       /* Primary vertex width [cm] */    
+    float     vertex_sigmaz;       /* Primary vertex width [cm] */    
+ 
+    /* Stepping/Punchout options (cm) */
+    long      punchout_stop;       /* Punchout action: 0=no action, 1=stop, 2=stop+reinject */
+    float     punchout_rmin;       /* Min radius for punchout logic */
+    float     punchout_zmin;       /* Min Z for punchout logic */
+ 
+    /* Scoring limits for truth tables */
+    float     scoring_rmax;        /* Maxium secondary production radius to enter truth tables */
+    float     scoring_zmax;        /* Maximum secondary production z to enter truth tables     */
+    float     scoring_emin;        /* Minimum secondary energy to enter truth tables           */
+ 
+    /* Multi-engine mode settings */
+    char      default_engine[4];   /* Default engine in multi-mode: "G3" or "G4" */
+    char      wcal_engine[4];      /* WCAL engine: "G3" or "G4" */
+    char      hcal_engine[4];      /* HCAL engine: "G3" or "G4" */
+ 
+    /* Embedding mode */
+    long      embedding_mode;      /* 0=off, otherwise embedding mode */
+ 
+    /* Run number */
+    long      run_number;          /* Run number from simulation */
 };
+ 

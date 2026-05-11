@@ -65,7 +65,7 @@ StMaker* g4star = 0;
 
 
 void my_particleGun( 
-      int nevents=2, 
+      int nevents=10, 
 		  const char* outname="particleGun.geant.root",
 		  int ntracks=1,
 		  double ptmn=2.0,
