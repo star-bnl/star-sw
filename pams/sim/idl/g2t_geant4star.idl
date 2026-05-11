@@ -1,0 +1,4 @@
+struct g2t_geant4star {
+    /* test */
+    float     field; 
+};
