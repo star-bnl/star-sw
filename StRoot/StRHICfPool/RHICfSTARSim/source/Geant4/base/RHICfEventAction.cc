@@ -109,7 +109,9 @@ void RHICfEventAction::EndOfEventAction(const G4Event* evt)
     bool isType1Pi0Trigger = IsType1Pi0Trigger();
     bool isHighEMTrigger = IsHighEMTrigger();
 
-    if(!isShowerTrigger && !isType1Pi0Trigger && !isHighEMTrigger){return;} // Not triggered
+    if(fSimOpt->GetOptBool("SAVETRIGEVENT")){
+        if(!isShowerTrigger && !isType1Pi0Trigger && !isHighEMTrigger){return;} // Not triggered
+    }
     if(isShowerTrigger){fSimEvent -> SetIsShowerTrigger();}
     if(isType1Pi0Trigger){fSimEvent -> SetIsType1Pi0Trigger();}
     if(isHighEMTrigger){fSimEvent -> SetIsHighEMTrigger();}

@@ -76,6 +76,15 @@ Input options can be inserted as two types, argument, and text file.
         * **TL**
         * **TOP**
 
+* **-s** (Saved with triggered event)
+
+    * Default can be saved with all events
+
+    * Available mode
+
+        * **TRUE** (Save only RHICf detecter triggered event)
+        * **FALSE** (Default)
+
 * **-g** (geometry directory)
 
     * Path the simulation detector geometry (GDML format) directory path

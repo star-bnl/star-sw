@@ -35,6 +35,7 @@ void RHICfSimOptions::Init()
     mRequiredPar.push_back(make_pair("r", "runtype")); // RHICf run tpye : TS, TL, TOP
     mRequiredPar.push_back(make_pair("g", "geometrydir")); // Geometry dir path
     mRequiredPar.push_back(make_pair("t", "tabledir")); // Table dir path
+    mRequiredPar.push_back(make_pair("s", "savetrigevent")); // saved only triggered event
 }
 
 void RHICfSimOptions::SetInputOption(int num,char** par)
@@ -61,6 +62,10 @@ void RHICfSimOptions::SetInputOption(int num,char** par)
             }
             if(requiredParName == "tabledir"){
                 AddOpt(requiredParName, GetDirPath(requiredParName));
+            }
+            if(requiredParName == "savetrigevent"){
+                AddOpt(requiredParName, bool(false));
+                cout << "RHICfSimOptions::SetInputOption() -- savetrigevent is to be FALSE. It can saved all event (non-triggered event)" << endl;
             }
             if(requiredParName == "mode"){
                 AddOpt(requiredParName, TString("STARSIM"));
