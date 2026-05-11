@@ -1108,7 +1108,7 @@ void StGeant4Maker::FillGeant4StarTable(){
   cfg.field = DAttr("field");
 
   g2t_g4cfg->AddAt(&cfg);
-  AddData(g2t_g4cfg);
+  AddData(g2t_g4cfg);   
   LOG_INFO << "Filled geant4star configuration in g2t_geant4star table" << endm;
 }
 //________________________________________________________________________________________________
