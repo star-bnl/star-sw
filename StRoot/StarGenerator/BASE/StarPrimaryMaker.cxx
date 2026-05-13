@@ -96,10 +96,10 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   SetAttr("ZMIN",   -999.0); SetAttr("ZMAX",    999.0);
 
   SetAttr("XVERTEX", 0.0 ); SetAttr("YVERTEX", 0.0); SetAttr("ZVERTEX", 0.0);
-  SetAttr("XSIGMA",  0.01); SetAttr("YSIGMA", 0.01); SetAttr("ZSIGMA", 15.0);  SetAttr("XYSIGMA", 0.0);
+  SetAttr("XSIGMA",  0.01); SetAttr("YSIGMA", 0.01); SetAttr("ZSIGMA", 15.0);  SetAttr("XYRHO", 0.0);
 
   SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
-  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYSIGMA") );
+  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYRHO") );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ Int_t StarPrimaryMaker::Init()
 	   DAttr("ZMIN"),   DAttr("ZMAX") );
 
   SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
-  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYSIGMA") );
+  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYRHO") );
 
   //
   // Initialize runtime flags
