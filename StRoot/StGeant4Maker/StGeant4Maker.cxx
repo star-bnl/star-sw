@@ -997,8 +997,6 @@ int StGeant4Maker::InitRun( int /* run */ ){
 
   gGeoManager = mGeometry;
   
-  FillGeant4StarTable();
-  
   return result;
 }
 //________________________________________________________________________________________________
@@ -1263,6 +1261,8 @@ int StGeant4Maker::Make() {
   LOG_INFO << "N tracks   = " << g2t_track_table->GetNRows() << endm;
 
   gGeoManager = mGeometry;
+
+  FillGeant4StarTable();
 
   return result; 
 }
