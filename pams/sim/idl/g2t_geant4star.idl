@@ -1,3 +1,22 @@
+/* $Id: g2t_geant4star.idl,v 1.0 2026/05/13  yelfeky $
+ * $Log$
+ *
+ * g2t_geant4star.idl - Configuration table for geant4star simulation
+ *
+ * This table persists the geant4star configuration parameters in the output
+ * .geant.root file. Downstream makers can check for its presence to distinguish
+ * geant4star simulations from legacy starsim simulations.
+ *
+ * If g2t_geant4star is present in the geant.root file:
+ *     - Simulation was run with geant4star
+ *     - Configuration parameters can be accessed from this table
+ *
+ * If g2t_geant4star is absent:
+ *     - Simulation was run with starsim
+ *     - Use default/legacy configuration values
+ *
+ */
+
 struct g2t_geant4star {
     /* Physics engine and mode */
     long      is_geant4star;       /* Always = 1 to indicate geant4star simulation */
