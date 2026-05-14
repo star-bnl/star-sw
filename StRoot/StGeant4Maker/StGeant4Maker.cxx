@@ -950,7 +950,7 @@ int StGeant4Maker::InitRun( int /* run */ ){
     InitVmcApp();
   }
 
-  gGeoManager = mGeometryG4;
+  gGeoManager = mGeometryG4; assert(gGeoManager);
 
   auto result = kStOK;
 
