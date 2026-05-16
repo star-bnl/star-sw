@@ -19,11 +19,11 @@
 
 struct g2t_geant4star {
     /* Physics engine and mode */
-    long      is_geant4star;       /* Always = 1 to indicate geant4star simulation */
-    long      is_geant3_mode;      /* 1 if running in G3 mode, 0 otherwise */
-    long      is_multi_engine;     /* 1 if running multi-engine G3/G4 mode */
-    char      physics_list[32];    /* Geant4 physics list name (e.g., "FTFP_BERT") */
-    char      engine_mode[8];      /* "G3", "G4", or "multi" */
+    char      application_engine[6]; /* Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode */
+    char      all_engine[6];         /* In multi-engine mode, selects the default engine for all subsystems */
+    char      wcal_engine[6];        /* WCAL engine: "G3" or "G4" */
+    char      hcal_engine[6];        /* HCAL engine: "G3" or "G4" */
+    char      physics_list[32];      /* Geant4 physics list name (e.g., "FTFP_BERT") */
  
     /* Physics cuts (energy in GeV) */
     float     cutgam;              /* Minimum photon energy for track propagation         */
@@ -41,7 +41,7 @@ struct g2t_geant4star {
     /* Physics process flags (1=enabled, 0=disabled) */
     long      pair;                       /* Enable/disable pair production           */
     long      comp;                       /* Enable/disable compton scattering        */
-    long      phot;                       /* Enable/diable photoelectric effect       */
+    long      phot;                       /* Enable/disable photoelectric effect      */
     long      pfis;                       /* Enable/disable photo fission"            */
     long      dray;                       /* Enable/disable delta rays                */
     long      anni;                       /* Enable/disable positron annihilation     */
@@ -83,12 +83,7 @@ struct g2t_geant4star {
     float     scoring_rmax;        /* Maxium secondary production radius to enter truth tables */
     float     scoring_zmax;        /* Maximum secondary production z to enter truth tables     */
     float     scoring_emin;        /* Minimum secondary energy to enter truth tables           */
- 
-    /* Multi-engine mode settings */
-    char      default_engine[4];   /* Default engine in multi-mode: "G3" or "G4" */
-    char      wcal_engine[4];      /* WCAL engine: "G3" or "G4" */
-    char      hcal_engine[4];      /* HCAL engine: "G3" or "G4" */
- 
+  
     /* Embedding mode */
     long      embedding_mode;      /* 0=off, otherwise embedding mode */
  
