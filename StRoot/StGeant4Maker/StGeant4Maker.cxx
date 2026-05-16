@@ -1103,14 +1103,23 @@ void StGeant4Maker::FillGeant4StarTable(){
   g2t_geant4star_st cfg;
   memset(&cfg, 0, sizeof(g2t_geant4star_st));
   
-  cfg.is_geant4star = 1;
-  TString engineMode = SAttr("application:engine");
-  cfg.is_geant3_mode = (engineMode == "G3") ? 1 : 0;
-  cfg.is_multi_engine = (engineMode == "multi") ? 1 : 0;
-  strncpy(cfg.physics_list, SAttr("G4VmcOpt:Phys"), 31);
-  cfg.physics_list[31] = '\0';
-  strncpy(cfg.engine_mode, engineMode.Data(), 7);
-  cfg.engine_mode[7] = '\0';
+  auto copy_engine = [](char* dest, size_t dest_size, const char* src) {
+    if (!dest || dest_size == 0) return;
+    if (!src || src[0] == '\0') {
+      dest[0] = '\0';
+      return;
+    }
+    std::string src_str(src);
+    size_t copy_len = std::min(src_str.length(), dest_size - 1);
+    src_str.copy(dest, copy_len);
+    dest[copy_len] = '\0';
+  };
+  
+  copy_engine(cfg.application_engine, sizeof(cfg.application_engine), SAttr("application:engine"));
+  copy_engine(cfg.all_engine,         sizeof(cfg.all_engine),         SAttr("all:engine"));
+  copy_engine(cfg.wcal_engine,        sizeof(cfg.wcal_engine),        SAttr("wcal:engine"));
+  copy_engine(cfg.hcal_engine,        sizeof(cfg.hcal_engine),        SAttr("hcal:engine"));
+  copy_engine(cfg.physics_list,       sizeof(cfg.physics_list),       SAttr("G4VmcOpt:Phys"));
 
   // Physics cuts
   cfg.cutgam = DAttr("cutgam");
@@ -1170,14 +1179,6 @@ void StGeant4Maker::FillGeant4StarTable(){
   cfg.scoring_rmax = DAttr("scoring:rmax");
   cfg.scoring_zmax = DAttr("scoring:zmax");
   cfg.scoring_emin = DAttr("scoring:emin");
-
-  // Multi-engine settings
-  strncpy(cfg.default_engine, SAttr("all:engine"), 3);
-  cfg.default_engine[3] = '\0';
-  strncpy(cfg.wcal_engine, SAttr("wcal:engine"), 3);
-  cfg.wcal_engine[3] = '\0';
-  strncpy(cfg.hcal_engine, SAttr("hcal:engine"), 3);
-  cfg.hcal_engine[3] = '\0';
 
   // Embedding mode
   cfg.embedding_mode = IAttr("embedding:mode");
