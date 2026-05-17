@@ -89,7 +89,7 @@ Int_t StFttClusterPointMaker::Make() {
         mFttCollection=mEvent->fttCollection(); //get the ftt collection from the event and make sure it exists
 
         MakeGeantPoints(); // act as a slow-sim
-
+        printf( "Finished making geant points \n" );
         return kStOk;
     }
 
@@ -99,11 +99,14 @@ Int_t StFttClusterPointMaker::Make() {
     if(!mFttCollection) { return kStOk; }
 
     mFttDb = static_cast<StFttDb*>(GetDataSet("fttDbMkr")); //get the ftt database
-    assert(mFttDb);
+    if ( !mFttDb ) {
+        LOG_ERROR << "StFttClusterPointMaker::Make() - fttDbMkr dataset not found, cannot continue" << endm;
+        return kStErr;
+    }
 
     //clear cluster vector
-    for (int i = 0; i<16; i++) {
-        for (int j = 0; j<4; j++) {
+    for (size_t i = 0; i < StFttDb::nRob; i++) {
+        for (size_t j = 0; j < StFttDb::nStripOrientations; j++) {
             clustersPerRob[i][j].clear();
         }
     }
@@ -112,16 +115,22 @@ Int_t StFttClusterPointMaker::Make() {
     for ( StFttCluster* clu : mFttCollection->clusters() ) {
         // group clusters by rob (1-16, 4 quadrants of 4 sTGC planes) and strip orientation
         UChar_t rob = mFttDb->rob( clu );
+        UChar_t orient = clu->orientation();
         if (mDebug){
             LOG_INFO << "rob = " << (int)rob << endm;
-            LOG_INFO << "direction = " << (int)clu->orientation() << endm;
+            LOG_INFO << "direction = " << (int)orient << endm;
             LOG_INFO << "cluster x = " << clu->x() << endm;
         }
-        clustersPerRob[ (int)rob ][ clu->orientation() ].push_back( clu );
+        if ( rob >= StFttDb::nRob || orient >= StFttDb::nStripOrientations ) {
+            LOG_WARN << "StFttClusterPointMaker: out-of-range rob=" << (int)rob
+                     << " orientation=" << (int)orient << ", skipping cluster" << endm;
+            continue;
+        }
+        clustersPerRob[ rob ][ orient ].push_back( clu );
     } // loop on cluster
 
     //loop over rob and make local points
-    for (int i = 0; i < 16; i++) {
+    for (size_t i = 0; i < StFttDb::nRob; i++) {
         if (mDebug){
             LOG_INFO << "Now at ROB " << i << endm;
             LOG_INFO << "nCluster kFttVertical = " << clustersPerRob[ i ][ kFttVertical ].size() << endm; //vertical is vertical strips, clusters_x
@@ -229,7 +238,7 @@ void StFttClusterPointMaker::MakeLocalPoints(UChar_t Rob) {
         double x_prime = clu_dx->x();
         double y_prime = clu_dx->maxStripLength()/2.; //needs to be + or - depending on row 3 or row 4
         if (clu_dx->row() == 3) {y_prime = -y_prime;}
-        if (clu_dx->row() == 4) {y_prime = y_prime;}
+        // row 4 keeps positive y_prime
 
         double xvar_prime = (clu_dx->sigma())*(clu_dx->sigma());
         double yvar_prime = clu_dx->maxStripLength()*clu_dx->maxStripLength()/12.;
@@ -268,7 +277,7 @@ void StFttClusterPointMaker::MakeLocalPoints(UChar_t Rob) {
 
         double x_prime = clu_dy->x();
         double y_prime = clu_dy->maxStripLength()/2.;
-        if (clu_dy->row() == 3) {y_prime = y_prime;}
+        // row 3 keeps positive y_prime
         if (clu_dy->row() == 4) {y_prime = -y_prime;}
 
         double xvar_prime = (clu_dy->sigma())*(clu_dy->sigma());
@@ -295,16 +304,18 @@ void StFttClusterPointMaker::MakeLocalPoints(UChar_t Rob) {
 
         point->setQuadrant( clu_dy->quadrant() );
         point->setPlane( clu_dy->plane() );
-        point->addCluster(clu_dy,kFttDiagonalV);
+        point->addCluster(clu_dy,kFttDiagonalH);
 
         mFttCollection->addPoint(point);
     }
 }
 
 void StFttClusterPointMaker::MakeGlobalPoints() {
+    LOG_INFO << "Making global points" << endm;
     for ( StFttPoint * p : mFttCollection->points() ){
-        if (mDebug && !p) {
-            LOG_INFO << "Point is NULL" << endm;
+        if (!p) {
+            if (mDebug) {LOG_WARN << "StFttClusterPointMaker::MakeGlobalPoints - null point, skipping" << endm;}
+            continue;
         }
         float x=p->x(); float y=p->y(); float z=0; //local coordinates
         float dx = 0, dy = 0, dz = 0; //offset to global coordiantes
@@ -359,6 +370,7 @@ void StFttClusterPointMaker::MakeGeantPoints() {
     std::map<std::pair<int, int>, int> track_vol_count;
     std::vector<std::vector<float>> covMatrix(2,std::vector<float>(2,0));
     for (int i = 0; i < geantFtt->GetNRows(); i++) {
+        printf( "Processing geant hit %d/%d \n", i, geantFtt->GetNRows() );
         g2t_fts_hit_st *git = (g2t_fts_hit_st *)geantFtt->At(i);
         if (!git)
             continue; // invalid geant hit
@@ -387,7 +399,11 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         float y = git->x[1];// + gRandom->Gaus(0, sigXY); // 100 micron blur according to approx sTGC reso
         float z = git->x[2];
 
-        
+        LOG_INFO << "Geant hit: track_id=" << track_id << " volume_id=" << volume_id
+                 << " plane_id=" << plane_id << " quadrant_id=" << quadrant_id
+                 << " orientation=" << orientation
+                 << " x=" << x << " y=" << y << " z=" << z
+                 << endm;
         auto point = new StFttPoint();
         point->setPlane(plane_id);
         point->setQuadrant(quadrant_id); // 0-3 for 4 quadrants
@@ -395,6 +411,7 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         // point->setXYZ(StThreeVectorD(x, y, z));
         const double sigXY = 0.01; // 100 microns in cm, this is sigma in cluster measurement direction
         const double stripLength = 15.0; // cm, approximate length of the strip
+        LOG_INFO << "Simulated point before smearing: x=" << x << " y=" << y << endm;
         if ( orientation == 0 ) { // vertical strips
             // 100 microns in cms = 0.01 cm
             covMatrix[0][0] = sigXY * sigXY; // sigma^2 for x
@@ -423,7 +440,8 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         mFttCollection->addPoint(point);
 
     } // loop on hits
-    
+    printf( "Total geant hits: %d, unique track/volume hits: %lu \n", geantFtt->GetNRows(), track_vol_count.size() );
+    LOG_INFO << "Total unique track/volume hits: " << track_vol_count.size() << endm;
     // for ( auto kv : track_vol_count ){
     //     printf( "track=%d, vol=%d => count = %d\n", kv.first.first, kv.first.second, kv.second);
     // }
