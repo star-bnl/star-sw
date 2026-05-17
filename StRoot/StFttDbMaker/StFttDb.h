@@ -56,12 +56,13 @@ public:
     uint16_t packVal( int row, int strip ) const;
     void unpackVal( int val, int &row, int &strip ) const;
     void loadHardwareMapFromFile( std::string fn );
-    bool loadStripCenterFromFile( std::string fn );
-    bool loadStripEdgeFromFile( std::string fn );
-    bool loadStripLengthFromFile( std::string fn );
     void loadHardwareMapFromDb( St_fttHardwareMap * );
     void loadDataWindowsFromFile( std::string fn );
     void loadDataWindowsFromDb( St_fttDataWindowsB * );
+
+    // FTT was retired with fixed hardware geometry; strip center/edge/length
+    // tables below are compiled-in constants populated by initStripGeometry().
+    void initStripGeometry();
 
 
     UChar_t plane( StFttRawHit * hit );

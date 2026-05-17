@@ -38,15 +38,9 @@ int StFttDbMaker::Make(){
 int StFttDbMaker::InitRun(int runNumber) {
   LOG_INFO << "StFttDbMaker::InitRun - run = " << runNumber << endm;
 
-    // mFttDb->loadHardwareMapFromFile( "StRoot/StFttDbMaker/vmm_map.dat" );
-    mFttDb->loadStripCenterFromFile( "StRoot/StFttDbMaker/Row1.txt" );
-    mFttDb->loadStripEdgeFromFile(   "StRoot/StFttDbMaker/Row4_edge.txt" );
-    mFttDb->loadStripCenterFromFile( "StRoot/StFttDbMaker/Row4.txt" );
-    mFttDb->loadStripLengthFromFile( "StRoot/StFttDbMaker/Row1_StripLength.txt" );
-    mFttDb->loadStripLengthFromFile( "StRoot/StFttDbMaker/Row2_StripLength.txt" );
-    mFttDb->loadStripLengthFromFile( "StRoot/StFttDbMaker/Row3_StripLength.txt" );
-    mFttDb->loadStripLengthFromFile( "StRoot/StFttDbMaker/Row4_StripLength.txt" );
-    mFttDb->loadStripLengthFromFile( "StRoot/StFttDbMaker/Row5_StripLength.txt" );
+    // Strip geometry (centers / edges / lengths) for the retired FTT hardware
+    // is compiled into StFttDb and loaded in its constructor — no external
+    // text files are required.
 
     std::ifstream file("vmm_map.dat");
     if(file.is_open()){ // debugging / calibration only
