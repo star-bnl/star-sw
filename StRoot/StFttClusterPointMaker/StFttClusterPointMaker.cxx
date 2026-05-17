@@ -89,7 +89,6 @@ Int_t StFttClusterPointMaker::Make() {
         mFttCollection=mEvent->fttCollection(); //get the ftt collection from the event and make sure it exists
 
         MakeGeantPoints(); // act as a slow-sim
-        printf( "Finished making geant points \n" );
         return kStOk;
     }
 
@@ -370,7 +369,6 @@ void StFttClusterPointMaker::MakeGeantPoints() {
     std::map<std::pair<int, int>, int> track_vol_count;
     std::vector<std::vector<float>> covMatrix(2,std::vector<float>(2,0));
     for (int i = 0; i < geantFtt->GetNRows(); i++) {
-        printf( "Processing geant hit %d/%d \n", i, geantFtt->GetNRows() );
         g2t_fts_hit_st *git = (g2t_fts_hit_st *)geantFtt->At(i);
         if (!git)
             continue; // invalid geant hit
@@ -381,8 +379,8 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         track_vol_count[ std::make_pair(track_id, volume_id) ] += 1;
 
         if ( track_vol_count[ std::make_pair(track_id, volume_id) ] > 1 ) {
-            printf( "Skipping hit on same track/vol \n" );
-            continue; // skip hits from the same track on the same volume, since we are treating them as clusters and don't want to double count
+            // skip hits from the same track on the same volume
+            continue;
         }
         int plane_id = (volume_id - 1) / 100;           // from 1 - 16. four chambers per station
         // extract tens (10, 20, 30, 40) and units (0-9) from volume_id
@@ -399,11 +397,6 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         float y = git->x[1];// + gRandom->Gaus(0, sigXY); // 100 micron blur according to approx sTGC reso
         float z = git->x[2];
 
-        LOG_INFO << "Geant hit: track_id=" << track_id << " volume_id=" << volume_id
-                 << " plane_id=" << plane_id << " quadrant_id=" << quadrant_id
-                 << " orientation=" << orientation
-                 << " x=" << x << " y=" << y << " z=" << z
-                 << endm;
         auto point = new StFttPoint();
         point->setPlane(plane_id);
         point->setQuadrant(quadrant_id); // 0-3 for 4 quadrants
@@ -411,7 +404,6 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         // point->setXYZ(StThreeVectorD(x, y, z));
         const double sigXY = 0.01; // 100 microns in cm, this is sigma in cluster measurement direction
         const double stripLength = 15.0; // cm, approximate length of the strip
-        LOG_INFO << "Simulated point before smearing: x=" << x << " y=" << y << endm;
         if ( orientation == 0 ) { // vertical strips
             // 100 microns in cms = 0.01 cm
             covMatrix[0][0] = sigXY * sigXY; // sigma^2 for x
@@ -440,8 +432,6 @@ void StFttClusterPointMaker::MakeGeantPoints() {
         mFttCollection->addPoint(point);
 
     } // loop on hits
-    printf( "Total geant hits: %d, unique track/volume hits: %lu \n", geantFtt->GetNRows(), track_vol_count.size() );
-    LOG_INFO << "Total unique track/volume hits: " << track_vol_count.size() << endm;
     // for ( auto kv : track_vol_count ){
     //     printf( "track=%d, vol=%d => count = %d\n", kv.first.first, kv.first.second, kv.second);
     // }
