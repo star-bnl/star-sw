@@ -10,7 +10,7 @@
 // Utility class for evaluating ID and QA truth
 struct MCTruthUtils {
 
-    static int dominantContribution(Seed_t hits, double &qa) {
+    static int dominantContribution(const Seed_t &hits, double &qa) {
         // track_id, hits on track
         std::unordered_map<int,int> truth;
         for ( auto hit : hits ) {
@@ -158,12 +158,14 @@ public:
         set( seed, track );
     }
     ~GenfitTrackResult(){
-        // Clear();
+        Clear();
     }
     void Clear() {
         if ( mTrack ){
-            mTrack->Clear();
-            mTrack.reset(); // inform the shared pointer to release the memory
+            // Only clear the genfit::Track internals if we are the sole owner
+            if ( mTrack.use_count() == 1 )
+                mTrack->Clear();
+            mTrack.reset();
         }
     }
     void set(   Seed_t &seeds, std::shared_ptr<genfit::Track> track ){
