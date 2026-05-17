@@ -43,7 +43,7 @@ void DoOnlyGlobalTrackFitting() {
 }
 
 void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw/Jet_Data_NoFilter_500/pythia_jet_vz0_run100.fzd",
-            int n = 100 // nEvents to run
+            int n = 1000 // nEvents to run
         ) {
     // report all of the parameters passed in
     cout << "inFile = " << inFile << endl;

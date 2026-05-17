@@ -24,32 +24,32 @@
 // bool runFitQa = true;
 
 // Tracking without FCS (but with DB)
-bool runDb = true;
-bool runFttChain = true;
-bool runFcsChain = false; 
-bool runFwdChain = true;
-bool refillMuDst = false;
-bool runFwdQa = false;
-bool runFitQa = false;
-bool runPico = true;
-
-
-// Memory Baseline
-// bool runDb = false;
+// bool runDb = true;
 // bool runFttChain = true;
-// bool runFcsChain = false;
-// bool runFwdChain = false;
+// bool runFcsChain = true; 
+// bool runFwdChain = true;
 // bool refillMuDst = false;
 // bool runFwdQa = false;
 // bool runFitQa = false;
 // bool runPico = true;
+
+
+// Memory Baseline
+bool runDb = false;
+bool runFttChain = false;
+bool runFcsChain = false;
+bool runFwdChain = false;
+bool refillMuDst = false;
+bool runFwdQa = false;
+bool runFitQa = false;
+bool runPico = true;
 
 #include "StMemStat.h"
 
 
 void loadLibs();
 void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 100 ){
+						size_t nEvents = 50 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: " << nEvents << endl;
 
@@ -85,6 +85,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	/*******************************************************************************************/
 	// Create the StMuDst2StEventMaker
     StMuDst2StEventMaker * mu2ev = new StMuDst2StEventMaker();
+	mu2ev->setActive(true);   // bisection: skip createStEvent() to test if leak is here
 	/*******************************************************************************************/
 
 	/*******************************************************************************************/
@@ -101,6 +102,9 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	// FTT chain
 	if (runFttChain){
 		gSystem->Load("libStFttDbMaker.so");
+		gSystem->Load("libStFttHitCalibMaker.so");
+		gSystem->Load("libStFttClusterMaker.so");
+		gSystem->Load("libStFttClusterPointMaker.so");
 		StFttDbMaker * fttDbMk = new StFttDbMaker();
 		chain->AddMaker(fttDbMk);
 		StFttHitCalibMaker * ftthcm = new StFttHitCalibMaker();
