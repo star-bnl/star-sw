@@ -16,6 +16,7 @@
 
 StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self) : StMaker(self) {
   mStEvent =0;
+  mActive = true;
   //cout << "StMuDst2StEventMaker::StMuDst2StEventMaker : constructor with args called" << endl;
   //cout << "                      muDstMakerName           " << muDstMakerName << endl;
   //cout << "                      self                     " << self << endl;
@@ -32,9 +33,16 @@ void StMuDst2StEventMaker::Clear(const char*) {
     mStEvent =0;
 }
 
-int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
-  mStEvent = 0; // I do not delete the StEvent, the chain is responsible for deletion. 
-                // I just set the pointer to zero, so that you never pick up the old StEvent 
+int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree
+  if ( !mActive ) {
+    // Skip per-event StEvent construction. Used to bisect memory growth: when
+    // disabled, none of the allocations inside StMuDst::createStEvent() run,
+    // so any remaining per-event growth must originate elsewhere.
+    mStEvent = 0;
+    return 0;
+  }
+  mStEvent = 0; // I do not delete the StEvent, the chain is responsible for deletion.
+                // I just set the pointer to zero, so that you never pick up the old StEvent
 
   StMuDst *muDst=0;
   muDst=(StMuDst*)GetInputDS("MuDst");

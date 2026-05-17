@@ -23,20 +23,26 @@ class StMuDst2StEventMaker : public StMaker {
     StMuDst2StEventMaker(const char* self="muDst2StEventMaker");
     ~StMuDst2StEventMaker();
     
-    void Clear(const char*);  
+    void Clear(const char*);
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
-    StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
+    StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created
+    /// Enable/disable the per-event StEvent construction. When disabled, Make()
+    /// is a no-op so callers can isolate downstream memory growth from the
+    /// allocations inside StMuDst::createStEvent(). Default: enabled.
+    void setActive( bool active ) { mActive = active; }
+    bool isActive() const { return mActive; }
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.8 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.8 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ;
 	return cvs;
     }
-  
+
 
  protected:
     void printTriggerIds(StEvent*);
     void loopOverTracks(StEvent*);
 
     StEvent* mStEvent;
+    bool mActive;
     
     ClassDef(StMuDst2StEventMaker, 0)
 }; 
