@@ -8,6 +8,22 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <cstdio>
+#include <cstdlib>
+#include <malloc.h>
+
+// Memory marker for the pico write path. Same tagging convention as the one
+// in StMuDst.cxx so both streams can be analysed with the same awk pipeline.
+static void _picoMemMark(const char* label) {
+    if ( ::getenv("ST_MEMMARK_OFF") ) return;
+    struct mallinfo m = mallinfo();
+    fprintf(stderr,
+            "picoMakeWrite_MEM %-20s uordblks=%u arena=%u hblkhd=%u\n",
+            label,
+            (unsigned)m.uordblks,
+            (unsigned)m.arena,
+            (unsigned)m.hblkhd);
+}
 
 // ROOT headers
 #include "TRegexp.h"
@@ -173,8 +189,13 @@ StPicoDstMaker::~StPicoDstMaker() {
 
 //_________________
 void StPicoDstMaker::clearArrays() {
+  // Use Delete() rather than Clear() so destructors run on stored TClonesArray
+  // elements. Several pico classes (StPicoFwdTrack, StPicoFcsCluster,
+  // StPicoEmcTrigger, StPicoEvent) hold std::vector members; with plain Clear()
+  // the next event's placement-new constructs over the slot without freeing the
+  // previous vector heap allocation, producing a steady per-event leak.
   for(Int_t i=0; i<StPicoArrays::NAllPicoArrays; i++) {
-    mPicoArrays[i]->Clear();
+    mPicoArrays[i]->Delete();
   }
 }
 
@@ -878,6 +899,8 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mBField = muEvent->magneticField();
 
+  _picoMemMark("00_enter");
+
 #if !defined (__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
@@ -901,13 +924,17 @@ Int_t StPicoDstMaker::MakeWrite() {
     fillBTowHits();
   }
 #endif /* !__TFG__VERSION__ */
-  
+
+  _picoMemMark("10_after_btow");
 
   // Fill StPicoEvent members
   fillMcVertices();
   fillMcTracks();
+  _picoMemMark("20_after_mc");
   fillTracks();
+  _picoMemMark("30_after_tracks");
   fillEvent();
+  _picoMemMark("40_after_event");
   fillEmcTrigger();
   fillMtdTrigger();
   fillBTofHits();
@@ -915,9 +942,11 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillEpdHits();
   fillBbcHits();
   fillETofHits();
+  _picoMemMark("50_after_hits");
   fillFcsHits();
   fillFcsClusters();
   fillFwdTracks();
+  _picoMemMark("60_after_fwd_fcs");
 
   // Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
@@ -927,16 +956,19 @@ Int_t StPicoDstMaker::MakeWrite() {
   }
 
   mFmsFiller.fill(*mMuDst);
+  _picoMemMark("70_after_fms");
 
   if (Debug()) mPicoDst->printTracks();
-  
+
   mTTree->Fill();
+  _picoMemMark("80_after_ttree_fill");
   if ( isFromDaq ) {
 //    delete mEmcCollection;
     mEmcCollection = nullptr;
   }
 
   mMuDst->setVertexIndex(originalVertexId);
+  _picoMemMark("99_exit");
 
   return kStOK;
 }
@@ -2620,11 +2652,12 @@ void StPicoDstMaker::fillFwdTracks() {
     }
   } else {
     LOG_DEBUG << "Cannot get Fwd Tracks from StEvent" << endm;
+    return;
   }
 
   // Fill FwdVertex also
   // get primary vertex from StEvent
-  LOG_DEBUG << "There are " << evt->numberOfPrimaryVertices() << " primary vertices from StEvent" << endm; 
+  LOG_DEBUG << "There are " << evt->numberOfPrimaryVertices() << " primary vertices from StEvent" << endm;
   for ( size_t i = 0; i < evt->numberOfPrimaryVertices(); i++ ){
     StPrimaryVertex * evVertex = evt->primaryVertex(i);
     if (!evVertex || !evVertex->isFwdVtx()) continue; // only save valid FwdVertex
