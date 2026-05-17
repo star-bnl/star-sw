@@ -140,7 +140,6 @@ int StFwdHitLoader::loadFttPointsFromStEvent( FwdDataSource::McTrackMap_t &mcTra
             } else {
                 sstr << " (unknown orientation)";
             }
-            sstr << endm;
             LOG_INFO << sstr.str() << endm;
 
             if ( sqrt(hitCov3(0, 0)) != sqrt(hitCov3(0, 0)) ){
