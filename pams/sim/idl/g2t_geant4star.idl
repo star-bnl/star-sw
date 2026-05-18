@@ -42,14 +42,14 @@ struct g2t_geant4star {
     long      pair;                       /* Enable/disable pair production           */
     long      comp;                       /* Enable/disable compton scattering        */
     long      phot;                       /* Enable/disable photoelectric effect      */
-    long      pfis;                       /* Enable/disable photo fission"            */
+    long      pfis;                       /* Enable/disable photo fission             */
     long      dray;                       /* Enable/disable delta rays                */
     long      anni;                       /* Enable/disable positron annihilation     */
     long      brem;                       /* Enable/disable bremstrahlung             */
     long      hadr;                       /* Enable/disable hadronic interactions     */
     long      munu;                       /* Enable/disable muon-nucleus interactions */
     long      dcay;                       /* Enable/disable decays                    */
-    long      loss;                       /* Energy loss mode"                        */
+    long      loss;                       /* Energy loss mode                         */
     long      muls;                       /* Multiple scattering                      */
     long      ckov;                       /* Cherenkov radiation                      */
     long      rayl;                       /* Rayleigh scattering                      */
@@ -80,7 +80,7 @@ struct g2t_geant4star {
     float     punchout_zmin;       /* Min Z for punchout logic */
  
     /* Scoring limits for truth tables */
-    float     scoring_rmax;        /* Maxium secondary production radius to enter truth tables */
+    float     scoring_rmax;        /* Maximum secondary production radius to enter truth tables*/
     float     scoring_zmax;        /* Maximum secondary production z to enter truth tables     */
     float     scoring_emin;        /* Minimum secondary energy to enter truth tables           */
   
