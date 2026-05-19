@@ -290,7 +290,7 @@ sub cons_skip_marker_present {
 if ( defined($SKIP_DIRS) ) {
   $items = join("|", split(" ", $SKIP_DIRS));
 } else {
-  $items = "StShadowMaker|PWGTools";
+  $items = "PWGTools";
 }
 
 if ( $#items > -1){
