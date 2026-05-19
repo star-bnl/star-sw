@@ -262,6 +262,30 @@ if ($STAR_SYS =~ /x86_darwin/) {
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
+# A directory can opt out of the cons build by dropping this file in it.
+my $skipConsBuildMarker = ".skip_cons_build";
+
+sub cons_skip_marker_overridden {
+  my ($dir_name, $dir_path) = @_;
+  return 0 if !$param::include;
+  return 1 if $dir_name =~ /$param::include/o;
+  return 1 if $param::include =~ m|/| && $dir_path =~ /$param::include/o;
+  return 0;
+}
+
+sub cons_skip_marker_present {
+  my ($dir_name, $dir_path) = @_;
+  return 0 if !-e "$dir_path/$skipConsBuildMarker";
+  return 0 if cons_skip_marker_overridden($dir_name, $dir_path);
+  if (!$param::quiet) {
+    print "skip ";
+    printf("%40s", "$dir_path");
+    printf("\tdue to %25s", "$skipConsBuildMarker");
+    printf("\tto build it you need to add %25s", "+$dir_name");
+    print " in cons command line\n";
+  }
+  return 1;
+}
 
 if ( defined($SKIP_DIRS) ) {
   $items = join("|", split(" ", $SKIP_DIRS));
@@ -290,6 +314,7 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
 
     # Do not build StRoot/Table if ROOT_VERSION < 6
     next if ($sub_Dir =~ m/StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+    next if cons_skip_marker_present($sub_dir, $sub_Dir);
 
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
 #    print "$sub_dir => $items\n";
@@ -331,6 +356,7 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
 	}
 	my $subsub_Dir = $sub_Dir . "/" . $subsub_dir;
 	next if !-d $subsub_Dir and !-l $subsub_Dir;
+	next if cons_skip_marker_present($subsub_dir, $subsub_Dir);
 	print "dir = $dir \t sub_dir = $sub_dir\tsub_Dir $sub_Dir\tsubsub_Dir $subsub_Dir\n" if ($param::debug);
 	if ($items and $subsub_dir =~ /$items/ and
 	    ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
@@ -409,6 +435,8 @@ foreach $dir(@sysdirlist , @subdirs ) {
 #	next if $param::exclude && $dir =~ /$param::exclude/o;
         print "Add dir : $dir\n" if $param::debug;
         #push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        (my $dir_name = $dir) =~ s|.*/||;
+        next if cons_skip_marker_present($dir_name, $dir);
         next if grep($dir =~ m/$_/, @skip_dirs);
         push @packages, $dir;
     }
@@ -418,7 +446,7 @@ foreach $dir(@sysdirlist , @subdirs ) {
 if ($STAR_SYS !~ /x86_darwin/) {# no qt on mac
  my $qtRoot = "QtRoot";
  #if ($param::include and $qtRoot =~ /$param::include/) {
-  push @packages, $qtRoot if ( -d $qtRoot or -l $qtRoot);
+  push @packages, $qtRoot if ( -d $qtRoot or -l $qtRoot) && !cons_skip_marker_present($qtRoot, $qtRoot);
 }
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
