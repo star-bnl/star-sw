@@ -5,11 +5,12 @@
 
 TFile *output = 0;
 
-bool RunFttChain = false; // we use GEANT directly
-bool RunFstChain = false; // we use GEANT directly
+bool RunFttChain = false; // obsolete - we use GEANT directly
+bool RunFstChain = false; // obsolete - we use GEANT directly
 bool RunFcsChain = true;
 bool RunFwdChain = true;
 bool RunMuDstMaker = true;
+bool RunPicoWrite = true;
 
 bool UseCachedGeom = true;
 bool UseConstBz = false;
@@ -70,9 +71,12 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
     if (RunFcsChain && RunFwdChain){
         _fwdTrackChain = "fwdTrack fcsTrackMatch";
     }
+
+    TString _timestamp = "sdt20211016";
+    _timestamp = "";
     
     // Form the complete chain
-    _chain = Form("fzin %s sdt20211016 %s %s %s %s MakeEvent StEvent McEvent ReverseField bigbig evout cmudst tree", _geom.Data(), _fttChain.Data(), _fcsChain.Data(), _fstChain.Data(), _fwdTrackChain.Data()); 
+    _chain = Form("fzin %s %s %s %s %s %s MakeEvent StEvent McEvent ReverseField bigbig evout cmudst tree", _geom.Data(), _timestamp.Data(), _fttChain.Data(), _fcsChain.Data(), _fstChain.Data(), _fwdTrackChain.Data()); 
     // Note, I dont include the PicoWrite and PicoVtxless in chain because they load a bunch of things I dont want (and somehow cannot remove with -options)
     printf("Chain: \n%s\n", _chain.Data());
     
@@ -109,12 +113,13 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
         fcsclu->setDebug(1);
     }
 
-    gSystem->Load("StFwdUtils.so");
+    
 
     // Configure FST FastSim
     if (RunFstChain){ // otherwise it is not loaded
         StFstFastSimMaker *fstFastSim = (StFstFastSimMaker*) chain->GetMaker( "fstFastSim" );;
         if (fstFastSim) {
+            gSystem->Load("StarGeneratorBase");
             printf("fstFastSim = %p\n", fstFastSim);
             TString qaoutname(gSystem->BaseName(inFile));
             qaoutname.ReplaceAll(".fzd", ".FastSimu.QA.root");
@@ -136,6 +141,7 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
     chain->AddBefore("fwdTrack", fttClusterPointMaker);
         
     // Configure the Forward Tracker
+    if (RunFwdChain) {
         StFwdTrackMaker * fwdTrack = (StFwdTrackMaker*) chain->GetMaker( "fwdTrack" );
 
         if ( fwdTrack ){
@@ -143,6 +149,7 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
                 cout << "Using the Geometry cache: fGeom.root" << endl;
                 fwdTrack->setGeoCache( "fGeom.root" );
             }
+            gSystem->Load("StFwdUtils.so");
 
             fwdTrack->setOutputFilename( TString::Format( "%s.output.root", inFile ).Data() );
 
@@ -175,6 +182,7 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
             
             cout << "fwd tracker setup" << endl;
         }
+    }
     
     bool doFitQA = false;
     if ( doFitQA ){
@@ -219,11 +227,13 @@ void sim(   char *inFile =  "/gpfs01/star/pwg/mrosales/jetFinderTest2024/star-sw
     // }
 
     // The PicoDst
-    gSystem->Load("libStPicoEvent");
-    gSystem->Load("libStPicoDstMaker");
-    StPicoDstMaker *picoMk = new StPicoDstMaker(StPicoDstMaker::IoWrite);
-    cout << "picoMk = " << picoMk << endl;
-    picoMk->setVtxMode(StPicoDstMaker::Vtxless);
+    if (RunPicoWrite) {
+        gSystem->Load("libStPicoEvent");
+        gSystem->Load("libStPicoDstMaker");
+        StPicoDstMaker *picoMk = new StPicoDstMaker(StPicoDstMaker::IoWrite);
+        cout << "picoMk = " << picoMk << endl;
+        picoMk->setVtxMode(StPicoDstMaker::Vtxless);
+    }
 
     StMemStat stmem;
     stmem.PrintMem("MEM before Chain::Init");
@@ -247,6 +257,23 @@ chain_loop:
 
         if (i > 1)
             stmem.PrintMem("MEM after Chain::Clear + Make");
+
+        // Per-event VmRSS readout (what the OOM killer actually measures).
+        // Tag is "RSS_EVT" so it's trivially grep-able out of LOG.
+        {
+            FILE* f = fopen("/proc/self/status", "r");
+            if (f) {
+                char buf[256]; long rss_kb = -1, vsz_kb = -1;
+                while (fgets(buf, sizeof(buf), f)) {
+                    if (rss_kb < 0) sscanf(buf, "VmRSS: %ld", &rss_kb);
+                    if (vsz_kb < 0) sscanf(buf, "VmSize: %ld", &vsz_kb);
+                    if (rss_kb >= 0 && vsz_kb >= 0) break;
+                }
+                fclose(f);
+                fprintf(stderr, "RSS_EVT %d  VmRSS=%ld kB  VmSize=%ld kB\n",
+                        i, rss_kb, vsz_kb);
+            }
+        }
 
         // StMuDst * mds = muDstMaker->muDst();
         // StMuFwdTrackCollection * ftc = mds->muFwdTrackCollection();
