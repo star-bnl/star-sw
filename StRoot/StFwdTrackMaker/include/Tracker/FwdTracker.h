@@ -2001,7 +2001,7 @@ class ForwardTrackMaker {
   protected:
     static constexpr bool kSaveFailedFits = true; // max number of track seeds to keep in memory
     static constexpr bool kProfile = false; // set to true to profile the tracking steps
-    static constexpr int verbose = 1; // Extra logging at INFO level
+    static constexpr int verbose = 0; // Extra logging at INFO level
     unsigned long long int nEvents;
 
     bool mDoTrackFitting = true;

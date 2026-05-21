@@ -45,7 +45,7 @@ class TrackFitter {
 
     // this is used rarely for debugging purposes, especially to check/compare plane misalignment
     static constexpr bool kUseSpacePoints = true; // use spacepoints instead of planar measurements
-    static constexpr int kVerbose = 1; // verbosity level for debugging
+    static constexpr int kVerbose = 0; // verbosity level for debugging
 
     void clear(){
         LOG_DEBUG << "TrackFitter::clear() called" << endm;
