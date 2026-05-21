@@ -29,6 +29,18 @@
 
 #include "StFttDbMaker/StFttDb.h"
 
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#undef  LOG_WARN
+#define LOG_INFO  if (!mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!mDebug) {} else LOGGERMESSAGE(Debug)
+#define LOG_WARN  if (!mDebug) {} else LOGGERMESSAGE(Warning)
+
 
 //_____________________________________________________________
 StFttClusterMaker::StFttClusterMaker( const char* name )
