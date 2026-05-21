@@ -12,22 +12,6 @@
 
 #include "StMuDst.h"
 
-// Memory-marker helper for localising per-event growth in createStEvent().
-// Prints current heap allocation (mallinfo) at each labelled point.
-// uordblks/arena are `int` in legacy glibc and wrap past 2 GB; we cast to
-// unsigned so the value stays monotonic for delta calculations.
-// Uses fprintf rather than LOG_INFO so it is independent of include order.
-// Set ST_MEMMARK_OFF=1 in the environment to disable at runtime.
-static void _memMark(const char* label) {
-    if ( ::getenv("ST_MEMMARK_OFF") ) return;
-    struct mallinfo m = mallinfo();
-    fprintf(stderr,
-            "createStEvent_MEM %-20s uordblks=%u arena=%u hblkhd=%u\n",
-            label,
-            (unsigned)m.uordblks,
-            (unsigned)m.arena,
-            (unsigned)m.hblkhd);
-}
 
 #include "StContainers.h"
 #include "StEvent/StEventTypes.h"
@@ -724,7 +708,7 @@ StEvent* StMuDst::createStEvent() {
   StTimer timer;
   timer.start();
 
-  _memMark("00_enter");
+  
 
   StMuEvent* mu = event();
   if(!mu) return NULL;
@@ -761,7 +745,7 @@ StEvent* StMuDst::createStEvent() {
   ev->addPrimaryVertex(vp);
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
-  _memMark("10_preamble");
+  
 
   int nGlobals = arrays[muGlobal]->GetEntriesFast();
 
@@ -781,7 +765,7 @@ StEvent* StMuDst::createStEvent() {
     }
   }
 
-  _memMark("20_global_tracks");
+  
 
   /// add primary tracks and primary vertex
   ///
@@ -804,7 +788,7 @@ StEvent* StMuDst::createStEvent() {
     vp->addDaughter( t );
   }
 
-  _memMark("30_primary_tracks");
+  
 
   /// do the same excercise for the l3 tracks
   /// we do this later
@@ -818,7 +802,7 @@ StEvent* StMuDst::createStEvent() {
       ev->addDetectorState(det);
   }
 
-  _memMark("40_detector_states");
+  
 
   // now get the EMC stuff and put it in the StEvent
   static StMuEmcUtil* mEmcUtil = new StMuEmcUtil();
@@ -827,7 +811,7 @@ StEvent* StMuDst::createStEvent() {
     StEmcCollection *EMC = mEmcUtil->getEmc(emc);
     if(EMC) ev->setEmcCollection(EMC);
   }
-  _memMark("50_emc");
+  
   // now get the FMS stuff and put it in the StEvent
   static StMuFmsUtil* mFmsUtil = new StMuFmsUtil();
   StMuFmsCollection *fms = muFmsCollection();
@@ -835,7 +819,7 @@ StEvent* StMuDst::createStEvent() {
      StFmsCollection *FMS = mFmsUtil->getFms(fms);
      if(FMS) ev->setFmsCollection(FMS);
   }
-  _memMark("51_fms");
+  
   // now get the RHICf stuff and put it in the StEvent
   static StMuRHICfUtil* mRHICfUtil = new StMuRHICfUtil();
   StMuRHICfCollection *rhicf = muRHICfCollection();
@@ -843,7 +827,7 @@ StEvent* StMuDst::createStEvent() {
     StRHICfCollection *RHICf = mRHICfUtil->getRHICf(rhicf);
     if(RHICf) ev->setRHICfCollection(RHICf);
   }
-  _memMark("52_rhicf");
+  
   // now get the FCS stuff and put it in the StEvent
   static StMuFcsUtil* mFcsUtil = new StMuFcsUtil();
   StMuFcsCollection *fcs = muFcsCollection();
@@ -851,7 +835,7 @@ StEvent* StMuDst::createStEvent() {
      StFcsCollection *FCS = mFcsUtil->getFcs(fcs);
      if(FCS) ev->setFcsCollection(FCS);
   }
-  _memMark("53_fcs");
+  
   // now get the FTT stuff and put it in the StEvent
   static StMuFttUtil* mFttUtil = new StMuFttUtil();
   StMuFttCollection *ftt = muFttCollection();
@@ -859,7 +843,7 @@ StEvent* StMuDst::createStEvent() {
      StFttCollection *FTT = mFttUtil->getFtt(ftt);
      if(FTT) ev->setFttCollection(FTT);
   }
-  _memMark("54_ftt");
+  
   // now get the FST stuff and put it in the StEvent
   static StMuFstUtil* mFstUtil = new StMuFstUtil();
   StMuFstCollection *fst = muFstCollection();
@@ -867,7 +851,7 @@ StEvent* StMuDst::createStEvent() {
      StFstHitCollection *FST = mFstUtil->getFst(fst);
      if(FST) ev->setFstHitCollection(FST);
   }
-  _memMark("55_fst");
+  
  // now get the FWD Tracks and put it in the StEvent
   static StMuFwdTrackUtil* mFwdTrackUtil = new StMuFwdTrackUtil();
   StMuFwdTrackCollection *fwdTrack = muFwdTrackCollection();
@@ -875,7 +859,7 @@ StEvent* StMuDst::createStEvent() {
      StFwdTrackCollection *theFwdTrack = mFwdTrackUtil->getFwdTrack(fwdTrack);
      if(theFwdTrack) ev->setFwdTrackCollection(theFwdTrack);
   }
-  _memMark("56_fwdtrack");
+  
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();
   StMuPmdCollection *pmd = pmdCollection();
@@ -883,7 +867,7 @@ StEvent* StMuDst::createStEvent() {
     StPhmdCollection *PMD = mPmdUtil->getPmd(pmd);
     if(PMD) ev->setPhmdCollection(PMD);
   }
-  _memMark("57_pmd");
+  
 
 // now get tof (after fix from Xin)
   StTofCollection *tofcoll = new StTofCollection();
@@ -922,7 +906,7 @@ StEvent* StMuDst::createStEvent() {
     tofcoll->addRawData(aRawData);
   }
 
-  _memMark("60_tof");
+  
 
   // now create, fill the StBTofCollection - dongx
   StBTofCollection *btofcoll = new StBTofCollection();
@@ -938,7 +922,7 @@ StEvent* StMuDst::createStEvent() {
     btofcoll->addRawHit(aRawHit);
   }
   if(btofHeader()) btofcoll->setHeader(new StBTofHeader(*(btofHeader())));
-  _memMark("70_btof");
+  
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
   StTriggerId triggerId;
@@ -952,7 +936,7 @@ StEvent* StMuDst::createStEvent() {
   if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setNominal( new StTriggerId( triggerId ) );
   ev->setTriggerIdCollection( triggerIdCollection );
 
-  _memMark("99_exit");
+  
 
   DEBUGVALUE2(timer.elapsedTime());
   return ev;
