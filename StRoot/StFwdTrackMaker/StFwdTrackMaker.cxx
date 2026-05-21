@@ -69,10 +69,21 @@
 #include "StMemStat.h"
 #include <cstdlib>
 
-// #define LOG_DEBUG if(false) std::cerr
-// #define LOG_INFO if(false) std::cerr
-
 #include "StFwdTrackMaker/StFwdTrackMaker.h"
+
+bool StFwdTrackMaker::mDebug = false; // initialize static member variable
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#undef  LOG_WARN
+#define LOG_INFO  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Debug)
+#define LOG_WARN  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Warning)
+
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #include "StFwdTrackMaker/include/Tracker/FwdTracker.h"
 #include "StFwdTrackMaker/include/Tracker/TrackFitter.h"
