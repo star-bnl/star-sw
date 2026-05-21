@@ -21,6 +21,18 @@
 
 #include "TRandom.h"
 
+// Per-file gating of STAR logging macros via mDebug. Bypasses a per-call
+// allocation leak in the log4cxx pipeline. When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation. Only affects
+// this translation unit. The `if (!mDebug) {} else` form guards against
+// dangling-else attaching to a caller's `if`.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#undef  LOG_WARN
+#define LOG_INFO  if (!mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!mDebug) {} else LOGGERMESSAGE(Debug)
+#define LOG_WARN  if (!mDebug) {} else LOGGERMESSAGE(Warning)
+
 StFttClusterPointMaker::StFttClusterPointMaker( const char* name )
 : StMaker( name ),
   mEvent( 0 ),          /// pointer to StEvent

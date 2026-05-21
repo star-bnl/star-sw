@@ -2,6 +2,7 @@
 #include "KiTrack/IHit.h"
 #include "GenFit/Track.h"
 
+#include "StFwdTrackMaker.h"
 #include "TMath.h"
 #include "StBFChain/StBFChain.h"
 
@@ -67,8 +68,18 @@
 
 #include <cstdlib>
 
-// #define LOG_DEBUG if(false) std::cerr
-// #define LOG_INFO if(false) std::cerr
+bool StFwdTrackMaker::mDebug = false; // initialize static member variable
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#undef  LOG_WARN
+#define LOG_INFO  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Debug)
+#define LOG_WARN  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Warning)
 
 #include "StFwdTrackMaker/StFwdTrackMaker.h"
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
@@ -78,6 +89,7 @@
 #include "StFwdTrackMaker/include/Tracker/ObjExporter.h"
 
 FwdSystem* FwdSystem::sInstance = nullptr;
+
 
 
 //_______________________________________________________________________________________
@@ -91,6 +103,7 @@ class GenfitUtils{
 // Basic sanity cuts on genfit tracks
 template<> bool GenfitUtils::accept( genfit::Track *track )
 {
+    // const bool mDebug = false; // set to true to enable debug logging in this function
     // This also gets rid of failed fits (but may need to explicitly
     // for fit failure...)
     if (track->getNumPoints() <= 0 ) return false; // fit may have failed
@@ -714,7 +727,6 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
                 if( p[2]<0  && p[0]<0  ){ det=3; }
             }
             if (!mFcsDb) {
-                LOG_ERROR << "FCS database not initialized, cannot project to FCS" << endm;
                 continue;
             }
             StThreeVectorD xyzoff = mFcsDb->getDetectorOffset(det,mFcsDb->getShowerMaxZ(det));
@@ -751,6 +763,10 @@ void StFwdTrackMaker::FillEvent() {
         stEvent->setFwdTrackCollection( ftc );
     } else {
         ftc->Clear();
+    }
+
+    if (!mFcsDb) {
+        LOG_ERROR << "FCS database not initialized, cannot project FwdTracks to FCS" << endm;
     }
 
     size_t indexTrack = 0;

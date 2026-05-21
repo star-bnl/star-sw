@@ -29,6 +29,18 @@
 
 #include "StFttDbMaker/StFttDb.h"
 
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#undef  LOG_WARN
+#define LOG_INFO  if (!mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!mDebug) {} else LOGGERMESSAGE(Debug)
+#define LOG_WARN  if (!mDebug) {} else LOGGERMESSAGE(Warning)
+
 
 //_____________________________________________________________
 StFttClusterMaker::StFttClusterMaker( const char* name )
@@ -38,7 +50,7 @@ StFttClusterMaker::StFttClusterMaker( const char* name )
   mDebug( false ),       /// print out of all full messages for debugging
   mFttDb( nullptr )
 {
-    LOG_DEBUG << "StFttClusterMaker::ctor"  << endm;
+    LOG_INFO << "StFttClusterMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -97,14 +109,16 @@ StFttClusterMaker::Make()
         LOG_WARN << "No StFttCollection" << endm;
         return kStOk;
     }
+    LOG_INFO << "DEBUG: mFttCollection->numberOfClusters() = " << mFttCollection->numberOfClusters() << endm;
+    mFttCollection->clusters().clear();
+
+
 
     mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb"));
     assert( mFttDb );
 
-    LOG_DEBUG << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
+    LOG_INFO << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
     ApplyHardwareMap();
-
-    
 
     // InjectTestData();
 
@@ -144,14 +158,18 @@ StFttClusterMaker::Make()
         }
     } // loop on hit
 
+    
+
     size_t nClusters = 0;
-    LOG_DEBUG << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
+    LOG_INFO << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
 
     static const std::vector<StFttRawHit*> emptyHits;
     auto getHits = [&]( const std::map<UChar_t, std::vector<StFttRawHit*>>& m, UChar_t key ) -> const std::vector<StFttRawHit*>& {
         auto it = m.find( key );
         return it != m.end() ? it->second : emptyHits;
     };
+
+    
 
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
@@ -241,7 +259,7 @@ bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
         int hitTimeMode = (int)kHitCalibratedTime;
 
         mFttDb->getTimeCut(hit, hitTimeMode, timeCutMin, timeCutMax);
-        LOG_DEBUG << TString::Format( "StFttClusterMaker::PassTimeCut - DB gave hit time mode: %d, time cut min: %d, time cut max: %d", hitTimeMode, timeCutMin, timeCutMax ) << endm;
+        LOG_INFO << TString::Format( "StFttClusterMaker::PassTimeCut - DB gave hit time mode: %d, time cut min: %d, time cut max: %d", hitTimeMode, timeCutMin, timeCutMax ) << endm;
         if (hitTimeMode == kHitCalibratedTime) {
             return (hit->time() >= timeCutMin && hit->time() <= timeCutMax);
         } else if ( hitTimeMode == kHitTimebin ) {
@@ -290,7 +308,9 @@ void StFttClusterMaker::SearchClusterEdges( const std::vector< StFttRawHit * >& 
     StFttRawHit *hitLeft = nullptr, *hitRight = nullptr;
 
     while ( searchRight || searchLeft ){
-            LOG_DEBUG << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
+            if (mDebug){
+                LOG_DEBUG << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
+            }
         if ( searchRight ){
             if ( right == hits.size() || right == hits.size() - 1 ){ 
                 searchRight = false;
@@ -422,10 +442,10 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         StFttCluster * clu = new StFttCluster();
 
         if ( Debug() ){
-            LOG_DEBUG << "CLUSTER FIND START WITH HITS:" << endm;
+            LOG_INFO << "CLUSTER FIND START WITH HITS:" << endm;
             size_t i = 0;
             for ( auto *h : hits ){
-                LOG_DEBUG << "[" << i << "]" << *h;
+                LOG_INFO << "[" << i << "]" << *h;
                 i++;
             }
         }
@@ -440,7 +460,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         size_t left = anchor, right = anchor;
         SearchClusterEdges( hits, anchor, left, right);
         
-        LOG_DEBUG << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
+        LOG_INFO << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
         
         
         // OK now add these hits to the cluster

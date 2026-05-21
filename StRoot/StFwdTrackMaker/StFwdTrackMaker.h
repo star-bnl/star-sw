@@ -52,8 +52,10 @@ class GenfitTrackResult;
 class StFwdTrackMaker : public StMaker {
 
     ClassDef(StFwdTrackMaker, 0);
+    
 
   public:
+    static bool mDebug; 
     StFwdTrackMaker();
     ~StFwdTrackMaker(){/* nada */};
 
@@ -61,7 +63,7 @@ class StFwdTrackMaker : public StMaker {
     int Finish();
     int Make();
     void Clear(const Option_t *opts = "");
-
+    void setDebug(bool debug) { mDebug = debug; }
     enum { kInnerGeometry,
            kOuterGeometry };
 
