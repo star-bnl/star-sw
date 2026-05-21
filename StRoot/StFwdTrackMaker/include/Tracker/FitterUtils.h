@@ -58,11 +58,11 @@ class GenericFitSeeder : public FitSeedMaker {
             double area = std::abs(det) / 2.0;
 
             if (area == 0) {
-                std::cerr << "The points are collinear, curvature is undefined." << std::endl;
+                LOG_DEBUG << "The points are collinear, curvature is undefined." << endm;
                 // Show each point:
-                std::cout << "p1 = " << p1.x << ", " << p1.y << std::endl;
-                std::cout << "p2 = " << p2.x << ", " << p2.y << std::endl;
-                std::cout << "p3 = " << p3.x << ", " << p3.y << std::endl;
+                LOG_DEBUG << "p1 = " << p1.x << ", " << p1.y << endm;
+                LOG_DEBUG << "p2 = " << p2.x << ", " << p2.y << endm;
+                LOG_DEBUG << "p3 = " << p3.x << ", " << p3.y << endm;
                 return -1e-7; // Curvature is undefined for collinear points
             }
 
@@ -78,7 +78,7 @@ class GenericFitSeeder : public FitSeedMaker {
             // const std::vector<Point>& points;
             int numPoints = points.size();
             if (numPoints < 3) {
-                std::cerr << "Not enough points to form a circle." << std::endl;
+                LOG_DEBUG << "Not enough points to form a circle." << endm;
                 return -1;
             }
 
