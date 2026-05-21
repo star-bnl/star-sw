@@ -42,14 +42,14 @@ bool runFwdChain = true;
 bool refillMuDst = false;
 bool runFwdQa    = false;
 bool runFitQa    = false;
-bool runPico     = true;
+bool runPico     = false;
 
 #include "StMemStat.h"
 
 
 void loadLibs();
 void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root",
-						size_t nEvents = 1500,
+						size_t nEvents = 1400,
 						size_t nSkip   = 0 ){
 	cout << "FileList: " << fileList << endl;
 	cout << "nEvents: "  << nEvents  << endl;
@@ -222,6 +222,32 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	
 	// print the chain status
 	chain->PrintInfo();
+
+
+	// Read 1st event from MuDst to get run number and event time 
+	// makes sure that the DB is set with the correct timestamps
+	if (runDb) {
+	  muDstChain.GetEntry(0);
+	  int run = muDstMaker->muDst()->event()->runNumber();
+	  time_t tt = (time_t)muDstMaker->muDst()->event()->eventInfo()->time();
+	  printf("Run number from 1st event: %d time: %d\n", run, tt);
+	  struct tm* gmt = gmtime(&tt);
+	  int date = (gmt->tm_year + 1900) * 10000 + (gmt->tm_mon + 1) * 100 + gmt->tm_mday;
+	  int itime = gmt->tm_hour * 10000 + gmt->tm_min * 100 + gmt->tm_sec;
+	  printf("GMT date: %d time: %d\n", date, itime);
+	  dbMk->SetDateTime(date, itime);
+	  chain->InitRun(run);
+	  fcsDb->InitRun(run); //not sure why I need to call this separately...
+	  StFcsDb* fcsdb = (StFcsDb*) chain->GetDataSet("fcsDb");
+	  //make sure we get good values
+	  for(int d=0; d<4; d++){
+	    StThreeVectorD off=fcsdb->getDetectorOffset(d);
+	    printf("FCS Offset d=%1d %8.2f  %8.2f  %8.2f\n",d,off.x(),off.y(),off.z());
+	  }
+	  printf("FCS Gain 352 R17c0 = %8.4f\n",fcsdb->getGainCorrection(0,352));
+	  printf("FCS Gain 374 R18c0 = %8.4f\n",fcsdb->getGainCorrection(0,374));
+	}
+
 
 	StMemStat stmem;
 	stmem.PrintMem("BEFORE Event Loop");
