@@ -35,23 +35,25 @@
 
 
 // Memory Baseline
-bool runDb = false;
-bool runFttChain = false;
-bool runFcsChain = false;
-bool runFwdChain = false;
+bool runDb       = true;
+bool runFttChain = true;
+bool runFcsChain = true;
+bool runFwdChain = true;
 bool refillMuDst = false;
-bool runFwdQa = false;
-bool runFitQa = false;
-bool runPico = true;
+bool runFwdQa    = false;
+bool runFitQa    = false;
+bool runPico     = true;
 
 #include "StMemStat.h"
 
 
 void loadLibs();
-void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root", 
-						size_t nEvents = 50 ){
+void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_1000064.MuDst.root",
+						size_t nEvents = 1500,
+						size_t nSkip   = 0 ){
 	cout << "FileList: " << fileList << endl;
-	cout << "nEvents: " << nEvents << endl;
+	cout << "nEvents: "  << nEvents  << endl;
+	cout << "nSkip: "    << nSkip    << endl;
 
 	// First load some shared libraries we need
 	loadLibs();
@@ -70,6 +72,8 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 												);
 	TChain& muDstChain = *muDstMaker.chain();
     printf( "MuDst file has %d events available in tree\n", muDstChain.GetEntries());
+    muDstChain.SetCacheSize(0);   // disable input TTreeCache: avoids ~128 MB-class per-event VSize jumps
+    printf( "Input TTreeCache size set to 0 (disabled)\n");
 	
 	/*******************************************************************************************/
 	// Initialize the database
@@ -85,7 +89,7 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	/*******************************************************************************************/
 	// Create the StMuDst2StEventMaker
     StMuDst2StEventMaker * mu2ev = new StMuDst2StEventMaker();
-	mu2ev->setActive(true);   // bisection: skip createStEvent() to test if leak is here
+	mu2ev->setActive(true);
 	/*******************************************************************************************/
 
 	/*******************************************************************************************/
@@ -222,22 +226,50 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 	StMemStat stmem;
 	stmem.PrintMem("BEFORE Event Loop");
 	/*******************************************************************************************/
+    // OPTIONAL: skip first nSkip events (advance the input MuDst without running any
+    // downstream maker work, so per-event accumulation from those events does NOT happen).
+    // Use this to test whether a crash is event-content driven (always at the same input
+    // event #) or accumulation driven (always after N processed events).
+    /*******************************************************************************************/
+	size_t totalEntries = muDstChain.GetEntries();
+	if (nSkip >= totalEntries) {
+		cout << "ERROR: nSkip (" << nSkip << ") >= total entries (" << totalEntries << "). Nothing to process." << endl;
+		return;
+	}
+	if (nSkip > 0) {
+		cout << "Skipping first " << nSkip << " events (advancing input only, no chain processing)..." << endl;
+		for (size_t s = 0; s < nSkip; s++) {
+			chain->Clear();
+			if (kStOK != muDstMaker->Make()) {
+				cout << "ERROR: muDstMaker->Make() failed during skip at s=" << s << endl;
+				break;
+			}
+		}
+		stmem.PrintMem(TString::Format("After Skip of %zu events:", nSkip).Data());
+		cout << "Skip complete. Main loop will now process input events starting at #" << nSkip << endl;
+	}
+
+	/*******************************************************************************************/
     // MAIN EVENT LOOP
     /*******************************************************************************************/
-	size_t nEntries = muDstChain.GetEntries();
-	if (nEntries > nEvents && nEvents > 0) {
+	size_t availableAfterSkip = totalEntries - nSkip;
+	size_t nEntries = availableAfterSkip;
+	if (nEvents > 0 && nEvents < availableAfterSkip) {
 		nEntries = nEvents;
-		cout << "Limiting to " << nEntries << " events." << endl;
+		cout << "Limiting to " << nEntries << " events (input #" << nSkip
+		     << " .. #" << (nSkip + nEntries - 1) << ")." << endl;
 	}
+	double initialUsedHeap = stmem.Used();
 	size_t numProcessed = 0;
 	for (int i = 0; i < nEntries; i++) {
-		printf("Processing event %d of %d\n", i, nEntries);
+		size_t inputEv = nSkip + i;   // absolute input event number
+		printf("Processing event %d of %d (input #%zu)\n", i, nEntries, inputEv);
 		if (i > 0) // skip first event to make it consistent
 			stmem.Start();
 		chain->Clear();
 		if (fwdTrack)
 			fwdTrack->SetDebug(1);
-		
+
         if (kStOK != chain->Make())
             break;
 
@@ -246,12 +278,16 @@ void fwd_afterburner( 	const Char_t * fileList = "st_physics_23037002_raw_100006
 			// muDstMaker->fillFwdTrack( mStEvent);
 			fwdQA->Make();
 		}
-		stmem.PrintMem(TString::Format("After Event %d:", i).Data());	
+		stmem.PrintMem(TString::Format("After Event %zu:", inputEv).Data());
 		if (i > 0)
 			stmem.Stop();
 		// MipMaker->Make();
 		// picoMk->Make();
-        cout << "EVENT #" << i << " COMPLETED" << endl; 
+        cout << "EVENT #" << i << " (input #" << inputEv << ") COMPLETED" << endl;
+		double currentUsedHeap = stmem.Used();
+		double deltaUsed = currentUsedHeap - initialUsedHeap;
+		cout << "Memory used after event #" << inputEv << ": " << currentUsedHeap << " MB (delta: " << deltaUsed << " MB)" << endl;
+
     }
 	stmem.PrintMem("After Event Loop");
 	stmem.Summary();
