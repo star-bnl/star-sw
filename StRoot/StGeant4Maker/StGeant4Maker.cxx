@@ -789,6 +789,10 @@ bool CreateGeometry(const Char_t *name="y2011") {
 }
 
 int StGeant4Maker::Init() {
+#ifndef INITIALIZE_VMC_AT_INITRUN
+  InitGeom();
+  InitVmcApp();
+#endif
   return StMaker::Init();
 }
 int StGeant4Maker::InitVmcApp() {
@@ -945,10 +949,12 @@ int StGeant4Maker::InitVmcApp() {
 int StGeant4Maker::InitRun( int /* run */ ){
 
   // One time initialization of the application
+#ifdef INITIALIZE_VMC_AT_INITRUN
   if ( 0 == mVmcApplication ) {
     InitGeom();
     InitVmcApp();
   }
+#endif
 
   gGeoManager = mGeometryG4; assert(gGeoManager);
 
