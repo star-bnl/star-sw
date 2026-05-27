@@ -2,12 +2,19 @@
 
 <job name="&JOBNAME;" maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="false" nProcesses="&NJOBS;" >
 
-  <shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
+  <shell>singularity exec --env BATCH_SYSTEM=${BATCH_SYSTEM} -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
 
 <command>
 
 <!--RNG seed is set to the JOBINDEX for reproducibility -->
 setenv GSL_RNG_SEED ${JOBINDEX}
+
+printenv
+
+source $HOME/.cshrc
+
+# Make sure we are using nfs not afs
+setup nfs4
 
 <!-- Load shared libraries -->
 # Setup group environment
@@ -39,6 +46,8 @@ module load star-table-0.1.1-root-6.24.06
 #cp -R &WORKINGDIR;/StarVMC/ .
 
 #setenv STAR .
+
+
 
 mkdir StRoot
 cp -R $STAR/StRoot/macros StRoot/
