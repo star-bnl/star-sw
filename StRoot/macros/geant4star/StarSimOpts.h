@@ -99,11 +99,13 @@ void ListStarSimOpts( const int mode=999, bool attr=false ) {
 };
 
 #include "StarSimOpts2016.h"
+#include "StarSimOpts2021.h"
 
 void setupProductionJobs() {
   StarSimOpts__init = true;
 
   StarSimOpts2016();
+  StarSimOpts2021();
 
   { // 2025 200 GeV AuAu Hijing 
     auto& job=addjob("rcf25000:y2025:AuAu200:G4:hijing1.383:minbias:v001");
