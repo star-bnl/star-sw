@@ -41,7 +41,9 @@ def main():
 
     parser.add_argument( '--verbose', dest="verbose", default=False, action="store_true", help="Full output from SUMS submission" )
 
-    parser.add_argument( '--no-submit', dest="submit", default=True, action="store_false", help="Print command to submit and exit." )        
+    parser.add_argument( '--no-submit', dest="submit", default=True, action="store_false", help="Print command to submit and exit." )
+
+    parser.add_argument( '--embedding', dest="embedding", default=False, action="store_true", help="Submit embedding job." )        
 
     args = parser.parse_args()
 
@@ -57,13 +59,42 @@ def main():
     # Pop the series selector
     series = argd.pop('series', None)
 
+    # Store result from every submitted job
+    resultmap = {}    
+
+    # If we are running embedding, submit the specified embedding *test* workflow and exit.  No
+    # sanity checks here, so proceed at own risk.
+    if args.embedding:
+        entities=[]
+        for arg,val in argd.items():
+            entities.append(f"{arg}={val}")        
+        k=series
+        entities.append(f"TAG={k}")
+        entities.append(f"JOBNAME={k.replace(':','_')}-")
+        command = f"star-submit-template-beta -entities {','.join(entities)} -template StRoot/macros/geant4star/submit_embedding_jobs.xml"
+        if args.submit:
+            result_shell = subprocess.run(command, shell=True, capture_output=True, text=True)
+            submission=result_shell.stdout.split('\n')
+            resultmap[k]=submission
+            
+            if args.verbose:
+                print(result_shell)
+            else:                
+                print( f'[{k}] {submission[-2]} {submission[-3]}' )
+
+
+
+        else:
+            print(command)        
+
+        return
+    
+
     # Create the list of jobs
     root.Macro("StRoot/macros/geant4star/StarSimOpts.h")
 
     jobs = ROOT.jobmap
-
-    resultmap = {}
-
+    
     for k,_ in jobs:
         if series==None or series in k:
             entities=[]

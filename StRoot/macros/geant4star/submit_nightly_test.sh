@@ -27,7 +27,7 @@
 
 TODAY=$( date +%a )
 
-WORKINGDIR=.
+#WORKINGDIR=`pwd`
 LOGDIR=/star/data19/G4STAR/tests/${TODAY}/log
 OUTDIR=/star/data19/G4STAR/tests/${TODAY}/out
 JOBDIR=/star/data19/G4STAR/tests/${TODAY}/job
@@ -39,18 +39,28 @@ NJOBS=1
 rm    -r ${LOGDIR} ${OUTDIR} ${JOBDIR}
 mkdir -p ${LOGDIR} ${OUTDIR} ${JOBDIR}
 
-OPTS=""
+OPTS="$@"
 
-#
-# Loop over all of the defined simulation tags and submit test jobs for each of them
-#
+SYS=${STAR}
+#SYS=.
+
 for tag in $( root -n -q -b ${STAR}/StRoot/macros/geant4star/StarSimOpts.h\(-1\) | awk '/rcf/{ print $1 }' )
 do
 
     echo
     echo $tag
     echo
-    ${STAR}/StRoot/macros/geant4star/submit_simulation_jobs.py ${OPTS} --series ${tag} -w ${WORKINGDIR} -l ${LOGDIR} -o ${OUTDIR} -j ${JOBDIR} -b ${BASELIB} --nevents ${NEVENTS} --njobs ${NJOBS}
+    ${SYS}/StRoot/macros/geant4star/submit_simulation_jobs.py ${OPTS} --series ${tag}  -l ${LOGDIR} -o ${OUTDIR} -j ${JOBDIR} -b ${BASELIB} --nevents ${NEVENTS} --njobs ${NJOBS}
 
 done
 
+
+for tag in P21icAuAu19 P21idIsobar200
+do
+
+    echo
+    echo $tag
+    echo
+    ${SYS}/StRoot/macros/geant4star/submit_simulation_jobs.py ${OPTS} --series ${tag}  -l ${LOGDIR} -o ${OUTDIR} -j ${JOBDIR} -b ${BASELIB} --nevents ${NEVENTS} --njobs ${NJOBS} --embedding
+    
+done

@@ -9,8 +9,6 @@
 <!--RNG seed is set to the JOBINDEX for reproducibility -->
 setenv GSL_RNG_SEED ${JOBINDEX}
 
-printenv
-
 source $HOME/.cshrc
 
 # Make sure we are using nfs not afs
@@ -51,6 +49,7 @@ module load star-table-0.1.1-root-6.24.06
 
 mkdir StRoot
 cp -R $STAR/StRoot/macros StRoot/
+#$$$cp -R &WORKINGDIR;/StRoot/macros StRoot
 
 # Ensure that any ROOT5 library is removed from the path
 setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
