@@ -35,7 +35,7 @@ void StarSimOpts2021() {
     job.simSAttr = {
       { "application:engine", "G4" }
     };
-    job.recopts="P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker btofsim  vpdsim emcsim eefs eess nodefault";
+    job.recopts="P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu TpcRS -VFMinuit -hitfilt  MiniMcMk,McAna ,useInTracker btofsim  vpdsim emcsim eefs eess fcssim fcscluster nodefault";
 
 
     // Photons | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
