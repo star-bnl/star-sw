@@ -778,7 +778,7 @@ class ForwardTrackMaker {
             gtrPVRefit.mIndex = index;
             gtrPVRefit.mTrackType = StFwdTrack::kPrimaryVertexConstrained;
             gtrPVRefit.mGlobalTrackIndex = gtr.mIndex;
-            gtrPVRefit.mVertexIndex = 0;
+            gtrPVRefit.mVertexIndex = 0; //! TODO track PV index correctly
 
             if ( gtrPVRefit.mIsFitConvergedPartially ){
                 primaryTracks.push_back( gtrPVRefit );

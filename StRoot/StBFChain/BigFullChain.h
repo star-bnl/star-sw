@@ -1716,8 +1716,10 @@ Bfc_st BFC[] = { // standard chains
                                                             "sTGC hit calib maker",                 kFALSE},
   {"FttClu","","fttChain","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker", 
                                                                            "sTGC Cluster maker",    kFALSE},
-  {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker", 
+  {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker",
                                                                              "sTGC Point maker",    kFALSE},
+  {"FttClusterPoint","","fttChain","StEvent,fttDb","StFttClusterPointMaker","StFttClusterPointMaker,StEvent,StFttDbMaker",
+                                                              "sTGC ClusterPoint maker",  kFALSE},
   {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
   {"FwdTrack","","","fcsDb","StFwdTrackMaker",
