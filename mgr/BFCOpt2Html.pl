@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env -S perl -w
 
 #
 # Written J.Lauret sometime in January 2002
