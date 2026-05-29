@@ -302,7 +302,7 @@ Int_t StMuFcsAnaRun22Qa::FillEventInfo(StMuFcsAnaData* anadata)
 
 Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
 {
-  std::cout << "========== StMuFcsAnaRun22Qa::FillFcsInfo Start ==========" << std::endl;
+  //std::cout << "========== StMuFcsAnaRun22Qa::FillFcsInfo Start ==========" << std::endl;
   //std::cout << "Filled Event" << std::endl;
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
@@ -439,12 +439,12 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
 	StThreeVectorD iclu_pos = FcsDb->getStarXYZfromColumnRow( idet, iclu_x, iclu_y );
 	StLorentzVectorD iclu_p = FcsDb->getLorentzVector( iclu_pos, iclu_energy, 0 );
 
-	std::cout << " + |idet:"<<idet <<"|iclus:"<<iclus << "|clusid:"<<clu->id() << "|npoints:"<<clu->nPoints() <<"|nTowers:"<<clu->nTowers()<<"|sigmamin:"<<clu->sigmaMin() << "|sigmamax:"<<clu->sigmaMax() << std::endl;
+	//std::cout << " + |idet:"<<idet <<"|iclus:"<<iclus << "|clusid:"<<clu->id() << "|npoints:"<<clu->nPoints() <<"|nTowers:"<<clu->nTowers()<<"|sigmamin:"<<clu->sigmaMin() << "|sigmamax:"<<clu->sigmaMax() << std::endl;
 	if( clu->sigmaMin()<0.00001 || clu->sigmaMax()<0.00001 ){
 	  TRefArray* cluhits = clu->hits();
 	  for(int itow=0; itow<cluhits->GetEntriesFast(); ++itow ){
 	    StMuFcsHit* hit = (StMuFcsHit*)cluhits->At(itow);
-	    std::cout << "    * |hit:"<<itow << "|col:"<< FcsDb->getColumnNumber(hit->detectorId(),hit->id()) << "|row:"<<FcsDb->getRowNumber(hit->detectorId(),hit->id()) << std::endl;
+	    //std::cout << "    * |hit:"<<itow << "|col:"<< FcsDb->getColumnNumber(hit->detectorId(),hit->id()) << "|row:"<<FcsDb->getRowNumber(hit->detectorId(),hit->id()) << std::endl;
 	  }
 	}
 
@@ -498,7 +498,7 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
 	StThreeVectorD ipoi_pos = FcsDb->getStarXYZfromColumnRow( idet, ipoi_x, ipoi_y );
 	StLorentzVectorD ipoi_p = FcsDb->getLorentzVector(ipoi_pos, ipoi_energy, 0);
 
-	std::cout << " - |idet:"<<idet << "|ipoint:"<<ipoint << "|clusid:"<<point->parentClusterId() << "|nparentpoints:"<<point->nParentClusterPhotons()<</*"|parentclusternpoints:"<< point->cluster()->nPoints() <<"|sigmamin:"<< point->cluster()->sigmaMin() << "|sigmamax:"<<point->cluster()->sigmaMax() <<*/ std::endl;
+	//std::cout << " - |idet:"<<idet << "|ipoint:"<<ipoint << "|clusid:"<<point->parentClusterId() << "|nparentpoints:"<<point->nParentClusterPhotons()<</*"|parentclusternpoints:"<< point->cluster()->nPoints() <<"|sigmamin:"<< point->cluster()->sigmaMin() << "|sigmamax:"<<point->cluster()->sigmaMax() <<*/ std::endl;
 
 	if( mBestMassOn ){
 	  if( idet<=kFcsEcalSouthDetId ){

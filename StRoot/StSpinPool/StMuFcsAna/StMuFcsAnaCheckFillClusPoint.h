@@ -14,6 +14,7 @@
 
   LOG
   @[Februrary 23, 2026] > First instance where relevant functionality was copied from #StMuFcsAnaFillClusPoint and modified to grab information from StEvent
+  @[May 29, 2026] > Commented out printing for when I needed to test why the MuDsts did not contain the point-cluster associations
 
 */
 
