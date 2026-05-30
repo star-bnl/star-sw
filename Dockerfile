@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 
-ARG starenv=root5
+ARG starenv=root6
 
 # Pick one from [gcc485, gcc11]
 ARG compiler=gcc485
