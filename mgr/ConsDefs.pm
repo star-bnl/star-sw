@@ -230,7 +230,16 @@
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
+    # Prefer the locally built agetof.def (in the current build tree) so that
+    # a local build is always self-consistent.  Fall back to the centrally
+    # installed copy when no local one exists yet.
+    {
+        my $local_def = cwd() . "/." . $STAR_HOST_SYS . "/bin/agetof.def";
+        my $agetof_def_dir = (-e $local_def)
+            ? cwd() . "/." . $STAR_HOST_SYS . "/bin"
+            : $STAR_BIN;
+        $AGETOFLAGS = "-V 1 -d $agetof_def_dir/agetof.def";
+    }
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
