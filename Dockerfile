@@ -5,7 +5,7 @@ ARG starenv=root6
 # Pick one from [gcc485, gcc11]
 ARG compiler=gcc485
 
-FROM ghcr.io/star-bnl/star-spack:0.4.0-${starenv}-${compiler}
+FROM ghcr.io/star-bnl/star-spack:v0.4.0-${starenv}-${compiler}
 
 ARG compiler
 
@@ -17,7 +17,6 @@ ENV STAR_SYS=x8664_sl7
 ENV PATH=$STAR_BIN:$STAR/mgr:$PATH
 ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV ROOT_INCLUDE_PATH=$STAR/.${STAR_HOST_SYS}/include:$ROOT_INCLUDE_PATH
-ENV SKIP_DIRS="St_geom_Maker StAngleCorrMaker StSpinMaker StEbyeScaTagsMaker StEbye2ptMaker StDaqClfMaker StFtpcV0Maker GeoTestMaker StShadowMaker StFgtPool StBTofPool StEbyePool StEEmcPool StEmcPool StFgtPool StHighptPool StRichPool StSpectraPool StSpinPool StStrangePool StTofPool StTpcPool PWGTools"
 
 WORKDIR ${STAR}
 COPY . ${STAR}
