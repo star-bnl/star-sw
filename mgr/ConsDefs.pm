@@ -393,6 +393,12 @@
 
     chop($CERNLIBS);
 
+    # RHEL 9 / Alma9 ships libnsl.so.1 only (no unversioned linker symlink);
+    # the NSL functions are now part of glibc, so -lnsl is unnecessary.
+    unless ( -e "/usr/lib64/libnsl.so" || -e "/usr/lib/libnsl.so" ) {
+        $CERNLIBS =~ s/\s*-lnsl\b//g;
+    }
+
     if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
       $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
     }
