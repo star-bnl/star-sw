@@ -181,7 +181,11 @@ if ($LD =~ /g++/ && $FC !~ m/gfortran/) {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
 # if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
-my $LIBPATH    = $env->{LIBPATH};
+# Prepend the absolute path of the local build lib directory so that the
+# linker finds locally built libstarsim/libgeant321/libgcalor even when
+# there is no central installation (e.g. during an OS bootstrap).
+my $local_lib = $pwd . "/." . $STAR_SYS . "/lib";
+my $LIBPATH = $local_lib . $main::PATH_SEPARATOR . $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
 my $LIBS    = $env->{LIBS};
