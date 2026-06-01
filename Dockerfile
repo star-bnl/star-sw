@@ -3,9 +3,10 @@
 ARG starenv=root6
 
 # Pick one from [gcc485, gcc11]
+# gcc485 is the only one in spack 0.4?
 ARG compiler=gcc485
 
-FROM ghcr.io/star-bnl/star-spack:v0.4.0-${starenv}-${compiler}
+FROM ghcr.io/star-bnl/star-spack:v0.4.0-rc1-${starenv}-${compiler}
 
 ARG compiler
 
