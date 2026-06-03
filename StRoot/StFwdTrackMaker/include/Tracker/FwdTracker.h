@@ -941,7 +941,12 @@ class ForwardTrackMaker {
         std::vector<GenfitTrackResult> secondaryTracks;
 
         size_t index = 0;
-        for (auto vtx : mFwdVertices){
+        // iVtx is the 0-based position in mFwdVertices; downstream code in
+        // StFwdTrackMaker::FillEvent() adds this to the StEvent primary-vertex
+        // offset to recover the correct StEvent index. We deliberately do not
+        // use vtx->getId() because that is a RAVE-internal id, not a position.
+        for ( size_t iVtx = 0; iVtx < mFwdVertices.size(); iVtx++ ){
+            auto vtx = mFwdVertices[iVtx];
             LOG_INFO << "FwdVertex: " << vtx->getId() << ", " << vtx->getPos().X() << ", " << vtx->getPos().Y() << ", " << vtx->getPos().Z() << endm;
             LOG_INFO << "\tnTracks: " << vtx->getNTracks() << endm;
             LOG_INFO << "\tChi2: " << vtx->getChi2() << endm;
@@ -952,7 +957,7 @@ class ForwardTrackMaker {
                 LOG_WARN << "FwdVertex: " << vtx->getId() << ", covariance matrix is not valid" << endm;
                 continue;
             }
-            
+
             FwdHit vtxHit;
             vtxHit.setXYZDetId( vtx->getPos().X(), vtx->getPos().Y(), vtx->getPos().Z(), kTpcId );
             vtxHit._covmat = vtx->getCov();
@@ -993,7 +998,7 @@ class ForwardTrackMaker {
                 gtrPV.setDCA( TVector3( vtx->getPos().X(), vtx->getPos().Y(), vtx->getPos().Z() ) );
                 gtrPV.mTrackType = StFwdTrack::kForwardVertexConstrained;
                 gtrPV.mGlobalTrackIndex = gtr->mIndex;
-                gtrPV.mVertexIndex = vtx->getId();
+                gtrPV.mVertexIndex = iVtx;
 
                 LOG_INFO << "\tInitial fit complete, now refitting with additional points" << endm;
                 // refit the track with additional points
@@ -1001,7 +1006,7 @@ class ForwardTrackMaker {
                 gtrPVRefit.mIndex = index;
                 gtrPVRefit.mTrackType = StFwdTrack::kForwardVertexConstrained;
                 gtrPVRefit.mGlobalTrackIndex = gtr->mIndex;
-                gtrPVRefit.mVertexIndex = vtx->getId();
+                gtrPVRefit.mVertexIndex = iVtx;
                 if ( gtrPVRefit.mIsFitConvergedPartially ){
                     secondaryTracks.push_back( gtrPVRefit );
                     gtrPV.Clear(); // clear the original global track result since we will save the refit

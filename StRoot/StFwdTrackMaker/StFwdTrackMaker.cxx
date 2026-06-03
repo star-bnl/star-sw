@@ -300,19 +300,9 @@ EventStats StFwdTrackMaker::GetEventStats() {
  */
 size_t StFwdTrackMaker::loadMcTracks( FwdDataSource::McTrackMap_t &mcTrackMap ){
 
-    LOG_DEBUG << "Looking for GEANT sim vertex info" << endm;
-    St_g2t_vertex *g2t_vertex = (St_g2t_vertex *)GetDataSet("geant/g2t_vertex");
+    // PV is established once per event by GetEventPrimaryVertex() in Make();
+    // do not overwrite it here.
 
-    if ( g2t_vertex != nullptr ) {
-        // Set the MC Vertex for track fitting
-        g2t_vertex_st *vert = (g2t_vertex_st*)g2t_vertex->At(0);
-        TMatrixDSym cov;
-        cov.ResizeTo(3, 3);
-        cov(0, 0) = 0.001;
-        cov(1, 1) = 0.001;
-        cov(2, 2) = 0.001;
-        mForwardTracker->setEventVertex( TVector3( vert->ge_x[0], vert->ge_x[1], vert->ge_x[2] ), cov );
-    }
     // Get geant tracks
     St_g2t_track *g2t_track = (St_g2t_track *)GetDataSet("geant/g2t_track");
 
@@ -411,12 +401,22 @@ TVector3 StFwdTrackMaker::GetEventPrimaryVertex(){
 
     StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
     if(mMuDstMaker && mMuDstMaker->muDst() && mMuDstMaker->muDst()->numberOfPrimaryVertices() > 0 && mMuDstMaker->muDst()->primaryVertex() ) {
-        mEventVertex.SetX(mMuDstMaker->muDst()->primaryVertex()->position().x());
-        mEventVertex.SetY(mMuDstMaker->muDst()->primaryVertex()->position().y());
-        mEventVertex.SetZ(mMuDstMaker->muDst()->primaryVertex()->position().z());
+        StMuPrimaryVertex *muPv = mMuDstMaker->muDst()->primaryVertex();
+        mEventVertex.SetX( muPv->position().x() );
+        mEventVertex.SetY( muPv->position().y() );
+        mEventVertex.SetZ( muPv->position().z() );
+        // Use the TPC PV's own resolution rather than the 1 cm² default
+        const StThreeVectorF posErr = muPv->posError();
+        if ( posErr.x() > 0 && posErr.y() > 0 && posErr.z() > 0 ) {
+            mEventVertexCov(0, 0) = posErr.x() * posErr.x();
+            mEventVertexCov(1, 1) = posErr.y() * posErr.y();
+            mEventVertexCov(2, 2) = posErr.z() * posErr.z();
+        } else {
+            LOG_WARN << "TPC PV posError is not positive (" << posErr.x() << ", " << posErr.y() << ", " << posErr.z() << "), keeping default cov" << endm;
+        }
         mFwdVertexSource = kFwdVertexSourceTpc;
         return mEventVertex;
-    } 
+    }
     
     
     LOG_DEBUG << "FWD Tracking on event without available Mu Primary Vertex" << endm;
@@ -769,45 +769,102 @@ void StFwdTrackMaker::FillEvent() {
         LOG_ERROR << "FCS database not initialized, cannot project FwdTracks to FCS" << endm;
     }
 
-    size_t indexTrack = 0;
-    for ( auto &gtr : mForwardTracker->getTrackResults() ) {
-            LOG_INFO << "Processing GenfitTrackResult(type=" << gtr.mTrackType << "): " << indexTrack << " mIsFitConverged=" << gtr.mIsFitConverged << ", mIsFitConvergedPartially=" << gtr.mIsFitConvergedPartially << ", mNumFitPoints=" << gtr.mNumFitPoints << endm;
-            StFwdTrack* fwdTrack = makeStFwdTrack( gtr, indexTrack );
-            indexTrack++;
-            if (nullptr == fwdTrack)
-                continue;
-            ftc->addTrack( fwdTrack );
+    // Pack a 3x3 TMatrixDSym covariance into the 6-element lower-triangle
+    // representation expected by StVertex::setCovariantMatrix:
+    //   [xx, xy, yy, xz, yz, zz]
+    auto packCov6 = []( const TMatrixDSym &cov, float out[6] ) {
+        out[0] = cov(0,0);
+        out[1] = cov(0,1);
+        out[2] = cov(1,1);
+        out[3] = cov(0,2);
+        out[4] = cov(1,2);
+        out[5] = cov(2,2);
+    };
+
+    // -------------------------------------------------------------------
+    // Establish the StEvent PV index for the event vertex used by the fits
+    // so that StFwdTrack::vertexIndex() points into stEvent->primaryVertices().
+    // For TPC-sourced PVs we try to reuse an existing entry by position match;
+    // otherwise we add a copy of our PV with a source-tagging finder id.
+    int eventPvIndex = -1;
+    if ( mFwdVertexSource == kFwdVertexSourceTpc ) {
+        const double tol = 1e-3; // 10 microns
+        for ( UInt_t i = 0; i < stEvent->numberOfPrimaryVertices(); i++ ) {
+            StPrimaryVertex *pv = stEvent->primaryVertex(i);
+            if (!pv) continue;
+            if (pv->isFwdVtx()) continue; // skip ones we previously added
+            const StThreeVectorF &pos = pv->position();
+            double dx = pos.x() - mEventVertex.X();
+            double dy = pos.y() - mEventVertex.Y();
+            double dz = pos.z() - mEventVertex.Z();
+            if ( dx*dx + dy*dy + dz*dz < tol*tol ) {
+                eventPvIndex = static_cast<int>(i);
+                break;
+            }
+        }
+    }
+    if ( eventPvIndex < 0 &&
+         mFwdVertexSource != kFwdVertexSourceUnknown &&
+         mFwdVertexSource != kFwdVertexSourceNone ) {
+        StPrimaryVertex *pv = new StPrimaryVertex();
+        pv->setPosition( StThreeVectorF( mEventVertex.X(), mEventVertex.Y(), mEventVertex.Z() ) );
+        float cov6[6] = {0,0,0,0,0,0};
+        packCov6( mEventVertexCov, cov6 );
+        pv->setCovariantMatrix( cov6 );
+        if ( mFwdVertexSource == kFwdVertexSourceMc ) {
+            pv->setVertexFinderId( mcEventVertexFFinder );
+        } else if ( mFwdVertexSource == kFwdVertexSourceVpd ) {
+            pv->setBeamConstrained(); // VPD provides z only — effectively beam-constrained in (x,y)
+        }
+        stEvent->addPrimaryVertex( pv );
+        eventPvIndex = static_cast<int>(stEvent->numberOfPrimaryVertices()) - 1;
     }
 
-    LOG_INFO << "StFwdTrackCollection has " << ftc->numberOfTracks() << " tracks now" << endm;
-
-
-    // get the vertices from the forward tracker
-    // and add them to the StEvent as Primary vertices
+    // -------------------------------------------------------------------
+    // Add the FWD (RAVE) vertices BEFORE the tracks so that we know each
+    // secondary-fit track's vertex index. mVertexIndex stored in the
+    // GenfitTrackResult is the 0-based position in mForwardTracker->getVertices(),
+    // so adding fwdRaveOffset recovers the StEvent index.
+    const int fwdRaveOffset = static_cast<int>(stEvent->numberOfPrimaryVertices());
     auto fwdVertices = mForwardTracker->getVertices();
-    for ( auto vert : fwdVertices ){
+    for ( auto vert : fwdVertices ) {
         StPrimaryVertex *pv = new StPrimaryVertex();
         pv->setPosition( StThreeVectorF( vert->getPos().X(), vert->getPos().Y(), vert->getPos().Z() ) );
-        pv->setCovariantMatrix( vert->getCov().GetMatrixArray() );
+        float cov6[6] = {0,0,0,0,0,0};
+        packCov6( vert->getCov(), cov6 );
+        pv->setCovariantMatrix( cov6 );
         pv->setChiSquared( vert->getChi2() );
         pv->setNumTracksUsedInFinder( vert->getNTracks() );
         pv->setFwdVertex();
         stEvent->addPrimaryVertex( pv );
     }
 
+    // -------------------------------------------------------------------
+    // Add the tracks, remapping mVertexIndex to the StEvent PV collection.
+    size_t indexTrack = 0;
+    for ( auto &gtr : mForwardTracker->getTrackResults() ) {
+            LOG_INFO << "Processing GenfitTrackResult(type=" << gtr.mTrackType << "): " << indexTrack << " mIsFitConverged=" << gtr.mIsFitConverged << ", mIsFitConvergedPartially=" << gtr.mIsFitConvergedPartially << ", mNumFitPoints=" << gtr.mNumFitPoints << endm;
 
-    // Pico Dst requires a primary vertex,
-    // if we have a PicoDst maker in the chain, we need to add a primary vertex
-    // when one does not exist to get a "FWD" picoDst
-    // auto mk = GetMaker("PicoDst");
-    // LOG_INFO << "stEvent->numberOfPrimaryVertices() = " << stEvent->numberOfPrimaryVertices() << endm;
-    // if ( mk && stEvent->numberOfPrimaryVertices() == 0 ){
-    //     LOG_INFO << "Adding a primary vertex to StEvent since PicoDst maker was found in chain, but no vertices found" << endm;
-    //     stEvent->addPrimaryVertex( new StPrimaryVertex() );
-    //     LOG_INFO << "StPrimaryVertex::numberOfPrimaryVertices = " << stEvent->numberOfPrimaryVertices() << endm;
-    // }
+            // Translate the working index that the tracker stored into the
+            // index that points into stEvent->primaryVertices(). For Global,
+            // Beamline, and PrimaryVertex-constrained tracks the relevant PV
+            // is the event PV (and DCA is measured against it). For
+            // ForwardVertex-constrained tracks the relevant PV is the RAVE
+            // forward vertex at offset + iVtx.
+            if ( gtr.mTrackType == StFwdTrack::kForwardVertexConstrained ) {
+                gtr.mVertexIndex = fwdRaveOffset + gtr.mVertexIndex;
+            } else if ( eventPvIndex >= 0 ) {
+                gtr.mVertexIndex = eventPvIndex;
+            } else {
+                gtr.mVertexIndex = 0; // no event PV in StEvent — fall back
+            }
 
-
+            StFwdTrack* fwdTrack = makeStFwdTrack( gtr, indexTrack );
+            indexTrack++;
+            if (nullptr == fwdTrack)
+                continue;
+            ftc->addTrack( fwdTrack );
+    }
 
     LOG_INFO << "StFwdTrackCollection has " << ftc->numberOfTracks() << " tracks now" << endm;
 }
