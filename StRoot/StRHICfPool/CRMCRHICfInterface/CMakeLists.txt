@@ -73,22 +73,21 @@ include(ExternalProject)
 if(EXISTS "${CRMC_PATH}/.git")
   message(STATUS "CRMC v2.2.1 already exists at ${CRMC_PATH} skip git clone")
 else()
-  message(STATUS "CRMC v2.2.1 not found. It will be cloned into ${CRMC_PATH}")
-  ExternalProject_Add(
-    CRMCPackage
-
-    GIT_REPOSITORY https://gitlab.iap.kit.edu/AirShowerPhysics/crmc.git
-    GIT_TAG        v2.2.1
-
-    SOURCE_DIR     "${CRMC_PATH}"
-
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND     ""
-    INSTALL_COMMAND   ""
-    TEST_COMMAND      ""
-
-    LOG_DOWNLOAD 1
+  find_package(Git REQUIRED)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} clone --branch v2.2.1
+            https://gitlab.iap.kit.edu/AirShowerPhysics/crmc.git
+            "${CRMC_PATH}"
+    RESULT_VARIABLE CRMC_GIT_CLONE_RESULT
+    OUTPUT_VARIABLE CRMC_GIT_CLONE_OUTPUT
+    ERROR_VARIABLE  CRMC_GIT_CLONE_ERROR
   )
+  if(NOT CRMC_GIT_CLONE_RESULT EQUAL 0)
+    message(STATUS "git clone output: ${CRMC_GIT_CLONE_OUTPUT}")
+    message(STATUS "git clone error: ${CRMC_GIT_CLONE_ERROR}")
+    message(FATAL_ERROR "CRMC v2.2.1 can not clone.")
+  endif()
+  message(STATUS "CRMC v2.2.1 downloaded")
 endif()
 
 # Copy the modified sources to CRMC original (Seunghwan Lee, 26/June/04)
@@ -509,7 +508,7 @@ INCLUDE_DIRECTORIES ("${Boost_INCLUDE_DIRS}")
 # the executable
 IF (CRMC_PROG)
   ADD_EXECUTABLE(crmcrhicf   ${CMAKE_SOURCE_DIR}/source/mainCRMCRHICf.cc)
-#  add_dependencies(crmcrhicf CRMCPackage)
+ add_dependencies(crmcrhicf CRMCPackage)
   
   # linking of modules
   TARGET_LINK_LIBRARIES (crmcrhicf CRMCRHICf)
