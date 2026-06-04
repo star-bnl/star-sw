@@ -69,6 +69,17 @@ void StarSimOpts2021() {
     job.genIAttr["pid"]=8;
     job.simSAttr["application:engine"]="G3";
     addjob(job);
+
+    // Pions | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
+    job.name      = "rcf25000:y2021a:pions:G4:kinematics:mult1:eta2-5:pt9-11:v001";
+    job.genIAttr["pid"]=7;
+    addjob(job);
+
+    // Pions | G3 | 2 < eta < 5 | 9 < pt < 11 GeV
+    job.name      = "rcf25000:y2021a:pions:G3:kinematics:mult1:eta2-5:pt9-11:v001";    
+    job.genIAttr["pid"]=7;
+    job.simSAttr["application:engine"]="G3";
+    addjob(job);
        
   }
 
