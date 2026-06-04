@@ -508,7 +508,6 @@ INCLUDE_DIRECTORIES ("${Boost_INCLUDE_DIRS}")
 # the executable
 IF (CRMC_PROG)
   ADD_EXECUTABLE(crmcrhicf   ${CMAKE_SOURCE_DIR}/source/mainCRMCRHICf.cc)
- add_dependencies(crmcrhicf CRMCPackage)
   
   # linking of modules
   TARGET_LINK_LIBRARIES (crmcrhicf CRMCRHICf)
