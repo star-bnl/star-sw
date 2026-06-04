@@ -40,10 +40,13 @@ void StarSimOpts2021() {
 
     // Photons | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
     job.name      = "rcf25000:y2021a:photons:G4:kinematics:mult1:eta2-5:pt9-11:v001";
+    job.genIAttr["pid"]=1; // For symmetry
+    job.simSAttr["application:engine"]="G4";
     addjob(job);
 
     // Photons | G3 | 2 < eta < 5 | 9 < pt < 11 GeV
     job.name      = "rcf25000:y2021a:photons:G3:kinematics:mult1:eta2-5:pt9-11:v001";    
+    job.genIAttr["pid"]=1;
     job.simSAttr["application:engine"]="G3";
     addjob(job);
 
@@ -51,6 +54,7 @@ void StarSimOpts2021() {
     // Electrons | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
     job.name      = "rcf25000:y2021a:electrons:G4:kinematics:mult1:eta2-5:pt9-11:v001";
     job.genIAttr["pid"]=3;
+    job.simSAttr["application:engine"]="G4";
     addjob(job);
 
     // Electrons | G3 | 2 < eta < 5 | 9 < pt < 11 GeV
@@ -62,6 +66,7 @@ void StarSimOpts2021() {
     // Piplus | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
     job.name      = "rcf25000:y2021a:piplus:G4:kinematics:mult1:eta2-5:pt9-11:v001";
     job.genIAttr["pid"]=8;
+    job.simSAttr["application:engine"]="G4";
     addjob(job);
 
     // Piplus | G3 | 2 < eta < 5 | 9 < pt < 11 GeV
@@ -73,6 +78,7 @@ void StarSimOpts2021() {
     // Pions | G4 | 2 < eta < 5 | 9 < pt < 11 GeV
     job.name      = "rcf25000:y2021a:pions:G4:kinematics:mult1:eta2-5:pt9-11:v001";
     job.genIAttr["pid"]=7;
+    job.simSAttr["application:engine"]="G4";
     addjob(job);
 
     // Pions | G3 | 2 < eta < 5 | 9 < pt < 11 GeV
