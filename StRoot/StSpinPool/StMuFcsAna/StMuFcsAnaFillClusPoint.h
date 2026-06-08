@@ -13,6 +13,7 @@
 
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
+  @[June 4, 2026] > Fixed error printing to print this class's name and not old 'StMuFcsTreeMaker'
 
 */
 

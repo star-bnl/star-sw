@@ -242,10 +242,10 @@ Int_t StMuFcsAnaRun22Qa::DoMake(StMuFcsAnaData* anadata)
   }
   //std::cout << "Filled Fcs" << std::endl;
   //Local copy of needed variables to make things easier
-  StMuFcsCollection* MuFcsColl = anadata->fcsColl();
+  //StMuFcsCollection* MuFcsColl = anadata->fcsColl();
   //const StTriggerData* TrigData = anadata->trigData();
 
-  unsigned int totalecalhits = MuFcsColl->numberOfHits(kFcsEcalNorthDetId) + MuFcsColl->numberOfHits(kFcsEcalSouthDetId);
+  //unsigned int totalecalhits = MuFcsColl->numberOfHits(kFcsEcalNorthDetId) + MuFcsColl->numberOfHits(kFcsEcalSouthDetId);
   //mH2F_Mult_tofVecal->Fill(totalecalhits,TrigData->tofMultiplicity());
 
   //std::cout << "Finished Make" << std::endl;
@@ -440,13 +440,14 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
 	StLorentzVectorD iclu_p = FcsDb->getLorentzVector( iclu_pos, iclu_energy, 0 );
 
 	//std::cout << " + |idet:"<<idet <<"|iclus:"<<iclus << "|clusid:"<<clu->id() << "|npoints:"<<clu->nPoints() <<"|nTowers:"<<clu->nTowers()<<"|sigmamin:"<<clu->sigmaMin() << "|sigmamax:"<<clu->sigmaMax() << std::endl;
+	/* @[June 3, 2026] > I was printing this out at some point, maybe February 2026) because I wanted to check if clusters with low sigma min and max values are coming from single tower clusters.
 	if( clu->sigmaMin()<0.00001 || clu->sigmaMax()<0.00001 ){
 	  TRefArray* cluhits = clu->hits();
 	  for(int itow=0; itow<cluhits->GetEntriesFast(); ++itow ){
 	    StMuFcsHit* hit = (StMuFcsHit*)cluhits->At(itow);
 	    //std::cout << "    * |hit:"<<itow << "|col:"<< FcsDb->getColumnNumber(hit->detectorId(),hit->id()) << "|row:"<<FcsDb->getRowNumber(hit->detectorId(),hit->id()) << std::endl;
 	  }
-	}
+	  }*/
 
 	if( mBestMassOn ){
 	  if( idet<=kFcsEcalSouthDetId ){

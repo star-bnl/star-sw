@@ -31,16 +31,16 @@ Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
   StFcsDb* FcsDb = anadata->fcsDb();
   TClonesArray* PhArr = anadata->getPhArr();
   //Fcs Collection
-  if( !MuFcsColl ){ LOG_ERROR << "StMuFcsTreeMaker::Make did not find MuFcsCollection" << endm; return kStErr; }
+  if( !MuFcsColl ){ LOG_ERROR << "StMuFcsAnaFillClusPoint::Make did not find MuFcsCollection" << endm; return kStErr; }
 
   //TClonesArray* hits = mMuFcsColl->getHitArray();
-  //if( hits==0 ){ LOG_INFO << "StMuFcsTreeMaker::FillFcsInfo - No FCS hits" << endm; }
+  //if( hits==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS hits" << endm; }
   TClonesArray* clusters = anadata->fcsColl()->getClusterArray();
-  //if( clusters==0 ){ LOG_INFO << "StMuFcsTreeMaker::FillFcsInfo - No FCS clusters" << endm; }
-  if( clusters==0 ){ std::cout << "StMuFcsTreeMaker::FillFcsInfo - No FCS clusters" << std::endl; }
+  //if( clusters==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS clusters" << endm; }
+  if( clusters==0 ){ std::cout << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS clusters" << std::endl; }
   TClonesArray* points = anadata->fcsColl()->getPointArray();
-  //if( points==0 ){ LOG_INFO << "StMuFcsTreeMaker::FillFcsInfo - No FCS points" << endm; }
-  if( points==0 ){ std::cout << "StMuFcsTreeMaker::FillFcsInfo - No FCS points" << std::endl; }
+  //if( points==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS points" << endm; }
+  if( points==0 ){ std::cout << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS points" << std::endl; }
   
   //std::cout << "|hits:"<<hits << "|clusters:"<<clusters << "|points:"<<points << std::endl;
   Int_t ncandidates = 0;
