@@ -3,13 +3,14 @@
   David Kapukchyan
 
   PURPOSE
-  The purpoe of this class is to make pairs of #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and store them into #StMuFcsAnaData::mPairArr. These pairs serve as the basline for analysis that requires reconstructing a particle by looking at its two decay particles
+  The purpose of this class is to make pairs of #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and store them into #StMuFcsAnaData::mPhPairArr. These pairs serve as the basline for analysis that requires reconstructing a particle by looking at its two decay particles
 
   DESCRIPTION
-  The analysis module loops over all the #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and creates #FcsPi0Candidate and stores them into #StMuFcsAnaData::mPairArr. It will also check how different EPD nMIP cuts effect the invariant mass of the pairs 
+  The analysis module loops over all the #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and creates #FcsPi0Candidate and stores them into #StMuFcsAnaData::mPhPairArr. You can choose to make pairs with, clusters, points or both.
 
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
+  @[June 8, 2026] > Changed name of #FcsPi0Candidate to #FcsPairCandidate. Modified #DoMake() to make pairs with clusters, points, or both. Got rid of histograms and paint methods as this class should only be used to generate pairs and any QA related stuff should be done in the new #StMuFcsAnaMakePairsQa.
 
 */
 
@@ -25,21 +26,23 @@ public:
   StMuFcsAnaMakePairs();
   ~StMuFcsAnaMakePairs();
 
+  void setMakeClusPairs(bool val){ mMakeClusPairs=val; }
+  void setMakePointPairs(bool val){ mMakePointPairs=val; }
+
   virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
   virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
 
-  void PaintEnergy(TCanvas* canv, const char* savename) const;
-  void PaintEpdNmipCuts(TCanvas* canv, const char* savename) const;
+  //void PaintEpdNmipCuts(TCanvas* canv, const char* savename) const;
   
 protected:
-  TH1* mH2F_Energy_ph1Vph2 = 0;         ///< Histogram of two photons energy used in reconstruction
-  TH1* mH1F_NBadEpdProj = 0;            ///< Number of points that did not have a valid projection to an EPD tile in a given event
-  TH1* mH1F_NBadEpdProjVcut = 0;        ///< Number of points that did not have a valid projection to an EPD tile in a given event with cut |vertex|<150
+  bool mMakeClusPairs = true;        ///< Boolean to tell class to make pairs from FCS clusters
+  bool mMakePointPairs = true;          ///< Boolean to tell class to make pairs from FCS points
 
-  static const short NEPDCUTS = 8;
-  TObjArray* mH1F_InvMassEpdCuts[2];    ///< Invariant Mass using different epd nmip cuts and all triggers or only EM triggers
+  //@[June 8, 2026] > Not sure yet where to put this so leave this commented out for now so later can be cut and paste into appropriate class
+  //static const short NEPDCUTS = 8;
+  //TObjArray* mH1F_InvMassEpdCuts[2];    ///< Invariant Mass using different epd nmip cuts and all triggers or only EM triggers
   
-  ClassDef(StMuFcsAnaMakePairs,1)
+  ClassDef(StMuFcsAnaMakePairs,2)
 };
 
 #endif

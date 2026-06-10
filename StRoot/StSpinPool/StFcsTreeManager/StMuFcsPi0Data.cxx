@@ -77,7 +77,7 @@ FcsPhotonCandidate::FcsPhotonCandidate()
   for( int i=0; i<5; ++i ){
     mEpdHitNmip[i] = -1;
     mEpdMatch[i] = 0;
-  }    
+  }
 }
 
 FcsPhotonCandidate::~FcsPhotonCandidate()
@@ -121,7 +121,7 @@ Int_t FcsPhotonCandidate::Compare(const TObject* obj) const
 {
   FcsPhotonCandidate* other = 0;
   other = (FcsPhotonCandidate*)obj;
-  if( other==0 ){ std::cout << "ERROR - Not an FcsPi0Candidate" << std::endl; return 0; }
+  if( other==0 ){ std::cout << "ERROR - Not an FcsPairCandidate" << std::endl; return 0; }
   if( this->mFromCluster==other->mFromCluster ){
     //if( this->mFromCluster < other->mFromCluster ){ return -1; }
     //if( this->mFromCluster==other->mFromCluster ){
@@ -157,6 +157,9 @@ void FcsPhotonCandidate::Copy(TObject& object) const
     (((FcsPhotonCandidate&)object)).mEpdHitNmip[i] = mEpdHitNmip[i];
     (((FcsPhotonCandidate&)object)).mEpdMatch[i] = mEpdMatch[i];
   }
+
+  ((FcsPhotonCandidate&)object).mEpdHitNmipSum = mEpdHitNmipSum;
+  ((FcsPhotonCandidate&)object).mEpdHitAdjMax = mEpdHitAdjMax;
 }
 
 
@@ -183,59 +186,63 @@ void FcsPhotonCandidate::Clear(Option_t* opt)
 
     //std::cout << "=====|FcsPhotonCandidate::Clear()::DEEPDEBUG||hitnmip:"<<mEpdHitNmip[i] << "|hitmatch:"<<mEpdMatch[i] << std::endl;
   }
+
+  mEpdHitNmipSum = 0;
+  mEpdHitAdjMax = 0;
 }
 
 void FcsPhotonCandidate::Print(Option_t* opt) const
 {
-  std::cout << "|Clus:"<<mFromCluster << "|Pos:("<<mX<<","<<mY<<","<<mZ<<")|En:"<<mEn << "|PRaw:"<<mPxRaw<<","<<mPyRaw<<","<<mPzRaw<<","<<"|PVert:"<<mPxVert<<","<<mPyVert<<","<<mPzVert << "|EpdNmip:"<<mEpdHitNmip << std::endl;
+  std::cout << "|Clus:"<<mFromCluster << "|Pos:("<<mX<<","<<mY<<","<<mZ<<")|En:"<<mEn << "|PRaw:"<<mPxRaw<<","<<mPyRaw<<","<<mPzRaw<<","<<"|PVert:"<<mPxVert<<","<<mPyVert<<","<<mPzVert << std::endl;
+  //Need to add option for printing epd information "|EpdNmip:"<<mEpdHitNmip << std::endl;
 }
 
-ClassImp(FcsPi0Candidate)
+ClassImp(FcsPairCandidate)
 
-FcsPi0Candidate::FcsPi0Candidate()
+FcsPairCandidate::FcsPairCandidate()
 {}
 
-FcsPi0Candidate::~FcsPi0Candidate()
+FcsPairCandidate::~FcsPairCandidate()
 {}
 
-TLorentzVector FcsPi0Candidate::lv()
+TLorentzVector FcsPairCandidate::lv()
 {
   TLorentzVector v;
   v.SetPxPyPzE(mPx,mPy,mPz,mEn);
   return v;
 }
 
-Float_t FcsPi0Candidate::eta() const
+Float_t FcsPairCandidate::eta() const
 { if( mEta<0 ){ return asinh(mPz/pt()); }else{ return mEta; } }
 
-Float_t FcsPi0Candidate::phi() const
+Float_t FcsPairCandidate::phi() const
 { return atan2(mPy,mPx); }
 
-Float_t FcsPi0Candidate::pt() const
+Float_t FcsPairCandidate::pt() const
 { return sqrt( mPx*mPx + mPy*mPy ); }
 
-Float_t FcsPi0Candidate::ptot() const
+Float_t FcsPairCandidate::ptot() const
 { return sqrt( mPx*mPx + mPy*mPy + mPz*mPz ); }
 
-Float_t FcsPi0Candidate::theta() const
+Float_t FcsPairCandidate::theta() const
 { return 2.0*atan(exp(-1.0*eta())); }
 
-Float_t FcsPi0Candidate::mass() const
+Float_t FcsPairCandidate::mass() const
 { return sqrt(mEn*mEn - (mPx*mPx + mPy*mPy + mPz*mPz)); }
 
-Bool_t FcsPi0Candidate::IsEqual(const TObject* obj) const
+Bool_t FcsPairCandidate::IsEqual(const TObject* obj) const
 {
-  FcsPi0Candidate* other = (FcsPi0Candidate*) obj;
+  FcsPairCandidate* other = (FcsPairCandidate*) obj;
   if( obj==0 ){ return kFALSE; }
   //else{ return (this->mInvMass==other->mInvMass); }
   else{ return ( fabs(this->mInvMass-Pi0Mass())==fabs(other->mInvMass-Pi0Mass()) ); }
 }
 
-Int_t FcsPi0Candidate::Compare(const TObject* obj) const
+Int_t FcsPairCandidate::Compare(const TObject* obj) const
 {
-  FcsPi0Candidate* other = 0;
-  other = (FcsPi0Candidate*)obj;
-  if( other==0 ){ std::cout << "ERROR - Not an FcsPi0Candidate" << std::endl; return 0; }
+  FcsPairCandidate* other = 0;
+  other = (FcsPairCandidate*)obj;
+  if( other==0 ){ std::cout << "ERROR - Not an FcsPairCandidate" << std::endl; return 0; }
   if(      fabs(this->mInvMass-Pi0Mass()) < fabs(other->mInvMass-Pi0Mass()) ){ return -1; }
   else if( fabs(this->mInvMass-Pi0Mass()) > fabs(other->mInvMass-Pi0Mass()) ){ return  1; }
   //if(      (this->mEn) < (other->mEn) ){ return -1; }
@@ -243,7 +250,7 @@ Int_t FcsPi0Candidate::Compare(const TObject* obj) const
   else { return 0; }
 }
 
-void FcsPi0Candidate::Clear(Option_t* opt)
+void FcsPairCandidate::Clear(Option_t* opt)
 {
   mFromCluster = false;
   mFromPh = 0;
@@ -260,18 +267,18 @@ void FcsPi0Candidate::Clear(Option_t* opt)
   mInvMass = -1;  
 }
 
-void FcsPi0Candidate::Print(Option_t* opt) const
+void FcsPairCandidate::Print(Option_t* opt) const
 {
   std::cout << "|Clus:"<<mFromCluster <<"|PhCut:"<<mFromPh << "|Ph1Idx:"<<mPhoton1Idx << "|Ph2Idx:"<<mPhoton2Idx << "|En:"<<mEn << "|P:("<<mPx<<","<<mPy<<","<<mPz<<")|Pt:"<<pt()<<"|Eta:"<<mEta << "|Dgg:"<<mDgg << "|Zgg:"<<mZgg << "|Alpha:"<<mAlpha << "|InvMass:"<<mInvMass << std::endl;
 }
 
-Float_t FcsPi0Candidate::zgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
+Float_t FcsPairCandidate::zgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
 {return fabs(ph1.mEn-ph2.mEn)/(ph1.mEn+ph2.mEn);}
 
-Float_t FcsPi0Candidate::dgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
+Float_t FcsPairCandidate::dgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
 { return sqrt( (ph1.mX-ph2.mX)*(ph1.mX-ph2.mX) + (ph1.mY-ph2.mY)*(ph1.mY-ph2.mY) + (ph1.mZ-ph2.mZ)*(ph1.mZ-ph2.mZ) ); }
 
-Float_t FcsPi0Candidate::alpha(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
+Float_t FcsPairCandidate::alpha(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2)
 {
   Float_t ph1dotph2 = ph1.mX*ph2.mX + ph1.mY*ph2.mY + ph1.mZ*ph2.mZ; //dot product of vectors for the current cluster position and cluster j position
   Float_t ph1mag = ph1.magPosition(); //magnitude of position vector for candidate 1

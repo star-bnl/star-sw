@@ -16,6 +16,7 @@
   LOG
   @[January 9, 2026]  > Copied from *StMuFcsPi0TreeMaker* and modified to keep only the relevant data pointers
   @[January 21, 2026] > Copied members of *StFcsRun22TriggerMap* to here so don't need an extra pointer. Limited number of pointers to only the main relevant ones and the rest is accessed through getter functions
+  @[June 8, 2026] > Changed #FcsPi0Candidate to #FcsPairCandidate, added #mEvent as an internal event counter
 */
 
 
@@ -166,6 +167,7 @@ public:
   
   TTree* getPi0Tree()const{ return mPi0Tree; }
 
+  ULong_t getEventNum()const{ return mEvent; }
   FcsEventInfo* getEvtInfo()const{ return mEvtInfo; }
   Int_t getTreeEntries()const{ return mPi0Tree->GetEntriesFast(); }
   Int_t getEntry(Int_t ientry){ return mPi0Tree->GetEntry(ientry); }
@@ -182,7 +184,7 @@ public:
 
   TClonesArray* getPhPairArr()const{ return mPhPairArr; }
   Int_t getNPhPair()const{ return mPhPairArr->GetEntriesFast(); }
-  FcsPi0Candidate* getPhPair(Int_t ipi0)const{ return dynamic_cast<FcsPi0Candidate*>(mPhPairArr->UncheckedAt(ipi0)); }
+  FcsPairCandidate* getPhPair(Int_t ipi0)const{ return dynamic_cast<FcsPairCandidate*>(mPhPairArr->UncheckedAt(ipi0)); }
   //#ifndef __CINT__
   //void SetTrigs(const char* trigname,...);//{ mTargetTrig.emplace_back(trigname); }
   //template<typename... Args>
@@ -229,6 +231,8 @@ public:
 
 
 protected:
+  ULong_t mEvent = 0;                       ///< Internal event counter that can be used to tag and keep track of events
+  
   bool mIgnoreTrig = false;                 ///< (false) flag to check if ignoring triggers or not
   UShort_t mTreeOnBitMap = 0x7;             ///< (0x7) Turn on or off branches in the pi0 tree. first bit is events, second bit is photon branch, third bit is pi0 branch. Turn on all branches by default
 
@@ -289,7 +293,7 @@ private:
 
   void SetTriggerPtThresholds(TrigRange& input);  ///< Copied a map of trigger name to its corresponding P_T==E_T thresholds from https://www.star.bnl.gov/protected/spin/akio/fcs/run22trg.html on November 25, 2024. All values will be in GeV. Called when filling #mAllFcsTrigRanges
 
-  ClassDef(StMuFcsAnaData,1)
+  ClassDef(StMuFcsAnaData,2)
 };
 
 #endif

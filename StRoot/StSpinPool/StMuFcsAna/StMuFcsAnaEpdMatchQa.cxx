@@ -28,10 +28,6 @@ StMuFcsAnaEpdMatchQa::~StMuFcsAnaEpdMatchQa()
     delete itr->second;
   }
   mEpdTileMap.clear();
-  for( auto itr=mEpdCcwLines.begin(); itr!=mEpdCcwLines.end(); ++itr ){
-    delete itr->second;
-  }
-  mEpdCcwLines.clear();
 }
 
 UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuFcsAnaData* data )
@@ -48,8 +44,16 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
   //loaded += histman->AddH1F(file,mH1F_PointProjDistToEpdTiles,"H1F_PointProjDistToEpdTiles","Distance of FCS projected point to all EPD tiles;D (cm)", 200,0,200);
   //loaded += histman->AddH1F(file,mH1F_PointProjDistToEpdHits,"H1F_PointProjDistToEpdHits","Distance of FCS projected point to all EPD Hits;D (cm)", 200,0,200);
 
+  loaded += histman->AddH1F(file,mH1F_ClusNBadEpdProj,"H1F_ClusNBadEpdProj","Number of clusters in an event that did not project back to a valid EPD tile;;",15,0,15);
+  loaded += histman->AddH1F(file,mH1F_ClusNBadEpdProjVcut,"H1F_ClusNBadEpdProjVcut","Number of clusters in an event that did not project back to a valid EPD tile with |vertex|<150;;",15,0,15);
+
+  loaded += histman->AddH1F(file,mH1F_PointNBadEpdProj,"H1F_PointNBadEpdProj","Number of points in an event that did not project back to a valid EPD tile;;",15,0,15);
+  loaded += histman->AddH1F(file,mH1F_PointNBadEpdProjVcut,"H1F_PointNBadEpdProjVcut","Number of points in an event that did not project back to a valid EPD tile with |vertex|<150;;",15,0,15);
+
   loaded += histman->AddH2F(file,mH2F_ClusProjEpdAdj_maxVsum,"H2F_ClusProjEpdAdj_maxVsum","FCS projected cluster to EPD tile max vs. sum of adjacent tiles;Sum;Max", 70,0,7 , 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProjEpdAdj_maxVsum,"H2F_PointProjEpdAdj_maxVsum","FCS projected point to EPD tile max vs. sum of adjacent tiles;Sum;Max", 70,0,7 , 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_ClusProjEpdAdj_tileVsum,"H2F_ClusProjEpdAdj_tileVsum","FCS projected cluster to EPD tile nmip vs. sum of adjacent tiles;Sum;Found", 70,0,7 , 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_PointProjEpdAdj_tileVsum,"H2F_PointProjEpdAdj_tileVsum","FCS projected point to EPD tile nmip vs. sum of adjacent tiles;Sum;Found", 70,0,7 , 70,0,7);
 
   loaded += histman->AddH2F(file,mH2F_ClusProjEpdAdj_maxVtile,"H2F_ClusProjEpdAdj_maxVtile","FCS projected cluster to EPD adjacent tiles nmip max vs. nmip of intersecting tile;Found;Max", 70,0,7 , 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProjEpdAdj_maxVtile,"H2F_PointProjEpdAdj_maxVtile","FCS projected point to EPD adjacent tiles nmip max vs. nmip of intersecting tile;Found;Max", 70,0,7 , 70,0,7);
@@ -66,10 +70,9 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
 //----------------------
 Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
 {
-  memset(mAllEpdNmip,0,sizeof(mAllEpdNmip));
   //std::cout << this->ClassName() << "|Start Make" << std::endl;
   TClonesArray* PhArr = anadata->getPhArr();
-  StEpdGeom* EpdGeom = anadata->epdGeom();
+  //StEpdGeom* EpdGeom = anadata->epdGeom();
   Double_t usevertex = anadata->mUseVertex;
   Double_t vertexcutlow = anadata->mVertexCutLow;
   Double_t vertexcuthigh = anadata->mVertexCutHigh;
@@ -79,7 +82,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
   anadata->epdColl(MuEpdHits,EpdColl);
 
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
-  //Int_t npoints = ntotal - anadata->mEvtInfo->mClusterSize;
+  /*
   unsigned int nepdhits = 0;
   StSPtrVecEpdHit* epdhits = 0;
   if( MuEpdHits!=0 ){ nepdhits = MuEpdHits->GetEntriesFast(); }
@@ -88,16 +91,20 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     nepdhits = epdhits->size();
   }
   else{ LOG_ERROR << "StMuFcsAnaEpdMatchQa::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
-
+  */
   //std::cout << this->ClassName() << "|Start:Make_CheckAndSetEpdHit" << std::endl;
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
-  Int_t npoints = PhArr->GetEntriesFast();
   //Int_t nepdwesthits = 0;
-  for( Int_t iph = 0; iph<npoints; ++iph ){
+  Int_t n_clusnoepdproj = 0;
+  Int_t n_clusnoepdproj_vcut = 0;
+  Int_t n_pointnoepdproj = 0;
+  Int_t n_pointnoepdproj_vcut = 0;
+  for( Int_t iph = 0; iph<PhArr->GetEntriesFast(); ++iph ){
     //std::cout << "|iph:"<<iph << std::endl;
     FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
 
+    /*
     std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     //loop over all hits and if an nmip value exists set for the point
     StMuEpdHit* muepdhit = 0;
@@ -112,8 +119,6 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
       int epdpp = muepdhit!=0 ? muepdhit->position(): epdhit->position();  //Supersector runs [1,12]
       int epdtt = muepdhit!=0 ? muepdhit->tile()    : epdhit->tile();      //Tile number [1,31]
       float nmip = muepdhit!=0 ? muepdhit->nMIP(): epdhit->nMIP();         //The ADC value of the hit divided by the MIP peak position; e.g. if nmip==1 then adc value sits at the MIP peak
-      mAllEpdNmip[epdpp-1][epdtt-1] = nmip;
-      /*
       TVector3 epdhitxyz = EpdGeom->TileCenter(epdpp,epdtt,ew);
       double rpoint = sqrt(epdproj.at(0)*epdproj.at(0) + epdproj.at(1)*epdproj.at(1));
       double rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
@@ -128,10 +133,43 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
 	mH2F_PointProj_nmipVdrhit->Fill(rpoint-rhit,nmip);
 	mH2F_PointProj_nmipVdphihit->Fill(diffphi,nmip);
 	if( nmip>0.7 ){ mH1F_PointProjDistToEpdHits->Fill(dist); }
+       }
+     }
+    */
+    
+    //Check how many clusters/points didn't have a match
+    if( ph->mEpdMatch[0]==0 ){
+      if( ph->mFromCluster ){
+	++n_clusnoepdproj;
+	if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){ ++n_clusnoepdproj_vcut; }
       }
-      */
+      else{
+	++n_pointnoepdproj;
+	if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){ ++n_pointnoepdproj_vcut; }
+      }
     }
-    CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));
+
+    if( ph->mEpdMatch[0]!=0 ){
+      float nmiptile = ph->mEpdHitNmip[0];
+      float nmipmax = ph->mEpdHitAdjMax;
+      float nmipsum = ph->mEpdHitNmipSum;
+      if( ph->mFromCluster ){ mH2F_ClusProjEpdAdj_maxVsum->Fill(nmipsum,nmipmax); }
+      else{ mH2F_PointProjEpdAdj_maxVsum->Fill(nmipsum,nmipmax); }
+      if( ph->mFromCluster ){ mH2F_ClusProjEpdAdj_tileVsum->Fill(nmipsum,nmiptile); }
+      else{ mH2F_PointProjEpdAdj_tileVsum->Fill(nmipsum,nmiptile); }
+
+      if( ph->mFromCluster ){ mH2F_ClusProjEpdAdj_maxVtile->Fill(nmiptile,nmipmax); }
+      else{ mH2F_PointProjEpdAdj_maxVtile->Fill(nmiptile,nmipmax); }
+      
+      float reduced_nmip = nmipsum>0 ? nmipmax/nmipsum : 0;  //If sum is zero all adjacent nmips must be zero as well
+      //std::cout << "   * |nmipmax:"<<nmipmax << "|nmipsum:"<<nmipsum <<"|red_nmip:"<<nmipmax/nmipsum << std::endl;
+      if( ph->mFromCluster ){ mH1F_ClusProjEpdAdjRedMip->Fill(reduced_nmip); }
+      else{ mH1F_PointProjEpdAdjRedMip->Fill(reduced_nmip); }
+      
+      float reduced_max = nmipmax>0 ? nmiptile/nmipmax : 0;  //If max is 0 then that means even the found nmip was zero
+      if( ph->mFromCluster ){ mH1F_ClusProjEpdAdjRedMax->Fill(reduced_max); }
+      else{ mH1F_PointProjEpdAdjRedMax->Fill(reduced_max); }
+    }
 
     //loop over all west epd tiles after hit loop since we can use the saved nmip information from the hit loop
     /*
@@ -157,7 +195,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     if( mCanvas!=0 ){
       //if( mCanvSaveName.Length()==0 ){
       std::stringstream ss_savename;
-      ss_savename << "FcsAna_PointEpdDistQa_"<<ph->mFromCluster << "_Ph"<<iph << "_Evt"<<mEvent << ".png";
+      ss_savename << "FcsAna_PointEpdDistQa_"<<ph->mFromCluster << "_Ph"<<iph << "_Evt"<<amadata->getEventNum() << ".png";
       //std::cout << ss_savename.str() << std::endl;
       mCanvSaveName = ss_savename.str().c_str();
       //}
@@ -168,164 +206,32 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     }
     */
   }
-  
-  //++mEvent;
+
+  mH1F_ClusNBadEpdProj->Fill(n_clusnoepdproj);
+  mH1F_ClusNBadEpdProjVcut->Fill(n_clusnoepdproj_vcut);
+
+  mH1F_PointNBadEpdProj->Fill(n_pointnoepdproj);
+  mH1F_PointNBadEpdProjVcut->Fill(n_pointnoepdproj_vcut);
+
   return kStOk;
 }
 
-void StMuFcsAnaEpdMatchQa::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidate* photon, Double_t projx, Double_t projy )
+void StMuFcsAnaEpdMatchQa::PaintBadProjections(TCanvas* canv, const char* savename) const
 {
-  //loop over all west epd tiles so that even if no hit recorded can use as a veto
-  for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
-    for( int i_tt=1; i_tt<=31; ++i_tt ){ //Tile number [1,31]
-      if( epdgeo->IsInTile(i_pp,i_tt, 1, projx,projy) ){ //Only care about west EPD tiles; hence the '1'
-	//TPolyLine* epd_ccw = EpdCCWOuterCorner(i_pp,i_tt);
-	photon->mEpdHitNmip[0] = 0;
-	photon->mEpdMatch[0] = 100*i_pp + i_tt;
-	//std::cout << " + |projx:"<<projx << "|projy:"<<projy << "|nmip:"<< photon->mEpdHitNmip[0] << "|epdkey:"<<photon->mEpdMatch[0] << std::endl;
-	break; //Inside match should be unique
-      }
-    }
-  }
+  canv->Clear();
 
-  if( photon->mEpdMatch[0]==0 ){ //If no intersection found it would be -1 so now check all the CCW adjacencies
-    //std::cout << "   - |projx:"<<projx << "|projy:"<<projy << "|nmip:"<< photon->mEpdHitNmip[0] << "|epdkey:"<<photon->mEpdMatch[0] << std::endl;
-    int ccwcounter = 1; //Should be 1 but Hack to check the drawing of the projections
-    for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
-      for( int i_tt=1; i_tt<=31; ++i_tt ){ //Tile number [1,31]
-	Int_t epdkey = 100*i_pp+i_tt;
-	TPolyLine* epd_outerccw = 0;
-	auto itr = mEpdCcwLines.find(epdkey);
-	if( itr!=mEpdCcwLines.end() ){ epd_outerccw = itr->second; }
-	else{
-	  epd_outerccw = StMuFcsAnaEpdMatch::EpdCCWOuterCorner(epdgeo,i_pp,i_tt);
-	  auto result = mEpdCcwLines.emplace(epdkey,epd_outerccw);
-	  if( !(result.second) ){ std::cout << "If you see this ERROR,, something went totally wrong and For some reason you tried to insert an EPD Tile Outer CCW that already exists" << std::endl; }
-	}
-	if( TMath::IsInside( projx, projy, epd_outerccw->GetN(), epd_outerccw->GetX(), epd_outerccw->GetY() ) ){
-	  //TPolyLine* epd_ccw = EpdCCWOuterCorner(i_pp,i_tt);
-	  photon->mEpdHitNmip[ccwcounter] = 0;
-	  photon->mEpdMatch[ccwcounter] = epdkey;
-	  //std::cout << "     - |ccwcounter:"<<ccwcounter << "|nmip:"<< photon->mEpdHitNmip[ccwcounter] << "|epdkey:"<<photon->mEpdMatch[ccwcounter] << std::endl;
-	  ++ccwcounter;
-	}
-      }
-    }
-  }
+  canv->Divide(2,2);
 
-  int ncorners = 0;
-  for( int icorner=0; icorner<5; ++icorner ){
-    //std::cout << " + |projx:"<<projx << "|projy:"<<projy << "|epdkey:"<<photon->mEpdHitNmip[icorner] << std::endl;
-    if( photon->mEpdMatch[icorner]!=0 ){ ++ncorners; }
-  }
-  
-  if( ncorners>1 ){
-    int bestcorner = 0;
-    Double_t mindist = 999; //Pick some large distance so that the minimum will get set with first loop
-    for( int icorner=0; icorner<5; ++icorner ){
-      //Pick the best corner and set it to 0 value since the algorithm above only cares about the match in 0
-      //std::cout << " + |projx:"<<projx << "|projy:"<<projy << "|nmip:"<< photon->mEpdHitNmip[icorner] << "|epdkey:"<<photon->mEpdMatch[icorner];
-      if( photon->mEpdMatch[icorner]!=0 ){
-	int epdpp = photon->mEpdMatch[icorner]/100;
-	int epdtt = photon->mEpdMatch[icorner] - epdpp*100;
-	TVector3 epdhitxyz = epdgeo->TileCenter(epdpp,epdtt,1);//1 for west
-	Double_t distx = projx-epdhitxyz.x();
-	Double_t disty = projy-epdhitxyz.y();
-	Double_t dist = TMath::Sqrt(distx*distx+disty*disty);
-	//std::cout << "|("<<epdhitxyz.x() << ","<<epdhitxyz.y() <<")|dx:"<<distx << "|dy:"<< disty << "|dist:"<<dist;
-	if( dist<mindist ){ bestcorner = icorner; }
-      }
-      //else{std::cout << "|("<<0 << ","<<0 <<")"; }
-      //std::cout << std::endl;
-    }
-    //std::cout << "   + |ncorners:"<<ncorners << std::endl;
-    photon->mEpdMatch[0] = photon->mEpdMatch[bestcorner];
-    photon->mEpdHitNmip[0] = 0;
-  }
-  
-  /*
-  //For all tiles except 1, 2, or 3 only check Outer CCW since this will cover the gap for all tiles except 1, 2, or 3
-  TPolyLine* epd_outerccw = EpdCCWOuterCorner(i_pp,i_tt);
-  if( TMath::IsInside( projx, projy, epd_outerccw->GetN(), epd_outerccw->GetX(), epd_outerccw->GetY() ) ){
-  photon->mEpdHitNmip[1] = 0;
-  photon->mEpdMatch[1] = 100*i_pp + i_tt;
-  }
-  //else if( i_tt==1 || i_tt==2 || i_tt==3 ){
-  //For tiles 1, 2, and 3 need to check other than the outer CCW because of the pentagonal structure of tile 1 means that inner CCW, inner CW, and outer CW have a weird overlap that needs checking
-  TPolyLine* epd_innerccw = EpdCCWInnerCorner(i_pp,i_tt);
-  if( TMath::IsInside( projx, projy, epd_innerccw->GetN(), epd_innerccw->GetX(), epd_innerccw->GetY() ) ){
-  photon->mEpdHitNmip[2] = 0;
-  photon->mEpdMatch[2] = 100*i_pp + i_tt;
-  }
-  TPolyLine* epd_innercw = EpdCWInnerCorner(i_pp,i_tt);
-  if( TMath::IsInside( projx, projy, epd_innercw->GetN(), epd_innercw->GetX(), epd_innercw->GetY() ) ){
-  photon->mEpdHitNmip[3] = 0;
-  photon->mEpdMatch[3] = 100*i_pp + i_tt;
-  }
-  TPolyLine* epd_outercw = EpdCWOuterCorner(i_pp,i_tt);
-  if( TMath::IsInside( projx, projy, epd_outercw->GetN(), epd_outercw->GetX(), epd_outercw->GetY() ) ){
-  photon->mEpdHitNmip[4] = 0;
-  photon->mEpdMatch[4] = 100*i_pp + i_tt;
-  }
-  } //for i_tt
-  }   //for i_pp
-  */
-  
-  //Set nmip since this is called after hit loop above so the nmip array should be filled
-  int found_pp = 0;
-  int found_tt = 0;
-  if( photon->mEpdMatch[0]!=0 ){
-    found_pp = photon->mEpdMatch[0]/100;
-    found_tt = photon->mEpdMatch[0] - found_pp*100;
-    photon->mEpdHitNmip[0] = mAllEpdNmip[found_pp-1][found_tt-1];
-  }
-  
-  if( found_pp==0 || found_tt==0 ){ return; }
-  //Grab all adjacencies then check their mip values
-  const int MAX_ADJ = 8;
-  int adj_pp[MAX_ADJ];
-  int adj_tt[MAX_ADJ];
-  StMuFcsAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
-  StMuFcsAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
-  StMuFcsAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
-  StMuFcsAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
-  StMuFcsAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
-  StMuFcsAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
-  StMuFcsAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
-  StMuFcsAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
+  canv->cd(1)->SetLogy();
+  mH1F_ClusNBadEpdProj->Draw("hist e");
+  canv->cd(3)->SetLogy();
+  mH1F_ClusNBadEpdProjVcut->Draw("hist e");
+  canv->cd(2)->SetLogy();
+  mH1F_PointNBadEpdProj->Draw("hist e");
+  canv->cd(4)->SetLogy();
+  mH1F_PointNBadEpdProjVcut->Draw("hist e");
 
-  float nmiptile = mAllEpdNmip[found_pp-1][found_tt-1];
-  //Start with intersecting tile's values
-  float nmipmax = nmiptile;
-  float nmipsum = nmiptile;
-  //std::cout << "  + |pp:"<<found_pp << "|tt:"<<found_tt <<"|nmip:"<< nmipmax << "|projx:"<<projx <<"|projy:"<<projy << std::endl;
-  for(int iadj=0; iadj<MAX_ADJ; ++iadj ){
-    if( adj_pp[iadj]==0 || adj_tt[iadj]==0 ){ continue; }
-    float nmip_adj = mAllEpdNmip[adj_pp[iadj]-1][adj_tt[iadj]-1];
-    //TVector3 epdhitxyz = epdgeo->TileCenter(adj_pp[iadj],adj_tt[iadj],1);
-    //std::cout << "    - |iadj:"<<iadj << "|pp:"<<adj_pp[iadj] << "|tt:"<<adj_tt[iadj] << "|nmip:"<<nmip_adj << std::endl;
-    //std::cout << "    - |iadj:"<<iadj << "|pp:"<<adj_pp[iadj] << "|tt:"<<adj_tt[iadj] << "|nmip:"<<nmip_adj <<"|x:"<<epdhitxyz[0] <<"|y:"<<epdhitxyz[1] << std::endl;
-    if( nmip_adj>nmipmax ){ nmipmax=nmip_adj; }
-    nmipsum += nmip_adj;
-    //mH1F_PointProjEpdTile_nmipVadj->Fill(iadj,nmip_adj);
-  }
-
-  if( nmipmax>nmipsum ){ std::cout << "   * |nmiptile:"<<nmiptile << "|nmipmax:"<<nmipmax << "|nmipsum:"<<nmipsum << std::endl; }
-
-  if( photon->mFromCluster ){ mH2F_ClusProjEpdAdj_maxVsum->Fill(nmipsum,nmipmax); }
-  else{ mH2F_PointProjEpdAdj_maxVsum->Fill(nmipsum,nmipmax); }
-  if( photon->mFromCluster ){ mH2F_ClusProjEpdAdj_maxVtile->Fill(nmiptile,nmipmax); }
-  else{ mH2F_PointProjEpdAdj_maxVtile->Fill(nmiptile,nmipmax); }
-
-  float reduced_nmip = nmipsum>0 ? nmipmax/nmipsum : 0;  //If sum is zero all adjacent nmips must be zero as well
-  //std::cout << "   * |nmipmax:"<<nmipmax << "|nmipsum:"<<nmipsum <<"|red_nmip:"<<nmipmax/nmipsum << std::endl;
-  if( photon->mFromCluster ){ mH1F_ClusProjEpdAdjRedMip->Fill(reduced_nmip); }
-  else{ mH1F_PointProjEpdAdjRedMip->Fill(reduced_nmip); }
-
-  float reduced_max = nmipmax>0 ? nmiptile/nmipmax : 0;  //If max is 0 then that means even the found nmip was zero
-  if( photon->mFromCluster ){ mH1F_ClusProjEpdAdjRedMax->Fill(reduced_max); }
-  else{ mH1F_PointProjEpdAdjRedMax->Fill(reduced_max); }
-  
+  canv->Print(savename);
 }
 
 void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQa(TCanvas* canv, const char* savename) const
@@ -410,7 +316,7 @@ void StMuFcsAnaEpdMatchQa::StMuFcsAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv
 void StMuFcsAnaEpdMatchQa::PaintProjEpdAdjQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
-  canv->Divide(3,3);
+  canv->Divide(3,4);
   
   canv->cd(1)->SetLogz();
   mH2F_ClusProjEpdAdj_maxVsum->Draw("colz");
@@ -418,18 +324,23 @@ void StMuFcsAnaEpdMatchQa::PaintProjEpdAdjQa(TCanvas* canv, const char* savename
   mH2F_PointProjEpdAdj_maxVsum->Draw("colz");
 
   canv->cd(2)->SetLogz();
-  mH2F_ClusProjEpdAdj_maxVtile->Draw("colz");
+  mH2F_ClusProjEpdAdj_tileVsum->Draw("colz");
   canv->cd(5)->SetLogz();
+  mH2F_PointProjEpdAdj_tileVsum->Draw("colz");
+
+  canv->cd(3)->SetLogz();
+  mH2F_ClusProjEpdAdj_maxVtile->Draw("colz");
+  canv->cd(6)->SetLogz();
   mH2F_PointProjEpdAdj_maxVtile->Draw("colz");
 
-  canv->cd(3);
+  canv->cd(7)->SetLogy();
   mH1F_ClusProjEpdAdjRedMip->Draw("hist e");
-  canv->cd(6);
+  canv->cd(10)->SetLogy();
   mH1F_PointProjEpdAdjRedMip->Draw("hist e");
 
-  canv->cd(7)->SetLogy();
-  mH1F_ClusProjEpdAdjRedMax->Draw("hist e");
   canv->cd(8)->SetLogy();
+  mH1F_ClusProjEpdAdjRedMax->Draw("hist e");
+  canv->cd(11)->SetLogy();
   mH1F_PointProjEpdAdjRedMax->Draw("hist e");
   
   canv->Print(savename);
@@ -474,7 +385,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* 
       polyline->SetLineWidth(1);
       polyline->SetLineColor(kBlack);
       polyline->SetFillColorAlpha(kWhite,0);
-      float nmip = mAllEpdNmip[i_pp-1][i_tt-1];
+      float nmip = StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt);
       if( 0==nmip ){
 	polyline->SetFillColorAlpha(kWhite,0);
       }

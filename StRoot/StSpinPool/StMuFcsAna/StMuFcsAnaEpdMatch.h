@@ -3,14 +3,15 @@
   David Kapukchyan
 
   PURPOSE
-  The purpoe of this class is to match the photon candidates to the EPD hits and properly set the variables of the matched photons. Also contains static functions to generate EPD adjacency tile maps
+  The purpose of this class is to match the photon candidates to the EPD hits and properly set the variables of the matched photons (#FcsPhotonCandidate). Also contains static functions to generate EPD adjacency tile maps and polylines
 
   DESCRIPTION
-  Loops over all the #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and for each #FcsPhotonCandidate projects the #FcsPhotonCandidate onto the EPD plane; for each projected position it loops over all EPD tiles and checks if this position lies inside any EPD tile; if yes set nMIP to zero and store the tiles usual EPD key (100*pp+tt) into the #FcsPhotonCandidate's data. It then loops over all the EPD hits and sets the nMIP value for the #FcsPhotonCandidate to the matching intersecting EPD tile. The finding of the matched tiles is done in the static function #CheckInsideEpdTile(). It is static so that it can be re-used in other #StMuFcsAna analysis modules.
+  Loops over all EPD hits and fills the static array #mAllEpdNmip which can then be used for further analysis outside this class. Loops over all the #FcsPhotonCandidate in #StMuFcsAnaData::mPhArr and for each #FcsPhotonCandidate projects the #FcsPhotonCandidate onto the EPD plane; for each projected position it loops over all EPD tiles and checks if this position lies inside any EPD tile; if yes set nMIP to zero and store the tiles usual EPD key (100*pp+tt) into the #FcsPhotonCandidate's data. It then sets the nMIP value for the #FcsPhotonCandidate to the matching intersecting EPD tile. It also grabs the intersecting tiles nmip value (nmiptile) and the 8 adjacent tiles' nmip values and determines a sum (nmipsum) and a maximum out of all 9 (nmipmax) and stores those in #FcsPhotonCandidate. The finding of the matched and adjacent tiles is done in the static function #CheckInsideEpdTile(). It is static so that it can be re-used in other #StMuFcsAna analysis modules.
 
   LOG
   @[January 22, 2026] > Copied static methods of finding adjacenct EPD tiles from #StMuEpdRun22QaMaker
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
+  @[June 8, 2026] > Implemented #mAllEpdNmip array to hold the nmip value for each tile and supersector so calling #CheckInsideEpdTile() should happen after this filling. Moved EPD hit loop outside photon candidate loop since nmip can be grabbed from #mAllEpdNmip. You can now grab the nmip of an epd tile from outside this class using the static #epdNmip(). Improved the #CheckInsideEpdTile() algorithm by copying over the nmip tile, nmip adjacency sum, and nmip adjacency max filling algorithm from #StMuFcsAnaEpdMatchQa (which no longer has its own 'CheckInsideEpdTile()'). Moved some of the QA histograms and drawing to the new #StMuFcsAnaEpdMatchQa. Modified #EpdCCWOuterCorner() to grab polyline from internal static map or make one if it doesn't exist.
 
 */
 
@@ -31,7 +32,7 @@ public:
   virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data);
   virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
 
-  static void CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidate* photon, Double_t projx, Double_t projy);
+  static void CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidate* photon, Double_t projx, Double_t projy);   ///< Main algorithm that will check if a #FcsPhotonCandidate intersects any EPD tile or any OuterCCW EPD tiles if no EPD tile is found. Once such a match is found it will appropriately fill the nmip values in #FcsPhotonCandidate so that another analysis module can use this informaiton as a selection criteria
   
   static std::vector<Int_t> GetAdjacentEpdIds(Int_t pp,Int_t tt);
   static void GetEpdPPandTTFromId(Int_t id, Int_t& pp, Int_t& tt);
@@ -50,23 +51,25 @@ public:
      
      X (Beam line)
   */
-  static void GetEpdTileOuter(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);       ///! Get the tile going away from beam line from the given tile
-  static void GetEpdTileOuterCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);    ///! Get the tile going away and counterclockwise (increasing pp)
-  static void GetEpdTileCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);         ///! Get the tile going counterclockwise (increasing pp)
-  static void GetEpdTileInnerCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);    ///! Get the tile going in and counterclockwise (increasing pp)
-  static void GetEpdTileInner(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);       ///! Get the tile going towards the beam line (in) from the given tile
-  static void GetEpdTileInnerCW(Int_t pp, Int_t tt, Int_t &newpp, Int_t& newtt);     ///! Get the tile in and clockwise (decreasing pp)
-  static void GetEpdTileCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);          ///! Get the tile going clockwise (decreasing pp)
-  static void GetEpdTileOuterCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);     ///! Get the tile going away and clockwise (decreasing pp)
+  static void GetEpdTileOuter(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);       ///< Get the tile going away from beam line from the given tile
+  static void GetEpdTileOuterCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);    ///< Get the tile going away and counterclockwise (increasing pp)
+  static void GetEpdTileCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);         ///< Get the tile going counterclockwise (increasing pp)
+  static void GetEpdTileInnerCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);    ///< Get the tile going in and counterclockwise (increasing pp)
+  static void GetEpdTileInner(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);       ///< Get the tile going towards the beam line (in) from the given tile
+  static void GetEpdTileInnerCW(Int_t pp, Int_t tt, Int_t &newpp, Int_t& newtt);     ///< Get the tile in and clockwise (decreasing pp)
+  static void GetEpdTileCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);          ///< Get the tile going clockwise (decreasing pp)
+  static void GetEpdTileOuterCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt);     ///< Get the tile going away and clockwise (decreasing pp)
   
   //void GetAdjacentEpdTile(int pp, int tt, int& pp_adj, int& tt_adj) const;
-  static TPolyLine* EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt);       ///< Returns a new polyline using corners from StEpdGeom
-  static TPolyLine* EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt);  ///< Return a new polyline  using adjacency of outer CCW
-  static TPolyLine* EpdCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt);
-  static TPolyLine* EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt);
-  static TPolyLine* EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt);
+  static TPolyLine* EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt);        ///< Return a new polyline using corners from StEpdGeom
+  static TPolyLine* EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt);  ///< Return a new polyline using adjacency of outer CCW. This will either be a newly created one or an existing one from #mEpdCcwLines. Therefore it will be deleted by this class
+  static TPolyLine* EpdCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt);   ///< Return a new polyline using adjacency of outer CW
+  static TPolyLine* EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt);   ///< Return a new polyline using adjacency of inner CW
+  static TPolyLine* EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt);  ///< Return a new polyline using adjacency of inner CCW
 
-  void PaintEpdProjections(TCanvas* canv, const char* savename)   const;
+  static float epdNmip(short pp, short tt){ return mAllEpdNmip[pp-1][tt-1]; }    ///< Return the nmip value for a given EPD supersector and tile. Correctly accounts for shift in supersctor (pp) and tile (tt) so user should pass in the "normal" EPD values. See #mAllEpdNmip
+
+  void PaintEpdProjections(TCanvas* canv, const char* savename)   const;         ///< Paints the histograms in this class
   
 protected:
   TH1* mH2F_EpdProjHitMap = 0;          ///< Distribution of x,y projections of photon candidates onto STAR EPD plane in x,y space
@@ -74,6 +77,8 @@ protected:
   TH1* mH2F_EpdNmip = 0;                ///< Nmip distributions for EPD matched projected clusters (x-axis bin 1) and points (y-axis bin 2)
   
   static std::map<Int_t,TPolyLine*> mEpdCcwLines;  ///< Map of EPD key to TPolyline to keep track of created polyline objects
+
+  static float mAllEpdNmip[12][31];     ///< Array that will hold the nmip values for all west EPD tiles in an event. West EPD has 12 supersectors and 31 tiles per supersector. EPD database and map starts counting from 1 so need to downshift by 1 when using values supersector and tile numbers from EPD geometry. If using #epdNmip() this is handled correctly
   
   ClassDef(StMuFcsAnaEpdMatch,1)
 };

@@ -18,6 +18,7 @@
 ClassImp(StMuFcsAnaEpdMatch)
 
 std::map<Int_t,TPolyLine*> StMuFcsAnaEpdMatch::mEpdCcwLines;
+float StMuFcsAnaEpdMatch::mAllEpdNmip[12][31] = {0};
 
 StMuFcsAnaEpdMatch::StMuFcsAnaEpdMatch()
 {
@@ -47,6 +48,8 @@ UInt_t StMuFcsAnaEpdMatch::LoadHists(TFile* file, HistManager* histman, StMuFcsA
 
 Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
 {
+  memset(mAllEpdNmip,0,sizeof(mAllEpdNmip));
+  
   TClonesArray* PhArr = anadata->getPhArr();
   StEpdGeom* EpdGeom = anadata->epdGeom();
   Double_t usevertex = anadata->mUseVertex;
@@ -58,6 +61,7 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
 
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
   //Int_t npoints = ntotal - anadata->mEvtInfo->mClusterSize;
+  //First loop over all hits and set values of global nmip array
   unsigned int nepdhits = 0;
   StSPtrVecEpdHit* epdhits = 0;
   if( MuEpdHits!=0 ){ nepdhits = MuEpdHits->GetEntriesFast(); }
@@ -66,9 +70,28 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
     nepdhits = epdhits->size();
   }
   else{ LOG_ERROR << "StMuFcsAnaEpdMatch::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
-
-  Int_t ntotal = PhArr->GetEntriesFast();
+  StMuEpdHit* muepdhit = 0;
+  StEpdHit* epdhit = 0;
   Int_t nepdwesthits = 0;
+  for(unsigned int i=0; i<nepdhits; ++i ){
+    if( MuEpdHits!=0 ){ muepdhit = (StMuEpdHit*)MuEpdHits->UncheckedAt(i); } //To match similar in StMuDstMaker->epdHit(int i)
+    else if( epdhits!=0 ){ epdhit = (StEpdHit*)((*epdhits)[i]); }
+    else{ LOG_ERROR << "IF YOU SEE THIS ERROR THEN THERE IS A VERY SERIOUS BUG IN THE CODE" << endm; return kStErr; } 
+    //std::cout << "|i:"<<i << "|muepdhit:"<<muepdhit << "|epdhit:"<<epdhit << std::endl;
+    int ew    = muepdhit!=0 ? muepdhit->side()    : epdhit->side();      //east=-1, west=1
+    if( ew==-1 ){ continue; }                                            //Skip hits in the east since FCS is only on the west
+    ++nepdwesthits;
+    int epdpp = muepdhit!=0 ? muepdhit->position(): epdhit->position();  //Supersector runs [1,12]
+    int epdtt = muepdhit!=0 ? muepdhit->tile()    : epdhit->tile();      //Tile number [1,31]
+    //int adc = muepdhit!=0 ? muepdhit->adc() : epdhit->adc();
+    float nmip = muepdhit!=0 ? muepdhit->nMIP(): epdhit->nMIP();         //The ADC value of the hit divided by the MIP peak position; e.g. if nmip==1 then adc value sits at the MIP peak
+    mAllEpdNmip[epdpp-1][epdtt-1] = nmip;
+    //std::cout << "|epdpp:"<<epdpp <<"|epdtt:"<<epdtt <<"|nmip:"<<nmip << std::endl;
+    //std::cout << "|epdz:"<<epdhitxyz[2] << std::endl;
+  }
+
+  //Loop over all photon candidates and run #CheckInsideEpdTile() algorithm which relies on nmip values from hit loop
+  Int_t ntotal = PhArr->GetEntriesFast();
   for( Int_t iph = 0; iph<ntotal; ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
     FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
@@ -81,33 +104,6 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
     //std::cout << " + |epdx:"<<epdproj.at(0) << "|epdy:"<<epdproj.at(1) << "|epdz:"<<epdproj.at(2) << std::endl;
     //std::cout << " ** |iph:"<< iph-noldhits << std::endl;
     StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
-    
-    //loop over all hits and if an nmip value exists set for the point
-    StMuEpdHit* muepdhit = 0;
-    StEpdHit* epdhit = 0;
-    for(unsigned int i=0; i<nepdhits; ++i ){
-      if( MuEpdHits!=0 ){ muepdhit = (StMuEpdHit*)MuEpdHits->UncheckedAt(i); } //To match similar in StMuDstMaker->epdHit(int i)
-      else if( epdhits!=0 ){ epdhit = (StEpdHit*)((*epdhits)[i]); }
-      else{ LOG_ERROR << "IF YOU SEE THIS ERROR THEN THERE IS A VERY SERIOUS BUG IN THE CODE" << endm; return kStErr; } 
-      //std::cout << "|i:"<<i << "|muepdhit:"<<muepdhit << "|epdhit:"<<epdhit << std::endl;
-      int ew    = muepdhit!=0 ? muepdhit->side()    : epdhit->side();      //east=-1, west=1
-      if( ew==-1 ){ continue; }
-      if( iph==0){ ++nepdwesthits; }
-      int epdpp = muepdhit!=0 ? muepdhit->position(): epdhit->position();  //Supersector runs [1,12]
-      int epdtt = muepdhit!=0 ? muepdhit->tile()    : epdhit->tile();      //Tile number [1,31]
-      //int adc = muepdhit!=0 ? muepdhit->adc() : epdhit->adc();
-      float nmip = muepdhit!=0 ? muepdhit->nMIP(): epdhit->nMIP();         //The ADC value of the hit divided by the MIP peak position; e.g. if nmip==1 then adc value sits at the MIP peak
-      //std::cout << "|epdpp:"<<epdpp <<"|epdtt:"<<epdtt <<"|nmip:"<<nmip << std::endl;
-      //std::cout << "|epdz:"<<epdhitxyz[2] << std::endl;
-      //if( ! ph->mFromCluster ){
-      //if( mTrigEm2==3 && mTrigEm0<0 && mTrigEm1<0 ){
-      if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){
-	if( ph->mEpdMatch[0] == (100*epdpp+epdtt)  ){
-	  ph->mEpdHitNmip[0] = nmip;
-	}
-      }
-      //}
-    }
     //std::cout << "=====DEEPDEBUG=====:"<<((ph->mFromCluster)?0:1) << "|" << ph->mEpdHitNmip[0] << std::endl;
     //std::cout << "=====DEEPDEBUG=====:"<< ((ph->mFromCluster)?0:1) << "|" << ph->mEpdHitNmip[0] << std::endl;
     mH2F_EpdNmip->Fill( ((ph->mFromCluster)?0:1),ph->mEpdHitNmip[0] );
@@ -132,24 +128,17 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
       }
     }
   }
+
   if( photon->mEpdMatch[0]==0 ){ //If no intersection found it would be -1 so now check all the CCW adjacencies
     //std::cout << "   - |projx:"<<projx << "|projy:"<<projy << "|nmip:"<< photon->mEpdHitNmip[0] << "|epdkey:"<<photon->mEpdMatch[0] << std::endl;
     int ccwcounter = 1; //Should be 1 but Hack to check the drawing of the projections
     for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
       for( int i_tt=1; i_tt<=31; ++i_tt ){ //Tile number [1,31]
-	Int_t epdkey = 100*i_pp+i_tt;
-	TPolyLine* epd_outerccw = 0;
-	auto itr = mEpdCcwLines.find(epdkey);
-	if( itr!=mEpdCcwLines.end() ){ epd_outerccw = itr->second; }
-	else{
-	  epd_outerccw = EpdCCWOuterCorner(epdgeo,i_pp,i_tt);
-	  auto result = mEpdCcwLines.emplace(epdkey,epd_outerccw);
-	  if( !(result.second) ){ std::cout << "If you see this ERROR,, something went totally wrong and For some reason you tried to insert an EPD Tile Outer CCW that already exists" << std::endl; }
-	}
+	TPolyLine* epd_outerccw = EpdCCWOuterCorner(epdgeo,i_pp,i_tt);
 	if( TMath::IsInside( projx, projy, epd_outerccw->GetN(), epd_outerccw->GetX(), epd_outerccw->GetY() ) ){
 	  //TPolyLine* epd_ccw = EpdCCWOuterCorner(i_pp,i_tt);
 	  photon->mEpdHitNmip[ccwcounter] = 0;
-	  photon->mEpdMatch[ccwcounter] = epdkey;
+	  photon->mEpdMatch[ccwcounter] = 100*i_pp+i_tt;
 	  //std::cout << "     - |ccwcounter:"<<ccwcounter << "|nmip:"<< photon->mEpdHitNmip[ccwcounter] << "|epdkey:"<<photon->mEpdMatch[ccwcounter] << std::endl;
 	  ++ccwcounter;
 	}
@@ -176,6 +165,7 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
 	Double_t distx = projx-epdhitxyz.x();
 	Double_t disty = projy-epdhitxyz.y();
 	Double_t dist = TMath::Sqrt(distx*distx+disty*disty);
+	photon->mEpdHitNmip[icorner] = mAllEpdNmip[epdpp-1][epdtt-1];
 	//std::cout << "|("<<epdhitxyz.x() << ","<<epdhitxyz.y() <<")|dx:"<<distx << "|dy:"<< disty << "|dist:"<<dist;
 	if( dist<mindist ){ bestcorner = icorner; }
       }
@@ -184,7 +174,7 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
     }
     //std::cout << "   + |ncorners:"<<ncorners << std::endl;
     photon->mEpdMatch[0] = photon->mEpdMatch[bestcorner];
-    photon->mEpdHitNmip[0] = 0;
+    photon->mEpdHitNmip[0] = 0;  //0 means intersection found
   }
   
     /*
@@ -214,6 +204,49 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
     } //for i_tt
   }   //for i_pp
     */
+
+  //Set nmip since this is called after hit loop above so the nmip array should be filled
+  int found_pp = 0;
+  int found_tt = 0;
+  if( photon->mEpdMatch[0]!=0 ){
+    found_pp = photon->mEpdMatch[0]/100;
+    found_tt = photon->mEpdMatch[0] - found_pp*100;
+    photon->mEpdHitNmip[0] = mAllEpdNmip[found_pp-1][found_tt-1];
+  }
+  if( found_pp!=0 && found_tt!=0 ){
+    //Grab all adjacencies then check their mip values
+    const int MAX_ADJ = 8;
+    int adj_pp[MAX_ADJ];
+    int adj_tt[MAX_ADJ];
+    StMuFcsAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
+    StMuFcsAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
+    StMuFcsAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
+    StMuFcsAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
+    StMuFcsAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
+    StMuFcsAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
+    StMuFcsAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
+    StMuFcsAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
+
+    float nmiptile = mAllEpdNmip[found_pp-1][found_tt-1];
+    //Start with intersecting tile's values
+    float nmipmax = nmiptile;
+    float nmipsum = nmiptile;
+    //std::cout << "  + |pp:"<<found_pp << "|tt:"<<found_tt <<"|nmip:"<< nmipmax << "|projx:"<<projx <<"|projy:"<<projy << std::endl;
+    for(int iadj=0; iadj<MAX_ADJ; ++iadj ){
+      if( adj_pp[iadj]==0 || adj_tt[iadj]==0 ){ continue; }
+      float nmip_adj = mAllEpdNmip[adj_pp[iadj]-1][adj_tt[iadj]-1];
+      //TVector3 epdhitxyz = epdgeo->TileCenter(adj_pp[iadj],adj_tt[iadj],1);
+      //std::cout << "    - |iadj:"<<iadj << "|pp:"<<adj_pp[iadj] << "|tt:"<<adj_tt[iadj] << "|nmip:"<<nmip_adj << std::endl;
+      //std::cout << "    - |iadj:"<<iadj << "|pp:"<<adj_pp[iadj] << "|tt:"<<adj_tt[iadj] << "|nmip:"<<nmip_adj <<"|x:"<<epdhitxyz[0] <<"|y:"<<epdhitxyz[1] << std::endl;
+      if( nmip_adj>nmipmax ){ nmipmax=nmip_adj; }
+      nmipsum += nmip_adj;
+      //mH1F_PointProjEpdTile_nmipVadj->Fill(iadj,nmip_adj);
+    }
+    //if( nmipmax>nmipsum ){ std::cout << "   * |nmiptile:"<<nmiptile << "|nmipmax:"<<nmipmax << "|nmipsum:"<<nmipsum << std::endl; }
+
+    photon->mEpdHitNmipSum = nmipsum;
+    photon->mEpdHitAdjMax = nmipmax;
+  }
 }
 
 std::vector<Int_t> StMuFcsAnaEpdMatch::GetAdjacentEpdIds(Int_t pp,Int_t tt)
@@ -431,6 +464,10 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt
 //Makes the 2x2 
 TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt)
 {
+  Int_t epdkey = 100*pp+tt;
+  auto itr = mEpdCcwLines.find(epdkey);
+  if( itr!=mEpdCcwLines.end() ){ return itr->second; }  //return if already exists in map
+  
   //std::vector<Int_t> adjaenttiles = StMuFcsAnaEpdMatch::GetAdjacentEpdIds(pp,tt);
   //std::vector<TPolyLine*> alllines;
   //alllines.push_back(EpdTilePoly(pp,tt)); //Start with center tile
@@ -601,6 +638,8 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, sh
     
   delete main;
   TPolyLine* newline = new TPolyLine(newxvals.size(),newxvals.data(),newyvals.data());  //Equal sizes so shouldn't matter which is used
+  auto result = mEpdCcwLines.emplace(epdkey,newline);
+  if( !(result.second) ){ std::cout << "If you see this ERROR,, something went totally wrong and For some reason you tried to insert an EPD Tile Outer CCW that already exists" << std::endl; }
   return newline;
 }
 

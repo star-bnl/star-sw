@@ -3,13 +3,14 @@
   David Kapukchyan
 
   PURPOSE
-  Apply selection criteria on #FcsPi0Candidate and fill histograms needed to perform the Transverse Single Spin Assymetry (TSSA) analysis
+  Apply selection criteria on #FcsPairCandidate and fill histograms needed to perform the Transverse Single Spin Assymetry (TSSA) analysis for neutral pion (pi^0)
 
   DESCRIPTION
-  Loop over all the #FcsPi0Candidate in #StMuFcsAnaData::mPairArr and apply a selection criteria to isolate pi0s and fill a histogram to count number of pi0s over azimuthal angle, Feynman-x (x_F), and spin information. This histogram will be used to compute the TSSA. Also, does QA on the found pi0s. Applies several cuts on #FcsPi0Candidate: only FCS points are used, a z vertex cut is applied, a Z_gg cut of 0.7 is applied, a p_T cut based on the trigger p_T is applied (It is also split by FCS EM trigger). Lastly, an EPD nMIP cut is applied; the "Ph" acronym stands for "photon" and reprsents an EPD cut less than #StMuFcsAnaData::mEpdNmipCut; the "Ch" acronym stands for "charged" and represent an EPD cut greater than or equal to #StMuFcsAnaData::mEpdNmipCut; they are so named because real photons should not leave a MIP in the EPD, only a charged particle should. The pi0s that are used are ones where both #FcsPhotonCandidate have their nMIP set to less than #StMuFcsAnaData::mEpdNmipCut. It also compares the "Ph" to the "Ch" candidates. To do the TSSA analysis it is neccessary to define a signal region and a background region. This analysis will use the invariant mass of 0.1-0.2 as the signal region; two background regions exist: 0.3-0.4 and 0.7-0.9.
+  Loop over all the #FcsPairCandidate in #StMuFcsAnaData::mPairArr and apply a selection criteria to isolate pi0s and fill a histogram to count number of pi0s over azimuthal angle, Feynman-x (x_F), and spin information. This histogram will be used to compute the TSSA. Also, does QA on the found pi0s. Applies several cuts on #FcsPairCandidate: only FCS points are used, a z vertex cut is applied, a Z_gg cut of 0.7 is applied, a p_T cut based on the trigger p_T is applied (It is also split by FCS EM trigger). Lastly, an EPD nMIP cut is applied; the "Ph" acronym stands for "photon" and reprsents an EPD cut less than #StMuFcsAnaData::mEpdNmipCut; the "Ch" acronym stands for "charged" and represent an EPD cut greater than or equal to #StMuFcsAnaData::mEpdNmipCut; they are so named because real photons should not leave a MIP in the EPD, only a charged particle should. The pi0s that are used are ones where both #FcsPhotonCandidate have their nMIP set to less than #StMuFcsAnaData::mEpdNmipCut. It also compares the "Ph" to the "Ch" candidates. To do the TSSA analysis it is neccessary to define a signal region and a background region. This analysis will use the invariant mass of 0.1-0.2 as the signal region; two background regions exist: 0.3-0.4 and 0.7-0.9.
 
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsPi0TreeMaker
+  @[June 8, 2026] > Changed all 'FcsPi0Candidate' to the new #FcsPairCandidate
 
 */
 
@@ -135,7 +136,7 @@ protected:
   TH1* mH2F_NPi0Bg2_xfVphi[2][2];           ///< x_F and phi where pi0 candidate was found [blue,yellow][up,down] for invariant mass range of 0.7-0.9
   //Add mass vs. energy hisotgram??
   
-  ClassDef(StMuFcsAnaPi0Tssa,1)
+  ClassDef(StMuFcsAnaPi0Tssa,2)
 };
 
 #endif

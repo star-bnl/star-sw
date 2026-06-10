@@ -12,6 +12,7 @@
 
   LOG
   @[January 9, 2026] > Copied from *StMuFcsTreeMaker* and modified to do the relevant things. Since I am keeping *StMuFcsTreeMaker* please see that log for all relevant developments of the analysis code.
+  @[June 8, 2026] > Implemented #StMuFcsAnaData::mEvent
 
 */
 

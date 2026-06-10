@@ -213,6 +213,8 @@ Int_t StMuFcsAnaDataMaker::Make()
 
   mAnaData->mStEvent = (StEvent*)GetInputDS("StEvent");
 
+  mAnaData->mEvent = mAnaData->mEvent+1;
+
   mH1D_Entries->Fill(0); //This is just counting valid make calls (i.e. increment bin 1 by 1)
   
   mAnaData->mEvtInfo->mRunTime         = mAnaData->mRunInfo->beamFillNumber(StBeamDirection::east);    //using yellow beam

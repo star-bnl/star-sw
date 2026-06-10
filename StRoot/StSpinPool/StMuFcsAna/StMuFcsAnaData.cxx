@@ -520,10 +520,10 @@ void StMuFcsAnaData::loadTree(TFile* file)
       }
     }
     
-    if( mPhPairArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #FcsPi0Candidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhPairArr; mPhPairArr=0; }
+    if( mPhPairArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #FcsPairCandidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhPairArr; mPhPairArr=0; }
     if( isPhPairOn() ){
       if( mPi0Tree->Branch("Pi0")!=0 ){
-	mPhPairArr      = new TClonesArray("FcsPi0Candidate");  
+	mPhPairArr      = new TClonesArray("FcsPairCandidate");  
 	mPi0Tree->SetBranchAddress("Pi0",&mPhPairArr);
       }
       else{ std::cout << "LoadDataFromFile - WARNING:No \"Pi0\" branch found in mPi0Tree it could be that the tree was generated without this option." << std::endl; }
@@ -541,12 +541,12 @@ void StMuFcsAnaData::makeTree(TFile* file)
   }
   file->cd(); //File expected to be nonzero here if everything initialized correctly
   if( mTreeOnBitMap!=0 ){
-    mPi0Tree     = new TTree("Pi0Tree","Tree with FcsPi0Candidate");
+    mPi0Tree     = new TTree("Pi0Tree","Tree with FcsPairCandidate");
   }
   //These are still needed in Make so even if you are not writing the tree still need these objects
   mEvtInfo     = new FcsEventInfo();
   mPhArr       = new TClonesArray("FcsPhotonCandidate");
-  mPhPairArr      = new TClonesArray("FcsPi0Candidate");
+  mPhPairArr      = new TClonesArray("FcsPairCandidate");
 
   if( mTreeOnBitMap!=0 ){
     if( isEventOn() ){

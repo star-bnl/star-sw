@@ -164,7 +164,7 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
   //std::cout << "NPi0s:"<<PairArr->GetEntriesFast() << std::endl;
   short emtrig[5] = {0, anadata->mTrigEm0, anadata->mTrigEm1, anadata->mTrigEm2, anadata->mTrigEm3 };
   for( int i=0; i<PairArr->GetEntriesFast(); ++i ){
-    FcsPi0Candidate* pi0 = (FcsPi0Candidate*)PairArr->At(i);
+    FcsPairCandidate* pi0 = (FcsPairCandidate*)PairArr->At(i);
     if( pi0==0 ){ continue; }
     if( pi0->mFromCluster ){ /*std::cout << "StMuFcsPi0TreeMaker::Make() - Not a point - "<<pi0->mFromCluster<< std::endl;*/ continue; }
     ++nallpi0;

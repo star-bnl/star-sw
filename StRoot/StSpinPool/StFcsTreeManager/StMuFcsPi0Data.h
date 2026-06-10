@@ -6,7 +6,7 @@
   The Classes related to holding the data in the Pi0TTree in #StMuFcsPi0TreeMaker
 
   DESCRIPTION
-  Contains the classes #FcsEventInfo, #FcsPhotonCandidate, and #FcsPi0Candidate that is used to store information for the Pi0 Transverse Single Spin Asymmetry Analysis (TSSA). The #TTree is created and used in #StMuFcsPi0TreeMaker. Putting these classes in a separate folder was done so that the library can be loaded without loading other STAR libraries. This greatly simplifies the rootmap file needed as well. 
+  Contains the classes #FcsEventInfo, #FcsPhotonCandidate, and #FcsPairCandidate that is used to store information for the Pi0 Transverse Single Spin Asymmetry Analysis (TSSA). The #TTree is created and used in #StMuFcsPi0TreeMaker. Putting these classes in a separate folder was done so that the library can be loaded without loading other STAR libraries. This greatly simplifies the rootmap file needed as well. 
 
   LOG
   @[September 20, 2024] > Copied from *StMuFcsPi0TreeMaker*
@@ -28,8 +28,8 @@
   @[September 4, 2025] > Implemented a copy function for #FcsPhotonCandidate
   @[November 25, 2025] > Inside #FcsPhotonCandidate; added an array to hold EPD matches for different classes of intersections of EPD tiles; also added accessor functions to the EPD array that holds these matches and fixed the #FcsPhotonCandidate::Clear() and FcsPhotonCandidate::Copy() to clear and copy from array. Iterated #FcsPhotonCandidate to new version because of this change.
   @[January 26, 2026] > Added primary vertex information and #mFoundVertex to #FcsEventInfo. Also, changed #BlueSpin() and #YellowSpin() to be static functions that now take an argument of a 4 bit spin value and return "blue up(1)/down(-1)", or "yellow up(1)/down(-1)".
+  @[June 8, 2026] > Changed 'FcsPi0Candidate' to #FcsPairCandidate. Added two new variables #FcsPhotonCandidate::mEpdHitNmipSum and #FcsPhotonCandidate::mEpdHitAdjMax to help with the discrimation of #FcsPhotonCandidate into charged or neutral category 
 */
-
 
 #ifndef STMUFCSPI0DATA_HH
 #define STMUFCSPI0DATA_HH
@@ -116,6 +116,8 @@ public:
 
   Float_t mEpdHitNmip[5];   ///< NMIP value from EPD hit (-1 means could not project to valid tile, 0 means projected to valid tile but no hit, >0 value from EPD hit. first entry is always the "best" match
   Short_t mEpdMatch[5];       ///< Special key for knowing which Tile key (100*pp+tt) had an intersection, Note that "0" is not a valid key since pp goes from 1 to 12, and tt goes from 1 to 31. The index here matches #FcsPhotonCandidate::mEpdHitNmip
+  Float_t mEpdHitNmipSum = 0;   ///< Take the best matched EPD intersected tile and add up its nmip value to its 8 adjacent tiles as defined in #StMuFcsAnaEpdMatch
+  Float_t mEpdHitAdjMax = 0;    ///< The maximum nmip whecn checking the best matched EPD intersected tile and its 8 adjacent tiles as defined in #StMuFcsAnaEpdMatch
 
   TLorentzVector lvRaw();        ///< TLorentz vector for this condidate with 0,0,0 vertex momentum
   TLorentzVector lvVert();       ///< TLorentz vector for this candidate with vertex momentum
@@ -146,44 +148,43 @@ public:
   //static void ConvertFromKey(Short_t key, Int_t& pp, Int_t &tt);
   //bool corner                ///< Store which corner to use?
 
-
-  ClassDef( FcsPhotonCandidate, 2 )
+  ClassDef( FcsPhotonCandidate, 3 )
 };
 
-//Class to hold basic info for reconstructed pi0 candidates
-class FcsPi0Candidate : public TObject
+//Class to hold basic info for reconstructed pair candidates
+class FcsPairCandidate : public TObject
 {
 public:
-  FcsPi0Candidate();
-  ~FcsPi0Candidate();
+  FcsPairCandidate();
+  ~FcsPairCandidate();
   
   Bool_t mFromCluster = false;  ///< Pi0 reconstructed from clusters or points
-  Short_t mFromPh = 0;        ///< Flag to indicate if pi0 constructed using an epd photon cut or not (0=nocut, 1=both charged (>nmip), -1=both neutral(<nmip))
-  UShort_t mPhoton1Idx = -1;     ///< Index in #TClonesArray of #FcsPhotonCandidate 1 that was used to reconstruct this Pi0
-  UShort_t mPhoton2Idx = -1;     ///< Index in #TClonesArray of #FcsPhotonCandidate 2 that was used to reconstruct this Pi0
+  Short_t mFromPh = 0;          ///< Flag to indicate if pi0 constructed using an epd photon cut or not (0=nocut, 1=both charged (>nmip), -1=both neutral(<nmip))
+  UShort_t mPhoton1Idx = -1;    ///< Index in #TClonesArray of #FcsPhotonCandidate 1 that was used to reconstruct this Pi0
+  UShort_t mPhoton2Idx = -1;    ///< Index in #TClonesArray of #FcsPhotonCandidate 2 that was used to reconstruct this Pi0
 
   //#StMuFcsPi0TreeMaker will only store information for the Lorentz vector, and other data from the best vertex. To switch to 0,0,0 vertex; use the photon index
-  Float_t mPx = 0;            ///< X-Momentum from Lorentz vector of two reconstructed candidates
-  Float_t mPy = 0;            ///< Y-Momentum from Lorentz vector of two reconstructed candidates
-  Float_t mPz = 0;            ///< Z-Momentum from Lorentz vector of two reconstructed candidates
-  Float_t mEn = 0;            ///< Energy from Lorentz vector of two reconstructed candidates
-  TLorentzVector lv();        ///< TLorentz vector for this condidate constructed from #mPx, #mPy, #mPz, and #mEn
+  Float_t mPx = 0;              ///< X-Momentum from Lorentz vector of two reconstructed candidates
+  Float_t mPy = 0;              ///< Y-Momentum from Lorentz vector of two reconstructed candidates
+  Float_t mPz = 0;              ///< Z-Momentum from Lorentz vector of two reconstructed candidates
+  Float_t mEn = 0;              ///< Energy from Lorentz vector of two reconstructed candidates
+  TLorentzVector lv();          ///< TLorentz vector for this condidate constructed from #mPx, #mPy, #mPz, and #mEn
   
-  Float_t mEta = -1;          ///< Pseudorapidity from the lorentz vector
-  Float_t eta() const;        ///< Needed since in simulations the stored eta was not there when reconstructing from simulated photons
-  Float_t phi() const;        ///< Angle in x,y plane
-  Float_t pt() const;         ///< Transverse momentum
-  Float_t ptot() const;       ///< Total momentum
-  Float_t theta() const;      ///< azimuthal angle (angle from z-axis to x-y plane)
-  Float_t mass() const;       ///< Invariant mass of the Pi0
+  Float_t mEta = -1;            ///< Pseudorapidity from the lorentz vector
+  Float_t eta() const;          ///< Needed since in simulations the stored eta was not there when reconstructing from simulated photons
+  Float_t phi() const;          ///< Angle in x,y plane
+  Float_t pt() const;           ///< Transverse momentum
+  Float_t ptot() const;         ///< Total momentum
+  Float_t theta() const;        ///< azimuthal angle (angle from z-axis to x-y plane)
+  Float_t mass() const;         ///< Invariant mass of the Pi0
   //Need to project using momentum
-  //Float_t mStarX = 0;     ///< Global STAR x postion from best vertex
-  //Float_t mStarY = 0;     ///< Global STAR y postion from best vertex
-  //Float_t mStarZ = 0;     ///< Global STAR z postion from best vertex
-  Float_t mDgg = 0;        ///< Euclidean Distance between the two particles (cm) 
-  Float_t mZgg = 0;       ///< Energy Asymmetry |E1-E2|/(E1+E2) of pi0
-  Float_t mAlpha = 0;     ///< Opening angle of pi0
-  Float_t mInvMass = -1;  ///< invariant mass using best vertex as a variable to make it easier for analysis
+  //Float_t mStarX = 0;           ///< Global STAR x postion from best vertex
+  //Float_t mStarY = 0;           ///< Global STAR y postion from best vertex
+  //Float_t mStarZ = 0;           ///< Global STAR z postion from best vertex
+  Float_t mDgg = 0;             ///< Euclidean Distance between the two particles (cm) 
+  Float_t mZgg = 0;             ///< Energy Asymmetry |E1-E2|/(E1+E2) of pi0
+  Float_t mAlpha = 0;           ///< Opening angle of pi0
+  Float_t mInvMass = -1;        ///< invariant mass using best vertex as a variable to make it easier for analysis
   
   static Float_t zgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2);        ///< Energy asymmetry of pi0
   static Float_t dgg(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2);        ///< Distance between the two particles (cm)
@@ -199,7 +200,7 @@ public:
   virtual void Clear(Option_t* option="");            ///< Resets all variables to defaults
   virtual void Print(Option_t* option="") const;      ///< Print all variables no options
 
-  ClassDef( FcsPi0Candidate, 1 )
+  ClassDef( FcsPairCandidate, 1 )
 };
 
 #endif
