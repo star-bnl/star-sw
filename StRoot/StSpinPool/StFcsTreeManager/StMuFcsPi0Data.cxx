@@ -66,7 +66,7 @@ void FcsEventInfo::Print(Option_t* option) const
   std::cout <<"## FcsEventInfo|ClusterSize:"<<mClusterSize << std::endl;
   std::cout << " + |RunTime:"<<mRunTime << "|RunNum:"<<mRunNum << "|mFill:"<<mFill << "|mEvent:"<<mEvent << "|Bx48Id:"<<mBx48Id << "|Bx7Id:"<<mBx7Id << "|mSpin:"<<mSpin << "|mTofMult:"<<mTofMultiplicity << std::endl;
 
-  std::cout << " + |VertexBit:0x0"<<std::hex<<mFoundVertex<<std::dec << "|VpdVz:"<<mVpdVz << "|ZdcVz:"<<mZdcVz << "|BbcTDiff:"<<mBbcTacDiff << "|BbcVz:"<<mBbcVz << std::endl;
+  std::cout << " + |VertexBit:"<<mFoundVertex << "|VpdVz:"<<mVpdVz << "|ZdcVz:"<<mZdcVz << "|BbcTDiff:"<<mBbcTacDiff << "|BbcVz:"<<mBbcVz << std::endl;
   std::cout << " + |EpdTacEarlyW:"<<mEpdTacEarlyW << "|EpdTacEarlyE:"<<mEpdTacEarlyE << "|EpdTacAvgW:"<<mEpdAvgW << "|EpdTacAvgE:"<<mEpdAvgE << "|EpdVz:"<<mEpdVz << std::endl;
 }
 
@@ -193,8 +193,18 @@ void FcsPhotonCandidate::Clear(Option_t* opt)
 
 void FcsPhotonCandidate::Print(Option_t* opt) const
 {
-  std::cout << "|Clus:"<<mFromCluster << "|Pos:("<<mX<<","<<mY<<","<<mZ<<")|En:"<<mEn << "|PRaw:"<<mPxRaw<<","<<mPyRaw<<","<<mPzRaw<<","<<"|PVert:"<<mPxVert<<","<<mPyVert<<","<<mPzVert << std::endl;
-  //Need to add option for printing epd information "|EpdNmip:"<<mEpdHitNmip << std::endl;
+  TString option(opt);
+  option.ToLower();
+  std::cout << "|Clus:"<<mFromCluster << "|Pos:("<<mX<<","<<mY<<","<<mZ<<")|En:"<<mEn << "|PRaw:"<<mPxRaw<<","<<mPyRaw<<","<<mPzRaw<<","<<"|PVert:"<<mPxVert<<","<<mPyVert<<","<<mPzVert << std::endl;  
+  if( option.Contains("epd") ){
+    std::cout << "  - ";
+    for( short i=0; i<5; ++i ){
+      if( mEpdMatch[i]!=0 ){
+	std::cout << "|i:"<<i << "|key:"<<mEpdMatch[i] << "|nmip:"<<mEpdHitNmip[i];
+      }
+    }
+    std::cout << std::endl << "     - |Sum:"<<mEpdHitNmipSum << "|Max:"<<mEpdHitAdjMax << "|RedMip:"<<RedMip() << "|RedMax:"<<RedMax() << std::endl;
+  }
 }
 
 ClassImp(FcsPairCandidate)

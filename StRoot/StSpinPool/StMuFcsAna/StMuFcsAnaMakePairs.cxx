@@ -32,9 +32,9 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
   Int_t npi0candidate = 0;
   TClonesArray* mpharr = anadata->getPhArr();
   TClonesArray* pointpairs = anadata->getPhPairArr();
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  //Double_t usevertex = anadata->mUseVertex;
+  //Double_t vertexcutlow = anadata->mVertexCutLow;
+  //Double_t vertexcuthigh = anadata->mVertexCutHigh;
   //Filling cluster pi0s and cluster photon/elecron epd nmip cut. For clusters only store best pair to speed up code
   if( mMakeClusPairs ){
     for( Int_t ic = 0; ic<clustersize; ++ic ){
@@ -53,30 +53,31 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 	FcsPhotonCandidate* jclus = (FcsPhotonCandidate*) mpharr->UncheckedAt(jc);
 	if( !(jclus->mFromCluster) ){ std::cout << "MAJOR ERROR - cluster size of array found a point crashing" << std::endl; exit(0); }
 	TLorentzVector pi0Vert_LV = iclus->lvVert() + jclus->lvVert();
-	if( ic==0 && jc==ic+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
-	  FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
-	  pi0c->mFromCluster = true;
-	  pi0c->mFromPh = 0;
-	  pi0c->mPhoton1Idx = ic;
-	  pi0c->mPhoton2Idx = jc;
+	//if( ic==0 && jc==ic+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
+	FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
+	pi0c->mFromCluster = true;
+	pi0c->mFromPh = 0;
+	pi0c->mPhoton1Idx = ic;
+	pi0c->mPhoton2Idx = jc;
 	
-	  pi0c->mPx = pi0Vert_LV.Px();
-	  pi0c->mPy = pi0Vert_LV.Py();
-	  pi0c->mPz = pi0Vert_LV.Pz();
-	  pi0c->mEn = pi0Vert_LV.E();
+	pi0c->mPx = pi0Vert_LV.Px();
+	pi0c->mPy = pi0Vert_LV.Py();
+	pi0c->mPz = pi0Vert_LV.Pz();
+	pi0c->mEn = pi0Vert_LV.E();
 	
-	  pi0c->mEta     = pi0Vert_LV.PseudoRapidity();
-	  pi0c->mDgg     = FcsPairCandidate::dgg(*iclus,*jclus);
-	  pi0c->mZgg     = FcsPairCandidate::zgg(*iclus,*jclus);
-	  pi0c->mAlpha   = FcsPairCandidate::alpha(*iclus,*jclus);
-	  pi0c->mInvMass = pi0Vert_LV.Mag();
-	  //std::cout << "|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|clustermass:"<<pi0c->mInvMass <<  std::endl;
-	}
+	pi0c->mEta     = pi0Vert_LV.PseudoRapidity();
+	pi0c->mDgg     = FcsPairCandidate::dgg(*iclus,*jclus);
+	pi0c->mZgg     = FcsPairCandidate::zgg(*iclus,*jclus);
+	pi0c->mAlpha   = FcsPairCandidate::alpha(*iclus,*jclus);
+	pi0c->mInvMass = pi0Vert_LV.Mag();
+	//std::cout << "|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|clustermass:"<<pi0c->mInvMass <<  std::endl;
+	//}
 	/*
 	  else{
 	  //std::cout << "|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|pointmass:"<<pi0c->mInvMass <<  std::endl;
 	  mH1F_AllPointPairMass->Fill(pi0Vert_LV.Mag());
 	  }*/
+	//std::cout << "Clus|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|pointmass:"<<pi0c->mInvMass <<  std::endl;
       }
     }
   }
@@ -86,8 +87,8 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
   if( mMakePointPairs ){
     //FcsPhotonCandidate* firstphotoncut[NEPDCUTS] = {0};
     //FcsPhotonCandidate* secondphotoncut[NEPDCUTS] = {0};
-    Int_t n_noepdproj = 0;
-    Int_t n_noepdproj_vcut = 0;
+    //Int_t n_noepdproj = 0;
+    //Int_t n_noepdproj_vcut = 0;
     for( Int_t ip = clustersize; ip<mpharr->GetEntriesFast(); ++ip ){
       FcsPhotonCandidate* ipoi = (FcsPhotonCandidate*) mpharr->UncheckedAt(ip);
       if( ipoi->mFromCluster ){ std::cout << "MAJOR ERROR - point size of array found a cluster crashing" << std::endl; exit(0); }
@@ -103,12 +104,12 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 	  }
 	}
       }
-      */
+      
       else{
 	++n_noepdproj;
 	if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){ ++n_noepdproj_vcut; }
       }
-    
+      */
       if( ip==(mpharr->GetEntriesFast()-1) ){ continue; }
       for( Int_t jp=ip+1; jp<mpharr->GetEntriesFast(); ++jp ){
 	FcsPhotonCandidate* jpoi = (FcsPhotonCandidate*) mpharr->UncheckedAt(jp);
@@ -131,7 +132,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 	pi0c->mZgg     = FcsPairCandidate::zgg(*ipoi,*jpoi);
 	pi0c->mAlpha   = FcsPairCandidate::alpha(*ipoi,*jpoi);
 	pi0c->mInvMass = pi0Vert_LV.Mag();
-	//std::cout << "|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|pointmass:"<<pi0c->mInvMass <<  std::endl;
+	//std::cout << "Point|idx1:"<<pi0c->mPhoton1Idx << "|idx2:"<<pi0c->mPhoton2Idx << "|pointmass:"<<pi0c->mInvMass <<  std::endl;
       }
     }
   }

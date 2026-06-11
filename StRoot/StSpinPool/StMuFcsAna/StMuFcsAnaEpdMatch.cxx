@@ -452,9 +452,9 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt
     }
   }
   //std::cout << "|pp:"<<pp << "|tt:"<<tt << "|n:"<<ncorners << "|";
-  for( unsigned int j=0; j<xvals.size(); ++j ){
-    //std::cout << "("<<xvals.at(j) << ","<<yvals.at(j) << ")|";
-  }
+  /*for( unsigned int j=0; j<xvals.size(); ++j ){
+    std::cout << "("<<xvals.at(j) << ","<<yvals.at(j) << ")|";
+    }*/
   //std::cout << std::endl;
   TPolyLine* polyline = new TPolyLine(xvals.size(),xvals.data(),yvals.data());  //Equal sizes so shouldn't matter which is used
   return polyline;

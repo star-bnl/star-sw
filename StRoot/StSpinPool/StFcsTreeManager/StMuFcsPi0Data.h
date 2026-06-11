@@ -28,7 +28,8 @@
   @[September 4, 2025] > Implemented a copy function for #FcsPhotonCandidate
   @[November 25, 2025] > Inside #FcsPhotonCandidate; added an array to hold EPD matches for different classes of intersections of EPD tiles; also added accessor functions to the EPD array that holds these matches and fixed the #FcsPhotonCandidate::Clear() and FcsPhotonCandidate::Copy() to clear and copy from array. Iterated #FcsPhotonCandidate to new version because of this change.
   @[January 26, 2026] > Added primary vertex information and #mFoundVertex to #FcsEventInfo. Also, changed #BlueSpin() and #YellowSpin() to be static functions that now take an argument of a 4 bit spin value and return "blue up(1)/down(-1)", or "yellow up(1)/down(-1)".
-  @[June 8, 2026] > Changed 'FcsPi0Candidate' to #FcsPairCandidate. Added two new variables #FcsPhotonCandidate::mEpdHitNmipSum and #FcsPhotonCandidate::mEpdHitAdjMax to help with the discrimation of #FcsPhotonCandidate into charged or neutral category 
+  @[June 8, 2026] > Changed 'FcsPi0Candidate' to #FcsPairCandidate. Added two new variables #FcsPhotonCandidate::mEpdHitNmipSum and #FcsPhotonCandidate::mEpdHitAdjMax to help with the discrimation of #FcsPhotonCandidate into charged or neutral category
+  @[June 11, 2026] > Changed #mFoundVertex from Char_t to Short_t as it's a more appropriate type for this variable. Added 'epd' as print option to #FcsPhotonCandidate::Print()
 */
 
 #ifndef STMUFCSPI0DATA_HH
@@ -80,7 +81,7 @@ public:
   //Double_t EpdTacDiffAvg();
   Double_t mEpdVz = -999;      ///< EPD z Vertex
   Double_t mZdcVz = -999;      ///< ZDC z Vertex
-  Char_t mFoundVertex = 0;    ///< Bit vector encoding for which vertex was best; 0 means no vertex, 1=Primary Vertex found,2=Vpd,3=Epd,4=Bbc
+  Short_t mFoundVertex = 0;    ///< Bit vector encoding for which vertex was best; 0 means no vertex, 1=Primary Vertex found,2=Vpd,3=Epd,4=Bbc
 
   //This will be used to indicate how many clusters are in the #TClonesArray of #FcsPhotonCandidate. Everything from this number to the size of the array will be points for a given detector Id. I did it this way so I don't have to create a separate branch holding these two numbers and there should only be one #FcsEventInfo object. Also, didn't want a seperate class for clusters and points since they will store the same information. It is kind of a hack since I know that I am only looping up to detector id 2.
   UShort_t mClusterSize = 0;       ///< Size of clusters in #mPhArr in #StMuFcsPi0TreeMaker. This means 0 to <#mClusterSize is cluster photon candidates

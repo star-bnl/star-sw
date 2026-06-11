@@ -12,6 +12,7 @@
   @[January 22, 2026] > Copied static methods of finding adjacenct EPD tiles from #StMuEpdRun22QaMaker
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
   @[June 8, 2026] > Implemented #mAllEpdNmip array to hold the nmip value for each tile and supersector so calling #CheckInsideEpdTile() should happen after this filling. Moved EPD hit loop outside photon candidate loop since nmip can be grabbed from #mAllEpdNmip. You can now grab the nmip of an epd tile from outside this class using the static #epdNmip(). Improved the #CheckInsideEpdTile() algorithm by copying over the nmip tile, nmip adjacency sum, and nmip adjacency max filling algorithm from #StMuFcsAnaEpdMatchQa (which no longer has its own 'CheckInsideEpdTile()'). Moved some of the QA histograms and drawing to the new #StMuFcsAnaEpdMatchQa. Modified #EpdCCWOuterCorner() to grab polyline from internal static map or make one if it doesn't exist.
+  @[June 11, 2026] > Fixed a bug where #EpdTilePoly() was doing an extra loop for printout but not actually printing so commented out the loop
 
 */
 

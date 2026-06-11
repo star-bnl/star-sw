@@ -11,6 +11,7 @@
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
   @[June 8, 2026] > Changed name of #FcsPi0Candidate to #FcsPairCandidate. Modified #DoMake() to make pairs with clusters, points, or both. Got rid of histograms and paint methods as this class should only be used to generate pairs and any QA related stuff should be done in the new #StMuFcsAnaMakePairsQa.
+  @[June 11, 2026] > Fixed a bug where the cluster loop was still only looping over the two highest energy clusters
 
 */
 

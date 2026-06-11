@@ -43,6 +43,26 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
 
   //loaded += histman->AddH1F(file,mH1F_PointProjDistToEpdTiles,"H1F_PointProjDistToEpdTiles","Distance of FCS projected point to all EPD tiles;D (cm)", 200,0,200);
   //loaded += histman->AddH1F(file,mH1F_PointProjDistToEpdHits,"H1F_PointProjDistToEpdHits","Distance of FCS projected point to all EPD Hits;D (cm)", 200,0,200);
+  
+  loaded += histman->AddH2F(file,mH2F_EpdTilesNmip_yVx,"H2F_EpdTilesNmip_yVx","West EPD tile y vs. x weighted by nmip+1 (STAR coordinates);x (cm);y (cm)", 100,-100,100, 100,-100,100);
+  loaded += histman->AddH2F(file,mH2F_EpdTilesNmip_rVphi,"H2F_EpdTilesNmip_rVphi","West EPD tile r vs. phi in STAR coordinates;#phi;r", 96,-TMath::Pi(),TMath::Pi(),100,0,100);  //Use 96 bins in phi since opening angle is 7.5 degrees so this is double that in number of bins
+  //loaded += histman->AddH2F(file,mH2F_EpdHits_phiVr,"H2F_EpdHits_phiVr","west EPD hits phi vs. r in STAR coordinates;r;#phi", 100,0,100, 100,-TMath::Pi(),TMath::Pi());
+  //loaded += histman->AddH2F(file,mH2F_EpdHitsCut_phiVr,"H2F_EpdHitsCuts_phiVr","west EPD hits with nmip cut phi vs. r in STAR coordinates;r;#phi", 100,0,100, 100,-TMath::Pi(),TMath::Pi());
+  loaded += histman->AddH1F(file,mH1F_EpdAdjNmip,"H1F_EpdAdjNmip","nmip vs. EPD adjacency",9,0,9);
+  std::vector<std::string> adjnames;
+  adjnames.push_back("O");
+  adjnames.push_back("OCCW");
+  adjnames.push_back("CCW");
+  adjnames.push_back("ICCW");
+  adjnames.push_back("tile");
+  adjnames.push_back("I");
+  adjnames.push_back("ICW");
+  adjnames.push_back("CW");
+  adjnames.push_back("OCW");
+  for( int i=0; i<9; ++i ){
+    mH1F_EpdAdjNmip->GetXaxis()->SetBinLabel(i+1,adjnames.at(i).c_str());
+  }
+  
 
   loaded += histman->AddH1F(file,mH1F_ClusNBadEpdProj,"H1F_ClusNBadEpdProj","Number of clusters in an event that did not project back to a valid EPD tile;;",15,0,15);
   loaded += histman->AddH1F(file,mH1F_ClusNBadEpdProjVcut,"H1F_ClusNBadEpdProjVcut","Number of clusters in an event that did not project back to a valid EPD tile with |vertex|<150;;",15,0,15);
@@ -70,9 +90,14 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
 //----------------------
 Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
 {
+  mH2F_EpdTilesNmip_yVx->Reset();
+  mH2F_EpdTilesNmip_rVphi->Reset();
+  //mH2F_EpdHits_phiVr->Reset();
+  //mH2F_EpdHitsCut_phiVr->Reset();
+  
   //std::cout << this->ClassName() << "|Start Make" << std::endl;
   TClonesArray* PhArr = anadata->getPhArr();
-  //StEpdGeom* EpdGeom = anadata->epdGeom();
+  StEpdGeom* EpdGeom = anadata->epdGeom();
   Double_t usevertex = anadata->mUseVertex;
   Double_t vertexcutlow = anadata->mVertexCutLow;
   Double_t vertexcuthigh = anadata->mVertexCutHigh;
@@ -81,9 +106,19 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);
 
-  //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
-  /*
-  unsigned int nepdhits = 0;
+  //Loop over all West EPD tiles to get its distance
+  for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
+    for( int i_tt=1; i_tt<=31; ++i_tt ){ //Tile number [1,31]
+      TVector3 epdhitxyz = EpdGeom->TileCenter(i_pp,i_tt,1);  //Only project to west side
+      //loop over epd hits for distance checking
+      Double_t rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
+      Double_t phihit = TMath::ATan2(epdhitxyz[1],epdhitxyz[0]);
+      ((TH2*)mH2F_EpdTilesNmip_yVx)->Fill( epdhitxyz[0], epdhitxyz[1], StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt)+1 ); //Scale up by 1 to see empty tiles
+      ((TH2*)mH2F_EpdTilesNmip_rVphi)->Fill( phihit,rhit, StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt)+1 );              //Scale up by 1 to see empty tiles
+    }
+  }
+  
+  /*unsigned int nepdhits = 0;
   StSPtrVecEpdHit* epdhits = 0;
   if( MuEpdHits!=0 ){ nepdhits = MuEpdHits->GetEntriesFast(); }
   else if( EpdColl!=0 ){
@@ -91,10 +126,44 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     nepdhits = epdhits->size();
   }
   else{ LOG_ERROR << "StMuFcsAnaEpdMatchQa::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
-  */
+  StMuEpdHit* muepdhit = 0;
+  StEpdHit* epdhit = 0;
+  for(unsigned int i=0; i<nepdhits; ++i ){
+    if( MuEpdHits!=0 ){ muepdhit = (StMuEpdHit*)MuEpdHits->UncheckedAt(i); } //To match similar in StMuDstMaker->epdHit(int i)
+    else if( epdhits!=0 ){ epdhit = (StEpdHit*)((*epdhits)[i]); }
+    else{ LOG_ERROR << "IF YOU SEE THIS ERROR THEN THERE IS A VERY SERIOUS BUG IN THE CODE" << endm; return kStErr; } 
+    //std::cout << "|i:"<<i << "|muepdhit:"<<muepdhit << "|epdhit:"<<epdhit << std::endl;
+    int ew    = muepdhit!=0 ? muepdhit->side()    : epdhit->side();      //east=-1, west=1
+    if( ew==-1 ){ continue; }
+    int epdpp = muepdhit!=0 ? muepdhit->position(): epdhit->position();  //Supersector runs [1,12]
+    int epdtt = muepdhit!=0 ? muepdhit->tile()    : epdhit->tile();      //Tile number [1,31]
+    float nmip = muepdhit!=0 ? muepdhit->nMIP(): epdhit->nMIP();         //The ADC value of the hit divided by the MIP peak position; e.g. if nmip==1 then adc value sits at the MIP peak
+    TVector3 epdhitxyz = EpdGeom->TileCenter(epdpp,epdtt,ew);
+    Double_t rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
+    Double_t phihit = TMath::ATan2(epdhitxyz[1],epdhitxyz[0]);
+    ((TH2*)mH2F_EpdHits_phiVr)->Fill(rhit,phihit,nmip);
+    if( nmip > (anadata->epdNmipCut()) ){
+      ((TH2*)mH2F_EpdHitsCut_phiVr)->Fill(rhit,phihit,nmip);
+    }
+  }*/
+  
+  if( mCanvas!=0 ){
+    if( mCanvSaveName.Length()==0 ){
+      std::stringstream ss_savename;
+      ss_savename << "FcsAna_DistQa_Evt"<<anadata->getEventNum() << ".png";
+      //std::cout << ss_savename.str() << std::endl;
+      PaintEpdTileHitDistQa(mCanvas,ss_savename.str().c_str());
+      ss_savename.str("");
+      ss_savename << "FcsAna_DistQaFcs_Evt"<<anadata->getEventNum() << ".png";
+      DrawEpdTileHitDistWithFcs(anadata,mCanvas,ss_savename.str().c_str());
+    }
+    else{
+      PaintEpdTileHitDistQa(mCanvas,mCanvSaveName.Data());
+    }
+  }
+  
   //std::cout << this->ClassName() << "|Start:Make_CheckAndSetEpdHit" << std::endl;
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
-  //Int_t nepdwesthits = 0;
   Int_t n_clusnoepdproj = 0;
   Int_t n_clusnoepdproj_vcut = 0;
   Int_t n_pointnoepdproj = 0;
@@ -103,39 +172,40 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     //std::cout << "|iph:"<<iph << std::endl;
     FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
+    /*if( mCanvas!=0 ){
+      mH1F_EpdAdjNmip->Reset();
+      int found_pp = ph->mEpdMatch[0]/100;
+      int found_tt = ph->mEpdMatch[0] - found_pp*100;
+      const int MAX_ADJ = 8;
+      int adj_pp[MAX_ADJ];
+      int adj_tt[MAX_ADJ];
+      StMuFcsAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
+      StMuFcsAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
+      StMuFcsAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
+      StMuFcsAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
+      StMuFcsAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
+      StMuFcsAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
+      StMuFcsAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
+      StMuFcsAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
 
-    /*
+      mH1F_EpdAdjNmip->SetBinContent(1, StMuFcsAnaEpdMatch::epdNmip(adj_pp[0],adj_tt[0]) );
+      mH1F_EpdAdjNmip->SetBinContent(2, StMuFcsAnaEpdMatch::epdNmip(adj_pp[1],adj_tt[1]) );
+      mH1F_EpdAdjNmip->SetBinContent(3, StMuFcsAnaEpdMatch::epdNmip(adj_pp[2],adj_tt[2]) );
+      mH1F_EpdAdjNmip->SetBinContent(4, StMuFcsAnaEpdMatch::epdNmip(adj_pp[3],adj_tt[3]) );
+      mH1F_EpdAdjNmip->SetBinContent(5, ph->mEpdHitNmip[0]);
+      mH1F_EpdAdjNmip->SetBinContent(6, StMuFcsAnaEpdMatch::epdNmip(adj_pp[4],adj_tt[4]) );
+      mH1F_EpdAdjNmip->SetBinContent(7, StMuFcsAnaEpdMatch::epdNmip(adj_pp[5],adj_tt[5]) );
+      mH1F_EpdAdjNmip->SetBinContent(8, StMuFcsAnaEpdMatch::epdNmip(adj_pp[6],adj_tt[6]) );
+      mH1F_EpdAdjNmip->SetBinContent(9, StMuFcsAnaEpdMatch::epdNmip(adj_pp[7],adj_tt[7]) );
+
+      std::stringstream ss_savename;
+      ss_savename << "FcsAna_EpdAdjPh_Evt"<<anadata->getEventNum()<< "_Ph"<<iph << ".png";
+      mCanvas->Clear();
+      mH1F_EpdAdjNmip->Draw("hist e");
+      mCanvas->Print(ss_savename.str().c_str());
+      }*/
+    
     std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
-    //loop over all hits and if an nmip value exists set for the point
-    StMuEpdHit* muepdhit = 0;
-    StEpdHit* epdhit = 0;
-    for(unsigned int i=0; i<nepdhits; ++i ){
-      if( MuEpdHits!=0 ){ muepdhit = (StMuEpdHit*)MuEpdHits->UncheckedAt(i); } //To match similar in StMuDstMaker->epdHit(int i)
-      else if( epdhits!=0 ){ epdhit = (StEpdHit*)((*epdhits)[i]); }
-      else{ LOG_ERROR << "IF YOU SEE THIS ERROR THEN THERE IS A VERY SERIOUS BUG IN THE CODE" << endm; return kStErr; } 
-      //std::cout << "|i:"<<i << "|muepdhit:"<<muepdhit << "|epdhit:"<<epdhit << std::endl;
-      int ew    = muepdhit!=0 ? muepdhit->side()    : epdhit->side();      //east=-1, west=1
-      if( ew==-1 ){ continue; }
-      int epdpp = muepdhit!=0 ? muepdhit->position(): epdhit->position();  //Supersector runs [1,12]
-      int epdtt = muepdhit!=0 ? muepdhit->tile()    : epdhit->tile();      //Tile number [1,31]
-      float nmip = muepdhit!=0 ? muepdhit->nMIP(): epdhit->nMIP();         //The ADC value of the hit divided by the MIP peak position; e.g. if nmip==1 then adc value sits at the MIP peak
-      TVector3 epdhitxyz = EpdGeom->TileCenter(epdpp,epdtt,ew);
-      double rpoint = sqrt(epdproj.at(0)*epdproj.at(0) + epdproj.at(1)*epdproj.at(1));
-      double rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
-      Double_t phipoint = TMath::ATan2(epdproj.at(1),epdproj.at(0));
-      Double_t phihit = TMath::ATan2(epdhitxyz[1],epdhitxyz[0]);
-      Double_t diffphi = phipoint-phihit;
-      if( diffphi>TMath::Pi() ){ diffphi = diffphi - TMath::Pi(); }
-      if( diffphi<(-1.0*TMath::Pi()) ){ diffphi = diffphi + TMath::Pi(); }
-      Double_t dist = sqrt( (epdproj.at(0)-epdhitxyz[0])*(epdproj.at(0)-epdhitxyz[0]) + (epdproj.at(1)-epdhitxyz[1])*(epdproj.at(1)-epdhitxyz[1]) );
-      //std::cout << "|epdz:"<<epdhitxyz[2] << std::endl;
-      if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){
-	mH2F_PointProj_nmipVdrhit->Fill(rpoint-rhit,nmip);
-	mH2F_PointProj_nmipVdphihit->Fill(diffphi,nmip);
-	if( nmip>0.7 ){ mH1F_PointProjDistToEpdHits->Fill(dist); }
-       }
-     }
-    */
     
     //Check how many clusters/points didn't have a match
     if( ph->mEpdMatch[0]==0 ){
@@ -292,7 +362,183 @@ void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQaProj(TCanvas* canv, const char* sa
   
 }
 
-void StMuFcsAnaEpdMatchQa::StMuFcsAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv, const char* savename) const
+void StMuFcsAnaEpdMatchQa::PaintEpdTileHitDistQa(TCanvas* canv, const char* savename) const
+{
+  canv->Clear();
+
+  canv->Divide(2,2);
+
+  canv->cd(1);
+  mH2F_EpdTilesNmip_yVx->SetStats(0);
+  mH2F_EpdTilesNmip_yVx->SetMinimum(1);
+  mH2F_EpdTilesNmip_yVx->SetMaximum(5);
+  mH2F_EpdTilesNmip_yVx->Draw("colz");
+  canv->cd(2);
+  //mH2F_EpdHits_phiVr->Draw("colz");
+  //mH2F_EpdTilesNmip_yVx->Draw("pol colz");
+  mH2F_EpdTilesNmip_rVphi->SetStats(0);
+  mH2F_EpdTilesNmip_rVphi->SetMinimum(1);
+  mH2F_EpdTilesNmip_rVphi->SetMaximum(5);
+  mH2F_EpdTilesNmip_rVphi->Draw("colz");
+  //canv->cd(3);
+  //mH2F_EpdHitsCut_phiVr->Draw("colz");
+
+  canv->Print(savename);
+}
+
+Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, TCanvas* canvas, const char* savename)
+{
+  if( anadata==0 ){ return 0; }
+
+  Double_t usevertex = anadata->mUseVertex;
+  Double_t vertexcutlow = anadata->mVertexCutLow;
+  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  if( !(vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ return 0; }
+  
+  if( canvas==0  ){ return 0; }
+  TClonesArray* PhArr = anadata->getPhArr();
+  if( PhArr==0 ){ return 0; }
+  StFcsDb* FcsDb = anadata->fcsDb();
+  if( FcsDb==0 ){ return 0; }
+  StEpdGeom* EpdGeom = anadata->epdGeom();
+  if( EpdGeom==0 ){ return 0; }
+  Double_t EpdNmipCut = anadata->epdNmipCut();
+
+  anadata->getEvtInfo()->Print();
+
+  canvas->Clear();
+  //mH2F_EpdTilesNmip_yVx->SetStats(0);
+  //mH2F_EpdTilesNmip_yVx->SetMinimum(1);
+  //mH2F_EpdTilesNmip_yVx->SetMaximum(5);
+  //mH2F_EpdTilesNmip_yVx->Draw("colz2");
+  mH2F_EpdTilesNmip_rVphi->SetStats(0);
+  mH2F_EpdTilesNmip_rVphi->SetMinimum(1);
+  mH2F_EpdTilesNmip_rVphi->SetMaximum(5);
+  mH2F_EpdTilesNmip_rVphi->Draw("colz2");
+  //((TH2*)mH2F_EpdHits_phiVr)->SetMinimum(0);
+  //((TH2*)mH2F_EpdHits_phiVr)->SetMaximum(4);
+  //mH2F_EpdHits_phiVr->Draw("colz");
+    //loop over all west epd tiles and make the polygon need to do this every time otherwise root does not draw the fill correctly
+  //Don't need to loop over hits to get nmip since that should be stored in mEpdAllNmip
+  for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
+    for( int i_tt=1; i_tt<=31; ++i_tt ){ //Tile number [1,31]
+      std::map<Int_t,TPolyLine*>::iterator epdhitit = mEpdTileMap.find(100*i_pp+i_tt);
+      TPolyLine* polyline = 0;
+      TPolyLine* polyline_rVphi = 0;
+      if( epdhitit==mEpdTileMap.end() ){
+	polyline = StMuFcsAnaEpdMatch::EpdTilePoly(EpdGeom,i_pp,i_tt);
+	Int_t nvals = polyline->GetN();
+	Double_t* xvals = polyline->GetX();
+	Double_t* yvals = polyline->GetY();
+	Double_t philine[6] = {0};  //Max number of corners in EPD is 5 so need one more than that
+	Double_t rline[6] = {0};
+	for( int i=0; i<nvals; ++i ){
+	  philine[i] = TMath::ATan2(yvals[i],xvals[i]);
+	  rline[i] = sqrt( xvals[i]*xvals[i] + yvals[i]*yvals[i] );	  
+	}
+	polyline_rVphi = new TPolyLine(nvals,philine,rline);
+	//std::pair<std::map<Int_t,TPolyLine*>::iterator,bool> itr = mEpdTileMap.emplace(100*i_pp+i_tt,polyline);
+	std::pair<std::map<Int_t,TPolyLine*>::iterator,bool> itr = mEpdTileMap.emplace(100*i_pp+i_tt,polyline_rVphi);
+	if( ! (itr.second) ){ std::cout << "Could not add polyline to map" << std::endl; }
+	delete polyline;
+	polyline = 0;
+
+      }
+      else{
+	//polyline = epdhitit->second;
+	polyline_rVphi = epdhitit->second;
+      }
+      //std::cout << "|i_pp:"<<i_pp<<"|i_tt:"<<i_tt<<"|key:"<<100*i_pp+i_tt << std::endl;
+      if( polyline_rVphi==0 ){ std::cout << "Could not create polyline map element" << std::endl; continue; }
+      polyline_rVphi->SetLineWidth(1);
+      polyline_rVphi->SetLineColor(kBlack);
+      polyline_rVphi->SetFillColorAlpha(kWhite,0);
+    }
+  }
+
+  //loop over all photon candidates
+  std::vector<TMarker*> FcsMarkers;
+  std::vector<int> EpdTilesToDraw;
+  for( Int_t iph = 0; iph<PhArr->GetEntriesFast(); ++iph ){
+    //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
+    FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return 0; }
+    EpdTilesToDraw.push_back(ph->mEpdMatch[0]);
+    std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+    //Checking with BBC vertex
+    //std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,anadata->getEvtInfo()->mBbcVz);
+    //StMuFcsAnaEpdMatch::CheckInsideEpdTile( EpdGeom, ph, epdproj.at(0), epdproj.at(1) );
+    //std::cout << "|i:"<<iph <<"|x:"<<epdproj.at(0) << "|y:"<<epdproj.at(1) << std::endl;
+    Double_t rphoton = sqrt( (epdproj.at(0)*epdproj.at(0)) + (epdproj.at(1)*epdproj.at(1)) );
+    Double_t phiphoton = TMath::ATan2(epdproj.at(1),epdproj.at(0));
+    TMarker* fcsmarker = 0;
+    if( ph->mFromCluster ){
+      fcsmarker = new TMarker(phiphoton,rphoton,33);
+      //fcsmarker = new TMarker(epdproj.at(0),epdproj.at(1),33);
+      //fcsmarker = new TMarker(ph->mX,ph->mY,33);
+      fcsmarker->SetMarkerSize(1.5);
+    }
+    else{
+      fcsmarker = new TMarker(phiphoton,rphoton,30);
+      //fcsmarker = new TMarker(epdproj.at(0),epdproj.at(1),30);
+      //fcsmarker = new TMarker(ph->mX,ph->mY,30);
+      fcsmarker->SetMarkerSize(2);
+    }
+    fcsmarker->SetMarkerColor(kBlack);
+    //ph->Print("epd");
+    //Set colors based on best nmip
+    //Double_t RedMip= ph->mEpdHitNmip[0];
+    Double_t RedMip= ph->mEpdHitAdjMax;
+    //if( ph->mEpdHitAdjMax>0.00001 ){
+    //if( ph->mEpdHitNmipSum>0.00001 ){
+      //RedMip = ph->mEpdHitAdjMax/ph->mEpdHitNmipSum;
+      //RedMip = ph->mEpdHitNmip[0]/ph->mEpdHitAdjMax;
+      //RedMip = ph->mEpdHitNmip[0]/ph->mEpdHitNmipSum;
+      //RedMip = ph->mEpdHitNmip[0];
+    //}
+    if( RedMip < EpdNmipCut  ){
+      //fcsmarker->SetMarkerColor(kGreen+2);
+    }
+    else{
+      //fcsmarker->SetMarkerColor(kRed);
+    }
+    
+    FcsMarkers.push_back(fcsmarker);
+  }
+
+  //Draw Epd tiles first so they appear in the background
+  /*for( std::map<Int_t,TPolyLine*>::iterator polyitr=mEpdTileMap.begin(); polyitr!=mEpdTileMap.end(); ++polyitr ){
+    //std::cout << "|id:"<<polyitr->first << "|polyline:"<<polyitr->second << std::endl;
+    polyitr->second->Draw("f");
+    polyitr->second->Draw();
+  }*/
+  for( unsigned int i=0; i<EpdTilesToDraw.size(); ++i ){
+    auto itr = mEpdTileMap.find( EpdTilesToDraw.at(i) );
+    if( itr!=mEpdTileMap.end() ){
+      itr->second->Draw("f");
+      itr->second->Draw();
+    }
+  }
+
+  //Draw photon candidates next on top of the epd tiles
+  canvas->cd();
+  for( unsigned int i=0; i<FcsMarkers.size(); ++i ){
+    FcsMarkers.at(i)->Draw();
+  }
+
+  /*for( std::map<Int_t,bool>::iterator fcsepditr=fcsepdhits.begin(); fcsepditr!=fcsepdhits.end(); ++fcsepditr ){
+    if( fcsepditr->second==false ){ std::cout << "|NOHIT:"<<fcsepditr->first << std::endl; }
+    }*/
+    
+  canvas->Print(savename);
+  //Clean memory
+  for( unsigned int i=0; i<FcsMarkers.size(); ++i ){
+    delete FcsMarkers.at(i);
+  }
+  return 1;
+}
+
+void StMuFcsAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(2,2);
