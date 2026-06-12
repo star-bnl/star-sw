@@ -503,6 +503,18 @@ struct SD2Table_MTD {
   void operator()( StSensitiveDetector* sd, St_g2t_mtd_hit* table, St_g2t_track* track ) {
     
     TString sdname = sd->GetName();
+    
+    // We will be converting global to local coordinates via the navigator.
+    // We probably do not need to restore the current path, but push it if
+    // we do...
+    TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+    if( !nav ) {
+      LOG_FATAL << "No Pointer to Navigator" << endm;
+      assert(0);
+    }      
+    nav->PushPath();    
+
+
 
     // Retrieve the hit collection 
     StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
@@ -510,6 +522,12 @@ struct SD2Table_MTD {
     for ( auto hit : collection->hits() ) {
 
       g2t_mtd_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_mtd_hit_st)); 
+
+      bool success = nav->cd( hit->path );
+      if ( 0 == success ) {
+	LOG_FATAL << "Unable to cd to " << hit->path.Data() << ".  Terminating." << endm;
+	assert(0);
+      }
       
       g2t_hit.id        = hit->id;
       // TODO: add pointer to next hit on the track 
@@ -518,14 +536,30 @@ struct SD2Table_MTD {
       g2t_hit.de        = hit->de;
       g2t_hit.ds        = hit->ds;
 
-      g2t_hit.xglobal[0]      = (hit->position_in[0] + hit->position_out[0]) * 0.5;
-      g2t_hit.xglobal[1]      = (hit->position_in[1] + hit->position_out[1]) * 0.5;
-      g2t_hit.xglobal[2]      = (hit->position_in[2] + hit->position_out[2]) * 0.5;
+      double xglobal[] = {
+	(hit->position_in[0] + hit->position_out[0]) * 0.5,
+	(hit->position_in[1] + hit->position_out[1]) * 0.5,
+	(hit->position_in[2] + hit->position_out[2]) * 0.5
+      };
+
+      double xlocal[3];
+
+      g2t_hit.xglobal[0]      = xglobal[0];
+      g2t_hit.xglobal[1]      = xglobal[1];
+      g2t_hit.xglobal[2]      = xglobal[2];
+
+      nav -> MasterToLocal( xglobal, xlocal );
+
+      g2t_hit.x[0] = xlocal[0];
+      g2t_hit.x[1] = xlocal[1];
+      g2t_hit.x[2] = xlocal[2];
 
       g2t_hit.tof       = (hit->position_in[3] + hit->position_out[3]) * 0.5;
       g2t_hit.p[0]      = (hit->momentum_in[0] + hit->momentum_out[0]) * 0.5;
       g2t_hit.p[1]      = (hit->momentum_in[1] + hit->momentum_out[1]) * 0.5;
       g2t_hit.p[2]      = (hit->momentum_in[2] + hit->momentum_out[2]) * 0.5;
+
+
       g2t_hit.s_track   = hit->length;
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
@@ -536,7 +570,9 @@ struct SD2Table_MTD {
       trk->n_mtd_hit++;
       
     }
-  } 
+    // Restore navigator state
+    nav->PopPath();    
+  }
 } sd2table_mtd; 
 
 
