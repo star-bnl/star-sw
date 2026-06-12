@@ -82,15 +82,17 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
   // to help define PDG ids for the heavy ions.
   //  hid(Z,A,l)
 
-  TParticlePDG *D     = pdg->AddParticle( "D",     "Deuteron", /* mass */ 1.876,  true,  0., 1.0, "heavyion",       hid(1,2,0),   -1, 45 );
-  TParticlePDG *He    = pdg->AddParticle( "alpha", "Alpha"   , /* mass */ 3.7273794118, true, 0.0, 2.0, "heavyion", hid(2,4,0),   -1, 47 );
-  TParticlePDG *He3   = pdg->AddParticle( "He3",   "Helium-3", /* mass */ 2.809,  true,  0., 2.0, "heavyion",       hid(2,3,0),   -1, 49 );
+#define CHARGE *3
+  TParticlePDG *D     = pdg->AddParticle( "D",     "Deuteron", /* mass */ 1.876,        true,  0., 1.0 CHARGE, "heavyion",       hid(1,2,0),   -1, 45 );
+  TParticlePDG *He    = pdg->AddParticle( "alpha", "Alpha"   , /* mass */ 3.7273794118, true,  0., 2.0 CHARGE, "heavyion", hid(2,4,0),   -1, 47 );
+  TParticlePDG *He3   = pdg->AddParticle( "He3",   "Helium-3", /* mass */ 2.809,        true,  0., 2.0 CHARGE, "heavyion",       hid(2,3,0),   -1, 49 );
 
-  TParticlePDG* Li    = pdg->AddParticle( "Li", "Lithium", /* mass */ 6.015, true, 0., 3.0, "heavyion", hid(3,3,0), -1, 303 );
+  TParticlePDG* Li    = pdg->AddParticle( "Li", "Lithium", /* mass */ 6.015,            true,  0., 3.0 CHARGE, "heavyion", hid(3,3,0), -1, 303 );
 
-  TParticlePDG *Cu    = pdg->AddParticle( "Cu",    "Copper",   /* mass */ 0.0,  true,  0., 29,  "heavyion",         hid(29,64,0),  0, 0 );
-  TParticlePDG *Au    = pdg->AddParticle( "Au",    "Gold",     /* mass */ 0.0,  true,  0., 79,  "heavyion",         hid(79,197,0), 0, 0 );
-  TParticlePDG *U     = pdg->AddParticle( "U",     "Uranium",  /* mass */ 0.0,  true,  0., 92,  "heavyion",         hid(92,238,0), 0, 0 );
+  TParticlePDG *Cu    = pdg->AddParticle( "Cu",    "Copper",   /* mass */ 0.0,          true,  0., 29. CHARGE,  "heavyion",         hid(29,64,0),  0, 0 );
+  TParticlePDG *Au    = pdg->AddParticle( "Au",    "Gold",     /* mass */ 0.0,          true,  0., 79. CHARGE,  "heavyion",         hid(79,197,0), 0, 0 );
+  TParticlePDG *U     = pdg->AddParticle( "U",     "Uranium",  /* mass */ 0.0,          true,  0., 92. CHARGE,  "heavyion",         hid(92,238,0), 0, 0 );
+#undef CHARGE
 
   //  AddParticle("D",   D);
   //  AddParticle("He3", He3);
