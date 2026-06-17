@@ -11,7 +11,7 @@
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsPi0TreeMaker
   @[June 8, 2026] > Changed all 'FcsPi0Candidate' to the new #FcsPairCandidate
-
+  @[June 17, 2026] > Added histogram #mH1F_Pi0FromPh to track the distribution of #FcsPairCandidate::mFromPh. Changed #DoMake() to use new meaning of #FcsPairCandidate::mFromPh but to have the same logic as before
 */
 
 
@@ -64,6 +64,8 @@ public:
   
 protected:
   Double_t mEpdNmipCut = 0;             ///< Copy over from StMuFcsAnaData in LoadHists
+
+  TH1* mH1F_Pi0FromPh = 0;              ///< Pair Candidate mFromPh according to this analysis
 
   TH1* mH1F_AllPi0Mult = 0;             ///< pi0 multiplicity for all pairs of points
   TH1* mH1F_AllPi0Zgg = 0;              ///< Zgg of pi0 for all pairs of points

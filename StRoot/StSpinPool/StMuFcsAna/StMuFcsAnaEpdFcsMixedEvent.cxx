@@ -38,21 +38,21 @@ UInt_t StMuFcsAnaEpdFcsMixedEvent::LoadHists( TFile* file, HistManager* histman,
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldx,"H2F_PointProj_nmipValldx","nMIP vs. FCS projected point to EPD x minus EPD x of all hits;dX (cm);nmip", 200,-100,100, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldy,"H2F_PointProj_nmipValldy","nMIP vs. FCS projected point to EPD y minus EPD y of all hits;dY (cm);nmip", 200,-100,100, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldr,"H2F_PointProj_nmipValldr","nMIP vs. FCS projected point to EPD, polar distance to all other hits;dR (cm);nmip", 200,-100,100, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldphi,"H2F_PointProj_nmipValldphi","nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldphi,"H2F_PointProj_nmipValldphi","nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 90,0,TMath::Pi(), 70,0,7);
   loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipValldr,"H2F_MixedPointProj_nmipValldr","Mixed event nMIP vs. FCS projected point to EPD, polar distance to all other hits;dR (cm);nmip", 200,-100,100, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipValldphi,"H2F_MixedPointProj_nmipValldphi","Mixed event nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipValldphi,"H2F_MixedPointProj_nmipValldphi","Mixed event nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 90,0,TMath::Pi(), 70,0,7);
 
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipVtiledx,"H2F_PointProj_nmipVtiledx","nMIP vs. FCS projected point to EPD x minus EPD x of proj tile;dX (cm);nmip", 80,-20,20, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipVtiledy,"H2F_PointProj_nmipVtiledy","nMIP vs. FCS projected point to EPD y minus EPD y of proj tile;dY (cm);nmip", 80,-20,20, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipVtiledr,"H2F_PointProj_nmipVtiledr","nMIP vs. FCS projected point to EPD, polar distance to projected hit;dR (cm);nmip", 80,-20,20, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_PointProj_nmipVtiledphi,"H2F_PointProj_nmipVtiledphi","nMIP vs. FCS projected point to EPD, angle difference to proj tile;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_PointProj_nmipVtiledphi,"H2F_PointProj_nmipVtiledphi","nMIP vs. FCS projected point to EPD, angle difference to proj tile;d#phi;nmip", 90,0,TMath::Pi()/5.0, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipVtiledr,"H2F_MixedPointProj_nmipVtiledr","Mixed event nMIP vs. FCS projected point to EPD, polar distance to projected hit;dR (cm);nmip", 80,-20,20, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipVtiledphi,"H2F_MixedPointProj_nmipVtiledphi","Mixed event nMIP vs. FCS projected point to EPD, angle difference to proj tile;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_MixedPointProj_nmipVtiledphi,"H2F_MixedPointProj_nmipVtiledphi","Mixed event nMIP vs. FCS projected point to EPD, angle difference to proj tile;d#phi;nmip", 90,0,TMath::Pi()/5.0, 70,0,7);
 
   loaded += histman->AddH2F(file,mH2F_PointProj_LowMult_nmipValldr,"H2F_PointProj_LowMult_nmipValldr","Low Mult nMIP vs. FCS projected point to EPD, polar distance to all other hits;dR (cm);nmip", 200,-100,100, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_PointProj_LowMult_nmipValldphi,"H2F_PointProj_LowMult_nmipValldphi","Low Mult nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_PointProj_LowMult_nmipValldphi,"H2F_PointProj_LowMult_nmipValldphi","Low Mult nMIP vs. FCS projected point to EPD, angle difference to all other hits;d#phi;nmip", 90,0,TMath::Pi(), 70,0,7);
   loaded += histman->AddH2F(file,mH2F_MixedPointProj_LowMult_nmipValldr,"H2F_MixedPointProj_LowMult_nmipValldr","Low Mult Mixed event nMIP vs. FCS projected point to EPD, polar distance to projected hit;dR (cm);nmip", 200,-100,100, 70,0,7);
-  loaded += histman->AddH2F(file,mH2F_MixedPointProj_LowMult_nmipValldphi,"H2F_MixedPointProj_LowMult_nmipValldphi","Low Mult Mixed event nMIP vs. FCS projected point to EPD, angle difference to proj all;d#phi;nmip", 100,-TMath::Pi(),TMath::Pi(), 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_MixedPointProj_LowMult_nmipValldphi,"H2F_MixedPointProj_LowMult_nmipValldphi","Low Mult Mixed event nMIP vs. FCS projected point to EPD, angle difference to proj all;d#phi;nmip", 90,0,TMath::Pi(), 70,0,7);
 
   return loaded;
 }
@@ -105,7 +105,7 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
     else{
       //iph<noldhits
       epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,mOldVertex);
-      StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Do this check for 
+      //StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Do this check for 
     }
     //This will be taken care of already if StMuFcsAnaEpdMatch is called before this Ana class
     //if( iph>=noldhits ){
@@ -142,11 +142,10 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
       Double_t dy = epdproj.at(1)-epdhitxyz[1];
       double rpoint = sqrt(epdproj.at(0)*epdproj.at(0) + epdproj.at(1)*epdproj.at(1));
       double rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
-      Double_t phipoint = TMath::ATan2(epdproj.at(1),epdproj.at(0));
-      Double_t phihit = TMath::ATan2(epdhitxyz[1],epdhitxyz[0]);
-      Double_t diffphi = phipoint-phihit;
-      if( diffphi>TMath::Pi() ){ diffphi = diffphi - TMath::Pi(); }
-      if( diffphi<(-1.0*TMath::Pi()) ){ diffphi = diffphi + TMath::Pi(); }
+      Double_t pointdottile = epdproj.at(0)*epdhitxyz[0] + epdproj.at(1)*epdhitxyz[1];
+      //Dot product for angle difference
+      Double_t CosTheta = pointdottile / (rpoint*rhit);
+      Double_t diffphi = TMath::ACos( CosTheta );
       //std::cout << "|epdz:"<<epdhitxyz[2] << std::endl;
       if( ! ph->mFromCluster ){
 	//if( mTrigEm2==3 && mTrigEm0<0 && mTrigEm1<0 ){

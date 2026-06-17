@@ -12,7 +12,7 @@
   @[December 23, 2025] > Copied from #StMuFcsPi0TreeMaker and modified to use new class name
   @[January 19, 2026] > Obsolete class as part of the experimentation with using #StMuFcsTreeMaker for doing the EPD mixed event analysis. Still haven't implemented into the new framework and want to keep this for keeping track of the history of how the analysis worked and as a learning tool for how I was experimenting to find a new framework
   @[May 13, 2026] > Copied old StMuFcsPointEpdMixedEventMaker into StMuFcsAnaEpdFcsMixedEvent which utilizes new #StMuFcsVirtualAna framework and methods
-
+  @[June 17, 2026] > Changed angle difference to use dot product so changed range on phi histograms to 0 to pi to match arccos function
 */
 
 

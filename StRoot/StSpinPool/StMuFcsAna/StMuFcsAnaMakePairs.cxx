@@ -56,7 +56,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 	//if( ic==0 && jc==ic+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
 	FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
 	pi0c->mFromCluster = true;
-	pi0c->mFromPh = 0;
+	pi0c->mFromPh = -1;
 	pi0c->mPhoton1Idx = ic;
 	pi0c->mPhoton2Idx = jc;
 	
@@ -118,7 +118,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 	//if( ip==clustersize && jp==ip+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
 	FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
 	pi0c->mFromCluster = false;
-	pi0c->mFromPh = 0;
+	pi0c->mFromPh = -1;
 	pi0c->mPhoton1Idx = ip;
 	pi0c->mPhoton2Idx = jp;
       

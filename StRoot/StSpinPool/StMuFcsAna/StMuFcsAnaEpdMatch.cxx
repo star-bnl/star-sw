@@ -147,11 +147,16 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
   }
   
   int ncorners = 0;
-  for( int icorner=0; icorner<5; ++icorner ){
+  for( int icorner=1; icorner<5; ++icorner ){
     //std::cout << " + |projx:"<<projx << "|projy:"<<projy << "|epdkey:"<<photon->mEpdHitNmip[icorner] << std::endl;
     if( photon->mEpdMatch[icorner]!=0 ){ ++ncorners; }
   }
-  
+
+  if( ncorners==1 ){
+    //If only 1 corner found take that as the found corner, note that if a in match tile was found ncorners would be zero since OuterCCW would never get checked
+    photon->mEpdMatch[0] = photon->mEpdMatch[1];
+    photon->mEpdHitNmip[0] = photon->mEpdHitNmip[1];
+  }
   if( ncorners>1 ){
     int bestcorner = 0;
     Double_t mindist = 999; //Pick some large distance so that the minimum will get set with first loop
@@ -173,8 +178,10 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
       //std::cout << std::endl;
     }
     //std::cout << "   + |ncorners:"<<ncorners << std::endl;
-    photon->mEpdMatch[0] = photon->mEpdMatch[bestcorner];
-    photon->mEpdHitNmip[0] = 0;  //0 means intersection found
+    if( bestcorner!=0 ){
+      photon->mEpdMatch[0] = photon->mEpdMatch[bestcorner];
+      photon->mEpdHitNmip[0] = 0;  //0 means intersection found
+    }
   }
   
     /*
@@ -213,6 +220,10 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
     found_tt = photon->mEpdMatch[0] - found_pp*100;
     photon->mEpdHitNmip[0] = mAllEpdNmip[found_pp-1][found_tt-1];
   }
+  /*else{
+    std::cout << "---------- EpdMatch=0 ----------" << std::endl;
+    photon->Print("epd");
+    }*/
   if( found_pp!=0 && found_tt!=0 ){
     //Grab all adjacencies then check their mip values
     const int MAX_ADJ = 8;
@@ -246,7 +257,256 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
 
     photon->mEpdHitNmipSum = nmipsum;
     photon->mEpdHitAdjMax = nmipmax;
-  }
+
+    //Part 2 of the algorithm is to pick the maximum based on some intersecting region
+    //projx,projy dot with tilex,tiley
+    TVector3 epdhitxyz = epdgeo->TileCenter(found_pp,found_tt,1); //Only care about west tiles
+    Double_t tilex = epdhitxyz.x();
+    Double_t tiley = epdhitxyz.y();
+    Double_t rpoint = sqrt( projx*projx + projy*projy );
+    Double_t rtile = sqrt( tilex*tilex + tiley*tiley );
+    Double_t rdiff = rpoint - rtile;                              //Difference in r that needs to be checked
+    Double_t pointdottile = projx*tilex + projy*tiley;
+    //Dot product for angle difference
+    Double_t CosTheta = pointdottile / (rpoint*rtile);
+    Double_t phidiff = TMath::ACos( CosTheta );                   //Need possible positive, negative
+    //Cross product for angle direction, both vectors lie in plane so their z-components are zero therefore only need z-component of cross product. By using tile X point; a positive z-component means you need to go CCW from the tile to get to the point, and negative means go CW to go from the tile to the point. This was chosen to match CCW and CW adjacency rules for EPD
+    Double_t phidir = (tilex*projy) - (tiley*projx);
+    if( phidir<0 ){ phidiff = -1.0*phidiff; } //If negative cross product make angle difference negative for checks below
+    
+    //According to the #StEpdGeom::GetCorners() the opening angle for tile corners is 7.5 degrees so tile center is presumably half that and so take half of that to get the minimum angle as 1.875 degrees. Convert to radians to match radian angle unit above
+    Double_t phidiffmin = -7.5/4.0 * TMath::Pi()/180.0;  //minimum phi difference between point and tile center to consider the photon in tile
+    Double_t phidiffmax = 7.5/4.0 * TMath::Pi()/180.0;   //maximum phi difference between point and tile center to consider the photon in tile
+    //Tiles 1, 2, 3 in the EPD have an r gap of 4.4 cm and the others have a gap of 5.53 cm so take a quarter of that to form the +- range to check
+    Double_t rdiffmin = found_tt<=3 ? -4.4/4.0 : -5.53/4.0;  //minimum r difference between point and tile center to consider photon in tile
+    Double_t rdiffmax = found_tt<=3 ? 4.4/4.0 : 5.53/4.0;    //maximum r difference between point and tile center to consider photon in tile
+    //std::cout << "|rpoint:"<<rpoint << "|rtile:"<<rtile << "|phipoint:"<<TMath::ATan2(projy,projx)*180.0/TMath::Pi() << "|phitile:"<<TMath::ATan2(tiley,tilex)*180.0/TMath::Pi() << std::endl;
+    //std::cout << "  + |rdiff:"<<rdiff << "|phidiff:"<<phidiff*180.0/TMath::Pi() << "|phidir:"<<phidir << std::endl;
+    //std::cout << "  + |rmin:"<<rdiffmin << "|rmax:"<<rdiffmax << "|phimin:"<<phidiffmin*180.0/TMath::Pi() << "|phimax:"<<phidiffmax*180.0/TMath::Pi() << std::endl;
+    //Do this so the logic is separated from the action and thus code is easier to read
+    short foundregion = -2;   //-1=tile, 0=outer, 1=outerccw, 2=ccw, 3=innerccw, 4=inner, 5=innercw, 6=cw, 7=outercw; chosen to match array above
+    if( rdiffmin<=rdiff && rdiff<=rdiffmax && phidiffmin<=phidiff && phidiff<=phidiffmax ){ foundregion = -1; }  //In tile
+    else if( rdiffmax<rdiff && phidiffmin<=phidiff && phidiff<=phidiffmax )               { foundregion = 0; }   //Outer adjacency
+    else if( rdiffmax<rdiff && phidiffmax<phidiff )                                       { foundregion = 1; }   //CCW is positive in this convention so want phidiff larger than maximum
+    else if( rdiffmin<=rdiff && rdiff<=rdiffmax && phidiffmax<phidiff )                   { foundregion = 2; }   //Take the CCW tile
+    else if( rdiffmin>rdiff && phidiffmax<phidiff )                                       { foundregion = 3; }   //Take InnerCCW, CCW, Inner
+    else if( rdiffmin>rdiff && phidiffmin<=phidiff && phidiff<=phidiffmax )               { foundregion = 4; }   //Take Inner
+    else if( rdiffmin>rdiff && phidiffmin>phidiff )                                       { foundregion = 5; }   //Take inner CW
+    else if( rdiffmin<=rdiff && rdiff<=rdiffmax && phidiffmin>phidiff )                   { foundregion = 6; }   //Take CW
+    else if( rdiffmax<rdiff && phidiffmin>phidiff )                                       { foundregion = 7; }   //Outer CW
+    else{ foundregion = -2; }
+    photon->mEpdFoundRegion = foundregion;
+    //Take max of nmip between intersecting and outer tile (set ncorner 0 to max, corner 1 with nmip of found, corner 2 with outer tile nmip, the rest zero
+    //if( rmax<rdiff && phimaxrad<phidiff ) //take max nmip of outerCCW, CCW, and outer
+    //if( rmin<rdiff && rdiff<rmax && phimaxrad<phidiff )  // take the CCW tile
+    //if( rmin>rdiff && phidiff<phiminrad ) //Take InnerCCW, CCW, Inner
+    //if( rmin>rdiff && phiminrad<phidiff && phidiff<phimaxrad ) //Take Inner
+    //if( rmin>rdiff && phiminrad>phidiff ) //Take InnerCW, CW, and Inner
+    //if( rmin<rdiff && rdiff<rmax && phiminrad>phidiff ) //Take CW
+    //if( rmax<rdiff && phiminrad>phidiff ) //Take OuterCW, CW, and Outer
+    //
+    switch( foundregion ){
+    case -1:{
+      photon->mEpdMatch[0]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[0] = nmiptile;
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      for(short i=2; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    case 0:{
+      float nmipouter = epdNmip(adj_pp[0],adj_tt[0]);  //index 0 is the outer adjacency as defined above
+      if( nmiptile>=nmipouter ){
+	photon->mEpdMatch[0] = 100*found_pp + found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else{
+	photon->mEpdMatch[0]=100*adj_pp[0]+adj_tt[0];
+	photon->mEpdHitNmip[0] = nmipouter;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[0]+adj_tt[0];
+      photon->mEpdHitNmip[2] = nmipouter;
+      for(short i=3; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    case 1:{
+      float nmipouter = epdNmip(adj_pp[0],adj_tt[0]);     //index 0 is the outer adjacency as defined above
+      float nmipouterccw = epdNmip(adj_pp[1],adj_tt[1]);  //index 1 is the outer CCW adjacency as defined above
+      float nmipccw = epdNmip(adj_pp[2],adj_tt[2]);       //index 2 is the CCW adjacency as defined above
+      if( nmiptile>=nmipouter && nmiptile>=nmipouterccw && nmiptile>=nmipccw ){
+	photon->mEpdMatch[0] = 100*found_pp+found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else if( nmipouter>=nmiptile && nmipouter>=nmipouterccw && nmipouter>=nmipccw ){
+	photon->mEpdMatch[0] = 100*adj_pp[0]+adj_tt[0];
+	photon->mEpdHitNmip[0] = nmipouter;
+      }
+      else if( nmipouterccw>=nmiptile && nmipouterccw>=nmipouter && nmipouterccw>=nmipccw ){
+	photon->mEpdMatch[0] = 100*adj_pp[1]+adj_tt[1];
+	photon->mEpdHitNmip[0] = nmipouterccw;
+      }
+      else{
+	photon->mEpdMatch[0] = 100*adj_pp[2]+adj_tt[2];
+	photon->mEpdHitNmip[0] = nmipccw;
+      }	
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[0]+adj_tt[0];
+      photon->mEpdHitNmip[2] = nmipouter;
+      photon->mEpdMatch[3]=100*adj_pp[1]+adj_tt[1];
+      photon->mEpdHitNmip[3] = nmipouterccw;
+      photon->mEpdMatch[4]=100*adj_pp[2]+adj_tt[2];
+      photon->mEpdHitNmip[4] = nmipccw;
+      break;}
+    case 2:{
+      float nmipccw = epdNmip(adj_pp[2],adj_tt[2]);
+      if( nmiptile>=nmipccw ){
+	photon->mEpdMatch[0] = 100*found_pp + found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else{
+	photon->mEpdMatch[0]=100*adj_pp[2]+adj_tt[2];
+	photon->mEpdHitNmip[0] = nmipccw;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[2]+adj_tt[2];
+      photon->mEpdHitNmip[2] = nmipccw;
+      for(short i=3; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    case 3:{
+      float nmipccw = epdNmip(adj_pp[2],adj_tt[2]);       //index 2 is the CCW adjacency as defined above
+      float nmipinnerccw = epdNmip(adj_pp[3],adj_tt[3]);  //index 3 is the inner CCW adjacency as defined above
+      float nmipinner = epdNmip(adj_pp[4],adj_tt[4]);     //index 4 is the inner adjacency as defined above      
+      if( nmiptile>=nmipccw && nmiptile>=nmipinnerccw && nmiptile>=nmipinner ){
+	photon->mEpdMatch[0] = 100*found_pp+found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else if( nmipccw>=nmiptile && nmipccw>=nmipinnerccw && nmipccw>=nmipinner ){
+	photon->mEpdMatch[0] = 100*adj_pp[2]+adj_tt[2];
+	photon->mEpdHitNmip[0] = nmipccw;
+      }
+      else if( nmipinnerccw>=nmiptile && nmipinnerccw>=nmipccw && nmipinnerccw>=nmipinner ){
+	photon->mEpdMatch[0] = 100*adj_pp[3]+adj_tt[3];
+	photon->mEpdHitNmip[0] = nmipinnerccw;
+      }
+      else{
+	photon->mEpdMatch[0] = 100*adj_pp[4]+adj_tt[4];
+	photon->mEpdHitNmip[0] = nmipinner;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[2]+adj_tt[2];
+      photon->mEpdHitNmip[2] = nmipccw;
+      photon->mEpdMatch[3]=100*adj_pp[3]+adj_tt[3];
+      photon->mEpdHitNmip[3] = nmipinnerccw;
+      photon->mEpdMatch[4]=100*adj_pp[4]+adj_tt[4];
+      photon->mEpdHitNmip[4] = nmipinner;
+      break;}
+    case 4:{
+      float nmipinner = epdNmip(adj_pp[4],adj_tt[4]);
+      if( nmiptile>=nmipinner ){
+	photon->mEpdMatch[0] = 100*found_pp + found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else{
+	photon->mEpdMatch[0]=100*adj_pp[4]+adj_tt[4];
+	photon->mEpdHitNmip[0] = nmipinner;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[4]+adj_tt[4];
+      photon->mEpdHitNmip[2] = nmipinner;
+      for(short i=3; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    case 5:{
+      float nmipinner = epdNmip(adj_pp[4],adj_tt[4]);    //index 4 is the inner adjacency as defined above
+      float nmipinnercw = epdNmip(adj_pp[5],adj_tt[5]);  //index 5 is the inner CW adjacency as defined above
+      float nmipcw = epdNmip(adj_pp[6],adj_tt[6]);       //index 6 is the inner adjacency as defined above      
+      if( nmiptile>=nmipinner && nmiptile>=nmipinnercw && nmiptile>=nmipcw ){
+	photon->mEpdMatch[0] = 100*found_pp+found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else if( nmipinner>=nmiptile && nmipinner>=nmipinnercw && nmipinner>=nmipcw ){
+	photon->mEpdMatch[0] = 100*adj_pp[4]+adj_tt[4];
+	photon->mEpdHitNmip[0] = nmipinner;
+      }
+      else if( nmipinnercw>=nmiptile && nmipinnercw>=nmipinner && nmipinnercw>=nmipcw ){
+	photon->mEpdMatch[0] = 100*adj_pp[5]+adj_tt[5];
+	photon->mEpdHitNmip[0] = nmipinnercw;
+      }
+      else{
+	photon->mEpdMatch[0] = 100*adj_pp[6]+adj_tt[6];
+	photon->mEpdHitNmip[0] = nmipcw;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[4]+adj_tt[4];
+      photon->mEpdHitNmip[2] = nmipinner;
+      photon->mEpdMatch[3]=100*adj_pp[5]+adj_tt[5];
+      photon->mEpdHitNmip[3] = nmipinnercw;
+      photon->mEpdMatch[4]=100*adj_pp[6]+adj_tt[6];
+      photon->mEpdHitNmip[4] = nmipcw;
+      break;}
+    case 6:{
+      float nmipcw = epdNmip(adj_pp[6],adj_tt[6]);
+      if( nmiptile>=nmipcw ){
+	photon->mEpdMatch[0] = 100*found_pp + found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else{
+	photon->mEpdMatch[0]=100*adj_pp[6]+adj_tt[6];
+	photon->mEpdHitNmip[0] = nmipcw;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[6]+adj_tt[6];
+      photon->mEpdHitNmip[2] = nmipcw;
+      for(short i=3; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    case 7:{
+      float nmipcw = epdNmip(adj_pp[6],adj_tt[6]);          //index 6 is the CW adjacency as defined above
+      float nmipoutercw = epdNmip(adj_pp[7],adj_tt[7]);     //index 7 is the outer CW adjacency as defined above
+      float nmipouter = epdNmip(adj_pp[0],adj_tt[0]);       //index 0 is the outer adjacency as defined above      
+      if( nmiptile>=nmipcw && nmiptile>=nmipoutercw && nmiptile>=nmipouter ){
+	photon->mEpdMatch[0] = 100*found_pp+found_tt;
+	photon->mEpdHitNmip[0] = nmiptile;
+      }
+      else if( nmipcw>=nmiptile && nmipcw>=nmipoutercw && nmipcw>=nmipouter ){
+	photon->mEpdMatch[0] = 100*adj_pp[6]+adj_tt[6];
+	photon->mEpdHitNmip[0] = nmipcw;
+      }
+      else if( nmipoutercw>=nmiptile && nmipoutercw>=nmipcw && nmipoutercw>=nmipouter ){
+	photon->mEpdMatch[0] = 100*adj_pp[7]+adj_tt[7];
+	photon->mEpdHitNmip[0] = nmipoutercw;
+      }
+      else{
+	photon->mEpdMatch[0] = 100*adj_pp[0]+adj_tt[0];
+	photon->mEpdHitNmip[0] = nmipouter;
+      }
+      photon->mEpdMatch[1]=100*found_pp+found_tt;
+      photon->mEpdHitNmip[1] = nmiptile;
+      photon->mEpdMatch[2]=100*adj_pp[6]+adj_tt[6];
+      photon->mEpdHitNmip[2] = nmipcw;
+      photon->mEpdMatch[3]=100*adj_pp[7]+adj_tt[7];
+      photon->mEpdHitNmip[3] = nmipoutercw;
+      photon->mEpdMatch[4]=100*adj_pp[0]+adj_tt[0];
+      photon->mEpdHitNmip[4] = nmipouter;
+      break;}
+    default:{
+      photon->Print("epd");
+      //std::cout << "==========" << std::endl;
+      //for(short i=0; i<5; ++i ){ photon->mEpdMatch[i]=0; photon->mEpdHitNmip[i]=-1; }
+      break;}
+    }
+    //Check if maximum from adjacency check matches check from max adjacency?
+    //photon->Print("epd");
+    //std::cout << "==========" << std::endl;
+  }//if( found_pp!=0 && found_tt!=0 )
+  /*else{
+    std::cout << "---------- No Match Found!----------" << std::endl;
+    photon->Print();
+    }*/
 }
 
 std::vector<Int_t> StMuFcsAnaEpdMatch::GetAdjacentEpdIds(Int_t pp,Int_t tt)

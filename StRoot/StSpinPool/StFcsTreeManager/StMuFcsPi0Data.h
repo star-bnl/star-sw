@@ -30,6 +30,7 @@
   @[January 26, 2026] > Added primary vertex information and #mFoundVertex to #FcsEventInfo. Also, changed #BlueSpin() and #YellowSpin() to be static functions that now take an argument of a 4 bit spin value and return "blue up(1)/down(-1)", or "yellow up(1)/down(-1)".
   @[June 8, 2026] > Changed 'FcsPi0Candidate' to #FcsPairCandidate. Added two new variables #FcsPhotonCandidate::mEpdHitNmipSum and #FcsPhotonCandidate::mEpdHitAdjMax to help with the discrimation of #FcsPhotonCandidate into charged or neutral category
   @[June 11, 2026] > Changed #mFoundVertex from Char_t to Short_t as it's a more appropriate type for this variable. Added 'epd' as print option to #FcsPhotonCandidate::Print()
+  @[June 17, 2026] > Added #FcsPhotonCandidate::mFoundRegion to indicate in which region of the EPD matched tile the photon candidate lies. Changed comment of #FcsPhotonCandidate::mEpdHitNmip to better match new Epd matching algorithm. Added comments to explain new meaning of #FcsPairCandidate::mFromPh which can now be set using the new #FcsPairCandidate::DiscriminateCharge(). #FcsPairCandidate::DiscriminateCharge() will fit #FcsPairCandidate::mFromPh into 1 of 4 categories as described in the comment
 */
 
 #ifndef STMUFCSPI0DATA_HH
@@ -46,6 +47,7 @@
 #include "TLeaf.h"
 #include "TH1F.h"
 #include "TLorentzVector.h"
+#include "TClonesArray.h"
 
 class FcsEventInfo : public TObject
 {
@@ -115,7 +117,8 @@ public:
   Float_t mPyVert = 0;       ///< Y momentum using best found vertex
   Float_t mPzVert = 0;       ///< Z momentum using best found vertex
 
-  Float_t mEpdHitNmip[5];   ///< NMIP value from EPD hit (-1 means could not project to valid tile, 0 means projected to valid tile but no hit, >0 value from EPD hit. first entry is always the "best" match
+  Short_t mEpdFoundRegion = -2;  ///< Found Region in EPD tile where photon candidate exists, -1=intile, 0=outer, 1=outerccw, 2=ccw, 3=innerccw, 4=inner, 5=innercw, 6=cw, 7=outercw
+  Float_t mEpdHitNmip[5];   ///< NMIP value from EPD hit (-1 means could not project to valid tile, 0 means projected to valid tile but no hit, >0 value from EPD hit. first entry is always the "best" match, entry 1 is the intersected tile and the rest depend on found region
   Short_t mEpdMatch[5];       ///< Special key for knowing which Tile key (100*pp+tt) had an intersection, Note that "0" is not a valid key since pp goes from 1 to 12, and tt goes from 1 to 31. The index here matches #FcsPhotonCandidate::mEpdHitNmip
   Float_t mEpdHitNmipSum = 0;   ///< Take the best matched EPD intersected tile and add up its nmip value to its 8 adjacent tiles as defined in #StMuFcsAnaEpdMatch
   Float_t mEpdHitAdjMax = 0;    ///< The maximum nmip whecn checking the best matched EPD intersected tile and its 8 adjacent tiles as defined in #StMuFcsAnaEpdMatch
@@ -149,7 +152,7 @@ public:
   //static void ConvertFromKey(Short_t key, Int_t& pp, Int_t &tt);
   //bool corner                ///< Store which corner to use?
 
-  ClassDef( FcsPhotonCandidate, 3 )
+  ClassDef( FcsPhotonCandidate, 4 )
 };
 
 //Class to hold basic info for reconstructed pair candidates
@@ -160,7 +163,7 @@ public:
   ~FcsPairCandidate();
   
   Bool_t mFromCluster = false;  ///< Pi0 reconstructed from clusters or points
-  Short_t mFromPh = 0;          ///< Flag to indicate if pi0 constructed using an epd photon cut or not (0=nocut, 1=both charged (>nmip), -1=both neutral(<nmip))
+  Short_t mFromPh = -1;          ///< Flag to indicate if pi0 constructed using an epd photon cut or not (0=both neutral (<=nmip), 1=ph1<=nmip&&ph2>nmip, 2=ph2<=nmip&&ph1>nmip, 3=both charged (ph1>nmip && ph2>nmip), -2 means failure, -1 means not set)
   UShort_t mPhoton1Idx = -1;    ///< Index in #TClonesArray of #FcsPhotonCandidate 1 that was used to reconstruct this Pi0
   UShort_t mPhoton2Idx = -1;    ///< Index in #TClonesArray of #FcsPhotonCandidate 2 that was used to reconstruct this Pi0
 
@@ -178,6 +181,8 @@ public:
   Float_t ptot() const;         ///< Total momentum
   Float_t theta() const;        ///< azimuthal angle (angle from z-axis to x-y plane)
   Float_t mass() const;         ///< Invariant mass of the Pi0
+  void DiscriminateCharge(TClonesArray* photonarr, Double_t epdnmipcut);   ///< Set a pair mFromPh using two photon candidates and an epdnmip cut
+
   //Need to project using momentum
   //Float_t mStarX = 0;           ///< Global STAR x postion from best vertex
   //Float_t mStarY = 0;           ///< Global STAR y postion from best vertex

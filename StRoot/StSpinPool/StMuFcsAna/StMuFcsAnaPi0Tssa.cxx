@@ -32,6 +32,13 @@ UInt_t StMuFcsAnaPi0Tssa::LoadHists(TFile* file, HistManager* histman, StMuFcsAn
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
 
+  loaded += histman->AddH1F(file,mH1F_Pi0FromPh,"H1F_Pi0FromPh","FromPh value",6,-2.5,3.5);
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(1,"Error");
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(2,"NoMatch");
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(3,"ph1&ph2<=nmip");
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(4,"ph1<=nmip&ph2>nmip");
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(5,"ph1>nmip&ph2<=nmip");
+  mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(6,"ph1&ph2>nmip");
   loaded += histman->AddH1F(file,mH1F_AllPi0Mult,"H1F_AllPi0Mult","Pi0 Multiplicity with only an energy cut;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_AllPi0Zgg,"H1F_AllPi0Zgg","Zgg of all Pi0s with only an energy;Zgg;", 100,0,1);
   loaded += histman->AddH2F(file,mH2F_AllPi0_etaVphi,"H1F_AllPi0_etaVphi","#eta vs. #phi of all Pi0s with only energy cut;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
@@ -140,9 +147,9 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
 {
   PolData* poldat = anadata->getPolData(anadata->runInfo()->beamFillNumber(StBeamDirection::east));
   //if( politr!=mPolarizationData.end() ){ poldat = politr->second; }
-  if( poldat==0 ){ LOG_WARN << "No polarization data found for fill "<< anadata->runInfo()->beamFillNumber(StBeamDirection::east)  << endm; return kStSkip; }
-  if( anadata->spinDbMkr()==0 ){ return kStSkip; }
-  if( anadata->trigData()==0 ){ return kStSkip; }
+  if( poldat==0 ){ std::cout << "No polarization data found for fill "<< anadata->runInfo()->beamFillNumber(StBeamDirection::east)  << std::endl; return kStSkip; }
+  if( anadata->spinDbMkr()==0 ){ std::cout << "No Spin Db Maker loaded" << std::endl; return kStSkip; }
+  if( anadata->trigData()==0 ){ std::cout << "No Trig data found" << std::endl; return kStSkip; }
 
   TClonesArray* PhArr = anadata->getPhArr();
   TClonesArray* PairArr = anadata->getPhPairArr();
@@ -198,55 +205,55 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
     
     //epd photon cut, mFromPh can only be -1,0,1 for less than epd cut (neutral), no epd cut, greater than epd cut (charged); respectively
     //if( pi0->mFromPh != -1 ){ continue; } //Check to force mFromPh to always be -1 (neutral)
+    mH1F_NoEpdCutZgg->Fill(pi0->mZgg);
+    mH2F_NoEpdCut_etaVphi->Fill(phi,pi0_lv.Eta());
+    mH1F_NoEpdCutEn->Fill(pi0en);
+    mH1F_NoEpdCutPt->Fill(pi0->pt());
+    mH1F_NoEpdCutAllMass->Fill(pi0mass);   //All but EpdPh cut
+    ++npi0noepdcut;
+
+    FcsPhotonCandidate* ph1 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton1Idx);
+    FcsPhotonCandidate* ph2 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton2Idx);
+    pi0->DiscriminateCharge(PhArr,mEpdNmipCut);
+    mH1F_Pi0FromPh->Fill(pi0->mFromPh);
     if( pi0->mFromPh==0 ){
-      mH1F_NoEpdCutZgg->Fill(pi0->mZgg);
-      mH2F_NoEpdCut_etaVphi->Fill(phi,pi0_lv.Eta());
-      mH1F_NoEpdCutEn->Fill(pi0en);
-      mH1F_NoEpdCutPt->Fill(pi0->pt());
-      mH1F_NoEpdCutAllMass->Fill(pi0mass);   //All but EpdPh cut
-      ++npi0noepdcut;
-      FcsPhotonCandidate* ph1 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton1Idx);
-      FcsPhotonCandidate* ph2 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton2Idx);
-      if( ph1->mEpdHitNmip[0]>-0.1 && ph2->mEpdHitNmip[0]>-0.1 ){ //Only include candidates who have their nmip value set
-	if( ph1->mEpdHitNmip[0]<mEpdNmipCut || ph2->mEpdHitNmip[0]<mEpdNmipCut ){ //This is negation of mFromPh==1
-	  //Fill hisotrams with only one photon satisfying epd cut criteria for nuetral particles (photons)
-	  mH1F_EpdSinglePhZgg->Fill(pi0->mZgg);
-	  mH2F_EpdSinglePh_etaVphi->Fill(phi,pi0_lv.Eta());
-	  mH1F_EpdSinglePhEn->Fill(pi0en);
-	  mH1F_EpdSinglePhPt->Fill(pi0_lv.Pt());
-	  mH1F_EpdSinglePhAllMass->Fill(pi0mass);
-	  ++ngoodsingleph;
-	}
-	if( ph1->mEpdHitNmip[0]>=mEpdNmipCut || ph2->mEpdHitNmip[0]>=mEpdNmipCut ){ //This is negation of mFromPh==-1
-	  //Fill hisotrams with only one photon satisfying epd cut criteria for charged particle
-	  mH1F_EpdSingleChZgg->Fill(pi0->mZgg);
-	  mH2F_EpdSingleCh_etaVphi->Fill(phi,pi0_lv.Eta());
-	  mH1F_EpdSingleChEn->Fill(pi0en);
-	  mH1F_EpdSingleChPt->Fill(pi0_lv.Pt());
-	  mH1F_EpdSingleChAllMass->Fill(pi0mass);
-	  ++ngoodsinglech;
-	}
-	if( ph1->mEpdHitNmip[0]<mEpdNmipCut && ph2->mEpdHitNmip[0]<mEpdNmipCut ){
-	  pi0->mFromPh = -1;  //Label this pi0 as coming from two photons so can store it and analyze
-	  mH1F_EpdPhZgg->Fill(pi0->mZgg);
-	  mH2F_EpdPh_etaVphi->Fill(phi,pi0_lv.Eta());
-	  mH1F_EpdPhEn->Fill(pi0en);
-	  mH1F_EpdPhPt->Fill(pi0_lv.Pt());
-	  mH1F_EpdPhAllMass->Fill(pi0mass);
-	  ++ngoodbothph;
-	}
-	if( ph1->mEpdHitNmip[0]>=mEpdNmipCut && ph2->mEpdHitNmip[0]>=mEpdNmipCut ){
-	  pi0->mFromPh = 1;  //Label this pi0 as coming from two electrons
-	  mH1F_EpdChZgg->Fill(pi0->mZgg);
-	  mH2F_EpdCh_etaVphi->Fill(phi,pi0_lv.Eta());
-	  mH1F_EpdChEn->Fill(pi0en);
-	  mH1F_EpdChPt->Fill(pi0_lv.Pt());
-	  mH1F_EpdChAllMass->Fill(pi0mass);
-	  ++ngoodbothch;
-	}
-      }
+      //pi0 coming from two photons so can store it and analyze
+      mH1F_EpdPhZgg->Fill(pi0->mZgg);
+      mH2F_EpdPh_etaVphi->Fill(phi,pi0_lv.Eta());
+      mH1F_EpdPhEn->Fill(pi0en);
+      mH1F_EpdPhPt->Fill(pi0_lv.Pt());
+      mH1F_EpdPhAllMass->Fill(pi0mass);
+      ++ngoodbothph;
     }
-    if( pi0->mFromPh>=0   ){ /*std::cout << "StMuFcsPi0TreeMaker::Make() - Failed photon cut - "<<pi0->mFromPh<< std::endl;*/ continue; } //Got rid of extra photon loops so everything is now mFromPh==0. Do this check so only both nmip requirements is stored for the A_N analysis
+    if( pi0->mFromPh==3 ){
+      //pi0 coming from two electrons
+      mH1F_EpdChZgg->Fill(pi0->mZgg);
+      mH2F_EpdCh_etaVphi->Fill(phi,pi0_lv.Eta());
+      mH1F_EpdChEn->Fill(pi0en);
+      mH1F_EpdChPt->Fill(pi0_lv.Pt());
+      mH1F_EpdChAllMass->Fill(pi0mass);
+      ++ngoodbothch;
+    }
+    if( 0<=pi0->mFromPh && pi0->mFromPh<=2 ){
+      //pi0 as coming from at least one of them neutral
+      mH1F_EpdSinglePhZgg->Fill(pi0->mZgg);
+      mH2F_EpdSinglePh_etaVphi->Fill(phi,pi0_lv.Eta());
+      mH1F_EpdSinglePhEn->Fill(pi0en);
+      mH1F_EpdSinglePhPt->Fill(pi0_lv.Pt());
+      mH1F_EpdSinglePhAllMass->Fill(pi0mass);
+      ++ngoodsingleph;
+    }
+    if( 1<=pi0->mFromPh && pi0->mFromPh<=3 ){
+      //pi0 as coming from at least one of them charged
+      mH1F_EpdSingleChZgg->Fill(pi0->mZgg);
+      mH2F_EpdSingleCh_etaVphi->Fill(phi,pi0_lv.Eta());
+      mH1F_EpdSingleChEn->Fill(pi0en);
+      mH1F_EpdSingleChPt->Fill(pi0_lv.Pt());
+      mH1F_EpdSingleChAllMass->Fill(pi0mass);
+      ++ngoodsinglech;
+    }
+
+    if( pi0->mFromPh!=0 ){ /*std::cout << "StMuFcsPi0TreeMaker::Make() - Failed photon cut - "<<pi0->mFromPh<< std::endl;*/ continue; } //Got rid of extra photon loops so everything is now mFromPh==0. Do this check so only both nmip requirements is stored for the A_N analysis
     //std::cout << "StMuFcsPi0TreeMaker::Make() - Passed all cuts!" << std::endl;
     ++ngoodpi0s;
     //std::cout << " + |Ntrig:"<<mNTrig << "|trigname:"<<trigname << "|trigpt:"<<trigptthr;
@@ -375,7 +382,7 @@ void StMuFcsAnaPi0Tssa::PaintNoEpdCut(TCanvas* canv,  const char* savename)  con
 {
   canv->Clear();
   
-  canv->Divide(3,2);
+  canv->Divide(3,3);
   canv->cd(1)->SetLogy();
   mH1F_NoEpdCutPi0Mult->Draw("hist e");
   canv->cd(2);
@@ -388,6 +395,9 @@ void StMuFcsAnaPi0Tssa::PaintNoEpdCut(TCanvas* canv,  const char* savename)  con
   mH1F_NoEpdCutPt->Draw("hist e");
   canv->cd(6);
   mH1F_NoEpdCutAllMass->Draw("hist e");
+
+  canv->cd(7)->SetLogy();
+  mH1F_Pi0FromPh->Draw("hist e");
 
   canv->Print(savename);
 }

@@ -153,6 +153,7 @@ void FcsPhotonCandidate::Copy(TObject& object) const
   ((FcsPhotonCandidate&)object).mPyVert = mPyVert;
   ((FcsPhotonCandidate&)object).mPzVert = mPzVert;
 
+  ((FcsPhotonCandidate&)object).mEpdFoundRegion = mEpdFoundRegion;
   for( int i=0; i<5; ++i ){
     (((FcsPhotonCandidate&)object)).mEpdHitNmip[i] = mEpdHitNmip[i];
     (((FcsPhotonCandidate&)object)).mEpdMatch[i] = mEpdMatch[i];
@@ -180,6 +181,8 @@ void FcsPhotonCandidate::Clear(Option_t* opt)
   mPxVert = 0;
   mPyVert = 0;
   mPzVert = 0;
+
+  mEpdFoundRegion = -2;
   for( int i=0; i<5; ++i ){
     mEpdHitNmip[i] = -1;
     mEpdMatch[i] = 0;
@@ -197,13 +200,13 @@ void FcsPhotonCandidate::Print(Option_t* opt) const
   option.ToLower();
   std::cout << "|Clus:"<<mFromCluster << "|Pos:("<<mX<<","<<mY<<","<<mZ<<")|En:"<<mEn << "|PRaw:"<<mPxRaw<<","<<mPyRaw<<","<<mPzRaw<<","<<"|PVert:"<<mPxVert<<","<<mPyVert<<","<<mPzVert << std::endl;  
   if( option.Contains("epd") ){
-    std::cout << "  - ";
+    std::cout << "  - |FoundRegion:"<<mEpdFoundRegion;
     for( short i=0; i<5; ++i ){
       if( mEpdMatch[i]!=0 ){
 	std::cout << "|i:"<<i << "|key:"<<mEpdMatch[i] << "|nmip:"<<mEpdHitNmip[i];
       }
     }
-    std::cout << std::endl << "     - |Sum:"<<mEpdHitNmipSum << "|Max:"<<mEpdHitAdjMax << "|RedMip:"<<RedMip() << "|RedMax:"<<RedMax() << std::endl;
+    std::cout << std::endl << "     - |Sum3x3:"<<mEpdHitNmipSum << "|Max3x3:"<<mEpdHitAdjMax /*<< "|RedMip:"<<RedMip() << "|RedMax:"<<RedMax()*/ << std::endl;
   }
 }
 
@@ -263,7 +266,7 @@ Int_t FcsPairCandidate::Compare(const TObject* obj) const
 void FcsPairCandidate::Clear(Option_t* opt)
 {
   mFromCluster = false;
-  mFromPh = 0;
+  mFromPh = -1;
   mPhoton1Idx = -1;
   mPhoton2Idx = -1;
   mPx = 0;
@@ -294,6 +297,23 @@ Float_t FcsPairCandidate::alpha(FcsPhotonCandidate& ph1, FcsPhotonCandidate& ph2
   Float_t ph1mag = ph1.magPosition(); //magnitude of position vector for candidate 1
   Float_t ph2mag = ph2.magPosition(); //magnitude of position vector for candidate 2
   return acos( ph1dotph2 / (ph1mag*ph2mag) );
+}
+
+void FcsPairCandidate::DiscriminateCharge(TClonesArray* photonarr, Double_t epdnmipcut)
+{
+  TString photonarr_classname(photonarr->GetClass()->GetName());
+  if( !photonarr_classname.EqualTo("FcsPhotonCandidate") ){ return; }
+  FcsPhotonCandidate* ph1 = (FcsPhotonCandidate*)photonarr->At(mPhoton1Idx);
+  FcsPhotonCandidate* ph2 = (FcsPhotonCandidate*)photonarr->At(mPhoton2Idx);
+  if( ph1==0 || ph2==0 ){ return; }
+  //Only include candidates who have their nmip value set
+  if( ph1->mEpdMatch[0]==0 || ph2->mEpdMatch[0]==0 ){ return; }
+  //These if statements should be mutually exclusive but just in case give a -2 in case neither is satisfied
+  if( ph1->mEpdHitNmip[0]<=epdnmipcut && ph2->mEpdHitNmip[0]<=epdnmipcut )     { mFromPh = 0; }
+  else if( ph1->mEpdHitNmip[0]<=epdnmipcut && ph2->mEpdHitNmip[0]>epdnmipcut  ){ mFromPh = 1; }
+  else if( ph1->mEpdHitNmip[0]>epdnmipcut  && ph2->mEpdHitNmip[0]<=epdnmipcut ){ mFromPh = 2; }
+  else if( ph1->mEpdHitNmip[0]>epdnmipcut  && ph2->mEpdHitNmip[0]>epdnmipcut  ){ mFromPh = 3; }
+  else{ mFromPh = -2; }
 }
 
 
