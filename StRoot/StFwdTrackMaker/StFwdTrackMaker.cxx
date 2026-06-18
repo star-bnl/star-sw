@@ -717,7 +717,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
                 LOG_ERROR << "FCS database not initialized, cannot project to FCS" << endm;
                 continue;
             }
-            StThreeVectorD xyzoff = mFcsDb->getDetectorOffset(det);
+            StThreeVectorD xyzoff = mFcsDb->getDetectorOffset(det,mFcsDb->getShowerMaxZ(det));
             StThreeVectorD planenormal = mFcsDb->getNormal(det);
             float xyz0[3] = { 0, 0, 575.0 };
             float xyz1[3] = { 0, 0, 625.0 };
