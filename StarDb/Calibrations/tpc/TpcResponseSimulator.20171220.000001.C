@@ -59,13 +59,13 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
-#endif
+
 
   /* Sigmas 
      Tpx inner = 0.395
      Tpx outer = 0.314
      iTpc      = 0.322 Outer  0.316
-
+  */
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
 #endif
