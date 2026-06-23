@@ -119,7 +119,10 @@ struct EmbeddingChains {
       {"P21idIsobar200",  {"DbV20211206 P2018a StiCA -beamline3D btof etofDat mtdsim mtd mtdCalib BEmcChkStat CorrX OPr40 -OPr13 OSpaceZ2 OGridLeakFull -hitfilt -picoWrite McEvOut", "ry2018a", "useXgeom "}},
       
       // NOTE: CorrZ is removed because it is SL24y exclusive. 
-      {"P24iyFXT4p59",  {"DbV20241104 P2019a StiCA FXT -beamline3D btof BEmcChkStat picoVtxFXT PicoCovMtxWrite VFFV TpxClu -VFMinuit -hitfilt mtdsim", "ry2019b", "useXgeom "}}
+      {"P24iyFXT4p59",  {"DbV20241104 P2019a StiCA FXT -beamline3D btof BEmcChkStat picoVtxFXT PicoCovMtxWrite VFFV TpxClu -VFMinuit -hitfilt mtdsim", "ry2019b", "useXgeom "}},
+      
+      {"P23ieAuAu200",  {"DbV20231208 P2019a StiCA -beamline3D PicoVtxDefault PicoCovMtxWrite BEmcChkStat CorrY -OPr13 VFMCE TpxClu evout -VFMinuit -hitfilt mtdsim", "ry2019a", "useXgeom "}}
+
 
     };
 
