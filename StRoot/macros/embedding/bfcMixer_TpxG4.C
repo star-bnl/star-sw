@@ -80,6 +80,7 @@ double mult=100;
 std::vector<int> triggers = {870010};
 std::string prodName = "P23idAuAu17";
 std::string type = "FlatPT";
+std::string engine = "G4"; 
 
 
 
@@ -262,6 +263,8 @@ void bfcMixer_TpxG4()
     g4star->SetAttr( "embedding:mode",1);
     g4star->SetAttr( "G4VmcOpt:Nav",   "geomRoot");
 
+    g4star->SetAttr( "application:engine", engine.c_str() );
+
     g4star->SetAttr(
 		    "G4UI:PREINIT", 
 		    "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
@@ -330,7 +333,8 @@ void bfcMixer_TpxG4(
 		    std::vector<int> triggers_  = {600213,600214,600231,600232} , 
 		    const char* prodname  = "P21idIsobar200"  , 
 		    const char* kintype   = "FlatPT"       ,
-		    bool simIn = false                     ) {
+		    bool simIn = false                     ,
+		    const char* engine_ = "G4" ) {
 
 
 
@@ -349,6 +353,7 @@ void bfcMixer_TpxG4(
   // TODO: prodName, type ...
   prodName = prodname;
   type     = kintype;
+  engine   = engine_;
 
   daqfile=daqfile_;
   tagfile=tagfile_;
@@ -478,4 +483,30 @@ void bfcMixer_TpxG4( const char* dbg ) {
   }
 
     
+};
+
+
+//________________________________________________________________________________________
+void bfcMixer_Tpx( 
+		    const int   nevents_        , 
+		    const char* daqfile_        ,
+		    const char* tagfile_        ,
+		    double ptmn_                ,
+		    double ptmx_                ,
+		    double etamn_               ,
+		    double etamx_               ,
+		    double vzmn_                ,
+		    double vzmx_                ,
+		    double vr_                  ,
+		    int pid_                    ,
+		    double mult_                ,
+		    std::vector<int> triggers_  ,
+		    const char* prodname        ,
+		    const char* kintype         ,
+		    bool simIn                  ,
+		    const char* engine_ 
+		   ) {
+
+  bfcMixer_TpxG4( nevents_, daqfile_, tagfile_, ptmn_, ptmx_, etamn_, etamx_, vzmn_, vzmx_, vr_, pid_, mult_, triggers_, prodname, kintype, simIn, engine_ );
+
 };
