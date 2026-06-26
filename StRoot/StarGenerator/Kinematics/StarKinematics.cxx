@@ -72,6 +72,12 @@ Int_t StarKinematics::PreGenerate()
     assert(part);
     particles += part->GetName();
   }
+  else if ( SAttr("pdg") ) {
+    int pdg = IAttr("pdg");
+    auto* part = data.GetParticle(pdg);
+    assert(part);
+    particles += part->GetName();    
+  }
   double ptlow   = DAttr("ptlow");
   double pthigh  = DAttr("pthigh");
   double ylow    = DAttr("etalow"); 
