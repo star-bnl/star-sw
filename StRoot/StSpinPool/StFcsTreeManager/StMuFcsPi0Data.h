@@ -134,23 +134,7 @@ public:
   virtual void Copy(TObject& object) const;            ///< Copy this candidate to object
   virtual void Clear(Option_t* opt="");               ///< Resets all variables to defaults
   virtual void Print(Option_t* opt="") const;         ///< Print all variables no options
-
-  /*void SetEpdMatch(Short_t cornerid, Short_t key);
-  void GetEpdTileFromMatch(Short_t cornerid, Short_t &pp, Short_t &tt);
-  void GetEpdInside(Short_t &pp, Short_t &tt);
-  void GetEpdOuterCCW(Short_t &pp, Short_t &tt);
-  void GetEpdInnerCCW(Short_t &pp, Short_t &tt);
-  void GetEpdOuterCW(Short_t &pp, Short_t &tt);
-  void GetEpdInnerCW(Short_t &pp, Short_t &tt);*/
-
   static void ConvertEpdKeyToPpTt(Short_t key, Short_t &pp, Short_t &tt);   ///< pp=key/100 (integer divide), then tt=key-100*pp
-
-  //protected:
-  //void GetEpdKeyFromMatch(Short_t corner, Short_t &key);
-
-  //static void ConvertToKey(Int_t pp, Int_t tt);   ///< Make a key based on what epd tile and which "corner" had a hit, supersectors (pp) go from 1 to 12 so these will be the 4 left most bits, in the middle will be 5 bits for the tile (tt) which goes from 1 to 31. Lastly is a value that denotes type of corner, 0 is OuterCCW, 1 is InnerCCW, 2 is InnerCW, 3 is OuterCW. It may be confusing to have such keys, perhaps better to have a separate variable for each
-  //static void ConvertFromKey(Short_t key, Int_t& pp, Int_t &tt);
-  //bool corner                ///< Store which corner to use?
 
   ClassDef( FcsPhotonCandidate, 4 )
 };
