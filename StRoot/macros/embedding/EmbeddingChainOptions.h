@@ -67,8 +67,8 @@ struct EmbeddingChains {
     std::string chain1Opt = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput ";
     std::string chain2Opt = "gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault ";
     
-    if (readSim) { chain2Opt += ",fzin ";	}
-    else         { chain2Opt += ",NoInput,PrepEmbed "; }
+    if (readSim) { chain2Opt += ",fzin ";	}         //
+    else         { chain2Opt += ",NoInput,PrepEmbed "; }  //
     
     std::string chain3Opt = "";
     
@@ -115,6 +115,8 @@ struct EmbeddingChains {
 
       {"P21icAuAu19",  {"DbV20210827 DbV20220204_TPC_Calibrations P2019a StiCA,-beamline3D,btof,mtd,mtdCalib,ImpBToFt0Mode,BEmcChkStat,CorrY,-OPr13,ODistoSmear,EbyET0,PicoVtxDefault,PicoCovMtxWrite,VFMCE,TpxClu,-VFMinuit -hitfilt", "ry2019a", "usexgeom"}},
       {"P23idAuAu17",  {"DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt ", "ry2021a", "useXgeom "}},
+
+      {"P23idAuAu19",  {"DbV20230622 P2019a StiCA -beamline3D btof mtd mtdCalib ImpBToFt0Mode BEmcChkStat CorrY -OPr13 EbyET0 PicoVtxDefault PicoCovMtxWrite VFMCE TpxClu -VFMinuit -hitfilt", "ry2019a", "usexgeom"}},
 
       {"P21idIsobar200",  {"DbV20211206 P2018a StiCA -beamline3D btof etofDat mtdsim mtd mtdCalib BEmcChkStat CorrX OPr40 -OPr13 OSpaceZ2 OGridLeakFull -hitfilt -picoWrite McEvOut", "ry2018a", "useXgeom "}},
       
