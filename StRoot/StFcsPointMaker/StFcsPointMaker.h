@@ -101,13 +101,10 @@ inline double energyDepositionDistribution(double x, double y, double* parameter
 
 // getting shower shape integrals to corners and subtract to get integral in a cell
 inline double energyDepositionInTowerSingleLayer(double x, double y, double* parameters){
-  double halfwidth  = 0;
-  if( parameters[0] <= 1){ halfwidth = parameters[0]; }
-  else{ halfwidth =  (5.542+0.03)/2.0; }        //5.542+0.03 taken From StFcsDb getXWidth() as width of FcsCell
-    return  energyDepositionDistribution(x-halfwidth, y-halfwidth, parameters)
-	  - energyDepositionDistribution(x-halfwidth, y+halfwidth, parameters)
-	  - energyDepositionDistribution(x+halfwidth, y-halfwidth, parameters)
-	  + energyDepositionDistribution(x+halfwidth, y+halfwidth, parameters);
+    return  energyDepositionDistribution(x-0.5, y-0.5, parameters)
+	  - energyDepositionDistribution(x-0.5, y+0.5, parameters)
+	  - energyDepositionDistribution(x+0.5, y-0.5, parameters)
+	  + energyDepositionDistribution(x+0.5, y+0.5, parameters);
 }
 
 #endif  // STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_

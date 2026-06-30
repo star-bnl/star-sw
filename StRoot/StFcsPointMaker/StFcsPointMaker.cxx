@@ -63,14 +63,14 @@ void StFcsPointMaker::setShowerShapeParameters(int det){
     if(mShowerShape==0){ 
 	//Original single slice shower shap	
 	scl *= 1.0/3.849; //optimum from FMS study, scale it to cell size
-	mShowerShapeParameters= { width/2.0, 1.0708, 0.167773, -0.238578, 0.535845*scl, 0.850233*scl, 2.38264*scl, 1.0, unused, unused,
+	mShowerShapeParameters= { width, 1.0708, 0.167773, -0.238578, 0.535845*scl, 0.850233*scl, 2.38264*scl, 1.0, unused, unused,
 				 unused, unused, unused, unused, unused, unused, unused, unused, unused, unused,
 		 		 unused, unused, unused, unused, unused, unused, unused, unused, unused, unused,
 				 unused, unused, unused, unused, unused, unused, unused, unused, unused, unused,
 				 unused, unused, unused, unused, unused, unused, unused, unused, unused, unused,
 				 unused, unused, unused, unused, unused, unused, unused, unused, unused, unused};
     }else if(mShowerShape==1){ 
-	//Yuxi's 6 slices * 3 gaus                                                                                                        B           
+	//Yuxi's 6 slices * 3 gaus
 	scl *= 0.8/3.849; //optimum from FMS study, scale it to cell size
 	double a11=0.998438; double a12=0.222782;   double a13=-0.22122;   double b11=0.177028;double b12=0.000473222;double b13=0.178897;double w1 = 0.0372556;
 	double a21=1.07711 ; double a22=-0.0281385; double a23=-0.0489747; double b21=0.199964;double b22=3.5021;     double b23=2.35246; double w2 = 0.202699;
@@ -115,7 +115,7 @@ void StFcsPointMaker::setShowerShapeParameters(int det){
       //Parameters From Lednev Paper scaled to cm
       double a1[3] = {0.8, 0.3, -0.1};
       double b1[3] = {0.8, 0.2, 7.6};
-      mShowerShapeParameters = {width/2.0, a1[0],  a1[1],  a1[2],  b1[0]*scl, b1[1]*scl, b1[2]*scl, 1.0,    unused, unused,
+      mShowerShapeParameters = {width, a1[0],  a1[1],  a1[2],  b1[0]*scl, b1[1]*scl, b1[2]*scl, 1.0,    unused, unused,
 				unused,    unused, unused, unused, unused,    unused,    unused,    unused, unused, unused,
 				unused,    unused, unused, unused, unused,    unused,    unused,    unused, unused, unused,
 				unused,    unused, unused, unused, unused,    unused,    unused,    unused, unused, unused,
