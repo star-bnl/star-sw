@@ -3,13 +3,13 @@
   David Kapukchyan
 
   PURPOSE
-  The purpose of this class is to hold the mudst pointers and data that is needed for analysis with MuDsts and FCS classes. An instance of this data structure can be passed to objects inherting from #StMuFcsVirtualAna and this structure is filled with #StMuFcsAnaDataMaker. It also contains some static methods that can be used for processing the data and to compute the Transverse Single Spin Assymetry (TSSA)
+  The purpose of this class is to hold the mudst pointers and data that is needed for analysis with MuDsts and FCS classes. An instance of this data structure can be passed to objects inherting from #StMuFcsVirtualAna and this structure is filled with #StFwdAnaDataMaker. It also contains some static methods that can be used for processing the data and to compute the Transverse Single Spin Assymetry (TSSA)
 
   DESCRIPTION
   Contains all relevant pointers and data for mudst analysis with the FCS. Also contains a #TTree which can be turned on and off to save the event, point, and point pair information. It also contains a vector of triggers you want to include in your analysis and other variables related to the trigger information. Contains a simple #PolData struct to fill and hold polarization data and a map  of key->value pairing of filldata->#PolData. Also, contains variables related to cuts you may want to apply. All these "options" should be set before calling methods in the STAR maker chain. Also contains many useful static function calls that can be used in #StMuFcsVirtualAna objects or analysis and drawing macros.
 
   CAVEATS
-  1. The trigger matching only works if you have taken the time to create a text file that contains a list of all the FCS triggers and their starting and ending run numbers. It's format must be "TriggerName OfflineId StartRun EndRun". This text file must then be specified to #StMuFcsAnaDataMaker
+  1. The trigger matching only works if you have taken the time to create a text file that contains a list of all the FCS triggers and their starting and ending run numbers. It's format must be "TriggerName OfflineId StartRun EndRun". This text file must then be specified to #StFwdAnaDataMaker
 
   2. The polarization file should be taken from https://wiki.bnl.gov/rhicspin/Results_(Polarimetry) and saved as a text file. You need to manually remove any incomplete rows
 
@@ -17,11 +17,12 @@
   @[January 9, 2026]  > Copied from *StMuFcsPi0TreeMaker* and modified to keep only the relevant data pointers
   @[January 21, 2026] > Copied members of *StFcsRun22TriggerMap* to here so don't need an extra pointer. Limited number of pointers to only the main relevant ones and the rest is accessed through getter functions
   @[June 8, 2026] > Changed #FcsPi0Candidate to #FcsPairCandidate, added #mEvent as an internal event counter
+  @[June 30, 2026] > Changed name from StMuFcsAnaData to StFwdAnaData to be consistent with new naming scheme which is more general for STAR forward analysis software. Changed the related StMuFcs* names to the new StFwdData* names. Moved #mNTrig, #mTriggers, and #mUseVertex to #StFwdDataEvent. Changed #mEvtInfo to #mEvtData to be consistent with name change of FcsEventInfo to StFwdDataEvent. Changed mPi0Tree to #mDataTree and changed "Pi0" branch name to "Pair"
 */
 
 
-#ifndef STMUFCSANADATA_HH
-#define STMUFCSANADATA_HH
+#ifndef STFWDANA_STFWDANADATA_HH
+#define STFWDANA_STFWDANADATA_HH
 
 //C/C++ Headers
 #include <iostream>
@@ -70,7 +71,7 @@
 //#include "StSpinPool/StFcsPi0Ana/StFcsRun22TriggerMap.h"
 
 class StEpdGeom;
-class StMuFcsAnaDataMaker;
+class StFwdAnaDataMaker;
 
 /*Simple data struct to hold polarization information from file only important values are kept*/
 struct PolData
@@ -90,23 +91,17 @@ struct PolData
   void Print() const;
 };
 
-class StMuFcsAnaData : public TObject {
+class StFwdAnaData : public TObject {
 public:
-  friend class StMuFcsAnaDataMaker;
+  friend class StFwdAnaDataMaker;
   
-  StMuFcsAnaData();
-  virtual ~StMuFcsAnaData();
+  StFwdAnaData();
+  virtual ~StFwdAnaData();
 
-  static const UShort_t mMaxTrigs = 65;    ///< 64 FCS triggers + 1 for any other not found
   //static const short NENERGYBIN = 8;     ///< Number of energy bins
   static const short NXFBIN = 8;         ///< Number of x_F bins (should match energy binning)
   static const short NPHIBIN = 24;       ///< Number of phi bins
 
-  //Double_t ebins[NENERGYBIN+1] = {0, 15, 20, 25, 30, 40, 55, 70, 100};
-  //static const Double_t xfbins[NXFBIN+1] = {0, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12, 0.5}; //@[June 28, 2025] > xF binning such that statistics are even across bins
-  //static constexpr Double_t xfbins[NXFBIN+1] = {0, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12, 0.5}; //@[June 28, 2025] > Trying as static data member
-  //const static double xfbins[NXFBIN+1];  //@[July 31, 2025] > Can't use constexpr with ROOT 5 but this is the right c++ 11 way to do it
-  //Double_t xfbins[NXFBIN+1] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5}; //@[June 28, 2025] > Really fine xF binning to check which is the best xF binning
   static const Double_t xfbins[NXFBIN+1];// = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5}; //@[August 4, 2025] > New xF binning
 
   //STAR classes needed to access various STAR and event data
@@ -127,8 +122,8 @@ public:
 
   static std::vector<Double_t> ProjectToEpd(Double_t xfcs, Double_t yfcs, Double_t zfcs, Double_t zvertex);
   static void AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const std::string &title="" );
-  static void DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StMuFcsAnaData::NXFBIN] );    ///< Compute asymmetry from npi0 array of [blue,yellow][spin up,down] and return an array of raw assymtries by [blue,yellow][energybin]
-  static void DoTssaFit(TH1* h1_rawasymVphi[][StMuFcsAnaData::NXFBIN], TH1* h1_bluepoldata, TH1* h1_yellowpoldata, TH1* h1_AnResult[]);
+  static void DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN] );    ///< Compute asymmetry from npi0 array of [blue,yellow][spin up,down] and return an array of raw assymtries by [blue,yellow][energybin]
+  static void DoTssaFit(TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN], TH1* h1_bluepoldata, TH1* h1_yellowpoldata, TH1* h1_AnResult[]);
   static void DoPi0Fits(TH3* mH1F_invmass, TH1* hist_proj[] );
   static void DoBgCorrectedAn(TH1* h1_invmass_en[], TH1* h1_an_inc, TH1* h1_an_bg, TH1* h1_anresult );  
   static Double_t pol4bg(Double_t* x, Double_t* par);      ///< disjoint 4th order polynomial to exclude signal range
@@ -165,26 +160,26 @@ public:
   PolData* getPolData(Int_t fillnum);
   Double_t randomNum(){ return mSpinRndm.Rndm(); }  //random number between 0 and 1
   
-  TTree* getPi0Tree()const{ return mPi0Tree; }
+  TTree* getPi0Tree()const{ return mDataTree; }
 
   ULong_t getEventNum()const{ return mEvent; }
-  FcsEventInfo* getEvtInfo()const{ return mEvtInfo; }
-  Int_t getTreeEntries()const{ return mPi0Tree->GetEntriesFast(); }
-  Int_t getEntry(Int_t ientry){ return mPi0Tree->GetEntry(ientry); }
-  Int_t getNTrig()const{ return mNTrig; }
-  const Int_t* getTrig()const{ return mTriggers; }
-  Int_t getTrig(Int_t itrig)const{ return mTriggers[itrig]; }
+  StFwdDataEvent* getEvtData()const{ return mEvtData; }
+  Int_t getTreeEntries()const{ return mDataTree->GetEntriesFast(); }
+  Int_t getEntry(Int_t ientry){ return mDataTree->GetEntry(ientry); }
+  Int_t getNTrig()const{ return mEvtData->mNTrig; }
+  const Int_t* getTrig()const{ return mEvtData->mTriggers; }
+  Int_t getTrig(Int_t itrig)const{ return mEvtData->mTriggers[itrig]; }
   Float_t fcsPtThr(Int_t trigid) const;                               ///< Get Pt threshold for a given offline trigger id
   Float_t fcsPtThrAsym(Int_t trigid) const;                           ///< Get Pt threshold asymetric for a given offline trigger id
   bool exceedTrigPt(Double_t checkpt);    //Function to check if a particle "candidate"'s transverse momentum (pt) exceeds the trigger threshold for the run number loaded into the data
 
   TClonesArray* getPhArr()const{ return mPhArr; }
   Int_t getNPhoton()const{ return mPhArr->GetEntriesFast(); }
-  FcsPhotonCandidate* getPhoton(Int_t iph)const{ return dynamic_cast<FcsPhotonCandidate*>(mPhArr->UncheckedAt(iph)); }
+  StFcsPhotonCandidate* getPhoton(Int_t iph)const{ return dynamic_cast<StFcsPhotonCandidate*>(mPhArr->UncheckedAt(iph)); }
 
   TClonesArray* getPhPairArr()const{ return mPhPairArr; }
   Int_t getNPhPair()const{ return mPhPairArr->GetEntriesFast(); }
-  FcsPairCandidate* getPhPair(Int_t ipi0)const{ return dynamic_cast<FcsPairCandidate*>(mPhPairArr->UncheckedAt(ipi0)); }
+  StFcsPairCandidate* getPhPair(Int_t ipi0)const{ return dynamic_cast<StFcsPairCandidate*>(mPhPairArr->UncheckedAt(ipi0)); }
   //#ifndef __CINT__
   //void SetTrigs(const char* trigname,...);//{ mTargetTrig.emplace_back(trigname); }
   //template<typename... Args>
@@ -200,23 +195,11 @@ public:
 
   virtual void Print(const char* opt="") const;  //"e" for event, "t" for trigger, "g" for photon, "p" for photon pair, "a" for all
 
-  //Called in Init() and shouldn't be changed during the lifetime (Put in DataMaker?)
-  //StFcsRun22TriggerMap* mFcsTrigMap  = 0;
-
-  //Used and filled for #mPi0Tree
-
-  //StMuEpdRun22QaMaker* mEpdQaMkr = 0;
-
-  short mFoundVertex = 0;              ///< (0) Bit vector for knowing which vertex was used 0 means no vertex, 1=Vpd,2=Epd,3=Bbc
-  Double_t mUseVertex = -999.0;             ///< (-999.0) Vertex to use in analysis
-
   std::vector<std::string> mTargetTrig;     ///< For Target Trigger ID
-  Int_t mNTrig = 0;                     ///< Total triggers in the event
-  Int_t mTriggers[mMaxTrigs];       ///< Array of Triggers in the event
-
+  
   Double_t mVertexCutLow = -150.0;          ///< (-150.0) Variables for z vertex cuts at low end in cm
   Double_t mVertexCutHigh = 150.0;          ///< (150.0) Variables for z vertex cuts at high end in cm
-  Double_t mEnCut = 1.0;                    ///< (1.0) Energy Cut for #FcsPhotonCandidates
+  Double_t mEnCut = 1.0;                    ///< (1.0) Energy Cut for #StFcsPhotonCandidates
   Double_t mEpdNmipCut = 0.4;               ///< (0.4) Cut on EPD nmip to classify cluster or point as charged or uncharged
 
   //bool mReadMuDst;   ///< flag to check if reading from mudst or not (This can be used to turn off populating event info)
@@ -254,11 +237,11 @@ protected:
   StEpdGeom* mEpdGeom = 0;
 
   //Initialized in Init() but will be modified and reset by Make calls
-  TTree* mPi0Tree = 0;                  ///< #TTree with desired branches
-  FcsEventInfo* mEvtInfo = 0;           ///< #FcsEventInfo object for TTree
+  TTree* mDataTree = 0;                  ///< #TTree with desired branches
+  StFwdDataEvent* mEvtData = 0;           ///< #StFwdDataEvent object for TTree
   //For trigger branch of tree
-  TClonesArray* mPhArr = 0;             ///< #TClonesArray of all #FcsPhotonCandidate
-  TClonesArray* mPhPairArr = 0;         ///< Array of #FcsPhotonCandidate pairs to be used later in analysis
+  TClonesArray* mPhArr = 0;             ///< #TClonesArray of all #StFcsPhotonCandidate
+  TClonesArray* mPhPairArr = 0;         ///< Array of #StFcsPhotonCandidate pairs to be used later in analysis
 
   void loadTree(TFile* file);   ///< Attempts to read the TTree from a file
   void makeTree(TFile* file);   ///< Creates a new TTree deleting old one if it exists
@@ -283,9 +266,6 @@ protected:
 
   std::vector<std::string> mListOfFcsTriggers;       ///< All found names of the triggers. This just makes it easier to recall unique trigger names
   std::map<Int_t,TrigRange> mAllFcsTrigRanges;       ///< Map of the unique offline trigger Ids to all the found ranges for those triggers
-
-  //const TrigRange& GetTrig(Int_t trigid) const;
-  //TrigRange& GetTrig(Int_t trigid) const;
   
 private:
   TRandom3 mSpinRndm;                 ///< Spin state randomizer
@@ -293,7 +273,7 @@ private:
 
   void SetTriggerPtThresholds(TrigRange& input);  ///< Copied a map of trigger name to its corresponding P_T==E_T thresholds from https://www.star.bnl.gov/protected/spin/akio/fcs/run22trg.html on November 25, 2024. All values will be in GeV. Called when filling #mAllFcsTrigRanges
 
-  ClassDef(StMuFcsAnaData,2)
+  ClassDef(StFwdAnaData,1)
 };
 
 #endif

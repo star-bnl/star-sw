@@ -1,4 +1,4 @@
-#include "StMuFcsAnaData.h"
+#include "StFwdAnaData.h"
 
 //@[January 4, 2025] > Information about declaring static members in a class in no particular order
 //    - https://stackoverflow.com/questions/27408819/why-cant-non-static-data-members-be-constexpr
@@ -15,8 +15,8 @@
 //    - https://cplusplus.com/forum/general/133038/
 //      -> https://stackoverflow.com/questions/154469/why-should-you-prefer-unnamed-namespaces-over-static-functions
 
-//const double StMuFcsAnaData::xfbins[] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4, 0.44, 0.48, 0.52};
-const Double_t StMuFcsAnaData::xfbins[] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5}; //@[August 4, 2025] > New xF binning
+//const double StFwdAnaData::xfbins[] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4, 0.44, 0.48, 0.52};
+const Double_t StFwdAnaData::xfbins[] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5}; //@[August 4, 2025] > New xF binning
 
 void PolData::Print() const
 {
@@ -34,7 +34,7 @@ void PolData::Print() const
 	    << std::endl;
 }
 
-StMuFcsAnaData::TrigRange::TrigRange()
+StFwdAnaData::TrigRange::TrigRange()
 {
   mName = "";
   mOfflineTrigId = 0;
@@ -44,7 +44,7 @@ StMuFcsAnaData::TrigRange::TrigRange()
   mPtThresholdAsym = -1;
 }
 
-StMuFcsAnaData::TrigRange::TrigRange(const char* name, Int_t trigid, Int_t startrun, Int_t endrun)
+StFwdAnaData::TrigRange::TrigRange(const char* name, Int_t trigid, Int_t startrun, Int_t endrun)
 {
   mName = name;
   mOfflineTrigId = trigid;
@@ -54,31 +54,31 @@ StMuFcsAnaData::TrigRange::TrigRange(const char* name, Int_t trigid, Int_t start
   mPtThresholdAsym = -1;
 }
 
-bool StMuFcsAnaData::TrigRange::ValidRun(Int_t runnum) const
+bool StFwdAnaData::TrigRange::ValidRun(Int_t runnum) const
 {
   if( mStartRun<=runnum && runnum<=mEndRun ){ return true; }
   else{ return false; }
 }
 
 
-ClassImp(StMuFcsAnaData)
+ClassImp(StFwdAnaData)
 
-StMuFcsAnaData::StMuFcsAnaData()
+StFwdAnaData::StFwdAnaData()
 {
   mSpinRndm.SetSeed(0);
 }
 
-StMuFcsAnaData::~StMuFcsAnaData()
+StFwdAnaData::~StFwdAnaData()
 {
-  delete mEvtInfo;
+  delete mEvtData;
   delete mPhArr;
   delete mPhPairArr;
-  delete mPi0Tree;
+  delete mDataTree;
   for( auto itr=mPolarizationData.begin(); itr!=mPolarizationData.end(); ++itr){ delete itr->second; }
   mPolarizationData.clear();
 }
 
-std::vector<Double_t> StMuFcsAnaData::ProjectToEpd(Double_t xfcs, Double_t yfcs, Double_t zfcs, Double_t zvertex)
+std::vector<Double_t> StFwdAnaData::ProjectToEpd(Double_t xfcs, Double_t yfcs, Double_t zfcs, Double_t zvertex)
 {
   //Assume x,y=0 at vertex so only need zvertex as origin and is the initial point for the direction
   Double_t linedirection[3] = {xfcs,yfcs,zfcs-zvertex}; //This is the direction vector from the origin to the fcs point (FcsXYZ-Vertex)
@@ -93,7 +93,7 @@ std::vector<Double_t> StMuFcsAnaData::ProjectToEpd(Double_t xfcs, Double_t yfcs,
   return intersection;
 }
 
-void StMuFcsAnaData::AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const std::string &title )
+void StFwdAnaData::AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const std::string &title )
 {
   //This function is good for when many histograms are plotted
   if( HistLeg==0 || h1==0 ){return;}
@@ -110,7 +110,7 @@ void StMuFcsAnaData::AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const
   }
 }
 
-Int_t StMuFcsAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraph*& graph, const char* name, const char* title )
+Int_t StFwdAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraph*& graph, const char* name, const char* title )
 {
   if( graph!=0 ){ return 0; }  //Graph pointer should always be zero
   if( file!=0 ){
@@ -129,7 +129,7 @@ Int_t StMuFcsAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraph*& graph
   return 1;//1 if histogram loaded or exists, 0 otherwise
 }
 
-Int_t StMuFcsAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraphErrors*& graph, const char* name, const char* title )
+Int_t StFwdAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraphErrors*& graph, const char* name, const char* title )
 {
   if( graph!=0 ){ return 0; }  //Graph pointer should always be zero
   if( file!=0 ){ graph = (TGraphErrors*)file->Get(name); }
@@ -146,20 +146,20 @@ Int_t StMuFcsAnaData::MakeGraph(TFile* file, TObjArray* grapharr, TGraphErrors*&
 }
 
 
-void StMuFcsAnaData::DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StMuFcsAnaData::NXFBIN] )
+void StFwdAnaData::DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN] )
 {
   //Double_t pi = TMath::Pi();
   //TH1* h1_rawasymVphi[2][NENERGYBIN];  //Histograms of computed raw asymmetries for blue and yellow beams for each energy bin
   //memset(h1_rawasymVphi,0,sizeof(h1_rawasymVphi));
   
   //for( int ibeam = 0; ibeam<2; ++ibeam ){
-  for( int ixbin = 0; ixbin<StMuFcsAnaData::NXFBIN; ++ixbin ){
+  for( int ixbin = 0; ixbin<StFwdAnaData::NXFBIN; ++ixbin ){
     int ibeam = 0; //Blue beam first since that uses the normal STAR direction convention
-    for( int iphibin=0; iphibin<StMuFcsAnaData::NPHIBIN/2 ; ++iphibin ){
+    for( int iphibin=0; iphibin<StFwdAnaData::NPHIBIN/2 ; ++iphibin ){
       Double_t nupatphi         = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1,ixbin+1));
-      Double_t ndownatphipluspi = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1+StMuFcsAnaData::NPHIBIN/2,ixbin+1));
+      Double_t ndownatphipluspi = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1+StFwdAnaData::NPHIBIN/2,ixbin+1));
       Double_t ndownatphi       = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1,ixbin+1));
-      Double_t nupatphipluspi   = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1+StMuFcsAnaData::NPHIBIN/2,ixbin+1));
+      Double_t nupatphipluspi   = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1+StFwdAnaData::NPHIBIN/2,ixbin+1));
       
       Double_t nupdown = sqrt( nupatphi * ndownatphipluspi );
       Double_t ndownup = sqrt( ndownatphi * nupatphipluspi );
@@ -183,11 +183,11 @@ void StMuFcsAnaData::DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StMuFcsAna
       }
     }
     ibeam = 1; //Yellow beam next since need to flip the order because "left" for yellow is the opposite of the "left" for blue
-    for( int iphibin=StMuFcsAnaData::NPHIBIN/2; iphibin<StMuFcsAnaData::NPHIBIN; ++iphibin ){
+    for( int iphibin=StFwdAnaData::NPHIBIN/2; iphibin<StFwdAnaData::NPHIBIN; ++iphibin ){
       Double_t nupatphi         = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1,ixbin+1));
-      Double_t ndownatphipluspi = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1-StMuFcsAnaData::NPHIBIN/2,ixbin+1));
+      Double_t ndownatphipluspi = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1-StFwdAnaData::NPHIBIN/2,ixbin+1));
       Double_t ndownatphi       = npi0[ibeam][1]->GetBinContent(npi0[ibeam][1]->GetBin(iphibin+1,ixbin+1));
-      Double_t nupatphipluspi   = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1-StMuFcsAnaData::NPHIBIN/2,ixbin+1));
+      Double_t nupatphipluspi   = npi0[ibeam][0]->GetBinContent(npi0[ibeam][0]->GetBin(iphibin+1-StFwdAnaData::NPHIBIN/2,ixbin+1));
       
       Double_t nupdown = sqrt( nupatphi * ndownatphipluspi );
       Double_t ndownup = sqrt( ndownatphi * nupatphipluspi );
@@ -200,27 +200,27 @@ void StMuFcsAnaData::DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StMuFcsAna
 	// Propagate errors for A_N
 	Double_t AnErr = sqrt(ndownatphi*nupatphi*nupatphipluspi + ndownatphipluspi*nupatphi*nupatphipluspi + ndownatphi*ndownatphipluspi*nupatphi + ndownatphi*ndownatphipluspi*nupatphipluspi)/(denominator*denominator);
 	//std::cout << " + |An:"<<numerator/denominator << "|AnErr:"<<AnErr << std::endl;
-	h1_rawasymVphi[ibeam][ixbin]->SetBinContent(iphibin+1-StMuFcsAnaData::NPHIBIN/2,numerator/denominator); //instead of flipping can also multiply by -1
-	h1_rawasymVphi[ibeam][ixbin]->SetBinError(iphibin+1-StMuFcsAnaData::NPHIBIN/2,AnErr);
+	h1_rawasymVphi[ibeam][ixbin]->SetBinContent(iphibin+1-StFwdAnaData::NPHIBIN/2,numerator/denominator); //instead of flipping can also multiply by -1
+	h1_rawasymVphi[ibeam][ixbin]->SetBinError(iphibin+1-StFwdAnaData::NPHIBIN/2,AnErr);
       }
       else{
 	//If denomnator is zero set bin to zero to avoid bad division and set large error
-	h1_rawasymVphi[ibeam][ixbin]->SetBinContent(iphibin+1-StMuFcsAnaData::NPHIBIN/2,0);
-	h1_rawasymVphi[ibeam][ixbin]->SetBinError(iphibin+1-StMuFcsAnaData::NPHIBIN/2,1);
+	h1_rawasymVphi[ibeam][ixbin]->SetBinContent(iphibin+1-StFwdAnaData::NPHIBIN/2,0);
+	h1_rawasymVphi[ibeam][ixbin]->SetBinError(iphibin+1-StFwdAnaData::NPHIBIN/2,1);
       }
     }
   }
 }
 
-void StMuFcsAnaData::DoTssaFit( TH1* h1_rawasymVphi[][StMuFcsAnaData::NXFBIN], TH1* h1_bluepoldata, TH1* h1_yellowpoldata, TH1* h1_AnResult[] )
+void StFwdAnaData::DoTssaFit( TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN], TH1* h1_bluepoldata, TH1* h1_yellowpoldata, TH1* h1_AnResult[] )
 {
   Double_t pi = TMath::Pi();
   //Double_t ebins[NENERGYBIN+1] = {0, 15, 20, 25, 30, 40, 55, 70, 100};  //Copied from above
-  //h1_AnResult[0] = new TH1D("H1D_AnResultBlue","A_N vs. Energy;Energy;A_N",StMuFcsAnaData::NENERGYBIN,ebins);
-  //h1_AnResult[1] = new TH1D("H1D_AnResultYellow","A_N vs. Energy;Energy;A_N",StMuFcsAnaData::NENERGYBIN,ebins);
+  //h1_AnResult[0] = new TH1D("H1D_AnResultBlue","A_N vs. Energy;Energy;A_N",StFwdAnaData::NENERGYBIN,ebins);
+  //h1_AnResult[1] = new TH1D("H1D_AnResultYellow","A_N vs. Energy;Energy;A_N",StFwdAnaData::NENERGYBIN,ebins);
   //Double_t nentries = h1_poldata->GetBinContent(1);
   for( int ibeam = 0; ibeam<2; ++ibeam ){
-    for( int ixbin = 0; ixbin<StMuFcsAnaData::NXFBIN; ++ixbin ){
+    for( int ixbin = 0; ixbin<StFwdAnaData::NXFBIN; ++ixbin ){
       //std::stringstream ss_fname;
       //ss_fname << "AnFit_" << ibeam << "_" << iebin;
       //TF1* AnFit = new TF1("AnFit","[0]*cos(x+[1])+[2]",-pi/2.0,pi/2.0);
@@ -239,13 +239,13 @@ void StMuFcsAnaData::DoTssaFit( TH1* h1_rawasymVphi[][StMuFcsAnaData::NXFBIN], T
   }
 }
 
-void StMuFcsAnaData::DoPi0Fits(TH3* mH3F_invmass, TH1* hist_proj[] )
+void StFwdAnaData::DoPi0Fits(TH3* mH3F_invmass, TH1* hist_proj[] )
 {
-  for( short ixbin=0; ixbin<StMuFcsAnaData::NXFBIN; ++ixbin ){
+  for( short ixbin=0; ixbin<StFwdAnaData::NXFBIN; ++ixbin ){
     if( hist_proj[ixbin]==0 ){
       std::stringstream histname;
       histname << "H1F_InvMass_xf"<<ixbin;
-      hist_proj[ixbin] = (TH1*)((TH3F*)mH3F_invmass)->ProjectionZ( histname.str().c_str(), 1,StMuFcsAnaData::NPHIBIN, ixbin+1,ixbin+1 );
+      hist_proj[ixbin] = (TH1*)((TH3F*)mH3F_invmass)->ProjectionZ( histname.str().c_str(), 1,StFwdAnaData::NPHIBIN, ixbin+1,ixbin+1 );
       hist_proj[ixbin]->SetTitle( histname.str().c_str() );
     }
     TF1* PeakFit = new TF1("PeakFit",skewgaus,0.1,0.2,4);
@@ -306,15 +306,15 @@ void StMuFcsAnaData::DoPi0Fits(TH3* mH3F_invmass, TH1* hist_proj[] )
   }
 }
 
-void StMuFcsAnaData::DoBgCorrectedAn(TH1* h1_invmass_xf[], TH1* h1_an_inc, TH1* h1_an_bg, TH1* h1_anresult )
+void StFwdAnaData::DoBgCorrectedAn(TH1* h1_invmass_xf[], TH1* h1_an_inc, TH1* h1_an_bg, TH1* h1_anresult )
 {
   if( h1_anresult==0 ){ return; }
   if( h1_invmass_xf==0 ){ return; }
   if( h1_an_inc==0 ){ return; }
   if( h1_an_bg==0 ){ return; }
-  for( Int_t ixbin=0; ixbin<StMuFcsAnaData::NXFBIN; ++ixbin ){
+  for( Int_t ixbin=0; ixbin<StFwdAnaData::NXFBIN; ++ixbin ){
     TF1* bgfunc = 0;
-    if( ixbin<=(StMuFcsAnaData::NXFBIN-1) ){ bgfunc = h1_invmass_xf[ixbin]->GetFunction("BgGlobalFit"); }
+    if( ixbin<=(StFwdAnaData::NXFBIN-1) ){ bgfunc = h1_invmass_xf[ixbin]->GetFunction("BgGlobalFit"); }
     //if( ixbin<4 ){ bgfunc = h1_invmass_en[ixbin]->GetFunction("BgGlobalFit"); }
     else{ bgfunc = h1_invmass_xf[ixbin]->GetFunction("Bg2Fit"); }  //For all but the last energy bin this function had the most reasonable background shape(*/
     if( bgfunc==0 ){ continue; }
@@ -332,7 +332,7 @@ void StMuFcsAnaData::DoBgCorrectedAn(TH1* h1_invmass_xf[], TH1* h1_an_inc, TH1* 
   }
 }
 
-Double_t StMuFcsAnaData::pol4bg(Double_t* x, Double_t* par)
+Double_t StFwdAnaData::pol4bg(Double_t* x, Double_t* par)
 {
   //Rejecting these points gives good background at both the high and low end
   if( x[0]<0.045 ){ TF1::RejectPoint(); return 0; }
@@ -341,7 +341,7 @@ Double_t StMuFcsAnaData::pol4bg(Double_t* x, Double_t* par)
   return par[0] + par[1]*x[0] + par[2]*x[0]*x[0] + par[3]*x[0]*x[0]*x[0] + par[4]*x[0]*x[0]*x[0]*x[0];
 }
 
-Double_t StMuFcsAnaData::skewgaus(Double_t*x, Double_t* par)
+Double_t StFwdAnaData::skewgaus(Double_t*x, Double_t* par)
 {
   if( par[2]==0 ){ return 1.e30; }
   Double_t xarg = (x[0]-par[1])/par[2];
@@ -350,7 +350,7 @@ Double_t StMuFcsAnaData::skewgaus(Double_t*x, Double_t* par)
   return (2.0/par[2])*par[0]*gaus*skew;
 }
 
-Double_t StMuFcsAnaData::pol4skewgaus(Double_t*x, Double_t* par)
+Double_t StFwdAnaData::pol4skewgaus(Double_t*x, Double_t* par)
 {
   //if( x[0]<0.045 ){ TF1::RejectPoint(); return 0; }
   if( x[0]<0.045 || (0.4<x[0] && x[0]<0.6) ){ TF1::RejectPoint(); return 0; } //Avoid low mass region and 0.4 to 0.6 to skip eta meson mass
@@ -362,7 +362,7 @@ Double_t StMuFcsAnaData::pol4skewgaus(Double_t*x, Double_t* par)
   return pol4 + (2.0/par[7])*par[5]*gaus*skew;
 }
 
-Int_t StMuFcsAnaData::GetColor(Double_t Value, Double_t MinVal, Double_t MaxVal)
+Int_t StFwdAnaData::GetColor(Double_t Value, Double_t MinVal, Double_t MaxVal)
 {
   Double_t MinHue = 275.0;
   Double_t MaxHue = 0.0;
@@ -378,14 +378,14 @@ Int_t StMuFcsAnaData::GetColor(Double_t Value, Double_t MinVal, Double_t MaxVal)
     return TColor::GetColor( Red, Green, Blue );
 }
 
-void StMuFcsAnaData::epdColl(TClonesArray*& epdmucoll, StEpdCollection*& epdcoll)
+void StFwdAnaData::epdColl(TClonesArray*& epdmucoll, StEpdCollection*& epdcoll)
 {
   epdmucoll = mMuEpdHits;
   epdcoll = mEpdColl;
   return;
 }
 
-void StMuFcsAnaData::resetEvent()
+void StFwdAnaData::resetEvent()
 {  
   //Reset these mutable pointers set in make so that it can be easily checked which ones are modified on the next event call
   mMuDstMkr = 0;
@@ -398,9 +398,6 @@ void StMuFcsAnaData::resetEvent()
   mMuEpdHits = 0;
   mEpdColl = 0;
   
-  mFoundVertex = 0;
-  mUseVertex = -999.0;
-  
   mValidTrigFound = false;
   mEmTrigFound = false;
   mTrigEm0 = -1;
@@ -408,32 +405,31 @@ void StMuFcsAnaData::resetEvent()
   mTrigEm2 = -1;
   mTrigEm3 = -1;
 
-  mEvtInfo->Clear();
-  mNTrig = 0; //Since ROOT only writes up to the size of mNTrig then only need to reset this back to zero and next loop will overwrite array as neccessary
+  mEvtData->Clear();
   mPhArr->Clear("C");
   mPhPairArr->Clear("C");
 }
 
-void StMuFcsAnaData::setEventBit(bool val)
+void StFwdAnaData::setEventBit(bool val)
 {
   if( val ){ mTreeOnBitMap |= 0x01; }
   else{ mTreeOnBitMap &= ~(0x01); }
 }
 
-void StMuFcsAnaData::setPhotonOn(bool val)
+void StFwdAnaData::setPhotonOn(bool val)
 {
   if( val ){ mTreeOnBitMap |= 0x02; }
   else{ mTreeOnBitMap &= ~(0x02); }
 }
 
-void StMuFcsAnaData::setPhPairOn(bool val)
+void StFwdAnaData::setPhPairOn(bool val)
 {
   if( val ){ mTreeOnBitMap |= 0x04; }
   else{ mTreeOnBitMap &= ~(0x04); }
 }
 
 /*#ifndef __CINT__
-void StMuFcsAnaData::SetTrigs(const char* trigname,...)
+void StFwdAnaData::SetTrigs(const char* trigname,...)
 {
   va_list args;
   va_start(args,trigname);
@@ -445,25 +441,25 @@ void StMuFcsAnaData::SetTrigs(const char* trigname,...)
 }
 #endif*/
 
-bool StMuFcsAnaData::isEventOn() const
+bool StFwdAnaData::isEventOn() const
 {
   if( mTreeOnBitMap & 0x01 ){ return true; }
   else{ return false; }
 }
 
-bool StMuFcsAnaData::isPhotonOn() const
+bool StFwdAnaData::isPhotonOn() const
 {
   if( mTreeOnBitMap & 0x02 ){ return true; }
   else{ return false; }
 }
 
-bool StMuFcsAnaData::isPhPairOn() const
+bool StFwdAnaData::isPhPairOn() const
 {
   if( mTreeOnBitMap & 0x04 ){ return true; }
   else{ return false; }
 }
 
-PolData* StMuFcsAnaData::getPolData(Int_t fillnum)
+PolData* StFwdAnaData::getPolData(Int_t fillnum)
 {
   PolData* poldat = 0;
   auto itr = mPolarizationData.find(fillnum);
@@ -473,105 +469,107 @@ PolData* StMuFcsAnaData::getPolData(Int_t fillnum)
   return poldat;
 }
 
-bool StMuFcsAnaData::exceedTrigPt(Double_t checkpt)
+bool StFwdAnaData::exceedTrigPt(Double_t checkpt)
 {
   bool exceedtrigpt = false;
   //Float_t trigptthr = -1;
   //std::string trigname = "";
-  for( Int_t itrig=0; itrig<mNTrig; ++itrig ){
-    Float_t ptthres = fcsPtThr(mTriggers[itrig]);
-    std::string thistrig = fcsTrigNameFromId(mTriggers[itrig],mMuEvent->runNumber());
+  Int_t ntrig = getNtrig();
+  for( Int_t itrig=0; itrig<ntrig; ++itrig ){
+    Float_t ptthres = fcsPtThr(getTrig(itrig));
+    std::string thistrig = fcsTrigNameFromId(getTrig(itrig),mMuEvent->runNumber());
     if( checkpt>=ptthres ){ exceedtrigpt=true; break; /*trigptthr=ptthres; trigname=thistrig;*/ }
   }
   return exceedtrigpt;
 }
 
-void StMuFcsAnaData::loadTree(TFile* file)
+void StFwdAnaData::loadTree(TFile* file)
 {
   //mFile_Output = file;
   if( file==0 ){ std::cout << "LoadDataFromFile - WARNING:Null file given" << std::endl; return; }
   //if( tree!=0 ){ std::cout << "LoadDataFromFile - WARNING:Overwriting TTree pointer" << std::endl; }
-  if( mPi0Tree!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal TTree pointer not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPi0Tree; mPi0Tree=0; }
-  mPi0Tree = (TTree*)file->Get("Pi0Tree");
-  //tree = mPi0Tree;
-  if( mPi0Tree!=0 ){
+  if( mDataTree!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal TTree pointer not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mDataTree; mDataTree=0; }
+  mDataTree = (TTree*)file->Get("DataTree");
+  //tree = mDataTree;
+  if( mDataTree!=0 ){
     //Set event branches
-    if( mEvtInfo!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #FcsEventInfo not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mEvtInfo; mEvtInfo=0; }
+    if( mEvtData!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #StFwdDataEvent not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mEvtData; mEvtData=0; }
     if( isEventOn() ){
-      if( mPi0Tree->Branch("EventInfo")!=0 && mPi0Tree->Branch("TriggerInfo")!=0 ){
-	mEvtInfo     = new FcsEventInfo();
-	mPi0Tree->SetBranchAddress("EventInfo",&mEvtInfo);
+      if( mDataTree->Branch("EventInfo")!=0 && mDataTree->Branch("TriggerInfo")!=0 ){
+	mEvtData     = new StFwdDataEvent();
+	mDataTree->SetBranchAddress("EventInfo",&mEvtData);
 	//Set trigger branches
-	((TLeaf*)mPi0Tree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(0))->SetAddress(&mNTrig);
-	((TLeaf*)mPi0Tree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(1))->SetAddress(&mTriggers);
+	((TLeaf*)mDataTree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(0))->SetAddress(&(mEvtData->mNTrig));
+	((TLeaf*)mDataTree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(1))->SetAddress(&(mEvtData->mTriggers));
       }
-      else{ std::cout << "LoadDataFromFile - WARNING:No \"EventInfo\" and no \"TriggerInfo\" branch found in mPi0Tree it could be that the tree was generated without this option." << std::endl;
+      else{ std::cout << "LoadDataFromFile - WARNING:No \"EventInfo\" and no \"TriggerInfo\" branch found in mDataTree it could be that the tree was generated without this option." << std::endl;
       }
     }
     
-    if( mPhArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #FcsPhotonCandidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhArr; mPhArr=0; }
+    if( mPhArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #StFcsPhotonCandidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhArr; mPhArr=0; }
     if( isPhotonOn() ){
-      if( mPi0Tree->Branch("Photon")!=0 ){
-	mPhArr       = new TClonesArray("FcsPhotonCandidate");
-	mPi0Tree->SetBranchAddress("Photon",&mPhArr);
+      if( mDataTree->Branch("Photon")!=0 ){
+	mPhArr       = new TClonesArray("StFcsPhotonCandidate");
+	mDataTree->SetBranchAddress("Photon",&mPhArr);
       }
       else{
-	std::cout << "LoadDataFromFile - WARNING:No \"Photon\" branch found in mPi0Tree it could be that the tree was generated without this option." << std::endl;
+	std::cout << "LoadDataFromFile - WARNING:No \"Photon\" branch found in mDataTree it could be that the tree was generated without this option." << std::endl;
       }
     }
     
-    if( mPhPairArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #FcsPairCandidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhPairArr; mPhPairArr=0; }
+    if( mPhPairArr!=0 ){ std::cout << "LoadDataFromFile - WARNING:Internal #StFcsPairCandidate array not zero must have been intialized elsewhere\n -> Deleting old data for new" << std::endl; delete mPhPairArr; mPhPairArr=0; }
     if( isPhPairOn() ){
-      if( mPi0Tree->Branch("Pi0")!=0 ){
-	mPhPairArr      = new TClonesArray("FcsPairCandidate");  
-	mPi0Tree->SetBranchAddress("Pi0",&mPhPairArr);
+      if( mDataTree->Branch("Pair")!=0 ){
+	mPhPairArr      = new TClonesArray("StFcsPairCandidate");  
+	mDataTree->SetBranchAddress("Pair",&mPhPairArr);
       }
-      else{ std::cout << "LoadDataFromFile - WARNING:No \"Pi0\" branch found in mPi0Tree it could be that the tree was generated without this option." << std::endl; }
+      else{ std::cout << "LoadDataFromFile - WARNING:No \"Pair\" branch found in mDataTree it could be that the tree was generated without this option." << std::endl; }
     }
   }
   //else{ std::cout << "LoadDataFromFile - WARNING:Pi0Tree not found in file" << std::endl; }
 }
 
-void StMuFcsAnaData::makeTree(TFile* file)
+void StFwdAnaData::makeTree(TFile* file)
 {
   //mFile_Output = file;
   if( file==0 ){
-    std::cout << "StMuFcsAnaData::makeTree has no ROOT file" << std::endl;
+    std::cout << "StFwdAnaData::makeTree has no ROOT file" << std::endl;
     return;
   }
   file->cd(); //File expected to be nonzero here if everything initialized correctly
   if( mTreeOnBitMap!=0 ){
-    mPi0Tree     = new TTree("Pi0Tree","Tree with FcsPairCandidate");
+    mDataTree     = new TTree("DataTree","Tree with StFcsPairCandidate");
   }
   //These are still needed in Make so even if you are not writing the tree still need these objects
-  mEvtInfo     = new FcsEventInfo();
-  mPhArr       = new TClonesArray("FcsPhotonCandidate");
-  mPhPairArr      = new TClonesArray("FcsPairCandidate");
+  mEvtData     = new StFwdDataEvent();
+  mPhArr       = new TClonesArray("StFcsPhotonCandidate");
+  mPhPairArr      = new TClonesArray("StFcsPairCandidate");
 
   if( mTreeOnBitMap!=0 ){
     if( isEventOn() ){
-      mPi0Tree->Branch("EventInfo","FcsEventInfo",&mEvtInfo);
-      mPi0Tree->Branch("TriggerInfo",0,"NTrig/I:Trig[NTrig]/I");
-      ((TLeaf*)mPi0Tree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(0))->SetAddress(&mNTrig);
-      ((TLeaf*)mPi0Tree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(1))->SetAddress(&mTriggers);
+      mDataTree->Branch("EventInfo","StFwdDataEvent",&mEvtData);
+      mDataTree->Branch("TriggerInfo",0,"NTrig/I:Trig[NTrig]/I");
+      ((TLeaf*)mDataTree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(0))->SetAddress(&(mEvtData->mNTrig));
+      ((TLeaf*)mDataTree->GetBranch("TriggerInfo")->GetListOfLeaves()->At(1))->SetAddress(&(mEvtData->mTriggers));
     }
-    if( isPhotonOn() ){ mPi0Tree->Branch("Photon",&mPhArr); }
-    if( isPhPairOn() ){ mPi0Tree->Branch("Pi0",&mPhPairArr); }
+    if( isPhotonOn() ){ mDataTree->Branch("Photon",&mPhArr); }
+    if( isPhPairOn() ){ mDataTree->Branch("Pair",&mPhPairArr); }
   }
 }
 
 
-void StMuFcsAnaData::Print(Option_t* opt) const
+void StFwdAnaData::Print(Option_t* opt) const
 {
   TString option(opt);
   option.ToLower();
   if( option.Contains("a") ){ option = "etgp"; }
-  if( mEvtInfo!=0 && option.Contains("e") ){ mEvtInfo->Print(); }
+  if( mEvtData!=0 && option.Contains("e") ){ mEvtData->Print(); }
   if( option.Contains("t") ){
-    std::cout << "## Trigger Information|NTrig:"<<mNTrig << std::endl;
-    for( int i=0; i<mNTrig; ++i ){
-      std::cout << " + |TrigId:"<<mTriggers[i];
-      if( mEvtInfo!=0 ){ std::cout << "|TrigName:"<< fcsTrigNameFromId(mTriggers[i],mEvtInfo->mRunNum); }
+    Int_t ntrig = getNTrig();
+    std::cout << "## Trigger Information|NTrig:"<<ntrig << std::endl;
+    for( int i=0; i<ntrig; ++i ){
+      std::cout << " + |TrigId:"<<getTrig(i);
+      if( mEvtData!=0 ){ std::cout << "|TrigName:"<< fcsTrigNameFromId(getTrig(i),mEvtData->mRunNum); }
       std::cout << std::endl;
     }
   }
@@ -592,7 +590,7 @@ void StMuFcsAnaData::Print(Option_t* opt) const
 }
 
  
-Int_t StMuFcsAnaData::ReadPolFile(const char* filename)
+Int_t StFwdAnaData::ReadPolFile(const char* filename)
 {
   std::ifstream in_polfile(filename);       //input (in_) polarization (pol) file
   if( !in_polfile.is_open() ){ return 0; }
@@ -622,10 +620,10 @@ Int_t StMuFcsAnaData::ReadPolFile(const char* filename)
   return mPolarizationData.size();
 }
 
-void StMuFcsAnaData::readFcsTrigTxtFile(const char* filename)
+void StFwdAnaData::readFcsTrigTxtFile(const char* filename)
 {
   std::ifstream infile(filename);
-  if( !infile.is_open() ){ LOG_ERROR << "StMuFcsAnaData::readTxtFile - Unable to open file" << endm; }
+  if( !infile.is_open() ){ LOG_ERROR << "StFwdAnaData::readTxtFile - Unable to open file" << endm; }
   while( !infile.eof() ){
     std::string name;
     infile >> name;
@@ -647,13 +645,13 @@ void StMuFcsAnaData::readFcsTrigTxtFile(const char* filename)
 					   std::forward_as_tuple(trigid),
 					   std::forward_as_tuple(name.c_str(),trigid,startrun,endrun)
 					   );
-    if( !inserted.second ){ LOG_WARN << "StMuFcsAnaData::readTxtFile - Trigger Ids not unique found at least two with ID:"<<trigid << endm; }
+    if( !inserted.second ){ LOG_WARN << "StFwdAnaData::readTxtFile - Trigger Ids not unique found at least two with ID:"<<trigid << endm; }
     else{ SetTriggerPtThresholds( (*(inserted.first)).second ); }
   }
   infile.close();
 }
 
-const char* StMuFcsAnaData::fcsTrigNameFromId(Int_t trigidtomatch, Int_t runnumber) const
+const char* StFwdAnaData::fcsTrigNameFromId(Int_t trigidtomatch, Int_t runnumber) const
 {
   auto founditr = mAllFcsTrigRanges.find(trigidtomatch);
   if( founditr==mAllFcsTrigRanges.end() ){ return "NF"; }
@@ -663,7 +661,7 @@ const char* StMuFcsAnaData::fcsTrigNameFromId(Int_t trigidtomatch, Int_t runnumb
   }
 }
 
-void StMuFcsAnaData::SetTriggerPtThresholds(TrigRange& input)
+void StFwdAnaData::SetTriggerPtThresholds(TrigRange& input)
 {
   //List order matches the table on the website https://www.star.bnl.gov/protected/spin/akio/fcs/run22trg.html
   if( input.mName=="fcsJP2" )    { input.mPtThreshold = 8; return; }
@@ -739,24 +737,24 @@ void StMuFcsAnaData::SetTriggerPtThresholds(TrigRange& input)
   return;
 }
 
-int StMuFcsAnaData::sizeOfFcsTriggers() const
+int StFwdAnaData::sizeOfFcsTriggers() const
 {
   return mListOfFcsTriggers.size();
 }
 
-const char* StMuFcsAnaData::fcsTriggerName(int idx) const
+const char* StFwdAnaData::fcsTriggerName(int idx) const
 {
   return mListOfFcsTriggers.at(idx).c_str();
 }
 
-Float_t StMuFcsAnaData::fcsPtThr(Int_t trigid) const
+Float_t StFwdAnaData::fcsPtThr(Int_t trigid) const
 {
   auto itr=mAllFcsTrigRanges.find(trigid);
   if( itr!=mAllFcsTrigRanges.end() ){ return itr->second.mPtThreshold; }
   else{ return 999; } //if no trigger id exists then return a large value to avoid including bad triggers
 }
 
-Float_t StMuFcsAnaData::fcsPtThrAsym(Int_t trigid) const
+Float_t StFwdAnaData::fcsPtThrAsym(Int_t trigid) const
 {
   auto itr=mAllFcsTrigRanges.find(trigid);
   if( itr!=mAllFcsTrigRanges.end() ){ return itr->second.mPtThresholdAsym; }

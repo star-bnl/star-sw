@@ -3,22 +3,23 @@
   David Kapukchyan
 
   PURPOSE
-  The purpose of this class is to act as a bridge between the STAR makers and the "FcsAna" strategy framework. It will also fill the basic data structure of #StMuFcsAnaData and handle the calls of different sub-analysis modules (#StMuFcsVirtualAna). It will also manage the histogram objects created by the various sub-analysis modules by utilizing #HistManager.
+  The purpose of this class is to act as a bridge between the STAR makers and the "FcsAna" strategy framework. It will also fill the basic data structure of #StFwdAnaData and handle the calls of different sub-analysis modules (#StMuFcsVirtualAna). It will also manage the histogram objects created by the various sub-analysis modules by utilizing #HistManager.
   
   DESCRIPTION
-  In the "FcsAna" strategy framework this class contains a #HistManager, and a #StMuFcsAnaData that sub-analysis modules will utilize. Sub-analysis modules will inherit from #StMuFcsVirtualAna and should be added to this class. Contains a #StMuFcsAnaData, a #HistManager and a vector of #StMuFcsVirtualAna objects. It will fill #StMuFcsAnaData with the relevant information by utilizing the filenames #mPolDataFilename (For polarization information taken from https://wiki.bnl.gov/rhicspin/Results_(Polarimetry)), #mFcsTrigFilename (Generated from GetTrigList.csh which is a text file of all FCS triggers names and their offline id as well as the starting and ending run number)  , #mFilename (name of file to save histograms to, passed to #mHistManager). Inside of #Init(), it will call all the #StMuFcsVirtualAna::LoadHists(). Inside of #Make() it will call all the #StMuFcsVirtualAna::DoMake() methods. The rest of the code handles everything else so all you need to do is insert your algorithm for what you want "#Make()" to do using the #addAna() call. #InitRun() will grab the FCS database object.
+  In the "FcsAna" strategy framework this class contains a #HistManager, and a #StFwdAnaData that sub-analysis modules will utilize. Sub-analysis modules will inherit from #StMuFcsVirtualAna and should be added to this class. Contains a #StFwdAnaData, a #HistManager and a vector of #StMuFcsVirtualAna objects. It will fill #StFwdAnaData with the relevant information by utilizing the filenames #mPolDataFilename (For polarization information taken from https://wiki.bnl.gov/rhicspin/Results_(Polarimetry)), #mFcsTrigFilename (Generated from GetTrigList.csh which is a text file of all FCS triggers names and their offline id as well as the starting and ending run number)  , #mFilename (name of file to save histograms to, passed to #mHistManager). Inside of #Init(), it will call all the #StMuFcsVirtualAna::LoadHists(). Inside of #Make() it will call all the #StMuFcsVirtualAna::DoMake() methods. The rest of the code handles everything else so all you need to do is insert your algorithm for what you want "#Make()" to do using the #addAna() call. #InitRun() will grab the FCS database object.
 
-    Creates a histogram to keep track of make calls. Grabs the MuDstMaker pointer and the related pointers and stores them in #StMuFcsAnaData. Fills the #FcsEventInfo object in #StMuFcsAnaData
+    Creates a histogram to keep track of make calls. Grabs the MuDstMaker pointer and the related pointers and stores them in #StFwdAnaData. Fills the #FcsEventInfo object in #StFwdAnaData
 
   LOG
   @[January 9, 2026] > Copied from *StMuFcsTreeMaker* and modified to do the relevant things. Since I am keeping *StMuFcsTreeMaker* please see that log for all relevant developments of the analysis code.
-  @[June 8, 2026] > Implemented #StMuFcsAnaData::mEvent
+  @[June 8, 2026] > Implemented #StFwdAnaData::mEvent
+  @[June 30, 2026] > Changed name from StMuFcsAnaDataMaker to StFwdAnaDataMaker to be consistent with new naming that is more general for STAR forward analysis. Changed StMuFcsAnaData::mEvtInfo to StFwdAnaData::mEvtData
 
 */
 
 
-#ifndef STMUFCSANADATAMAKER_HH
-#define STMUFCSANADATAMAKER_HH
+#ifndef STFWDANA_STFWDANADATAMAKER_HH
+#define STFWDANA_STFWDANADATAMAKER_HH
 
 //C/C++ Headers
 #include <iostream>
@@ -60,22 +61,22 @@
 //#include "StSpinPool/StFcsPi0Ana/StFcsRun22TriggerMap.h"
 
 #include "StMuFcsVirtualAna.h"
-#include "StMuFcsAnaData.h"
+#include "StFwdAnaData.h"
 
-class StMuFcsAnaDataMaker : public StMaker {
+class StFwdAnaDataMaker : public StMaker {
 public:
   
-  StMuFcsAnaDataMaker(const Char_t* name = "MuFcsAnaData");
-  ~StMuFcsAnaDataMaker();
+  StFwdAnaDataMaker(const Char_t* name = "MuFcsAnaData");
+  ~StFwdAnaDataMaker();
   
   UInt_t addAna(StMuFcsVirtualAna* ana);
   
-  StMuFcsAnaData* anaData()const{ return mAnaData; }
+  StFwdAnaData* anaData()const{ return mAnaData; }
   HistManager* getHists()const{ return mHists; }
   void setPolDataFilename(const char* name) { mPolDataFilename = name; }
   void setFcsTrigFilename(const char* name) { mFcsTrigFilename = name; }
   void setOutFilename(const char* name) { mFilename = name; }
-  void setAnaData( StMuFcsAnaData* anadata);
+  void setAnaData( StFwdAnaData* anadata);
   void setHistManager( HistManager* hm );
   
   UInt_t LoadDataFromFile(TFile* file);       ///< Load tree and histograms from file, calls #StMuFcsVirtualAna::LoadHists()
@@ -90,7 +91,7 @@ protected:
   TString mPolDataFilename = "";                ///< File to read Polarization information
   TString mFcsTrigFilename = "";                ///< File to read Fcs trigger information
   TString mFilename = "";                       ///< File name to save to. Passed to #mHists
-  StMuFcsAnaData* mAnaData = 0;                 ///< Data structure that contains the pointers to the needed makers
+  StFwdAnaData* mAnaData = 0;                 ///< Data structure that contains the pointers to the needed makers
   HistManager* mHists = 0;                      ///< Manage loading and saving histograms
 
   TH1* mH1D_Entries = 0;                       ///< Number of events processed no cuts (i.e. "Make" calls)
@@ -100,7 +101,8 @@ private:
   bool mInternalHists = false;                  ///< Boolean to keep track if mHists was added externally or an internal one was created
   std::vector<StMuFcsVirtualAna*> mAnaList;     ///< List of analysis modules whose calls are executed sequentially
 
-  ClassDef(StMuFcsAnaDataMaker, 1)
+  ClassDef(StFwdAnaDataMaker, 1)
 };
 
 #endif
+

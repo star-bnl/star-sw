@@ -27,18 +27,18 @@
 #include "TStyle.h"
 #include "TText.h"
 
-#include "StMuFcsAnaDataMaker.h"
+#include "StFwdAnaDataMaker.h"
 
-ClassImp(StMuFcsAnaDataMaker)
+ClassImp(StFwdAnaDataMaker)
 
 
-StMuFcsAnaDataMaker::StMuFcsAnaDataMaker(const Char_t* name) : StMaker(name)
+StFwdAnaDataMaker::StFwdAnaDataMaker(const Char_t* name) : StMaker(name)
 {
 }
 
-StMuFcsAnaDataMaker::~StMuFcsAnaDataMaker()
+StFwdAnaDataMaker::~StFwdAnaDataMaker()
 {
-  //std::cout << "StMuFcsAnaDataMaker::~StMuFcsAnaDataMaker()" << std::endl;
+  //std::cout << "StFwdAnaDataMaker::~StFwdAnaDataMaker()" << std::endl;
   delete mAnaData;
   if( mInternalHists ){ delete mHists; } //This deletes the file too
   for( unsigned int i=0; i<mAnaList.size(); ++i ){
@@ -47,48 +47,48 @@ StMuFcsAnaDataMaker::~StMuFcsAnaDataMaker()
   mAnaList.clear();
 }
 
-UInt_t StMuFcsAnaDataMaker::addAna(StMuFcsVirtualAna* ana)
+UInt_t StFwdAnaDataMaker::addAna(StMuFcsVirtualAna* ana)
 {
   if( ana==0 ){ return -1; }
   mAnaList.push_back(ana);
   return mAnaList.size()-1;
 }
 
-void StMuFcsAnaDataMaker::setAnaData( StMuFcsAnaData* anadata )
+void StFwdAnaDataMaker::setAnaData( StFwdAnaData* anadata )
 {
   if( anadata==0 ){ return; }
   mAnaData = anadata;
 }
 
-void StMuFcsAnaDataMaker::setHistManager( HistManager* hm )
+void StFwdAnaDataMaker::setHistManager( HistManager* hm )
 {
   if( mInternalHists ){ delete mHists; mHists = 0; }
   mInternalHists = false;
-  if( mHists!=0 ){ LOG_WARN << "StMuFcsAnaDataMaker::setHistManager() - HistManager exists and is external - no changes made" << endm; return; }
+  if( mHists!=0 ){ LOG_WARN << "StFwdAnaDataMaker::setHistManager() - HistManager exists and is external - no changes made" << endm; return; }
   else{ mHists = hm; }
 }
 
-UInt_t StMuFcsAnaDataMaker::LoadDataFromFile(TFile* file)
+UInt_t StFwdAnaDataMaker::LoadDataFromFile(TFile* file)
 {
-  if( file==0 || file->IsZombie() ){ LOG_ERROR << "StMuFcsAnaDataMaker::LoadDataFromFile() - ERROR:Unable to load from null file or zombie file" << std::endl; return 0; }
+  if( file==0 || file->IsZombie() ){ LOG_ERROR << "StFwdAnaDataMaker::LoadDataFromFile() - ERROR:Unable to load from null file or zombie file" << std::endl; return 0; }
   if( mAnaData == 0 ){
-    LOG_ERROR << "StMuFcsAnaDataMaker::LoadDataFromFile() - No StMuFcsAnaData object set" << std::endl;
+    LOG_ERROR << "StFwdAnaDataMaker::LoadDataFromFile() - No StFwdAnaData object set" << std::endl;
     return 0;
   }
   
   mAnaData->loadTree(file);
   mAnaData->readFcsTrigTxtFile(mFcsTrigFilename.Data());
-  if( mAnaData->sizeOfFcsTriggers()<=0 ){ LOG_WARN << "StMuFcsAnaDataMaker::Init() - Trigger Map is empty" << endm; }
+  if( mAnaData->sizeOfFcsTriggers()<=0 ){ LOG_WARN << "StFwdAnaDataMaker::Init() - Trigger Map is empty" << endm; }
   
   Int_t npoldata = mAnaData->ReadPolFile(mPolDataFilename.Data());
   //The 259 fills is special for my Run 22 text file after filtering out data from nonexistent fills
   if( npoldata!=259 ){ LOG_WARN << "Incorrect number of polarizations found in file 'Run22PolForJobs.txt' either because file is missing or file is improperly formatted" << endm; }
 
   if( mAnaData->mEpdGeom==0 ){ mAnaData->mEpdGeom = new StEpdGeom(); }
-  else{ LOG_INFO << "StMuFcsAnaDataMaker::LoadDataFromFile() - StEpdGeom Exists!" << endm; }
+  else{ LOG_INFO << "StFwdAnaDataMaker::LoadDataFromFile() - StEpdGeom Exists!" << endm; }
 
   
-  if( mAnaData->sizeOfFcsTriggers()<=0 ){ std::cout << "StMuFcsAnaDataMaker::LoadDataFromFile() - FCS Trigger Map is empty" << std::endl; }
+  if( mAnaData->sizeOfFcsTriggers()<=0 ){ std::cout << "StFwdAnaDataMaker::LoadDataFromFile() - FCS Trigger Map is empty" << std::endl; }
   
   if( mHists==0 ){ mHists = new HistManager(); }
   //Histograms that need to be created by this class since can't move functionality
@@ -105,13 +105,13 @@ UInt_t StMuFcsAnaDataMaker::LoadDataFromFile(TFile* file)
   return totalhists;
 }
 
-Int_t StMuFcsAnaDataMaker::Init()
+Int_t StFwdAnaDataMaker::Init()
 {
   //std::cout << this->ClassName()<<"|Start Init:" << std::endl;
   TFile* savefile = 0;
   if( mFilename.Length() == 0){ mFilename="StMuFcsAna.root"; } //Ensure a TFile is always created
   if( mHists==0 ){
-    LOG_INFO << "StMuFcsAnaDataMaker::Init() - No HistManager specified. Creating a new one with file name " << mFilename << ". Potential conflicts exist if a HistManager exists with same file name" << endm;
+    LOG_INFO << "StFwdAnaDataMaker::Init() - No HistManager specified. Creating a new one with file name " << mFilename << ". Potential conflicts exist if a HistManager exists with same file name" << endm;
     mHists = new HistManager();
     mInternalHists = true;
     savefile = mHists->InitFile(mFilename.Data(),"RECREATE");//new TFile(mFilename.Data(), "RECREATE");
@@ -122,20 +122,20 @@ Int_t StMuFcsAnaDataMaker::Init()
   }
   
   if( mAnaData==0 ){
-    LOG_ERROR << "StMuFcsAnaDataMaker::Init() - mAnaData is null" << endm;
+    LOG_ERROR << "StFwdAnaDataMaker::Init() - mAnaData is null" << endm;
     return kStFatal;
   }
   mAnaData->makeTree(savefile);
 
   mAnaData->readFcsTrigTxtFile(mFcsTrigFilename.Data());
-  if( mAnaData->sizeOfFcsTriggers()<=0 ){ LOG_WARN << "StMuFcsAnaDataMaker::Init() - Trigger Map is empty" << endm; }
+  if( mAnaData->sizeOfFcsTriggers()<=0 ){ LOG_WARN << "StFwdAnaDataMaker::Init() - Trigger Map is empty" << endm; }
   
   Int_t npoldata = mAnaData->ReadPolFile(mPolDataFilename.Data());
   //The 259 fills is special for my Run 22 text file after filtering out data from nonexistent fills
   if( npoldata!=259 ){ LOG_WARN << "Incorrect number of polarizations found in file 'Run22PolForJobs.txt' either because file is missing or file is improperly formatted" << endm; }
 
   if( mAnaData->mEpdGeom==0 ){ mAnaData->mEpdGeom = new StEpdGeom(); }
-  else{ LOG_INFO << "StMuFcsAnaDataMaker::Init - StEpdGeom Exists!" << endm; }
+  else{ LOG_INFO << "StFwdAnaDataMaker::Init - StEpdGeom Exists!" << endm; }
   
   UInt_t totalhists = mHists->AddH1D(0,mH1D_Entries,"H1D_Entries", "Number of entries", 1,-0.5,0.5 );
   totalhists += mHists->AddH1F(0,mH1F_RndmSpin,"H1F_RndmSpin","Histogram to know if using random spin or not",2,0,2);
@@ -143,19 +143,19 @@ Int_t StMuFcsAnaDataMaker::Init()
     totalhists += mAnaList.at(i)->LoadHists(0,mHists,mAnaData); //This is total of histograms loaded from a file not created. Don't use mFileOutput as you are not trying to load from #mFileOutput
   }
   mHists->SetOwner(kTRUE);
-  LOG_INFO << "StMuFcsAnaDataMaker::Init() - Loaded " << totalhists << " histograms" << endm;
+  LOG_INFO << "StFwdAnaDataMaker::Init() - Loaded " << totalhists << " histograms" << endm;
 
   return kStOk;
 }
 
-Int_t StMuFcsAnaDataMaker::InitRun(int runnumber)
+Int_t StFwdAnaDataMaker::InitRun(int runnumber)
 {
   std::cout << this->ClassName()<<"|Start InitRun|runnum:"<<runnumber << std::endl;
   if( mAnaData->mFcsDb==0 ){
     mAnaData->mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
     //mFcsDb->setDbAccess(0);
     if(!(mAnaData->mFcsDb)){
-      LOG_ERROR << "StMuFcsAnaDataMaker::InitRun - Failed to get StFcsDbMaker" << endm;
+      LOG_ERROR << "StFwdAnaDataMaker::InitRun - Failed to get StFcsDbMaker" << endm;
       return kStFatal;
     }
   }
@@ -164,11 +164,11 @@ Int_t StMuFcsAnaDataMaker::InitRun(int runnumber)
   if( mAnaData->mSpinDbMkr==0 ){
     mAnaData->mSpinDbMkr = static_cast<StSpinDbMaker*>(GetMaker("spinDb"));
     if( mAnaData->mSpinDbMkr==0 ){
-      LOG_WARN << "StMuFcsAnaDataMaker::InitRun - Could not find StSpinDbMaker named 'spinDb'" << endm;
+      LOG_WARN << "StFwdAnaDataMaker::InitRun - Could not find StSpinDbMaker named 'spinDb'" << endm;
     }
     else{
       if( !(mAnaData->mSpinDbMkr->isValid()) ){
-	LOG_WARN << "StMuFcsAnaDataMaker::InitRun - Found StSpinDbMaker but contains invalid data so will not use it" << endm;
+	LOG_WARN << "StFwdAnaDataMaker::InitRun - Found StSpinDbMaker but contains invalid data so will not use it" << endm;
 	mAnaData->mSpinDbMkr=0;
 	mH1F_RndmSpin->SetBinContent(1,1);
       }
@@ -178,38 +178,31 @@ Int_t StMuFcsAnaDataMaker::InitRun(int runnumber)
     }
   }
   //std::cout << "End Spin:|spindb:"<<mAnaData->mSpinDbMkr << std::endl;
-  /*
-  if( mAnaData->mEpdQaMkr==0 ){
-    mAnaData->mEpdQaMkr = (StMuEpdRun22QaMaker*) GetMaker("FcsEpdRun22Qa");
-    if( mAnaData->mEpdQaMkr==0 ){
-      LOG_WARN << "StMuFcsAnaDataMaker::InitRun - No StMuEpdRun22QaMaker found, EPD vertex information may be missing" << endm;
-    }
-  }
-  */
+
   //std::cout << "End InitRun:|EpdQaMkr:"<<mAnaData->mEpdQaMkr << std::endl;
   return kStOK;
 }
 
-void StMuFcsAnaDataMaker::Clear(Option_t* option)
+void StFwdAnaDataMaker::Clear(Option_t* option)
 {
   mAnaData->resetEvent();
   return;
 }
 
 //----------------------
-Int_t StMuFcsAnaDataMaker::Make()
+Int_t StFwdAnaDataMaker::Make()
 {
   //std::cout << this->ClassName() << "|Start:Make_LoadEvent()" << std::endl;
   mAnaData->mMuDstMkr = (StMuDstMaker*)GetInputDS("MuDst");
-  if( mAnaData->mMuDstMkr==0 ){ LOG_ERROR <<"StMuFcsAnaDataMaker::Make_LoadEvent - !MuDstMkr" <<endm; return kStErr; }
+  if( mAnaData->mMuDstMkr==0 ){ LOG_ERROR <<"StFwdAnaDataMaker::Make_LoadEvent - !MuDstMkr" <<endm; return kStErr; }
   mAnaData->mMuDst = mAnaData->mMuDstMkr->muDst();
-  if( mAnaData->mMuDst==0 ){ LOG_ERROR << "StMuFcsAnaDataMaker::Make_LoadEvent - !MuDst" << endm; return kStErr; }
+  if( mAnaData->mMuDst==0 ){ LOG_ERROR << "StFwdAnaDataMaker::Make_LoadEvent - !MuDst" << endm; return kStErr; }
   mAnaData->mMuEvent = mAnaData->mMuDst->event();
-  if( mAnaData->mMuEvent==0 ){ LOG_ERROR <<"StMuFcsAnaDataMaker::Make_LoadEvent - !MuEvent" <<endm; return kStErr; }
+  if( mAnaData->mMuEvent==0 ){ LOG_ERROR <<"StFwdAnaDataMaker::Make_LoadEvent - !MuEvent" <<endm; return kStErr; }
   mAnaData->mTrigData = mAnaData->mMuEvent->triggerData();
-  //if( mAnaData->mTrigData==0 ){ LOG_ERROR <<"StMuFcsAnaDataMaker::Make_LoadEvent - !TrigData" <<endm; return kStErr; }
+  //if( mAnaData->mTrigData==0 ){ LOG_ERROR <<"StFwdAnaDataMaker::Make_LoadEvent - !TrigData" <<endm; return kStErr; }
   mAnaData->mRunInfo = &(mAnaData->mMuEvent->runInfo());
-  if( mAnaData->mRunInfo==0 ){ LOG_ERROR <<"StMuFcsAnaDataMaker::Make_LoadEvent - !RunInfo" <<endm; return kStErr; }
+  if( mAnaData->mRunInfo==0 ){ LOG_ERROR <<"StFwdAnaDataMaker::Make_LoadEvent - !RunInfo" <<endm; return kStErr; }
 
   mAnaData->mStEvent = (StEvent*)GetInputDS("StEvent");
 
@@ -217,30 +210,30 @@ Int_t StMuFcsAnaDataMaker::Make()
 
   mH1D_Entries->Fill(0); //This is just counting valid make calls (i.e. increment bin 1 by 1)
   
-  mAnaData->mEvtInfo->mRunTime         = mAnaData->mRunInfo->beamFillNumber(StBeamDirection::east);    //using yellow beam
-  mAnaData->mEvtInfo->mRunNum          = mAnaData->mMuEvent->runNumber();
-  mAnaData->mEvtInfo->mFill            = mAnaData->mMuEvent->eventInfo().time();
-  mAnaData->mEvtInfo->mEvent           = mAnaData->mMuEvent->eventId();
-  //mAnaData->mEvtInfo->mBx48Id          = mAnaData->mTrigData->bunchId48Bit();
-  //mAnaData->mEvtInfo->mBx7Id           = mAnaData->mTrigData->bunchId7Bit();
-  //mAnaData->mEvtInfo->mTofMultiplicity = mAnaData->mTrigData->tofMultiplicity();
-  //std::cout << "|runtime:"<<mEvtInfo->mRunTime << "|runnum:"<<mEvtInfo->mRunNum << "|event:"<<mEvtInfo->mEvent << std::endl;
+  mAnaData->mEvtData->mRunTime         = mAnaData->mRunInfo->beamFillNumber(StBeamDirection::east);    //using yellow beam
+  mAnaData->mEvtData->mRunNum          = mAnaData->mMuEvent->runNumber();
+  mAnaData->mEvtData->mFill            = mAnaData->mMuEvent->eventInfo().time();
+  mAnaData->mEvtData->mEvent           = mAnaData->mMuEvent->eventId();
+  //mAnaData->mEvtData->mBx48Id          = mAnaData->mTrigData->bunchId48Bit();
+  //mAnaData->mEvtData->mBx7Id           = mAnaData->mTrigData->bunchId7Bit();
+  //mAnaData->mEvtData->mTofMultiplicity = mAnaData->mTrigData->tofMultiplicity();
+  //std::cout << "|runtime:"<<mEvtData->mRunTime << "|runnum:"<<mEvtData->mRunNum << "|event:"<<mEvtData->mEvent << std::endl;
 
   //Get EPD collection
   mAnaData->mMuEpdHits = 0;
   mAnaData->mEpdColl = 0;
   mAnaData->mMuEpdHits = mAnaData->mMuDst->epdHits();
   if( mAnaData->mMuEpdHits!=0 ){ if( mAnaData->mMuEpdHits->GetEntriesFast()==0 ){mAnaData->mMuEpdHits=0;} }//If mMuEpdHits is not zero but has no hits set it to zero so rest of code processes from StEpdHitMaker
-  if( mAnaData->mMuEpdHits==0 ){ LOG_INFO << "StMuFcsAnaDataMaker::Make - No MuEPD hits" << endm;
+  if( mAnaData->mMuEpdHits==0 ){ LOG_INFO << "StFwdAnaDataMaker::Make - No MuEPD hits" << endm;
     mAnaData->mEpdHitMkr = (StEpdHitMaker*)GetMaker("epdHit");
-    if( (mAnaData->mEpdHitMkr)==0 ){ LOG_WARN << "StMuFcsAnaDataMaker::Make - No StEpdHitMaker(\"epdHit\")" << endm; mAnaData->mEpdColl=0; }
+    if( (mAnaData->mEpdHitMkr)==0 ){ LOG_WARN << "StFwdAnaDataMaker::Make - No StEpdHitMaker(\"epdHit\")" << endm; mAnaData->mEpdColl=0; }
     else{ mAnaData->mEpdColl = mAnaData->mEpdHitMkr->GetEpdCollection(); }
-    if( (mAnaData->mEpdColl)==0 ){ LOG_WARN << "StMuFcsAnaDataMaker::Make - No Epd hit information found" << endm; mAnaData->mEpdHitMkr=0; }//Set the hit maker back to zero so it can be used as a check that the epd collection doesn't exist
+    if( (mAnaData->mEpdColl)==0 ){ LOG_WARN << "StFwdAnaDataMaker::Make - No Epd hit information found" << endm; mAnaData->mEpdHitMkr=0; }//Set the hit maker back to zero so it can be used as a check that the epd collection doesn't exist
   }
 
   //Get Fcs collection
   mAnaData->mMuFcsColl = mAnaData->mMuDst->muFcsCollection();
-  if( mAnaData->mMuFcsColl==0 ){ LOG_WARN << "StMuFcsAnaDataMaker::Make - No Fcs Collection" << endm; }
+  if( mAnaData->mMuFcsColl==0 ){ LOG_WARN << "StFwdAnaDataMaker::Make - No Fcs Collection" << endm; }
 
   //auto start = std::chrono::steady_clock::now();
   for( unsigned int i=0; i<mAnaList.size(); ++i ){
@@ -262,7 +255,7 @@ Int_t StMuFcsAnaDataMaker::Make()
   return kStOk;
 }
 
-Int_t StMuFcsAnaDataMaker::Finish()
+Int_t StFwdAnaDataMaker::Finish()
 {
   //std::cout << this->ClassName()<<"|Start Finish:" << std::endl;
   TFile* savefile = mHists->InitFile(); //With no arguments just returns the file pointer
@@ -275,7 +268,7 @@ Int_t StMuFcsAnaDataMaker::Finish()
 }
 
 /*  
-Int_t StMuFcsAnaDataMaker::LoadGraphsFromFile(TFile* file, TObjArray* graphs )
+Int_t StFwdAnaDataMaker::LoadGraphsFromFile(TFile* file, TObjArray* graphs )
 {
   Int_t gloaded = 0;
   gloaded += StMuFcsRun22QaMaker::MakeGraph(file,graphs,mGE_AllCuts_InvMass,"GE_AllCuts_InvMass","Mean of Invariant Mass (Err=RMS) vs. Run Index");
@@ -284,7 +277,7 @@ Int_t StMuFcsAnaDataMaker::LoadGraphsFromFile(TFile* file, TObjArray* graphs )
 }
 
 
-void StMuFcsAnaDataMaker::FillGraphs(Int_t irun)
+void StFwdAnaDataMaker::FillGraphs(Int_t irun)
 {
   //TF1* pi0gausfit = new TF1("pi0gausfit","gaus(0)",0.1,0.2);
   //mH1F_InvMassAllCuts->Fit(pi0gausfit,"RQN");
@@ -299,7 +292,7 @@ void StMuFcsAnaDataMaker::FillGraphs(Int_t irun)
   return;
 }
 
-void StMuFcsAnaDataMaker::DrawQaGraphs(TCanvas* canv, const char* savename)
+void StFwdAnaDataMaker::DrawQaGraphs(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->cd();
@@ -313,7 +306,7 @@ void StMuFcsAnaDataMaker::DrawQaGraphs(TCanvas* canv, const char* savename)
   canv->SaveAs(savename);
 }
 
-void StMuFcsAnaDataMaker::MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr )
+void StFwdAnaDataMaker::MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr )
 {
   if( mH1F_RndmSpin->GetBinContent(1)>0.1 ){ std::cout << "  + RandomSpinFound" << std::endl; return; } //Don't merge histograms from files with random spin patterns
   for( int ibeam=0; ibeam<2; ++ibeam ){

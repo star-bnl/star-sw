@@ -3,7 +3,9 @@
 ClassImp(StFwdDataEvent);
 
 StFwdDataEvent::StFwdDataEvent()
-{}
+{
+  memset(mTriggers,0,mMaxTrigs*sizeof(Int_t));
+}
 
 StFwdDataEvent::~StFwdDataEvent()
 {}
@@ -48,6 +50,10 @@ void StFwdDataEvent::Clear(Option_t* option)
   mEpdVz = -999;
   mZdcVz = -999;
   mFoundVertex = 0;
+  mUseVertex = -999.0;
+
+  memset(mTriggers,0,mMaxTrigs*sizeof(Int_t));
+  mNTrig = 0; //Since ROOT only writes up to the size of mNTrig then only need to reset this back to zero and next loop will overwrite array as neccessary
 
   mClusterSize = 0;
 }
