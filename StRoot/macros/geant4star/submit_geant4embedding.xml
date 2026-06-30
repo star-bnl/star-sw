@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE note [                                                                                                                                                                        
+<!ENTITY PRODNAME "P23ieAuAu200" >                                                                                                           
+<!ENTITY OFFSET "0">                                                                                                                                                                    
+<!ENTITY NEVENTS "100">
+<!ENTITY NFILES "1">
+<!ENTITY DAQLIST "/star/simu/simu/jwebb/2026/production-filelists/P23ie:production_AuAu200_2019:st_physics_adc.daqlist">
+<!ENTITY TAGLIST "/star/simu/simu/jwebb/2026/production-filelists/P23ie:production_AuAu200_2019:st_physics_adc.taglist">
+<!ENTITY PTMN "0.0">
+<!ENTITY PTMX "6.0">
+<!ENTITY ETAMN "-1.2">
+<!ENTITY ETAMX "1.2">
+<!ENTITY VZMN "-30.0">
+<!ENTITY VZMX "30.0">
+<!ENTITY VRMX "2.0">
+<!ENTITY PID "8">
+<!ENTITY PIDTYPE "PID">
+<!ENTITY MULT "0.05">
+<!ENTITY KINTYPE "FlatPT">
+<!ENTITY TRIGGERS "700001">
+<!ENTITY OUTDIR "/star/simu/simu/g4star/.embedding/out/">                                                                                                                             
+<!ENTITY LOGDIR "/star/simu/simu/g4star/.embedding/log/">                                                                                                                             
+<!ENTITY JOBDIR "/star/simu/simu/g4star/.embedding/job/">
+<!ENTITY MACROSDIR "${STAR}/StRoot/macros">
+<!ENTITY WORKINGDIR "/star/simu/simu/jwebb/2026/Geant4STAR/geant4star-sl26-prune">
+<!ENTITY verbose "False">                                                                                                                                                               
+<!ENTITY nosubmit "false">
+]>  
+
+<job maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="&nosubmit;">
+
+<shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
+
+<command>
+
+<!--RNG seed is set to the JOBINDEX for reproducibility -->
+setenv GSL_RNG_SEED ${JOBINDEX}
+
+echo Sourcing the cshrc
+source $HOME/.cshrc
+
+# Make sure we are using nfs not afs
+setup nfs4
+
+<!-- Load shared libraries -->
+# Setup group environment
+setenv GROUP_DIR /star/u/jeromel/work/STAR/group
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver SL26x config/v0.3.0-rhel7-root6.24.06
+
+source $GROUP_DIR/star_cshrc.csh
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver SL26x config/v0.3.0-rhel7-root6.24.06
+
+
+module load vmc-1-0-p3-root-6.24.06-debug
+module load geant3-3-9-p1-root-6.24.06-debug
+module load geant4-10.5.1-debug
+module load geant4-data-10.5.1-debug
+module load geant4-vmc-5-0-p5-root-6.24.06-debug
+module load clhep-2.4.5.1-debug
+module unload star-table-0.1.1-root-6.24.06
+module load star-table-0.1.1-root-6.24.06
+
+mkdir StRoot
+#cp -R $STAR/StRoot/macros StRoot/
+
+cp -R &MACROSDIR; StRoot/
+# cp -R &WORKINGDIR;/.${STAR_HOST_SYS} .
+
+# Ensure that any ROOT5 library is removed from the path
+setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
+
+<!-- Set year and day from filename -->
+setenv EMYEAR `perl StRoot/macros/embedding/getYearDayFromFile.pl -y ${FILEBASENAME}`
+setenv EMDAY `perl StRoot/macros/embedding/getYearDayFromFile.pl -d ${FILEBASENAME}`
+setenv EMRUN `perl StRoot/macros/embedding/getYearDayFromFile.pl -r ${FILEBASENAME}`
+
+
+<!-- Print out EMYEAR and EMDAY and EMLOGS -->
+echo EMYEAR   : $EMYEAR
+echo EMDAY    : $EMDAY
+echo EMRUN    : $EMRUN
+
+<!-- Copy tags file to SCRATCH -->
+mkdir -v $SCRATCH/tags
+set tagfile=`grep ${FILEBASENAME} &TAGLIST;`
+cp -v   ${tagfile} $SCRATCH/tags/
+ls -lah $SCRATCH/
+ls -lah $SCRATCH/tags/ 
+
+touch $SCRATCH/${FILEBASENAME}_${JOBID}.log
+
+<!-- Start job -->
+
+cp StRoot/macros/embedding/EmbeddingChainOpts.h .
+#root.exe -q -b StRoot/macros/embedding/bfcMixer_TpxG4.C'(&NEVENTS;,"'$INPUTFILE0'","'$SCRATCH/tags/${FILEBASENAME}.tags.root'", &PTMN;, &PTMX;, &ETAMN;, &ETAMX;, &VZMN;, &VZMX;, &VRMX;, &PID;, &MULT;, triggers, "&PRODNAME;", "&KINTYPE;",false,"&PIDTYPE;","G4")' &gt;&gt;&amp; $SCRATCH/${FILEBASENAME}_${JOBID}.log
+root.exe -q -b StRoot/macros/embedding/bfcMixer_TpxG4.C'("P21idIsobar200")'
+
+
+  
+ls -la .
+
+<!-- Make output and list directory (if they don't exist) -->
+if ( ! -f &OUTDIR; ) then 
+  mkdir -pv &OUTDIR;
+endif
+ls -l &OUTDIR;
+
+
+if ( ! -f &LOGDIR; ) then 
+  mkdir -pv &LOGDIR;
+endif
+
+<!-- Move LOG files and csh to star disk, remove list files -->
+mv -v $SCRATCH/${FILEBASENAME}_${JOBID}.log &LOGDIR;/${FILEBASENAME}.log
+
+</command>
+
+<ResourceUsage>
+   <Memory>
+	<MinMemory>2200</MinMemory>
+	<MaxMemory>2500</MaxMemory>
+   </Memory>
+</ResourceUsage>
+
+<!-- Define locations of ROOT files -->
+<output fromScratch="st_*.root" toURL="&OUTDIR;/"/>
+
+<!-- Define locations of log/elog files -->
+<stdout URL="file:&LOGDIR;/$FILEBASENAME_$JOBID.log"/>
+<stderr URL="file:&LOGDIR;/$FILEBASENAME_$JOBID.elog"/>
+
+<!-- Input daq files -->
+<!--input URL="file:/&DAQDIR;/st*" -->
+<input URL="filelist:&DAQLIST;" nFiles="&NFILES;" />
+
+<!-- csh/list files -->
+<Generator>
+  <Location>&JOBDIR;</Location>
+</Generator>
+
+
+</job>
+
