@@ -80,7 +80,8 @@ double mult=100;
 std::vector<int> triggers = {870010};
 std::string prodName = "P23idAuAu17";
 std::string type = "FlatPT";
-std::string engine = "G4"; 
+std::string engine = "G4";
+std::string pidtype = "pid";
 
 
 
@@ -112,10 +113,10 @@ void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn,
   kine->SetAttr("phihigh", phimx);
   kine->SetAttr("mode", "FlatPT" );
 }
-void SetPartOpt( int pid, double mult ) {
+void SetPartOpt( int pid, double mult, const char* pidtype="pid" ) {
   // Map PID onto particle name
   auto* kine = chain2->Maker("StarKine");
-  kine->SetAttr("pid",int(pid));
+  kine->SetAttr(pidtype,int(pid));
   kine->SetAttr("ntrack", double(mult));
   if ( mult < 1.0 ) {
     auto* embed = chain2->Maker("StarEmbed");
@@ -253,7 +254,7 @@ void bfcMixer_TpxG4()
     
     SetTagFile( tagfile.c_str() );
     SetOpt( pt_low, pt_high, eta_low, eta_high, 0.0, TMath::TwoPi(), type.c_str() );
-    SetPartOpt( pid, mult );
+    SetPartOpt( pid, mult, pidtype.c_str() );
     SetZVertexCut( vzlow, vzhigh, vr );
     SetTriggers( triggers );
 
@@ -334,7 +335,9 @@ void bfcMixer_TpxG4(
 		    const char* prodname  = "P21idIsobar200"  , 
 		    const char* kintype   = "FlatPT"       ,
 		    bool simIn = false                     ,
-		    const char* engine_ = "G4" ) {
+		    const char* pidtype_ = "pid"           ,  // PID (aka geant 3 id) or PDG
+		    const char* engine_ = "G4"
+		     ) {
 
 
 
@@ -354,6 +357,7 @@ void bfcMixer_TpxG4(
   prodName = prodname;
   type     = kintype;
   engine   = engine_;
+  pidtype  = pidtype_;
 
   daqfile=daqfile_;
   tagfile=tagfile_;
@@ -462,7 +466,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
   };
 
   if ( dbg_ == "P21idIsobar200" ) {
-    const int   nevents_ = 10; 
+    const int   nevents_ = 100; 
     const char* mydaqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq"; 
     const char* mytagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" ; 
     double myptmn_           = 0.0           ; 
