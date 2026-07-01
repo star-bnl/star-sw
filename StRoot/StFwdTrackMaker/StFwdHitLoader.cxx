@@ -391,7 +391,7 @@ int StFwdHitLoader::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
                     float vR   = fsthits[ih]->localPosition(0);
                     float vPhi = fsthits[ih]->localPosition(1);
                     float vZ   = fsthits[ih]->localPosition(2);
-                    if ( kLogLevel >= kLogInfo ){LOG_INFO << TString::Format("FST local position: %f %f %f", vR, vPhi, vZ) << endm;}
+                    if ( kLogLevel >= kLogVerbose ){LOG_DEBUG << TString::Format("FST local position: %f %f %f", vR, vPhi, vZ) << endm;}
                     
                     int wedgeIndex  = iw % kFstNumWedgePerDisk;
                     int sensorIndex = is % kFstNumSensorsPerWedge;
@@ -488,7 +488,7 @@ int StFwdHitLoader::loadFstHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrackMa
         float z = git->x[2];
 
         TVector3 rastered = mFstRasterizer.raster(TVector3(git->x[0], git->x[1], git->x[2]));
-        if ( kLogLevel >= kLogInfo ){LOG_INFO << TString::Format("Rastered: %f %f %f -> %f %f %f", git->x[0], git->x[1], git->x[2], rastered.X(), rastered.Y(), rastered.Z()) << endm;}
+        if ( kLogLevel >= kLogVerbose ){LOG_DEBUG << TString::Format("Rastered: %f %f %f -> %f %f %f", git->x[0], git->x[1], git->x[2], rastered.X(), rastered.Y(), rastered.Z()) << endm;}
         x = rastered.X();
         y = rastered.Y();
         
