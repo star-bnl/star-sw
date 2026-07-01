@@ -356,9 +356,9 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     });
 
     if ( mDebug ) {
-        LOG_INFO << "m0Sum = " << m0Sum << endm; 
-        LOG_INFO << "m1Sum = " << m1Sum << endm;
-        LOG_INFO << "m2Sum = " << m2Sum << endm;
+        LOG_DEBUG << "m0Sum = " << m0Sum << endm;
+        LOG_DEBUG << "m1Sum = " << m1Sum << endm;
+        LOG_DEBUG << "m2Sum = " << m2Sum << endm;
     }
 
     // m0Sum = sumAdc
@@ -408,7 +408,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         });
 
     if ( mDebug ) {
-        LOG_INFO << "We have " << hits.size() << " hits after removing duplicates" << endm;
+        LOG_DEBUG << "We have " << hits.size() << " hits after removing duplicates" << endm;
     }
 
 
@@ -451,7 +451,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         CalculateClusterInfo( clu );
 
         if (mDebug){
-            LOG_INFO << *clu << endm;;
+            LOG_DEBUG << *clu << endm;;
         }
         clusters.push_back( clu );
 
