@@ -33,13 +33,12 @@
 // log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
 // LOG expression is skipped at the AST level — no allocation, no leak.
 // Affects only this translation unit. The `if (!mDebug) {} else` form guards
-// against dangling-else attaching to a caller's `if`.
+// against dangling-else attaching to a caller's `if`. LOG_WARN is left
+// ungated so warnings are always emitted.
 #undef  LOG_INFO
 #undef  LOG_DEBUG
-#undef  LOG_WARN
 #define LOG_INFO  if (!mDebug) {} else LOGGERMESSAGE(Info)
 #define LOG_DEBUG if (!mDebug) {} else LOGGERMESSAGE(Debug)
-#define LOG_WARN  if (!mDebug) {} else LOGGERMESSAGE(Warning)
 
 
 //_____________________________________________________________
