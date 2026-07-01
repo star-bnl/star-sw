@@ -27,12 +27,11 @@
 // helper class with no per-instance debug flag. The `if (true) {} else` form
 // guards against dangling-else attaching to a caller's `if`. Flip `true` to
 // `false` (or to a flag) to re-enable logging in this translation unit.
+// LOG_WARN is left ungated so warnings are always emitted.
 #undef  LOG_INFO
 #undef  LOG_DEBUG
-#undef  LOG_WARN
 #define LOG_INFO  if (true) {} else LOGGERMESSAGE(Info)
 #define LOG_DEBUG if (true) {} else LOGGERMESSAGE(Debug)
-#define LOG_WARN  if (true) {} else LOGGERMESSAGE(Warning)
 
 TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.0040906154) {
     // we can calculate the CovMat since we know the det info, but in future we should probably keep this info in the hit itself
