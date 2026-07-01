@@ -61,12 +61,12 @@ UInt_t StFwdAnaEpdQaAndVert::LoadHists(TFile* file, HistManager* histman, StFwdA
 
 Int_t StFwdAnaEpdQaAndVert::DoMake(StFwdAnaData* anadata)
 {
-  FcsEventInfo* EvtInfo = anadata->getEvtInfo();
+  StFwdDataEvent* EvtData = anadata->getEvtData();
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);
   
-  //Int_t npoints = ntotal - anadata->mEvtInfo->mClusterSize;
+  //Int_t npoints = ntotal - anadata->mEvtData->mClusterSize;
   unsigned int nepdhits = 0;
   StSPtrVecEpdHit* epdhits = 0;
   if( MuEpdHits!=0 ){ nepdhits = MuEpdHits->GetEntriesFast(); }
@@ -162,14 +162,14 @@ Int_t StFwdAnaEpdQaAndVert::DoMake(StFwdAnaData* anadata)
   if( mH2F_EpdCutTacDiff_avgVearly!=0 ){ mH2F_EpdCutTacDiff_avgVearly->Fill( mCutEarliestTacW-mCutEarliestTacE, mCutAvgTacW-mCutAvgTacE ); }
 
   //Fill tree event structure with values
-  EvtInfo->mEpdTacEarlyE = mCutEarliestTacE;
-  EvtInfo->mEpdTacEarlyW = mCutEarliestTacW;
-  EvtInfo->mEpdAvgE = mCutAvgTacE;
-  EvtInfo->mEpdAvgW = mCutAvgTacW;
+  EvtData->mEpdTacEarlyE = mCutEarliestTacE;
+  EvtData->mEpdTacEarlyW = mCutEarliestTacW;
+  EvtData->mEpdAvgE = mCutAvgTacE;
+  EvtData->mEpdAvgW = mCutAvgTacW;
   //For vertex only fill if the average TAC is >50 which is determined by eye for Run 22
   if( mCutAvgTacW>50 && mCutAvgTacE>50 ){
     mEpdVertex = (mCutAvgTacW-mCutAvgTacE) * 0.2475;    
-    EvtInfo->mEpdVz = mEpdVertex;
+    EvtData->mEpdVz = mEpdVertex;
   }
   else{ mEpdVertex = -999; }
   //@[Julye 17, 2024] > Using the same logic as BBC since haven't looked at EpdTacDiff histograms, also because EPD has same 15.6ps/TAC as BBC.

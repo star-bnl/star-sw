@@ -50,11 +50,10 @@ Int_t StFwdAnaEpdMatch::DoMake(StFwdAnaData* anadata)
 {
   memset(mAllEpdNmip,0,sizeof(mAllEpdNmip));
   
-  TClonesArray* PhArr = anadata->getPhArr();
   StEpdGeom* EpdGeom = anadata->epdGeom();
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);  
@@ -91,10 +90,10 @@ Int_t StFwdAnaEpdMatch::DoMake(StFwdAnaData* anadata)
   }
 
   //Loop over all photon candidates and run #CheckInsideEpdTile() algorithm which relies on nmip values from hit loop
-  Int_t ntotal = PhArr->GetEntriesFast();
+  Int_t ntotal = anadata->getNPhoton();
   for( Int_t iph = 0; iph<ntotal; ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
-    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    StFcsPhotonCandidate* ph = anadata->getPhoton(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
     std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     

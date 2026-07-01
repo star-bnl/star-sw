@@ -459,12 +459,12 @@ bool StFwdAnaData::isPhPairOn() const
   else{ return false; }
 }
 
-PolData* StFwdAnaData::getPolData()
+PolData* StFwdAnaData::getPolData() const
 {
   return getPolData(mEvtData->mFill);
 }
 
-PolData* StFwdAnaData::getPolData(Int_t fillnum)
+PolData* StFwdAnaData::getPolData(Int_t fillnum) const
 {
   PolData* poldat = 0;
   auto itr = mPolarizationData.find(fillnum);
@@ -479,7 +479,7 @@ bool StFwdAnaData::exceedTrigPt(Double_t checkpt)
   bool exceedtrigpt = false;
   //Float_t trigptthr = -1;
   //std::string trigname = "";
-  Int_t ntrig = getNtrig();
+  Int_t ntrig = getNTrig();
   for( Int_t itrig=0; itrig<ntrig; ++itrig ){
     Float_t ptthres = fcsPtThr(getTrig(itrig));
     std::string thistrig = fcsTrigNameFromId(getTrig(itrig),mMuEvent->runNumber());

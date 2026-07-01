@@ -60,7 +60,7 @@ Int_t StFwdAnaFillEcalClusPoint::DoMake(StFwdAnaData* anadata)
 	float iclu_x = clu->x();
 	float iclu_y = clu->y();
 	float iclu_energy = clu->energy();
-	if( iclu_energy<anadata->mEnCut ){ continue; }
+	if( iclu_energy<anadata->enCut() ){ continue; }
 	if( !(mincolumncut<=iclu_x && iclu_x<=maxcolumncut) ){ continue; }
 	if( !(minrowcut<=iclu_y && iclu_y<=maxrowcut) ){ continue; }
 
@@ -82,8 +82,8 @@ Int_t StFwdAnaFillEcalClusPoint::DoMake(StFwdAnaData* anadata)
 
 	//std::cout << "Cluster|detid:"<<ph->mDetId << "|mX:"<<ph->mX << "|mY:"<<ph->mY << "|mZ:"<<ph->mZ << std::endl;
 
-	if( anadata->mFoundVertex > 0 ){
-	  StLorentzVectorD iclu_p_withz = FcsDb->getLorentzVector( iclu_pos, iclu_energy, anadata->mUseVertex );
+	if( anadata->getEvtData()->mFoundVertex > 0 ){
+	  StLorentzVectorD iclu_p_withz = FcsDb->getLorentzVector( iclu_pos, iclu_energy, anadata->getEvtData()->mUseVertex );
 	  ph->mPxVert = iclu_p_withz.px();
 	  ph->mPyVert = iclu_p_withz.py();
 	  ph->mPzVert = iclu_p_withz.pz();
@@ -117,7 +117,7 @@ Int_t StFwdAnaFillEcalClusPoint::DoMake(StFwdAnaData* anadata)
 	float ipoi_x = point->x();
 	float ipoi_y = point->y();
 	float ipoi_energy = point->energy();
-	if( ipoi_energy<anadata->mEnCut ){ continue; }
+	if( ipoi_energy<anadata->enCut() ){ continue; }
 	if( !(mincolumncut<=ipoi_x && ipoi_x<=maxcolumncut) ){ continue; }
 	if( !(minrowcut<=ipoi_y && ipoi_y<=maxrowcut) ){ continue; }
 
@@ -140,7 +140,7 @@ Int_t StFwdAnaFillEcalClusPoint::DoMake(StFwdAnaData* anadata)
 	ph->mPzRaw = ipoi_p.pz();
 	mH1F_PointEnergy->Fill(ipoi_energy);
 
-	if( anadata->mFoundVertex > 0 ){ 	StLorentzVectorD ipoi_p_withz = FcsDb->getLorentzVector( ipoi_pos, ipoi_energy, anadata->mUseVertex );
+	if( anadata->getEvtData()->mFoundVertex > 0 ){ 	StLorentzVectorD ipoi_p_withz = FcsDb->getLorentzVector( ipoi_pos, ipoi_energy, anadata->getEvtData()->mUseVertex );
 	  ph->mPxVert = ipoi_p_withz.px();
 	  ph->mPyVert = ipoi_p_withz.py();
 	  ph->mPzVert = ipoi_p_withz.pz();

@@ -56,10 +56,6 @@
 #include "StMuDSTMaker/COMMON/StMuFcsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFcsPoint.h"
 
-#include "StSpinPool/StFcsTreeManager/StMuFcsPi0Data.h"
-//#include "StSpinPool/StFcsPi0Ana/StMuEpdRun22QaMaker.h"
-//#include "StSpinPool/StFcsPi0Ana/StFcsRun22TriggerMap.h"
-
 #include "StFwdAnaVirtual.h"
 #include "StFwdAnaData.h"
 

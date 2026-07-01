@@ -34,7 +34,7 @@ public:
   virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* data);
   virtual Int_t DoMake(StFwdAnaData* anadata);
 
-  static void CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidate* photon, Double_t projx, Double_t projy);   ///< Main algorithm that will check if a #FcsPhotonCandidate intersects any EPD tile or any OuterCCW EPD tiles if no EPD tile is found. Once such a match is found it will appropriately fill the nmip values in #FcsPhotonCandidate so that another analysis module can use this informaiton as a selection criteria
+  static void CheckInsideEpdTile(StEpdGeom* epdgeo, StFcsPhotonCandidate* photon, Double_t projx, Double_t projy);   ///< Main algorithm that will check if a #StFcsPhotonCandidate intersects any EPD tile or any OuterCCW EPD tiles if no EPD tile is found. Once such a match is found it will appropriately fill the nmip values in #StFcsPhotonCandidate so that another analysis module can use this informaiton as a selection criteria
   
   static std::vector<Int_t> GetAdjacentEpdIds(Int_t pp,Int_t tt);
   static void GetEpdPPandTTFromId(Int_t id, Int_t& pp, Int_t& tt);

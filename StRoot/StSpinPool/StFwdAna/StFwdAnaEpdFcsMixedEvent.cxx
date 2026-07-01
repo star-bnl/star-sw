@@ -63,9 +63,9 @@ Int_t StFwdAnaEpdFcsMixedEvent::DoMake(StFwdAnaData* anadata)
   //std::cout << this->ClassName() << "|Start Make" << std::endl;
   TClonesArray* PhArr = anadata->getPhArr();
   StEpdGeom* EpdGeom = anadata->epdGeom();
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);  
@@ -85,17 +85,17 @@ Int_t StFwdAnaEpdFcsMixedEvent::DoMake(StFwdAnaData* anadata)
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
   Int_t noldhits = mMixedPhArr->GetEntriesFast();
   Int_t nnewhits = PhArr->GetEntriesFast();
-  Int_t npoints = nnewhits - anadata->getEvtInfo()->mClusterSize;
+  Int_t npoints = nnewhits - anadata->getEvtData()->mClusterSize;
   Int_t ntotal = noldhits+nnewhits;
   Int_t nepdwesthits = 0;
   for( Int_t iph = 0; iph<ntotal; ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
-    FcsPhotonCandidate* ph = 0;
+    StFcsPhotonCandidate* ph = 0;
     if( iph>=noldhits ){
-      ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph-noldhits);
+      ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph-noldhits);
     }
     else{
-      ph = (FcsPhotonCandidate*) mMixedPhArr->UncheckedAt(iph);
+      ph = (StFcsPhotonCandidate*) mMixedPhArr->UncheckedAt(iph);
     }
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
     std::vector<Double_t> epdproj;
@@ -221,8 +221,8 @@ Int_t StFwdAnaEpdFcsMixedEvent::DoMake(StFwdAnaData* anadata)
   //mMixedPhArr->AbsorbObjects(PhArr); //@[September 4, 2025] > This may giving a memory leak adding my own for loop to copy
 
   for( int i=0; i<PhArr->GetEntriesFast(); ++i ){
-    FcsPhotonCandidate* mixedph = (FcsPhotonCandidate*)mMixedPhArr->ConstructedAt(i);
-    FcsPhotonCandidate* ph = (FcsPhotonCandidate*)PhArr->ConstructedAt(i);
+    StFcsPhotonCandidate* mixedph = (StFcsPhotonCandidate*)mMixedPhArr->ConstructedAt(i);
+    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*)PhArr->ConstructedAt(i);
     ph->Copy(*mixedph); //Copy function copies ph into mixedph
     //ph->Print();
     //mixedph->Print();

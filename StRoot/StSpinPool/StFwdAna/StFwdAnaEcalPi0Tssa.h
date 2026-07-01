@@ -27,8 +27,8 @@ public:
   StFwdAnaEcalPi0Tssa();
   ~StFwdAnaEcalPi0Tssa();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* anadata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
   
   //void MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr );
 
@@ -64,7 +64,7 @@ public:
   void PaintAllTrigPi0yVx(TCanvas* canv, const char* savename="testAllTrigPi0yVx.png") const{ PaintOneHistAllTrigger(canv,mH2F_AllCuts_Pi0_yVx,"colz",savename); }
   
 protected:
-  Double_t mEpdNmipCut = 0;             ///< Copy over from StMuFcsAnaData in LoadHists
+  Double_t mEpdNmipCut = 0;             ///< Copy over from #StFwdAnaData in LoadHists
 
   TH1* mH1F_Pi0FromPh = 0;              ///< Pair Candidate mFromPh according to this analysis
 

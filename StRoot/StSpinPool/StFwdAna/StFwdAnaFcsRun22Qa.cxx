@@ -280,8 +280,8 @@ Int_t StFwdAnaFcsRun22Qa::FillEventInfo(StFwdAnaData* anadata)
     //int bx7 = (trig.bunchCrossingId7bit(runnum)) % 120;
     int spinx7 = SpinDbMkr->spin4usingBX7(TrigData->bunchId7Bit());
     //std::cout << "|trigbx7:"<<TrigData->bunchId7Bit() << "|l0bx7:"<<bx7 << "|spinx7:"<<spinx7 << "|spinx7arr:"<<spinx7arr <<"|trgspin:"<<TrigData->spinBit() <<"|l0spin:"<<trig.spinBits(runnum) <<"|trigname:"<<TrigData->ClassName()<< std::endl;
-    int bluespin = FcsEventInfo::BlueSpin(spinx7);
-    int yellowspin = FcsEventInfo::YellowSpin(spinx7);
+    int bluespin = StFwdDataEvent::BlueSpin(spinx7);
+    int yellowspin = StFwdDataEvent::YellowSpin(spinx7);
     mH1F_Spin->Fill(bluespin);
     mH1F_Spin->Fill(yellowspin);
   }
@@ -311,7 +311,7 @@ Int_t StFwdAnaFcsRun22Qa::FillFcsInfo(StFwdAnaData* anadata)
   StMuFcsCollection* MuFcsColl = anadata->fcsColl();
   if (!MuFcsColl) { LOG_ERROR << "StFwdAnaFcsRun22Qa::FillFcsInfo did not find MuFcsCollection" << endm; return kStErr; }
   StFcsDb* FcsDb = anadata->fcsDb();
-  Double_t EnCut = anadata->mEnCut;
+  Double_t EnCut = anadata->enCut();
   
   bool check_fillclu = false;
   bool check_fillpoi = false;

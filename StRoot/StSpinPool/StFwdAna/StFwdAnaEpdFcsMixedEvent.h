@@ -55,7 +55,7 @@
 #include "StMuDSTMaker/COMMON/StMuFcsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFcsPoint.h"
 
-#include "StSpinPool/StFwdAna/StFwdData/StFwdDataFcs.h"
+#include "StSpinPool/StFwdData/StFwdDataFcs.h"
 #include "StFwdAnaEpdMatch.h"
 //#include "StFcsRun22TriggerMap.h"
 

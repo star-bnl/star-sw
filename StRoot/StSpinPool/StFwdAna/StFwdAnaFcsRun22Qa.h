@@ -106,8 +106,8 @@ class StFwdAnaFcsRun22Qa : public StFwdAnaVirtual
   StFwdAnaFcsRun22Qa();
   ~StFwdAnaFcsRun22Qa();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* anadata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
   
   void setFcsAdcTbOn(bool value=true)  { mFcsAdcTbOn = value; }
   void setEpdAdcQaOn(bool value=true)  { mEpdAdcQaOn = value; }
@@ -156,8 +156,8 @@ class StFwdAnaFcsRun22Qa : public StFwdAnaVirtual
   void PrintSpinBits();        ///< Special funtion to cross check the spin bit dump with spin bits stored in the histograms #mH1F_spin4Vbx7 and #mH1F_spin4Vbx48.
   
 protected:
-  Int_t FillEventInfo(StMuFcsAnaData* anadata);
-  Int_t FillFcsInfo(StMuFcsAnaData* anadata);
+  Int_t FillEventInfo(StFwdAnaData* anadata);
+  Int_t FillFcsInfo(StFwdAnaData* anadata);
 
   TH1* mH1F_AllFcsTriggers = 0;       ///< Triggers in the events
   TH1* mH2F_BxId_7V48 = 0;            ///< Bunch crossing Id 7 bit vs. 48 bit

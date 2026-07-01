@@ -154,11 +154,11 @@ Int_t StFwdAnaEpdMatchQa::DoMake(StFwdAnaData* anadata)
   //std::cout << this->ClassName() << "|Start Make" << std::endl;
   TClonesArray* PhArr = anadata->getPhArr();
   StEpdGeom* EpdGeom = anadata->epdGeom();
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   //if( !(vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ return kStOk; }
-  Double_t epdnmipcut = anadata->mEpdNmipCut;
+  Double_t epdnmipcut = anadata->epdNmipCut();
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);
@@ -498,9 +498,9 @@ Int_t StFwdAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StFwdAnaData* anadata, TCanv
 {
   if( anadata==0 ){ return 0; }
 
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   if( !(vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ return 0; }
   
   if( canvas==0  ){ return 0; }
@@ -578,7 +578,7 @@ Int_t StFwdAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StFwdAnaData* anadata, TCanv
       }
       auto itr = mEpdTileMap.find(ph->mEpdMatch[0]);
       if( itr!=mEpdTileMap.end() ){
-	if( ph->mEpdHitNmip[0]>anadata->mEpdNmipCut ){ itr->second->SetLineColor(kRed); }
+	if( ph->mEpdHitNmip[0]>anadata->epdNmipCut() ){ itr->second->SetLineColor(kRed); }
 	else{ itr->second->SetLineColor(kBlue); }
       }
     }
@@ -732,9 +732,9 @@ Int_t StFwdAnaEpdMatchQa::DrawEpdProjection(StFwdAnaData* anadata, TCanvas* canv
 {
   if( anadata==0 ){ return 0; }
 
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   if( !(vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ return 0; }
   
   if( canvas==0  ){ return 0; }

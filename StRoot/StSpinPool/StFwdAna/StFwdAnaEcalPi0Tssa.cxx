@@ -27,7 +27,7 @@ StFwdAnaEcalPi0Tssa::~StFwdAnaEcalPi0Tssa()
 
 UInt_t StFwdAnaEcalPi0Tssa::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
-  mEpdNmipCut = anadata->mEpdNmipCut;
+  mEpdNmipCut = anadata->epdNmipCut();
   
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -160,9 +160,9 @@ Int_t StFwdAnaEcalPi0Tssa::DoMake(StFwdAnaData* anadata)
   Int_t ngoodbothph = 0;
   Int_t ngoodsinglech = 0;
   Int_t ngoodbothch = 0;
-  Double_t usevertex = anadata->mUseVertex;
-  Double_t vertexcutlow = anadata->mVertexCutLow;
-  Double_t vertexcuthigh = anadata->mVertexCutHigh;
+  Double_t usevertex = anadata->getEvtData()->mUseVertex;
+  Double_t vertexcutlow = anadata->vertexCutLow();
+  Double_t vertexcuthigh = anadata->vertexCutHigh();
   //FcsEventInfo* evtinfo = anadata->mEvtInfo;
   int spin4 = anadata->getEvtData()->mSpin;
   int bluespin = StFwdDataEvent::BlueSpin(spin4);     //Decode the 4 bit spin into +1 and -1 for blue up and blue down respectively
@@ -212,9 +212,7 @@ Int_t StFwdAnaEcalPi0Tssa::DoMake(StFwdAnaData* anadata)
     mH1F_NoEpdCutAllMass->Fill(pi0mass);   //All but EpdPh cut
     ++npi0noepdcut;
 
-    StFcsPhotonCandidate* ph1 = anadata->getPhoton(pi0->mPhoton1Idx);
-    StFcsPhotonCandidate* ph2 = anadata->getPhoton(pi0->mPhoton2Idx);
-    pi0->DiscriminateCharge(PhArr,mEpdNmipCut);
+    pi0->DiscriminateCharge(anadata->getPhArr(),mEpdNmipCut);
     mH1F_Pi0FromPh->Fill(pi0->mFromPh);
     if( pi0->mFromPh==0 ){
       //pi0 coming from two photons so can store it and analyze

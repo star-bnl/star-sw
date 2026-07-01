@@ -67,9 +67,8 @@
 #include "StEpdDbMaker/StEpdDbMaker.h"
 #include "StEpdHitMaker/StEpdHitMaker.h"
 
-#include "StSpinPool/StFcsTreeManager/StMuFcsPi0Data.h"
-//#include "StSpinPool/StFcsPi0Ana/StMuEpdRun22QaMaker.h"
-//#include "StSpinPool/StFcsPi0Ana/StFcsRun22TriggerMap.h"
+#include "StSpinPool/StFwdData/StFwdDataEvent.h"
+#include "StSpinPool/StFwdData/StFwdDataFcs.h"
 
 class StEpdGeom;
 class StFwdAnaDataMaker;
@@ -160,13 +159,16 @@ public:
 
   PolData* getPolData() const;                            //Get polarization data based on fill number in #StFwdDataEvent
   PolData* getPolData(Int_t fillnum) const;               //Get polarization data based on specific fill number
-  Double_t randomNum()const { return mSpinRndm.Rndm(); }  //random number between 0 and 1
+  Double_t randomNum(){ return mSpinRndm.Rndm(); }        //random number between 0 and 1
   
-  TTree* getPi0Tree()const{ return mDataTree; }
+  TTree* getTree()const{ return mDataTree; }
+  Int_t fillTree()const{ if(mDataTree!=0){return mDataTree->Fill();} return 0; }
+  Int_t writeTree(const char* name=nullptr,Int_t option=0,Int_t bufsize=0)const{ if(mDataTree!=0){return mDataTree->Write(name,option,bufsize);} return 0;}
+  Int_t writeTree(const char* name=nullptr,Int_t option=0,Int_t bufsize=0){ if(mDataTree!=0){return mDataTree->Write(name,option,bufsize);} return 0;}
+  Int_t getTreeEntries()const{ if(mDataTree!=0){return mDataTree->GetEntriesFast();} return 0; }
 
   ULong_t getEventNum()const{ return mEvent; }
   StFwdDataEvent* getEvtData()const{ return mEvtData; }
-  Int_t getTreeEntries()const{ return mDataTree->GetEntriesFast(); }
   Int_t getEntry(Int_t ientry){ return mDataTree->GetEntry(ientry); }
   Int_t getNTrig()const{ return mEvtData->mNTrig; }
   const Int_t* getTrig()const{ return mEvtData->mTriggers; }

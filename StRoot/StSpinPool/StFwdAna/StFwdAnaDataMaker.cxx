@@ -214,9 +214,9 @@ Int_t StFwdAnaDataMaker::Make()
   mAnaData->mEvtData->mRunNum          = mAnaData->mMuEvent->runNumber();
   mAnaData->mEvtData->mFill            = mAnaData->mMuEvent->eventInfo().time();
   mAnaData->mEvtData->mEvent           = mAnaData->mMuEvent->eventId();
-  //mAnaData->mEvtData->mBx48Id          = mAnaData->mTrigData->bunchId48Bit();
-  //mAnaData->mEvtData->mBx7Id           = mAnaData->mTrigData->bunchId7Bit();
-  //mAnaData->mEvtData->mTofMultiplicity = mAnaData->mTrigData->tofMultiplicity();
+  mAnaData->mEvtData->mBx48Id          = mAnaData->mTrigData->bunchId48Bit();
+  mAnaData->mEvtData->mBx7Id           = mAnaData->mTrigData->bunchId7Bit();
+  mAnaData->mEvtData->mTofMultiplicity = mAnaData->mTrigData->tofMultiplicity();
   //std::cout << "|runtime:"<<mEvtData->mRunTime << "|runnum:"<<mEvtData->mRunNum << "|event:"<<mEvtData->mEvent << std::endl;
 
   //Get EPD collection
@@ -249,8 +249,8 @@ Int_t StFwdAnaDataMaker::Make()
   //auto end = std::chrono::steady_clock::now();
   //auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   //std::cout << "|ievent:"<<mH1D_Entries->GetEntries() << "|time:"<<elapsed.count() << std::endl;
-  
-  if( (mAnaData->mPi0Tree)!=0 ){ mAnaData->mPi0Tree->Fill(); }
+
+  mAnaData->fillTree();        //Checks if tree exists before filling
   
   return kStOk;
 }
@@ -261,7 +261,7 @@ Int_t StFwdAnaDataMaker::Finish()
   TFile* savefile = mHists->InitFile(); //With no arguments just returns the file pointer
   if( savefile!=0 ){
     savefile->cd();
-    if( mAnaData->mPi0Tree!=0 ){ mAnaData->mPi0Tree->Write(); }
+    mAnaData->writeTree();      //Checks if tree exists before writing
     mHists->Write();
   }
   return kStOK;

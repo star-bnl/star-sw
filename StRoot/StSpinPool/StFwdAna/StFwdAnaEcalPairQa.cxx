@@ -27,7 +27,7 @@ UInt_t StFwdAnaEcalPairQa::LoadHists(TFile* file, HistManager* histman, StFwdAna
 Int_t StFwdAnaEcalPairQa::DoMake(StFwdAnaData* anadata)
 {
 
-  for( int ipair=0; ipair<anadata->GetNPhPair(); ++ipair ){
+  for( int ipair=0; ipair<anadata->getNPhPair(); ++ipair ){
     StFcsPairCandidate* pairc = anadata->getPhPair(ipair);
     StFcsPhotonCandidate* ph1 = anadata->getPhoton(pairc->mPhoton1Idx);
     StFcsPhotonCandidate* ph2 = anadata->getPhoton(pairc->mPhoton2Idx);
