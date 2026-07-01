@@ -1,19 +1,19 @@
-#include "StMuFcsAnaMakePairs.h"
+#include "StFwdAnaMakeEcalPairs.h"
 
-ClassImp(StMuFcsAnaMakePairs)
+ClassImp(StFwdAnaMakeEcalPairs)
 
-StMuFcsAnaMakePairs::StMuFcsAnaMakePairs()
+StFwdAnaMakeEcalPairs::StFwdAnaMakeEcalPairs()
 {
   //memset(mH1F_InvMassEpdCuts,0,sizeof(mH1F_InvMassEpdCuts));
 }
 
-StMuFcsAnaMakePairs::~StMuFcsAnaMakePairs()
+StFwdAnaMakeEcalPairs::~StFwdAnaMakeEcalPairs()
 {
   //delete mH1F_InvMassEpdCuts[0];
   //delete mH1F_InvMassEpdCuts[1];  
 }
 
-UInt_t StMuFcsAnaMakePairs::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaMakeEcalPairs::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -26,7 +26,7 @@ UInt_t StMuFcsAnaMakePairs::LoadHists(TFile* file, HistManager* histman, StMuFcs
   return loaded;
 }
 
-Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaMakeEcalPairs::DoMake(StFwdAnaData* anadata)
 {
   Int_t clustersize = anadata->getEvtInfo()->mClusterSize;
   Int_t npi0candidate = 0;
@@ -43,6 +43,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
       //std::cout << "|ic:"<<ic << std::endl;
       //std::cout << "  + ";
       //iclus->Print();
+      if( !(0<=iclus->mDetId && iclus->mDetId<=kFcsEcalSouthDetId) ){ continue; }
       if( ic==(clustersize-1) ){ continue; }
 
       ///if( iclus->mEpdHitNmip>-0.1){ //Only include candidates who have their nmip value set
@@ -52,6 +53,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
       for( Int_t jc=ic+1; jc<clustersize; jc++ ){
 	FcsPhotonCandidate* jclus = (FcsPhotonCandidate*) mpharr->UncheckedAt(jc);
 	if( !(jclus->mFromCluster) ){ std::cout << "MAJOR ERROR - cluster size of array found a point crashing" << std::endl; exit(0); }
+	if( !(0<=jclus->mDetId && jclus->mDetId<=kFcsEcalSouthDetId) ){ continue; }
 	TLorentzVector pi0Vert_LV = iclus->lvVert() + jclus->lvVert();
 	//if( ic==0 && jc==ic+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
 	FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
@@ -111,9 +113,11 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
       }
       */
       if( ip==(mpharr->GetEntriesFast()-1) ){ continue; }
+      if( !(0<=ipoi->mDetId && ipoi->mDetId<=kFcsEcalSouthDetId) ){ continue; }
       for( Int_t jp=ip+1; jp<mpharr->GetEntriesFast(); ++jp ){
 	FcsPhotonCandidate* jpoi = (FcsPhotonCandidate*) mpharr->UncheckedAt(jp);
 	if( jpoi->mFromCluster ){ std::cout << "MAJOR ERROR - point size of array found a cluster crashing" << std::endl; exit(0); }
+	if( !(0<=jpoi->mDetId && jpoi->mDetId<=kFcsEcalSouthDetId) ){ continue; }
 	TLorentzVector pi0Vert_LV = ipoi->lvVert() + jpoi->lvVert();
 	//if( ip==clustersize && jp==ip+1 ){ //Since we have a sorted photon array highest two energies are the first two entries
 	FcsPairCandidate* pi0c = (FcsPairCandidate*) pointpairs->ConstructedAt(npi0candidate++);
@@ -151,7 +155,7 @@ Int_t StMuFcsAnaMakePairs::DoMake(StMuFcsAnaData* anadata)
 }
 
 /*
-void StMuFcsAnaMakePairs::PaintEpdNmipCuts(TCanvas* canv, const char* savename ) const
+void StFwdAnaMakeEcalPairs::PaintEpdNmipCuts(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
   canv->Divide(2,1);

@@ -10,23 +10,23 @@
 
   LOG
   @[January 15, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
-
+  @[July 1, 2026] > Changed name from StMuFcsAnaVertex to StFwdAnaVertex
 */
 
 
-#ifndef STMUFCSANAVERTEX_HH
-#define STMUFCSANAVERTEX_HH
+#ifndef STFWDANA_STFWDANAVERTEX_HH
+#define STFWDANA_STFWDANAVERTEX_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaVertex : public StMuFcsVirtualAna
+class StFwdAnaVertex : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaVertex();
-  ~StMuFcsAnaVertex();
+  StFwdAnaVertex();
+  ~StFwdAnaVertex();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
 
   void DrawVertex(TCanvas* canv, const char* savename) const;
   void DrawVertexCorrelation(TCanvas* canv, const char* savename) const;
@@ -54,7 +54,7 @@ protected:
 
   TH1* mH2F_foundVvertex = 0;           ///< found vertex bit vs. Vertex
   
-  ClassDef(StMuFcsAnaVertex,1)
+  ClassDef(StFwdAnaVertex,1)
 };
 
 #endif

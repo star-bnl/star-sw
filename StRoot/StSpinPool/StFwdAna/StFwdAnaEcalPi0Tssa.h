@@ -12,22 +12,23 @@
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsPi0TreeMaker
   @[June 8, 2026] > Changed all 'FcsPi0Candidate' to the new #FcsPairCandidate
   @[June 17, 2026] > Added histogram #mH1F_Pi0FromPh to track the distribution of #FcsPairCandidate::mFromPh. Changed #DoMake() to use new meaning of #FcsPairCandidate::mFromPh but to have the same logic as before
+  @[July 1, 2026] > Changed name from StMuFcsAnaPi0Tssa to StFwdAnaEcalPi0Tssa since this analysis module relies only on Ecal and EPD information being there
 */
 
 
-#ifndef STMUFCSANAPI0TSSA_HH
-#define STMUFCSANAPI0TSSA_HH
+#ifndef STFWDANA_STFWDANAECALPI0TSSA_HH
+#define STFWDANA_STFWDANAECALPI0TSSA_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaPi0Tssa : public StMuFcsVirtualAna
+class StFwdAnaEcalPi0Tssa : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaPi0Tssa();
-  ~StMuFcsAnaPi0Tssa();
+  StFwdAnaEcalPi0Tssa();
+  ~StFwdAnaEcalPi0Tssa();
 
   virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual Int_t DoMake(StMuFcsAnaData* anadata);
   
   //void MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr );
 
@@ -138,7 +139,7 @@ protected:
   TH1* mH2F_NPi0Bg2_xfVphi[2][2];           ///< x_F and phi where pi0 candidate was found [blue,yellow][up,down] for invariant mass range of 0.7-0.9
   //Add mass vs. energy hisotgram??
   
-  ClassDef(StMuFcsAnaPi0Tssa,2)
+  ClassDef(StFwdAnaEcalPi0Tssa,1)
 };
 
 #endif

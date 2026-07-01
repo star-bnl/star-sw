@@ -11,24 +11,24 @@
 #include "StThreeVectorF.hh"
 #include "Stypes.h"
 
-#include "StMuFcsAnaEpdQaAndVert.h"
+#include "StFwdAnaEpdQaAndVert.h"
 
-ClassImp(StMuFcsAnaEpdQaAndVert)
+ClassImp(StFwdAnaEpdQaAndVert)
 
 
-StMuFcsAnaEpdQaAndVert::StMuFcsAnaEpdQaAndVert()
+StFwdAnaEpdQaAndVert::StFwdAnaEpdQaAndVert()
 {
   memset(mH2F_HitEpd_nmipVchkey,0,sizeof(mH2F_HitEpd_nmipVchkey));
   memset(mH2F_HitEpd_tacVadcmip,0,sizeof(mH2F_HitEpd_tacVadcmip));  
 }
 
-StMuFcsAnaEpdQaAndVert::~StMuFcsAnaEpdQaAndVert()
+StFwdAnaEpdQaAndVert::~StFwdAnaEpdQaAndVert()
 {
   delete mH2F_HitEpd_tacVadcmip[0];
   delete mH2F_HitEpd_tacVadcmip[1];
 }
 
-UInt_t StMuFcsAnaEpdQaAndVert::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaEpdQaAndVert::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   if( histman==0 ){ return 0; }
   UInt_t loaded = 0;
@@ -59,7 +59,7 @@ UInt_t StMuFcsAnaEpdQaAndVert::LoadHists(TFile* file, HistManager* histman, StMu
   return loaded;
 }
 
-Int_t StMuFcsAnaEpdQaAndVert::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEpdQaAndVert::DoMake(StFwdAnaData* anadata)
 {
   FcsEventInfo* EvtInfo = anadata->getEvtInfo();
   TClonesArray* MuEpdHits = 0;
@@ -75,7 +75,7 @@ Int_t StMuFcsAnaEpdQaAndVert::DoMake(StMuFcsAnaData* anadata)
     nepdhits = epdhits->size();
   }
   else{
-    LOG_ERROR << "StMuFcsAnaEpdQaAndVert::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr;
+    LOG_ERROR << "StFwdAnaEpdQaAndVert::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr;
   }
   if( mH1F_Epd_NHits!=0 ){ mH1F_Epd_NHits->Fill(nepdhits); }  
   
@@ -180,7 +180,7 @@ Int_t StMuFcsAnaEpdQaAndVert::DoMake(StMuFcsAnaData* anadata)
 }
 
 
-void StMuFcsAnaEpdQaAndVert::DrawEpdAllQa(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawEpdAllQa(TCanvas* canv, const char* savename)
 {
   DrawEpdHitQa(canv, savename);
   DrawEpdTacQa( canv, savename);
@@ -188,7 +188,7 @@ void StMuFcsAnaEpdQaAndVert::DrawEpdAllQa(TCanvas* canv, const char* savename)
   DrawEpdTacAdcQa( canv, savename);
 }
 
-void StMuFcsAnaEpdQaAndVert::DrawEpdHitQa(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawEpdHitQa(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -207,7 +207,7 @@ void StMuFcsAnaEpdQaAndVert::DrawEpdHitQa(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdQaAndVert::DrawEpdTacQa(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawEpdTacQa(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -230,7 +230,7 @@ void StMuFcsAnaEpdQaAndVert::DrawEpdTacQa(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdQaAndVert::DrawEpdTacCutQa(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawEpdTacCutQa(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -255,7 +255,7 @@ void StMuFcsAnaEpdQaAndVert::DrawEpdTacCutQa(TCanvas* canv, const char* savename
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdQaAndVert::DrawEpdTacAdcQa(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawEpdTacAdcQa(TCanvas* canv, const char* savename)
 {
   if( mEpdTacAdcOn || (mH2F_HitEpd_tacVadcmip[0]!=0 && mH2F_HitEpd_tacVadcmip[1]!=0) ){
     canv->Clear();
@@ -270,20 +270,20 @@ void StMuFcsAnaEpdQaAndVert::DrawEpdTacAdcQa(TCanvas* canv, const char* savename
   }
 }
 /*
-Int_t StMuFcsAnaEpdQaAndVert::LoadGraphsFromFile(TFile* file, TObjArray* graphs )
+Int_t StFwdAnaEpdQaAndVert::LoadGraphsFromFile(TFile* file, TObjArray* graphs )
 {
   Int_t gloaded = 0;
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_VertexEpd,"GE_VertexEpd","EPD vertex mean (Err=RMS) vs. Run index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_VertexEpd,"GE_VertexEpd","EPD vertex mean (Err=RMS) vs. Run index");
   return gloaded;
 }
 
-void StMuFcsAnaEpdQaAndVert::FillGraphs(Int_t irun)
+void StFwdAnaEpdQaAndVert::FillGraphs(Int_t irun)
 {
   mGE_VertexEpd->SetPoint(irun,irun,mH1F_VertexEpd->GetMean());
   mGE_VertexEpd->SetPointError(irun,0,mH1F_VertexEpd->GetRMS());
 }
 
-void StMuFcsAnaEpdQaAndVert::DrawGraphVertex(TCanvas* canv, const char* savename)
+void StFwdAnaEpdQaAndVert::DrawGraphVertex(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->cd();

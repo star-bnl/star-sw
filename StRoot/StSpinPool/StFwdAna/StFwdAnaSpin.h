@@ -10,26 +10,27 @@
   
   LOG
   @[January 15, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
+  @[July 1, 2026] > Changed name from StMuFcsAnaSpin to StFwdAnaSpin
 
 */
 
 
-#ifndef STMUFCSANASPIN_HH
-#define STMUFCSANASPIN_HH
+#ifndef STFWDANA_STFWDANASPIN_HH
+#define STFWDANA_STFWDANASPIN_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaSpin : public StMuFcsVirtualAna
+class StFwdAnaSpin : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaSpin();
-  ~StMuFcsAnaSpin();
+  StFwdAnaSpin();
+  ~StFwdAnaSpin();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
   
 private:
-  ClassDef(StMuFcsAnaSpin,1)
+  ClassDef(StFwdAnaSpin,1)
 };
 
 #endif

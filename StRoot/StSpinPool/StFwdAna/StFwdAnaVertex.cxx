@@ -1,17 +1,17 @@
-#include "StMuFcsAnaVertex.h"
+#include "StFwdAnaVertex.h"
 #include "StBTofHeader.h"
 
-ClassImp(StMuFcsAnaVertex)
+ClassImp(StFwdAnaVertex)
 
-StMuFcsAnaVertex::StMuFcsAnaVertex()
+StFwdAnaVertex::StFwdAnaVertex()
 {
 }
 
-StMuFcsAnaVertex::~StMuFcsAnaVertex()
+StFwdAnaVertex::~StFwdAnaVertex()
 {
 }
 
-UInt_t StMuFcsAnaVertex::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data)
+UInt_t StFwdAnaVertex::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* data)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -37,10 +37,10 @@ UInt_t StMuFcsAnaVertex::LoadHists(TFile* file, HistManager* histman, StMuFcsAna
   return loaded;
 }
 
-Int_t StMuFcsAnaVertex::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaVertex::DoMake(StFwdAnaData* anadata)
 {
   //Local copy of needed variables to make things easier
-  FcsEventInfo* EvtInfo = anadata->getEvtInfo();
+  StFwdDataEvent* EvtData = anadata->getEvtData();
   StMuDst* MuDst = anadata->muDst();
   StMuEvent* MuEvent = anadata->muEvent();
   const StTriggerData* TrigData = anadata->trigData();
@@ -50,36 +50,36 @@ Int_t StMuFcsAnaVertex::DoMake(StMuFcsAnaData* anadata)
   //For vertex one possible function is MuEvent->primaryVertexPosition()
   //To get all possible vertex StMuPrimaryVertex *muprimv = MuDst->primaryVertex(index);
   Double_t primvz = -999;
-  if( MuDst->primaryVertex()){EvtInfo->mPrimVertRanking = MuDst->primaryVertex()->ranking();}
-  else{EvtInfo->mPrimVertRanking=-1;}
-  EvtInfo->mPrimVx = MuEvent->primaryVertexPosition().x();
-  EvtInfo->mPrimVy = MuEvent->primaryVertexPosition().y();
+  if( MuDst->primaryVertex()){EvtData->mPrimVertRanking = MuDst->primaryVertex()->ranking();}
+  else{EvtData->mPrimVertRanking=-1;}
+  EvtData->mPrimVx = MuEvent->primaryVertexPosition().x();
+  EvtData->mPrimVy = MuEvent->primaryVertexPosition().y();
   primvz = MuEvent->primaryVertexPosition().z();
-  EvtInfo->mPrimVz = primvz;
-  mH2F_VertexPrim_yVx->Fill(EvtInfo->mPrimVx,EvtInfo->mPrimVy);
+  EvtData->mPrimVz = primvz;
+  mH2F_VertexPrim_yVx->Fill(EvtData->mPrimVx,EvtData->mPrimVy);
   mH1F_VertexPrimZ->Fill( primvz );
 
   Double_t vpdvz = -999;
   if( MuDst==0 ){ return kStWarn; }
   if( MuDst->btofHeader() ){ vpdvz = MuDst->btofHeader()->vpdVz(); }
   mH1F_VertexVpd->Fill( vpdvz );
-  EvtInfo->mVpdVz = vpdvz;
+  EvtData->mVpdVz = vpdvz;
 
   //@[April 7, 2021] > No Slewing correction for BBC yet, see StFmsJetMaker2015 in BrightSTAR??
-  EvtInfo->mBbcTacDiff = TrigData->bbcTimeDifference() - 4096; //subtract 4096 since 0 means bad event and distribution is Gaussian around 4096
-  mH1F_BbcTimeDiff->Fill(EvtInfo->mBbcTacDiff);
+  EvtData->mBbcTacDiff = TrigData->bbcTimeDifference() - 4096; //subtract 4096 since 0 means bad event and distribution is Gaussian around 4096
+  mH1F_BbcTimeDiff->Fill(EvtData->mBbcTacDiff);
   Double_t bbcvz = -999;
-  if( fabs(EvtInfo->mBbcTacDiff)>1.e-6 ){ bbcvz = EvtInfo->mBbcTacDiff * -0.2475; } //0.2475 = 0.0165*30/2x
+  if( fabs(EvtData->mBbcTacDiff)>1.e-6 ){ bbcvz = EvtData->mBbcTacDiff * -0.2475; } //0.2475 = 0.0165*30/2x
   mH1F_VertexBbc->Fill( bbcvz );
-  EvtInfo->mBbcVz = bbcvz;
+  EvtData->mBbcVz = bbcvz;
 
   //StZdcTriggerDetector& zdc = mMuEvent->zdcTriggerDetector();
   //std::cout <<"|ZdcV:"<<zdc.vertexZ() << std::endl;
   Double_t zdcvz = TrigData->zdcVertexZ();
-  EvtInfo->mZdcVz = zdcvz;
+  EvtData->mZdcVz = zdcvz;
   mH1F_VertexZdc->Fill( zdcvz );
 
-  Double_t epdvz = EvtInfo->mEpdVz;     //Should be valid if #StMuFcsAnaEpdQaAndVert was called first otherwise it will be -999
+  Double_t epdvz = EvtData->mEpdVz;     //Should be valid if #StFwdAnaEpdQaAndVert was called first otherwise it will be -999
   mH1F_VertexEpd->Fill( epdvz );
 
   //Correlation Histograms
@@ -95,19 +95,18 @@ Int_t StMuFcsAnaVertex::DoMake(StMuFcsAnaData* anadata)
   mH2F_VertexZ_zdcVbbc->Fill(bbcvz,zdcvz);
   
   //std::cout << this->ClassName()<< "|set vertex" << std::endl;
-  if( EvtInfo->mPrimVertRanking>-1 ){ anadata->mFoundVertex = 1; anadata->mUseVertex = EvtInfo->mPrimVz; }
-  else if( vpdvz > -998 ){ anadata->mFoundVertex = 2; anadata->mUseVertex = vpdvz; }
-  else if( epdvz > -998 ){ anadata->mFoundVertex = 3; anadata->mUseVertex = epdvz; }
-  else if( bbcvz > -998 ){ anadata->mFoundVertex = 4; anadata->mUseVertex = bbcvz; }
-  else{ anadata->mFoundVertex = 0; anadata->mUseVertex = 0; } //If no vertex found use 0
-  EvtInfo->mFoundVertex = anadata->mFoundVertex;
+  if( EvtData->mPrimVertRanking>-1 ){ EvtData->mFoundVertex = 1; EvtData->mUseVertex = EvtData->mPrimVz; }
+  else if( vpdvz > -998 ){ EvtData->mFoundVertex = 2; EvtData->mUseVertex = vpdvz; }
+  else if( epdvz > -998 ){ EvtData->mFoundVertex = 3; EvtData->mUseVertex = epdvz; }
+  else if( bbcvz > -998 ){ EvtData->mFoundVertex = 4; EvtData->mUseVertex = bbcvz; }
+  else{ EvtData->mFoundVertex = 0; EvtData->mUseVertex = 0; } //If no vertex found use 0
   //std::cout << this->ClassName()<< "|foundvertex:"<<mFoundVertex << "|usevertex:"<<mUseVertex << "|mH2F_foundVvertex:"<<mH2F_foundVvertex << std::endl;
-  mH2F_foundVvertex->Fill(anadata->mUseVertex,anadata->mFoundVertex);
+  mH2F_foundVvertex->Fill(EvtData->mUseVertex,EvtData->mFoundVertex);
 
   return kStOk;
 }
 
-void StMuFcsAnaVertex::DrawVertex(TCanvas* canv, const char* savename) const
+void StFwdAnaVertex::DrawVertex(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,3);
@@ -130,7 +129,7 @@ void StMuFcsAnaVertex::DrawVertex(TCanvas* canv, const char* savename) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaVertex::DrawVertexCorrelation(TCanvas* canv, const char* savename) const
+void StFwdAnaVertex::DrawVertexCorrelation(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,3);
@@ -155,7 +154,7 @@ void StMuFcsAnaVertex::DrawVertexCorrelation(TCanvas* canv, const char* savename
   canv->Print(savename);
 }
 
-void StMuFcsAnaVertex::DrawVertexCorrelationNoZdc(TCanvas* canv, const char* savename) const
+void StFwdAnaVertex::DrawVertexCorrelationNoZdc(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(2,2);

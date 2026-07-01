@@ -1,16 +1,16 @@
-#include "StMuFcsAnaCheckTrig.h"
+#include "StFwdAnaCheckTrig.h"
 
-ClassImp(StMuFcsAnaCheckTrig)
+ClassImp(StFwdAnaCheckTrig)
 
-StMuFcsAnaCheckTrig::StMuFcsAnaCheckTrig()
+StFwdAnaCheckTrig::StFwdAnaCheckTrig()
 {
 }
 
-StMuFcsAnaCheckTrig::~StMuFcsAnaCheckTrig()
+StFwdAnaCheckTrig::~StFwdAnaCheckTrig()
 {
 }
 
-UInt_t StMuFcsAnaCheckTrig::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaCheckTrig::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -32,9 +32,10 @@ UInt_t StMuFcsAnaCheckTrig::LoadHists(TFile* file, HistManager* histman, StMuFcs
   return loaded;
 }
 
-Int_t StMuFcsAnaCheckTrig::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaCheckTrig::DoMake(StFwdAnaData* anadata)
 {
   //Local copy of needed variables to make things easier
+  StFwdDataEvent* EvtData = anadata->getEvtData();
   StMuEvent* MuEvent = anadata->muEvent();
 
   //Filter with Trigger Information first
@@ -45,13 +46,13 @@ Int_t StMuFcsAnaCheckTrig::DoMake(StMuFcsAnaData* anadata)
     bool hasfcstrigs = (anadata->sizeOfFcsTriggers()>0);
     for( Int_t i=0; i<ntrig; ++i ){
       unsigned int trig = trgIDs.triggerId(i);
-      anadata->mTriggers[i] = trig;
+      EvtData->mTriggers[i] = trig;
       if( hasfcstrigs ){
-	std::string thistrig = anadata->fcsTrigNameFromId(trig,MuEvent->runNumber());
+	std::string thistrig = anadata->fcsTrigNameFromId(trig,EvtData->mRunNum);
 	//if( !(anadata->ignoreTrig()) ){
 	for( unsigned int j=0; j<anadata->mTargetTrig.size(); ++j ){
 	  if( (anadata->mTargetTrig.at(j))==thistrig ){
-	    (anadata->mNTrig)++;
+	    (EvtData->mNTrig)++;
 	    anadata->mValidTrigFound=true;
 	    mH1F_MatchFcsTriggers->Fill( thistrig.c_str(), 1);
 	  }
@@ -67,7 +68,7 @@ Int_t StMuFcsAnaCheckTrig::DoMake(StMuFcsAnaData* anadata)
 	    anadata->mEmTrigFound = true;
 	  }
       }
-      else{ anadata->mNTrig = ntrig; }
+      else{ EvtData->mNTrig = ntrig; }
     }
     /* Debugging why some events were skipped. The events that were skipped were fcsHad triggered events because I didn't turn them on in the runMuDst.C macro
     if( !(anadata->mValidTrigFound) ){
@@ -80,7 +81,7 @@ Int_t StMuFcsAnaCheckTrig::DoMake(StMuFcsAnaData* anadata)
     */
   }
   else{
-    LOG_WARN <<"StMuFcsAnaCheckTrig::DoMake() - !TrigMuColl" <<endl;
+    LOG_WARN <<"StFwdAnaCheckTrig::DoMake() - !TrigMuColl" <<endl;
     anadata->mValidTrigFound=false;
   }
 
@@ -92,7 +93,7 @@ Int_t StMuFcsAnaCheckTrig::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaCheckTrig::PaintMatchTriggers(TCanvas* canvas, const char* savename) const
+void StFwdAnaCheckTrig::PaintMatchTriggers(TCanvas* canvas, const char* savename) const
 {
   canvas->Clear();
   mH1F_MatchFcsTriggers->Draw("hist e");

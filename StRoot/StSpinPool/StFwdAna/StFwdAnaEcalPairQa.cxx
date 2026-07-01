@@ -1,16 +1,16 @@
-#include "StMuFcsAnaMakePairsQa.h"
+#include "StFwdAnaEcalPairQa.h"
 
-ClassImp(StMuFcsAnaMakePairsQa)
+ClassImp(StFwdAnaEcalPairQa)
 
-StMuFcsAnaMakePairsQa::StMuFcsAnaMakePairsQa()
+StFwdAnaEcalPairQa::StFwdAnaEcalPairQa()
 {
 }
 
-StMuFcsAnaMakePairsQa::~StMuFcsAnaMakePairsQa()
+StFwdAnaEcalPairQa::~StFwdAnaEcalPairQa()
 {
 }
 
-UInt_t StMuFcsAnaMakePairsQa::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaEcalPairQa::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -24,15 +24,13 @@ UInt_t StMuFcsAnaMakePairsQa::LoadHists(TFile* file, HistManager* histman, StMuF
   return loaded;
 }
 
-Int_t StMuFcsAnaMakePairsQa::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEcalPairQa::DoMake(StFwdAnaData* anadata)
 {
-  TClonesArray* pharr = anadata->getPhArr();
-  TClonesArray* pointpairs = anadata->getPhPairArr();
 
-  for( int ipair=0; ipair<pointpairs->GetEntriesFast(); ++ipair ){
-    FcsPairCandidate* pairc = (FcsPairCandidate*)pointpairs->At(ipair);
-    FcsPhotonCandidate* ph1 = (FcsPhotonCandidate*)pharr->At(pairc->mPhoton1Idx);
-    FcsPhotonCandidate* ph2 = (FcsPhotonCandidate*)pharr->At(pairc->mPhoton2Idx);
+  for( int ipair=0; ipair<anadata->GetNPhPair(); ++ipair ){
+    StFcsPairCandidate* pairc = anadata->getPhPair(ipair);
+    StFcsPhotonCandidate* ph1 = anadata->getPhoton(pairc->mPhoton1Idx);
+    StFcsPhotonCandidate* ph2 = anadata->getPhoton(pairc->mPhoton2Idx);
     if( pairc->mFromCluster ){
       mH1F_InvMassClusPairs->Fill(pairc->mass());
       mH2F_ClusEnergy_ph1Vph2->Fill(ph1->mEn,ph2->mEn);
@@ -46,7 +44,7 @@ Int_t StMuFcsAnaMakePairsQa::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaMakePairsQa::PaintPairEnergy(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPairQa::PaintPairEnergy(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
 

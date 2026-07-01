@@ -13,11 +13,12 @@
   @[January 19, 2026] > Obsolete class as part of the experimentation with using #StMuFcsTreeMaker for doing the EPD mixed event analysis. Still haven't implemented into the new framework and want to keep this for keeping track of the history of how the analysis worked and as a learning tool for how I was experimenting to find a new framework
   @[May 13, 2026] > Copied old StMuFcsPointEpdMixedEventMaker into StMuFcsAnaEpdFcsMixedEvent which utilizes new #StMuFcsVirtualAna framework and methods
   @[June 17, 2026] > Changed angle difference to use dot product so changed range on phi histograms to 0 to pi to match arccos function
+  @[July 1, 2026] > Changed name from StMuFcsAnaEpdFcsMixedEvent to StFwdAnaEpdFcsMixedEvent
 */
 
 
-#ifndef STMUFCSANAEPDFCSMIXEDEVENT_HH
-#define STMUFCSANAEPDFCSMIXEDEVENT_HH
+#ifndef STFWDANA_STFWDANAEPDFCSMIXEDEVENT_HH
+#define STFWDANA_STFWDANAEPDFCSMIXEDEVENT_HH
 
 //C/C++ Headers
 #include <iostream>
@@ -54,20 +55,20 @@
 #include "StMuDSTMaker/COMMON/StMuFcsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFcsPoint.h"
 
-#include "StSpinPool/StFcsTreeManager/StMuFcsPi0Data.h"
-#include "StMuFcsAnaEpdMatch.h"
+#include "StSpinPool/StFwdAna/StFwdData/StFwdDataFcs.h"
+#include "StFwdAnaEpdMatch.h"
 //#include "StFcsRun22TriggerMap.h"
 
 class StEpdGeom;
 
-class StMuFcsAnaEpdFcsMixedEvent : public StMuFcsVirtualAna {
+class StFwdAnaEpdFcsMixedEvent : public StFwdAnaVirtual {
 public:
   
-  StMuFcsAnaEpdFcsMixedEvent();
-  ~StMuFcsAnaEpdFcsMixedEvent();
+  StFwdAnaEpdFcsMixedEvent();
+  ~StFwdAnaEpdFcsMixedEvent();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* data);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
 
   //virtual void Print(Option_t* opt="") const; //"e" for event, "t" for trigger, "g" for photon, "p" for pi0, "a" for all
 
@@ -101,7 +102,7 @@ private:
   Double_t mOldVertex = -999.0;                ///< Vertex from last event needed for event mixing
   Int_t mNOldPoints = 0;                       ///< Number of points in previous event
   
-  ClassDef(StMuFcsAnaEpdFcsMixedEvent, 1)
+  ClassDef(StFwdAnaEpdFcsMixedEvent, 1)
 };
 
 #endif

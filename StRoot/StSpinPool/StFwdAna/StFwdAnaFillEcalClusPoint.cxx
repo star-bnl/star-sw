@@ -1,16 +1,16 @@
-#include "StMuFcsAnaFillClusPoint.h"
+#include "StFwdAnaFillEcalClusPoint.h"
 
-ClassImp(StMuFcsAnaFillClusPoint)
+ClassImp(StFwdAnaFillEcalClusPoint)
 
-StMuFcsAnaFillClusPoint::StMuFcsAnaFillClusPoint()
+StFwdAnaFillEcalClusPoint::StFwdAnaFillEcalClusPoint()
 {
 }
 
-StMuFcsAnaFillClusPoint::~StMuFcsAnaFillClusPoint()
+StFwdAnaFillEcalClusPoint::~StFwdAnaFillEcalClusPoint()
 {
 }
 
-UInt_t StMuFcsAnaFillClusPoint::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaFillEcalClusPoint::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -25,22 +25,22 @@ UInt_t StMuFcsAnaFillClusPoint::LoadHists(TFile* file, HistManager* histman, StM
   return loaded;
 }
 
-Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaFillEcalClusPoint::DoMake(StFwdAnaData* anadata)
 {
   StMuFcsCollection* MuFcsColl = anadata->fcsColl();
   StFcsDb* FcsDb = anadata->fcsDb();
   TClonesArray* PhArr = anadata->getPhArr();
   //Fcs Collection
-  if( !MuFcsColl ){ LOG_ERROR << "StMuFcsAnaFillClusPoint::Make did not find MuFcsCollection" << endm; return kStErr; }
+  if( !MuFcsColl ){ LOG_ERROR << "StFwdAnaFillEcalClusPoint::Make did not find MuFcsCollection" << endm; return kStErr; }
 
   //TClonesArray* hits = mMuFcsColl->getHitArray();
-  //if( hits==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS hits" << endm; }
+  //if( hits==0 ){ LOG_INFO << "StFwdAnaFillEcalClusPoint::FillFcsInfo - No FCS hits" << endm; }
   TClonesArray* clusters = anadata->fcsColl()->getClusterArray();
-  //if( clusters==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS clusters" << endm; }
-  if( clusters==0 ){ std::cout << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS clusters" << std::endl; }
+  //if( clusters==0 ){ LOG_INFO << "StFwdAnaFillEcalClusPoint::FillFcsInfo - No FCS clusters" << endm; }
+  if( clusters==0 ){ std::cout << "StFwdAnaFillEcalClusPoint::FillFcsInfo - No FCS clusters" << std::endl; }
   TClonesArray* points = anadata->fcsColl()->getPointArray();
-  //if( points==0 ){ LOG_INFO << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS points" << endm; }
-  if( points==0 ){ std::cout << "StMuFcsAnaFillClusPoint::FillFcsInfo - No FCS points" << std::endl; }
+  //if( points==0 ){ LOG_INFO << "StFwdAnaFillEcalClusPoint::FillFcsInfo - No FCS points" << endm; }
+  if( points==0 ){ std::cout << "StFwdAnaFillEcalClusPoint::FillFcsInfo - No FCS points" << std::endl; }
   
   //std::cout << "|hits:"<<hits << "|clusters:"<<clusters << "|points:"<<points << std::endl;
   Int_t ncandidates = 0;
@@ -67,7 +67,7 @@ Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
 	StThreeVectorD iclu_pos = FcsDb->getStarXYZfromColumnRow( idet, iclu_x, iclu_y );
 	StLorentzVectorD iclu_p = FcsDb->getLorentzVector( iclu_pos, iclu_energy, 0 );
 
-	FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->ConstructedAt(ncandidates++);
+	StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->ConstructedAt(ncandidates++);
 	ph->mFromCluster = true;
 	ph->mDetId = idet;
 	ph->mX = iclu_pos[0];
@@ -97,9 +97,9 @@ Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
     }
   }
 
-  //std::cout << "===== EventId:"<< mEvtInfo->mEvent <<" =====" << std::endl;
-  anadata->getEvtInfo()->mClusterSize = ncandidates;
-  Int_t clustersize = ncandidates; //local copy of mEvtInfo->mClusterSize
+  //std::cout << "===== EventId:"<< mEvtData->mEvent <<" =====" << std::endl;
+  anadata->getEvtData()->mClusterSize = ncandidates;
+  Int_t clustersize = ncandidates; //local copy of mEvtData->mClusterSize
   mH1F_ClusterMult->Fill(ncandidates);
   
   if( points!=0 ){
@@ -124,7 +124,7 @@ Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
 	StThreeVectorD ipoi_pos = FcsDb->getStarXYZfromColumnRow( idet, ipoi_x, ipoi_y );
 	StLorentzVectorD ipoi_p = FcsDb->getLorentzVector(ipoi_pos, ipoi_energy, 0);
 
-	FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->ConstructedAt(ncandidates++);
+	StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->ConstructedAt(ncandidates++);
 	ph->mFromCluster = false;
 	ph->mDetId = idet;
 	ph->mX = ipoi_pos[0];
@@ -162,7 +162,7 @@ Int_t StMuFcsAnaFillClusPoint::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaFillClusPoint::PaintHeatMap(TCanvas* canv, const char* savename) const
+void StFwdAnaFillEcalClusPoint::PaintHeatMap(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->SetLogz();
@@ -170,7 +170,7 @@ void StMuFcsAnaFillClusPoint::PaintHeatMap(TCanvas* canv, const char* savename) 
   canv->Print(savename);
 }
 
-void StMuFcsAnaFillClusPoint::PaintClusPointQa(TCanvas* canv, const char* savename)   const
+void StFwdAnaFillEcalClusPoint::PaintClusPointQa(TCanvas* canv, const char* savename)   const
 {
   canv->Clear();
   
@@ -189,7 +189,7 @@ void StMuFcsAnaFillClusPoint::PaintClusPointQa(TCanvas* canv, const char* savena
   canv->Print(savename);
 }
 
-void StMuFcsAnaFillClusPoint::PaintEnergyZoom(TCanvas* canv, const char* savename) const
+void StFwdAnaFillEcalClusPoint::PaintEnergyZoom(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
 

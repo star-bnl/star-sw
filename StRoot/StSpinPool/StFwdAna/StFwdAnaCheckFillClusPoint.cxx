@@ -6,7 +6,7 @@
 // #include "StThreeVectorF.hh"
 // #include "Stypes.h"
 
-#include "StMuFcsAnaCheckFillClusPoint.h"
+#include "StFwdAnaCheckFillClusPoint.h"
 
 #include "StEvent.h"
 #include "StFcsCollection.h"
@@ -14,32 +14,32 @@
 #include "StFcsCluster.h"
 #include "StFcsPoint.h"
 
-ClassImp(StMuFcsAnaCheckFillClusPoint)
+ClassImp(StFwdAnaCheckFillClusPoint)
 
-StMuFcsAnaCheckFillClusPoint::StMuFcsAnaCheckFillClusPoint()
+StFwdAnaCheckFillClusPoint::StFwdAnaCheckFillClusPoint()
 {
 }
 
-StMuFcsAnaCheckFillClusPoint::~StMuFcsAnaCheckFillClusPoint()
+StFwdAnaCheckFillClusPoint::~StFwdAnaCheckFillClusPoint()
 {
 }
 
-UInt_t StMuFcsAnaCheckFillClusPoint::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaCheckFillClusPoint::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
   return loaded;
 }
 
-Int_t StMuFcsAnaCheckFillClusPoint::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaCheckFillClusPoint::DoMake(StFwdAnaData* anadata)
 {
-  //std::cout << "========== StMuFcsAnaCheckFillClusPoint::DoMake Start ==========" << std::endl;
+  //std::cout << "========== StFwdAnaCheckFillClusPoint::DoMake Start ==========" << std::endl;
   StEvent* event = anadata->event();
-  if( event==0 ){ LOG_ERROR << "StMuFcsAnaCheckFillClusPoint::DoMake - No StEvent" << endm; return kStErr; }
+  if( event==0 ){ LOG_ERROR << "StFwdAnaCheckFillClusPoint::DoMake - No StEvent" << endm; return kStErr; }
   StFcsCollection* FcsColl = event->fcsCollection();
   StFcsDb* FcsDb = anadata->fcsDb();
   //Fcs Collection
-  if( !FcsColl ){ LOG_ERROR << "StMuFcsAnaCheckFillClusPoint::DoMake did not find FcsCollection" << endm; return kStErr; }
+  if( !FcsColl ){ LOG_ERROR << "StFwdAnaCheckFillClusPoint::DoMake did not find FcsCollection" << endm; return kStErr; }
   
   //std::cout << "|hits:"<<hits << "|clusters:"<<clusters << "|points:"<<points << std::endl;
   for( UInt_t idet=0; idet<kFcsNDet; ++idet ){

@@ -1,15 +1,15 @@
-#include "StMuFcsAnaPi0Tssa.h"
+#include "StFwdAnaEcalPi0Tssa.h"
 
-ClassImp(StMuFcsAnaPi0Tssa)
+ClassImp(StFwdAnaEcalPi0Tssa)
 
-StMuFcsAnaPi0Tssa::StMuFcsAnaPi0Tssa()
+StFwdAnaEcalPi0Tssa::StFwdAnaEcalPi0Tssa()
 {
   memset(mH2F_NPi0Inc_xfVphi, 0,sizeof(mH2F_NPi0Inc_xfVphi));
   memset(mH2F_NPi0Bg1_xfVphi, 0,sizeof(mH2F_NPi0Bg1_xfVphi));
   memset(mH2F_NPi0Bg2_xfVphi, 0,sizeof(mH2F_NPi0Bg2_xfVphi));
 }
 
-StMuFcsAnaPi0Tssa::~StMuFcsAnaPi0Tssa()
+StFwdAnaEcalPi0Tssa::~StFwdAnaEcalPi0Tssa()
 {
   delete mH1F_InvMassAllCuts;
   delete mH1F_Pi0MultAllCuts;
@@ -25,7 +25,7 @@ StMuFcsAnaPi0Tssa::~StMuFcsAnaPi0Tssa()
   delete mH2F_AllCuts_Pi0_yVx;
 }
 
-UInt_t StMuFcsAnaPi0Tssa::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaEcalPi0Tssa::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   mEpdNmipCut = anadata->mEpdNmipCut;
   
@@ -41,42 +41,42 @@ UInt_t StMuFcsAnaPi0Tssa::LoadHists(TFile* file, HistManager* histman, StMuFcsAn
   mH1F_Pi0FromPh->GetXaxis()->SetBinLabel(6,"ph1&ph2>nmip");
   loaded += histman->AddH1F(file,mH1F_AllPi0Mult,"H1F_AllPi0Mult","Pi0 Multiplicity with only an energy cut;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_AllPi0Zgg,"H1F_AllPi0Zgg","Zgg of all Pi0s with only an energy;Zgg;", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_AllPi0_etaVphi,"H1F_AllPi0_etaVphi","#eta vs. #phi of all Pi0s with only energy cut;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_AllPi0_etaVphi,"H1F_AllPi0_etaVphi","#eta vs. #phi of all Pi0s with only energy cut;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_AllPi0En,"H1F_AllPi0En","Energy of all Pi0s with only an energy cut;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_AllPi0Pt,"H1F_AllPi0Pt","Pt of Pi0s with only an energy cut;p_{T} (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_AllPi0Mass,"H1F_AllAllMass","Invariant mass of all point pair combinations;Invariant Mass (GeV);", 500,0,1);
   
   loaded += histman->AddH1F(file,mH1F_NoEpdCutPi0Mult,"H1F_NoEpdCutPi0Mult","Pi0 Multiplicity all cuts except EPD nmip;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_NoEpdCutZgg,"H1F_NoEpdCutZgg","Zgg of all Pi0s, all cuts except EPD nmip;Zgg;", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_NoEpdCut_etaVphi,"H1F_NoEpdCut_etaVphi","#eta vs. #phi of all Pi0s, all cuts except EPD nmip;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_NoEpdCut_etaVphi,"H1F_NoEpdCut_etaVphi","#eta vs. #phi of all Pi0s, all cuts except EPD nmip;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_NoEpdCutEn,"H1F_NoEpdCutEn","Energy of all Pi0s, all cuts except EPD nmip;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_NoEpdCutPt,"H1F_NoEpdCutPt","Pt of all Pi0s, all cuts except EPD nmip;p_{T} (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_NoEpdCutAllMass,"H1F_NoEpdCutAllMass","Invariant mass all Pi0s, all cuts except EPD nmip;Invariant Mass (GeV);", 500,0,1);
   
   loaded += histman->AddH1F(file,mH1F_EpdPhPi0Mult,"H1F_EpdPhPi0Mult","Point Multiplicity with an energy cut and EPD cut on photon;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_EpdPhZgg,"H1F_EpdPhZgg","Zgg of Pi0s using highest energy pairs and Epd Cut Photons;Z_{#gamma#gamma};", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_EpdPh_etaVphi,"H1F_EpdPh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD photon cut on both points;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_EpdPh_etaVphi,"H1F_EpdPh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD photon cut on both points;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_EpdPhEn,"H1F_EpdPhEn","Energy of Pi0s using highest energy pairs and Epd Cut Photons;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_EpdPhPt,"H1F_EpdPhPt","Pt of Pi0s using highest energy pairs and Epd Cut Photons;Pt (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_EpdPhAllMass,"H1F_EpdPhAllMass","Invariant mass of all point pair combinations with Epd Cut Photons;Invariant Mass (GeV);", 500,0,1);
 
   loaded += histman->AddH1F(file,mH1F_EpdChPi0Mult,"H1F_EpdChPi0Mult","Point Multiplicity with an energy cut and EPD cut on photon;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_EpdChZgg,"H1F_EpdChZgg","Zgg of Pi0s using highest energy pairs and Epd Cut Charged;Zgg;", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_EpdCh_etaVphi,"H1F_EpdCh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD electron cut on both points;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_EpdCh_etaVphi,"H1F_EpdCh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD electron cut on both points;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_EpdChEn,"H1F_EpdChEn","Energy of Pi0s using highest energy pairs and Epd Cut Charged;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_EpdChPt,"H1F_EpdChPt","Pt of Pi0s using highest energy pairs and Epd Cut Charged;Pt (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_EpdChAllMass,"H1F_EpdChAllMass","Invariant mass of all point pair combinations with Epd Cut Charged;Invariant Mass (GeV);", 500,0,1); //This makes it such that this bin size is twice that of the 0,1 range with 500 bins
 
   loaded += histman->AddH1F(file,mH1F_EpdSinglePhPi0Mult,"H1F_EpdSinglePhPi0Mult","Pi0 Multiplicity with all cuts and EPD cut on only one photon;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_EpdSinglePhZgg,"H1F_EpdSinglePhZgg","Z_{gg} of Pi0s with all cuts and EPD cut on only one photon;Z_{gg};", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_EpdSinglePh_etaVphi,"H1F_EpdSinglePh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD cut on only one photon;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_EpdSinglePh_etaVphi,"H1F_EpdSinglePh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD cut on only one photon;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_EpdSinglePhEn,"H1F_EpdSinglePhEn","Energy of Pi0s with all cuts and EPD cut on only one photon;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_EpdSinglePhPt,"H1F_EpdSinglePhPt","p_{T} of Pi0s with all cuts and EPD cut on only one photon;#p_{T} (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_EpdSinglePhAllMass,"H1F_EpdSinglePhAllMass","Invariant mass of all point pair combinations after all cuts and Epd cut on single photon;Invariant Mass (GeV);", 500,0,1); //This makes it such that this bin size is twice that of the 0,1 range with 500 bins
 
   loaded += histman->AddH1F(file,mH1F_EpdSingleChPi0Mult,"H1F_EpdSingleChPi0Mult","Pi0 Multiplicity with all cuts and EPD cut on only one photon;Point Multiplicity", 30,0,30);
   loaded += histman->AddH1F(file,mH1F_EpdSingleChZgg,"H1F_EpdSingleChZgg","Z_{gg} of Pi0s with all cuts and EPD cut on only one electron;Z_{gg};", 100,0,1);
-  loaded += histman->AddH2F(file,mH2F_EpdSingleCh_etaVphi,"H1F_EpdSingleCh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD cut on only one electron;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2F(file,mH2F_EpdSingleCh_etaVphi,"H1F_EpdSingleCh_etaVphi","#eta vs. #phi of Pi0s with all cuts and EPD cut on only one electron;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   loaded += histman->AddH1F(file,mH1F_EpdSingleChEn,"H1F_EpdSingleChEn","Energy of Pi0s with all cuts and EPD cut on only one electron;Energy (GeV)", 1000,0,200);
   loaded += histman->AddH1F(file,mH1F_EpdSingleChPt,"H1F_EpdSingleChPt","p_{T} of Pi0s with all cuts and EPD cut on only one electron;#p_{T} (GeV)", 100,0,10);
   loaded += histman->AddH1F(file,mH1F_EpdSingleChAllMass,"H1F_EpdSingleChAllMass","Invariant mass of all point pair combinations after all cuts and Epd cut on single electron;Invariant Mass (GeV);", 500,0,1); //This makes it such that this bin size is twice that of the 0,1 range with 500 bins
@@ -107,52 +107,52 @@ UInt_t StMuFcsAnaPi0Tssa::LoadHists(TFile* file, HistManager* histman, StMuFcsAn
   loaded += histman->AddH2FArr(file,mH2F_AllCuts_Pi0_ptVeta,5,"H2F_AllCuts_Pi0_ptVeta","Pi0 p_{T} vs. eta after all cuts applied;#eta;p_{T}", 100,0,10, 100,0,50);
   
   if( mH2F_AllCuts_Pi0_etaVphi==0 ){ mH2F_AllCuts_Pi0_etaVphi = new TObjArray(); }
-  loaded += histman->AddH2FArr(file,mH2F_AllCuts_Pi0_etaVphi,5,"H2F_AllCuts_Pi0_etaVphi","Eta vs. Phi distriubtion of pi0s;#phi;#eta", StMuFcsAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
+  loaded += histman->AddH2FArr(file,mH2F_AllCuts_Pi0_etaVphi,5,"H2F_AllCuts_Pi0_etaVphi","Eta vs. Phi distriubtion of pi0s;#phi;#eta", StFwdAnaData::NPHIBIN,-TMath::Pi()/2.0,3.0*TMath::Pi()/2.0, 70,0,7);
   //loaded += histman->AddH2F(file,mH2F_EpdNmip,"H2F_EpdNmip","EpdNmip;cluster;nmip", 2,0,2, 50,0,5);
 
   //TString entitletext[NENERGYBIN] = { "En<=10", "10<En<=30", "30<En<=50", "50<En<=70", "70<En<=100", "En>100" };
-  //TString phititletext[StMuFcsAnaData::NPHIBIN] = { "0<=#phi<#frac{#pi}{4}", "#frac{#pi}{4}<=#phi<#frac{#pi}{2}", "#frac{#pi}{2}<=#phi<#frac{3#pi}{4}", "#frac{3#pi}{4}<=#phi<#pi" };
+  //TString phititletext[StFwdAnaData::NPHIBIN] = { "0<=#phi<#frac{#pi}{4}", "#frac{#pi}{4}<=#phi<#frac{#pi}{2}", "#frac{#pi}{2}<=#phi<#frac{3#pi}{4}", "#frac{3#pi}{4}<=#phi<#pi" };
   double pi  = TMath::Pi();
-  //Double_t xfbins[StMuFcsAnaData::NXFBIN+1] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4, 0.44, 0.48, 0.52};
-  //Double_t xfbins[StMuFcsAnaData::NXFBIN+1] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5};
+  //Double_t xfbins[StFwdAnaData::NXFBIN+1] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.28, 0.32, 0.36, 0.4, 0.44, 0.48, 0.52};
+  //Double_t xfbins[StFwdAnaData::NXFBIN+1] = {0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.3, 0.5};
 
-  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[0][0],"H2F_NPi0Inc_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.1<=M<=0.2", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[0][1],"H2F_NPi0Inc_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.1<=M<=0.2", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[1][0],"H2F_NPi0Inc_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.1<=M<=0.2", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[1][1],"H2F_NPi0Inc_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.1<=M<=0.2", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[0][0],"H2F_NPi0Inc_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.1<=M<=0.2", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[0][1],"H2F_NPi0Inc_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.1<=M<=0.2", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[1][0],"H2F_NPi0Inc_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.1<=M<=0.2", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Inc_xfVphi[1][1],"H2F_NPi0Inc_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.1<=M<=0.2", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
 
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[0][0],"H2F_NPi0Bg1_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.3<=M<=0.4", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[0][1],"H2F_NPi0Bg1_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.3<=M<=0.4", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[1][0],"H2F_NPi0Bg1_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.3<=M<=0.4", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[1][1],"H2F_NPi0Bg1_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.3<=M<=0.4", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[0][0],"H2F_NPi0Bg1_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.3<=M<=0.4", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[0][1],"H2F_NPi0Bg1_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.3<=M<=0.4", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[1][0],"H2F_NPi0Bg1_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.3<=M<=0.4", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg1_xfVphi[1][1],"H2F_NPi0Bg1_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.3<=M<=0.4", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
 
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[0][0],"H2F_NPi0Bg2_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.7<=M<=0.9", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[0][1],"H2F_NPi0Bg2_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.7<=M<=0.9", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[1][0],"H2F_NPi0Bg2_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.7<=M<=0.9", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
-  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[1][1],"H2F_NPi0Bg2_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.7<=M<=0.9", StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[0][0],"H2F_NPi0Bg2_xfVphi_blue_up","Number of Pi0s in a given energy and phi bin for blue beam spin up 0.7<=M<=0.9", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[0][1],"H2F_NPi0Bg2_xfVphi_blue_down","Number of Pi0s in a given energy and phi bin for blue beam spin down 0.7<=M<=0.9", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[1][0],"H2F_NPi0Bg2_xfVphi_yellow_up","Number of Pi0s in a given energy and phi bin for yellow beam spin up 0.7<=M<=0.9", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
+  loaded += histman->AddH2F(file,mH2F_NPi0Bg2_xfVphi[1][1],"H2F_NPi0Bg2_xfVphi_yellow_down","Number of Pi0s in a given energy and phi bin for yellow beam spin down 0.7<=M<=0.9", StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins );
 
   //[January 29, 2025] > [How to create a TH3F with fixed and variable bin sizes](https://root-forum.cern.ch/t/how-to-make-th3-histograms-with-variable-bin-edges/38789)
-  TAxis tmpphi(StMuFcsAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0);
-  Double_t phiedges[StMuFcsAnaData::NPHIBIN+1] = {0};
+  TAxis tmpphi(StFwdAnaData::NPHIBIN,-pi/2.0,3.0*pi/2.0);
+  Double_t phiedges[StFwdAnaData::NPHIBIN+1] = {0};
   for( int i=0; i<25; ++i ){ phiedges[i] = tmpphi.GetBinUpEdge(i); }
   TAxis tmpmass(500,0,1);
   Double_t massedges[501] = {0};
   for( int i=0; i<501; ++i ){ massedges[i] = tmpmass.GetBinUpEdge(i); }
-  loaded += histman->AddH3F(file,mH3F_AllCutsInvMass_xfVphi,"H3F_AllCutsInvMass_xfVphi","Invariant mass after all cuts by phi and energy binning", StMuFcsAnaData::NPHIBIN,phiedges, StMuFcsAnaData::NXFBIN,StMuFcsAnaData::xfbins, 500,massedges );
+  loaded += histman->AddH3F(file,mH3F_AllCutsInvMass_xfVphi,"H3F_AllCutsInvMass_xfVphi","Invariant mass after all cuts by phi and energy binning", StFwdAnaData::NPHIBIN,phiedges, StFwdAnaData::NXFBIN,StFwdAnaData::xfbins, 500,massedges );
   
   return loaded;
 }
 
-Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEcalPi0Tssa::DoMake(StFwdAnaData* anadata)
 {
-  PolData* poldat = anadata->getPolData(anadata->runInfo()->beamFillNumber(StBeamDirection::east));
+  PolData* poldat = anadata->getPolData(anadata->getEvtData()->mFill);
   //if( politr!=mPolarizationData.end() ){ poldat = politr->second; }
-  if( poldat==0 ){ std::cout << "No polarization data found for fill "<< anadata->runInfo()->beamFillNumber(StBeamDirection::east)  << std::endl; return kStSkip; }
+  if( poldat==0 ){ std::cout << "No polarization data found for fill "<< anadata->getEvtData()->mFill  << std::endl; return kStSkip; }
   if( anadata->spinDbMkr()==0 ){ std::cout << "No Spin Db Maker loaded" << std::endl; return kStSkip; }
   if( anadata->trigData()==0 ){ std::cout << "No Trig data found" << std::endl; return kStSkip; }
 
-  TClonesArray* PhArr = anadata->getPhArr();
-  TClonesArray* PairArr = anadata->getPhPairArr();
+  //TClonesArray* PhArr = anadata->getPhArr();
+  //TClonesArray* PairArr = anadata->getPhPairArr();
   Int_t nallpi0 = 0;
   Int_t npi0noepdcut = 0 ;
   Int_t ngoodpi0s = 0;
@@ -164,16 +164,16 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
   Double_t vertexcutlow = anadata->mVertexCutLow;
   Double_t vertexcuthigh = anadata->mVertexCutHigh;
   //FcsEventInfo* evtinfo = anadata->mEvtInfo;
-  int spin4 = anadata->spinDbMkr()->spin4usingBX7( anadata->trigData()->bunchId7Bit() );
-  int bluespin = FcsEventInfo::BlueSpin(spin4);     //Decode the 4 bit spin into +1 and -1 for blue up and blue down respectively
-  int yellowspin = FcsEventInfo::YellowSpin(spin4); //Decode the 4 bit spin into +1 and -1 for yellow up and yellow down respectively
+  int spin4 = anadata->getEvtData()->mSpin;
+  int bluespin = StFwdDataEvent::BlueSpin(spin4);     //Decode the 4 bit spin into +1 and -1 for blue up and blue down respectively
+  int yellowspin = StFwdDataEvent::YellowSpin(spin4); //Decode the 4 bit spin into +1 and -1 for yellow up and yellow down respectively
   StFcsDb* fcsdb = anadata->fcsDb();
   //std::cout << "NPi0s:"<<PairArr->GetEntriesFast() << std::endl;
   short emtrig[5] = {0, anadata->mTrigEm0, anadata->mTrigEm1, anadata->mTrigEm2, anadata->mTrigEm3 };
-  for( int i=0; i<PairArr->GetEntriesFast(); ++i ){
-    FcsPairCandidate* pi0 = (FcsPairCandidate*)PairArr->At(i);
+  for( int i=0; i<anadata->getNPhPair(); ++i ){
+    StFcsPairCandidate* pi0 = anadata->getPhPair(i);
     if( pi0==0 ){ continue; }
-    if( pi0->mFromCluster ){ /*std::cout << "StMuFcsPi0TreeMaker::Make() - Not a point - "<<pi0->mFromCluster<< std::endl;*/ continue; }
+    if( pi0->mFromCluster ){ /*std::cout << "StFwdAnaEcalPi0Tssa::DoMake() - Not a point - "<<pi0->mFromCluster<< std::endl;*/ continue; }
     ++nallpi0;
     Double_t pi0en = pi0->mEn;
     TLorentzVector pi0_lv = pi0->lv();
@@ -191,11 +191,11 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
     mH1F_AllPi0Pt->Fill(pi0->pt());
     mH1F_AllPi0Mass->Fill(pi0->mInvMass);
 
-    if( ! (vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ /*std::cout << " StMuFcsAnaPi0Tssa::DoMake() - Failed vertex cut:"<<usevertex << std::endl;*/ continue; }
-    if( pi0->mZgg>0.7     ){ /*std::cout << "StMuFcsAnaPi0Tssa::Make() - Failed Zgg:"<< pi0->mZgg << std::endl;*/ continue; }
+    if( ! (vertexcutlow<=usevertex && usevertex<=vertexcuthigh) ){ /*std::cout << " StFwdAnaEcalPi0Tssa::DoMake() - Failed vertex cut:"<<usevertex << std::endl;*/ continue; }
+    if( pi0->mZgg>0.7     ){ /*std::cout << "StFwdAnaEcalPi0Tssa::Make() - Failed Zgg:"<< pi0->mZgg << std::endl;*/ continue; }
     //Add pt cut based on trigger
     //if( !(anadata->ignoreTrig()) ){ if( !(anadata->mEmTrigFound) ){ continue; } } //New framework will still check for matched triggers even if ignore trig is on
-    //if( !(anadata->mEmTrigFound) ){ std::cout << "StMuFcsAnaPi0Tssa::DoMake() - Failed Trig:"<<anadata->mEmTrigFound << std::endl; continue; }
+    //if( !(anadata->mEmTrigFound) ){ std::cout << "StFwdAnaEcalPi0Tssa::DoMake() - Failed Trig:"<<anadata->mEmTrigFound << std::endl; continue; }
     //bool exceedtrigpt = anadata->exceedTrigPt(pi0->pt());
     //if( !exceedtrigpt ){ continue; }
 
@@ -212,8 +212,8 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
     mH1F_NoEpdCutAllMass->Fill(pi0mass);   //All but EpdPh cut
     ++npi0noepdcut;
 
-    FcsPhotonCandidate* ph1 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton1Idx);
-    FcsPhotonCandidate* ph2 = (FcsPhotonCandidate*)PhArr->UncheckedAt(pi0->mPhoton2Idx);
+    StFcsPhotonCandidate* ph1 = anadata->getPhoton(pi0->mPhoton1Idx);
+    StFcsPhotonCandidate* ph2 = anadata->getPhoton(pi0->mPhoton2Idx);
     pi0->DiscriminateCharge(PhArr,mEpdNmipCut);
     mH1F_Pi0FromPh->Fill(pi0->mFromPh);
     if( pi0->mFromPh==0 ){
@@ -253,14 +253,14 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
       ++ngoodsinglech;
     }
 
-    if( pi0->mFromPh!=0 ){ /*std::cout << "StMuFcsPi0TreeMaker::Make() - Failed photon cut - "<<pi0->mFromPh<< std::endl;*/ continue; } //Got rid of extra photon loops so everything is now mFromPh==0. Do this check so only both nmip requirements is stored for the A_N analysis
-    //std::cout << "StMuFcsPi0TreeMaker::Make() - Passed all cuts!" << std::endl;
+    if( pi0->mFromPh!=0 ){ /*std::cout << "StFwdAnaEcalPi0Tssa::DoMake() - Failed photon cut - "<<pi0->mFromPh<< std::endl;*/ continue; } //Got rid of extra photon loops so everything is now mFromPh==0. Do this check so only both nmip requirements is stored for the A_N analysis
+    //std::cout << "StFwdAnaEcalPi0Tssa::DoMake() - Passed all cuts!" << std::endl;
     ++ngoodpi0s;
     //std::cout << " + |Ntrig:"<<mNTrig << "|trigname:"<<trigname << "|trigpt:"<<trigptthr;
     //pi0->Print();
     /*
-    FcsPhotonCandidate* ph1 = PhArr->UncheckedAt(pi0->mPhoton1Idx);
-    FcsPhotonCandidate* ph2 = PhArr->UncheckedAt(pi0->mPhoton2Idx);
+    StFcsPhotonCandidate* ph1 = PhArr->UncheckedAt(pi0->mPhoton1Idx);
+    StFcsPhotonCandidate* ph2 = PhArr->UncheckedAt(pi0->mPhoton2Idx);
     mH2F_AllCuts_PoiX_1V2->(ph1->mX,ph2->mX);
     mH2F_AllCuts_PoiY_1V2->(ph1->mY,ph2->mY);
     */
@@ -332,7 +332,7 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-/*void StMuFcsAnaPi0Tssa::MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr )
+/*void StFwdAnaEcalPi0Tssa::MergeForTssa( TH1* totalhistinc[][2], TH1* totalhistbg1[][2], TH1* totalhistbg2[][2], TH3* mergedinvmass, TH1* mergedpolblue, TH1* mergedpolyell, TH1* mergedpolblueerr, TH1* mergedpolyellerr )
 {
   if( mH1F_RndmSpin->GetBinContent(1)>0.1 ){ std::cout << "  + RandomSpinFound" << std::endl; return; } //Don't merge histograms from files with random spin patterns
   for( int ibeam=0; ibeam<2; ++ibeam ){
@@ -352,7 +352,7 @@ Int_t StMuFcsAnaPi0Tssa::DoMake(StMuFcsAnaData* anadata)
   
   }*/
 
-void StMuFcsAnaPi0Tssa::PaintAllPi0(TCanvas* canv,  const char* savename)  const
+void StFwdAnaEcalPi0Tssa::PaintAllPi0(TCanvas* canv,  const char* savename)  const
 {
   canv->Clear();
   
@@ -378,7 +378,7 @@ void StMuFcsAnaPi0Tssa::PaintAllPi0(TCanvas* canv,  const char* savename)  const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintNoEpdCut(TCanvas* canv,  const char* savename)  const
+void StFwdAnaEcalPi0Tssa::PaintNoEpdCut(TCanvas* canv,  const char* savename)  const
 {
   canv->Clear();
   
@@ -402,7 +402,7 @@ void StMuFcsAnaPi0Tssa::PaintNoEpdCut(TCanvas* canv,  const char* savename)  con
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintEpdPhPi0(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintEpdPhPi0(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -428,7 +428,7 @@ void StMuFcsAnaPi0Tssa::PaintEpdPhPi0(TCanvas* canv, const char* savename) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintEpdChPi0(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintEpdChPi0(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -454,7 +454,7 @@ void StMuFcsAnaPi0Tssa::PaintEpdChPi0(TCanvas* canv, const char* savename) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintEpdSinglePh(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintEpdSinglePh(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -475,7 +475,7 @@ void StMuFcsAnaPi0Tssa::PaintEpdSinglePh(TCanvas* canv, const char* savename) co
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintEpdSingleCh(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintEpdSingleCh(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -496,7 +496,7 @@ void StMuFcsAnaPi0Tssa::PaintEpdSingleCh(TCanvas* canv, const char* savename) co
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintPi0Overlap(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintPi0Overlap(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -699,7 +699,7 @@ void StMuFcsAnaPi0Tssa::PaintPi0Overlap(TCanvas* canv, const char* savename) con
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintInvMassEpdQa(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintInvMassEpdQa(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
 
@@ -806,7 +806,7 @@ void StMuFcsAnaPi0Tssa::PaintInvMassEpdQa(TCanvas* canv, const char* savename ) 
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintEpdQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintEpdQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
@@ -881,7 +881,7 @@ void StMuFcsAnaPi0Tssa::PaintEpdQa(TCanvas* canv, const char* savename) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintPi0Cuts(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintPi0Cuts(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
   canv->Divide(3,3);
@@ -913,12 +913,12 @@ void StMuFcsAnaPi0Tssa::PaintPi0Cuts(TCanvas* canv, const char* savename ) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintInvMassCuts(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintInvMassCuts(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
-  for( short ixbin=0; ixbin<StMuFcsAnaData::NXFBIN; ++ixbin ){
-    canv->DivideSquare(StMuFcsAnaData::NPHIBIN);
-    for( short phibin=0; phibin<StMuFcsAnaData::NPHIBIN; ++phibin ){
+  for( short ixbin=0; ixbin<StFwdAnaData::NXFBIN; ++ixbin ){
+    canv->DivideSquare(StFwdAnaData::NPHIBIN);
+    for( short phibin=0; phibin<StFwdAnaData::NPHIBIN; ++phibin ){
       canv->cd(phibin+1);
       std::stringstream histname;
       histname << "H1F_InvMass_xf"<<ixbin << "_phi"<<phibin;
@@ -932,7 +932,7 @@ void StMuFcsAnaPi0Tssa::PaintInvMassCuts(TCanvas* canv, const char* savename ) c
   }
 }
 
-void StMuFcsAnaPi0Tssa::PaintNpi0Inc(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintNpi0Inc(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -958,7 +958,7 @@ void StMuFcsAnaPi0Tssa::PaintNpi0Inc(TCanvas* canv, const char* savename ) const
   */
 }
 
-void StMuFcsAnaPi0Tssa::PaintNpi0Bg1(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintNpi0Bg1(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -973,7 +973,7 @@ void StMuFcsAnaPi0Tssa::PaintNpi0Bg1(TCanvas* canv, const char* savename ) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintNpi0Bg2(TCanvas* canv, const char* savename ) const
+void StFwdAnaEcalPi0Tssa::PaintNpi0Bg2(TCanvas* canv, const char* savename ) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -988,7 +988,7 @@ void StMuFcsAnaPi0Tssa::PaintNpi0Bg2(TCanvas* canv, const char* savename ) const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintAllHistOneTrigger(TCanvas* canv, int trigidx, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintAllHistOneTrigger(TCanvas* canv, int trigidx, const char* savename) const
 {
   canv->Clear();
   canv->Divide(4,3);
@@ -1021,7 +1021,7 @@ void StMuFcsAnaPi0Tssa::PaintAllHistOneTrigger(TCanvas* canv, int trigidx, const
   canv->Print(savename);
 }
 
-void StMuFcsAnaPi0Tssa::PaintOneHistAllTrigger(TCanvas* canv, TObjArray* histarr, const char* drawoption, const char* savename) const
+void StFwdAnaEcalPi0Tssa::PaintOneHistAllTrigger(TCanvas* canv, TObjArray* histarr, const char* drawoption, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);

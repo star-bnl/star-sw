@@ -51,12 +51,13 @@
   @[January 21, 2026] > Copied from #StMuFcsRun22QaMaker and renamed and modified to work in "StMuFcsAna" structure
   @[May 29, 2026] > Commented out printing for when I needed to test why the MuDsts did not contain the point-cluster associations
   @[June 3, 2026] > Commented out some extraneous code from the MuDst Q&A testing
+  @[July 1, 2026] > Changed name from StMuFcsAnaRun22Qa to StFwdAnaFcsRun22Qa
   
   Do DEP calib of EPD chs, bunch xing analysis for spin. Change some plots so they use logz and move/remove the stats box for some of hte 2d histograms when plotting. Show on the fly EPD MIP peak locations and valleys
  */
 
-#ifndef STMUFCSANARUN22QA_HH
-#define STMUFCSANARUN22QA_HH
+#ifndef STFWDANA_STFWDANAFCSRUN22QA_HH
+#define STFWDANA_STFWDANAFCSRUN22QA_HH
 
 //C/C++ Headers
 #include <iostream>
@@ -97,13 +98,13 @@
 //Custom headers in this folder
 // #include "HistManager.h"
 // #include "StFcsRun22TriggerMap.h"
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaRun22Qa : public StMuFcsVirtualAna
+class StFwdAnaFcsRun22Qa : public StFwdAnaVirtual
 {
  public:
-  StMuFcsAnaRun22Qa();
-  ~StMuFcsAnaRun22Qa();
+  StFwdAnaFcsRun22Qa();
+  ~StFwdAnaFcsRun22Qa();
 
   virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
   virtual Int_t DoMake(StMuFcsAnaData* anadata);
@@ -234,7 +235,7 @@ protected:
 
   double GraphAverage(TGraph* g);        ///< Helper function to check if a graph has zero average so I don't plot it
 
-  ClassDef(StMuFcsAnaRun22Qa,1)
+  ClassDef(StFwdAnaFcsRun22Qa,1)
 };
 
 #endif

@@ -13,18 +13,18 @@
 #include "StThreeVectorF.hh"
 #include "Stypes.h"
 
-#include "StMuFcsAnaEpdMatch.h"
+#include "StFwdAnaEpdMatch.h"
 
-ClassImp(StMuFcsAnaEpdMatch)
+ClassImp(StFwdAnaEpdMatch)
 
-std::map<Int_t,TPolyLine*> StMuFcsAnaEpdMatch::mEpdCcwLines;
-float StMuFcsAnaEpdMatch::mAllEpdNmip[12][31] = {0};
+std::map<Int_t,TPolyLine*> StFwdAnaEpdMatch::mEpdCcwLines;
+float StFwdAnaEpdMatch::mAllEpdNmip[12][31] = {0};
 
-StMuFcsAnaEpdMatch::StMuFcsAnaEpdMatch()
+StFwdAnaEpdMatch::StFwdAnaEpdMatch()
 {
 }
 
-StMuFcsAnaEpdMatch::~StMuFcsAnaEpdMatch()
+StFwdAnaEpdMatch::~StFwdAnaEpdMatch()
 {
   for( auto itr=mEpdCcwLines.begin(); itr!=mEpdCcwLines.end(); ++itr ){
     delete itr->second;
@@ -32,7 +32,7 @@ StMuFcsAnaEpdMatch::~StMuFcsAnaEpdMatch()
   mEpdCcwLines.clear();
 }
 
-UInt_t StMuFcsAnaEpdMatch::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data)
+UInt_t StFwdAnaEpdMatch::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* data)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -46,7 +46,7 @@ UInt_t StMuFcsAnaEpdMatch::LoadHists(TFile* file, HistManager* histman, StMuFcsA
   return loaded;
 }
 
-Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEpdMatch::DoMake(StFwdAnaData* anadata)
 {
   memset(mAllEpdNmip,0,sizeof(mAllEpdNmip));
   
@@ -69,7 +69,7 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
     epdhits = &(EpdColl->epdHits());
     nepdhits = epdhits->size();
   }
-  else{ LOG_ERROR << "StMuFcsAnaEpdMatch::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
+  else{ LOG_ERROR << "StFwdAnaEpdMatch::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
   StMuEpdHit* muepdhit = 0;
   StEpdHit* epdhit = 0;
   Int_t nepdwesthits = 0;
@@ -94,16 +94,16 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
   Int_t ntotal = PhArr->GetEntriesFast();
   for( Int_t iph = 0; iph<ntotal; ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
-    FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
-    std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+    std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     
     mH2F_EpdProjHitMap->Fill( epdproj.at(0),epdproj.at(1) );
     if( vertexcutlow<=usevertex && usevertex<=vertexcuthigh ){ mH2F_EpdProjHitMap_Vcut->Fill(epdproj.at(0),epdproj.at(1)); }
     //std::cout << " + |phx:"<<ph->mX << "|phy:"<<ph->mY << "|phz:"<<ph->mZ << "|v:"<<usevertex << std::endl;
     //std::cout << " + |epdx:"<<epdproj.at(0) << "|epdy:"<<epdproj.at(1) << "|epdz:"<<epdproj.at(2) << std::endl;
     //std::cout << " ** |iph:"<< iph-noldhits << std::endl;
-    StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
+    StFwdAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
     //std::cout << "=====DEEPDEBUG=====:"<<((ph->mFromCluster)?0:1) << "|" << ph->mEpdHitNmip[0] << std::endl;
     //std::cout << "=====DEEPDEBUG=====:"<< ((ph->mFromCluster)?0:1) << "|" << ph->mEpdHitNmip[0] << std::endl;
     mH2F_EpdNmip->Fill( ((ph->mFromCluster)?0:1),ph->mEpdHitNmip[0] );
@@ -114,7 +114,7 @@ Int_t StMuFcsAnaEpdMatch::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidate* photon, Double_t projx, Double_t projy )
+void StFwdAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, StFcsPhotonCandidate* photon, Double_t projx, Double_t projy )
 {
   //loop over all west epd tiles so that even if no hit recorded can use as a veto
   for(int i_pp=1; i_pp<=12; ++i_pp){     //Supersector runs [1,12]
@@ -229,14 +229,14 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
     const int MAX_ADJ = 8;
     int adj_pp[MAX_ADJ];
     int adj_tt[MAX_ADJ];
-    StMuFcsAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
-    StMuFcsAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
-    StMuFcsAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
-    StMuFcsAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
-    StMuFcsAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
-    StMuFcsAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
-    StMuFcsAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
-    StMuFcsAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
+    StFwdAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
+    StFwdAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
+    StFwdAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
+    StFwdAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
+    StFwdAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
+    StFwdAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
+    StFwdAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
+    StFwdAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
 
     float nmiptile = mAllEpdNmip[found_pp-1][found_tt-1];
     //Start with intersecting tile's values
@@ -509,7 +509,7 @@ void StMuFcsAnaEpdMatch::CheckInsideEpdTile(StEpdGeom* epdgeo, FcsPhotonCandidat
     }*/
 }
 
-std::vector<Int_t> StMuFcsAnaEpdMatch::GetAdjacentEpdIds(Int_t pp,Int_t tt)
+std::vector<Int_t> StFwdAnaEpdMatch::GetAdjacentEpdIds(Int_t pp,Int_t tt)
 {
   std::vector<Int_t> adjtiles;
   //Start from top tile and go counterclockwise
@@ -535,7 +535,7 @@ std::vector<Int_t> StMuFcsAnaEpdMatch::GetAdjacentEpdIds(Int_t pp,Int_t tt)
   return adjtiles;
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileOuter(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileOuter(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 2<=tt && tt<=29 ){
@@ -549,7 +549,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileOuter(Int_t pp, Int_t tt, Int_t& newpp, Int_t
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileOuterCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileOuterCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 2<=tt && tt<=29 ){
@@ -570,7 +570,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileOuterCCW(Int_t pp, Int_t tt, Int_t& newpp, In
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 2<=tt && tt<=31 ){
@@ -589,7 +589,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& 
   }
 }
   
-void StMuFcsAnaEpdMatch::GetEpdTileInnerCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileInnerCCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 4<=tt && tt<=31 ){
@@ -610,7 +610,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileInnerCCW(Int_t pp, Int_t tt, Int_t& newpp, In
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileInner(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileInner(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 4<=tt && tt<=31 ){
@@ -624,7 +624,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileInner(Int_t pp, Int_t tt, Int_t& newpp, Int_t
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileInnerCW(Int_t pp, Int_t tt, Int_t &newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileInnerCW(Int_t pp, Int_t tt, Int_t &newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 4<=tt && tt<=31 ){
@@ -645,7 +645,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileInnerCW(Int_t pp, Int_t tt, Int_t &newpp, Int
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 2<=tt && tt<=31 ){
@@ -664,7 +664,7 @@ void StMuFcsAnaEpdMatch::GetEpdTileCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& n
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdTileOuterCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
+void StFwdAnaEpdMatch::GetEpdTileOuterCW(Int_t pp, Int_t tt, Int_t& newpp, Int_t& newtt)
 {
   newpp = 0; newtt=0;    //Catch all just in case
   if( 2<=tt && tt<=29 ){
@@ -685,14 +685,14 @@ void StMuFcsAnaEpdMatch::GetEpdTileOuterCW(Int_t pp, Int_t tt, Int_t& newpp, Int
   }
 }
 
-void StMuFcsAnaEpdMatch::GetEpdPPandTTFromId(Int_t id, Int_t& pp, Int_t& tt)
+void StFwdAnaEpdMatch::GetEpdPPandTTFromId(Int_t id, Int_t& pp, Int_t& tt)
 {
   pp = id/100;  //Automatically should floor to lowest positive integer in implicity conversion
   tt = id%100;  
 }
 
 
-TPolyLine* StMuFcsAnaEpdMatch::EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt)
+TPolyLine* StFwdAnaEpdMatch::EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt)
 {
   if( epdgeo==0 ){ return 0; }
   double x[5] = {0};
@@ -722,13 +722,13 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdTilePoly(StEpdGeom* epdgeo, short pp, short tt
 
 
 //Makes the 2x2 
-TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt)
+TPolyLine* StFwdAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt)
 {
   Int_t epdkey = 100*pp+tt;
   auto itr = mEpdCcwLines.find(epdkey);
   if( itr!=mEpdCcwLines.end() ){ return itr->second; }  //return if already exists in map
   
-  //std::vector<Int_t> adjaenttiles = StMuFcsAnaEpdMatch::GetAdjacentEpdIds(pp,tt);
+  //std::vector<Int_t> adjaenttiles = StFwdAnaEpdMatch::GetAdjacentEpdIds(pp,tt);
   //std::vector<TPolyLine*> alllines;
   //alllines.push_back(EpdTilePoly(pp,tt)); //Start with center tile
   TPolyLine* main = EpdTilePoly(epdgeo, pp,tt);
@@ -752,7 +752,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, sh
   yitr = yvals.begin();
   Int_t adjpp = 0;
   Int_t adjtt = 0;
-  StMuFcsAnaEpdMatch::GetEpdTileCCW(pp,tt,adjpp,adjtt);
+  StFwdAnaEpdMatch::GetEpdTileCCW(pp,tt,adjpp,adjtt);
   //std::cout << "CCW|adjpp:"<<adjpp << "|adjtt:"<<adjtt << std::endl;
   if( adjpp!=0 && adjtt!=0 ){
     //Know there is something in the counter clockwise direction
@@ -793,7 +793,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, sh
       std::cout << " + |x:"<< *xit << "|y:"<<*yit << std::endl;
       }*/
   }
-  StMuFcsAnaEpdMatch::GetEpdTileOuter(pp,tt,adjpp,adjtt);
+  StFwdAnaEpdMatch::GetEpdTileOuter(pp,tt,adjpp,adjtt);
   //std::cout << "Outer|adjpp:"<<adjpp << "|adjtt:"<<adjtt << std::endl;
   if( adjpp!=0 && adjtt!=0 ){
     //Erase point on this corner
@@ -833,7 +833,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, sh
       std::cout << " + |x:"<< *xit << "|y:"<<*yit << std::endl;
       }*/
   }
-  StMuFcsAnaEpdMatch::GetEpdTileOuterCCW(pp,tt,adjpp,adjtt);
+  StFwdAnaEpdMatch::GetEpdTileOuterCCW(pp,tt,adjpp,adjtt);
   //std::cout << "OuterCCW|adjpp:"<<adjpp << "|adjtt:"<<adjtt << std::endl;
   if( adjpp!=0 && adjtt!=0 ){
     //Know there is something in the outer CCW position
@@ -903,21 +903,21 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWOuterCorner(StEpdGeom* epdgeo, short pp, sh
   return newline;
 }
 
-TPolyLine* StMuFcsAnaEpdMatch::EpdCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt)
+TPolyLine* StFwdAnaEpdMatch::EpdCWOuterCorner(StEpdGeom* epdgeo, short pp, short tt)
 {
   int newtt = 0;
   int newpp = 0;
-  StMuFcsAnaEpdMatch::GetEpdTileCW(pp,tt,newpp,newtt);
+  StFwdAnaEpdMatch::GetEpdTileCW(pp,tt,newpp,newtt);
   //std::cout << "|newpp:"<<newpp << "|newtt:"<<newtt << std::endl;
   if( newtt!=0 && newpp!=0 ){ return EpdCCWOuterCorner(epdgeo, newpp,newtt); }
   else{ return 0; }
 }
 
-TPolyLine* StMuFcsAnaEpdMatch::EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt)
+TPolyLine* StFwdAnaEpdMatch::EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt)
 {
   int newtt = 0;
   int newpp = 0;
-  StMuFcsAnaEpdMatch::GetEpdTileInner(pp,tt,newpp,newtt);
+  StFwdAnaEpdMatch::GetEpdTileInner(pp,tt,newpp,newtt);
   //std::cout << "|pp:"<<pp << "|tt:"<<tt << "|newpp:"<<newpp << "|newtt:"<<newtt << std::endl;
   if( newpp!=0 && newtt!=0 ){ return EpdCCWOuterCorner(epdgeo,newpp,newtt); }
   else{
@@ -984,7 +984,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, sh
       bool CCWIstt1 = false;
       Int_t adjpp = 0;
       Int_t adjtt = 0;
-      StMuFcsAnaEpdMatch::GetEpdTileCCW(pp,tt,adjpp,adjtt);
+      StFwdAnaEpdMatch::GetEpdTileCCW(pp,tt,adjpp,adjtt);
       if( adjpp!=0 && adjtt!=0 ){
 	//Know there is something in the counter clockwise direction
 	TPolyLine* adjline = EpdTilePoly(epdgeo,adjpp,adjtt);
@@ -1040,11 +1040,11 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCCWInnerCorner(StEpdGeom* epdgeo, short pp, sh
   return 0;
 }
 
-TPolyLine* StMuFcsAnaEpdMatch::EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt)
+TPolyLine* StFwdAnaEpdMatch::EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, short tt)
 {
   int newtt = 0;
   int newpp = 0;
-  StMuFcsAnaEpdMatch::GetEpdTileInnerCW(pp,tt,newpp,newtt);
+  StFwdAnaEpdMatch::GetEpdTileInnerCW(pp,tt,newpp,newtt);
   //std::cout << "|pp:"<<pp << "|tt:"<<tt << "|newpp:"<<newpp << "|newtt:"<<newtt << std::endl;
   if( newpp!=0 && newtt!=0 ){ return EpdCCWOuterCorner(epdgeo,newpp,newtt); }
   else{
@@ -1110,7 +1110,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, sho
       yitr = yvals.end();
       Int_t adjpp = 0;
       Int_t adjtt = 0;
-      StMuFcsAnaEpdMatch::GetEpdTileCW(pp,tt,adjpp,adjtt);
+      StFwdAnaEpdMatch::GetEpdTileCW(pp,tt,adjpp,adjtt);
       if( adjpp!=0 && adjtt!=0 ){
 	//Know there is something in the clockwise direction and it is tt 1 with 5 corners based on adjacent mapping
 	TPolyLine* adjline = EpdTilePoly(epdgeo,adjpp,adjtt);
@@ -1157,7 +1157,7 @@ TPolyLine* StMuFcsAnaEpdMatch::EpdCWInnerCorner(StEpdGeom* epdgeo, short pp, sho
   return 0;
 }
 
-void StMuFcsAnaEpdMatch::PaintEpdProjections(TCanvas* canv, const char* savename)   const
+void StFwdAnaEpdMatch::PaintEpdProjections(TCanvas* canv, const char* savename)   const
 {
   canv->Clear();
   

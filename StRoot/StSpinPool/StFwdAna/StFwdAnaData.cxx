@@ -459,6 +459,11 @@ bool StFwdAnaData::isPhPairOn() const
   else{ return false; }
 }
 
+PolData* StFwdAnaData::getPolData()
+{
+  return getPolData(mEvtData->mFill);
+}
+
 PolData* StFwdAnaData::getPolData(Int_t fillnum)
 {
   PolData* poldat = 0;

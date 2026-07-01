@@ -15,28 +15,28 @@
   LOG
   @[Februrary 23, 2026] > First instance where relevant functionality was copied from #StMuFcsAnaFillClusPoint and modified to grab information from StEvent
   @[May 29, 2026] > Commented out printing for when I needed to test why the MuDsts did not contain the point-cluster associations
-
+  @[July 1, 2026] > Changed name from StMuFcsAnaCheckFillClusPoint to StFwdAnaCheckFillClusPoint
 */
 
 
-#ifndef STMUFCSANACHECKFILLCLUSPOINT_HH
-#define STMUFCSANACHECKFILLCLUSPOINT_HH
+#ifndef STFWDANA_STFWDANACHECKFILLCLUSPOINT_HH
+#define STFWDANA_STFWDANACHECKFILLCLUSPOINT_HH
 
 //#include "StEnumerations.h"
 //#include "StContainers.h"
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaCheckFillClusPoint : public StMuFcsVirtualAna
+class StFwdAnaCheckFillClusPoint : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaCheckFillClusPoint();
-  ~StMuFcsAnaCheckFillClusPoint();
+  StFwdAnaCheckFillClusPoint();
+  ~StFwdAnaCheckFillClusPoint();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
   
-  ClassDef(StMuFcsAnaCheckFillClusPoint,1)
+  ClassDef(StFwdAnaCheckFillClusPoint,1)
 };
 
 #endif

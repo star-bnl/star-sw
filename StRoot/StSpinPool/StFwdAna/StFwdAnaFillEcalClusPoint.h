@@ -14,23 +14,23 @@
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
   @[June 4, 2026] > Fixed error printing to print this class's name and not old 'StMuFcsTreeMaker'
-
+  @[July 1, 2026] > Changed name from StMuFcsAnaFillClusPoint to StFwdAnaFillEcalClusPoint
 */
 
 
-#ifndef STMUFCSANAFILLCLUSPOINT_HH
-#define STMUFCSANAFILLCLUSPOINT_HH
+#ifndef STFWDANA_STFWDANAFILLECALCLUSPOINT_HH
+#define STFWDANA_STFWDANAFILLECALCLUSPOINT_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaFillClusPoint : public StMuFcsVirtualAna
+class StFwdAnaFillEcalClusPoint : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaFillClusPoint();
-  ~StMuFcsAnaFillClusPoint();
+  StFwdAnaFillEcalClusPoint();
+  ~StFwdAnaFillEcalClusPoint();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
 
   void PaintHeatMap(TCanvas* canv, const char* savename) const;
   void PaintClusPointQa(TCanvas* canv, const char* savename)   const;
@@ -47,7 +47,7 @@ protected:
   TH1* mH1F_ClusterMult = 0;            ///< Raw cluster multiplicity in event
   TH1* mH1F_PointMult = 0;              ///< Raw point multiplicity in event
   
-  ClassDef(StMuFcsAnaFillClusPoint,1)
+  ClassDef(StFwdAnaFillEcalClusPoint,1)
 };
 
 #endif

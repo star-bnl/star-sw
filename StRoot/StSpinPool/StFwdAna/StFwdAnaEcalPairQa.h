@@ -10,23 +10,23 @@
 
   LOG
   @[June 8, 2026] > First instance where relevant functionality was copied from #StMuFcsAnaMakePairs
-
+  @[July 1, 2026] > Changed name from StMuFcsAnaMakePairsQa to StFwdAnaEcalPairQa and modified #DoMake() to grab pairs and photon candidates by calling methods in #StFwdAnaData
 */
 
 
-#ifndef STMUFCSANAMAKEPAIRSQA_HH
-#define STMUFCSANAMAKEPAIRSQA_HH
+#ifndef STFWDANA_STFWDANAECALPAIRQA_HH
+#define STFWDANA_STFWDANAECALPAIRQA_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaMakePairsQa : public StMuFcsVirtualAna
+class StFwdAnaEcalPairQa : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaMakePairsQa();
-  ~StMuFcsAnaMakePairsQa();
+  StFwdAnaEcalPairQa();
+  ~StFwdAnaEcalPairQa();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
 
   void PaintPairEnergy(TCanvas* canv, const char* savename="test_pairenergy.png") const;
   
@@ -37,7 +37,7 @@ protected:
   TH1* mH2F_ClusEnergy_ph1Vph2 = 0;               ///< Histogram of two clusters used in energy used in pair reconstruction
   TH1* mH2F_PointEnergy_ph1Vph2 = 0;              ///< Histogram of two points used in energy used in pair reconstruction
 
-  ClassDef(StMuFcsAnaMakePairsQa,1)
+  ClassDef(StFwdAnaEcalPairQa,1)
 };
 
 #endif

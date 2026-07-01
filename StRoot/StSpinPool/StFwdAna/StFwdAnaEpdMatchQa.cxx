@@ -14,15 +14,15 @@
 #include "StThreeVectorF.hh"
 #include "Stypes.h"
 
-#include "StMuFcsAnaEpdMatchQa.h"
+#include "StFwdAnaEpdMatchQa.h"
 
-ClassImp(StMuFcsAnaEpdMatchQa)
+ClassImp(StFwdAnaEpdMatchQa)
 
-StMuFcsAnaEpdMatchQa::StMuFcsAnaEpdMatchQa()
+StFwdAnaEpdMatchQa::StFwdAnaEpdMatchQa()
 {
 }
 
-StMuFcsAnaEpdMatchQa::~StMuFcsAnaEpdMatchQa()
+StFwdAnaEpdMatchQa::~StFwdAnaEpdMatchQa()
 {
   for( auto itr=mEpdTileMap.begin(); itr!=mEpdTileMap.end(); ++itr ){
     delete itr->second;
@@ -30,7 +30,7 @@ StMuFcsAnaEpdMatchQa::~StMuFcsAnaEpdMatchQa()
   mEpdTileMap.clear();
 }
 
-UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuFcsAnaData* data )
+UInt_t StFwdAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StFwdAnaData* data )
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -41,7 +41,7 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
       std::map<Int_t,TPolyLine*>::iterator epdhitit = mEpdTileMap.find(100*i_pp+i_tt);
       TPolyLine* polyline = 0;
       if( epdhitit==mEpdTileMap.end() ){
-	polyline = StMuFcsAnaEpdMatch::EpdTilePoly(data->epdGeom(),i_pp,i_tt);
+	polyline = StFwdAnaEpdMatch::EpdTilePoly(data->epdGeom(),i_pp,i_tt);
 	polyline = new TPolyLine(polyline->GetN(),polyline->GetX(),polyline->GetY());
 	std::pair<std::map<Int_t,TPolyLine*>::iterator,bool> itr = mEpdTileMap.emplace(100*i_pp+i_tt,polyline);
 	if( ! (itr.second) ){ std::cout << "Could not add polyline to map" << std::endl; }
@@ -58,7 +58,7 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
     }
   }
   
-  //std::cout << "StMuFcsAnaEpdMatchQa::LoadHists()" << std::endl;
+  //std::cout << "StFwdAnaEpdMatchQa::LoadHists()" << std::endl;
 
   //loaded += histman->AddH2F(file,mH2F_PointProj_nmipVdrtile,"H2F_PointProj_nmipVdrtile","nMIP vs. FCS projected point to EPD, polar distance to all other tiles;dR (cm);nmip", 200,-100,100, 70,0,7);
   //loaded += histman->AddH2F(file,mH2F_PointProj_nmipVdrhit,"H2F_PointProj_nmipVdrhit","nMIP vs. FCS projected point to EPD, polar distance to all other hits;dR (cm);nmip", 200,-100,100, 70,0,7);
@@ -144,7 +144,7 @@ UInt_t StMuFcsAnaEpdMatchQa::LoadHists( TFile* file, HistManager* histman, StMuF
 }
 
 //----------------------
-Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEpdMatchQa::DoMake(StFwdAnaData* anadata)
 {
   mH2F_EpdTilesNmip_yVx->Reset();
   mH2F_EpdTilesNmip_rVphi->Reset();
@@ -171,8 +171,8 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
 	//loop over epd hits for distance checking
 	Double_t rhit = sqrt(epdhitxyz[0]*epdhitxyz[0] + epdhitxyz[1]*epdhitxyz[1]);
 	Double_t phihit = TMath::ATan2(epdhitxyz[1],epdhitxyz[0]);
-	((TH2*)mH2F_EpdTilesNmip_yVx)->Fill( epdhitxyz[0], epdhitxyz[1], StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt)+1 ); //Scale up by 1 to see empty tiles
-	((TH2*)mH2F_EpdTilesNmip_rVphi)->Fill( phihit,rhit, StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt)+1 );              //Scale up by 1 to see empty tiles
+	((TH2*)mH2F_EpdTilesNmip_yVx)->Fill( epdhitxyz[0], epdhitxyz[1], StFwdAnaEpdMatch::epdNmip(i_pp,i_tt)+1 ); //Scale up by 1 to see empty tiles
+	((TH2*)mH2F_EpdTilesNmip_rVphi)->Fill( phihit,rhit, StFwdAnaEpdMatch::epdNmip(i_pp,i_tt)+1 );              //Scale up by 1 to see empty tiles
       }
     }
   }
@@ -183,7 +183,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
     epdhits = &(EpdColl->epdHits());
     nepdhits = epdhits->size();
   }
-  else{ LOG_ERROR << "StMuFcsAnaEpdMatchQa::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
+  else{ LOG_ERROR << "StFwdAnaEpdMatchQa::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
   StMuEpdHit* muepdhit = 0;
   StEpdHit* epdhit = 0;
   for(unsigned int i=0; i<nepdhits; ++i ){
@@ -228,7 +228,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
   Int_t n_pointnoepdproj_vcut = 0;
   for( Int_t iph = 0; iph<PhArr->GetEntriesFast(); ++iph ){
     //std::cout << "|iph:"<<iph << std::endl;
-    FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
     /*if( mCanvas!=0 ){
       mH1F_EpdAdjNmip->Reset();
@@ -237,24 +237,24 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
       const int MAX_ADJ = 8;
       int adj_pp[MAX_ADJ];
       int adj_tt[MAX_ADJ];
-      StMuFcsAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
-      StMuFcsAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
-      StMuFcsAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
-      StMuFcsAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
-      StMuFcsAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
-      StMuFcsAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
-      StMuFcsAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
-      StMuFcsAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
+      StFwdAnaEpdMatch::GetEpdTileOuter(    found_pp, found_tt, adj_pp[0], adj_tt[0] );
+      StFwdAnaEpdMatch::GetEpdTileOuterCCW( found_pp, found_tt, adj_pp[1], adj_tt[1] );
+      StFwdAnaEpdMatch::GetEpdTileCCW(      found_pp, found_tt, adj_pp[2], adj_tt[2] );
+      StFwdAnaEpdMatch::GetEpdTileInnerCCW( found_pp, found_tt, adj_pp[3], adj_tt[3] );
+      StFwdAnaEpdMatch::GetEpdTileInner(    found_pp, found_tt, adj_pp[4], adj_tt[4] );
+      StFwdAnaEpdMatch::GetEpdTileInnerCW(  found_pp, found_tt, adj_pp[5], adj_tt[5] );
+      StFwdAnaEpdMatch::GetEpdTileCW(       found_pp, found_tt, adj_pp[6], adj_tt[6] );
+      StFwdAnaEpdMatch::GetEpdTileOuterCW(  found_pp, found_tt, adj_pp[7], adj_tt[7] );
 
-      mH1F_EpdAdjNmip->SetBinContent(1, StMuFcsAnaEpdMatch::epdNmip(adj_pp[0],adj_tt[0]) );
-      mH1F_EpdAdjNmip->SetBinContent(2, StMuFcsAnaEpdMatch::epdNmip(adj_pp[1],adj_tt[1]) );
-      mH1F_EpdAdjNmip->SetBinContent(3, StMuFcsAnaEpdMatch::epdNmip(adj_pp[2],adj_tt[2]) );
-      mH1F_EpdAdjNmip->SetBinContent(4, StMuFcsAnaEpdMatch::epdNmip(adj_pp[3],adj_tt[3]) );
+      mH1F_EpdAdjNmip->SetBinContent(1, StFwdAnaEpdMatch::epdNmip(adj_pp[0],adj_tt[0]) );
+      mH1F_EpdAdjNmip->SetBinContent(2, StFwdAnaEpdMatch::epdNmip(adj_pp[1],adj_tt[1]) );
+      mH1F_EpdAdjNmip->SetBinContent(3, StFwdAnaEpdMatch::epdNmip(adj_pp[2],adj_tt[2]) );
+      mH1F_EpdAdjNmip->SetBinContent(4, StFwdAnaEpdMatch::epdNmip(adj_pp[3],adj_tt[3]) );
       mH1F_EpdAdjNmip->SetBinContent(5, ph->mEpdHitNmip[0]);
-      mH1F_EpdAdjNmip->SetBinContent(6, StMuFcsAnaEpdMatch::epdNmip(adj_pp[4],adj_tt[4]) );
-      mH1F_EpdAdjNmip->SetBinContent(7, StMuFcsAnaEpdMatch::epdNmip(adj_pp[5],adj_tt[5]) );
-      mH1F_EpdAdjNmip->SetBinContent(8, StMuFcsAnaEpdMatch::epdNmip(adj_pp[6],adj_tt[6]) );
-      mH1F_EpdAdjNmip->SetBinContent(9, StMuFcsAnaEpdMatch::epdNmip(adj_pp[7],adj_tt[7]) );
+      mH1F_EpdAdjNmip->SetBinContent(6, StFwdAnaEpdMatch::epdNmip(adj_pp[4],adj_tt[4]) );
+      mH1F_EpdAdjNmip->SetBinContent(7, StFwdAnaEpdMatch::epdNmip(adj_pp[5],adj_tt[5]) );
+      mH1F_EpdAdjNmip->SetBinContent(8, StFwdAnaEpdMatch::epdNmip(adj_pp[6],adj_tt[6]) );
+      mH1F_EpdAdjNmip->SetBinContent(9, StFwdAnaEpdMatch::epdNmip(adj_pp[7],adj_tt[7]) );
 
       std::stringstream ss_savename;
       ss_savename << "FcsAna_EpdAdjPh_Evt"<<anadata->getEventNum()<< "_Ph"<<iph << ".png";
@@ -263,7 +263,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
       mCanvas->Print(ss_savename.str().c_str());
       }*/
     
-    std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+    std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     
     //Check how many clusters/points didn't have a match
     if( ph->mEpdMatch[0]==0 ){
@@ -366,7 +366,7 @@ Int_t StMuFcsAnaEpdMatchQa::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaEpdMatchQa::PaintBadProjections(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintBadProjections(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
 
@@ -412,7 +412,7 @@ void StMuFcsAnaEpdMatchQa::PaintBadProjections(TCanvas* canv, const char* savena
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintPointEpdDistQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -433,7 +433,7 @@ void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQa(TCanvas* canv, const char* savena
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQaProj(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintPointEpdDistQaProj(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -470,7 +470,7 @@ void StMuFcsAnaEpdMatchQa::PaintPointEpdDistQaProj(TCanvas* canv, const char* sa
   
 }
 
-void StMuFcsAnaEpdMatchQa::PaintEpdTileHitDistQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintEpdTileHitDistQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
 
@@ -494,7 +494,7 @@ void StMuFcsAnaEpdMatchQa::PaintEpdTileHitDistQa(TCanvas* canv, const char* save
   canv->Print(savename);
 }
 
-Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, TCanvas* canvas, const char* savename)
+Int_t StFwdAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StFwdAnaData* anadata, TCanvas* canvas, const char* savename)
 {
   if( anadata==0 ){ return 0; }
 
@@ -534,7 +534,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, T
       TPolyLine* polyline = 0;
       TPolyLine* polyline_rVphi = 0;
       if( epdhitit==mEpdTileMap.end() ){
-	polyline = StMuFcsAnaEpdMatch::EpdTilePoly(EpdGeom,i_pp,i_tt);
+	polyline = StFwdAnaEpdMatch::EpdTilePoly(EpdGeom,i_pp,i_tt);
 	Int_t nvals = polyline->GetN();
 	Double_t* xvals = polyline->GetX();
 	Double_t* yvals = polyline->GetY();
@@ -569,7 +569,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, T
   std::vector<int> EpdTilesToDraw;
   for( Int_t iph = 0; iph<PhArr->GetEntriesFast(); ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
-    FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return 0; }
     //Draw all "matched" tiles
     for( short i=1; i<5; ++i ){
@@ -582,10 +582,10 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, T
 	else{ itr->second->SetLineColor(kBlue); }
       }
     }
-    std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+    std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     //Checking with BBC vertex
-    //std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,anadata->getEvtInfo()->mBbcVz);
-    //StMuFcsAnaEpdMatch::CheckInsideEpdTile( EpdGeom, ph, epdproj.at(0), epdproj.at(1) );
+    //std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,anadata->getEvtInfo()->mBbcVz);
+    //StFwdAnaEpdMatch::CheckInsideEpdTile( EpdGeom, ph, epdproj.at(0), epdproj.at(1) );
     //std::cout << "|i:"<<iph <<"|x:"<<epdproj.at(0) << "|y:"<<epdproj.at(1) << std::endl;
     Double_t rphoton = sqrt( (epdproj.at(0)*epdproj.at(0)) + (epdproj.at(1)*epdproj.at(1)) );
     Double_t phiphoton = TMath::ATan2(epdproj.at(1),epdproj.at(0));
@@ -656,7 +656,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdTileHitDistWithFcs(StMuFcsAnaData* anadata, T
   return 1;
 }
 
-void StMuFcsAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -677,7 +677,7 @@ void StMuFcsAnaEpdMatchQa::PaintPointEpdDist(TCanvas* canv, const char* savename
   delete h1f_subtract;
 }
 
-void StMuFcsAnaEpdMatchQa::PaintProjEpdAdjQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintProjEpdAdjQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,4);
@@ -710,7 +710,7 @@ void StMuFcsAnaEpdMatchQa::PaintProjEpdAdjQa(TCanvas* canv, const char* savename
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdMatchQa::PaintFoundChargeId(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdMatchQa::PaintFoundChargeId(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -728,7 +728,7 @@ void StMuFcsAnaEpdMatchQa::PaintFoundChargeId(TCanvas* canv, const char* savenam
   canv->Print(savename);
 }
 
-Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* canvas, const char* savename)
+Int_t StFwdAnaEpdMatchQa::DrawEpdProjection(StFwdAnaData* anadata, TCanvas* canvas, const char* savename)
 {
   if( anadata==0 ){ return 0; }
 
@@ -757,7 +757,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* 
       std::map<Int_t,TPolyLine*>::iterator epdhitit = mEpdTileMap.find(100*i_pp+i_tt);
       TPolyLine* polyline = 0;
       if( epdhitit==mEpdTileMap.end() ){
-	polyline = StMuFcsAnaEpdMatch::EpdTilePoly(EpdGeom,i_pp,i_tt);
+	polyline = StFwdAnaEpdMatch::EpdTilePoly(EpdGeom,i_pp,i_tt);
 	std::pair<std::map<Int_t,TPolyLine*>::iterator,bool> itr = mEpdTileMap.emplace(100*i_pp+i_tt,polyline);
 	if( ! (itr.second) ){ std::cout << "Could not add polyline to map" << std::endl; }
       }
@@ -767,7 +767,7 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* 
       polyline->SetLineWidth(1);
       polyline->SetLineColor(kBlack);
       polyline->SetFillColorAlpha(kWhite,0);
-      float nmip = StMuFcsAnaEpdMatch::epdNmip(i_pp,i_tt);
+      float nmip = StFwdAnaEpdMatch::epdNmip(i_pp,i_tt);
       if( 0==nmip ){
 	polyline->SetFillColorAlpha(kWhite,0);
       }
@@ -815,8 +815,8 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* 
   }
   */ 
   /*std::map<Int_t,bool> fcsepdhits;
-  for( unsigned int ihit=mMuFcsColl->indexOfFirstHit(4); ihit<mMuFcsColl->numberOfHits(); ++ihit ){
-    StMuFcsHit* fcshit = mMuFcsColl->getHit(ihit);
+  for( unsigned int ihit=mFwdColl->indexOfFirstHit(4); ihit<mFwdColl->numberOfHits(); ++ihit ){
+    StFwdHit* fcshit = mFwdColl->getHit(ihit);
     unsigned short det = fcshit->detectorId();
     unsigned short id = fcshit->id();
     int pp=0;
@@ -833,9 +833,9 @@ Int_t StMuFcsAnaEpdMatchQa::DrawEpdProjection(StMuFcsAnaData* anadata, TCanvas* 
   std::vector<TEllipse*> FcsPointEllipse;
   for( Int_t iph = 0; iph<PhArr->GetEntriesFast(); ++iph ){
     //std::cout << "|iph:"<<iph << "|iphnew:"<<iph-noldhits << std::endl;
-    FcsPhotonCandidate* ph = (FcsPhotonCandidate*) PhArr->UncheckedAt(iph);
+    StFcsPhotonCandidate* ph = (StFcsPhotonCandidate*) PhArr->UncheckedAt(iph);
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return 0; }
-    std::vector<Double_t> epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+    std::vector<Double_t> epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     //std::cout << "|i:"<<iph <<"|x:"<<epdproj.at(0) << "|y:"<<epdproj.at(1) << std::endl;
     TMarker* fcsmarker = 0;
     TEllipse* ellipse = 0;

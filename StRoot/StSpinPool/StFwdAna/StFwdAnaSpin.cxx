@@ -1,24 +1,24 @@
-#include "StMuFcsAnaSpin.h"
+#include "StFwdAnaSpin.h"
 
-ClassImp(StMuFcsAnaSpin)
+ClassImp(StFwdAnaSpin)
 
-StMuFcsAnaSpin::StMuFcsAnaSpin()
+StFwdAnaSpin::StFwdAnaSpin()
 {
 }
 
-StMuFcsAnaSpin::~StMuFcsAnaSpin()
+StFwdAnaSpin::~StFwdAnaSpin()
 {
 }
 
-UInt_t StMuFcsAnaSpin::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaSpin::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   return 0;
 }
 
-Int_t StMuFcsAnaSpin::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaSpin::DoMake(StFwdAnaData* anadata)
 {
   //Local copy of needed variables to make things easier
-  FcsEventInfo* EvtInfo = anadata->getEvtInfo();
+  StFwdDataEvent* EvtData = anadata->getEvtData();
   StSpinDbMaker* SpinDbMkr = anadata->spinDbMkr();
   const StTriggerData* TrigData = anadata->trigData();
   //Spin information
@@ -31,7 +31,7 @@ Int_t StMuFcsAnaSpin::DoMake(StMuFcsAnaData* anadata)
     else{ EvtInfo->mSpin = 10; }                               //Bits 1010 is B- and Y-
   }
   else{
-    EvtInfo->mSpin = SpinDbMkr->spin4usingBX7( TrigData->bunchId7Bit() ); //This is also source polarization
+    EvtInfo->mSpin = SpinDbMkr->spin4usingBX7( EvtData->mBx7Id ); //This is also source polarization
   }
   return kStOk;
 }

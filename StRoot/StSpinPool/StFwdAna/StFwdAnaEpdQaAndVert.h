@@ -20,12 +20,13 @@
   @[September 10, 2025] > Implemented an adjacency map for EPD tiles
 
   @[January 22, 2026] > Copied from #StMuEpdRun22QaMaker and modified for this analysis
+  @[July 1, 2026] > Changed name from StMuFcsAnaEpdQaAndVert to StFwdAnaEpdQaAndVert
   
   Do DEP calib of EPD chs, bunch xing analysis for spin. Change some plots so they use logz and move/remove the stats box for some of hte 2d histograms when plotting. Show on the fly EPD MIP peak locations and valleys
  */
 
-#ifndef STMUFCSANAEPDQAANDVERT_HH
-#define STMUFCSANAEPDQAANDVERT_HH
+#ifndef STFWDANA_STFWDANAEPDQAANDVERT_HH
+#define STFWDANA_STFWDANAEPDQAANDVERT_HH
 
 //C/C++ Headers
 // #include <iostream>
@@ -63,18 +64,18 @@
 // #include "StEpdHitMaker/StEpdHitMaker.h"
 
 //Custom headers in this folder
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 //#include "StMuFcsRun22QaMaker.h"   //For MakeGraph
 
 
-class StMuFcsAnaEpdQaAndVert : public StMuFcsVirtualAna
+class StFwdAnaEpdQaAndVert : public StFwdAnaVirtual
 {
  public:
-  StMuFcsAnaEpdQaAndVert();
-  ~StMuFcsAnaEpdQaAndVert();
+  StFwdAnaEpdQaAndVert();
+  ~StFwdAnaEpdQaAndVert();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
   
   void setEpdTacAdcOn(bool value=true) { mEpdTacAdcOn = value; }
 
@@ -139,7 +140,7 @@ private:
 
   double mEpdScale = 15.6;             ///< picoSecond/TAC for EPD
 
-  ClassDef(StMuFcsAnaEpdQaAndVert,1)
+  ClassDef(StFwdAnaEpdQaAndVert,1)
 
 };
 

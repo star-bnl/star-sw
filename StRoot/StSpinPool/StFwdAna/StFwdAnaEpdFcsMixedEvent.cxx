@@ -14,26 +14,26 @@
 #include "StThreeVectorF.hh"
 #include "Stypes.h"
 
-#include "StMuFcsAnaEpdFcsMixedEvent.h"
+#include "StFwdAnaEpdFcsMixedEvent.h"
 
-ClassImp(StMuFcsAnaEpdFcsMixedEvent)
+ClassImp(StFwdAnaEpdFcsMixedEvent)
 
-StMuFcsAnaEpdFcsMixedEvent::StMuFcsAnaEpdFcsMixedEvent()
+StFwdAnaEpdFcsMixedEvent::StFwdAnaEpdFcsMixedEvent()
 {
-  mMixedPhArr  = new TClonesArray("FcsPhotonCandidate");
+  mMixedPhArr  = new TClonesArray("StFcsPhotonCandidate");
 }
 
-StMuFcsAnaEpdFcsMixedEvent::~StMuFcsAnaEpdFcsMixedEvent()
+StFwdAnaEpdFcsMixedEvent::~StFwdAnaEpdFcsMixedEvent()
 {
   mMixedPhArr->Clear("C");
   delete mMixedPhArr;
 }
 
-UInt_t StMuFcsAnaEpdFcsMixedEvent::LoadHists( TFile* file, HistManager* histman, StMuFcsAnaData* data )
+UInt_t StFwdAnaEpdFcsMixedEvent::LoadHists( TFile* file, HistManager* histman, StFwdAnaData* data )
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
-  //std::cout << "StMuFcsAnaEpdFcsMixedEvent::LoadHists()" << std::endl;
+  //std::cout << "StFwdAnaEpdFcsMixedEvent::LoadHists()" << std::endl;
 
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldx,"H2F_PointProj_nmipValldx","nMIP vs. FCS projected point to EPD x minus EPD x of all hits;dX (cm);nmip", 200,-100,100, 70,0,7);
   loaded += histman->AddH2F(file,mH2F_PointProj_nmipValldy,"H2F_PointProj_nmipValldy","nMIP vs. FCS projected point to EPD y minus EPD y of all hits;dY (cm);nmip", 200,-100,100, 70,0,7);
@@ -58,7 +58,7 @@ UInt_t StMuFcsAnaEpdFcsMixedEvent::LoadHists( TFile* file, HistManager* histman,
 }
 
 //----------------------
-Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaEpdFcsMixedEvent::DoMake(StFwdAnaData* anadata)
 {
   //std::cout << this->ClassName() << "|Start Make" << std::endl;
   TClonesArray* PhArr = anadata->getPhArr();
@@ -79,7 +79,7 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
     epdhits = &(EpdColl->epdHits());
     nepdhits = epdhits->size();
   }
-  else{ LOG_ERROR << "StMuFcsAnaEpdFcsMixedEvent::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
+  else{ LOG_ERROR << "StFwdAnaEpdFcsMixedEvent::DoMake() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
 
   //std::cout << this->ClassName() << "|Start:Make_CheckAndSetEpdHit" << std::endl;
   //Check photon candidates if they have any hits in the EPD. Use a separate loop so that this information could be used in the pi0 checking loop if needed. In future may also want to check against FCS preshower (EPD) hits
@@ -100,14 +100,14 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
     if( ph==0 ){ std::cout << "==========I=CANNOT=BE=ZERO==========" << std::endl; return kStErr; }
     std::vector<Double_t> epdproj;
     if( iph>=noldhits ){
-      epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
+      epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,usevertex);
     }
     else{
       //iph<noldhits
-      epdproj = StMuFcsAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,mOldVertex);
-      //StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Do this check for 
+      epdproj = StFwdAnaData::ProjectToEpd(ph->mX,ph->mY,ph->mZ,mOldVertex);
+      //StFwdAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Do this check for 
     }
-    //This will be taken care of already if StMuFcsAnaEpdMatch is called before this Ana class
+    //This will be taken care of already if StFwdAnaEpdMatch is called before this Ana class
     //if( iph>=noldhits ){
       //Only fill for the points from current event
       //mH2F_EpdProjHitMap->Fill( epdproj.at(0),epdproj.at(1) );
@@ -116,7 +116,7 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
       //std::cout << " + |epdx:"<<epdproj.at(0) << "|epdy:"<<epdproj.at(1) << "|epdz:"<<epdproj.at(2) << std::endl;
       //std::cout << " ** |iph:"<< iph-noldhits << std::endl;
       //Only need to do this for the new points
-      //StMuFcsAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
+      //StFwdAnaEpdMatch::CheckInsideEpdTile(EpdGeom, ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
       //CheckInsideEpdTile(ph,epdproj.at(0),epdproj.at(1));  //Function that will check which EPD tiles photon candidate overlaps with and sets the appropriate variables for it
       /*
       if( ph->mEpdMatch[0]==0 ){ //If no intersection found it would be -1 so now check all the CCW adjacencies
@@ -231,7 +231,7 @@ Int_t StMuFcsAnaEpdFcsMixedEvent::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-void StMuFcsAnaEpdFcsMixedEvent::PaintEpdAllDistQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdFcsMixedEvent::PaintEpdAllDistQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -258,7 +258,7 @@ void StMuFcsAnaEpdFcsMixedEvent::PaintEpdAllDistQa(TCanvas* canv, const char* sa
   canv->Print(savename);
 }
 
-void StMuFcsAnaEpdFcsMixedEvent::PaintEpdDistAnaQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdFcsMixedEvent::PaintEpdDistAnaQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -289,7 +289,7 @@ void StMuFcsAnaEpdFcsMixedEvent::PaintEpdDistAnaQa(TCanvas* canv, const char* sa
   
 }
 
-void StMuFcsAnaEpdFcsMixedEvent::PaintEpdAllDistQaLowMult(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdFcsMixedEvent::PaintEpdAllDistQaLowMult(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -336,7 +336,7 @@ void StMuFcsAnaEpdFcsMixedEvent::PaintEpdAllDistQaLowMult(TCanvas* canv, const c
 
 }
 
-void StMuFcsAnaEpdFcsMixedEvent::PaintEpdTileDistQa(TCanvas* canv, const char* savename) const
+void StFwdAnaEpdFcsMixedEvent::PaintEpdTileDistQa(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   canv->Divide(3,2);

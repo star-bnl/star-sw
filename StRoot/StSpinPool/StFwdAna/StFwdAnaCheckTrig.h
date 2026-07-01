@@ -13,30 +13,30 @@
 
   LOG
   @[January 14, 2026] > First instance where relevant functionality was copied from #StMuFcsTreeMaker
-
+  @[July 1, 2026] > Changed name from StMuFcsAnaCheckTrig to StFwdAnaCheckTrig
 */
 
 
 #ifndef STMUFCSANACHECKTRIG_HH
 #define STMUFCSANACHECKTRIG_HH
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 
-class StMuFcsAnaCheckTrig : public StMuFcsVirtualAna
+class StFwdAnaCheckTrig : public StFwdAnaVirtual
 {
 public:
-  StMuFcsAnaCheckTrig();
-  ~StMuFcsAnaCheckTrig();
+  StFwdAnaCheckTrig();
+  ~StFwdAnaCheckTrig();
 
-  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data);
-  virtual Int_t DoMake(StMuFcsAnaData* mufcsdata);
+  virtual UInt_t LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata);
+  virtual Int_t DoMake(StFwdAnaData* anadata);
 
   void PaintMatchTriggers(TCanvas* canvas, const char* savename) const;
   
 protected:
   TH1* mH1F_MatchFcsTriggers = 0;               ///< Triggers used in analysis
   
-  ClassDef(StMuFcsAnaCheckTrig,1)
+  ClassDef(StFwdAnaCheckTrig,1)
 };
 
 #endif

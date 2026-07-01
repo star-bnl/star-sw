@@ -18,6 +18,7 @@
   @[January 21, 2026] > Copied members of *StFcsRun22TriggerMap* to here so don't need an extra pointer. Limited number of pointers to only the main relevant ones and the rest is accessed through getter functions
   @[June 8, 2026] > Changed #FcsPi0Candidate to #FcsPairCandidate, added #mEvent as an internal event counter
   @[June 30, 2026] > Changed name from StMuFcsAnaData to StFwdAnaData to be consistent with new naming scheme which is more general for STAR forward analysis software. Changed the related StMuFcs* names to the new StFwdData* names. Moved #mNTrig, #mTriggers, and #mUseVertex to #StFwdDataEvent. Changed #mEvtInfo to #mEvtData to be consistent with name change of FcsEventInfo to StFwdDataEvent. Changed mPi0Tree to #mDataTree and changed "Pi0" branch name to "Pair"
+  @[July 1, 2026] > Added #getPolData() with no arguments which returns the polarization data based on the fill number in #StFwdDataEvent, made some getter functions const. Made variables that cut on energy, vertex, etc protected so they must be set and gotten with functions
 */
 
 
@@ -133,10 +134,10 @@ public:
 
   void resetEvent(); ///< Reset those variables relevant to the next event
 
-  Double_t vertexCutLow(){ return mVertexCutLow; }
-  Double_t vertexCutHigh(){ return mVertexCutHigh; }
-  Double_t enCut(){ return mEnCut; }
-  Double_t epdNmipCut(){ return mEpdNmipCut; }
+  Double_t vertexCutLow()const{ return mVertexCutLow; }
+  Double_t vertexCutHigh()const{ return mVertexCutHigh; }
+  Double_t enCut()const{ return mEnCut; }
+  Double_t epdNmipCut()const{ return mEpdNmipCut; }
 
   void setVertexCutLow(Double_t vlow){  mVertexCutLow = vlow;  }
   void setVertexCutHigh(Double_t vhigh){ mVertexCutHigh = vhigh; }
@@ -145,7 +146,7 @@ public:
   
   void setRandomSeed(ULong_t seed){ mSpinRndm.SetSeed(seed); }
 
-  UInt_t getRandomSeed(){ return mSpinRndm.GetSeed(); }
+  UInt_t getRandomSeed()const{ return mSpinRndm.GetSeed(); }
 
   void setTreeOnBit(UShort_t bitmap){ mTreeOnBitMap = bitmap; }
   void setEventBit(bool val=1);
@@ -157,8 +158,9 @@ public:
   bool isPhotonOn() const;
   bool isPhPairOn() const;
 
-  PolData* getPolData(Int_t fillnum);
-  Double_t randomNum(){ return mSpinRndm.Rndm(); }  //random number between 0 and 1
+  PolData* getPolData() const;                            //Get polarization data based on fill number in #StFwdDataEvent
+  PolData* getPolData(Int_t fillnum) const;               //Get polarization data based on specific fill number
+  Double_t randomNum()const { return mSpinRndm.Rndm(); }  //random number between 0 and 1
   
   TTree* getPi0Tree()const{ return mDataTree; }
 
@@ -187,7 +189,7 @@ public:
   //#endif
   void AddTrig(const char* trigname ){ mTargetTrig.emplace_back(trigname); }  //function to set trigger ids to use. Does not check for repetition so need to be a good user
   void setIgnoreTrig(bool value=true){ mIgnoreTrig = value; }
-  bool ignoreTrig(){ return mIgnoreTrig; }
+  bool ignoreTrig()const{ return mIgnoreTrig; }
   
   int sizeOfFcsTriggers() const;                                          ///< Return size of #mListOfFcsTriggers
   const char* fcsTriggerName(int idx) const;                              ///< Return the trigger name in #mListOfFcsTriggers for a given index (#idx)
@@ -197,11 +199,6 @@ public:
 
   std::vector<std::string> mTargetTrig;     ///< For Target Trigger ID
   
-  Double_t mVertexCutLow = -150.0;          ///< (-150.0) Variables for z vertex cuts at low end in cm
-  Double_t mVertexCutHigh = 150.0;          ///< (150.0) Variables for z vertex cuts at high end in cm
-  Double_t mEnCut = 1.0;                    ///< (1.0) Energy Cut for #StFcsPhotonCandidates
-  Double_t mEpdNmipCut = 0.4;               ///< (0.4) Cut on EPD nmip to classify cluster or point as charged or uncharged
-
   //bool mReadMuDst;   ///< flag to check if reading from mudst or not (This can be used to turn off populating event info)
   //bool mReadSim;     ///< flag to check if reading mudst from simulations
   bool mValidTrigFound = false;       ///< (false) Found a trigger that matches the ones specified or #mIgnoreTrig is on
@@ -215,6 +212,11 @@ public:
 
 protected:
   ULong_t mEvent = 0;                       ///< Internal event counter that can be used to tag and keep track of events
+
+  Double_t mVertexCutLow = -150.0;          ///< (-150.0) Variables for z vertex cuts at low end in cm
+  Double_t mVertexCutHigh = 150.0;          ///< (150.0) Variables for z vertex cuts at high end in cm
+  Double_t mEnCut = 1.0;                    ///< (1.0) Energy Cut for #StFcsPhotonCandidates
+  Double_t mEpdNmipCut = 0.4;               ///< (0.4) Cut on EPD nmip to classify cluster or point as charged or uncharged
   
   bool mIgnoreTrig = false;                 ///< (false) flag to check if ignoring triggers or not
   UShort_t mTreeOnBitMap = 0x7;             ///< (0x7) Turn on or off branches in the pi0 tree. first bit is events, second bit is photon branch, third bit is pi0 branch. Turn on all branches by default

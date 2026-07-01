@@ -14,13 +14,13 @@
 #include "Stypes.h"
 #include "StBTofHeader.h"
 
-#include "StMuFcsAnaRun22Qa.h"
+#include "StFwdAnaFcsRun22Qa.h"
 
 
-ClassImp(StMuFcsAnaRun22Qa)
+ClassImp(StFwdAnaFcsRun22Qa)
 
 
-StMuFcsAnaRun22Qa::StMuFcsAnaRun22Qa()
+StFwdAnaFcsRun22Qa::StFwdAnaFcsRun22Qa()
 {
   memset(mH2F_Hit_adcVtb,0,sizeof(mH2F_Hit_adcVtb));
   memset(mH2F_Hit_enVid,0,sizeof(mH2F_Hit_enVid));
@@ -60,7 +60,7 @@ StMuFcsAnaRun22Qa::StMuFcsAnaRun22Qa()
   //memset(mSpinPattern,0,sizeof(mSpinPattern));
 }
 
-StMuFcsAnaRun22Qa::~StMuFcsAnaRun22Qa()
+StFwdAnaFcsRun22Qa::~StFwdAnaFcsRun22Qa()
 {
   for( UShort_t i=0; i<kFcsNDet; ++i ){
     delete mH2F_Hit_adcVtb[i];
@@ -80,7 +80,7 @@ StMuFcsAnaRun22Qa::~StMuFcsAnaRun22Qa()
   }
 }
 
-UInt_t StMuFcsAnaRun22Qa::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* anadata)
+UInt_t StFwdAnaFcsRun22Qa::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* anadata)
 {
   if( histman==0 ){ return 0; }
   UInt_t loaded = 0;
@@ -221,7 +221,7 @@ UInt_t StMuFcsAnaRun22Qa::LoadHists(TFile* file, HistManager* histman, StMuFcsAn
   return loaded;
 }
 
-Int_t StMuFcsAnaRun22Qa::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaFcsRun22Qa::DoMake(StFwdAnaData* anadata)
 {
   // Int_t infostatus = this->FillEventInfo(anadata);
   // switch( infostatus ){
@@ -254,7 +254,7 @@ Int_t StMuFcsAnaRun22Qa::DoMake(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-Int_t StMuFcsAnaRun22Qa::FillEventInfo(StMuFcsAnaData* anadata)
+Int_t StFwdAnaFcsRun22Qa::FillEventInfo(StFwdAnaData* anadata)
 {
   //Local copy of needed variables to make things easier
   StMuEvent* MuEvent = anadata->muEvent();
@@ -288,7 +288,7 @@ Int_t StMuFcsAnaRun22Qa::FillEventInfo(StMuFcsAnaData* anadata)
   
   //Trigger Information
   StMuTriggerIdCollection* TrigMuColl = &(MuEvent->triggerIdCollection());
-  if( !TrigMuColl ){ LOG_ERROR <<"StMuFcsAnaRun22Qa::FillEventInfo - !TrigMuColl" <<endl; return kStErr; }
+  if( !TrigMuColl ){ LOG_ERROR <<"StFwdAnaFcsRun22Qa::FillEventInfo - !TrigMuColl" <<endl; return kStErr; }
   const StTriggerId& trgIDs = TrigMuColl->nominal();
   Int_t ntrig = trgIDs.triggerIds().size();
   for( Int_t i=0; i<ntrig; ++i ){
@@ -300,16 +300,16 @@ Int_t StMuFcsAnaRun22Qa::FillEventInfo(StMuFcsAnaData* anadata)
   return kStOk;
 }
 
-Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
+Int_t StFwdAnaFcsRun22Qa::FillFcsInfo(StFwdAnaData* anadata)
 {
-  //std::cout << "========== StMuFcsAnaRun22Qa::FillFcsInfo Start ==========" << std::endl;
+  //std::cout << "========== StFwdAnaFcsRun22Qa::FillFcsInfo Start ==========" << std::endl;
   //std::cout << "Filled Event" << std::endl;
   TClonesArray* MuEpdHits = 0;
   StEpdCollection* EpdColl = 0;
   anadata->epdColl(MuEpdHits,EpdColl);
 
   StMuFcsCollection* MuFcsColl = anadata->fcsColl();
-  if (!MuFcsColl) { LOG_ERROR << "StMuFcsAnaRun22Qa::FillFcsInfo did not find MuFcsCollection" << endm; return kStErr; }
+  if (!MuFcsColl) { LOG_ERROR << "StFwdAnaFcsRun22Qa::FillFcsInfo did not find MuFcsCollection" << endm; return kStErr; }
   StFcsDb* FcsDb = anadata->fcsDb();
   Double_t EnCut = anadata->mEnCut;
   
@@ -335,11 +335,11 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
   double esum[3] = {0,0,0}; //total energy deposited from all hits in the Ecal, Hcal, and Pres respectively
 
   TClonesArray* hits = MuFcsColl->getHitArray();
-  if( hits==0 ){ LOG_INFO << "StMuFcsAnaRun22Qa::FillFcsInfo - No FCS hits" << endm; }
+  if( hits==0 ){ LOG_INFO << "StFwdAnaFcsRun22Qa::FillFcsInfo - No FCS hits" << endm; }
   TClonesArray* clusters = MuFcsColl->getClusterArray();
-  if( clusters==0 ){ LOG_INFO << "StMuFcsAnaRun22Qa::FillFcsInfo - No FCS clusters" << endm; }
+  if( clusters==0 ){ LOG_INFO << "StFwdAnaFcsRun22Qa::FillFcsInfo - No FCS clusters" << endm; }
   TClonesArray* points = MuFcsColl->getPointArray();
-  if( points==0 ){ LOG_INFO << "StMuFcsAnaRun22Qa::FillFcsInfo - No FCS points" << endm; }
+  if( points==0 ){ LOG_INFO << "StFwdAnaFcsRun22Qa::FillFcsInfo - No FCS points" << endm; }
   
   //std::cout << "|hits:"<<hits << "|clusters:"<<clusters << "|points:"<<points << std::endl;
     
@@ -385,7 +385,7 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
 	      epdhits = &(EpdColl->epdHits());
 	      nepdhits = epdhits->size();
 	    }
-	    else{ LOG_ERROR << "StMuFcsAnaRun22Qa::FillFcsInfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
+	    else{ LOG_ERROR << "StFwdAnaFcsRun22Qa::FillFcsInfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
 	    
 	    int fcspp; int fcstt;
 	    FcsDb->getEPDfromId(idet,hit_id,fcspp,fcstt);
@@ -563,7 +563,7 @@ Int_t StMuFcsAnaRun22Qa::FillFcsInfo(StMuFcsAnaData* anadata)
   return kStOk;
 }
 /*
-void StMuFcsAnaRun22Qa::DrawEventInfo(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawEventInfo(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(4,3);
@@ -585,7 +585,7 @@ void StMuFcsAnaRun22Qa::DrawEventInfo(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 */
-void StMuFcsAnaRun22Qa::DrawTrigger(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawTrigger(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->cd();
@@ -597,14 +597,14 @@ void StMuFcsAnaRun22Qa::DrawTrigger(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawBxId(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawBxId(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   mH2F_BxId_7V48->Draw("colz");
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawBx7Bx48Ana(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawBx7Bx48Ana(TCanvas* canv, const char* savename)
 {
   TH1* out_h1_bx7 = 0;
   TH1* out_h1_bx48 = 0;
@@ -642,7 +642,7 @@ void StMuFcsAnaRun22Qa::DrawBx7Bx48Ana(TCanvas* canv, const char* savename)
   mH2F_BxId_7V48->SetStats(1);  
 }
 
-void StMuFcsAnaRun22Qa::DrawSpinInfo(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawSpinInfo(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,1);
@@ -655,7 +655,7 @@ void StMuFcsAnaRun22Qa::DrawSpinInfo(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsHitSingle(TCanvas* canv, unsigned int det, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsHitSingle(TCanvas* canv, unsigned int det, const char* savename)
 {
   canv->Clear();
   canv->Divide(3,2);
@@ -672,7 +672,7 @@ void StMuFcsAnaRun22Qa::DrawFcsHitSingle(TCanvas* canv, unsigned int det, const 
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsClusterSingle(TCanvas* canv, unsigned int det, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsClusterSingle(TCanvas* canv, unsigned int det, const char* savename)
 {
   canv->Clear();
   canv->Divide(3,3);
@@ -697,7 +697,7 @@ void StMuFcsAnaRun22Qa::DrawFcsClusterSingle(TCanvas* canv, unsigned int det, co
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsPointSingle(TCanvas* canv, unsigned int det, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsPointSingle(TCanvas* canv, unsigned int det, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -712,7 +712,7 @@ void StMuFcsAnaRun22Qa::DrawFcsPointSingle(TCanvas* canv, unsigned int det, cons
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsTotalE(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsTotalE(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -725,7 +725,7 @@ void StMuFcsAnaRun22Qa::DrawFcsTotalE(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawAdcVTb(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawAdcVTb(TCanvas* canv, const char* savename)
 {
   if( mFcsAdcTbOn ){
     canv->Clear();
@@ -741,7 +741,7 @@ void StMuFcsAnaRun22Qa::DrawAdcVTb(TCanvas* canv, const char* savename)
   }
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsHitQa(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsHitQa(TCanvas* canv, const char* savename)
 {
   for( UShort_t i=0; i<kFcsNDet; ++i ){
     canv->Clear();
@@ -772,7 +772,7 @@ void StMuFcsAnaRun22Qa::DrawFcsHitQa(TCanvas* canv, const char* savename)
 }
 
 
-void StMuFcsAnaRun22Qa::DrawEpdDepAdcQa(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawEpdDepAdcQa(TCanvas* canv, const char* savename)
 {
   if( mEpdAdcQaOn || (mH2F_HitPres_depVqt[0]!=0 && mH2F_HitPres_depVqt[1]!=0) ){
     canv->Clear();
@@ -788,7 +788,7 @@ void StMuFcsAnaRun22Qa::DrawEpdDepAdcQa(TCanvas* canv, const char* savename)
   }  
 }
 
-void StMuFcsAnaRun22Qa::DrawEpdDepTacQa(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawEpdDepTacQa(TCanvas* canv, const char* savename)
 {
   if( mEpdTacQaOn || (mH2F_HitPres_peakVtac[0]!=0 && mH2F_HitPres_peakVtac[1]!=0) ){
     canv->Clear();
@@ -803,7 +803,7 @@ void StMuFcsAnaRun22Qa::DrawEpdDepTacQa(TCanvas* canv, const char* savename)
   }
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsClusterQa(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsClusterQa(TCanvas* canv, const char* savename)
 {
   for( UShort_t i=0; i<kFcsNDet; ++i ){
     canv->Clear();
@@ -830,7 +830,7 @@ void StMuFcsAnaRun22Qa::DrawFcsClusterQa(TCanvas* canv, const char* savename)
   }
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsClusterPi0(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsClusterPi0(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   if( mBestMassOn ){
@@ -850,7 +850,7 @@ void StMuFcsAnaRun22Qa::DrawFcsClusterPi0(TCanvas* canv, const char* savename)
     canv->Print(savename);
   }
 }
-void StMuFcsAnaRun22Qa::DrawFcsPointQa(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsPointQa(TCanvas* canv, const char* savename)
 {
   for( UShort_t i=0; i<kFcsNDet; ++i ){
     canv->Clear();
@@ -867,7 +867,7 @@ void StMuFcsAnaRun22Qa::DrawFcsPointQa(TCanvas* canv, const char* savename)
   }
 }
 
-void StMuFcsAnaRun22Qa::DrawFcsPointPi0(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawFcsPointPi0(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   if( mBestMassOn ){
@@ -888,15 +888,15 @@ void StMuFcsAnaRun22Qa::DrawFcsPointPi0(TCanvas* canv, const char* savename)
   }
 }
 /*
-Int_t StMuFcsAnaRun22Qa::LoadGraphsFromFile(TFile* file, TObjArray* graphs, StMuFcsAnaData* anadata )
+Int_t StFwdAnaFcsRun22Qa::LoadGraphsFromFile(TFile* file, TObjArray* graphs, StFwdAnaData* anadata )
 {
   Int_t gloaded = 0;
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_Entries,"G_Entries","Number of Entries vs. Run Index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_VertexVpd,"GE_VertexVpd","VPD vertex mean (Err=RMS) vs. Run index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_VertexBbc,"GE_VertexBbc","Bbc vertex mean (Err=RMS) vs. Run index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_UpSpin,"G_UpSpin","Number of Spin Up states vs. Run Index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_NoSpin,"G_NoSpin","Number of No Spin states vs. Run Index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_DownSpin,"G_DownSpin","Number of Spin Down states vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_Entries,"G_Entries","Number of Entries vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_VertexVpd,"GE_VertexVpd","VPD vertex mean (Err=RMS) vs. Run index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_VertexBbc,"GE_VertexBbc","Bbc vertex mean (Err=RMS) vs. Run index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_UpSpin,"G_UpSpin","Number of Spin Up states vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_NoSpin,"G_NoSpin","Number of No Spin states vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_DownSpin,"G_DownSpin","Number of Spin Down states vs. Run Index");
   
   //Trigger QA
   int trigsize = anadata->sizeOfFcsTriggers();
@@ -908,9 +908,9 @@ Int_t StMuFcsAnaRun22Qa::LoadGraphsFromFile(TFile* file, TObjArray* graphs, StMu
       TString gtitle("Number of Events for trigger ");
       gname += trigname;
       gtitle += trigname + " vs. Run Index";
-      gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_Triggers[i],gname.Data(),gtitle.Data());
+      gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_Triggers[i],gname.Data(),gtitle.Data());
     }
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_Triggers[64],"NF","Number of Events with no trigger vs. Run Index"); //Last bin is named "NF" for not found which is what nameFromId() returns if trigger is not in the map. This way if no map was loaded but an StFcsRun22TriggerMap was found, searching for triggers will return "NF"
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_Triggers[64],"NF","Number of Events with no trigger vs. Run Index"); //Last bin is named "NF" for not found which is what nameFromId() returns if trigger is not in the map. This way if no map was loaded but an StFcsRun22TriggerMap was found, searching for triggers will return "NF"
   }
 
   //Nhits QA
@@ -928,33 +928,33 @@ Int_t StMuFcsAnaRun22Qa::LoadGraphsFromFile(TFile* file, TObjArray* graphs, StMu
     //loaded += mHists->AddH2F(file,(mH2F_Hit_enVid[i]),histname.Data(),histtitle.Data(),nchs,0,nchs,200,0,200);
     TString gname = "GE_NHits_" + namesuffix[i];
     TString gtitle = "Mean number of hits (Err=RMS) for " + namesuffix[i] + " vs. Run Index";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_NHits[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_NHits[i],gname.Data(),gtitle.Data());
     gname = "GE_NHitsCut_" + namesuffix[i];
     gtitle = "Mean number of hits with Cuts (Err=RMS) for " + namesuffix[i] + " vs. Run Index";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_NHitsCut[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_NHitsCut[i],gname.Data(),gtitle.Data());
 
     gname = "GE_NClusters_" + namesuffix[i];
     gtitle = "Mean number of clusters (Err=RMS) for " + namesuffix[i] + " vs. Run Index";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_NClusters[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_NClusters[i],gname.Data(),gtitle.Data());
     gname = "GE_NPoints_" + namesuffix[i];
     gtitle = "Mean number of points (Err=RMS) for " + namesuffix[i] + " vs. RunIndex";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_NPoints[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_NPoints[i],gname.Data(),gtitle.Data());
     gname = "G_Clu_En_" + namesuffix[i];
     gtitle = "Mean of Cluster Energy for " + namesuffix[i] + " vs. RunIndex;;GeV";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_Clu_En[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_Clu_En[i],gname.Data(),gtitle.Data());
     gname = "G_Poi_En_" + namesuffix[i];
     gtitle = "Mean of Point Energy for " + namesuffix[i] + " vs. RunIndex;;GeV";
-    gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mG_Poi_En[i],gname.Data(),gtitle.Data());
+    gloaded += StFwdAnaData::MakeGraph(file,graphs,mG_Poi_En[i],gname.Data(),gtitle.Data());
   }
   
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_ESum_Ecal,"GE_ESum_Ecal","Ecal total energy (Err=RMS) vs. Run Index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_ESum_Hcal,"GE_ESum_Hcal","Hcal total energy (Err=RMS) vs. Run Index");
-  gloaded += StMuFcsAnaData::MakeGraph(file,graphs,mGE_ESum_Pres,"GE_ESum_Pres","Pres total energy (Err=RMS) vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_ESum_Ecal,"GE_ESum_Ecal","Ecal total energy (Err=RMS) vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_ESum_Hcal,"GE_ESum_Hcal","Hcal total energy (Err=RMS) vs. Run Index");
+  gloaded += StFwdAnaData::MakeGraph(file,graphs,mGE_ESum_Pres,"GE_ESum_Pres","Pres total energy (Err=RMS) vs. Run Index");
 
   return gloaded;
 }
 
-void StMuFcsAnaRun22Qa::FillGraphs(Int_t irun)
+void StFwdAnaFcsRun22Qa::FillGraphs(Int_t irun)
 {
   //Entries QA
   //std::cout << "|mG_Entries:"<<mG_Entries << std::endl;
@@ -1006,7 +1006,7 @@ void StMuFcsAnaRun22Qa::FillGraphs(Int_t irun)
   mGE_ESum_Pres->SetPointError(irun,0,mH1F_Hit_ESum[2]->GetRMS());
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphs(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawGraphs(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1030,7 +1030,7 @@ void StMuFcsAnaRun22Qa::DrawGraphs(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphTrig(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphTrig(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(4,4);
@@ -1045,7 +1045,7 @@ void StMuFcsAnaRun22Qa::DrawGraphTrig(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-double StMuFcsAnaRun22Qa::GraphAverage(TGraph* g)
+double StFwdAnaFcsRun22Qa::GraphAverage(TGraph* g)
 {
   double sum = 0;
   for( int i=0; i<g->GetN(); ++i ){
@@ -1056,7 +1056,7 @@ double StMuFcsAnaRun22Qa::GraphAverage(TGraph* g)
   return sum;
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphNhits(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphNhits(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1069,7 +1069,7 @@ void StMuFcsAnaRun22Qa::DrawGraphNhits(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphNhitsCut(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphNhitsCut(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1082,7 +1082,7 @@ void StMuFcsAnaRun22Qa::DrawGraphNhitsCut(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphESum(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphESum(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(2,2);
@@ -1098,7 +1098,7 @@ void StMuFcsAnaRun22Qa::DrawGraphESum(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphNClusters(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphNClusters(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1110,7 +1110,7 @@ void StMuFcsAnaRun22Qa::DrawGraphNClusters(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphNPoints(TCanvas* canv, const char* savename )
+void StFwdAnaFcsRun22Qa::DrawGraphNPoints(TCanvas* canv, const char* savename )
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1122,7 +1122,7 @@ void StMuFcsAnaRun22Qa::DrawGraphNPoints(TCanvas* canv, const char* savename )
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphCluEn(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawGraphCluEn(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1134,7 +1134,7 @@ void StMuFcsAnaRun22Qa::DrawGraphCluEn(TCanvas* canv, const char* savename)
   canv->Print(savename);
 }
 
-void StMuFcsAnaRun22Qa::DrawGraphPoiEn(TCanvas* canv, const char* savename)
+void StFwdAnaFcsRun22Qa::DrawGraphPoiEn(TCanvas* canv, const char* savename)
 {
   canv->Clear();
   canv->Divide(2,3);
@@ -1147,7 +1147,7 @@ void StMuFcsAnaRun22Qa::DrawGraphPoiEn(TCanvas* canv, const char* savename)
 }
 */
 
-void StMuFcsAnaRun22Qa::PrintSpinBits()
+void StFwdAnaFcsRun22Qa::PrintSpinBits()
 {
   /*
   std::cout << "==================================================" << std::endl;

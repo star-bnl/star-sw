@@ -1,17 +1,17 @@
-#include "StMuFcsAnaPolarization.h"
+#include "StFwdAnaPolarization.h"
 
-ClassImp(StMuFcsAnaPolarization)
+ClassImp(StFwdAnaPolarization)
 
-StMuFcsAnaPolarization::StMuFcsAnaPolarization()
+StFwdAnaPolarization::StFwdAnaPolarization()
 {
 }
 
-StMuFcsAnaPolarization::~StMuFcsAnaPolarization()
+StFwdAnaPolarization::~StFwdAnaPolarization()
 {
 }
 
 
-UInt_t StMuFcsAnaPolarization::LoadHists(TFile* file, HistManager* histman, StMuFcsAnaData* data)
+UInt_t StFwdAnaPolarization::LoadHists(TFile* file, HistManager* histman, StFwdAnaData* data)
 {
   UInt_t loaded = 0;
   if( histman==0 ){ return loaded; }
@@ -24,10 +24,10 @@ UInt_t StMuFcsAnaPolarization::LoadHists(TFile* file, HistManager* histman, StMu
   return loaded;
 }
 
-Int_t StMuFcsAnaPolarization::DoMake(StMuFcsAnaData* anadata)
+Int_t StFwdAnaPolarization::DoMake(StFwdAnaData* anadata)
 {
-  Int_t fillnum = anadata->runInfo()->beamFillNumber(StBeamDirection::east);
-  Int_t evttime = anadata->muEvent()->eventInfo().time();
+  Int_t fillnum = anadata->getEvtData()->mFill;//runInfo()->beamFillNumber(StBeamDirection::east);
+  Int_t evttime = anadata->getEvtData()->mRunTime;//anadata->muEvent()->eventInfo().time();
   PolData* poldat = anadata->getPolData(fillnum);
   if( poldat==0 ){ return kStSkip; }
   
@@ -49,7 +49,7 @@ Int_t StMuFcsAnaPolarization::DoMake(StMuFcsAnaData* anadata)
 
 }
 
-void StMuFcsAnaPolarization::PaintPolarization(TCanvas* canv, const char* savename) const
+void StFwdAnaPolarization::PaintPolarization(TCanvas* canv, const char* savename) const
 {
   canv->Clear();
   
