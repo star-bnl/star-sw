@@ -13,7 +13,7 @@
   LOG
   @[January 9, 2026] > Copied from *StMuFcsTreeMaker* and modified to do the relevant things. Since I am keeping *StMuFcsTreeMaker* please see that log for all relevant developments of the analysis code.
   @[June 8, 2026] > Implemented #StFwdAnaData::mEvent
-  @[June 30, 2026] > Changed name from StMuFcsAnaDataMaker to StFwdAnaDataMaker to be consistent with new naming that is more general for STAR forward analysis. Changed StMuFcsAnaData::mEvtInfo to StFwdAnaData::mEvtData
+  @[June 30, 2026] > Changed name from StMuFcsAnaDataMaker to StFwdAnaDataMaker to be consistent with new naming that is more general for STAR forward analysis. Changed StMuFcsAnaData::mEvtInfo to StFwdAnaData::mEvtData. Changed StMuFcsVirtualAna to StFwdAnaVirtual
 
 */
 
@@ -60,7 +60,7 @@
 //#include "StSpinPool/StFcsPi0Ana/StMuEpdRun22QaMaker.h"
 //#include "StSpinPool/StFcsPi0Ana/StFcsRun22TriggerMap.h"
 
-#include "StMuFcsVirtualAna.h"
+#include "StFwdAnaVirtual.h"
 #include "StFwdAnaData.h"
 
 class StFwdAnaDataMaker : public StMaker {
@@ -69,7 +69,7 @@ public:
   StFwdAnaDataMaker(const Char_t* name = "MuFcsAnaData");
   ~StFwdAnaDataMaker();
   
-  UInt_t addAna(StMuFcsVirtualAna* ana);
+  UInt_t addAna(StFwdAnaVirtual* ana);
   
   StFwdAnaData* anaData()const{ return mAnaData; }
   HistManager* getHists()const{ return mHists; }
@@ -79,12 +79,12 @@ public:
   void setAnaData( StFwdAnaData* anadata);
   void setHistManager( HistManager* hm );
   
-  UInt_t LoadDataFromFile(TFile* file);       ///< Load tree and histograms from file, calls #StMuFcsVirtualAna::LoadHists()
+  UInt_t LoadDataFromFile(TFile* file);       ///< Load tree and histograms from file, calls #StFwdAnaVirtual::LoadHists()
 
   virtual Int_t Init();
   virtual Int_t InitRun(int runnumber);
   virtual void Clear(Option_t* option="");    ///< Gets called before #Make() in #StChain::EventLoop()
-  virtual Int_t Make();                       ///< Call #StMuFcsVirtualAna::DoMake() on internal analysis modules
+  virtual Int_t Make();                       ///< Call #StFwdAnaVirtual::DoMake() on internal analysis modules
   virtual Int_t Finish();
   
 protected:
@@ -99,7 +99,7 @@ protected:
   
 private:
   bool mInternalHists = false;                  ///< Boolean to keep track if mHists was added externally or an internal one was created
-  std::vector<StMuFcsVirtualAna*> mAnaList;     ///< List of analysis modules whose calls are executed sequentially
+  std::vector<StFwdAnaVirtual*> mAnaList;     ///< List of analysis modules whose calls are executed sequentially
 
   ClassDef(StFwdAnaDataMaker, 1)
 };

@@ -47,7 +47,7 @@ StFwdAnaDataMaker::~StFwdAnaDataMaker()
   mAnaList.clear();
 }
 
-UInt_t StFwdAnaDataMaker::addAna(StMuFcsVirtualAna* ana)
+UInt_t StFwdAnaDataMaker::addAna(StFwdAnaVirtual* ana)
 {
   if( ana==0 ){ return -1; }
   mAnaList.push_back(ana);
