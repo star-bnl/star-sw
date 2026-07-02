@@ -25,9 +25,11 @@ void gen_bsmd_cells() {
   cout << "Generating BSMD Map" << endl;
 
   for (int rileft = 1; rileft <= 2; rileft++) { 
-    for (int phi_enc = 60; phi_enc >= 1; phi_enc--) { 
+    for (int phi_local = 60; phi_local >= 1; phi_local--) { 
         
-      int m = (rileft == 1) ? (61 - phi_enc) : (phi_enc + 60);
+      int m = (rileft == 1) ? (61 - phi_local) : (phi_local + 60);
+
+      int phi_enc = (rileft == 1) ? phi_local : (phi_local + 60);
 
       for (int layer = 1; layer <= 2; layer++) {
         for (int strip = 1; strip <= 75; strip++) {
@@ -61,10 +63,12 @@ void gen_bsmd_cells() {
     }
   }
   for (int rileft = 1; rileft <= 2; rileft++) { 
-    for (int phi_enc = 60; phi_enc >= 1; phi_enc--) { 
+    for (int phi_local = 60; phi_local >= 1; phi_local--) { 
       
-      int m = (rileft == 1) ? (61 - phi_enc) : (phi_enc + 60);
-
+      int m = (rileft == 1) ? (61 - phi_local) : (phi_local + 60);
+      
+      int phi_enc = (rileft == 1) ? phi_local : (phi_local + 60);
+      
       for (int eta_bin = 1; eta_bin <= 10; eta_bin++) {
         for (int strip = 1; strip <= 15; strip++) {
             

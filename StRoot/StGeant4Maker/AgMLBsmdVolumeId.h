@@ -44,7 +44,7 @@ public:
     if (rileft == 1) {
       phi_encoded = 60 - phi_mod + 1;
     } else {
-      phi_encoded = phi_mod;
+      phi_encoded = 60 + phi_mod;
     }
 
     TLorentzVector _direction(0,0,0,0);
