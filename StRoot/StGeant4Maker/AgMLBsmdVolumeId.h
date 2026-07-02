@@ -23,10 +23,9 @@ class AgMLBsmdVolumeId : public AgMLVolumeId {
 
   const double width_eta1 {1.53668};
   const double width_eta2 {1.96088};
-  const double width_phi  {1.49348};
-  const int n_strip_eta1 {75};
-  const int n_strip_eta2 {75};
-  const int n_strip_phi  {15};
+  const double width_phi {1.49348};
+  const int max_strip {75};
+  const int n_strip_phi {15};
 
 public:
   
@@ -67,15 +66,12 @@ public:
     if (forw_back <= 2) { //smde
 
       double start_z_pos {0.0};
-      double width       {0.0};
-      int    max_strip   { 0 };
+      double width {0.0};
       
       if (forw_back == 1) {
-        max_strip = n_strip_eta1;//same for both layers
-        width     = width_eta1;
+        width = width_eta1;
       } else {
-        max_strip = n_strip_eta2;//same for both layers
-        width     = width_eta2;
+        width = width_eta2;
       }
 
       // Center alignment
