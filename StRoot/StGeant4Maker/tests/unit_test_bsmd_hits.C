@@ -50,24 +50,23 @@ struct Cell {
 std::vector<Cell> cells;
 
 struct TestResult {
-    int id;
-    int hits;
-    int matches;
-    bool passed;
+  int id;
+  int hits;
+  int matches;
+  bool passed;
 };
 
 void load_bsmd_cells(const char* filename="bsmd_cells.dat") {
-    std::ifstream in(filename);
-    if (!in.is_open()) return;
-    Cell c;
-    while (in >> c.volumeId >> c.softId >> c.m >> c.e >> c.s >> c.d >> c.eta >> c.phi) {
-        cells.push_back(c);
-    }
-    in.close();
+  std::ifstream in(filename);
+  if (!in.is_open()) return;
+  Cell c;
+  while (in >> c.volumeId >> c.softId >> c.m >> c.e >> c.s >> c.d >> c.eta >> c.phi) {
+      cells.push_back(c);
+  }
+  in.close();
 }
 
 
-bool chain_is_init = false;
 extern StBFChain* chain;
 StBFChain* top = new StBFChain("physicssim");
 
@@ -109,15 +108,11 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
           << std::left << std::setw(12) << "Found"
           << "Status" << std::endl;
   logFile << std::string(100, '-') << std::endl;
-  // gErrorIgnoreLevel = kFatal;
 
   if (cells.empty()) load_bsmd_cells(real_input_file.c_str());
   if (cells.empty()) return;
   std::cout << "Loaded " << cells.size() << " target cells." << std::endl;
   
-  // 
-  //std::string chainopts = "noinput nodefault y2021a sdt20201216 agml stargen:mk kinematics:mk g4star:mk geant4out";
-  //  std::string chainopts = "noinput nodefault dev2021 agml stargen:mk kinematics:mk g4star:mk geant4out";
   std::string chainopts = "noinput nodefault y2021a sdt20201216 agml stargen:mk kinematics:mk g4star:mk geant4out";
 
   top->SetDebug(0);
@@ -131,15 +126,16 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   auto* g4mk = top->Maker("geant4star");
 
   g4mk->SetAttr("application:engine", "G3"); 
+  g4mk->SetAttr("all:engine", "G3"); 
+  g4mk->SetAttr("wcal:engine", "G3"); 
+  g4mk->SetAttr("hcal:engine", "G3"); 
+  
   
   pmk->AddMaker( kine );
   pmk->SetAttr("verbose",111);
-  // pmk->SetAttr("xvertex", 0.0); pmk->SetAttr("yvertex", 0.0); pmk->SetAttr("zvertex", 0.0);
-  // pmk->SetAttr("xsigma",  0.0); pmk->SetAttr("ysigma",  0.0); pmk->SetAttr("zsigma",  0.0);
 
   top->ls(5);
   top->Init();
-  chain_is_init = true;
   gSystem->SetFPEMask( kNoneMask );
 
   int tested = 0;
@@ -152,10 +148,13 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   TRandom* randGen = new TRandom(0);
   // jitter = randGen->Uniform(0, 0.001);
   
+  // TODO: report that first event is trash??
+  top->Clear();
+  top->Make();
+
   for (int i=0; i<nCells; i++) {
+
     const auto& cell = cells[i];      
-    // if (tested++ % 180 != 0) continue; 
-    // if(i<18000)continue;//only east side for smdp
     total++;
 
     double eta_s = cell.d == 3 ? jitter : 0.0; //smear only in eta for smde
@@ -170,6 +169,8 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
     kine->SetAttr("etahigh", (double)cell.eta + 0.00000001 + eta_s);
     kine->SetAttr("philow",  (double)cell.phi); 
     kine->SetAttr("phihigh", (double)cell.phi + 0.00000001 + phi_s);
+    pmk->SetAttr("xvertex", 0.0); pmk->SetAttr("yvertex", 0.0); pmk->SetAttr("zvertex", 0.0);
+    pmk->SetAttr("xsigma",  0.0); pmk->SetAttr("ysigma",  0.0); pmk->SetAttr("zsigma",  0.0);
 
     top->Make();
 
@@ -183,16 +184,16 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
       int nHits = hitTable->GetNRows();
       g2t_emc_hit_st* hits = (g2t_emc_hit_st*)hitTable->GetArray();
 
-      for (int i = 0; i < nHits; i++) {
-        if (hits[i].track_p != 1) continue; // Primary tracks only
+      for (int j = 0; j < nHits; j++) {
+        if (hits[j].track_p != 1) continue;
         
-        int currentVid = hits[i].volume_id;
+        int currentVid = hits[j].volume_id;
         
         if (currentVid == cell.volumeId) {
-            matchFound = true;
-	    if ( hits[i].de > 0 ) {
-	      energyDeposit = true;
-	    }
+          matchFound = true;
+          if ( hits[j].de > 0 ) {
+            energyDeposit = true;
+          }
         }
 
         int hitLayer = (currentVid / 100) % 10;
@@ -203,12 +204,9 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
         bool targetIsPhi = (cell.d == 4);
 
         
-        // if ((targetIsEta && isEtaHit) || (!targetIsEta && isPhiHit)) {
-        if (1) { // Log all hits
-          bool already_listed = false;
-          for(int existing : foundVids) if(existing == currentVid) already_listed = true;
-          if(!already_listed) foundVids.push_back(currentVid);
-        }
+        bool already_listed = false;
+        for(int existing : foundVids) if(existing == currentVid) already_listed = true;
+        if(!already_listed) foundVids.push_back(currentVid);
       }
     }
     
@@ -253,7 +251,7 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   std::cout << "\rDone!                                      " << std::endl;
   
   std::cout << "------------------------------------------------" << std::endl;
-  std::cout << "Total Tested: " << std::endl;
+  std::cout << "Total Tested: " << total << std::endl;
   std::cout << "Passed:       " << passed << std::endl;
   std::cout << "Failed:       " << (total - passed) << std::endl;
   std::cout << "Success Rate: " << (float)passed/total * 100.0 << "%" << std::endl;
@@ -263,198 +261,4 @@ void unit_test_bsmd_hits(const char* input_file = "bsmd_cells.dat", int jobIndex
   logFile.close();
 
   top->Finish();
-}
-void validate_multiple_cells(std::vector<int> targetIds, int nEventsPerCell = 10, double jitter = 0.0) {
-  
-  if (cells.empty()) load_bsmd_cells();
-  if (cells.empty()) return;
-
-  StMaker *pmk = nullptr;
-  StMaker *kine = nullptr;
-  StMaker *g4mk = nullptr;
-
-  if (!chain_is_init) {
-      std::cout << "--- Initializing Chain ---" << std::endl;
-      std::string chainopts = "noinput nodefault dev2021 sdt20210215 agml stargen:mk kinematics:mk g4star:mk geant4out";
-
-      top->SetDebug(0);
-      top->SetFlags(chainopts.c_str());
-      top->Set_IO_Files(0, "bsmd_multi_test.geant.root");
-      top->Load();
-      top->Instantiate();
-
-      pmk  = top->Maker("PrimaryMaker");
-      kine = top->Maker("StarKine");
-      
-      pmk->AddMaker(kine);
-      pmk->SetAttr("verbose", 0);
-
-      top->Init();
-      gSystem->SetFPEMask(kNoneMask);
-      chain_is_init = true;
-  }
-
-  pmk  = top->Maker("PrimaryMaker");
-  kine = top->Maker("StarKine");
-  g4mk = top->Maker("geant4star");
-
-  if (!kine || !g4mk) {
-      std::cout << "Error: Could not retrieve StarKine or Geant4Maker." << std::endl;
-      return;
-  }
-
-  std::ofstream logFile("bsmd_test_results_individual_cells.txt");
-  if (!logFile.is_open()) {
-      std::cout << "Error: Could not open output file." << std::endl;
-      return;
-  }
-  auto getCellString = [&](int vid) -> std::string {
-    for (const auto& c : cells) {
-      if (c.volumeId == vid) {
-        std::stringstream ss;
-        ss << vid << " (E:" << std::fixed << std::setprecision(4) << c.eta 
-            << " P:" << std::setprecision(4) << c.phi << ")";
-        return ss.str();
-      }
-    }
-    return std::to_string(vid) + " (Unknown ID)";
-  };
-  logFile << std::left << std::setw(12) << "VolumeID"
-          << std::left << std::setw(8)  << "Layer"
-          << std::left << std::setw(12) << "Eta"
-          << std::left << std::setw(12) << "Phi"
-          << std::left << std::setw(10) << "Status"
-          << std::left << std::setw(15) << "Hits/Events" 
-          << std::endl;
-  logFile << std::string(70, '-') << std::endl;
-
-  std::vector<TestResult> failures;
-  int total_cells = targetIds.size();
-  int processed = 0;
-
-  std::cout << "Starting validation of " << total_cells << " cells..." << std::endl;
-
-  for (int vid : targetIds) {
-    processed++;
-    
-    Cell target;
-    bool foundInfo = false;
-    for (const auto& c : cells) {
-        if (c.volumeId == vid) { target = c; foundInfo = true; break; }
-    }
-
-    if (!foundInfo) {
-      logFile << std::left << std::setw(12) << vid << " NOT FOUND IN .DAT - SKIPPED" << std::endl;
-      continue;
-    }
-    
-    logFile << "\n" << std::string(60, '=') << "\n"
-    << "Testing Cell: " << vid << " (" << (target.d==3?"Eta":"Phi") 
-    << " E:" << target.eta << " P:" << target.phi << ")\n"
-    << std::string(60, '-') << std::endl;
-    
-    int matches_for_this_cell = 0;
-    int successful_events = 0; 
-
-    for (int i = 0; i < nEventsPerCell; i++) {
-      
-      
-      // Jitter
-      double eta_s = (jitter > 0) ? ((double)rand()/RAND_MAX - 0.5)*jitter : 0;
-      double phi_s = (jitter > 0) ? ((double)rand()/RAND_MAX - 0.5)*jitter : 0;
-
-      kine->SetAttr("mode", "FlatPT"); 
-      kine->SetAttr("ntrack",  1);
-      kine->SetAttr("pid",     6); 
-      kine->SetAttr("ptlow",   10.0);
-      kine->SetAttr("pthigh",  10.0 + 0.0001);
-      kine->SetAttr("etalow",  (double)target.eta + eta_s);
-      kine->SetAttr("etahigh", (double)target.eta + eta_s + 0.000001);
-      kine->SetAttr("philow",  (double)target.phi + phi_s); 
-      kine->SetAttr("phihigh", (double)target.phi + phi_s + 0.000001);
-
-      top->Make();
-
-      TDataSet *gds = g4mk->GetDataSet("g2t_smd_hit");
-      TTable   *hitTable = (gds) ? (TTable*)gds : nullptr;
-      
-      std::vector<int> other_hits_same_layer;
-      bool exact_match_found = false;
-      
-      if (hitTable) {
-        int nHits = hitTable->GetNRows();
-        g2t_emc_hit_st* hits = (g2t_emc_hit_st*)hitTable->GetArray();
-        for (int i = 0; i < nHits; i++) {
-          if (hits[i].track_p != 1) continue;//primary track only
-          
-          int currentVid = hits[i].volume_id;
-          if (hits[i].volume_id == target.volumeId) { 
-            // matches_for_this_cell++;
-            exact_match_found = true;
-            // break; 
-          }
-          int hitLayer = (currentVid / 100) % 10;
-          int targetLayer = target.d; // 3 for SMDE(1,2), 4 for SMDP
-          bool isEtaHit = (hitLayer == 1 || hitLayer == 2);
-          bool isPhiHit = (hitLayer == 3 || hitLayer == 4);
-          bool targetIsEta = (target.d == 3) ? true : false;
-
-          if ((targetIsEta && isEtaHit) || (!targetIsEta && isPhiHit)) {
-            bool already_listed = false;
-            for(int existing : other_hits_same_layer) if(existing == currentVid) already_listed = true;
-            if(!already_listed) other_hits_same_layer.push_back(currentVid);
-          }
-        }
-      }
-      logFile << "  Evt " << std::left << std::setw(3) << i << ": ";
-
-      if (exact_match_found) {
-          successful_events++; //once per event
-          matches_for_this_cell++;
-          logFile << "MATCH";
-      } 
-      else if (!other_hits_same_layer.empty()) {
-          //didn't hit the target, but it hit the detector nearby
-          logFile << "MISMATCH - Hit: ";
-          for(int badId : other_hits_same_layer) logFile << badId << " ";
-      } 
-      else {
-          logFile << "MISS (No hits in layer)";
-      }
-      if (!other_hits_same_layer.empty()) {
-        logFile << "\n        -> Other Hits: ";
-        for (int id : other_hits_same_layer) {
-          logFile << "\n           * " << getCellString(id);
-        }
-      }
-      logFile << std::endl;
-      top->Clear();
-      kine->Clear();
-    }
-
-    bool passed = (successful_events > 0);
-    if (!passed) failures.push_back({vid, matches_for_this_cell, nEventsPerCell, false});
-
-    std::stringstream ss;
-    ss << matches_for_this_cell << "/" << nEventsPerCell;
-    
-    logFile << std::left << std::setw(12) << vid
-            << std::left << std::setw(8)  << (target.d == 3 ? "Eta" : "Phi")
-            << std::left << std::setw(12) << std::fixed << std::setprecision(5) << target.eta
-            << std::left << std::setw(12) << std::fixed << std::setprecision(5) << target.phi
-            << std::left << std::setw(10) << (passed ? "PASS" : "FAIL")
-            << std::left << std::setw(15) << ss.str()
-            << std::endl;
-  }
-  logFile << std::string(70, '-') << std::endl;
-  logFile << "SUMMARY: " << (total_cells - failures.size()) << "/" << total_cells << " Passed." << std::endl;
-  
-  if (!failures.empty()) {
-      logFile << "\nCode list for failed IDs:" << std::endl;
-      logFile << "{ ";
-      for (const auto& f : failures) logFile << f.id << ", ";
-      logFile << "}" << std::endl;
-  }
-
-  logFile.close();
 }
