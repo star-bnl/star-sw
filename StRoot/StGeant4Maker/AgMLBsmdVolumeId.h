@@ -34,13 +34,14 @@ public:
 
   virtual int id( int* numbv ) const { 
     
-
-    int rileft    = numbv[0];
-    int phi_mod   = numbv[1];
+    int rileft = numbv[0];
+    int phi_mod = numbv[1];
+    
     // Note: in the g2t_volume_id.g layer is numbv[2]
     // but numbv[2] is always 2. I think geant4 treats the mother 
     // volume CSDA as a separate volume, so the layer info is shifted by 1.
-    int layer     = numbv[3];
+    int layer = numbv[3];
+    
     int phi_encoded {0};
     if (rileft == 1) {
       phi_encoded = 60 - phi_mod + 1;
@@ -56,8 +57,8 @@ public:
     TVirtualMC::GetMC()->Gmtod( xg, xl, 1 );
 
 
-    int strip     {  0  };
-    int eta_bin   {  0  };
+    int strip {0};
+    int eta_bin {0};
     int forw_back {layer};
 
     if (forw_back == 4) forw_back = 3;
@@ -82,17 +83,18 @@ public:
       // Strip = (LocalZ - Start) / Width
       strip = static_cast<int>(floor( (xl[2] - start_z_pos) / width )) + 1;
 
-      //for smde, calculate eta bin from strip
       int global_strip {strip};
       if (forw_back == 2) global_strip += 75; 
+
+      // SMDE does not care about eta bin, but we need to calculate it anyways
       eta_bin = (global_strip - 1) / 15 + 1;
-    }
-    else { //smdp
+    
+    } else { //smdp
 
       TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
 
       if( !nav ) {
-        LOG_FATAL << "No Pointer to Navigator" << endm;
+        LOG_FATAL << "No Pointer to Navigator, how did we get here?" << endm;
         assert(0);
       }
 
@@ -102,7 +104,7 @@ public:
       nav->CdUp();//go to csme
       nav->CdUp();//go to csda
 
-      
+
       double masterPos[3] = {xg[0], xg[1], xg[2]}; //global hit position
       double localPos[3];
       //smdp is rotated 180 in phi 90 theta wrt tower
@@ -113,7 +115,7 @@ public:
       nav->PopPath();
 
       double total_width {n_strip_phi * width_phi}; // ~22.4022
-      double start_y     {  -total_width / 2.0   };
+      double start_y {-total_width / 2.0};
 
       strip = static_cast<int>(floor( (localPos[1] - start_y) / width_phi ) ) + 1;      
       eta_bin = static_cast<int>( TMath::Abs(_direction.Eta()) * 10.0) + 1;
@@ -124,6 +126,7 @@ public:
                   + 1000      * phi_encoded
                   + 100       * forw_back
                   + strip;
+
     return volume_id;
   };
 };
