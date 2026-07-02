@@ -8,6 +8,7 @@
 #include <StMessMgr.h>
 #include <TGeoManager.h>
 #include <TGeoMatrix.h>
+#include <assert.h>
 
 /**
  * @class AgMLBsmdVolumeId
@@ -92,7 +93,7 @@ public:
 
       if( !nav ) {
         LOG_FATAL << "No Pointer to Navigator" << endm;
-        return -1;
+        assert(0);
       }
 
       // SAVE CURRENT NAVIGATOR STATE
