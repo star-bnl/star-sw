@@ -9,12 +9,21 @@
 #include <TGeoManager.h>
 #include <TGeoMatrix.h>
 
+/**
+ * @class AgMLBsmdVolumeId
+ * @brief A volume identifier for the Barrel Shower Maximum Detector (BSMD).
+ *
+ * This class provides a unique integer identifier for each sensitive volume
+ * in the BSMD. The ID is calculated based on the barrel side (East/West),
+ * phi bin, eta bin, layer, and strip number, mapping these to a standard STAR
+ * numbering scheme.
+ */
+
 class AgMLBsmdVolumeId : public AgMLVolumeId {
 
-  const double width_eta1 {1.53668}; // 2 * (0.7277 + 0.04064)
-  const double width_eta2 {1.96088}; // 2 * (0.9398 + 0.04064)
-  const double width_phi  {1.49348}; // 2 * (0.6680 + 0.07874)
-
+  const double width_eta1 {1.53668};
+  const double width_eta2 {1.96088};
+  const double width_phi  {1.49348};
   const int n_strip_eta1 {75};
   const int n_strip_eta2 {75};
   const int n_strip_phi  {15};
@@ -26,28 +35,16 @@ public:
   virtual int id( int* numbv ) const { 
     
 
-    int rileft    = numbv[0]; // 1 west, 2 east
-    int phi_mod   = numbv[1]; // 1-60 phi module
-    int layer     = numbv[3]; // smd layer 1-4
-    //Note: in the g2t_volume_id.g layer is numbv(3), which is numbv[2] in C++
-    // but for some reason, numbv[2] is always 2. I think geant4 treats the mother 
+    int rileft    = numbv[0];
+    int phi_mod   = numbv[1];
+    // Note: in the g2t_volume_id.g layer is numbv[2]
+    // but numbv[2] is always 2. I think geant4 treats the mother 
     // volume CSDA as a separate volume, so the layer info is shifted by 1.
+    int layer     = numbv[3];
     int phi_encoded {0};
     if (rileft == 1) {
       phi_encoded = 60 - phi_mod + 1;
     } else {
-      //Note: StEmcGeom does this differently than g2t_volume_id.g
-      //StEmcGeom: phi    = smdChid[2];  // module phi [1,60]
-      //g2t_volume_id.g
-      /*
-        If (rileft==1) then
-          phi=60-phi+1
-        else
-          phi=60+phi
-        endif     
-      */
-     //keeping the StEmcGeom logic because we are using
-     //it to generate bsmd cells in gen_bsmd_cells.C
       phi_encoded = phi_mod;
     }
 
@@ -63,7 +60,7 @@ public:
     int eta_bin   {  0  };
     int forw_back {layer};
 
-    if (forw_back == 4) forw_back = 3;  //from g2t_volume_id.g
+    if (forw_back == 4) forw_back = 3;
 
     // the SMD-Eta is treated as one big gas volume (by the geometry definition)
     // so we have to segment it ourself from the local z position of the hit.
