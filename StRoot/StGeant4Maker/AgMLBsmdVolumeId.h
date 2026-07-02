@@ -81,12 +81,6 @@ public:
       // Strip = (LocalZ - Start) / Width
       strip = static_cast<int>(floor( (xl[2] - start_z_pos) / width )) + 1;
 
-      // In East (rileft=2), the module is rotated 180 degrees.
-      // Strip 1 is still at Eta=0 (which is now Max Local Z).
-      // So we must invert the calculated strip index.
-      if (rileft == 2) {
-        strip = max_strip - strip + 1;
-      }
       //for smde, calculate eta bin from strip
       int global_strip {strip};
       if (forw_back == 2) global_strip += 75; 
