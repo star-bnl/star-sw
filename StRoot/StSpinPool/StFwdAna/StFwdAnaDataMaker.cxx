@@ -210,9 +210,9 @@ Int_t StFwdAnaDataMaker::Make()
 
   mH1D_Entries->Fill(0); //This is just counting valid make calls (i.e. increment bin 1 by 1)
   
-  mAnaData->mEvtData->mRunTime         = mAnaData->mRunInfo->beamFillNumber(StBeamDirection::east);    //using yellow beam
+  mAnaData->mEvtData->mRunTime         = mAnaData->mMuEvent->eventInfo().time();
   mAnaData->mEvtData->mRunNum          = mAnaData->mMuEvent->runNumber();
-  mAnaData->mEvtData->mFill            = mAnaData->mMuEvent->eventInfo().time();
+  mAnaData->mEvtData->mFill            = mAnaData->mRunInfo->beamFillNumber(StBeamDirection::east);    //using yellow beam
   mAnaData->mEvtData->mEvent           = mAnaData->mMuEvent->eventId();
   mAnaData->mEvtData->mBx48Id          = mAnaData->mTrigData->bunchId48Bit();
   mAnaData->mEvtData->mBx7Id           = mAnaData->mTrigData->bunchId7Bit();
@@ -241,7 +241,7 @@ Int_t StFwdAnaDataMaker::Make()
     switch( result ){
     case kStErr: return kStErr;
     case kStFatal: return kStFatal;
-    case kStSkip: return kStSkip;
+    case kStSkip: continue;
     case kStStop: return kStStop;
     }
   }

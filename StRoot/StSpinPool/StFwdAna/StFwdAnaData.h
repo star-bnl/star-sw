@@ -221,7 +221,7 @@ protected:
   Double_t mEpdNmipCut = 0.4;               ///< (0.4) Cut on EPD nmip to classify cluster or point as charged or uncharged
   
   bool mIgnoreTrig = false;                 ///< (false) flag to check if ignoring triggers or not
-  UShort_t mTreeOnBitMap = 0x7;             ///< (0x7) Turn on or off branches in the pi0 tree. first bit is events, second bit is photon branch, third bit is pi0 branch. Turn on all branches by default
+  UShort_t mTreeOnBitMap = 0x7;             ///< (0x7) Turn on or off branches in the data tree. first bit is events, second bit is photon branch, third bit is pi0 branch. Turn on all branches by default
 
   //Mutable Makers that need to be changed in Make
   StEvent* mStEvent = 0;

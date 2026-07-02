@@ -61,7 +61,7 @@ public:
 
   static const UShort_t mMaxTrigs = 65;    ///< 64 FCS triggers + 1 for any other not found
   Int_t mNTrig = 0;                        //! Total triggers in the event
-  Int_t mTriggers[mMaxTrigs];               //! Array with all the triggers found in the data, (according to)[https://root.cern/manual/io/#excluding-data-members-from-io] the '//!' tag at the beginning says don't store this variable. A separate branch will be created manually for storing the trigger information
+  Int_t mTriggers[mMaxTrigs];              //! Array with all the triggers found in the data, (according to)[https://root.cern/manual/io/#excluding-data-members-from-io] the '//!' tag at the beginning says don't store this variable. A separate branch will be created manually for storing the trigger information
 
   virtual void Clear(Option_t* opt="");          ///< Resets all variables to default
   virtual void Print(Option_t* opt="") const;    ///< Prints all values no options
