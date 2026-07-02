@@ -93,6 +93,30 @@ std::vector<Double_t> StFwdAnaData::ProjectToEpd(Double_t xfcs, Double_t yfcs, D
   return intersection;
 }
 
+void StFwdAnaData::AddHistStats( TLegend* HistLeg, const TH1* h1, const std::string &title )
+{
+  if( HistLeg==0 || h1==0 ){return;}
+  if( title.size()==0 ){ HistLeg->AddEntry(h1,h1->GetName(),"fle"); }
+  else{ HistLeg->AddEntry(h1, title.c_str(),"fle" ); }
+  if( h1->GetDimension()==1 ){
+    std::stringstream ss_entry;
+    ss_entry << "Entries: "<< h1->GetEntries();
+    HistLeg->AddEntry((TObject*)0, ss_entry.str().c_str(),"" );
+    ss_entry.str("");
+    ss_entry << "Mean: "<< h1->GetMean();
+    HistLeg->AddEntry((TObject*)0, ss_entry.str().c_str(),"" );
+    ss_entry.str("");
+    ss_entry << "RMS: "<< h1->GetRMS();
+    HistLeg->AddEntry((TObject*)0, ss_entry.str().c_str(),"" );
+    ss_entry.str("");
+    ss_entry << "Underflow: " << h1->GetBinContent(0);
+    HistLeg->AddEntry((TObject*)0,ss_entry.str().c_str(),"" );
+    ss_entry.str("");
+    ss_entry << "Overflow: " << h1->GetBinContent(h1->GetNbinsX()+1);
+    HistLeg->AddEntry((TObject*)0,ss_entry.str().c_str(),"" );
+  }
+}
+
 void StFwdAnaData::AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const std::string &title )
 {
   //This function is good for when many histograms are plotted

@@ -19,6 +19,7 @@
   @[June 8, 2026] > Changed #FcsPi0Candidate to #FcsPairCandidate, added #mEvent as an internal event counter
   @[June 30, 2026] > Changed name from StMuFcsAnaData to StFwdAnaData to be consistent with new naming scheme which is more general for STAR forward analysis software. Changed the related StMuFcs* names to the new StFwdData* names. Moved #mNTrig, #mTriggers, and #mUseVertex to #StFwdDataEvent. Changed #mEvtInfo to #mEvtData to be consistent with name change of FcsEventInfo to StFwdDataEvent. Changed mPi0Tree to #mDataTree and changed "Pi0" branch name to "Pair"
   @[July 1, 2026] > Added #getPolData() with no arguments which returns the polarization data based on the fill number in #StFwdDataEvent, made some getter functions const. Made variables that cut on energy, vertex, etc protected so they must be set and gotten with functions
+  @[July 2, 2026] > Added AddHistStats() from my Rtools to here
 */
 
 
@@ -121,6 +122,7 @@ public:
   static Int_t MakeGraph(TFile* file, TObjArray* grapharr, TGraphErrors*& graph, const char* name, const char* title );
 
   static std::vector<Double_t> ProjectToEpd(Double_t xfcs, Double_t yfcs, Double_t zfcs, Double_t zvertex);
+  static void AddHistStats( TLegend* HistLeg, const TH1* h1, const std::string &title="" );
   static void AddHistStatsOneline( TLegend* HistLeg, const TH1* h1, const std::string &title="" );
   static void DoTssaAna( TH1* npi0[][2], TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN] );    ///< Compute asymmetry from npi0 array of [blue,yellow][spin up,down] and return an array of raw assymtries by [blue,yellow][energybin]
   static void DoTssaFit(TH1* h1_rawasymVphi[][StFwdAnaData::NXFBIN], TH1* h1_bluepoldata, TH1* h1_yellowpoldata, TH1* h1_AnResult[]);
