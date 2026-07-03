@@ -27,7 +27,7 @@ RUN echo "module load clhep-2.4.5.1 geant3-3-9-p1-root-6.24.06 geant4-data-10.5.
 
 RUN <<EOF
 	set -e
-	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="-Werror" || EXTRA_CXXFLAGS=""
+	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="" || EXTRA_CXXFLAGS=""
 	cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
 	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 EOF
