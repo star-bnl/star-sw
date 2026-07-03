@@ -21,7 +21,7 @@
 #include "TString.h"
 #include "StSensitiveDetector.h"
 
-// #include <CLHEP/Random/Random.h>
+#include <CLHEP/Random/Random.h>
 
 #include "StarVMC/StarAgmlLib/AgMLExtension.h"
 #include "GeometryUtils.h"

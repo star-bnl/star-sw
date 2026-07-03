@@ -753,6 +753,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	chomp($g4prefix);
 	$CPPPATH .= $main::PATH_SEPARATOR . $g4prefix . "/include/Geant4/";
 
+	# Add CLHEP to include path
+	my $clhepprefix = `clhep-config --prefix`;
+	chomp($clhepprefix);
+	# Strip any literal double or single quotes printed by clhep-config
+	$clhepprefix =~ s/^"|"$//g;
+	$clhepprefix =~ s/^'|'$//g;
+	if ($clhepprefix) {
+		print "cons: Adding CLHEP path: ", $clhepprefix, "\n";
+		$CPPPATH .= $main::PATH_SEPARATOR . $clhepprefix . "/include/";
+	}
+
 	# Add G4 vmc to include path  (presumes that spack has added this to ROOT_INCLUDE_PATH ...)
 	# Add vmc package to include path (ditto)
 	my @paths = split ":", $ENV{ROOT_INCLUDE_PATH};
