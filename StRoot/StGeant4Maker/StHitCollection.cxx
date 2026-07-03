@@ -574,7 +574,7 @@ void StCalorimeterHitCollection::EndOfEvent() {
 
     if ( hit->user.size() == myhit->user.size() ) 
       {
-	for ( int i=0;i<myhit->user.size();i++ ) {
+	for ( size_t i=0;i<myhit->user.size();i++ ) {
 	  myhit->user[i]+=hit->user[i];
 	}    	
       }
