@@ -5,7 +5,7 @@ ARG starenv=root6
 # Pick one from [gcc485, gcc11]
 ARG compiler=gcc485
 
-FROM ghcr.io/star-bnl/star-spack:v0.4.0-rc1-${starenv}-${compiler}
+FROM ghcr.io/yousif-elfeky/star-spack:0.4-${starenv}-${compiler}
 
 ARG compiler
 
