@@ -76,7 +76,7 @@ protected:
     Double_t  mTrailingEdgeTime;
     const static Float_t mBTofPadWidth;
     //    StTrack *mAssociatedTrack;   //$LINK
-#ifdef __CINT__
+#if defined(__CINT__) || (defined(__ROOTCLING__) && ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0))
     StObjLink        mAssociatedTrack;
 #else
     StLink<StTrack>  mAssociatedTrack;

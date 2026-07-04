@@ -69,7 +69,7 @@ class StPrimaryTrack : public StTrack {
   void Print(Option_t *option="") const {cout << option << *this << endl; }
  private:
   //  StPrimaryVertex*         	mVertex; 	//$LINK
-#ifdef __CINT__
+#if defined(__CINT__) || (defined(__ROOTCLING__) && ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0))
   StObjLink  		mVertex; 	
 #else
   StLink<StPrimaryVertex>  	mVertex; 	
