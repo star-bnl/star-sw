@@ -113,7 +113,7 @@ struct EmbeddingChains {
       {"P17iddAu39",   {"DbV20170426,P2016a,StiCA,mtd,mtdCalib,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt,mtdsim",    "ry2016a", " useXgeom "}},
       {"P17iddAu20",   {"DbV20170426,P2016a,StiCA,mtd,mtdCalib,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt,mtdsim",    "ry2016a", " useXgeom "}},
 
-      {"P21icAuAu19",  {"DbV20210827 DbV20220204_TPC_Calibrations P2019a StiCA,-beamline3D,btof,mtd,mtdCalib,ImpBToFt0Mode,BEmcChkStat,CorrY,-OPr13,ODistoSmear,EbyET0,PicoVtxDefault,PicoCovMtxWrite,VFMCE,TpxClu,-VFMinuit -hitfilt", "ry2019a", "usexgeom"}},
+      {"P21icAuAu19",  {"DbV20210827 DbV20220204_TPC_Calibrations P2019a StiCA,-beamline3D,btof,mtd,mtdCalib,ImpBToFt0Mode,BEmcChkStat,CorrY,-OPr13,ODistoSmear,EbyET0,PicoVtxDefault,PicoCovMtxWrite,VFMCE,TpxClu,-VFMinuit -hitfilt -ETofHit -ETofMatch", "ry2019a", "usexgeom"}},
       {"P23idAuAu17",  {"DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt ", "ry2021a", "useXgeom "}},
 
       {"P23idAuAu19",  {"DbV20230622 P2019a StiCA -beamline3D btof mtd mtdCalib ImpBToFt0Mode BEmcChkStat CorrY -OPr13 EbyET0 PicoVtxDefault PicoCovMtxWrite VFMCE TpxClu -VFMinuit -hitfilt", "ry2019a", "usexgeom"}},
