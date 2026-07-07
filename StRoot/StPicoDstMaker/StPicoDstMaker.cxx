@@ -173,8 +173,13 @@ StPicoDstMaker::~StPicoDstMaker() {
 
 //_________________
 void StPicoDstMaker::clearArrays() {
+  // Use Delete() rather than Clear() so destructors run on stored TClonesArray
+  // elements. Several pico classes (StPicoFwdTrack, StPicoFcsCluster,
+  // StPicoEmcTrigger, StPicoEvent) hold std::vector members; with plain Clear()
+  // the next event's placement-new constructs over the slot without freeing the
+  // previous vector heap allocation, producing a steady per-event leak.
   for(Int_t i=0; i<StPicoArrays::NAllPicoArrays; i++) {
-    mPicoArrays[i]->Clear();
+    mPicoArrays[i]->Delete();
   }
 }
 
@@ -1962,6 +1967,10 @@ void StPicoDstMaker::fillEvent() {
 
     // Set bunch crossing ID
   picoEvent->setBunchId( ev->l0Trigger().bunchCrossingId7bit(ev->runNumber()) );
+
+  //set past and future guardians 
+  picoEvent->setPastCorruption( ev->triggerData()->pastCorruption() );
+  picoEvent->setFutureCorruption( ev->triggerData()->futureCorruption() );
 }
 
 //_________________
