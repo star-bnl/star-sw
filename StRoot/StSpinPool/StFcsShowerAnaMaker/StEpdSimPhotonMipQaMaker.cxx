@@ -23,11 +23,7 @@ StEpdSimPhotonMipQaMaker::StEpdSimPhotonMipQaMaker(const char* name):StMaker(nam
 
 StEpdSimPhotonMipQaMaker::~StEpdSimPhotonMipQaMaker()
 {
-  if( mOutFile!=0 ){ mOutFile->Close(); }
-  delete mOutFile;
-  CleanHists();
-  delete mHistsArr;
-  
+  delete mHistsMan;  
 }
 
 Int_t StEpdSimPhotonMipQaMaker::Init()
@@ -35,49 +31,35 @@ Int_t StEpdSimPhotonMipQaMaker::Init()
   if( !mEpdGeo ){ mEpdGeo = new StEpdGeom(); }
   //mFcsDb->setDbAccess(0);
 
-  if( mFileName.Length()!=0 && mOutFile==0 ){ mOutFile = new TFile(mFileName.Data(), "RECREATE"); }
-
-  mHistsArr = new TObjArray();
-  if( LoadHistograms(mHistsArr) ){ std::cout << "StEpdSimPhotonMipQaMaker::Init Failed to make new histgorams" << std::endl; }
+  mHistsMan = new HistManager();
+  if( mFileName.Length()==0 ){ mHistsMan->InitFile("EpdSimPhoton.root", "RECREATE"); }
+  else{ mHistsMan->InitFile(mFileName.Data(),"RECREATE"); }
+  
+  UInt_t nmade = LoadHistograms(0,mHistsMan);
+  std::cout << "StEpdSimPhotonMipQaMaker::Init made "<<nmade << " histograms" << std::endl;
     
   return kStOk;
 }
 
 Int_t StEpdSimPhotonMipQaMaker::Finish()
 {
-  if( mOutFile==0 ){ return kStOk; }
-  
-  mOutFile->cd();
-  WriteHists();
+  mHistsMan->Write();
   return kStOk;
 }
 
-bool StEpdSimPhotonMipQaMaker::LoadHistograms(TObjArray* arr, TFile* file)
+UInt_t StEpdSimPhotonMipQaMaker::LoadHistograms( TFile* file, HistManager* histman )
 {
-  if( arr->GetEntriesFast()!=0 ){ return true; }
   UInt_t nloaded = 0;
 
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NumberOfWestHits, "H1F_NumberOfWestHits", ";NumberofWestHits",500,0,500);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NumberOfMips,"H1F_NumberOfMips",";NumberOfMips",100,0,100);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_Hit_yVx,"H2F_Hit_yVx",";Hit X;Hit Y", 300,-150,150, 200,-100,100);
+  nloaded += histman->AddH1F(file,mH1F_NumberOfWestHits, "H1F_NumberOfWestHits", ";NumberofWestHits",500,0,500);
+  nloaded += histman->AddH1F(file,mH1F_NumberOfMips,"H1F_NumberOfMips",";NumberOfMips",100,0,100);
+  nloaded += histman->AddH2F(file,mH2F_Hit_yVx,"H2F_Hit_yVx",";Hit X;Hit Y", 300,-150,150, 200,-100,100);
 
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NTracks,"H1F_NTracks",";NTracks", 11,-0.5,10.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_GeantId,"H1F_GeantId",";GEANT ID", 11,-0.5,10.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NVertex,"H1F_NVertex",";NVertex", 11,-0.5,10.5);
+  nloaded += histman->AddH1F(file,mH1F_NTracks,"H1F_NTracks",";NTracks", 11,-0.5,10.5);
+  nloaded += histman->AddH1F(file,mH1F_GeantId,"H1F_GeantId",";GEANT ID", 11,-0.5,10.5);
+  nloaded += histman->AddH1F(file,mH1F_NVertex,"H1F_NVertex",";NVertex", 11,-0.5,10.5);
 
-  if( nloaded == arr->GetEntriesFast() ){ return true; }
-  else{ return false; }  //i.e. It is not true that all histograms were made
-}
-
-void StEpdSimPhotonMipQaMaker::CleanHists()
-{
-  for( UInt_t i=0; i<mHistsArr->GetEntriesFast(); ++i ){ delete mHistsArr->At(i); }
-  mHistsArr->Clear();
-}
-
-void StEpdSimPhotonMipQaMaker::WriteHists()
-{
-  for( UInt_t i=0; i<mHistsArr->GetEntriesFast(); ++i ){ mHistsArr->At(i)->Write(); }
+  return nloaded;
 }
 
 Int_t StEpdSimPhotonMipQaMaker::Make()
@@ -104,7 +86,7 @@ Int_t StEpdSimPhotonMipQaMaker::Make()
   else{ LOG_ERROR << "StMuEpdRun22QaMaker::FillEpdinfo() - If you see this error then there is a bug that is setting EPD hits improperly" << endm; return kStErr; }
   StMuEpdHit* muepdhit = 0;
   StEpdHit* epdhit = 0;
-  for(unsigned int i=0; i<nepdhits; ++i ){
+  for(int i=0; i<nepdhits; ++i ){
     if( mMuEpdHits!=0 ){ muepdhit = (StMuEpdHit*)mMuEpdHits->UncheckedAt(i); } //To match similar in StMuDstMaker->epdHit(int i)
     else if( epdhits!=0 ){ epdhit = (StEpdHit*)((*epdhits)[i]); }
     else{ LOG_ERROR << "IF YOU SEE THIS ERROR THEN THERE IS A VERY SERIOUS BUG IN THE CODE" << endm; return kStErr; } 

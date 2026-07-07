@@ -9,7 +9,9 @@
   This class relies on grabbing events from StEvent and using the EpdHitMaker to fill the hit strucuture so these two makers need to be called before this class can be used.
 
   LOG
-  @[November 7, 2025](David Kapukchyan) > First instance 
+  @[November 7, 2025](David Kapukchyan) > First instance
+
+  @[July 7, 2026](David Kapukchyan) > Got rid of dependency on MyTools and changed to use #HistManager in StSpinPool/StFwdData so that it can be compiled with cons
  */
 
 #ifndef StEpdSimPhotonMipQaMaker_H
@@ -24,6 +26,7 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TCanvas.h"
 
 //STAR headers
 #include "StThreeVectorD.hh"
@@ -31,8 +34,7 @@
 #include "StEpdHitMaker/StEpdHitMaker.h"
 
 //Custom Headers
-#include "ClonesArrTree.h"
-#include "HistColl2.h"
+#include "StSpinPool/StFwdData/HistManager.h"
 
 class StEpdGeom;
 
@@ -47,9 +49,9 @@ class StEpdSimPhotonMipQaMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
 
-  void setFileName(const char* name){ mFileName = name; }    //!< set file name that #Finish() will use to write to a file
+  void setFileName(const char* name){ mFileName = name; }    ///< set file name that #Finish() will use to write to a file
 
-  bool LoadHistograms(TObjArray* arr, TFile* file=0);
+  UInt_t LoadHistograms( TFile* file, HistManager* histman);
 
   void PaintEpd(TCanvas* canvas, const char* savename="testepdphoton.png");
   void PaintSimEpd(TCanvas* canvas, const char* savename="testepdsimphoton.png");
@@ -62,27 +64,22 @@ class StEpdSimPhotonMipQaMaker : public StMaker
   StEpdHitMaker* mEpdHitMkr      = 0;
   StEpdCollection* mEpdColl      = 0;
 
-  TString mFileName = "";        //!< name of output file name
+  TString mFileName = "";        //< name of output file name
   
   //Histograms
-  TH1* mH1F_NumberOfWestHits = 0;    ///!< Histogram of number of MIPs
-  TH1* mH1F_NumberOfMips = 0;        ///!< Histogram of number of MIPs
-  TH1* mH2F_Hit_yVx = 0;             ///!< Histogram of hit x and y positions
-  //TH1* mH2F_SimPhoton_yVx = 0;         //!< Histogram of hit x and y positions
-  //TH1* mH2F_SimPhoton_En = 0;         //!< Histogram of hit x and y positions
-  TH1* mH1F_NTracks = 0;             ///!< Number tracks from GEANT
-  TH1* mH1F_GeantId = 0;             ///!< Geant Ids of tracks
-  TH1* mH1F_NVertex = 0;             ///!< Number of "vertices" from GEANT
-
-  void WriteHists();    //!< Write all histograms to file
-  void CleanHists();    //!< Delete all histograms
+  TH1* mH1F_NumberOfWestHits = 0;    ///< Histogram of number of MIPs
+  TH1* mH1F_NumberOfMips = 0;        ///< Histogram of number of MIPs
+  TH1* mH2F_Hit_yVx = 0;             ///< Histogram of hit x and y positions
+  //TH1* mH2F_SimPhoton_yVx = 0;         ///< Histogram of hit x and y positions
+  //TH1* mH2F_SimPhoton_En = 0;         ///< Histogram of hit x and y positions
+  TH1* mH1F_NTracks = 0;             ///< Number tracks from GEANT
+  TH1* mH1F_GeantId = 0;             ///< Geant Ids of tracks
+  TH1* mH1F_NVertex = 0;             ///< Number of "vertices" from GEANT
 
   double mnMIPCut = 0.7;  //!< Cut for nMIP
 
 private:
-  TObjArray* mHistsArr = 0;             //! Array to hold histograms
-
-  TFile* mOutFile = 0;
+  HistManager* mHistsMan = 0;             //! Array to hold histograms and TFile
   //std::ofstream* mTestFile = 0;
   
   ClassDef(StEpdSimPhotonMipQaMaker,1);
