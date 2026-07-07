@@ -82,7 +82,7 @@ private:
   HistManager* mHistsMan = 0;             //! Array to hold histograms and TFile
   //std::ofstream* mTestFile = 0;
   
-  ClassDef(StEpdSimPhotonMipQaMaker,1);
+  ClassDef(StEpdSimPhotonMipQaMaker,2);
 };
 
 #endif

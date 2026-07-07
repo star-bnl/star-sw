@@ -20,6 +20,7 @@
   @[August 4, 2025] > Added const methods for #AddH2F and #AddH3F so I can use static xf array to initialize the histograms
   @[January 6, 2026] > Added a map so that I can check if a histogram exists in a collection before adding it. If it does set that pointer to the existing histogram but only if it is null.
   @[February 11, 2026] > Moved this class to directory StFcsTreeManager to decouple from the classes in StFcsPi0Ana. Added #AddH1D() that takes in an array of x values so that you can create histograms with variable bin sizes. Added a #Find() function that checks the internal map if a given named histogram exists. Added #InitialCheck() to simplify how histograms are created by checking if a named histogram already exists. Added my own #Add() function that is used internally to add histogram pointers to the array.
+  @[July 7, 2026] > Added an #AddH3() function that takes non-array arguments, i.e. nbinsx,xlow,xup, nbinsy,ylow,up, nbinsz,zlow,zup
  */
 
 #ifndef HISTMANAGER_HH
@@ -63,6 +64,7 @@ public:
 
   UInt_t AddH2FArr(TFile* file, TObjArray*& arr, UInt_t nobjs, const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xhigh, Int_t nbinsy, Double_t ylow, Double_t yhigh);//!< This functions should be used to make #nobjs number of the same 2D histogram (names will be incremented from 0 to nobjs) and store them in the TObjArray given by #arr. Those histogram pointers will also be copied into #AllHists which will own the object. Returns number of histograms created/loaded from file
 
+  UInt_t AddH3F(TFile* file,  TH1*& h3, const char* name, const char* title,  Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
   UInt_t AddH3F(TFile* file,  TH1*& h, const char* name, const char* title,  Int_t nbinsx, Double_t* xbins, Int_t nbinsy, Double_t* ybins, Int_t nbinsz, Double_t *zbins);
   UInt_t AddH3F(TFile* file,  TH1*& h, const char* name, const char* title,  Int_t nbinsx, Double_t* xbins, const Int_t nbinsy, const Double_t* ybins, Int_t nbinsz, Double_t *zbins); ///< Const version of AddH3F
 

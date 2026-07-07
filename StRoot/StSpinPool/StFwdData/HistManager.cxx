@@ -252,6 +252,30 @@ UInt_t HistManager::AddH2FArr(TFile* file, TObjArray*& arr, UInt_t nobjs, const 
   return status; 
 }
 
+UInt_t HistManager::AddH3F(TFile* file,  TH1*& h3, const char* name, const char* title,  Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
+{
+  UInt_t status = 0;
+  if( InitialCheck(h3,name) ){ return status; }
+
+  if( file!=0 ){ h3 = (TH1*)file->Get(name); }
+  if( h3==0 ){
+    //h3 = (TH2*)FindObject(name);
+    //if( h2==0 ){
+
+    h3 = new TH3F(name,title, nbinsx,xlow,xup, nbinsy,ylow,yup, nbinsz,zlow,zup);
+    h3->Sumw2();
+    //}
+    //else{ return 1; }
+  }
+  else{
+    h3->SetBit(22);
+    ++status;
+  }
+  h3->SetTitle(title);
+  Add(h3,name);
+  return status;//1 if histogram loaded, 0 if new
+}
+
 UInt_t HistManager::AddH3F(TFile* file,  TH1*& h3, const char* name, const char* title,  Int_t nbinsx, Double_t* xbins, Int_t nbinsy, Double_t* ybins, Int_t nbinsz, Double_t *zbins)
 {
   UInt_t status = 0;

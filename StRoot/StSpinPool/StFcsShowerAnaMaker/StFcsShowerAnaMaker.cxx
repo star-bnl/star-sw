@@ -85,25 +85,12 @@ StFcsShowerAnaMaker::StFcsShowerAnaMaker(const char* name):StMaker(name)
 
 StFcsShowerAnaMaker::~StFcsShowerAnaMaker()
 {
-  if( mOutFile!=0 ){ mOutFile->Close(); }
-  delete mOutFile;
-  //delete mTestFile;
-  CleanHists();
-  delete mHistsArr;
   delete mDataTree;
-  
+  delete mHistMan;  //Delete last since contains pointer to TFile
 }
 
 Int_t StFcsShowerAnaMaker::Init()
 {
-  if( !mFcsDb ){ mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb")); }
-  //mFcsDb->setDbAccess(0);
-  if (!mFcsDb) {
-    LOG_ERROR << "StFcsShowerAnaMaker::InitRun Failed to get StFcsDb" << endm;
-    return kStFatal;
-  }
-
-  if( mFileName.Length()!=0 && mOutFile==0 ){ mOutFile = new TFile(mFileName.Data(), "RECREATE"); }
   /*if( mFileName.Length()!=0 ){
     mTestFile = new ofstream();
     TString fname(mFileName);
@@ -112,98 +99,96 @@ Int_t StFcsShowerAnaMaker::Init()
     if( !(mTestFile->is_open()) ){ std::cout <<"file '"<< fname << "' not open" << std::endl; }
     }*/
 
-  mHistsArr = new TObjArray();
-  if( LoadHistograms(mHistsArr) ){ std::cout << "StFcsShowerAnaMaker::InitRun Failed to make new histgorams" << std::endl; }
+  mHistMan = new HistManager();
+  if( mFileName.Length()==0 ){ mHistMan->InitFile("ShowerAna.root","RECREATE"); }
+  else{ mHistMan->InitFile(mFileName.Data(), "RECREATE"); }
+  //std::cout << "|nloaded:"<<nloaded << std::endl;
+  UInt_t nhists = LoadHistograms(0,mHistMan);  //Use zero to create new histograms
+  std::cout << "StFcsShowerAnaMaker::Init made "<<nhists << " histograms" << std::endl;
   
   if( mDataTree==0 ){
-    mDataTree = new Rtools::ClonesArrTree("ShowerAnaTree","");
-    mDataTree->AddArr("FcsHit",    "StFcsPicoHit");
-    mDataTree->AddArr("FcsCluster","StFcsPicoCluster");
-    mDataTree->AddArr("FcsPoint",  "StFcsPicoPoint");
-    mDataTree->AddArr("G2tPrim",   "StPicoG2tTrack");
-    mDataTree->AddArr("G2tParent", "StPicoG2tTrack");
+    mDataTree    = new TTree("ShowerAnaTree","");
+    mFcsHitsArr  = new TClonesArray("StFcsPicoHit");
+    mFcsClusArr  = new TClonesArray("StFcsPicoCluster");
+    mFcsPointArr = new TClonesArray("StFcsPicoPoint");
+    mG2tPrimArr  = new TClonesArray("StPicoG2tTrack");
+    mG2tParArr   = new TClonesArray("StPicoG2tTrack");
+    mDataTree->Branch("FcsHit",     &mFcsHitsArr);
+    mDataTree->Branch("FcsCluster", &mFcsClusArr);
+    mDataTree->Branch("FcsPoint",   &mFcsPointArr);
+    mDataTree->Branch("G2tPrim",    &mG2tPrimArr);
+    mDataTree->Branch("G2tParent",  &mG2tParArr);
   }
   else{ std::cout << "WARNING StFcsShowerAnaMaker::Init - DataTree Exists" << std::endl; }
   
   return kStOk;
 }
 
+Int_t StFcsShowerAnaMaker::InitRun(Int_t runnumber)
+{
+  if( !mFcsDb ){ mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb")); }
+  //mFcsDb->setDbAccess(0);
+  if (!mFcsDb) {
+    LOG_ERROR << "StFcsShowerAnaMaker::Init Failed to get StFcsDb" << endm;
+    return kStFatal;
+  }
+  return kStOk;
+}
+
 Int_t StFcsShowerAnaMaker::Finish()
 {
-  if( mOutFile==0 ){ return kStOk; }
-  
-  mOutFile->cd();
-  WriteHists();
+  mHistMan->Write();
   if( mDataTree!=0 ){ mDataTree->Write(); }
   return kStOk;
 }
 
-bool StFcsShowerAnaMaker::LoadHistograms(TObjArray* arr, TFile* file)
+UInt_t StFcsShowerAnaMaker::LoadHistograms(TFile* file, HistManager* histman)
 {
-  if( arr->GetEntriesFast()!=0 ){ return true; }
   UInt_t nloaded = 0;
 
-  nloaded += Rtools::LoadH1(arr,file,mH1F_PointXLocal,"H1F_PointXLocal","",100,0,1);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_PointYLocal,"H1F_PointYLocal","",100,0,1);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_PointLocalyVx,"H2F_PointLocalyVx",";Point Local X;Point Local Y", 100,0,1, 100,0,1);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_Chi2Ndf1Photon,"H1F_Chi2Ndf1Photon","Single Photon Fit;Chi^2/NDF",100,0,100);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_Chi2Ndf2Photon,"H1F_Chi2Ndf2Photon","Two Photon Fit;Chi^2/NDF",100,0,100);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_ClusSigMax,"H1F_ClusSigMax","",200,0,2);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_ClusSigMin,"H1F_ClusSigMin","",200,0,2);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_PointXProjX,"H2F_PointXProjX","",160,-160,160, 160,-160,160);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_PointYProjY,"H2F_PointYProjY","",160,-160,160, 160,-160,160);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_ClusSigMaxEn,"H2F_ClusSigMaxEn","",100,0,100,200,0,2);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_ClusSigMinEn,"H2F_ClusSigMinEn","",100,0,100,200,0,2);
+  nloaded += histman->AddH1F(file,mH1F_PointXLocal,"H1F_PointXLocal","",100,0,1);
+  nloaded += histman->AddH1F(file,mH1F_PointYLocal,"H1F_PointYLocal","",100,0,1);
+  nloaded += histman->AddH2F(file,mH2F_PointLocalyVx,"H2F_PointLocalyVx",";Point Local X;Point Local Y", 100,0,1, 100,0,1);
+  nloaded += histman->AddH1F(file,mH1F_Chi2Ndf1Photon,"H1F_Chi2Ndf1Photon","Single Photon Fit;Chi^2/NDF",100,0,100);
+  nloaded += histman->AddH1F(file,mH1F_Chi2Ndf2Photon,"H1F_Chi2Ndf2Photon","Two Photon Fit;Chi^2/NDF",100,0,100);
+  nloaded += histman->AddH1F(file,mH1F_ClusSigMax,"H1F_ClusSigMax","",200,0,2);
+  nloaded += histman->AddH1F(file,mH1F_ClusSigMin,"H1F_ClusSigMin","",200,0,2);
+  nloaded += histman->AddH2F(file,mH2F_PointXProjX,"H2F_PointXProjX","",160,-160,160, 160,-160,160);
+  nloaded += histman->AddH2F(file,mH2F_PointYProjY,"H2F_PointYProjY","",160,-160,160, 160,-160,160);
+  nloaded += histman->AddH2F(file,mH2F_ClusSigMaxEn,"H2F_ClusSigMaxEn","",100,0,100,200,0,2);
+  nloaded += histman->AddH2F(file,mH2F_ClusSigMinEn,"H2F_ClusSigMinEn","",100,0,100,200,0,2);
   
-  nloaded += Rtools::LoadH1(arr,file,mH1F_primid,"H1F_primid",";GEANT ID", 11,-0.5,10.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_parentid,"H1F_parentid",";GEANT ID", 11,-0.5,10.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NParClusPhotons,"H1F_NParClusPhotons",";Number of parent cluster photons", 5,-0.5,4.5);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_npoiVnclus,"H2F_npoiVnclus",";NClusters;NPoints", 7,-0.5,6.5, 7,-0.5,6.5);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_cluseVlore,"H2F_cluseVlore",";Cluster Lorentz E;Cluster E", 100,0,50, 100,0,50);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_trkeVpoie,"H2F_trkeVpoie",";point E;trk E", 300,0,30, 300,0,30);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_invmasspoi,"H1F_invmasspoi",";inv mass point (GeV)", 100,0,0.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_invmasstrk,"H1F_invmasstrk",";inv mass g2trk (GeV)", 100,-0.5,0.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_dpoitrk,"H1F_dpoitrk",";r (cm)", 100,0,10);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_massVdgg,"H2F_massVdgg",";d_{gg} point (cm);inv masss point (GeV)", 100,0,50, 100,0,1);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_trkmassVdgg,"H2F_trkmassVdgg",";d_{gg} point (cm);inv masss track (GeV)", 100,0,50, 100,0,1);
+  nloaded += histman->AddH1F(file,mH1F_primid,"H1F_primid",";GEANT ID", 11,-0.5,10.5);
+  nloaded += histman->AddH1F(file,mH1F_parentid,"H1F_parentid",";GEANT ID", 11,-0.5,10.5);
+  nloaded += histman->AddH1F(file,mH1F_NParClusPhotons,"H1F_NParClusPhotons",";Number of parent cluster photons", 5,-0.5,4.5);
+  nloaded += histman->AddH2F(file,mH2F_npoiVnclus,"H2F_npoiVnclus",";NClusters;NPoints", 7,-0.5,6.5, 7,-0.5,6.5);
+  nloaded += histman->AddH2F(file,mH2F_cluseVlore,"H2F_cluseVlore",";Cluster Lorentz E;Cluster E", 100,0,50, 100,0,50);
+  nloaded += histman->AddH2F(file,mH2F_trkeVpoie,"H2F_trkeVpoie",";point E;trk E", 300,0,30, 300,0,30);
+  nloaded += histman->AddH1F(file,mH1F_invmasspoi,"H1F_invmasspoi",";inv mass point (GeV)", 100,0,0.5);
+  nloaded += histman->AddH1F(file,mH1F_invmasstrk,"H1F_invmasstrk",";inv mass g2trk (GeV)", 100,-0.5,0.5);
+  nloaded += histman->AddH1F(file,mH1F_dpoitrk,"H1F_dpoitrk",";r (cm)", 100,0,10);
+  nloaded += histman->AddH2F(file,mH2F_massVdgg,"H2F_massVdgg",";d_{gg} point (cm);inv masss point (GeV)", 100,0,50, 100,0,1);
+  nloaded += histman->AddH2F(file,mH2F_trkmassVdgg,"H2F_trkmassVdgg",";d_{gg} point (cm);inv masss track (GeV)", 100,0,50, 100,0,1);
   
-  nloaded += Rtools::LoadH2(arr,file,mH2F_parprojyVprojx,"H2F_parprojyVprojx",";proj x cm;proj y cm", 160,-160,160, 160,-160,160 );
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NPrimTrks,"H1F_NPrimTrks",";Number of Primary Tracks", 5,-0.5,4.5);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_NParTrks,"H1F_NParTrks",";Number of Parent Tracks", 5,-0.5,4.5);
+  nloaded += histman->AddH2F(file,mH2F_parprojyVprojx,"H2F_parprojyVprojx",";proj x cm;proj y cm", 160,-160,160, 160,-160,160 );
+  nloaded += histman->AddH1F(file,mH1F_NPrimTrks,"H1F_NPrimTrks",";Number of Primary Tracks", 5,-0.5,4.5);
+  nloaded += histman->AddH1F(file,mH1F_NParTrks,"H1F_NParTrks",";Number of Parent Tracks", 5,-0.5,4.5);
 
-  nloaded += Rtools::LoadH2(arr,file,mH2F_hiteVtrkdist,"H2F_hiteVtrkdist",";track distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
-  nloaded += Rtools::LoadH2(arr,file,mH2F_hiteVtrktaxid,"H2F_hiteVtrktaxid",";track Taxicab distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
-  nloaded += Rtools::LoadH2(arr,file,mH2F_hiteVtrkchebd,"H2F_hiteVtrkchebd",";track Chebyshev distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
-  nloaded += Rtools::LoadH2(arr,file,mH2F_TrkhitfracVdist,"H2F_TrkhitfracVdist",";track distance (cm);fraction of energy (GeV)", 50,0,100, 100,0,1 );
+  nloaded += histman->AddH2F(file,mH2F_hiteVtrkdist,"H2F_hiteVtrkdist",";track distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
+  nloaded += histman->AddH2F(file,mH2F_hiteVtrktaxid,"H2F_hiteVtrktaxid",";track Taxicab distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
+  nloaded += histman->AddH2F(file,mH2F_hiteVtrkchebd,"H2F_hiteVtrkchebd",";track Chebyshev distance (cm);hit energy (GeV)", 100,0,100, 500,0,50 );
+  nloaded += histman->AddH2F(file,mH2F_TrkhitfracVdist,"H2F_TrkhitfracVdist",";track distance (cm);fraction of energy (GeV)", 50,0,100, 100,0,1 );
 
-  nloaded += Rtools::LoadH2(arr,file,mH2F_clusmeanyVx,"H2F_clusmeanyVx",";Cluster Mean X (cm);Cluster Mean Y (cm)", 160,-160,160, 160,-160,160);
-  nloaded += Rtools::LoadH1(arr,file,mH1F_ClusMeanDTrk,"H1F_ClusMeanDTrk",";Cluster Mean Distance to Track(cm);", 100,0,50);
+  nloaded += histman->AddH2F(file,mH2F_clusmeanyVx,"H2F_clusmeanyVx",";Cluster Mean X (cm);Cluster Mean Y (cm)", 160,-160,160, 160,-160,160);
+  nloaded += histman->AddH1F(file,mH1F_ClusMeanDTrk,"H1F_ClusMeanDTrk",";Cluster Mean Distance to Track(cm);", 100,0,50);
 
-  nloaded += Rtools::LoadH3(arr,file,mH3F_Showers,"H3F_Showers",";HitLocalX;HitLocalY;HitEn", 100,-10,10, 100,-10,10, 100,0,1);
-  nloaded += Rtools::LoadH2(arr,file,mH2F_NhitsPerClus,"H2F_NhitsPerClus",";NhitsPerClus", 6,0,6, 50,0,50);
+  nloaded += histman->AddH3F(file,mH3F_Showers,"H3F_Showers",";HitLocalX;HitLocalY;HitEn", 100,-10,10, 100,-10,10, 100,0,1);
+  nloaded += histman->AddH2F(file,mH2F_NhitsPerClus,"H2F_NhitsPerClus",";NhitsPerClus", 6,0,6, 50,0,50);
 
-  if( file==0 ){
-    mHC2F_PointLocalyVx = new Rtools::HistColl2F("PointLocalyVx_PhiEta",";Point Local X;Point Local Y",100,0,1, 100,0,1);
-    mHC2F_PointLocalyVx->Create(8*6); //8 bins in phi, 6 in eta
-  }
-  else{ mHC2F_PointLocalyVx = new Rtools::HistColl2F(file,"PointLocalyVx_PhiEta",";Point Local X;Point Local Y"); }
-  //std::cout << "|nloaded:"<<nloaded << std::endl;
-  //If number of new histograms == array size then all histograms are new so return true i.e. it is true that all histograms were "made"
-  if( nloaded == arr->GetEntriesFast() ){ return true; }
-  else{ return false; }  //i.e. It is not true that all histograms were made
-}
+  if( mHC2F_PointLocalyVx==0 ){ mHC2F_PointLocalyVx = new TObjArray(); }
+  nloaded += histman->AddH2FArr(file,mHC2F_PointLocalyVx,8*6,"PointLocalyVx_PhiEta",";Point Local X;Point Local Y",100,0,1, 100,0,1); //8 bins in phi, 6 in eta
 
-void StFcsShowerAnaMaker::CleanHists()
-{
-  for( UInt_t i=0; i<mHistsArr->GetEntriesFast(); ++i ){ delete mHistsArr->At(i); }
-  mHistsArr->Clear();
-  delete mHC2F_PointLocalyVx;
-}
-
-void StFcsShowerAnaMaker::WriteHists()
-{
-  for( UInt_t i=0; i<mHistsArr->GetEntriesFast(); ++i ){ mHistsArr->At(i)->Write(); }
-  mHC2F_PointLocalyVx->Write();
+  return nloaded;
 }
 
 Int_t StFcsShowerAnaMaker::Make()
@@ -223,19 +208,14 @@ Int_t StFcsShowerAnaMaker::Make()
   int totalclus = 0;   //Running counter for all clusters for all detectors
   int totalpoints = 0; //Running counter for all points for all detectors
   
-  TClonesArray* mHitsArr = mDataTree->GetBranchArr("FcsHit");
-  TClonesArray* mClusArr = mDataTree->GetBranchArr("FcsCluster");
-  TClonesArray* mPointArr = mDataTree->GetBranchArr("FcsPoint");
-  TClonesArray* mG2tPrimArr = mDataTree->GetBranchArr("G2tPrim");
-  TClonesArray* mG2tParArr = mDataTree->GetBranchArr("G2tParent");
-  //std::cout << "|HitsArr:"<<mHitsArr << "|ClusArr:"<<mClusArr << "|PointArr:"<<mPointArr << "|G2tPrimArr:"<<mG2tPrimArr << "|G2tParArr:"<<mG2tParArr << std::endl;
+  //std::cout << "|HitsArr:"<<mFcsHitsArr << "|ClusArr:"<<mFcsClusArr << "|PointArr:"<<mFcsPointArr << "|G2tPrimArr:"<<mG2tPrimArr << "|G2tParArr:"<<mG2tParArr << std::endl;
   for( int det=0; det<kFcsNDet; det++ ){
     StSPtrVecFcsHit& hits = mFcsColl->hits(det);
     int nh = mFcsColl->numberOfHits(det);
     //std::cout << "|det:"<<det << "|nh:"<<nh << std::endl;
     for( int ihit=0; ihit<nh; ++ihit ){
       StFcsHit* hit=hits[ihit];
-      StFcsPicoHit* picohit = (StFcsPicoHit*)mHitsArr->ConstructedAt(totalhits++);
+      StFcsPicoHit* picohit = (StFcsPicoHit*)mFcsHitsArr->ConstructedAt(totalhits++);
       //std::cout << "|det:"<<det<<"|ihit:"<<ihit << "|hit:"<<hit << "|picohit:"<<picohit << std::endl;
       picohit->mDetId  = hit->detectorId();
       picohit->mChId   = hit->id();
@@ -261,7 +241,7 @@ Int_t StFcsShowerAnaMaker::Make()
     //std::cout << "|det:"<<det << "|nc:"<<nc << std::endl;
     for( int iclus=0; iclus<nc; ++iclus ){
       StFcsCluster* cluster = clusters[iclus];
-      StFcsPicoCluster* picoclus = (StFcsPicoCluster*)mClusArr->ConstructedAt(totalclus++);
+      StFcsPicoCluster* picoclus = (StFcsPicoCluster*)mFcsClusArr->ConstructedAt(totalclus++);
       picoclus->mId             = cluster->id();
       picoclus->mDetId          = cluster->detectorId();
       picoclus->mCategory       = cluster->category();
@@ -300,8 +280,8 @@ Int_t StFcsShowerAnaMaker::Make()
 	StFcsHit* hit = clushits[ihit];
 	if( GetDebug()==3 ){ std::cout << " + |detid:"<<hit->detectorId() << "|id:"<<hit->id() << std::endl; }
 	StFcsPicoHit* picohit = 0;
-	for( UInt_t phit=0; phit<mHitsArr->GetEntriesFast(); ++phit ){
-	  picohit = (StFcsPicoHit*)mHitsArr->At(phit);
+	for( Int_t phit=0; phit<mFcsHitsArr->GetEntriesFast(); ++phit ){
+	  picohit = (StFcsPicoHit*)mFcsHitsArr->At(phit);
 	  if( picohit->mDetId==hit->detectorId() && picohit->mChId==hit->id() ){ picohit->mClusterId = cluster->id(); break; }
 	}
 	if( det<2 ){
@@ -339,7 +319,7 @@ Int_t StFcsShowerAnaMaker::Make()
 	if( psuedorap_index < 0 ){ psuedorap_index = 0; }
 	if( psuedorap_index > 4.2 ){ psuedorap_index = 5; } //Since we have 6 psuedorapidity bins
 	int index = 8*psuedorap_index + phi_index; //Since we have 8 phi indicies
-	mHC2F_PointLocalyVx->At(index)->Fill(xpart,ypart);
+	((TH2*)mHC2F_PointLocalyVx->At(index))->Fill(xpart,ypart);
 
 	StFcsCluster* pointclus = point->cluster();
 	g2t_track_st* g2ttrk = 0;
@@ -366,14 +346,14 @@ Int_t StFcsShowerAnaMaker::Make()
 	  }
 	}
 	if( g2ttrk && g2tvert ){
-	  StFcsPicoPoint* picopoint = (StFcsPicoPoint*)mPointArr->ConstructedAt(totalpoints);
+	  StFcsPicoPoint* picopoint = (StFcsPicoPoint*)mFcsPointArr->ConstructedAt(totalpoints);
 	  picopoint->mDetId                 = point->detectorId();
 	  picopoint->mEnergy                = point->energy();
 	  picopoint->mXlocal                = point->x();
 	  picopoint->mYlocal                = point->y();
 	  picopoint->mParentClusterId       = point->parentClusterId();
 	  picopoint->mNParentClusterPhotons = point->nParentClusterPhotons();
-	  picopoint->mClusterIndex          = mClusArr->GetEntriesFast() - nc + point->parentClusterId(); //The correct index to use is old cluster size (current size - number of clusters added(nc)) + parentclusterid
+	  picopoint->mClusterIndex          = mFcsClusArr->GetEntriesFast() - nc + point->parentClusterId(); //The correct index to use is old cluster size (current size - number of clusters added(nc)) + parentclusterid
 	  //STAR xyx
 	  //StThreeVectorF pointxyz = point->xyz();
 	  //std::cout << "|ipoint:"<<ipoint << "|E:"<<point->energy() << "|x:"<<pointxyz.x() << "|y:"<<pointxyz.y() << "|z:"<<pointxyz.z() << std::endl;
@@ -445,11 +425,11 @@ Int_t StFcsShowerAnaMaker::Make()
 
 	  StPtrVecFcsHit& clushits = pointclus->hits();
 	  //if( clushits.size() != pointclus->nTowers() ){ std::cout << "|nTowers:"<<pointclus->nTowers() << "|HitSize:"<<clushits.size() << std::endl; }
-	  bool longdist = false;
+	  //bool longdist = false;
 	  for( UInt_t ihit=0; ihit<clushits.size(); ++ihit ){
 	    StFcsHit* hit = clushits[ihit];
-	    int hitcol = mFcsDb->getColumnNumber(hit->detectorId(),hit->id());
-	    int hitrow = mFcsDb->getRowNumber(hit->detectorId(),hit->id());
+	    //int hitcol = mFcsDb->getColumnNumber(hit->detectorId(),hit->id());
+	    //int hitrow = mFcsDb->getRowNumber(hit->detectorId(),hit->id());
 	    float hitlocalx = 0;
 	    float hitlocaly = 0;
 	    mFcsDb->getLocalXYinCell(hit,hitlocalx,hitlocaly);
@@ -460,13 +440,13 @@ Int_t StFcsShowerAnaMaker::Make()
 	    StThreeVectorD projhitparentxyz = mFcsDb->projectTrackToEcalSMax(hitparenttrk,g2tvert);
 	    StThreeVectorD hitxyz = mFcsDb->getStarXYZ(hit);
 	    Double_t hitdist = DistStThreeVecD(hitxyz,projhitparentxyz);
-	    if( hitdist>50 ){ longdist = true; }
+	    //if( hitdist>50 ){ longdist = true; }
 	    int trackcol = 0;
 	    int trackrow = 0;
 	    int trackdet = projhitparentxyz.x()>=0 ? 1:0;
 	    StThreeVectorD tracklocalxyz = starXYZtoLocal(trackdet,projhitparentxyz);
 	    starXYZtoColRow(trackdet,projhitparentxyz,trackcol,trackrow);
-	    int trackid = mFcsDb->getId(trackdet,trackrow,trackcol);
+	    //int trackid = mFcsDb->getId(trackdet,trackrow,trackcol);
 	    //std::cout << " + |ihit:"<<ihit << "|hitdist:"<<hitdist << "|hitparentid:"<<hitparenttrk->id << std::endl;
 	    //std::cout << "    - |Hit(X,Y,Z):("<<hitxyz.x()<<","<<hitxyz.y() << ","<< hitxyz.z() << ")" << "|det:"<<hit->detectorId() << "|col:"<<hitcol << "|row:"<<hitrow << "|id:"<<hit->id() << "|E:"<<hit->energy() << "|Local(X,Y,X):("<<hitlocalx*mFcsDb->getXWidth(det)<<","<<hitlocaly*mFcsDb->getYWidth(det)<<","<<0<<")"<< std::endl;
 	    //std::cout << "    - |Trk(X,Y,Z):("<<projhitparentxyz.x()<<","<<projhitparentxyz.y() << ","<< projhitparentxyz.z() << ")" << "|det:"<<trackdet << "|col:"<<trackcol <<"|row:"<<trackrow <<"|id:"<<trackid << "|E:"<<hitparenttrk->e << "|Local(X,Y,X):("<<tracklocalxyz.x()<<","<<tracklocalxyz.y()<<","<<tracklocalxyz.z()<<")"<< std::endl;//"Trk" short for Track but use 3 characters to match number of characters in "Hit"
@@ -562,18 +542,18 @@ Int_t StFcsShowerAnaMaker::Make()
       }
     }
     
-    if( mPointArr->GetEntriesFast()>=2 ){
+    if( mFcsPointArr->GetEntriesFast()>=2 ){
       TLorentzVector lv_p0;   //Lorentz vector of 1 point
       TLorentzVector lv_p1;   //Lorentz vector of other point
       TLorentzVector lv_trk0; //Lorentz vector of 1 g2t track
       TLorentzVector lv_trk1; //Lorentz vector of other g2t track
       
-      StFcsPicoPoint* poi0 = (StFcsPicoPoint*)mPointArr->At(0);
+      StFcsPicoPoint* poi0 = (StFcsPicoPoint*)mFcsPointArr->At(0);
       lv_p0.SetPx(poi0->mPx);
       lv_p0.SetPy(poi0->mPy);
       lv_p0.SetPz(poi0->mPz);
       lv_p0.SetE(poi0->mE);
-      StFcsPicoPoint* poi1 = (StFcsPicoPoint*)mPointArr->At(1);
+      StFcsPicoPoint* poi1 = (StFcsPicoPoint*)mFcsPointArr->At(1);
       lv_p1.SetPx(poi1->mPx);
       lv_p1.SetPy(poi1->mPy);
       lv_p1.SetPz(poi1->mPz);
@@ -617,9 +597,9 @@ Int_t StFcsShowerAnaMaker::Make()
   mH2F_npoiVnclus->Fill(totalclus,totalpoints);
 
   mDataTree->Fill();
-  mHitsArr->Clear();
-  mClusArr->Clear();
-  mPointArr->Clear();
+  mFcsHitsArr->Clear();
+  mFcsClusArr->Clear();
+  mFcsPointArr->Clear();
   mG2tPrimArr->Clear();
   mG2tParArr->Clear();
   
