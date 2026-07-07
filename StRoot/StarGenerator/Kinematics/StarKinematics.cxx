@@ -66,18 +66,24 @@ Int_t StarKinematics::PreGenerate()
   int ntrack = IAttr("ntrack");
 
   std::string particles = SAttr("particles"); // particle list
-  if ( SAttr("pid") ) {                       // and/or single pid
+  if ( SAttr("pid") && IAttr("pid")>0 ) {                       // and/or single pid
     int pid = IAttr("pid");
     auto* part = data.GetParticleG3(pid);
     assert(part);
     particles += part->GetName();
+    LOG_INFO << "Adding particle w/ G3 PID=" << pid << " " << part->GetName() << endm;
   }
-  else if ( SAttr("pdg") ) {
+  else if ( SAttr("pdg") && IAttr("pdg")!=0 ) {
     int pdg = IAttr("pdg");
     auto* part = data.GetParticle(pdg);
     assert(part);
     particles += part->GetName();    
+    LOG_INFO << "Adding particle w/ PDG PID=" << pdg << " " << part->GetName() << endm;
   }
+  else {
+    // hopefully we have a list of particles
+  }
+  LOG_INFO << "Generating particle list: " << particles.c_str() << endm;
   double ptlow   = DAttr("ptlow");
   double pthigh  = DAttr("pthigh");
   double ylow    = DAttr("etalow"); 
