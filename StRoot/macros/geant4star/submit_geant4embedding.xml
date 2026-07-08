@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE note [                                                                                                                                                                        
-<!ENTITY PRODNAME "P23ieAuAu200" >                                                                                                           
+<!ENTITY PRODNAME "P21icAuAu19" >                                                                                                           
 <!ENTITY OFFSET "0">                                                                                                                                                                    
 <!ENTITY NEVENTS "100">
 <!ENTITY NFILES "1">
-<!ENTITY DAQLIST "/star/simu/simu/jwebb/2026/production-filelists/P23ie:production_AuAu200_2019:st_physics_adc.daqlist">
-<!ENTITY TAGLIST "/star/simu/simu/jwebb/2026/production-filelists/P23ie:production_AuAu200_2019:st_physics_adc.taglist">
+<!ENTITY DAQLIST "/star/simu/simu/jwebb/2026/production-filelists/P21ic:production_19GeV_2019:st_physics_adc.daqlist">
+<!ENTITY TAGLIST "/star/simu/simu/jwebb/2026/production-filelists/P21ic:production_19GeV_2019:st_physics_adc.taglist">
 <!ENTITY PTMN "0.0">
 <!ENTITY PTMX "6.0">
 <!ENTITY ETAMN "-1.2">
 <!ENTITY ETAMX "1.2">
-<!ENTITY VZMN "-30.0">
-<!ENTITY VZMX "30.0">
+<!ENTITY VZMN "-145.0">
+<!ENTITY VZMX "145.0">
 <!ENTITY VRMX "2.0">
-<!ENTITY PID "8">
-<!ENTITY PIDTYPE "PID">
+<!ENTITY PIDTYPE "PDG"> 
+<!ENTITY PID "333">
 <!ENTITY MULT "0.05">
 <!ENTITY KINTYPE "FlatPT">
-<!ENTITY TRIGGERS "700001">
+<!ENTITY SIMIN   "false">
+<!ENTITY TRIGGERS "640001,640011,640021,640031,640041,640051">
+<!ENTITY DECAYS   "decayMode(333,{100.0,321,-321, 0}), decayMode(321,{100.0,211,211,-211}), decayMode(-321,{100.0,-211,-211,211}) ">
+<!ENTITY ENGINE   "G4">
 <!ENTITY OUTDIR "/star/simu/simu/g4star/.embedding/out/">                                                                                                                             
 <!ENTITY LOGDIR "/star/simu/simu/g4star/.embedding/log/">                                                                                                                             
 <!ENTITY JOBDIR "/star/simu/simu/g4star/.embedding/job/">
@@ -67,10 +70,9 @@ module unload star-table-0.1.1-root-6.24.06
 module load star-table-0.1.1-root-6.24.06
 
 mkdir StRoot
-#cp -R $STAR/StRoot/macros StRoot/
 
 cp -R &MACROSDIR; StRoot/
-# cp -R &WORKINGDIR;/.${STAR_HOST_SYS} .
+#cp -R &WORKINGDIR;/.${STAR_HOST_SYS} .
 
 # Ensure that any ROOT5 library is removed from the path
 setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
@@ -96,12 +98,38 @@ ls -lah $SCRATCH/tags/
 touch $SCRATCH/${FILEBASENAME}_${JOBID}.log
 
 <!-- Start job -->
+echo Copy embedding chain options
+cp StRoot/macros/embedding/EmbeddingChainOptions.h .
 
-cp StRoot/macros/embedding/EmbeddingChainOpts.h .
-#root.exe -q -b StRoot/macros/embedding/bfcMixer_TpxG4.C'(&NEVENTS;,"'$INPUTFILE0'","'$SCRATCH/tags/${FILEBASENAME}.tags.root'", &PTMN;, &PTMX;, &ETAMN;, &ETAMX;, &VZMN;, &VZMX;, &VRMX;, &PID;, &MULT;, triggers, "&PRODNAME;", "&KINTYPE;",false,"&PIDTYPE;","G4")' &gt;&gt;&amp; $SCRATCH/${FILEBASENAME}_${JOBID}.log
-root.exe -q -b StRoot/macros/embedding/bfcMixer_TpxG4.C'("P21idIsobar200")'
+echo Where is root
+which root
 
+echo List macros directory
+ls -l StRoot/macros/embedding/
 
+echo STAR version is $STAR
+
+echo Create the run macro
+touch runBfc.C
+cat &lt;&lt;EOF &gt;&gt; runBfc.C
+#include "StRoot/macros/embedding/bfcMixer_TpxG4.C"
+void runBfc() {
+     bfcMixer_TpxG4(
+     &NEVENTS;,
+     "$INPUTFILE0",
+     "$SCRATCH/tags/${FILEBASENAME}.tags.root",
+     &PTMN;, &PTMX;, &ETAMN;, &ETAMX;, &VZMN;, &VZMX;, &VRMX;, &PID;, &MULT;, 
+     {&TRIGGERS;},   // comma separated list of triggers is inserted into a vector of triggers
+     "&PRODNAME;", 
+     "&KINTYPE;",
+     &SIMIN;,
+     "&PIDTYPE;", 
+     {&DECAYS;},    // comma separated list of decay modes is inserted into a vector of decay modes
+     "&ENGINE;");
+};
+EOF
+cat runBfc.C
+root -q -b runBfc.C
   
 ls -la .
 
