@@ -75,7 +75,7 @@ public:
   virtual void InitGeometry();
 
   /// Add user defined particles (optional)
-  virtual void AddParticles() {LOG_INFO << "VMC APP AddParticles()" << endm; };
+  virtual void AddParticles();
 
   /// Add user defined ions (optional)
   virtual void AddIons() {}

@@ -15,7 +15,7 @@
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
-//#include "TG4ParticlesManager.h"
+#include "TG4ParticlesManager.h"
 
 #include "TString.h"
 #include "StSensitiveDetector.h"
@@ -29,6 +29,9 @@
 #include "StChain/StEvtHddr.h"
 #include "TH2F.h"
 
+#include "TAttr.h"
+#include "TROOT.h"
+
 #include <functional>
 
 //_______________________________________________________________________________________________
@@ -40,6 +43,7 @@
 #include "TG4RunManager.h"
 #include "TG4RunConfiguration.h"
 #include "TGeant3/TGeant3TGeo.h"
+// #include "TG4ParticlesManager.h"
 
 #include <G4ParticleTable.hh>
 #include <G4IonTable.hh>
@@ -627,7 +631,7 @@ std::function<void(void)> trigger;
 
 //________________________________________________________________________________________________
 StarParticleData& particleData = StarParticleData::instance();
-//TG4ParticlesManager* g4particleManager = TG4ParticlesManager::Instance();
+TG4ParticlesManager* g4particleManager = TG4ParticlesManager::Instance();
 
 //________________________________________________________________________________________________
 StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title, double zmax, double rmax, std::string multi, StMCParticleStack* stack ) : 
@@ -1136,6 +1140,35 @@ double StarVMCApplication::TrackingZmax() const {
   return mZmax;
 }
 //________________________________________________________________________________________________
+void StarVMCApplication::AddParticles() {
+  // Builds list of particle IDs which will have their decays constrained
+  std::map<int,int> pdgmap;
+  for ( auto* o : *_g4maker->GetAttr() ) {
+    std::string key = o->GetName();
+    std::string val = o->GetTitle();
+    auto keys = tokenize(key, ":" );
+    if ( keys[0]=="setdecay" && keys.size() > 1 ) {
+      int pdg = std::stoi( keys[1] );
+      if ( pdg ) {
+	pdgmap[pdg] = pdg;
+      }
+    }
+  }
+  // Loop over particles with constrained decays and set the branching ratios and decay channels
+  for ( const auto& pair : pdgmap ) {
+    int pdg = pair.first;
+    std::string bratio = _g4maker->SAttr( Form("setdecay:%i:bratio",pdg) );
+    std::string mode   = _g4maker->SAttr( Form("setdecay:%i:mode",pdg) );
+    std::string cmd = Form( "int pdg=%i; float bratio[6]=%s; int mode[6][3]=%s; gMC->SetDecayMode( pdg, bratio, mode );", pdg, bratio.c_str(), mode.c_str() );
+    LOG_INFO << cmd.c_str() << endm;
+    gROOT->ProcessLine( cmd.c_str() );	
+  }
+
+  // Dump the G4 particle table (if this is a G4 simulation)
+  if ( gG4 == gMC && gG4 )   G4ParticleTable::GetParticleTable()->DumpTable();
+
+}
+//________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
 }
@@ -1276,14 +1309,13 @@ int StGeant4Maker::Make() {
   // be skipped.  This transpires when the embed maker has terminated early without generating any
   // particles.  The simulation should have returned an empty g2t_vertex and g2t_track structure.
   St_g2t_vertex  *g2t_vertex_table  =  (St_g2t_vertex  *) GetDataSet("g2t_vertex");
-  St_g2t_track   *g2t_track_table   =  (St_g2t_track   *) GetDataSet("g2t_track");  
+  St_g2t_track   *g2t_track_table   =  (St_g2t_track   *) GetDataSet("g2t_track");    
 
   assert(g2t_vertex_table);
   assert(g2t_track_table);
 
   int nv = g2t_vertex_table->GetNRows();
   int nt = g2t_track_table->GetNRows();
-
 
   if ( nv==0 || nt ==0 ) {
     LOG_INFO << "No vertices || no tracks" << endm;
