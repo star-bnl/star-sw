@@ -1,8 +1,10 @@
+
 class StBFChain;        
 class StMessMgr;
 
 #include <string>
 #include <TString.h>
+#include <TVirtualMC.h>
 
 #include "EmbeddingChainOptions.h"
 
@@ -25,7 +27,6 @@ std::string   chain0opts = ( prepend + " " + chain1opts_ + chain2opts_ + " " + c
 std::string   chain1opts = chain1opts_ + " nooutput " ;
 std::string   chain2opts = chain2opts_ + " noinput nooutput " ;
 std::string   chain3opts = chain3opts_ + " -in noinput " ;
-
 
 const bool runchains[] = { false, true, true, true };
 
@@ -83,7 +84,46 @@ std::string type = "FlatPT";
 std::string engine = "G4";
 std::string pidtype = "pid";
 
+struct DecayMode {
+  int    pdg;
+  float bratio[6];
+  int mode[6][3];
+};
 
+struct SingleDecay {
+  double br;
+  int   daughter1, daughter2, daughter3;
+};
+
+DecayMode decayMode( int pdg, SingleDecay d, SingleDecay d2={}, SingleDecay d3={}, SingleDecay d4={}, SingleDecay d5={}, SingleDecay d6={} ) {
+  DecayMode result={
+    pdg,    
+    {float(d.br), float(d2.br), float(d3.br), float(d4.br), float(d5.br), float(d6.br) },
+    {
+      {d.daughter1, d.daughter2, d.daughter3},
+      {d2.daughter1, d2.daughter2, d2.daughter3},
+      {d3.daughter1, d3.daughter2, d3.daughter3},
+      {d4.daughter1, d4.daughter2, d4.daughter3},
+      {d5.daughter1, d5.daughter2, d5.daughter3},
+      {d6.daughter1, d6.daughter2, d6.daughter3}      
+    }
+  };
+  return result;
+};
+
+ostream& operator<<(ostream& os, const DecayMode& m) {
+  os << "Set decay mode pdg=" << m.pdg << " ";
+  for ( int i=0;i<6;i++ ) {
+    if ( m.bratio[i] <= 0 ) break;
+    os << m.bratio[i] << " ";
+    for ( int j=0;j<3;j++ ) {
+      if ( m.mode[i][j] ) os << m.mode[i][j] << " ";
+    }
+  }
+  return os;
+};
+
+std::vector< DecayMode > decayModes;
 
 void process( const char* line ){
   std::cout << "]" << line << std::endl;
@@ -116,6 +156,7 @@ void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn,
 void SetPartOpt( int pid, double mult, const char* pidtype="pid" ) {
   // Map PID onto particle name
   auto* kine = chain2->Maker("StarKine");
+  gMessMgr->Info() << "SetPartOpt " << pidtype << " " << pid << " " << mult << endm;
   kine->SetAttr(pidtype,int(pid));
   kine->SetAttr("ntrack", double(mult));
   if ( mult < 1.0 ) {
@@ -243,7 +284,7 @@ void bfcMixer_TpxG4()
   top->cd();
 
 
-#if 1
+
   auto* g4star = chain2->Maker("geant4star");
   if ( g4star ) {
 
@@ -276,14 +317,38 @@ void bfcMixer_TpxG4()
 		    "/mcCrossSection/setMinKinE 1 keV "       ";"
 		    "/mcCrossSection/setMaxKinE 250 GeV "     ";"
 		    "/mcCrossSection/setMinMomentum 10 keV "  ";"
-		    "/mcCrossSection/setMaxMomentum 250 GeV " ";"
+		    "/mcCrossSection/setMaxMomentum 250 GeV " ";"		   
+		    "/mcVerbose/physicsExtDecayer 2"     ";"
+		    "/mcVerbose/particlesManager 2"      ";"
 		    );
+		    
 
+  // After initialization, set any decay modes on the virtual MC
+  // NOTE: This implementation is not compatible with multi engine
+  // simulation mode.
+  for ( auto d : decayModes ) {
+    LOG_INFO << "Setting custom decay modes for " << d.pdg << endm;
+    if ( d.pdg ) {
+      g4star->SetAttr( "setdecay", d.pdg );
+      g4star->SetAttr( "setdecay", d.pdg );
+      g4star->SetAttr( "setdecay", d.pdg );
+      g4star->SetAttr( "setdecay", d.pdg );
+      g4star->SetAttr( Form("setdecay:%i:bratio", d.pdg), Form("{%f,%f,%f,%f,%f,%f}", d.bratio[0], d.bratio[1], d.bratio[2], d.bratio[3], d.bratio[4], d.bratio[5] ));
+      g4star->SetAttr( Form("setdecay:%i:mode", d.pdg),  
+		       Form("{{%i,%i,%i},{%i,%i,%i},{%i,%i,%i},{%i,%i,%i},{%i,%i,%i},{%i,%i,%i}}",
+			    d.mode[0][0],	d.mode[0][1], d.mode[0][2],
+			    d.mode[1][0],	d.mode[1][1], d.mode[1][2],
+			    d.mode[2][0],	d.mode[2][1], d.mode[2][2],
+			    d.mode[3][0],	d.mode[3][1], d.mode[3][2],
+			    d.mode[4][0],	d.mode[4][1], d.mode[4][2],
+			    d.mode[5][0],	d.mode[5][1], d.mode[5][2]) );
+    }
+							    
+  }
 
     
 
   }
-#endif
   
   TAttr::SetDebug(0);
   
@@ -303,6 +368,9 @@ void bfcMixer_TpxG4()
 
   top->Init();
   top->ls(10);
+
+
+
 
   //  top->Maker("TpcRS")->SetDebug(999);
   //  top->Maker("Sti")->SetDebug(999);
@@ -336,6 +404,7 @@ void bfcMixer_TpxG4(
 		    const char* kintype   = "FlatPT"       ,
 		    bool simIn = false                     ,
 		    const char* pidtype_ = "pid"           ,  // PID (aka geant 3 id) or PDG
+		    const std::vector< DecayMode > decays_ = {}, 
 		    const char* engine_ = "G4"
 		     ) {
 
@@ -361,6 +430,8 @@ void bfcMixer_TpxG4(
 
   daqfile=daqfile_;
   tagfile=tagfile_;
+
+  decayModes = decays_;
 
   auto opts = getChainOptions( prodName, simIn );
 
@@ -422,31 +493,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
 
   if ( dbg_ == "P21icAuAu19" ) {
-    //lrwxrwxrwx   1 jwebb rhstar     48 Mar 25 16:13 auau19_phys_chop150 -> /gpfs01/star/embed/daq/2019/auau19_phys_chop150/
-    //lrwxrwxrwx   1 jwebb rhstar     40 Mar 25 16:12 auau19_phys -> /gpfs01/star/embed/tags/2019/auau19_phys
-    //auau19_phys_chop150/st_physics_adc_20069061_raw_6500004.daq  auau19_phys/st_physics_adc_20069061_raw_6500004.tags.root
-    /*
-      root4star -b &gt;&gt;&amp; $SCRATCH/${FILEBASENAME}_${JOBID}.log &lt;&lt;EOF                                                                                                            
-      std::vector&lt;Int_t&gt; triggers;                                                                                                                                                    
-      triggers.push_back(640001);                                                                                                                                                           
-      triggers.push_back(640011);                                                                                                                                                           
-      triggers.push_back(640021);                                                                                                                                                           
-      triggers.push_back(640031);                                                                                                                                                           
-      triggers.push_back(640041);                                                                                                                                                           
-      triggers.push_back(640051);                                                                                                                                                           
-      .L StRoot/macros/embedding/bfcMixer_Tpx.C                                                                                                                                             
-      bfcMixer_Tpx(1060, "$INPUTFILE0", "$SCRATCH/tags/${FILEBASENAME}.tags.root", 0, 6.0, -1.0, 1.0, -145.0, 145.0, 2.0, 45, 0.05, triggers, "P21icAuAu19", "FlatPt", 0, "${FILEBASENAME}.$
-      .q                                                                                                                                                                                    
-      EOF            
-
-/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq
-/star/data03/daq/2019/076/20076023/st_physics_adc_20076023_raw_4000002.daq
-/star/data03/daq/2019/093/20093002/st_physics_adc_20093002_raw_6000012.daq
-
-
-     */
-
-    const int   nevents_     = 10; 
+    const int   nevents_     = 100; 
     const char* mydaqfile_   = "/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq";
     const char* mytagfile_   = "/gpfs01/star/embed/tags/2019/auau19_phys/st_physics_adc_20057049_raw_2000003.tags.root" ;
     double myptmn_           = 0.0;
@@ -462,8 +509,66 @@ void bfcMixer_TpxG4( const char* dbg ) {
     const char* myprodname  = "P21icAuAu19" ; 
     const char* mykintype   = "FlatPT"      ;
     bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
-
   };
+
+  /*
+/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq
+/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root
+   */
+  if ( dbg_ == "P21icAuAu19:phi" ) {
+    const int   nevents_     = 100; 
+    const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq";
+    const char* mytagfile_   = "/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root";
+    double myptmn_           = 0.0;
+    double myptmx_           = 6.0;
+    double myetamn_          = -1.0;
+    double myetamx_          = +1.0;
+    double myvzmn_           = -145.0       ; 
+    double myvzmx_           =  145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 333        ;
+    double mymult_           = 0.05           ; 
+    std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; // TODO:  check triggers
+    const char* myprodname  = "P21icAuAu19" ; 
+    const char* mykintype   = "FlatPT"      ;
+    const char* mypidtype   = "pdg";
+    // 50% phi --> K+ K-
+    // 50% phi --> K- K+ 
+    //    DecayMode phiKK = decayMode( 333, {50.0, 321, -321, 0 }, {50.0, -321, 321, 0 } );
+    //    decayModes.push_back( phiKK );			 
+
+    // bfcMixer_TpxG4( 100, "/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq", "/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root", 0., 6., -1., 1., -145., 145., 2.0, 333, 0.05, {640001,640011,640021,640031,640041,640051}, "P21icAuAu19" , "FlatPT", "pdg",        {    decayMode(  333, { 100.0,  321, -321,    0 } ),           decayMode(  321, { 100.0,  211,  211, -211 } ),         decayMode( -321, { 100.0, -211, -211,  211 } )       }
+
+
+    bfcMixer_TpxG4
+      ( 
+       nevents_, 
+       mydaqfile_, 
+       mytagfile_,
+       myptmn_, 
+       myptmx_, 
+       myetamn_, 
+       myetamx_, 
+       myvzmn_, 
+       myvzmx_, 
+       myvr_, 
+       mypid_, 
+       mymult_, 
+       mytriggers_, 
+       myprodname, 
+       mykintype, 
+       false, 
+       mypidtype,
+       {
+	 decayMode(  333, { 100.0,  321, -321,    0 } ),     // phi -- K+ K- 100%
+	 decayMode(  321, { 100.0,  211,  211, -211 } ),     //    K+ --> pi+ pi+ pi- 100%
+	 decayMode( -321, { 100.0, -211, -211,  211 } )      //    K- --> pi+ pi- pi- 100%	   
+       }
+	);
+  };
+
+
+
 
   if ( dbg_ == "P21idIsobar200" ) {
     const int   nevents_ = 100; 
@@ -485,6 +590,54 @@ void bfcMixer_TpxG4( const char* dbg ) {
     bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
      
   }
+  /*
+/star/data101/EMBED/daq/2019/193/20193026/st_physics_adc_20193026_raw_4000002.daq
+/star/data20/tags/production_AuAu200_2019/ReversedFullField/P23ie/2019/193/20193026/st_physics_adc_20193026_raw_4000002.tags.root
+
+   */
+  if ( dbg_ == "P23ieAuAu200:pion" ) {
+    const int   nevents_     = 100; 
+    const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/193/20193026/st_physics_adc_20193026_raw_4000002.daq"; 
+    const char* mytagfile_   = "/star/data20/tags/production_AuAu200_2019/ReversedFullField/P23ie/2019/193/20193026/st_physics_adc_20193026_raw_4000002.tags.root" ; 
+    double myptmn_           = 0.0           ; 
+    double myptmx_           = 20.0          ;
+    double myetamn_          = -1.0          ; 
+    double myetamx_          =  1.0          ; 
+    double myvzmn_           = -55.0         ; 
+    double myvzmx_           = 55.0          ; 
+    double myvr_             = 100.0         ; 
+    int mypid_               = 7             ;
+    double mymult_           = 0.05          ; 
+    std::vector<int> mytriggers_  = {700001} ; 
+    const char* myprodname  = "P23ieAuAu200"  ; 
+    const char* mykintype   = "FlatPT"       ;
+    bool mysimIn = false                     ;
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );     
+  }
+
+  /*
+/star/data101/EMBED/daq/2019/062/20062042/st_physics_adc_20062042_raw_6000002.daq
+/star/data20/tags/production_19GeV_2019/ReversedFullField/P23id/2019/062/20062042/st_physics_adc_20062042_raw_6000002.tags.root
+
+   */
+  if ( dbg_ == "P23idAuAu19:deuteron" ) {
+    const int   nevents_     = 100; 
+    const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/062/20062042/st_physics_adc_20062042_raw_6000002.daq";
+    const char* mytagfile_   = "/star/data20/tags/production_19GeV_2019/ReversedFullField/P23id/2019/062/20062042/st_physics_adc_20062042_raw_6000002.tags.root";
+    double myptmn_           = 0.0;
+    double myptmx_           = 6.0;
+    double myetamn_          = -1.0;
+    double myetamx_          = +1.0;
+    double myvzmn_           = -145.0       ; 
+    double myvzmx_           =  145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 45            ;
+    double mymult_           = 0.05           ; 
+    std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
+    const char* myprodname  = "P23idAuAu19" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+  };
 
     
 };
