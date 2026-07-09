@@ -88,7 +88,7 @@ public:
 
 private:
     //    StBTofHit *mBTofHit;   //$LINK
-#if defined(__CINT__) || (defined(__ROOTCLING__) && ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0))
+#ifdef __CINT__
     StObjLink        mBTofHit;
 #else
     StLink<StBTofHit>  mBTofHit;
