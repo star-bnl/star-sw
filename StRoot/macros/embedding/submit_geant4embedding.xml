@@ -2,8 +2,8 @@
 <!DOCTYPE note [                                                                                                                                                                        
 <!ENTITY PRODNAME "P21icAuAu19" >                                                                                                           
 <!ENTITY OFFSET "0">                                                                                                                                                                    
-<!ENTITY NEVENTS "100">
-<!ENTITY NFILES "1">
+<!ENTITY NEVENTS "1000">
+<!ENTITY NFILES "ALL">
 <!ENTITY DAQLIST "/star/simu/simu/jwebb/2026/production-filelists/P21ic:production_19GeV_2019:st_physics_adc.daqlist">
 <!ENTITY TAGLIST "/star/simu/simu/jwebb/2026/production-filelists/P21ic:production_19GeV_2019:st_physics_adc.taglist">
 <!ENTITY PTMN "0.0">
