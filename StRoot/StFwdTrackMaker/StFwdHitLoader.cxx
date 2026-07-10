@@ -34,7 +34,9 @@
 #define LOG_DEBUG if (true) {} else LOGGERMESSAGE(Debug)
 #define LOG_WARN  if (true) {} else LOGGERMESSAGE(Warning)
 
-TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.0040906154) {
+// Issue #5: default rSize was 3.0, not kFstStripPitchR (2.875 cm) -- the actual
+// FST strip pitch in r. phiSize stays numeric (= kFstStripPitchPhi).
+TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = kFstStripPitchR, float phiSize = 0.0040906154) {
     // we can calculate the CovMat since we know the det info, but in future we should probably keep this info in the hit itself
     // measurements on a plane only need 2x2
     // for Si geom we need to convert from cylindrical to cartesian coords
@@ -644,12 +646,28 @@ int StFwdHitLoader::loadEpdHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
             double y0 = (y[0] + y[1] + y[2] + y[3]) / 4.0;
             mSpacepointsEpd.push_back( TVector3( x0, y0, zepd ) );
 
-            // make the covariance matrix based on max x and y distance
+            // Fix (Issue #23): covariance from tile corners, not a hardcoded
+            // isotropic sigma_xy=4cm. EPD tiles are trapezoidal with very
+            // different radial (sigma_r~1-2cm) and azimuthal (sigma_phi*r~3-8cm)
+            // extents, and for a tile not aligned with x/y the (x,y) covariance
+            // has a non-zero off-diagonal term -- both were missing. For a
+            // uniform distribution over a quadrilateral, C = (1/3)*mean(corner
+            // outer-products) = sum/12, exact for rectangles/parallelograms and a
+            // good approximation for the mildly trapezoidal EPD tiles. This
+            // naturally gives the anisotropic, correlated (x,y) uncertainty from
+            // the actual tile shape (corners already available above via
+            // epdgeo.GetCorners) without any hardcoded approximation.
             TMatrixDSym hitCov3(3);
-            const double sigXY = 4; //cm TODO: get good
-            hitCov3(0, 0) = sigXY * sigXY;
-            hitCov3(1, 1) = sigXY * sigXY;
-            hitCov3(2, 2) = 1; //cm // unused if they are loaded as points on plane
+            double cxx=0, cyy=0, cxy=0;
+            for(int k=0;k<4;k++){
+                double dx=x[k]-x0, dy=y[k]-y0;
+                cxx+=dx*dx; cyy+=dy*dy; cxy+=dx*dy;
+            }
+            hitCov3(0, 0) = cxx / 12.0;
+            hitCov3(1, 1) = cyy / 12.0;
+            hitCov3(0, 1) = cxy / 12.0;
+            hitCov3(1, 0) = cxy / 12.0;
+            hitCov3(2, 2) = 1.0; // σ_z² = 1 cm² (tile thickness ≈ 2 cm / √12 ≈ 0.58 cm; conservative)
 
             const vector<pair<unsigned int, float>> gt = hit->getGeantTracks();
             int track_id = -1;

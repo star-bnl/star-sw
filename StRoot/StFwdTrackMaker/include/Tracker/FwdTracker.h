@@ -1553,12 +1553,31 @@ class ForwardTrackMaker {
         }
         if (gtr.mIsFitConverged != true)
             return 0;
+
+        // Guard: skip blown-up Kalman states. A degenerate zero-curvature fit can
+        // report sigU up to O(1e4) cm, which produces ghost hit associations far
+        // (up to ~16 cm) from the real track (Issue #2).
+        if (gtr.mMomentum.Perp() < 0.05) {
+            LOG_WARN << "addFttHits: skipping blown-up state pT=" << gtr.mMomentum.Perp() << endm;
+            return 0;
+        }
+
         if ( hitmap.find(disk) == hitmap.end() )
             return 0;
 
         Seed_t hits_near_plane;
         try {
-            auto msp = mTrackFitter->projectToFtt(disk, gtr.mTrack);
+            // Fix (Issue #1): project to disk's first front-quadrant plane, not
+            // projectToFtt(disk). That helper aliases the 0-3 disk index directly
+            // into mFttPlanes, a 32-entry per-quadrant array (see
+            // TrackFitter::createAllFttPlanes: 16 quadrants x front/back, quadrants
+            // 1-4=disk0, 5-8=disk1, 9-12=disk2, 13-16=disk3) -- indices 0-3 are
+            // actually disk-0's 4 front quadrants (all z=312.34 cm), not one entry
+            // per disk, so disks 1-3 all projected to disk 0's z. mFttPlanes[disk*4]
+            // is disk's first front quadrant -- same geometry source the real hits
+            // use (via _genfit_plane_index), just picked as a representative z for
+            // the initial projection/search.
+            auto msp = mTrackFitter->projectToPlane(mTrackFitter->mFttPlanes[disk * 4], gtr.mTrack);
 
             // now look for Ftt hits near the specified state
             // hits_near_plane = findFttHitsNearProjectedState(hitmap.at(disk), msp);
@@ -1638,13 +1657,46 @@ class ForwardTrackMaker {
             LOG_ERROR << "Invalid FST disk number: " << disk << endm;
             return 0;
         }
+
+        // Guard: skip blown-up Kalman states (Issue #2, same rationale as addFttHits).
+        if (gtr.mMomentum.Perp() < 0.05) {
+            LOG_WARN << "addFstHits: skipping blown-up state pT=" << gtr.mMomentum.Perp() << endm;
+            return 0;
+        }
+
         if ( hitmap.find(disk) == hitmap.end() )
             return 0;
 
         Seed_t nearby_hits;
         try {
-            // get measured state on plane at specified disk
-            auto msp = mTrackFitter->projectToFst(disk, gtr.mTrack);
+            // Fix (Issue #8): project to the disk's known sensor-plane z, not
+            // projectToFst(disk). That helper aliases the 0-2 disk index directly
+            // into mFstSensorPlanes, a 108-entry per-sensor array (3 disks x 12
+            // wedges x 3 sensors, see TrackFitter::createAllFstPlanes) -- indices
+            // 0-2 are actually disk-0's first wedge's 3 sensors, not one entry per
+            // disk, so disks 1-2 both projected to disk 0's z. Unlike FTT's
+            // quadrants (exactly coplanar, same physical layer), FST wedges are
+            // individually mounted, so average all 36 sensors (12 wedges x 3
+            // r-sensors) of the disk rather than trust one wedge's z alone; also
+            // use a flat z-normal plane, not any one wedge's own (azimuthally
+            // rotated) orientation, since we don't yet know which wedge/phi the
+            // track will actually cross. Geometry is fixed for the whole job, so
+            // compute the 3 disk-z averages once (lazily, on first call) instead
+            // of every track/disk/event.
+            static double fstDiskZ[3];
+            static bool fstDiskZReady = false;
+            if (!fstDiskZReady) {
+                for (int d = 0; d < 3; d++) {
+                    double z = 0;
+                    for (size_t is = d * 36; is < d * 36 + 36; is++)
+                        z += mTrackFitter->mFstSensorPlanes[is]->getO().Z();
+                    fstDiskZ[d] = z / 36.0;
+                }
+                fstDiskZReady = true;
+            }
+            auto diskPlane = genfit::SharedPlanePtr(
+                new genfit::DetPlane(TVector3(0, 0, fstDiskZ[disk]), TVector3(0, 0, 1)));
+            auto msp = mTrackFitter->projectToPlane(diskPlane, gtr.mTrack);
             // now look for Si hits near this state
             nearby_hits = findFstHitsNearProjectedState(hitmap.at(disk), msp);
         } catch (genfit::Exception &e) {
@@ -1690,8 +1742,12 @@ class ForwardTrackMaker {
             double h_phi = TMath::ATan2(h->getY(), h->getX());
             double h_r = sqrt(pow(h->getX(), 2) + pow(h->getY(), 2));
             double mdphi = fabs(h_phi - probe_phi);
-            if (mdphi > 2*3.1415926)
-                mdphi = mdphi - 2*3.1415926;
+            // Fix (Issue #9): wrapping was broken. The original check (> 2pi) never
+            // fires because fabs(atan2 diff) is already in [0, 2pi] with equality
+            // only at +-pi vs -+pi. Correct fold: if diff > pi, the short way around
+            // is 2pi - diff.
+            if (mdphi > TMath::Pi())
+                mdphi = TMath::TwoPi() - mdphi;
 
             if ( mdphi < dphi && fabs( h_r - probe_r ) < dr) { // handle 2pi edge
                 found_hits.push_back(h);
@@ -1836,8 +1892,13 @@ class ForwardTrackMaker {
                 }
             }
     
+            // Fix (Issue #3/4/7): select by minimum |dy|/|dx| (the strip's precision
+            // coordinate), not minimum dPhi. H strips measure y precisely
+            // (sigma_y~0.01 cm); their phi-center can be displaced from the track by
+            // up to ~0.18 rad since the strip spans ~4 cm in x, so gating on dPhi
+            // systematically rejected good H-strip hits (and vice versa for V/dx).
             if ( hsx > hsy ){ // horizontal strip
-                if ( sp < horizontalMin_dp ){
+                if ( sy < horizontalMin_dy ){
                     horizontalMin_dp = sp;
                     horizontalClosest = h;
                     horizontalMin_dx = sx;
@@ -1845,7 +1906,7 @@ class ForwardTrackMaker {
                     horizontalMin_dr = sr;
                 }
             } else if ( hsy > hsx ){ // vertical strip
-                if ( sp < verticalMin_dp ){
+                if ( sx < verticalMin_dx ){
                     verticalMin_dp = sp;
                     verticalClosest = h;
                     verticalMin_dx = sx;
@@ -1860,13 +1921,16 @@ class ForwardTrackMaker {
         } // loop h
 
         // check threshold and add the closest horizontal strip hit
-        if (  fabs(horizontalMin_dp) < thresholdPhi && fabs(horizontalMin_dr) < thresholdR && (horizontalMin_dx < thresholdX || horizontalMin_dy < thresholdY) ) {
+        // Fix (Issue #3/4/7): gate on the precision coordinate (|dy|) instead of
+        // dPhi, and use && instead of || so a hit isn't accepted just because one
+        // coordinate happened to pass while the other was far off (up to ~16 cm).
+        if ( horizontalMin_dy < thresholdY && fabs(horizontalMin_dr) < thresholdR ) {
             found_hits.push_back(horizontalClosest);
             LOG_INFO << "Adding horizontal strip hit with dPhi = " << horizontalMin_dp << ", dR = " << horizontalMin_dr << ", dx = " << horizontalMin_dx << ", dy = " << horizontalMin_dy << endm;
         }
-        
+
         // check threshold and add the closest vertical strip hit
-        if (  fabs(verticalMin_dp) < thresholdPhi && fabs(verticalMin_dr) < thresholdR && (verticalMin_dx < thresholdX || verticalMin_dy < thresholdY) ) {
+        if ( verticalMin_dx < thresholdX && fabs(verticalMin_dr) < thresholdR ) {
             found_hits.push_back(verticalClosest);
             LOG_INFO << "Adding vertical strip hit with dPhi = " << verticalMin_dp << ", dR = " << verticalMin_dr << ", dx = " << verticalMin_dx << ", dy = " << verticalMin_dy << endm;
         }
@@ -1894,6 +1958,12 @@ class ForwardTrackMaker {
         const FwdDataSource::HitMap_t &hitmap = mDataSource->getEpdHits();
         if (gtr.mIsFitConverged != true)
             return 0;
+
+        // Guard: skip blown-up Kalman states (Issue #2, same rationale as addFttHits).
+        if (gtr.mMomentum.Perp() < 0.05) {
+            LOG_WARN << "addEpdHits: skipping blown-up state pT=" << gtr.mMomentum.Perp() << endm;
+            return 0;
+        }
 
         Seed_t hits_near_plane;
         try {
@@ -1942,7 +2012,9 @@ class ForwardTrackMaker {
     */
     Seed_t findEpdHitsNearProjectedState(const Seed_t &available_hits,
             genfit::MeasuredStateOnPlane &msp,
-            double dx = 1.5, double dy = 1.5,
+            // Fix (Issue #11): EPD tile uncertainty is sigma_xy~4 cm, so the
+            // threshold must be >=2sigma~8cm to find real hits; widened from 1.5 cm.
+            double dx = 10.0, double dy = 10.0,
             double dr = 99, double dphi = 0.2
         ) {
 
@@ -1964,16 +2036,17 @@ class ForwardTrackMaker {
             double sx = h->getX() - msp.getPos().X();
             double sy = h->getY() - msp.getPos().Y();
 
-            if ( fabs(sr) < fabs(mindr) )
-                mindr = sr;
+            // Fix (Issue #10/12): update all 4 metrics together from the same
+            // minimum-dPhi hit. Previously each metric tracked its own independent
+            // minimum over all hits, so acceptance could mix metrics from different
+            // hits (e.g. mindx from hit A, closest=hit B) and accept the wrong hit.
             if ( fabs(sp) < fabs(mindp) ){
                 mindp = sp;
+                mindx = sx;
+                mindy = sy;
+                mindr = sr;
                 closest = h;
             }
-            if ( fabs(sx) < fabs(mindx) )
-                mindx = sx;
-            if ( fabs(sy) < fabs(mindy) )
-                mindy = sy;
 
         } // loop h
 

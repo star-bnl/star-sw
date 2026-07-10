@@ -889,15 +889,30 @@ std::string StFwdTrackMaker::defaultConfig = R"(
             <SegmentBuilder>
                 <!-- <Criteria name="Crit2_RZRatio" min="0" max="1.20" /> -->
                 <!-- <Criteria name="Crit2_DeltaRho" min="-50" max="50.9"/> -->
+                <!-- Fix (Issue #22): require adjacent-disk r-strip change to be physical.
+                     deltaRho = rhoParent - rhoChild (parent=outer disk, child=inner).
+                     Same strip (s,s): deltaRho~0; adjacent strip (s,s+1): deltaRho~2.875 cm.
+                     Rejects looping/backward hits (deltaRho < -0.3) and multi-strip jumps
+                     (deltaRho > 3.1). 0.3 cm buffer for floating-point + disk misalignment.
+                     Recommended by Barak Schmookler 2026-06-22. -->
+                <Criteria name="Crit2_DeltaRho" min="-0.3" max="3.1" />
                 <Criteria name="Crit2_DeltaPhi" min="0" max="2.0" />
                 <!-- <Criteria name="Crit2_StraightTrackRatio" min="0.01" max="5.85"/> -->
             </SegmentBuilder>
 
             <ThreeHitSegments>
-				<Criteria name="Crit3_3DAngle" min="0" max="1" />
+                <!-- Fix (Issue #22): Crit3_3DAngle/Crit3_2DAngle parameters are in
+                     DEGREES, not radians. max="1" means 1 degree, not 1 radian. For a
+                     seed with r-segments (s,s,s+1) -- one r-strip change between
+                     adjacent disks, geometrically expected at eta~2.5-3 -- the 3D kink
+                     angle is ~21 deg and the 2D angle is ~90 deg, both far above the 1
+                     deg cut, so every valid seed with any r-strip change was rejected.
+                     Removed both; replaced by Crit2_DeltaRho above.
+                     [Barak Schmookler 2026-06-22] -->
+                <!-- <Criteria name="Crit3_3DAngle" min="0" max="1" /> -->
                 <!-- <Criteria name="Crit3_PT" min="0" max="100" /> -->
 				<!-- <Criteria name="Crit3_ChangeRZRatio" min="0.8" max="1.21" /> -->
-				<Criteria name="Crit3_2DAngle" min="0" max="1" />
+                <!-- <Criteria name="Crit3_2DAngle" min="0" max="1" /> -->
             </ThreeHitSegments>
 
         </Iteration>
