@@ -127,11 +127,15 @@ class GenericFitSeeder : public FitSeedMaker {
         
             // const double BStrength = 0.5; // 0.5 T = 5 Gauss
             // const double C = 0.3 * BStrength; //C depends on the units used for momentum and Bfield (here GeV and Tesla)
-            const double K = 0.00029979; // K depends on the units used for Bfield and momentum (here Gauss and GeV)
+            // Fix (Issue #18): comment said "Gauss"; K is actually in units of
+            // GeV*cm/kGauss, and B=5 below is kGauss (5 kG = 0.5 T). Numerical
+            // value was already correct.
+            const double K = 0.00029979; // momentum in GeV/c, Bfield in kGauss (B=5 kG = 0.5 T)
             double pt = fabs((K*5)/qc); // pT from average measured curv
             LOG_INFO << "GenericFitSeeder::makeSeed::pt = " << pt << endm;
-            // set the momentum seed's transverse momentum
-            momSeed.SetXYZ(pt/sqrt(2.0),pt/sqrt(2.0),10);
+            // Fix (Issue #17): this line was dead code -- immediately overwritten
+            // two lines below by the proper SetXYZ call.
+            //momSeed.SetXYZ(pt/sqrt(2.0),pt/sqrt(2.0),10);
             // compute the seed's eta from seed points
             TVector3 p0 = TVector3(seed[0]->getX(), seed[0]->getY(), seed[0]->getZ());
             TVector3 p1 = TVector3(seed[1]->getX(), seed[1]->getY(), seed[1]->getZ());

@@ -499,7 +499,7 @@ class ForwardTrackMaker {
      * @param includeVertex : include the primary vertex in the fit or not
      * @return GenfitTrackResult : result of the fit
      */
-    GenfitTrackResult fitTrack(Seed_t &seed, TVector3 *momentumSeedState = nullptr) {
+    GenfitTrackResult fitTrack(Seed_t &seed, TVector3 *momentumSeedState = nullptr, int chargeSeed = 0) {
         LOG_DEBUG << "FwdTracker::fitTrack->" << endm;
         if (kProfile) mEventStats.mAttemptedFits++;
         // We will build this up as we go
@@ -512,7 +512,7 @@ class ForwardTrackMaker {
         // If we are using a provided momentum state
         if ( momentumSeedState ){
             LOG_DEBUG << "--FitTrack with provided momentum seed state" << endm;
-            mTrackFitter->fitTrack( seed, momentumSeedState );
+            mTrackFitter->fitTrack( seed, momentumSeedState, chargeSeed );
         } else {
             LOG_DEBUG << "--FitTrack without provided momentum seed state" << endm;
             mTrackFitter->fitTrack( seed );
@@ -750,8 +750,9 @@ class ForwardTrackMaker {
             Seed_t seedWithPV = gtr.mSeed;
             seedWithPV.push_back( &mEventVertexHit );
 
+            // Fix (Issue #19): also pass the global track's charge -- see setupTrack.
             TVector3 seedMomPV = gtr.mMomentum;
-            GenfitTrackResult gtrPV = fitTrack(seedWithPV, &seedMomPV);
+            GenfitTrackResult gtrPV = fitTrack(seedWithPV, &seedMomPV, gtr.mCharge);
             gtrPV.mTrackType = StFwdTrack::kPrimaryVertexConstrained;
             gtrPV.mGlobalTrackIndex = gtr.mIndex;
             gtrPV.mVertexIndex = 0;
@@ -762,11 +763,16 @@ class ForwardTrackMaker {
             } else {
                 if (kProfile) mEventStats.mFailedPrimaryFits++;
 
+                // Fix (Issue #14): set mIndex before continue -- was missing, so
+                // failed tracks got mIndex=0 and subsequent tracks had corrupted
+                // indices.
+                gtrPV.mIndex = index;
                 if (kSaveFailedFits) {
                     primaryTracks.push_back( gtrPV );
                 } else {
                     gtrPV.Clear();
                 }
+                index++;
                 continue;
             }
             // only do this for a track the converges -> that we can project
@@ -846,15 +852,19 @@ class ForwardTrackMaker {
             Seed_t seedWithPV = gtr.mSeed;
             seedWithPV.push_back( &mBeamlineHit );
 
-            GenfitTrackResult gtrPV; 
-            
-            if ( true || gtr.mIsFitConvergedFully == false ){
+            GenfitTrackResult gtrPV;
+
+            // Fix (Issue #13): "true||" made the else branch (reuse the global
+            // track's converged momentum) permanently dead -- beamline fit always
+            // re-seeded from scratch via GenericFitSeeder.
+            // Fix (Issue #19): also pass the global track's charge -- see setupTrack.
+            if ( !gtr.mIsFitConvergedFully ){
                 // if we do not provide a momentum seed state then the setup will compute one using the selected scheme
-                gtrPV = fitTrack(seedWithPV);    
+                gtrPV = fitTrack(seedWithPV);
             } else {
-                // Only use the momentum of the global track if it converged
+                // Only use the momentum/charge of the global track if it converged
                 TVector3 seedMomBL = gtr.mMomentum;
-                gtrPV = fitTrack(seedWithPV, &seedMomBL);
+                gtrPV = fitTrack(seedWithPV, &seedMomBL, gtr.mCharge);
             }
 
             gtrPV.mTrackType = StFwdTrack::kBeamlineConstrained;
@@ -868,11 +878,16 @@ class ForwardTrackMaker {
                 LOG_DEBUG << "\tInitial Beamline fitting failed for seed " << index << endm;
                 if (kProfile) mEventStats.mFailedBeamlineFits++;
 
+                // Fix (Issue #14): set mIndex before continue -- was missing, so
+                // failed tracks got mIndex=0 and subsequent tracks had corrupted
+                // indices.
+                gtrPV.mIndex = index;
                 if (kSaveFailedFits) {
                     beamlineTracks.push_back( gtrPV );
                 } else {
                     gtrPV.Clear();
                 }
+                index++;
                 continue;
             }
             gtrPV.setDCA( mEventVertex );
@@ -987,12 +1002,17 @@ class ForwardTrackMaker {
                 Seed_t seedWithVtx = gtr->mSeed;
                 seedWithVtx.push_back( &mFwdVerticesAsHits.back() );
                 TVector3 seedMom = gtr->mMomentum;
-                GenfitTrackResult gtrPV = fitTrack(seedWithVtx, &seedMom);
+                // Fix (Issue #19): also pass the global track's charge -- see setupTrack.
+                GenfitTrackResult gtrPV = fitTrack(seedWithVtx, &seedMom, gtr->mCharge);
                 if ( gtrPV.mIsFitConvergedFully ) {
                     if (kProfile) mEventStats.mGoodSecondaryFits++;
                 } else {
                     if (kProfile) mEventStats.mFailedSecondaryFits++;
+                    // Fix (Issue #14): set mIndex before continue -- same missing
+                    // index++ as the beamline/primary fitters.
+                    gtrPV.mIndex = index;
                     gtrPV.Clear();
+                    index++;
                     continue;
                 }
                 gtrPV.setDCA( TVector3( vtx->getPos().X(), vtx->getPos().Y(), vtx->getPos().Z() ) );

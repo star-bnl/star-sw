@@ -6,6 +6,7 @@
 #include "GenFit/FitStatus.h"
 #include <map>
 #include <unordered_map>
+#include "StEvent/StFwdTrack.h"
 
 // Utility class for evaluating ID and QA truth
 struct MCTruthUtils {
@@ -28,10 +29,18 @@ struct MCTruthUtils {
         using P = decltype(truth)::value_type;
         auto dom = max_element(begin(truth), end(truth), [](P a, P b){ return a.second < b.second; });
 
-        // QA represents the percentage of hits which
-        // vote the same way on the track
-        if ( hits.size() > 0 )
-            qa = double(dom->second) / double(hits.size()) ;
+        // QA represents the percentage of hits which vote the same way on the track.
+        // Fix (Issue #15): original used hits.size() as denominator, which includes
+        // PV/beamline hits that are skipped (isPV) in the numerator -- making qa < 1
+        // even for a pure single-track seed, and making qa=1.0 impossible when a
+        // vertex constraint is in the seed. Use the count of non-PV hits instead.
+        int nonPVHits = 0;
+        for ( auto hit : hits ) {
+            FwdHit* fh = dynamic_cast<FwdHit*>(hit);
+            if ( fh && !fh->isPV() ) nonPVHits++;
+        }
+        if ( nonPVHits > 0 )
+            qa = double(dom->second) / double(nonPVHits);
         else
             qa = 0;
 
@@ -246,9 +255,14 @@ public:
         if ( mTrack ){
             try {
                 auto dcaState = mTrack->getFittedState( 0 );
-                // this->mTrackRep->extrapolateToPoint( dcaState, mPV );
+                // Fix (Issue #16): PV-constrained tracks benefit from full 3D DCA
+                // (extrapolateToPoint) instead of transverse-only extrapolateToLine.
                 TVector3 beamDirection = TVector3(0,0,1);
-                mTrack->getCardinalRep()->extrapolateToLine( dcaState, mPV, beamDirection );
+                if ( mTrackType == StFwdTrack::kPrimaryVertexConstrained ) {
+                    mTrack->getCardinalRep()->extrapolateToPoint( dcaState, mPV );
+                } else {
+                    mTrack->getCardinalRep()->extrapolateToLine( dcaState, mPV, beamDirection );
+                }
                 this->mDCA = dcaState.getPos();
             } catch ( genfit::Exception &e ) {
                 LOG_ERROR << "CANNOT GET DCA : GenfitException: " << e.what() << endm;

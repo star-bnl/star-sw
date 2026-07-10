@@ -604,16 +604,16 @@ class TrackFitter {
      * @param seedPos : seed position
      * @param Vertex : primary vertex
      */
-    bool setupTrack(Seed_t trackSeed, TVector3 *externalSeedMom = nullptr ) {
-        
+    bool setupTrack(Seed_t trackSeed, TVector3 *externalSeedMom = nullptr, int externalCharge = 0 ) {
+
         mCurrentTrackSeed = trackSeed;
         // setup the track fit seed parameters
         GenericFitSeeder gfs;
         mCurrentSeedCharge = 0; // explicitly reset because a zero charge indicates a failed seed
-        gfs.makeSeed(   trackSeed, 
-                        mCurrentSeedPosition, 
-                        mCurrentSeedMomentum, 
-                        mCurrentSeedCharge 
+        gfs.makeSeed(   trackSeed,
+                        mCurrentSeedPosition,
+                        mCurrentSeedMomentum,
+                        mCurrentSeedCharge
                     );
         if ( mCurrentSeedMomentum.Perp() > 1000 ) {
             LOG_WARN << "Seed momentum is too high, setting to (0,0,1)" << endm;
@@ -623,11 +623,18 @@ class TrackFitter {
         if ( externalSeedMom != nullptr ) {
             LOG_INFO << "Note: Using externally provided seed momentum" << endm;
             mCurrentSeedMomentum = *externalSeedMom;
-        } else {
-            // mCurrentSeedMomentum.SetXYZ(0, 0, 10);
         }
 
-        LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(px=%f, py=%f, pz=%f)", mCurrentSeedPosition.X(), mCurrentSeedPosition.Y(), mCurrentSeedPosition.Z() )  << endm; 
+        // Fix (Issue #19): when the global fit has a reliable charge, propagate it
+        // directly instead of re-deriving from GenericFitSeeder::averageCurvature.
+        // For near-straight forward tracks (curvature ~= 0) the signed curvature is
+        // numerically unstable and flips the charge sign ~20% of the time.
+        if ( externalCharge != 0 ) {
+            LOG_INFO << "Note: Using externally provided seed charge = " << externalCharge << endm;
+            mCurrentSeedCharge = externalCharge;
+        }
+
+        LOG_DEBUG << "Setting track fit seed position = " << TString::Format( "(px=%f, py=%f, pz=%f)", mCurrentSeedPosition.X(), mCurrentSeedPosition.Y(), mCurrentSeedPosition.Z() )  << endm;
         LOG_DEBUG << "Setting track fit seed momentum = " << TString::Format( "(%f, %f, %f)", mCurrentSeedMomentum.X(), mCurrentSeedMomentum.Y(), mCurrentSeedMomentum.Z() ) << endm;
         if ( mCurrentSeedMomentum.Perp() > 1e-5 && (mCurrentSeedMomentum.Perp() / mCurrentSeedMomentum.Pz()) > 1e-5 ) {
             LOG_DEBUG << "\t" << TString::Format( "(pT=%f, eta=%f, phi=%f)", mCurrentSeedMomentum.Perp(), mCurrentSeedMomentum.Eta(), mCurrentSeedMomentum.Phi() ) << endm;
@@ -817,7 +824,7 @@ class TrackFitter {
      * @param seedMomentum : seed momentum (can be from MC)
      * @return void : the results can be accessed via the getTrack() method
      */
-    long long fitTrack(Seed_t trackSeed, TVector3 *seedMomentum = 0) {
+    long long fitTrack(Seed_t trackSeed, TVector3 *seedMomentum = 0, int seedCharge = 0) {
         long long itStart = FwdTrackerUtils::nowNanoSecond();
         LOG_DEBUG << "Fitting track with " << trackSeed.size() << " FWD Measurements" << endm;
 
@@ -832,7 +839,7 @@ class TrackFitter {
         /******************************************************************************************************************
 		 * Setup the track fit seed parameters and objects
 		 ******************************************************************************************************************/
-        bool valid = setupTrack(trackSeed, seedMomentum);
+        bool valid = setupTrack(trackSeed, seedMomentum, seedCharge);
         if ( !valid ){
             LOG_ERROR << "Failed to setup track for fit" << endm;
             return -1;
