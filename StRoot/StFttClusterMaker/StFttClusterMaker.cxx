@@ -385,7 +385,14 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     if ( m0Sum > 0 ){
         clu->setX( m1Sum / m0Sum );
         float var = (m2Sum - m1Sum*m1Sum / m0Sum) / m0Sum;
-        clu->setSigma( sqrt( var ) );
+        // Fix (Issue #21): for single-strip clusters var==0 (all charge in one
+        // strip, m2Sum/m0Sum = mean^2). A zero sigma gives GenFit infinite weight
+        // in the precise direction, forcing the track through the strip centre
+        // exactly and causing numerical instability. Clamp to pitch/sqrt(12) =
+        // 0.924 mm. x is computed as strip*3.2 - 1.6, so units here are mm
+        // (pitch = 3.2 mm).
+        const float kSigmaMin = 3.2f / sqrtf(12.f); // 0.924 mm = pitch/sqrt12
+        clu->setSigma( std::max( sqrtf(std::max(var, 0.f)), kSigmaMin ) );
     } else {
         clu->setX( -999 );
         clu->setSigma( -999 );
