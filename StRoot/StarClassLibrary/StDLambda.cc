@@ -50,10 +50,11 @@ StDLambda::StDLambda(const string  &  aName,
 //
 // d + Lambda bound state (pseudo-particle).
 // Decays to deuteron(45) + Lambda constrained to p+pi-(98).
-// Daughter mass sum: 1.876 + 1.115683 = 2.992 GeV; parent mass = 2.998 GeV.
+// Daughter mass sum: 1.876 + 1.115683 = 2.9917 GeV; parent mass = 2.996 GeV
+// (a few MeV above threshold for stable decay kinematics).  GEANT3 ID: 60104.
 //
 StDLambda StDLambda::mDLambda(
-    "dLambda",    2.998*GeV,   0.0*MeV,   +1.0*eplus,
+    "dLambda",    2.996*GeV,   0.0*MeV,   +1.0*eplus,
     1,              +1,           0,
     0,               0,           0,
     "pseudo",        0,          +3,    kDLambda,
