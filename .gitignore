@@ -7,3 +7,5 @@ StRoot/StBFChain/doc/
 SCL
 jail
 TEMP
+.al96_x8664_gcc11
+*.root
