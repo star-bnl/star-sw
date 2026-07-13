@@ -1,3 +1,5 @@
+
+
 #include "StarKinematics.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
@@ -97,7 +99,11 @@ Int_t StarKinematics::PreGenerate()
   if ( type_ == "FlatPT" || type_ == "flatpt" ) {
     Kine( ntrack, particles.c_str(), ptlow, pthigh, ylow, yhigh, philow, phihigh );
     mEvent->Print();
-  };
+    return kStOK;
+  }
+
+  LOG_INFO << "FlatPT is the only \"mode\" implented" << endm;'
+   
 
 
   return kStOK;
