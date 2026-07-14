@@ -1,0 +1,58 @@
+02.06.2016 - GDML_3_1_4
+-----------------------
+
+- Updated GDML schema:
+  o Added support for scaled shapes along Cartesian axes.
+    Added 'scaledSolid' tag for scale component with values greater than zero.
+- Updated documentation accordingly (GDML Guide v.2.6).
+
+09.10.2015 - GDML_3_1_3
+-----------------------
+
+- Updated GDML schema:
+  o Added support for specifying copy-numbers associated to
+    normal volume placements.
+
+12.06.2015 - GDML_3_1_2
+-----------------------
+
+- Updated GDML schema:
+  o Added optional 'userinfo' tag to allow for 'global' auxiliary fields.
+  o Extended auxiliary field with optional 'auxunit' and pointer to
+    recursive auxiliary fields (no limit on the number of levels).
+- Updated documentation accordingly (GDML Guide v.2.5).
+
+18.11.2014 - GDML_3_1_1
+-----------------------
+
+- Updated GDML schema:
+  o Corrected MultiUnion structure specification.
+- Updated documentation accordingly (GDML Guide v.2.4).
+
+26.11.2013 - GDML_3_1_0
+-----------------------
+
+- Updated GDML schema:
+  o Added MultiUnion structure and 'generic' Polycone and Polyhedra;
+  o Added parameterisation for Ellipsoid;
+  o Added parameterisation of Polycone and Polyhedra.
+- Updated documentation accordingly (GDML Guide v.2.3).
+
+27.9.2011 - GDML_3_0_1
+----------------------
+
+- Updated GDML schema:
+  o included ionisation potential (mean excitation energy) property
+    to materials.
+
+19.12.2008 - GDML_3_0_0
+-----------------------
+
+- Updated GDML schema:
+  o included descriptions (with units specification) for parameterised volume
+    types: box, tubs, cons, trd, trap, para, sphere, orb, torus, hype.
+  o Added elliptical cone shape.
+  o Added handling of variables in loops.
+- Removed obsolete I/O modules and related configuration/build setup.
+  The Geant4 Toolkit now integrated reader and writer with full capabilities
+  and making use of the XercesC DOM parser.
