@@ -71,6 +71,7 @@ class StBFChain : public StChain {
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
    virtual Int_t       Make(){return StChain::Make();};
    virtual Int_t       Load();             
+   virtual Int_t       LoadSharedLibrary(const char* name );
    virtual Int_t       Instantiate();      
    virtual Int_t       Init();      
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1);
