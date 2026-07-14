@@ -62,6 +62,9 @@ C.
 #endif
       PARAMETER (ONE=1)
       COMMON /GCKINE_CONT/ ITRO,TOFO,MECATO
+
+      real agsumlif
+
 C.
 C.    ------------------------------------------------------------------
 *
@@ -185,18 +188,18 @@ C.    ------------------------------------------------------------------
       ELSE IF (ITRTYP.EQ.3) THEN
 *       Neutral hadrons
          CALL GRNDM(RNDM,2)
-         SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
+         sumlif = agsumlif(tlife) !SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
          ZINTHA = -LOG(RNDM(2))
       ELSE IF (ITRTYP.EQ.4) THEN
 *       Charged hadrons
          CALL GRNDM(RNDM,3)
-         SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
+         sumlif = agsumlif(tlife) !SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
          ZINTHA = -LOG(RNDM(2))
          ZINTDR = -LOG(RNDM(3))
       ELSE IF (ITRTYP.EQ.5) THEN
 *       Muons
          CALL GRNDM(RNDM,5)
-         SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
+         sumlif = agsumlif(tlife) !SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1))
          ZINTBR = -LOG(RNDM(2))
          ZINTPA = -LOG(RNDM(3))
          ZINTDR = -LOG(RNDM(4))
@@ -208,7 +211,7 @@ C.    ------------------------------------------------------------------
       ELSE IF (ITRTYP.EQ.8) THEN
 *       Ions
          CALL GRNDM(RNDM,3)
-         SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1)) !-- Added lifetime for unstable nuclei (e.g. hypernuclei)
+         sumlif = agsumlif(tlife) !SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1)) !-- Added lifetime for unstable nuclei (e.g. hypernuclei)
          ZINTHA = -LOG(RNDM(2))
          ZINTDR = -LOG(RNDM(3))
       ENDIF
@@ -223,4 +226,35 @@ C.    ------------------------------------------------------------------
 *                                                             END GLTRAC
       END
 
+      real function agsumlif( tlife, vertex )
+        integer, save :: uaddress = 0
+        logical, save :: first = .true.
+        integer       :: csaddr
+        real          :: rndm(1)
+        real          :: vertex(3)
+!#include "geant321/gconsp.inc"
+        double precision, PARAMETER :: CLIGHT=29979245800.
+
+        if ( first ) then
+           first = .false.
+           uaddress = CsADDR( 'agusumlif' )
+        endif
+
+        if ( uaddress .gt. 0 ) then
+
+           call CsJCAL(uaddress,5, agsumlif,tlife,
+     >                 vertex(1),vertex(2),vertex(3), 0,0,0,0,0)
+
+        else
+
+           CALL GRNDM(RNDM,1)          
+           agsumlif = -clight * tlife * log( rndm(1) )
+
+        endif
+
+
+             
+        return
+
+      end function agsumlif
 
