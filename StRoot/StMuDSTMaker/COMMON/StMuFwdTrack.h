@@ -164,7 +164,10 @@ public:
     UShort_t qaTruth() const { return mQATruth; }
     TVector3 dca() const { return TVector3( mDCA[0], mDCA[1], mDCA[2] ); }
     UChar_t vertexIndex() const { return mVtxIndex; }
-    bool isPrimary() const { return mVtxIndex != UCHAR_MAX; }
+    UChar_t trackType()   const { return mTrackType; }
+    bool isPrimary() const { return mTrackType == kPrimaryVertexConstrained; }
+
+    enum StMuFwdTrackType { kGlobal=0, kBeamlineConstrained=1, kPrimaryVertexConstrained=2, kForwardVertexConstrained=3 };
     
 protected:
 
@@ -184,8 +187,9 @@ protected:
 
     float mDCA[3]; // DCA to the primary vertex
     UChar_t mVtxIndex;
-    
-    ClassDef(StMuFwdTrack,3)
+    UChar_t mTrackType;  // track type (v4+): 0=global, 1=beamline, 2=primary vertex, 3=fwd vertex; defaults to 0 for pre-v4 files
+
+    ClassDef(StMuFwdTrack,4)
 
 };
 
