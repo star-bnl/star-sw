@@ -776,20 +776,21 @@ def tryRules(line):
             pass
 
     if ( verbose >= 1 ):
-        print("[RULES]: -------------------------------------------------------------------")
-        print("[RULES]: line:    "+line)
-        print("[RULES]: matched: "+last_key+" at slot %03i"%slot)
+        print ""
+        print "[RULES]: -------------------------------------------------------------------"
+        print "[RULES]: line:    "+line
+        print "[RULES]: matched: "+last_key+" at slot %03i"%slot
     if ( verbose >= 2 ):
-        print("[RULES]: result:  "+str(result))
-        print("[RULES]: last:    "+str(last_match)                )
+        print "[RULES]: result:  "+str(result)
+        print "[RULES]: last:    "+str(last_match)                
     if ( verbose >= 3 ):
         if ( result != None ):
-            print("[RULES]: result:  "+str(result.asDict()))
+            print "[RULES]: result:  "+str(result.asDict())
         else:
-            print("[RULES]: result:  "+str(result))
+            print "[RULES]: result:  "+str(result)
 
     if ( verbose >= 1 ):
-        print("[RULES]: -------------------------------------------------------------------")
+        print "[RULES]: -------------------------------------------------------------------"
 
     if ( result == None and line.strip() != '' and verbose > -1 ):
         warnings+=1
@@ -817,8 +818,10 @@ def lastChar( fline, mychar=';' ):
     match = Literal(mychar) + ZeroOrMore( Word( printables ) )
     try:
         result=match.parseString(rline)
+        #        print '[T]' + rline        
         return True
     except ParseException:
+        #        print '[F]' + rline                
         return False
 
 def isComment( fline ):
@@ -915,8 +918,30 @@ def setContinuation(style):
     global continuation
     style=style.lower()
     if ( style != 'mortran' and style != 'fortran' ):
-        print("!$ [RULES]: WARNING: %s is not a recognized continuation style"%style)
+        print "!$ [RULES]: WARNING: %s is not a recognized continuation style"%style
     continuation=style
 
 
 
+if __name__ == '__main__':
+    #              1         2         3         4         5         6         7         8         9        10        11        12
+    #     123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+    TEST="Structure TROV { version, array(10), matrix(11,12) }";
+    result = AgStructure.parseString(TEST)
+    print result
+
+    
+#   TEST="      Subroutine ecal_get_strip( section, cut, istrip, xcenter, ycenter, length )"
+#   result = AgSubroutine.parseString(TEST)
+#    print result
+#    
+#    TEST="      real function joy(j,o,y)"
+#    result = AgFunction.parseString(TEST)
+#    print result
+
+    
+    
+#    TEST="  Tanf(x) =  tan(2*atan(exp(-etax)))"
+#    result = AgInline.parseString(TEST)
+#    result = AgAssignment.parseString(TEST)
+#    print result

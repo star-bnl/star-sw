@@ -44,10 +44,12 @@ def setExportSyntax ( syn ):
     try:
         Language = export_table[syn]
     except KeyError:
-        print("%s has not been defined as an export syntax.  Possibilities are:" % syn)
+        print """
+        %s has not been defined as an export syntax.  Possibilities are:
+        """ % syn
 
-        for key,value in export_table.items():
-            print("%s --> %s"%( key, value ))
+        for key,value in export_table.iteritems():
+            print "%s --> %s"%( key, value )
         sys.exit(0)
     
 #from Handler import Handler
@@ -205,6 +207,9 @@ class SyntaxHandler ( ContentHandler ):
         call it's start element method.  (Remember,
         'handler' here is the class ctor).
         """
+
+        #print tag, xattr.keys(), xattr.values()
+
         attr = {}                         # Copy to a plain dictionary
         for key in xattr.keys():
             attr[key] = xattr.get(key)
@@ -216,18 +221,19 @@ class SyntaxHandler ( ContentHandler ):
         try:
             handler = self.syntax[ tag ]
         except KeyError:
-            MSG="""
-            =================================================================
-            ERROR: The tag %s is unknown to the syntax handler
-                   Please make sure the case is correct (i.e. 'camelcase',
-                   is different from 'camelCase' and 'CamelCase'.  If the
-                   case is correct, please email this message to the simu"
-                   team:
-            
-               --   print summary of AgML at this point    --"
-               --   print summary of XML stack at this point --"                        
-            """ % tag
-            print(MSG)
+            print ""
+            print "================================================================="
+            print "ERROR: The tag %s is unknown to the syntax handler" % tag
+            print "       Please make sure the case is correct (i.e. 'camelcase',"
+            print "       is different from 'camelCase' and 'CamelCase'.  If the"
+            print "       case is correct, please email this message to the simu"
+            print "       team:"
+            print ""
+            print "   --   print summary of AgML at this point    --"
+            print "   -- print summary of XML stack at this point --"
+            print ""
+            print "================================================================="
+            print ""            
             sys.exit(0) # wah wah wah waaaahhhhh
             return
 
