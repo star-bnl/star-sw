@@ -82,7 +82,6 @@ bool StFwdTrackMaker::mDebug = false; // initialize static member variable
 #undef  LOG_DEBUG
 #define LOG_INFO  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Info)
 #define LOG_DEBUG if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Debug)
-#define LOG_WARN  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Warning)
 
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #include "StFwdTrackMaker/include/Tracker/FwdTracker.h"
@@ -671,7 +670,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     // if the track did not converged, do not try to project it
     if ( !gtr.mIsFitConvergedFully ){
         gtr.Clear();
-        LOG_WARN << "Genfit track did not converge fully, skipping projections" << endm;
+        LOG_DEBUG << "Genfit track did not converge fully, skipping projections" << endm;
 
         return fwdTrack;
     }
