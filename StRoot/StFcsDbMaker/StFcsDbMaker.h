@@ -90,6 +90,7 @@
 
 #ifndef StMaker_H
 #include "StMaker.h"
+#include "StFcsDb.h"
 #endif
 
 class StFcsDb;
@@ -103,7 +104,7 @@ public:
   int  InitRun(int runNumber);
   void  Clear(Option_t *option);
   int  Make();
-  void setDbAccess(int v){mDbAccess=v;}
+  void setDbAccess(int v){mDbAccess=v; if(mFcsDb) mFcsDb->setDbAccess(v);}
  
 private:
   StFcsDb *mFcsDb;

@@ -22,6 +22,17 @@
 #include "StMuDSTMaker/COMMON/StMuFstCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFstHit.h"
 
+// Per-file gating of STAR logging macros. Bypasses a per-call allocation leak
+// in the log4cxx pipeline. Hardcoded OFF here because this is a non-StMaker
+// helper class with no per-instance debug flag. The `if (true) {} else` form
+// guards against dangling-else attaching to a caller's `if`. Flip `true` to
+// `false` (or to a flag) to re-enable logging in this translation unit.
+// LOG_WARN is left ungated so warnings are always emitted.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#define LOG_INFO  if (true) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (true) {} else LOGGERMESSAGE(Debug)
+
 TMatrixDSym makeFstCovMat(TVector3 hit, float rSize = 3.0 , float phiSize = 0.0040906154) {
     // we can calculate the CovMat since we know the det info, but in future we should probably keep this info in the hit itself
     // measurements on a plane only need 2x2
@@ -380,7 +391,7 @@ int StFwdHitLoader::loadFstHitsFromStEvent( FwdDataSource::McTrackMap_t &mcTrack
                     float vR   = fsthits[ih]->localPosition(0);
                     float vPhi = fsthits[ih]->localPosition(1);
                     float vZ   = fsthits[ih]->localPosition(2);
-                    if ( kLogLevel >= kLogInfo ){LOG_INFO << TString::Format("FST local position: %f %f %f", vR, vPhi, vZ) << endm;}
+                    if ( kLogLevel >= kLogVerbose ){LOG_DEBUG << TString::Format("FST local position: %f %f %f", vR, vPhi, vZ) << endm;}
                     
                     int wedgeIndex  = iw % kFstNumWedgePerDisk;
                     int sensorIndex = is % kFstNumSensorsPerWedge;
@@ -477,7 +488,7 @@ int StFwdHitLoader::loadFstHitsFromGEANT( FwdDataSource::McTrackMap_t &mcTrackMa
         float z = git->x[2];
 
         TVector3 rastered = mFstRasterizer.raster(TVector3(git->x[0], git->x[1], git->x[2]));
-        if ( kLogLevel >= kLogInfo ){LOG_INFO << TString::Format("Rastered: %f %f %f -> %f %f %f", git->x[0], git->x[1], git->x[2], rastered.X(), rastered.Y(), rastered.Z()) << endm;}
+        if ( kLogLevel >= kLogVerbose ){LOG_DEBUG << TString::Format("Rastered: %f %f %f -> %f %f %f", git->x[0], git->x[1], git->x[2], rastered.X(), rastered.Y(), rastered.Z()) << endm;}
         x = rastered.X();
         y = rastered.Y();
         

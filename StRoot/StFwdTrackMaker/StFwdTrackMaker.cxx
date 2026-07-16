@@ -747,6 +747,8 @@ void StFwdTrackMaker::FillEvent() {
         LOG_INFO << "Creating the StFwdTrackCollection" << endm;
         ftc = new StFwdTrackCollection();
         stEvent->setFwdTrackCollection( ftc );
+    } else {
+        ftc->Clear();
     }
 
     size_t indexTrack = 0;
