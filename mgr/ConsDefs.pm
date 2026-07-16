@@ -230,7 +230,16 @@
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
+    # Prefer the locally built agetof.def (in the current build tree) so that
+    # a local build is always self-consistent.  Fall back to the centrally
+    # installed copy when no local one exists yet.
+    {
+        my $local_def = cwd() . "/." . $STAR_HOST_SYS . "/bin/agetof.def";
+        my $agetof_def_dir = (-e $local_def)
+            ? cwd() . "/." . $STAR_HOST_SYS . "/bin"
+            : $STAR_BIN;
+        $AGETOFLAGS = "-V 1 -d $agetof_def_dir/agetof.def";
+    }
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
@@ -392,6 +401,12 @@
     $CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
 
     chop($CERNLIBS);
+
+    # RHEL 9 / Alma9 ships libnsl.so.1 only (no unversioned linker symlink);
+    # the NSL functions are now part of glibc, so -lnsl is unnecessary.
+    unless ( -e "/usr/lib64/libnsl.so" || -e "/usr/lib/libnsl.so" ) {
+        $CERNLIBS =~ s/\s*-lnsl\b//g;
+    }
 
     if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
       $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
