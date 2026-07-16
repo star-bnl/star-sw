@@ -69,10 +69,20 @@
 #include "StMemStat.h"
 #include <cstdlib>
 
-// #define LOG_DEBUG if(false) std::cerr
-// #define LOG_INFO if(false) std::cerr
-
 #include "StFwdTrackMaker/StFwdTrackMaker.h"
+
+bool StFwdTrackMaker::mDebug = false; // initialize static member variable
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`. LOG_WARN is left
+// ungated so warnings are always emitted.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#define LOG_INFO  if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!StFwdTrackMaker::mDebug) {} else LOGGERMESSAGE(Debug)
+
 #include "StFwdTrackMaker/include/Tracker/FwdHit.h"
 #include "StFwdTrackMaker/include/Tracker/FwdTracker.h"
 #include "StFwdTrackMaker/include/Tracker/TrackFitter.h"
@@ -660,7 +670,7 @@ StFwdTrack * StFwdTrackMaker::makeStFwdTrack( GenfitTrackResult &gtr, size_t ind
     // if the track did not converged, do not try to project it
     if ( !gtr.mIsFitConvergedFully ){
         gtr.Clear();
-        LOG_WARN << "Genfit track did not converge fully, skipping projections" << endm;
+        LOG_DEBUG << "Genfit track did not converge fully, skipping projections" << endm;
 
         return fwdTrack;
     }
@@ -753,7 +763,7 @@ void StFwdTrackMaker::FillEvent() {
 
     size_t indexTrack = 0;
     for ( auto gtr : mForwardTracker->getTrackResults() ) {
-            LOG_INFO << "Processing GenfitTrackResult(type=" << gtr.mTrackType << "): " << indexTrack << " mIsFitConverged=" << gtr.mIsFitConverged << ", mIsFitConvergedPartially=" << gtr.mIsFitConvergedPartially << ", mNumFitPoints=" << gtr.mNumFitPoints << endm;
+            LOG_DEBUG << "Processing GenfitTrackResult(type=" << gtr.mTrackType << "): " << indexTrack << " mIsFitConverged=" << gtr.mIsFitConverged << ", mIsFitConvergedPartially=" << gtr.mIsFitConvergedPartially << ", mNumFitPoints=" << gtr.mNumFitPoints << endm;
             StFwdTrack* fwdTrack = makeStFwdTrack( gtr, indexTrack );
             indexTrack++;
             if (nullptr == fwdTrack)
