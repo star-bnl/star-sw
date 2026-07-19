@@ -198,7 +198,15 @@ std::string check_epd_hit( std::string message, std::function<std::string(const 
   LOG_TEST << result << std::endl;
   return result;
 };
-
+//___________________________________________________________________
+template<typename Add, typename Test>
+std::string check_kine( std::string message, Add addfunc, Test testfunc ) {
+  std::string af = addfunc();
+  std::string tf = testfunc();
+  std::string result = "\u001b[37m [" + message + "] " + "(" + af +") " + tf;
+  LOG_TEST << result << std::endl;
+  return result;
+};
 //___________________________________________________________________
 template<typename Hit>
 TH1F* gimmeTH1F( std::string name, std::string title, int nbin, double xmn, double xmx, 

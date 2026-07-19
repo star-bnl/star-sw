@@ -2,14 +2,6 @@
 
 #include <TTable.h>
 
-template<typename Add, typename Test>
-std::string check_kine( std::string message, Add addfunc, Test testfunc ) {
-  std::string af = addfunc();
-  std::string tf = testfunc();
-  std::string result = "\u001b[37m [" + message + "] " + "(" + af +") " + tf;
-  gMessMgr->Info() << result << endm;
-  return result;
-};
 
 void unit_test_kinematics() {
 
