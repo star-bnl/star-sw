@@ -19,6 +19,8 @@ count = 0
 p = argparse.ArgumentParser()
 p.add_argument('input', nargs='?',
                  type=argparse.FileType(), default=sys.stdin)
+p.add_argument('--max-fail-rate', type=float, default=0.0, 
+                 help='Maximum allowed failure rate (e.g. 0.10 for 10%)')
 args = p.parse_args()
 
 # Number of test lines with passes and failures
@@ -55,11 +57,11 @@ for line in args.input.readlines():
             TEST_FAIL[group1] = TEST_FAIL[group1] + 1
  
 
-print ""
-print "Summary of tests"
-print "----------------------------------------------------------------------"
-print "pass | fail | total  | test"
-print "----------------------------------------------------------------------"
+print("")
+print("Summary of tests")
+print("----------------------------------------------------------------------")
+print("pass | fail | total  | test")
+print("----------------------------------------------------------------------")
 
 for key in TEST_KEYS:
 
@@ -78,16 +80,36 @@ for key in TEST_KEYS:
         
     
     if ( nfail == 0 ):
-        print "%4i | %4i | %4i     %s"%(npass,nfail,count,key)
+        print("%4i | %4i | %4i     %s"%(npass,nfail,count,key))
     else:
-        print "%4i | %4i | %4i [!] %s"%(npass,nfail,count,key)
+        print("%4i | %4i | %4i [!] %s"%(npass,nfail,count,key))
 
-print "----------------------------------------------------------------------"
-print "N tests w/ passes            = " + str(npass_line)
-print "N tests w/ failures          = " + str(nfail_line)
-print "N tests w/ complete passes   = " + str(npass_complete)
-print "N tests w/ complete failures = " + str(nfail_complete)
+print("----------------------------------------------------------------------")
+print("N tests w/ passes            = " + str(npass_line))
+print("N tests w/ failures          = " + str(nfail_line))
+print("N tests w/ complete passes   = " + str(npass_complete))
+print("N tests w/ complete failures = " + str(nfail_complete))
             
+total_passes = sum(TEST_PASS.values())
+total_fails  = sum(TEST_FAIL.values())
+total_checks = total_passes + total_fails
 
+print("----------------------------------------------------------------------")
+if total_checks > 0:
+    fail_rate = float(total_fails) / total_checks
+    print("Grand Total Checks : %d" % total_checks)
+    print("Grand Total Passes : %d" % total_passes)
+    print("Grand Total Fails  : %d" % total_fails)
+    print("Overall Fail Rate  : %.2f%%" % (fail_rate * 100))
+    
+    if fail_rate > args.max_fail_rate:
+        print("\n[!] JOB FAILED: Failure rate exceeds the %.2f%% limit." % (args.max_fail_rate * 100))
+        sys.exit(1)
+    else:
+        print("\n[+] JOB PASSED: Failure rate is within the limit.")
+        sys.exit(0)
+else:
+    print("\n[!] JOB FAILED: No tests were successfully parsed!")
+    sys.exit(1)
 
 
