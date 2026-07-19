@@ -17,17 +17,17 @@ jobs:
     strategy:
       matrix:
         starenv: [root6]
-        compiler: [gcc485]
+        compiler: [gcc485, gcc11]
     env:
       STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
         with:
           driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10000000
 
       - name: Build with Docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v7
         with:
           build-args: |
             starenv=${{ matrix.starenv }}
@@ -36,7 +36,7 @@ jobs:
           outputs: type=docker,dest=/tmp/star-sw-${{ env.STARENV }}.tar
 
       - name: Save built image for test jobs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp/star-sw-${{ env.STARENV }}.tar
@@ -54,7 +54,7 @@ jobs:
       STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
@@ -78,7 +78,7 @@ jobs:
       STARENV: root6-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
@@ -102,7 +102,7 @@ jobs:
       STARENV: root6-${{ matrix.compiler }}
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: star-sw-${{ env.STARENV }}
           path: /tmp
