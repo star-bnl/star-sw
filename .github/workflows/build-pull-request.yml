@@ -114,3 +114,39 @@ jobs:
              TEST_CMD="root4star -b -q -l 'StRoot/macros/analysis/find_vertexR6.C(\"$TEST_FILE\")'"
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
                sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep '<StIOMaker::Finish> StIO:' log"
+  ROOT6_test_geant4_units:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        test_file: 
+          - unit_test_btof_hits.C
+          - unit_test_emc_hits.C
+          - unit_test_fst_hits.C
+          - unit_test_mtd_hits.C
+          - unit_test_muons.C
+          - unit_test_tdm_truth.C
+          - unit_test_tpc_hits.C
+        compiler: [gcc485]
+    env:
+      STARENV: root6-${{ matrix.compiler }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: star-sw-${{ env.STARENV }}
+          path: /tmp
+
+      - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
+      
+      # Loading test data container just to match the environment of other test jobs
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v7
+      
+      - name: Run Unit Test
+        run: |
+          CD_CMD="cd StRoot/StGeant4Maker"
+          TEST_CMD="root4star -b -q -l 'macros/geant4star.C' 'tests/${{ matrix.test_file }}' --output=${{ matrix.test_file }}.root"
+          SUMMARY_CMD="python tests/unit-test-summary --max-fail-rate 0.10 test_output.log"          
+          docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
+            sh -c " $CD_CMD; $TEST_CMD; $SUMMARY_CMD; EXIT_CODE=\$?; echo -e '\n=====================================\nCLEAN TEST RESULTS:\n====================================='; cat test_output.log; exit \$EXIT_CODE"
