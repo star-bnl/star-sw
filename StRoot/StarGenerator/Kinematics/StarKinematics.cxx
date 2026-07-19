@@ -102,7 +102,7 @@ Int_t StarKinematics::PreGenerate()
     return kStOK;
   }
 
-  LOG_INFO << "FlatPT is the only \"mode\" implented" << endm;'
+  LOG_INFO << "FlatPT is the only \"mode\" implented" << endm;
    
 
 
