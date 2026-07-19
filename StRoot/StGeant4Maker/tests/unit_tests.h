@@ -23,8 +23,12 @@
 #endif
 
 #include <string>
+#include <fstream>
 #include <iostream>
 
+static std::ofstream gTestLog("test_output.log");
+#undef LOG_TEST
+#define LOG_TEST gTestLog << __PREFIX__
 
 #define __COLOR__
 #ifdef __COLOR__
@@ -55,8 +59,6 @@ bool Conditional( std::string result ) {
 }
 
 using namespace std;
-//___________________________________________________________________
-#define LOG_TEST std::cout << __PREFIX__
 //___________________________________________________________________
 TTable* hit_table    = 0;
 TTable* track_table  = 0;
