@@ -22,8 +22,6 @@ WORKDIR ${STAR}
 COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
-# This is temporary until I rebuild the container with loading the modules 
-RUN echo "module load clhep-2.4.5.1 geant3-3-9-p1-root-6.24.06 geant4-data-10.5.1 || true" >> /etc/profile.d/z11_load_star_deps.sh
 
 RUN <<EOF
 	set -e
