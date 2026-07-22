@@ -43,6 +43,8 @@ class StRHICfSimGenerator : public StarGenerator
         Int_t mSetEventNumber;
         Int_t mTotalEventNumber;
 
+        Int_t mGenEventNum;
+        Int_t mPassedEventNum;
         Int_t mProcessID;
         TClonesArray* mParticleArr;
         TParticle* mParticle;
