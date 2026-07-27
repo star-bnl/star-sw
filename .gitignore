@@ -9,3 +9,8 @@ jail
 TEMP
 .al96_x8664_gcc11
 *.root
+*.log
+.rootrc
+.sl79_gcc485/
+.sl79_gcc11/
+temp_gccflags.c
