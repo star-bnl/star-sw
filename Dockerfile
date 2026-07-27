@@ -15,7 +15,7 @@ ENV STAR_LIB=$STAR/.${STAR_HOST_SYS}/LIB
 ENV STAR_BIN=$STAR/.${STAR_HOST_SYS}/BIN
 ENV STAR_SYS=x8664_sl7
 ENV PATH=$STAR_BIN:$STAR/mgr:$PATH
-ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=./.${STAR_HOST_SYS}/LIB:$STAR_LIB:$LD_LIBRARY_PATH
 ENV ROOT_INCLUDE_PATH=$STAR/.${STAR_HOST_SYS}/include
 
 WORKDIR ${STAR}
@@ -23,11 +23,15 @@ COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
 
+ARG BUILD_STAR=yes
+
 RUN <<EOF
 	set -e
-	[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="" || EXTRA_CXXFLAGS=""
-	cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
-	find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+	if [ "$BUILD_STAR" = "yes" ]; then 
+		[[ $compiler = "gcc485" ]] && EXTRA_CXXFLAGS="" || EXTRA_CXXFLAGS=""
+		cons EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS"
+		# find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+	fi
 EOF
 
 COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh
