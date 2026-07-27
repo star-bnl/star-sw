@@ -753,7 +753,19 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	chomp($g4prefix);
 	$CPPPATH .= $main::PATH_SEPARATOR . $g4prefix . "/include/Geant4/";
 
+	# Add DG4MULTITHREADED flag in CXXFLAGS
+	# TODO: determen why it does not work 
+	# in ci but work on starsub nodes
+	my $g4cflags = `geant4-config --cflags`;
+	chomp($g4cflags);
+	if ( $g4cflags =~ m/-DG4MULTITHREADED/ ) {
+			print "cons: Geant4 multithreading detected. Adding -DG4MULTITHREADED to CXXFLAGS\n";
+			$CXXFLAGS .= " -DG4MULTITHREADED";
+	}
+
 	# Add CLHEP to include path
+	# TODO: determen why it does not work 
+	# in ci but work on starsub nodes
 	my $clhepprefix = `clhep-config --prefix`;
 	chomp($clhepprefix);
 	# Strip any literal double or single quotes printed by clhep-config
