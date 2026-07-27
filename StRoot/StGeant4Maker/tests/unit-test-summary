@@ -7,7 +7,8 @@ import subprocess
 
 ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
-TEST_REPORT = re.compile( '.*\[(.*)\].*-(.*)-' )
+TEST_REPORT_BRACKET = re.compile(r'.*\[(.*?)\].*-\s*(passed|failed)\s*-', re.IGNORECASE)
+TEST_REPORT_PLAIN   = re.compile(r'^\s*(.*?)\s*-\s*(passed|failed)\s*-\s*$', re.IGNORECASE)
 
 TEST_PASS  = {}
 TEST_FAIL  = {}
@@ -34,10 +35,13 @@ nfail_complete = 0
 for line in args.input.readlines():
     line = line.replace(' | ','')
     line = ansi_escape.sub('',line)
-    m = TEST_REPORT.match(line)
+    line = line.strip()
+    m = TEST_REPORT_BRACKET.match(line)
+    if not m:
+        m = TEST_REPORT_PLAIN.match(line)
     if m:
-        group1 = m.group(1)
-        group2 = m.group(2)
+        group1 = m.group(1).strip()
+        group2 = m.group(2).strip().lower()
 
         count = count + 1
 
@@ -97,9 +101,9 @@ total_checks = total_passes + total_fails
 print("----------------------------------------------------------------------")
 if total_checks > 0:
     fail_rate = float(total_fails) / total_checks
-    print("Grand Total Checks : %d" % total_checks)
-    print("Grand Total Passes : %d" % total_passes)
-    print("Grand Total Fails  : %d" % total_fails)
+    print("Total Checks : %d" % total_checks)
+    print("Total Passes : %d" % total_passes)
+    print("Total Fails  : %d" % total_fails)
     print("Overall Fail Rate  : %.2f%%" % (fail_rate * 100))
     
     if fail_rate > args.max_fail_rate:
