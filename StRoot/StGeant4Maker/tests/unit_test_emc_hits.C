@@ -168,11 +168,11 @@ void unit_test_emc_hits() {
 	    result = Form("etabin=%i ",tow) + result;
 	    return result;		
 	  });
-	check_emc_hit( "Phi module is in 1..60", hit, [=](const g2t_emc_hit_st* h) {
+	check_emc_hit( "Phi module is in 1..120", hit, [=](const g2t_emc_hit_st* h) {
 	    int volId = h->volume_id;
 	    int tow  = (h->volume_id % 100000) / 100;
 	    std::string result = FAIL;
-	    if ( tow>=1 && tow<= 60 ) result = PASS;
+	    if ( tow>=1 && tow<= 120 ) result = PASS;
 	    result = Form("phibin=%i ",tow) + result;
 	    return result;		
 	  });
