@@ -260,10 +260,17 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
-    assert(mGeantId>=0 && mGeantId<=0xFFFF);
     mPdgId   = trk->eg_pid;
+    assert(mGeantId>=0 && mGeantId<=0xFFFF);
     mKey     = trk->id;
-    mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
+    if ( 0==mGeantId && 0 != mPdgId ) {        // fill in geant ID if practicable
+      mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
+      mGeantId            = StParticleTable::instance()->geantId( mPdgId );
+    } else if ( mPdgId ) { 
+      mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
+    } else {
+      mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
+    }
     mEventGenLabel = trk->eg_label;
     mIsPrimary = kFALSE;
     // The information to fill the collections 

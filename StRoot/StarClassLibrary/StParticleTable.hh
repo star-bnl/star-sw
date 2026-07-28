@@ -68,9 +68,9 @@ public:
     bool contains(int) const;                         // by PDG encoding
     bool containsGeantId(int) const;                  // by Geant3 id
     
-    StParticleDefinition* findParticle(const string&)  const; // by name    
-    StParticleDefinition* findParticle(int)  const;           // by PDG encoding   
-    StParticleDefinition* findParticleByGeantId(int) const;   // by Geant3 id
+    virtual StParticleDefinition* findParticle(const string&)  const; // by name    
+    virtual StParticleDefinition* findParticle(int)  const;           // by PDG encoding   
+    virtual StParticleDefinition* findParticleByGeantId(int) const;   // by Geant3 id
     
     void insert(StParticleDefinition*);
     void erase(StParticleDefinition*);
@@ -78,8 +78,10 @@ public:
     void dump(ostream& = cout);
 
     StVecPtrParticleDefinition allParticles() const;
+
+    int geantId( const int pdgId ) { return mGeantPdgMap[ pdgId ]; }
     
-    friend class nobody;
+    friend class StarParticleTable;
 
 private:
     StParticleTable();
