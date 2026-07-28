@@ -54,6 +54,7 @@ typedef vector<StParticleDefinition*, allocator<StParticleDefinition*> > StVecPt
 typedef vector<StParticleDefinition*> StVecPtrParticleDefinition;
 #endif
 
+
 class StParticleTable {
 public:
     virtual ~StParticleTable();
@@ -79,7 +80,7 @@ public:
 
     StVecPtrParticleDefinition allParticles() const;
 
-    int geantId( const int pdgId ) { return mGeantPdgMap[ pdgId ]; }
+    int geantId( const int pdgId );
     
     friend class StarParticleTable;
 
