@@ -82,7 +82,7 @@ public:
 
     int geantId( const int pdgId );
     
-    friend class StarParticleTable;
+    friend class nobody;
 
 private:
     StParticleTable();
@@ -110,8 +110,9 @@ private:
     mGeantPdgMapType   mGeantPdgMap;     // Geant3 IDs only
     mPdgMapType        mPdgMap;          // PDG IDs only
     mNameMapType       mNameMap;         // complete list
+    std::map<int,int>  mGeantFromPdg;
 #ifdef __ROOT__
-  ClassDef(StParticleTable,1)
+  ClassDef(StParticleTable,2)
 #endif
 };
 #endif
