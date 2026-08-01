@@ -30,10 +30,10 @@ struct EmbeddingChainOptions_t {
   std::string loadopts;   // concatination of all options, stripping out options which prevent loading libs needed in other chains
 };
 
-template< int simEngine > 
+// template< int simEngine > 
 struct EmbeddingChains {
 
-  EmbeddingChainOptions_t operator() ( const std::string& prodName, const bool readSim=false ) {
+  EmbeddingChainOptions_t operator() ( int simEngine, const std::string& prodName, const bool readSim=false ) {
 
     EmbeddingChainOptions_t result = { false, "", "", "", "" };
     

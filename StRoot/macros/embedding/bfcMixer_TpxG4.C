@@ -4,12 +4,12 @@ class StMessMgr;
 
 #include <string>
 #include <TString.h>
-#include <TVirtualMC.h>
+// #include <TVirtualMC.h>
 
 #include "EmbeddingChainOptions.h"
 
 // Functor for the embedding chain options
-EmbeddingChains<geant4star> getChainOptions;
+EmbeddingChains getChainOptions;
 const int debuglevel = 1;
 
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry stargen:stubs "; // agml??
@@ -32,6 +32,7 @@ const bool runchains[] = { false, true, true, true };
 
 // Load sufficient libraries to bootstrap the StBFChain framework
 #pragma cling load("libTree.so")
+#pragma cling load("libEG.so")
 #pragma cling load("StarRoot")
 #pragma cling load("St_base")
 #pragma cling load("StChain")
@@ -82,6 +83,7 @@ std::vector<int> triggers = {870010};
 std::string prodName = "P23idAuAu17";
 std::string type = "FlatPT";
 std::string engine = "G4";
+int simcore = geant4star;
 std::string pidtype = "pid";
 
 struct DecayMode {
@@ -132,58 +134,75 @@ void process( const char* line ){
 };
 
 void SetTagFile( const char* tags ) {
-  //  process( "#pragma cling add_include_path(\"StRoot\")               ");
-  //  process( "#include \"St_geant_Maker/Embed/StPrepEmbedMaker.h\"     ");
-  //  process( "auto* embmk = dynamic_cast<StPrepEmbedMaker*>( StMaker::GetTopChain()->Maker(\"PrepEmbed\") );");
-  //  process( "assert(embmk);                                           ");
-  //  process( Form( "embmk->SetTagFile(\"%s\");                         ", tags ) );
-  process( "auto* stembed = dynamic_cast<StarEmbedMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );");
-  process( Form("stembed->SetAttr(\"tags\",\"%s\");",tags) );
-  //  process( Form("stembed->SetInputFile(\"%s\");", tags ) );
-
+  if ( simcore == geant4star ) {
+    process( "auto* stembed = dynamic_cast<StarEmbedMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );");
+    process( Form("stembed->SetAttr(\"tags\",\"%s\");",tags) );
+  } else if ( simcore == starsimR6 ) {
+    process( "#pragma cling add_include_path(\"StRoot\")               ");
+    process( "#include \"St_geant_Maker/Embed/StPrepEmbedMaker.h\"     ");
+    process( "auto* embmk = dynamic_cast<StPrepEmbedMaker*>( StMaker::GetTopChain()->Maker(\"PrepEmbed\") );" );
+    process( "assert(embmk);" );
+    process( Form( "embmk->SetTagFile(\"%s\");", tags ) );
+  }
 }
 void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx, const char* type_ ) {
-  //  process( Form( "embmk->SetOpt( %f, %f, %f, %f, %f, %f, \"%s\" );   ", ptmn, ptmx, etamn, etamx, phimn, phimx, type_ ) );
-  auto* kine = chain2->Maker("StarKine");
-  kine->SetAttr("ptlow", ptmn);
-  kine->SetAttr("pthigh", ptmx);
-  kine->SetAttr("etalow", etamn);
-  kine->SetAttr("etahigh", etamx);
-  kine->SetAttr("philow", phimn);
-  kine->SetAttr("phihigh", phimx);
-  kine->SetAttr("mode", "FlatPT" );
+  if ( simcore == geant4star ) {
+    std::cout << "HHHHHHHHHHHHHHHHHHHHH" << std::endl;
+    auto* kine = chain2->Maker("StarKine");
+    kine->SetAttr("ptlow", ptmn);
+    kine->SetAttr("pthigh", ptmx);
+    kine->SetAttr("etalow", etamn);
+    kine->SetAttr("etahigh", etamx);
+    kine->SetAttr("philow", phimn);
+    kine->SetAttr("phihigh", phimx);
+    kine->SetAttr("mode", "FlatPT" );
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetOpt( %f, %f, %f, %f, %f, %f, \"%s\" );   ", ptmn, ptmx, etamn, etamx, phimn, phimx, type_ ) );
+  }
 }
 void SetPartOpt( int pid, double mult, const char* pidtype="pid" ) {
-  // Map PID onto particle name
-  auto* kine = chain2->Maker("StarKine");
-  gMessMgr->Info() << "SetPartOpt " << pidtype << " " << pid << " " << mult << endm;
-  kine->SetAttr(pidtype,int(pid));
-  kine->SetAttr("ntrack", double(mult));
-  if ( mult < 1.0 ) {
-    auto* embed = chain2->Maker("StarEmbed");
-    LOG_INFO << "Setting eventmult=" << mult << endm;
-    embed->SetAttr("eventmult",double(mult));
+  if ( simcore == geant4star ) {
+    // Map PID onto particle name
+    auto* kine = chain2->Maker("StarKine");
+    gMessMgr->Info() << "SetPartOpt " << pidtype << " " << pid << " " << mult << endm;
+    kine->SetAttr(pidtype,int(pid));
+    kine->SetAttr("ntrack", double(mult));
+    if ( mult < 1.0 ) {
+      auto* embed = chain2->Maker("StarEmbed");
+      LOG_INFO << "Setting eventmult=" << mult << endm;
+      embed->SetAttr("eventmult",double(mult));
+    }
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetPartOpt(%i,%f,\"%s\");", pid, mult, pidtype) );
+    process( "embmk->SetSkipMode(true);" );
+    process( "embmk->SetTemp(0.35);");
   }
 }
 void SetTriggers( std::vector<int> triggers ) {
-  auto* kine = chain2->Maker("StarEmbed");
-  std::string triglist = "";
-  for ( int t : triggers ) {
-    //    process( Form( "embmk->SetTriOpt(%i);",t ) );
-    triglist += Form( "%i ", t );
+  if ( simcore == geant4star ) {
+    auto* kine = chain2->Maker("StarEmbed");
+    std::string triglist = "";
+    for ( int t : triggers ) {
+      triglist += Form( "%i ", t );
+    }
+    kine->SetAttr("triggers", triglist.c_str());
+  } else if ( simcore == starsimR6 ) {
+    for ( int t : triggers ) {
+      process( Form( "embmk->SetTrgOpt(%i);",t ) );
+    }
   }
-  kine->SetAttr("triggers", triglist.c_str());
 }
 void SetZVertexCut( double vzmn, double vzmx, double vr=-1.0 ) {
-  //  process( Form( "embmk->SetZVertexCut(%f, %f);", vzmn, vzmx ) );
-  //  if ( vr>0.0 )   
-  //    process( Form( "embmk->SetVrCut(%f);", vr ) );
-
-  auto* embed = chain2->Maker("StarEmbed");  
-  embed->SetAttr("vzmin", vzmn);
-  embed->SetAttr("vzmax", vzmx);
-  embed->SetAttr("vrmax", vr );
-
+  if ( simcore == geant4star ) {
+    auto* embed = chain2->Maker("StarEmbed");  
+    embed->SetAttr("vzmin", vzmn);
+    embed->SetAttr("vzmax", vzmx);
+    embed->SetAttr("vrmax", vr );
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetZVertexCut(%f, %f);", vzmn, vzmx ) );
+    if ( vr>0.0 )   
+      process( Form( "embmk->SetVrCut(%f);", vr ) );
+  }
 };
 
 
@@ -234,7 +253,7 @@ void bfcMixer_TpxG4()
     chain3 -> SetFlags( chain3opts.c_str() );
     chain3 -> SetName("Three");
     TString outfile = gSystem->BaseName(daqfile.c_str());    
-    outfile.ReplaceAll(".daq","_G4.root");
+    outfile.ReplaceAll(".daq",Form("_%s.root", engine.c_str()));
     chain3->Set_IO_Files(nullptr, outfile);
   };
 
@@ -243,8 +262,10 @@ void bfcMixer_TpxG4()
 
   if ( chain1 ) { chain1->cd();  chain1->Instantiate(); }
   if ( chain2 ) { chain2->cd();  chain2->Instantiate();
-    auto* prim=chain2->Maker("StarEmbed");
-    prim->SetAttr("output","genevents.root");
+    if ( simcore == geant4star ) {
+      auto* prim=chain2->Maker("StarEmbed");
+      prim->SetAttr("output","genevents.root");
+    }
   }
   if ( chain3 ) { chain3->cd();  chain3->Instantiate(); }
 
@@ -257,7 +278,7 @@ void bfcMixer_TpxG4()
   if ( chain2 ) {
     auto* tpcrs = chain2->Maker("TpcRS");
     if ( tpcrs ) {
-      tpcrs->SetAttr("inputds","geant4star");
+  if ( simcore == geant4star ) tpcrs->SetAttr("inputds","geant4star");
     }
   }
 
@@ -270,7 +291,7 @@ void bfcMixer_TpxG4()
 
   if ( chain3 ) { 
     chain3->cd();
-    auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpcmixer);
+    auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpxmixer);
     tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
     tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
 
@@ -293,12 +314,6 @@ void bfcMixer_TpxG4()
     process( "kine_->SetAttr(\"rapidity\",1);" );
     process( "primary_ -> AddGenerator( kine_ );");
     
-    SetTagFile( tagfile.c_str() );
-    SetOpt( pt_low, pt_high, eta_low, eta_high, 0.0, TMath::TwoPi(), type.c_str() );
-    SetPartOpt( pid, mult, pidtype.c_str() );
-    SetZVertexCut( vzlow, vzhigh, vr );
-    SetTriggers( triggers );
-
     //
     // Configure G4 maker
     //
@@ -350,6 +365,13 @@ void bfcMixer_TpxG4()
 
   }
   
+  SetTagFile( tagfile.c_str() );
+  SetOpt( pt_low, pt_high, eta_low, eta_high, 0.0, TMath::TwoPi(), type.c_str() );
+  SetPartOpt( pid, mult, pidtype.c_str() );
+  SetZVertexCut( vzlow, vzhigh, vr );
+  SetTriggers( triggers );
+
+
   TAttr::SetDebug(0);
   
   //
@@ -358,7 +380,7 @@ void bfcMixer_TpxG4()
   top->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   top->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   top->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
-  //top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+  top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StGeant4Maker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StarEmbedMaker::*"); 	//It is also IO maker
 
@@ -433,7 +455,15 @@ void bfcMixer_TpxG4(
 
   decayModes = decays_;
 
-  auto opts = getChainOptions( prodName, simIn );
+  if ( engine == "G4" || engine == "G3" ) simcore = geant4star;
+  else if ( engine == "starsimR6" ) simcore = starsimR6;
+  else {
+    std::cout << "Unknown simulation engine: " << engine << std::endl;
+    std::cout << "Valid options are: G4, G3, starsimR6" << std::endl;
+    return;
+  }
+
+  auto opts = getChainOptions(simcore, prodName, simIn );
 
   if ( opts.isValid ) {
     

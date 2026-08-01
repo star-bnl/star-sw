@@ -6,7 +6,7 @@ class StMessMgr;
 #include "EmbeddingChainOptions.h"
 
 // Functor for the embedding chain options
-EmbeddingChains<starsimR6> getChainOptions;
+EmbeddingChains getChainOptions;
 
 const int debuglevel = 1;
 
@@ -175,7 +175,7 @@ void bfcMixer_TpxR6()
 
   if ( chain3 ) {
     chain3->cd();
-    auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpcmixer);
+    auto* tpxmixer = chain3->Maker("TpcMixer"); assert(tpxmixer);
     if ( tpxmixer ) {
       tpxmixer -> SetInput( "Input1", "TpxRaw/.data/Event" );
       tpxmixer -> SetInput( "Input2", "TpcRS/Event" );
@@ -261,7 +261,7 @@ void bfcMixer_TpxR6(
   daqfile=daqfile_;
   tagfile=tagfile_;
 
-  auto opts = getChainOptions( prodName, simIn );
+  auto opts = getChainOptions(starsimR6, prodName, simIn );
 
   if ( opts.isValid ) {
     

@@ -129,7 +129,16 @@ void runBfc() {
 };
 EOF
 cat runBfc.C
-root -q -b runBfc.C
+
+set engine = "&ENGINE;"
+
+if ( "$engine" == "starsimR6" ) then
+  echo "Running $engine engine using root4star"
+  root4star -b -q runBfc.C
+else 
+  echo "Running $engine engine using root"
+  root -q -b runBfc.C
+endif
   
 ls -la .
 
