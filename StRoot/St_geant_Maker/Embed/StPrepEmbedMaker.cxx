@@ -27,6 +27,8 @@
 #include "TTree.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "TDatabasePDG.h"
+
 
 #include "tables/St_vertexSeed_Table.h"
 #include "TString.h"
@@ -625,9 +627,26 @@ void StPrepEmbedMaker::Do(const Char_t *job)
 }
 
 //____________________________________________________________________________________________________
-void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult)  
+void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult,std::string type)  
 { 
-  mSettings->mult=mult; mSettings->pid=pid; 
+  mSettings->mult=mult;
+  int g3_pid = 0;
+
+
+  if (type == "pid" || type == "PID") {
+    g3_pid = pid;
+  } else if (type == "pdg" || type == "PDG") {
+    TDatabasePDG *pdgDB = TDatabasePDG::Instance();
+    g3_pid = pdgDB->ConvertPdgToGeant3(pid);
+    if (g3_pid < 1) {
+      LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  PDG code " << pid << " not found in Geant3 database" << endm;
+    }
+  } else {
+    LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  Unknown type '" << type << "', expected 'pid' or 'pdg'" << endm;
+  }
+  // TODO: better error handling if g3_pid is not valid
+  assert(g3_pid > 0);
+  mSettings->pid=g3_pid; 
   LOG_INFO << "StPrepEmbedMaker::SetPartOpt mult = " << mSettings->mult
 	   << " pid = " << mSettings->pid << endm;
 }
