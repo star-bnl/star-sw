@@ -25,6 +25,7 @@ const bool runchains[] = { false, true, true, true };
 
 // Load sufficient libraries to bootstrap the StBFChain framework
 #pragma cling load("libTree.so")
+#pragma cling load("libEG.so")
 #pragma cling load("StarRoot")
 #pragma cling load("St_base")
 #pragma cling load("StChain")
