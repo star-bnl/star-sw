@@ -104,6 +104,9 @@ cp StRoot/macros/embedding/EmbeddingChainOptions.h .
 echo Where is root
 which root
 
+echo Where is root4star
+which root4star
+
 echo List macros directory
 ls -l StRoot/macros/embedding/
 
