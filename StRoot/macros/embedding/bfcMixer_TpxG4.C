@@ -147,7 +147,6 @@ void SetTagFile( const char* tags ) {
 }
 void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx, const char* type_ ) {
   if ( simcore == geant4star ) {
-    std::cout << "HHHHHHHHHHHHHHHHHHHHH" << std::endl;
     auto* kine = chain2->Maker("StarKine");
     kine->SetAttr("ptlow", ptmn);
     kine->SetAttr("pthigh", ptmx);
