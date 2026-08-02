@@ -381,6 +381,7 @@ void bfcMixer_TpxG4()
   top->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   top->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+  top->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StGeant4Maker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StarEmbedMaker::*"); 	//It is also IO maker
 
