@@ -32,7 +32,6 @@ const bool runchains[] = { false, true, true, true };
 
 // Load sufficient libraries to bootstrap the StBFChain framework
 #pragma cling load("libTree.so")
-#pragma cling load("libEG.so")
 #pragma cling load("StarRoot")
 #pragma cling load("St_base")
 #pragma cling load("StChain")
@@ -42,7 +41,6 @@ const bool runchains[] = { false, true, true, true };
 #pragma cling load("StStarLogger.so")
 #pragma cling load("StarClassLibrary.so")
 #pragma cling load("libmysqlclient.so")
-//#pragma cling load("libStarMiniCern.so")
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
 
