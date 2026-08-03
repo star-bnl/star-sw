@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE note [                                                                                                                                                                        
-<!ENTITY PRODNAME "P21icAuAu19" >                                                                                                           
-<!ENTITY OFFSET "0">                                                                                                                                                                    
+<!DOCTYPE note [
+<!ENTITY PRODNAME "P21icAuAu19" >
+<!ENTITY OFFSET "0">
 <!ENTITY NEVENTS "1000">
 <!ENTITY NFILES "ALL">
 <!ENTITY DAQLIST "/star/simu/simu/jwebb/2026/production-filelists/P21ic:production_19GeV_2019:st_physics_adc.daqlist">
@@ -13,7 +13,7 @@
 <!ENTITY VZMN "-145.0">
 <!ENTITY VZMX "145.0">
 <!ENTITY VRMX "2.0">
-<!ENTITY PIDTYPE "PDG"> 
+<!ENTITY PIDTYPE "PDG">
 <!ENTITY PID "333">
 <!ENTITY MULT "0.05">
 <!ENTITY KINTYPE "FlatPT">
@@ -21,14 +21,14 @@
 <!ENTITY TRIGGERS "640001,640011,640021,640031,640041,640051">
 <!ENTITY DECAYS   "decayMode(333,{100.0,321,-321, 0}), decayMode(321,{100.0,211,211,-211}), decayMode(-321,{100.0,-211,-211,211}) ">
 <!ENTITY ENGINE   "G4">
-<!ENTITY OUTDIR "/star/simu/simu/g4star/.embedding/out/">                                                                                                                             
-<!ENTITY LOGDIR "/star/simu/simu/g4star/.embedding/log/">                                                                                                                             
+<!ENTITY OUTDIR "/star/simu/simu/g4star/.embedding/out/">
+<!ENTITY LOGDIR "/star/simu/simu/g4star/.embedding/log/">
 <!ENTITY JOBDIR "/star/simu/simu/g4star/.embedding/job/">
 <!ENTITY MACROSDIR "${STAR}/StRoot/macros">
 <!ENTITY WORKINGDIR "/star/simu/simu/jwebb/2026/Geant4STAR/geant4star-sl26-prune">
-<!ENTITY verbose "False">                                                                                                                                                               
+<!ENTITY verbose "False">
 <!ENTITY nosubmit "false">
-]>  
+]>
 
 <job maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="&nosubmit;">
 
@@ -93,7 +93,7 @@ mkdir -v $SCRATCH/tags
 set tagfile=`grep ${FILEBASENAME} &TAGLIST;`
 cp -v   ${tagfile} $SCRATCH/tags/
 ls -lah $SCRATCH/
-ls -lah $SCRATCH/tags/ 
+ls -lah $SCRATCH/tags/
 
 touch $SCRATCH/${FILEBASENAME}_${JOBID}.log
 
@@ -115,18 +115,18 @@ echo STAR version is $STAR
 echo Create the run macro
 touch runBfc.C
 cat &lt;&lt;EOF &gt;&gt; runBfc.C
-#include "StRoot/macros/embedding/bfcMixer_TpxG4.C"
+#include "StRoot/macros/embedding/bfcMixer_TpxAll.C"
 void runBfc() {
-     bfcMixer_TpxG4(
+     bfcMixer_TpxAll(
      &NEVENTS;,
      "$INPUTFILE0",
      "$SCRATCH/tags/${FILEBASENAME}.tags.root",
-     &PTMN;, &PTMX;, &ETAMN;, &ETAMX;, &VZMN;, &VZMX;, &VRMX;, &PID;, &MULT;, 
+     &PTMN;, &PTMX;, &ETAMN;, &ETAMX;, &VZMN;, &VZMX;, &VRMX;, &PID;, &MULT;,
      {&TRIGGERS;},   // comma separated list of triggers is inserted into a vector of triggers
-     "&PRODNAME;", 
+     "&PRODNAME;",
      "&KINTYPE;",
      &SIMIN;,
-     "&PIDTYPE;", 
+     "&PIDTYPE;",
      {&DECAYS;},    // comma separated list of decay modes is inserted into a vector of decay modes
      "&ENGINE;");
 };
@@ -138,21 +138,21 @@ set engine = "&ENGINE;"
 if ( "$engine" == "starsimR6" ) then
   echo "Running $engine engine using root4star"
   root4star -b -q runBfc.C
-else 
+else
   echo "Running $engine engine using root"
   root -q -b runBfc.C
 endif
-  
+
 ls -la .
 
 <!-- Make output and list directory (if they don't exist) -->
-if ( ! -f &OUTDIR; ) then 
+if ( ! -f &OUTDIR; ) then
   mkdir -pv &OUTDIR;
 endif
 ls -l &OUTDIR;
 
 
-if ( ! -f &LOGDIR; ) then 
+if ( ! -f &LOGDIR; ) then
   mkdir -pv &LOGDIR;
 endif
 

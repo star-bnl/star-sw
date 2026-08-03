@@ -4,7 +4,7 @@ class StMessMgr;
 
 #include <string>
 #include <TString.h>
-#include <TVirtualMC.h>
+// #include <TVirtualMC.h>
 
 #include "EmbeddingChainOptions.h"
 
@@ -14,10 +14,7 @@ const int debuglevel = 1;
 
 std::string   chain1opts_ = "in,magF,tpcDb,NoDefault,TpxRaw,-ittf,usexgeom,xgeometry stargen:stubs "; // agml??
 std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,tpcrs     -ittf,-tpc_daq,nodefault stargen:embed kinematics:embed ry2021a g4star:mk ";
-//std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,     -ittf,-tpc_daq,nodefault stargen:embed kinematics:embed ry2021a g4star:mk ";
-//std::string   chain2opts_ = "gen_T,emc_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault  ry2021a  ";
 std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer MiniMcMk McAna useInTracker emcSim bemcMixer eefs eemcmixer nodefault";
-//std::string   chain3opts_ = "DbV20230818 P2021a StiCA BEmcChkStat EbyET0 ODistoSmear VFMCE TpxClu -VFMinuit -hitfilt TpcMixer " " MiniMcMk McAna useInTracker " " emcSim bemcMixer eefs eemcmixer nodefault";
 
 
 std::string   prepend = "";
@@ -81,6 +78,7 @@ std::vector<int> triggers = {870010};
 std::string prodName = "P23idAuAu17";
 std::string type = "FlatPT";
 std::string engine = "G4";
+int simcore = geant4star;
 std::string pidtype = "pid";
 
 struct DecayMode {
@@ -131,50 +129,78 @@ void process( const char* line ){
 };
 
 void SetTagFile( const char* tags ) {
-  process( "auto* stembed = dynamic_cast<StarEmbedMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );");
-  process( Form("stembed->SetAttr(\"tags\",\"%s\");",tags) );
-  //  process( Form("stembed->SetInputFile(\"%s\");", tags ) );
-
+  if ( simcore == geant4star ) {
+    process( "auto* stembed = dynamic_cast<StarEmbedMaker*>( StMaker::GetTopChain()->Maker(\"StarEmbed\") );");
+    process( Form("stembed->SetAttr(\"tags\",\"%s\");",tags) );
+  } else if ( simcore == starsimR6 ) {
+    process( "#pragma cling add_include_path(\"StRoot\")               ");
+    process( "#include \"St_geant_Maker/Embed/StPrepEmbedMaker.h\"     ");
+    process( "auto* embmk = dynamic_cast<StPrepEmbedMaker*>( StMaker::GetTopChain()->Maker(\"PrepEmbed\") );" );
+    process( "assert(embmk);" );
+    process( Form( "embmk->SetTagFile(\"%s\");", tags ) );
+  }
 }
 void SetOpt( double ptmn, double ptmx, double etamn, double etamx, double phimn, double phimx, const char* type_ ) {
-  auto* kine = chain2->Maker("StarKine");
-  kine->SetAttr("ptlow", ptmn);
-  kine->SetAttr("pthigh", ptmx);
-  kine->SetAttr("etalow", etamn);
-  kine->SetAttr("etahigh", etamx);
-  kine->SetAttr("philow", phimn);
-  kine->SetAttr("phihigh", phimx);
-  kine->SetAttr("mode", "FlatPT" );
+  if ( simcore == geant4star ) {
+    auto* kine = chain2->Maker("StarKine");
+    kine->SetAttr("ptlow", ptmn);
+    kine->SetAttr("pthigh", ptmx);
+    kine->SetAttr("etalow", etamn);
+    kine->SetAttr("etahigh", etamx);
+    kine->SetAttr("philow", phimn);
+    kine->SetAttr("phihigh", phimx);
+    kine->SetAttr("mode", "FlatPT" );
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetOpt( %f, %f, %f, %f, %f, %f, \"%s\" );   ", ptmn, ptmx, etamn, etamx, phimn, phimx, type_ ) );
+  }
 }
 void SetPartOpt( int pid, double mult, const char* pidtype="pid" ) {
-  // Map PID onto particle name
-  auto* kine = chain2->Maker("StarKine");
-  gMessMgr->Info() << "SetPartOpt " << pidtype << " " << pid << " " << mult << endm;
-  kine->SetAttr(pidtype,int(pid));
-  kine->SetAttr("ntrack", double(mult));
-  if ( mult < 1.0 ) {
-    auto* embed = chain2->Maker("StarEmbed");
-    LOG_INFO << "Setting eventmult=" << mult << endm;
-    embed->SetAttr("eventmult",double(mult));
+  if ( simcore == geant4star ) {
+    // Map PID onto particle name
+    auto* kine = chain2->Maker("StarKine");
+    gMessMgr->Info() << "SetPartOpt " << pidtype << " " << pid << " " << mult << endm;
+    kine->SetAttr(pidtype,int(pid));
+    kine->SetAttr("ntrack", double(mult));
+    if ( mult < 1.0 ) {
+      auto* embed = chain2->Maker("StarEmbed");
+      LOG_INFO << "Setting eventmult=" << mult << endm;
+      embed->SetAttr("eventmult",double(mult));
+    }
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetPartOpt(%i,%f,\"%s\");", pid, mult, pidtype) );
+    process( "embmk->SetSkipMode(true);" );
+    process( "embmk->SetTemp(0.35);");
   }
 }
 void SetTriggers( std::vector<int> triggers ) {
-  auto* kine = chain2->Maker("StarEmbed");
-  std::string triglist = "";
-  for ( int t : triggers ) {
-    triglist += Form( "%i ", t );
+  if ( simcore == geant4star ) {
+    auto* kine = chain2->Maker("StarEmbed");
+    std::string triglist = "";
+    for ( int t : triggers ) {
+      triglist += Form( "%i ", t );
+    }
+    kine->SetAttr("triggers", triglist.c_str());
+  } else if ( simcore == starsimR6 ) {
+    for ( int t : triggers ) {
+      process( Form( "embmk->SetTrgOpt(%i);",t ) );
+    }
   }
-  kine->SetAttr("triggers", triglist.c_str());
 }
 void SetZVertexCut( double vzmn, double vzmx, double vr=-1.0 ) {
-  auto* embed = chain2->Maker("StarEmbed");  
-  embed->SetAttr("vzmin", vzmn);
-  embed->SetAttr("vzmax", vzmx);
-  embed->SetAttr("vrmax", vr );
+  if ( simcore == geant4star ) {
+    auto* embed = chain2->Maker("StarEmbed");  
+    embed->SetAttr("vzmin", vzmn);
+    embed->SetAttr("vzmax", vzmx);
+    embed->SetAttr("vrmax", vr );
+  } else if ( simcore == starsimR6 ) {
+    process( Form( "embmk->SetZVertexCut(%f, %f);", vzmn, vzmx ) );
+    if ( vr>0.0 )   
+      process( Form( "embmk->SetVrCut(%f);", vr ) );
+  }
 };
 
 
-void bfcMixer_TpxG4() 
+void bfcMixer_TpxAll() 
 {
 
   // Create the top level chain
@@ -230,8 +256,10 @@ void bfcMixer_TpxG4()
 
   if ( chain1 ) { chain1->cd();  chain1->Instantiate(); }
   if ( chain2 ) { chain2->cd();  chain2->Instantiate();
-    auto* prim=chain2->Maker("StarEmbed");
-    prim->SetAttr("output","genevents.root");
+    if ( simcore == geant4star ) {
+      auto* prim=chain2->Maker("StarEmbed");
+      prim->SetAttr("output","genevents.root");
+    }
   }
   if ( chain3 ) { chain3->cd();  chain3->Instantiate(); }
 
@@ -244,7 +272,7 @@ void bfcMixer_TpxG4()
   if ( chain2 ) {
     auto* tpcrs = chain2->Maker("TpcRS");
     if ( tpcrs ) {
-      tpcrs->SetAttr("inputds","geant4star");
+  if ( simcore == geant4star ) tpcrs->SetAttr("inputds","geant4star");
     }
   }
 
@@ -280,12 +308,6 @@ void bfcMixer_TpxG4()
     process( "kine_->SetAttr(\"rapidity\",1);" );
     process( "primary_ -> AddGenerator( kine_ );");
     
-    SetTagFile( tagfile.c_str() );
-    SetOpt( pt_low, pt_high, eta_low, eta_high, 0.0, TMath::TwoPi(), type.c_str() );
-    SetPartOpt( pid, mult, pidtype.c_str() );
-    SetZVertexCut( vzlow, vzhigh, vr );
-    SetTriggers( triggers );
-
     //
     // Configure G4 maker
     //
@@ -337,6 +359,13 @@ void bfcMixer_TpxG4()
 
   }
   
+  SetTagFile( tagfile.c_str() );
+  SetOpt( pt_low, pt_high, eta_low, eta_high, 0.0, TMath::TwoPi(), type.c_str() );
+  SetPartOpt( pid, mult, pidtype.c_str() );
+  SetZVertexCut( vzlow, vzhigh, vr );
+  SetTriggers( triggers );
+
+
   TAttr::SetDebug(0);
   
   //
@@ -345,7 +374,8 @@ void bfcMixer_TpxG4()
   top->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   top->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   top->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
-  //top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+  top->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+  top->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StGeant4Maker::*"); 	//It is also IO maker
   top->SetAttr(".Privilege",1,"StarEmbedMaker::*"); 	//It is also IO maker
 
@@ -373,7 +403,7 @@ void bfcMixer_TpxG4()
 
 
 
-void bfcMixer_TpxG4( 
+void bfcMixer_TpxAll( 
 		    const int   nevents_ , 
 		    const char* daqfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.daq", 
 		    const char* tagfile_   = "/gpfs01/star/pwg/yelfeky/PicoThirdMaker/hpss_restore_with_tags/st_hf_adc_19101008_raw_3500011.tags.root" , 
@@ -420,19 +450,15 @@ void bfcMixer_TpxG4(
 
   decayModes = decays_;
 
-
-  if ( engine != "G4" && engine != "G3" ) {
-    if ( engine == "starsimR6" ) {
-      std::cout << "starsimR6 is not yet supported in this macro" << std::endl;
-      std::cout << "Please use the bfcMixer_TpxAll.C macro for starsimR6" << std::endl;
-    } else{
-      std::cout << "Unknown simulation engine: " << engine << std::endl;
-    }
-    std::cout << "Valid options are: G4, G3" << std::endl;
+  if ( engine == "G4" || engine == "G3" ) simcore = geant4star;
+  else if ( engine == "starsimR6" ) simcore = starsimR6;
+  else {
+    std::cout << "Unknown simulation engine: " << engine << std::endl;
+    std::cout << "Valid options are: G4, G3, starsimR6" << std::endl;
     return;
   }
 
-  auto opts = getChainOptions( geant4star, prodName, simIn );
+  auto opts = getChainOptions(simcore, prodName, simIn );
 
   if ( opts.isValid ) {
     
@@ -440,7 +466,7 @@ void bfcMixer_TpxG4(
     chain1opts = opts.chain1 + " nooutput ";
     chain2opts = opts.chain2 + " noinput nooutput ";
     chain3opts = opts.chain3 + " -in noinput ";    
-    bfcMixer_TpxG4();
+    bfcMixer_TpxAll();
 
   }
 
@@ -455,7 +481,7 @@ void bfcMixer_TpxG4(
 
 };
 
-void bfcMixer_TpxG4( const char* dbg ) {
+void bfcMixer_TpxAll( const char* dbg ) {
 
   std::string dbg_ = dbg;
 
@@ -464,7 +490,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     const int   nevents_ = 50; 
     const char* mydaqfile_   = "/gpfs01/star/embed/daq/2021/auau17_phys_chop/st_physics_adc_22155034_raw_5500004.daq"   ;
     const char* mytagfile_   = "/gpfs01/star/embed/tags/2021/auau17_phys/st_physics_adc_22155034_raw_5500004.tags.root" ;
-    bfcMixer_TpxG4( 50, mydaqfile_, mytagfile_ );
+    bfcMixer_TpxAll( 50, mydaqfile_, mytagfile_ );
 
   };
 
@@ -485,7 +511,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     std::vector<int> mytriggers_  = {870010} ; 
     const char* myprodname  = "P23idAuAu17" ; 
     const char* mykintype   = "FlatPT"      ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+    bfcMixer_TpxAll( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
 
   };
 
@@ -507,7 +533,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
     const char* myprodname  = "P21icAuAu19" ; 
     const char* mykintype   = "FlatPT"      ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+    bfcMixer_TpxAll( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
   };
 
   /*
@@ -536,10 +562,10 @@ void bfcMixer_TpxG4( const char* dbg ) {
     //    DecayMode phiKK = decayMode( 333, {50.0, 321, -321, 0 }, {50.0, -321, 321, 0 } );
     //    decayModes.push_back( phiKK );			 
 
-    // bfcMixer_TpxG4( 100, "/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq", "/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root", 0., 6., -1., 1., -145., 145., 2.0, 333, 0.05, {640001,640011,640021,640031,640041,640051}, "P21icAuAu19" , "FlatPT", "pdg",        {    decayMode(  333, { 100.0,  321, -321,    0 } ),           decayMode(  321, { 100.0,  211,  211, -211 } ),         decayMode( -321, { 100.0, -211, -211,  211 } )       }
+    // bfcMixer_TpxAll( 100, "/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq", "/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root", 0., 6., -1., 1., -145., 145., 2.0, 333, 0.05, {640001,640011,640021,640031,640041,640051}, "P21icAuAu19" , "FlatPT", "pdg",        {    decayMode(  333, { 100.0,  321, -321,    0 } ),           decayMode(  321, { 100.0,  211,  211, -211 } ),         decayMode( -321, { 100.0, -211, -211,  211 } )       }
 
 
-    bfcMixer_TpxG4
+    bfcMixer_TpxAll
       ( 
        nevents_, 
        mydaqfile_, 
@@ -586,7 +612,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     const char* myprodname  = "P21idIsobar200"  ; 
     const char* mykintype   = "FlatPT"       ;
     bool mysimIn = false                     ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+    bfcMixer_TpxAll( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
      
   }
   /*
@@ -611,7 +637,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     const char* myprodname  = "P23ieAuAu200"  ; 
     const char* mykintype   = "FlatPT"       ;
     bool mysimIn = false                     ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );     
+    bfcMixer_TpxAll( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );     
   }
 
   /*
@@ -635,7 +661,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
     std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
     const char* myprodname  = "P23idAuAu19" ; 
     const char* mykintype   = "FlatPT"      ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+    bfcMixer_TpxAll( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
   };
 
     
@@ -663,6 +689,6 @@ void bfcMixer_Tpx(
 		    const char* engine_ 
 		   ) {
 
-  bfcMixer_TpxG4( nevents_, daqfile_, tagfile_, ptmn_, ptmx_, etamn_, etamx_, vzmn_, vzmx_, vr_, pid_, mult_, triggers_, prodname, kintype, simIn, engine_ );
+  bfcMixer_TpxAll( nevents_, daqfile_, tagfile_, ptmn_, ptmx_, etamn_, etamx_, vzmn_, vzmx_, vr_, pid_, mult_, triggers_, prodname, kintype, simIn, engine_ );
 
 };

@@ -155,7 +155,7 @@ void bfcMixer_TpxR6()
     chain3 -> SetFlags( chain3opts.c_str() );
     chain3 -> SetName("Three");
     TString outfile = gSystem->BaseName(daqfile.c_str());    
-    outfile.ReplaceAll(".daq","_R6.root");
+    outfile.ReplaceAll(".daq","_starsimR6.root");
     chain3->Set_IO_Files(nullptr, outfile);    
   }
 
