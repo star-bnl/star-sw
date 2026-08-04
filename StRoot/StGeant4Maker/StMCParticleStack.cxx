@@ -161,7 +161,8 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   // mArray and mPersistent track should always have same number of entries
   mPersistentTrack.push_back(0);
 
-  bool isPrimary = parent<0;
+  // A track is a primary track if the parent is < 0.
+  bool isPrimary = ( parent<0 );
   mNumPrimary += isPrimary;
 
   // Add to the stack of particles
@@ -180,13 +181,14 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   bool tracing = (vr2<Rmax2) && (TMath::Abs(vz)<mScoringZmax) && energy > mScoringEmin;
   
   //
-  // And handle region-based track persistence
+  // And handle region-based track persistence.
   //
-  if ( tracing && (agmlreg == 2 || isPrimary) ) {
+  if ( ( tracing && (agmlreg == 2 ))  || isPrimary  ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
-    auto* persistent = new StarMCParticle(particle,vertex);
+    auto* persistent = new StarMCParticle(particle,vertex); // new persistent track is created
+
     persistent->setIdTruth( mParticleTable.size() );
     persistent->setStartVertex( vertex ); // ... redundant with the ctor ... harmless ...
     mParticleTable.push_back(persistent); // mParticleTable owns the pointer
@@ -203,6 +205,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
       {
 	vertex->addDaughter( mParticleTable.back() );  
       }
+
     // Set the vertex parent to the mother track's persistent particle
     if ( !isPrimary ) {
       int mother = particle->GetFirstMother();
@@ -212,6 +215,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
         }
       }
     }
+
     auto* navigator = gGeoManager->GetCurrentNavigator();
     auto* volume    = navigator->GetCurrentVolume();
     auto* medium    = volume->GetMedium();
@@ -229,6 +233,15 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     int mother = particle->GetFirstMother();
     if ( mother >= 0 ) {
       mPersistentTrack[mArraySize] = mPersistentTrack[mother];
+    }
+    else {
+      LOG_INFO << "MCSTACK ISSUE: Invalid mother index " << mother << " so this track cannot be made persistent at index=" << mArraySize << endm;
+      //      if ( volume ) LOG_INFO << volume->GetName() << endm;
+      //      LOG_INFO << "  ... PushTrack called w/ parent="  << parent << endm;
+      //      particle->Print();
+      //      LOG_INFO << " tracing=" << tracing << endm;
+      //      LOG_INFO << " agmlreg=" << agmlreg << endm;
+      //      LOG_INFO << " isPrimary=" << isPrimary << endm;
     }
   }
 
@@ -251,7 +264,11 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 //___________________________________________________________________________________________________________________
 StarMCParticle* StMCParticleStack::GetCurrentPersistentTrack() {    
   int index = GetCurrentTrackNumber();
-  return mPersistentTrack[ index ];
+  auto* result = mPersistentTrack[ index ];
+  if ( 0==result ) {
+    LOG_INFO << "MCSTACK ISSUE: Persistent track is NULL at index=" << index << endm;
+  }
+  return result;
 }
 //___________________________________________________________________________________________________________________
 StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt, int proc ) {
