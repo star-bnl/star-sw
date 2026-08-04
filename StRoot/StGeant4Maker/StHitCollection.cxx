@@ -225,7 +225,9 @@ void StTrackerHitCollection::ProcessHits() {
   // This should be the current particle truth 
   StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
   if ( 0==truth ) {
-    LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
+    LOG_INFO << "=======================================================================================" << endm;
+    LOG_INFO << "==== There is no truth.  Keep the hit but do not register it to the truth particle. ===" << endm;
+    LOG_INFO << "=======================================================================================" << endm;
   }
 
   bool isNewTrack      = mc->IsNewTrack();
@@ -427,7 +429,9 @@ void StCalorimeterHitCollection::ProcessHits() {
   // This should be the current particle truth 
   StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
   if ( 0==truth ) {
-    LOG_INFO << "There is no truth.  Keep the hit but do not register it to the truth particle." << endm;
+    LOG_INFO << "=======================================================================================" << endm;
+    LOG_INFO << "==== There is no truth.  Keep the hit but do not register it to the truth particle. ===" << endm;
+    LOG_INFO << "=======================================================================================" << endm;
   }
 
   bool isNewTrack      = mc->IsNewTrack();
