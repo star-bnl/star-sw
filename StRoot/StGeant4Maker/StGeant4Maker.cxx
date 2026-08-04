@@ -1688,7 +1688,7 @@ void StGeant4Maker::FinishEvent(){
       mytrack.charge = pdgdata->Charge()/3.0;    // Presumes PDG particles... all charges are fractional.
     }
     else {
-      LOG_WARN << Form("Particle w/ pdgid = %i has no G3 ID (assign 0 to g2t_track::ge_pid)",t->GetPdg()) << endm;
+      LOG_WARN << Form("Particle w/ pdgid = %i has no G3 ID (assign 0 to g2t_track::ge_pid AND CHARGE)",t->GetPdg()) << endm;
     }
     mytrack.p[0]     = t->px();
     mytrack.p[1]     = t->py();
