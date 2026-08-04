@@ -1,5 +1,6 @@
 #include "StGeant4Maker.h"
 #include "StChainOpt.h"
+
 //________________________________________________________________________________________________
 #include "StMessMgr.h"
 //________________________________________________________________________________________________
@@ -2085,34 +2086,39 @@ void StGeant4Maker::Stepping(){
     if ( mc->IsTrackDisappeared() || 
 	 mc->IsTrackStop()        ||
 	 mc->IsTrackOut()         ) {
-      
-      const StarMCVertex* vertex_ = truth->stop();
-      if ( 0==vertex_ ) {
 
-	auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
-
-	// Why do we set the truth track as the parent?
-	vertex->setParent( truth );
-	vertex->setMedium( mc->CurrentMedium() );
+      if ( truth ) {
+	const StarMCVertex* vertex_ = truth->stop();
+	if ( 0==vertex_ ) {
+	  
+	  auto* vertex = mMCStack->GetVertex( vx, vy, vz, tof, -1 );
+	  
+	  // Why do we set the truth track as the parent?
+	  vertex->setParent( truth );
+	  vertex->setMedium( mc->CurrentMedium() );
 	
-//	int pdgid = 0;
-	if ( mc->IsTrackDisappeared() ) {
+	  //	int pdgid = 0;
+	  if ( mc->IsTrackDisappeared() ) {
 	  
-	  if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
-	  else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
-	  else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
+	    if ( nsec )                         vertex->setProcess( mc->ProdProcess(0) );
+	    else if ( mc->IsTrackStop() )       vertex->setProcess( kPStop );
+	    else if ( mc->IsTrackOut()  )       vertex->setProcess( kPNull );
 	  
+	  }
+	  else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
+	  else if ( mc->IsTrackOut()  )   vertex->setProcess( kPNull );
+	
+	  truth->setStopVertex( vertex );         
 	}
-	else if ( mc->IsTrackStop() )   vertex->setProcess( kPStop );
-	else if ( mc->IsTrackOut()  )   vertex->setProcess( kPNull );
-	
-	truth->setStopVertex( vertex );         
+
+      }
+      else {
+	LOG_WARN << "Truth is not set for this track." << endm;
       }
       
     }
-    else if ( nsec > 0 ) {
-      
-      
+    else if ( nsec > 0 && truth ) {  
+            
       TMCProcess proc = mc->ProdProcess(0);
       {
 	
@@ -2122,11 +2128,25 @@ void StGeant4Maker::Stepping(){
 	vertex->setParent( truth );
 	vertex->setMedium( mc->CurrentMedium() );
 	vertex->setProcess( mc->ProdProcess(0) );
+	truth->addIntermediateVertex( vertex ); // ... 
 
-	//$$$	vertex->setIntermediate(true); // do not flag as intermediate
 	
-	// this is an intermediate vertex on the truth track
-	truth->addIntermediateVertex( vertex );
+      }
+      
+    }
+
+    else if ( nsec > 0 && !truth ) {  // This is a bit of an unexpected error condition...
+            
+      TMCProcess proc = mc->ProdProcess(0);
+      {
+	
+	// interaction which throws off secondaries and track contiues...
+	auto* vertex = mMCStack->GetVertex(vx,vy,vz,tof,proc);
+
+	std::cout << "No truth handler you! " << *vertex << endm;
+	current->Print();
+	vertex->Print();
+
 	
       }
       
@@ -2206,7 +2226,7 @@ void StGeant4Maker::PushPrimaries() {
       if ( 1 == stat ) 
 	{
 	  
-	  // Push all tracks with parent = -1 to flag as primary
+	  // Push all tracks with parent = -1 ** to flag as primary **
 	  mMCStack->PushTrack( 1, parent=-1, pdg, px, py, pz, E, vx, vy, vz, tof, 0, 0, 0, proc, ntr, weight, stat );
 
 	}
