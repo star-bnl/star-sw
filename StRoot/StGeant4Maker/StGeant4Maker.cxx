@@ -873,7 +873,7 @@ int StGeant4Maker::InitVmcApp() {
     }
   }
 
-  if ( IAttr("G4:ParticleTable:DumpTables") ) {
+  if ( IAttr("G4:ParticleTable:DumpTables") && gG4 ) {
     G4ParticleTable::GetParticleTable()->DumpTable();
     G4ParticleTable::GetParticleTable()->GetIonTable()->DumpTable();
   }
