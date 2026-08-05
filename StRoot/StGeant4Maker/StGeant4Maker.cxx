@@ -2145,8 +2145,6 @@ void StGeant4Maker::Stepping(){
 
 	std::cout << "No truth handler you! " << *vertex << endm;
 	current->Print();
-	vertex->Print();
-
 	
       }
       
