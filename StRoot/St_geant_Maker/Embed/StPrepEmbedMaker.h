@@ -18,6 +18,7 @@
 #ifndef StPrepEmbedMaker_hh     
 #define StPrepEmbedMaker_hh
 
+#include <string>
 #include "StMaker.h"
 #include "TGiant3.h"
 #include "TString.h"
