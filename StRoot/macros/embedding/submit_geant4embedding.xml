@@ -146,7 +146,7 @@ endif
 ls -la .
 
 <!-- Make output and list directory (if they don't exist) -->
-if ( ! -f &OUTDIR; ) then
+if ( ! -d &OUTDIR; ) then
   mkdir -pv &OUTDIR;
 endif
 ls -l &OUTDIR;
