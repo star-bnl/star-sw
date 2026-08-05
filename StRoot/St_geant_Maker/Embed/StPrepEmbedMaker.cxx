@@ -35,6 +35,8 @@
 #include "TSystem.h"
 
 #include <unistd.h>
+#include <cassert>
+#include <algorithm>
 
 ClassImp(StPrepEmbedMaker)
 struct embedSettings{
@@ -627,29 +629,35 @@ void StPrepEmbedMaker::Do(const Char_t *job)
 }
 
 //____________________________________________________________________________________________________
-void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult,std::string type)  
+void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult,const std::string& type)  
 { 
   mSettings->mult=mult;
   int g3_pid = 0;
 
+  auto string_lower = [](const std::string& str) -> std::string {
+    std::string lower_str = str;
+    std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(), ::tolower);
+    return lower_str;
+  };
 
-  if (type == "pid" || type == "PID") {
+  std::string type_lower = string_lower(type);
+
+  if (type_lower == "pid") {
     g3_pid = pid;
-  } else if (type == "pdg" || type == "PDG") {
+  } else if (type_lower == "pdg") {
     StParticleTable *pdgtable = StParticleTable::instance();
     assert(pdgtable);
     g3_pid = pdgtable->geantId(pid);
-    if (g3_pid < 1) {
-      LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  PDG code " << pid << " not found in Geant3 database" << endm;
-      // TODO: better error handling if g3_pid is not valid
-      assert(0);
-    }
   } else {
     LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  Unknown type '" << type << "', expected 'pid' or 'pdg'" << endm;
   }
+  assert(g3_pid > 0 && Form("StPrepEmbedMaker::SetPartOpt %d not found in Geant3 database", pid));
+
+  mSettings->mult=mult;
   mSettings->pid=g3_pid; 
   LOG_INFO << "StPrepEmbedMaker::SetPartOpt mult = " << mSettings->mult
 	   << " pid = " << mSettings->pid << endm;
+
 }
 
 //____________________________________________________________________________________________________

@@ -46,8 +46,8 @@ class StPrepEmbedMaker : public StMaker {
     return cvs;
   }
   
-  void SetPartOpt(const Int_t pid, const Double_t mult, std::string type = "pid"); /// Set particle id, multiplicity and type of id ("PID" or "PDG")
-  /// "PID" is geantid() while "PDG" is pdg() from StParticleDataTable.  Default is "PID"
+  void SetPartOpt(const Int_t pid, const Double_t mult,const std::string& type = "pid"); /// Set particle id, multiplicity and type of id ("PID" or "PDG")
+  /// "PID" is geantid() while "PDG" is pdg() from StParticleDataTable.  Default is "pid"
 
   /// Set (ptlow, pthigh), (etalow, etahigh), (philow, phihigh), and type
   /// type can be
