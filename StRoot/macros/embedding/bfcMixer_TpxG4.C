@@ -660,9 +660,11 @@ void bfcMixer_Tpx(
 		    const char* prodname        ,
 		    const char* kintype         ,
 		    bool simIn                  ,
+		    const char* pidtype_        , 
+		    const std::vector< DecayMode > decays_, 
 		    const char* engine_ 
 		   ) {
 
-  bfcMixer_TpxG4( nevents_, daqfile_, tagfile_, ptmn_, ptmx_, etamn_, etamx_, vzmn_, vzmx_, vr_, pid_, mult_, triggers_, prodname, kintype, simIn, engine_ );
+  bfcMixer_TpxG4( nevents_, daqfile_, tagfile_, ptmn_, ptmx_, etamn_, etamx_, vzmn_, vzmx_, vr_, pid_, mult_, triggers_, prodname, kintype, simIn, pidtype_, decays_, engine_ );
 
 };
