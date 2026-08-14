@@ -418,7 +418,10 @@ void StMCParticleStack::Clear( const Option_t *opts )
 
   mVertexTable.clear();
   mTruthTable.clear();
-  mParticleTable.clear(); 
+  mParticleTable.clear();  
+
+  mStackToTable.clear(); 
+  mIdTruthFromParticle.clear();
 
 }
 //___________________________________________________________________________________________________________________
