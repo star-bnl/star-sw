@@ -195,8 +195,10 @@ StParticleTable::StParticleTable()
       /** Geant ID: X	*/				\
       /** PDG ID:   Y	*/				\
       /** */						\
+      if ( 0==mGeantFromPdg[ Y ] ) {			\
       mGeantPdgMap.insert(geantPdgPairType(X,Y));	\
       mGeantFromPdg[ Y ] = X;				\
+      }							\
     }
 
 
@@ -580,8 +582,11 @@ void StParticleTable::insert(StParticleDefinition* p)
     typedef mPdgMapType::value_type pdgPairType;
     typedef mNameMapType::value_type namePairType;
 
-    if (p->pdgEncoding() != 0)
+    // Add entry to the PDG map.  Do not replace entries with subsequent definitions.
+    int pdgid = p->pdgEncoding();
+    if ( pdgid && 0==mPdgMap[pdgid] ) {
 	mPdgMap.insert(pdgPairType(p->pdgEncoding(), p));
+    }
     mNameMap.insert(namePairType(p->name(), p));
 }
 
