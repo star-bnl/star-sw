@@ -267,15 +267,13 @@ protected:
       LOG_INFO << report.c_str() << endm;
     }
     
-    // Create new table (possibly empty)
-    auto* table     = new T( gname.c_str(), nhits );
-    // Get the track table
-    auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
-
-
-
     //    LOG_INFO << name << " adding number of hits = " << nhits << endm;
     if ( nhits > 0 ) {
+
+      // Create new table (possibly empty)
+      auto* table     = new T( gname.c_str(), nhits );
+      // Get the track table
+      auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
 
       // Copy data from the sensitive detectors to the table
       for ( auto* sd_ : sds ) {
