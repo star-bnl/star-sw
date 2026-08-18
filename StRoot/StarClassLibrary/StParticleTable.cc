@@ -195,10 +195,7 @@ StParticleTable::StParticleTable()
       /** Geant ID: X	*/				\
       /** PDG ID:   Y	*/				\
       /** */						\
-      if ( 0==mGeantFromPdg[ Y ] ) {			\
       mGeantPdgMap.insert(geantPdgPairType(X,Y));	\
-      mGeantFromPdg[ Y ] = X;				\
-      }							\
     }
 
 
@@ -455,7 +452,18 @@ StParticleTable::StParticleTable()
 
 }
 
-int StParticleTable::geantId( const int pdgid ) { return mGeantFromPdg[pdgid]; }
+
+std::vector<int> StParticleTable::geantIds( const int pdgid_ ) {
+  std::vector<int> result;
+  for ( const auto& kv : mGeantPdgMap ) {
+    int g3id = kv.first;
+    int pdgid = kv.second;
+    if ( pdgid==pdgid_ ) {
+      result.push_back( g3id );
+    }
+  }
+  return result;
+};
 
 StParticleTable::StParticleTable(const StParticleTable &) {/* private */}
    
@@ -475,7 +483,7 @@ unsigned int StParticleTable::entries() const {return mNameMap.size();}
 unsigned int StParticleTable::size() const {return mNameMap.size();}
 
 bool StParticleTable::contains(const string& name) const
-{
+{  
     return (findParticle(name) != 0);
 }
 
@@ -584,9 +592,7 @@ void StParticleTable::insert(StParticleDefinition* p)
 
     // Add entry to the PDG map.  Do not replace entries with subsequent definitions.
     int pdgid = p->pdgEncoding();
-    if ( pdgid && 0==mPdgMap[pdgid] ) {
-	mPdgMap.insert(pdgPairType(p->pdgEncoding(), p));
-    }
+    mPdgMap.insert(pdgPairType(p->pdgEncoding(), p));
     mNameMap.insert(namePairType(p->name(), p));
 }
 

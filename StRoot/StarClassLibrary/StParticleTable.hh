@@ -80,7 +80,7 @@ public:
 
     StVecPtrParticleDefinition allParticles() const;
 
-    int geantId( const int pdgId );
+    std::vector<int> geantIds( const int pdgId ); // return vector of geant IDs mapped to single PDG id
     
     friend class nobody;
 
@@ -110,7 +110,7 @@ private:
     mGeantPdgMapType   mGeantPdgMap;     // Geant3 IDs only
     mPdgMapType        mPdgMap;          // PDG IDs only
     mNameMapType       mNameMap;         // complete list
-    std::map<int,int>  mGeantFromPdg;
+
 #ifdef __ROOT__
   ClassDef(StParticleTable,2)
 #endif
