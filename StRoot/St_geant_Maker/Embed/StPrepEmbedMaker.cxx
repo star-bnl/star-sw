@@ -647,7 +647,13 @@ void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult,const std
   } else if (type_lower == "pdg") {
     StParticleTable *pdgtable = StParticleTable::instance();
     assert(pdgtable);
-    g3_pid = pdgtable->geantId(pid);
+    g3_pid = 9E9;
+    for ( auto id : pdgtable->geantIds(pid) ) {
+      if ( id < g3_pid ) g3_pid = id;
+    }
+    if ( g3_pid == 9E9 ) {
+      g3_pid = 0; // this will not end well...
+    }
   } else {
     LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  Unknown type '" << type << "', expected 'pid' or 'pdg'" << endm;
   }
