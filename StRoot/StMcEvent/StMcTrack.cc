@@ -265,7 +265,13 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mKey     = trk->id;
     if ( 0==mGeantId && 0 != mPdgId ) {        // fill in geant ID if practicable
       mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
-      mGeantId            = StParticleTable::instance()->geantId( mPdgId );
+      mGeantId=9E9;
+      for ( auto id : StParticleTable::instance()->geantIds( mPdgId ) ) {
+	if ( id<mGeantId ) mGeantId = id;
+      }
+      if ( mGeantId==9E9 ) {
+	mGeantId = 0;
+      }
     } else if ( mPdgId ) { 
       mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
     } else {
