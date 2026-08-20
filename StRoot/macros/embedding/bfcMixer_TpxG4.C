@@ -308,14 +308,14 @@ void bfcMixer_TpxG4()
       seed1 = std::atoi( gSystem->Getenv("GSL_RNG_SEED") );
     }
     else {
-      auto ss1 = std::atoi( gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom") );
+      auto ss1 = gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom");
       seed1=std::atoi( ss1.Data() );
     }
     if ( gSystem->Getenv("JOBINDEX") ) {
       seed1 = std::atoi( gSystem->Getenv("JOB_INDEX") );
     }
     else {
-      auto ss2 = std::atoi( gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom") );
+      auto ss2 = gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom");
       int seed2=std::atoi( ss2.Data() );
     }
 
