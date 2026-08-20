@@ -386,8 +386,7 @@ void bfcMixer_TpxAll()
   top->Init();
   top->ls(10);
 
-
-
+  gInterpreter->ProcessLine("StarRandom::capture();");
 
   //  top->Maker("TpcRS")->SetDebug(999);
   //  top->Maker("Sti")->SetDebug(999);

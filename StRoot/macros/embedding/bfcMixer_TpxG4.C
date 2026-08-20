@@ -294,10 +294,36 @@ void bfcMixer_TpxG4()
 
     g4star->SetAttr( "application:engine", engine.c_str() );
 
-    g4star->SetAttr(
+
+    //
+    // Default to a random run seed...
+    ///
+
+
+    int seed1 = 0;
+    int seed2 = 0;
+
+    // 
+    if ( gSystem->Getenv("GSL_RNG_SEED") ) {
+      seed1 = std::atoi( gSystem->Getenv("GSL_RNG_SEED") );
+    }
+    else {
+      auto ss1 = std::atoi( gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom") );
+      seed1=std::atoi( ss1.Data() );
+    }
+    if ( gSystem->Getenv("JOBINDEX") ) {
+      seed1 = std::atoi( gSystem->Getenv("JOB_INDEX") );
+    }
+    else {
+      auto ss2 = std::atoi( gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom") );
+      int seed2=std::atoi( ss2.Data() );
+    }
+
+    g4star->SetAttr( 
 		    "G4UI:PREINIT", 
-		    "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
-		    "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+		    Form( "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
+			  "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+		          "/random/setSeeds %i %i;" , seed1, seed2 )
 		    );
     g4star->SetAttr(
 		    "G4UI:INIT",
@@ -357,6 +383,7 @@ void bfcMixer_TpxG4()
   top->ls(10);
 
 
+  gInterpreter->ProcessLine("StarRandom::capture();");
 
 
   //  top->Maker("TpcRS")->SetDebug(999);
@@ -507,7 +534,11 @@ void bfcMixer_TpxG4( const char* dbg ) {
     std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
     const char* myprodname  = "P21icAuAu19" ; 
     const char* mykintype   = "FlatPT"      ;
-    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype );
+    bool simIn=false;
+    const char* pidtype="pid";
+    const std::vector<DecayMode> decays={};
+    const char* engine="G3";
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype, simIn, pidtype, decays, engine );
   };
 
   /*
@@ -515,7 +546,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 /star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root
    */
   if ( dbg_ == "P21icAuAu19:phi" ) {
-    const int   nevents_     = 100; 
+    const int   nevents_     = 10; 
     const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq";
     const char* mytagfile_   = "/star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root";
     double myptmn_           = 0.0;
@@ -595,7 +626,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
    */
   if ( dbg_ == "P23ieAuAu200:pion" ) {
-    const int   nevents_     = 100; 
+    const int   nevents_     = 25; 
     const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/193/20193026/st_physics_adc_20193026_raw_4000002.daq"; 
     const char* mytagfile_   = "/star/data20/tags/production_AuAu200_2019/ReversedFullField/P23ie/2019/193/20193026/st_physics_adc_20193026_raw_4000002.tags.root" ; 
     double myptmn_           = 0.0           ; 
@@ -620,7 +651,7 @@ void bfcMixer_TpxG4( const char* dbg ) {
 
    */
   if ( dbg_ == "P23idAuAu19:deuteron" ) {
-    const int   nevents_     = 100; 
+    const int   nevents_     = 500; 
     const char* mydaqfile_   = "/star/data101/EMBED/daq/2019/062/20062042/st_physics_adc_20062042_raw_6000002.daq";
     const char* mytagfile_   = "/star/data20/tags/production_19GeV_2019/ReversedFullField/P23id/2019/062/20062042/st_physics_adc_20062042_raw_6000002.tags.root";
     double myptmn_           = 0.0;

@@ -215,6 +215,8 @@ void bfcMixer_TpxR6()
   top->Init();
   top -> ls(10);
 
+  gInterpreter->ProcessLine("StarRandom::capture();");
+
   gSystem->SetFPEMask( kNoneMask );
   top->EventLoop(nevents, top->Maker("outputStream"));
 
