@@ -36,8 +36,9 @@
 
 <command>
 
-<!--RNG seed is set to the JOBINDEX for reproducibility -->
-setenv GSL_RNG_SEED ${JOBINDEX}
+<!--RNG seed is set to the checksum of the job id, truncated to 6 digits, for reproducability...  may introduce 1 in 100k jobs being identical -->
+<!-- n.b. this sets the rng seeds under control of the StarGenerator random package --> 
+setenv GSL_RND_SEED `echo ${JOBID} | cksum | awk '//{ print $1 % 100000 }'`
 
 echo Sourcing the cshrc
 source $HOME/.cshrc
