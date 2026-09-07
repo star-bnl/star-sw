@@ -38,6 +38,10 @@ int StFttDbMaker::Make(){
 int StFttDbMaker::InitRun(int runNumber) {
   LOG_INFO << "StFttDbMaker::InitRun - run = " << runNumber << endm;
 
+    // Strip geometry (centers / edges / lengths) for the retired FTT hardware
+    // is compiled into StFttDb and loaded in its constructor — no external
+    // text files are required.
+
     std::ifstream file("vmm_map.dat");
     if(file.is_open()){ // debugging / calibration only
         file.close();

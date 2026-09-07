@@ -61,6 +61,10 @@ public:
     void loadDataWindowsFromFile( std::string fn );
     void loadDataWindowsFromDb( St_fttDataWindowsB * );
 
+    // FTT was retired with fixed hardware geometry; strip center/edge/length
+    // tables below are compiled-in constants populated by initStripGeometry().
+    void initStripGeometry();
+
 
     UChar_t plane( StFttRawHit * hit );
     UChar_t quadrant( StFttRawHit * hit );
