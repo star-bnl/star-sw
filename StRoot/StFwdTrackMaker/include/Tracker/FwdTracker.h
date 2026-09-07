@@ -335,6 +335,7 @@ class ForwardTrackMaker {
         mTrackResults.clear();
         mEventStats.reset();
         mTotalHitsRemoved = 0;
+        for ( auto vtx : mFwdVertices ) { delete vtx; }
         mFwdVertices.clear();
         mFwdVerticesAsHits.clear();
         /************** Cleanup **************************/
@@ -709,7 +710,7 @@ class ForwardTrackMaker {
         return globalTracks;
     }
 
-    std::vector<GenfitTrackResult> doPrimaryTrackFitting( std::vector<GenfitTrackResult> globalTracks) {
+    std::vector<GenfitTrackResult> doPrimaryTrackFitting( const std::vector<GenfitTrackResult> &globalTracks) {
         if (verbose){
             LOG_INFO << ">>doPrimaryTrackFitting" << Form("( #globals = %lu )", globalTracks.size()) << endm;
         }
@@ -718,7 +719,7 @@ class ForwardTrackMaker {
         std::vector<GenfitTrackResult> primaryTracks;
 
         size_t index = 0;
-        for (auto &gtr : globalTracks) {
+        for (const auto &gtr : globalTracks) {
             if (kProfile) mEventStats.mAttemptedPrimaryFits ++;
             if (verbose){
                 LOG_INFO << "Refitting Track " << index << ", McId=" << gtr.mIdTruth << " with Primary Vertex, seed already has: " << gtr.mSeed.size() << " hits" << endm;
@@ -729,9 +730,9 @@ class ForwardTrackMaker {
             // just use the global track to build the track that will use the PV also
             Seed_t seedWithPV = gtr.mSeed;
             seedWithPV.push_back( &mEventVertexHit );
-            
 
-            GenfitTrackResult gtrPV = fitTrack(seedWithPV, &gtr.mMomentum);
+            TVector3 seedMomPV = gtr.mMomentum;
+            GenfitTrackResult gtrPV = fitTrack(seedWithPV, &seedMomPV);
             gtrPV.mTrackType = StFwdTrack::kPrimaryVertexConstrained;
             gtrPV.mGlobalTrackIndex = gtr.mIndex;
             gtrPV.mVertexIndex = 0;
@@ -805,7 +806,7 @@ class ForwardTrackMaker {
         return primaryTracks;
     }
 
-    std::vector<GenfitTrackResult> doBeamlineTrackFitting( std::vector<GenfitTrackResult> globalTracks) {
+    std::vector<GenfitTrackResult> doBeamlineTrackFitting( const std::vector<GenfitTrackResult> &globalTracks) {
         if (verbose){
             LOG_INFO << ">>doBeamlineTrackFitting" << Form("( #globals = %lu )", globalTracks.size()) << endm;
         }
@@ -814,7 +815,7 @@ class ForwardTrackMaker {
         std::vector<GenfitTrackResult> beamlineTracks;
 
         size_t index = 0;
-        for (auto &gtr : globalTracks) {
+        for (const auto &gtr : globalTracks) {
             if (kProfile) mEventStats.mAttemptedBeamlineFits ++;
             if (verbose){
                 LOG_INFO << "doBeamlineTrackFitting>>" << index << " McId=" << gtr.mIdTruth << " with Beamline, seed already has: " << gtr.mSeed.size() << " hits" << endm;
@@ -833,7 +834,8 @@ class ForwardTrackMaker {
                 gtrPV = fitTrack(seedWithPV);    
             } else {
                 // Only use the momentum of the global track if it converged
-                gtrPV = fitTrack(seedWithPV, &gtr.mMomentum);
+                TVector3 seedMomBL = gtr.mMomentum;
+                gtrPV = fitTrack(seedWithPV, &seedMomBL);
             }
 
             gtrPV.mTrackType = StFwdTrack::kBeamlineConstrained;
@@ -910,7 +912,7 @@ class ForwardTrackMaker {
         return beamlineTracks;
     }
 
-    std::vector<GenfitTrackResult> doSecondaryTrackFitting( std::vector<GenfitTrackResult> globalTracks) {
+    std::vector<GenfitTrackResult> doSecondaryTrackFitting( const std::vector<GenfitTrackResult> &globalTracks) {
         mFwdVerticesAsHits.clear();
         if (verbose){
             LOG_INFO << ">>doSecondaryTrackFitting" << Form("( #globals = %lu )", globalTracks.size()) << endm;
@@ -949,7 +951,7 @@ class ForwardTrackMaker {
                     LOG_WARN << "FwdVertex: " << vtx->getId() << ", iVtxTrack = " << iVtxTrack << ", vtxTrack == nullptr" << endm;
                     continue;
                 }
-                auto gtr = std::find_if( globalTracks.begin(), globalTracks.end(), [&]( GenfitTrackResult &gtr ) {
+                auto gtr = std::find_if( globalTracks.begin(), globalTracks.end(), [&]( const GenfitTrackResult &gtr ) {
                     return gtr.mTrack.get() == vtxTrack;
                 });
                 if ( gtr == globalTracks.end() ){
@@ -960,7 +962,8 @@ class ForwardTrackMaker {
                 
                 Seed_t seedWithVtx = gtr->mSeed;
                 seedWithVtx.push_back( &mFwdVerticesAsHits.back() );
-                GenfitTrackResult gtrPV = fitTrack(seedWithVtx, &gtr->mMomentum);
+                TVector3 seedMom = gtr->mMomentum;
+                GenfitTrackResult gtrPV = fitTrack(seedWithVtx, &seedMom);
                 if ( gtrPV.mIsFitConvergedFully ) {
                     if (kProfile) mEventStats.mGoodSecondaryFits++;
                 } else {
@@ -1485,7 +1488,7 @@ class ForwardTrackMaker {
      *
      */
     void addFstHitsMc( GenfitTrackResult &gtr ) {
-        FwdDataSource::HitMap_t hitmap = mDataSource->getFstHits();
+        const FwdDataSource::HitMap_t &hitmap = mDataSource->getFstHits();
         if ( gtr.mIsFitConverged == false || gtr.mMomentum.Perp() < 1e-3) {
             LOG_DEBUG << "Skipping addFstHitsMc, fit failed" << endm;
             return;
@@ -1493,7 +1496,9 @@ class ForwardTrackMaker {
         Seed_t fstHitsThisTrack;
 
         for (size_t j = 0; j < 3; j++) {
-            for (auto h0 : hitmap[j]) {
+            auto it = hitmap.find(j);
+            if ( it == hitmap.end() ) continue;
+            for (auto h0 : it->second) {
                 if (dynamic_cast<FwdHit *>(h0)->_tid == gtr.mIdTruth) {
                     fstHitsThisTrack.push_back(h0);
                     break;
@@ -1517,12 +1522,14 @@ class ForwardTrackMaker {
      * @return Seed_t : The combined seed points
      */
     int addFttHits( GenfitTrackResult &gtr, size_t disk ) {
-        FwdDataSource::HitMap_t hitmap = mDataSource->getFttHits();
+        const FwdDataSource::HitMap_t &hitmap = mDataSource->getFttHits();
         if ( disk > 3 ) {
             LOG_WARN << "Invalid FTT disk number: " << disk << ", cannot add Ftt points to track" << endm;
             return 0;
         }
         if (gtr.mIsFitConverged != true)
+            return 0;
+        if ( hitmap.find(disk) == hitmap.end() )
             return 0;
 
         Seed_t hits_near_plane;
@@ -1530,8 +1537,8 @@ class ForwardTrackMaker {
             auto msp = mTrackFitter->projectToFtt(disk, gtr.mTrack);
 
             // now look for Ftt hits near the specified state
-            // hits_near_plane = findFttHitsNearProjectedState(hitmap[disk], msp);
-            hits_near_plane = findFttStripsNearProjectedState(hitmap[disk], msp);
+            // hits_near_plane = findFttHitsNearProjectedState(hitmap.at(disk), msp);
+            hits_near_plane = findFttStripsNearProjectedState(hitmap.at(disk), msp);
             LOG_DEBUG << " Found #FTT strips on plane #" << disk << TString::Format( " = [%ld]", hits_near_plane.size() ) << endm;
         } catch (genfit::Exception &e) {
             // Failed to project
@@ -1564,7 +1571,7 @@ class ForwardTrackMaker {
     void addFttHitsMc( GenfitTrackResult &gtr ) {
         LOG_DEBUG << "Looking for FTT hits on this track (MC lookup)" << endm;
         LOG_DEBUG << "Track TruthId = " << gtr.mIdTruth << " vs. " << gtr.mTrack->getMcTrackId() << endm;
-        FwdDataSource::HitMap_t hitmap = mDataSource->getFttHits();
+        const FwdDataSource::HitMap_t &hitmap = mDataSource->getFttHits();
         if ( gtr.mIsFitConverged == false || gtr.mMomentum.Perp() < 1e-6) {
             LOG_DEBUG << "Skipping addFttHitsMc on this track, fit failed" << endm;
             return;
@@ -1572,7 +1579,9 @@ class ForwardTrackMaker {
         Seed_t fttHitsForThisTrack;
 
         for (size_t j = 0; j < 4; j++) {
-            for (auto h0 : hitmap[j]) {
+            auto it = hitmap.find(j);
+            if ( it == hitmap.end() ) continue;
+            for (auto h0 : it->second) {
                 if (dynamic_cast<FwdHit *>(h0)->_tid == gtr.mIdTruth) {
                     fttHitsForThisTrack.push_back( h0 );
                     break;
@@ -1594,7 +1603,7 @@ class ForwardTrackMaker {
      * @param disk : The FST disk number
      */
     int addFstHits( GenfitTrackResult &gtr, size_t disk ) {
-        FwdDataSource::HitMap_t hitmap = mDataSource->getFstHits();
+        const FwdDataSource::HitMap_t &hitmap = mDataSource->getFstHits();
         if (gtr.mIsFitConverged == false) {
             // Original Track fit did not converge, skipping
             return 0;
@@ -1603,13 +1612,15 @@ class ForwardTrackMaker {
             LOG_ERROR << "Invalid FST disk number: " << disk << endm;
             return 0;
         }
+        if ( hitmap.find(disk) == hitmap.end() )
+            return 0;
 
         Seed_t nearby_hits;
         try {
             // get measured state on plane at specified disk
             auto msp = mTrackFitter->projectToFst(disk, gtr.mTrack);
             // now look for Si hits near this state
-            nearby_hits = findFstHitsNearProjectedState(hitmap[disk], msp);
+            nearby_hits = findFstHitsNearProjectedState(hitmap.at(disk), msp);
         } catch (genfit::Exception &e) {
             LOG_WARN << "Unable to get projections: " << e.what() << endm;
         }
@@ -1632,7 +1643,7 @@ class ForwardTrackMaker {
      * @param dr : search distance in r
      * @return Seed_t : compatible FST hits
      */
-    Seed_t findFstHitsNearProjectedState(Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double dphi = 0.004 * 20.5, double dr = 2.75 * 2) {
+    Seed_t findFstHitsNearProjectedState(const Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double dphi = 0.004 * 20.5, double dr = 2.75 * 2) {
         double probe_phi = TMath::ATan2(msp.getPos().Y(), msp.getPos().X());
         double probe_r = sqrt(pow(msp.getPos().X(), 2) + pow(msp.getPos().Y(), 2));
 
@@ -1734,7 +1745,7 @@ class ForwardTrackMaker {
      *
      * @return compatible FTT hits
     */
-    Seed_t findFttStripsNearProjectedState(Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double thresholdPhi = 0.004 * 3 , double thresholdR = 30, double thresholdX = 7.5, double thresholdY = 7.5) {
+    Seed_t findFttStripsNearProjectedState(const Seed_t &available_hits, genfit::MeasuredStateOnPlane &msp, double thresholdPhi = 0.004 * 30 , double thresholdR = 30, double thresholdX = 7.5, double thresholdY = 7.5) {
 
         Seed_t found_hits;
         if (available_hits.size() == 0) {
@@ -1825,7 +1836,7 @@ class ForwardTrackMaker {
      * @return Seed_t : The combined seed points
      */
      int addEpdHits( GenfitTrackResult &gtr ) {
-        FwdDataSource::HitMap_t hitmap = mDataSource->getEpdHits();
+        const FwdDataSource::HitMap_t &hitmap = mDataSource->getEpdHits();
         if (gtr.mIsFitConverged != true)
             return 0;
 
@@ -1835,7 +1846,9 @@ class ForwardTrackMaker {
 
             // now look for Ftt hits near the specified state
             const int plane = 7; // EPD plane number
-            hits_near_plane = findEpdHitsNearProjectedState(hitmap[plane], msp);
+            auto it = hitmap.find(plane);
+            if ( it != hitmap.end() )
+                hits_near_plane = findEpdHitsNearProjectedState(it->second, msp);
             LOG_DEBUG << " Found #EPD hits on plane " << TString::Format( " = [%ld]", hits_near_plane.size() ) << endm;
         } catch (genfit::Exception &e) {
             // Failed to project
@@ -1872,8 +1885,8 @@ class ForwardTrackMaker {
      *
      * @return compatible FTT hits
     */
-    Seed_t findEpdHitsNearProjectedState(Seed_t &available_hits, 
-            genfit::MeasuredStateOnPlane &msp, 
+    Seed_t findEpdHitsNearProjectedState(const Seed_t &available_hits,
+            genfit::MeasuredStateOnPlane &msp,
             double dx = 1.5, double dy = 1.5,
             double dr = 99, double dphi = 0.2
         ) {

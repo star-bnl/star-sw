@@ -56,6 +56,7 @@ class TrackFitter {
                 track.reset();
             }
         }
+        mFitTracks.clear();
     }
 
   public:
