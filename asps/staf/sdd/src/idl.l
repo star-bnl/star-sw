@@ -1,3 +1,4 @@
+%option noyywrap
 l [A-Za-z]
 lun [\_A-Za-z0-9]
 %%

@@ -92,7 +92,7 @@ $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
 $CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^al/) {
   # $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -Df2cFortran -DCERNLIB_QMGLIBC";
@@ -181,7 +181,11 @@ if ($LD =~ /g++/ && $FC !~ m/gfortran/) {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
 # if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
-my $LIBPATH    = $env->{LIBPATH};
+# Prepend the absolute path of the local build lib directory so that the
+# linker finds locally built libstarsim/libgeant321/libgcalor even when
+# there is no central installation (e.g. during an OS bootstrap).
+my $local_lib = $pwd . "/." . $STAR_SYS . "/lib";
+my $LIBPATH = $local_lib . $main::PATH_SEPARATOR . $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
 my $LIBS    = $env->{LIBS};

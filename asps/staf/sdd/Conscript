@@ -14,11 +14,11 @@ my $YACC = "yacc";
 my $YACCLIB = "-ly";
 my $LEX  = "lex";
 my $LEXLIB = "-ll";
-if ($env->{ENV}->{STAR_SYS} =~ /i386/) {
+if ($env->{ENV}->{STAR_SYS} =~ /i386/ or $env->{ENV}->{STAR_SYS} =~ /^al/) {
   $YACC = "/usr/bin/bison -y";
   $YACCLIB = "";
   $LEX = "flex";
-  $LEXLIB = "-lfl";
+  $LEXLIB = "";
 }
 
 my $CXX_VERSION= $env->{CXX_VERSION};
