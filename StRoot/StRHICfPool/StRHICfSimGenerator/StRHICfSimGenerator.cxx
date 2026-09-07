@@ -118,6 +118,8 @@ int StRHICfSimGenerator::InitTree()
 
     mParticleArr = new TClonesArray("TParticle");
     mGenTree -> SetBranchAddress("Particles",&mParticleArr);
+    mGenTree -> SetBranchAddress("GenEventNum", &mGenEventNum);
+    mGenTree -> SetBranchAddress("PassedEventNum", &mPassedEventNum);
     mGenTree -> SetBranchAddress("ProcessID", &mProcessID);
 
     mTotalEventNumber = mGenTree -> GetEntries();
@@ -161,7 +163,7 @@ void StRHICfSimGenerator::FillPP( StarGenEvent *myevent )
     event -> ptHat      = -999;
     event -> thetaHat   = -999;
     event -> phiHat     = -999;
-    event -> weight     = -999;
+    event -> weight     = mGenEventNum; // the nubmer of generated event
 }
 
 StarGenStats StRHICfSimGenerator::Stats()

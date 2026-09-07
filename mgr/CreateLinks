@@ -90,9 +90,9 @@ endif
 
 # Shorter group for Alma - we should NOT support 32 bits
 set arch="_x8664_"
-set refos="a92"$arch"gcc11"
-foreach vers ( 95 96 97 )
-    set dir="a"$vers$arch"gcc11"
+set refos="al92"$arch"gcc11"
+foreach vers ( 95 96 97 98 )
+    set dir="al"$vers$arch"gcc11"
     if ( ! -e .$dir && -e .$refos ) then
        echo "  Backward compatibility assumed between $dir -> $refos "
        /bin/ln -s .$refos .$dir

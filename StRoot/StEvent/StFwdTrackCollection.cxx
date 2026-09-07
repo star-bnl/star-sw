@@ -17,11 +17,10 @@ ClassImp(StFwdTrackCollection)
 
 StFwdTrackCollection::StFwdTrackCollection(){}
 
-StFwdTrackCollection::~StFwdTrackCollection(){
-	for (unsigned int i=0; i<mTracks.size(); i++) {
-		delete mTracks[i];
-		mTracks[i] = 0;
-	}
+StFwdTrackCollection::~StFwdTrackCollection() {}
+
+void StFwdTrackCollection::Clear( Option_t* ) {
+	mTracks.clear();  // StSPtrVec::clear() deletes each owned pointer
 }
 
 void StFwdTrackCollection::addTrack( StFwdTrack *track ) {

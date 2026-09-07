@@ -117,7 +117,6 @@
  **************************************************************************/
 
 #include "StFcsDbMaker.h"
-#include "StFcsDb.h"
 #include "StFcsDbPulse.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StMessMgr.h"
