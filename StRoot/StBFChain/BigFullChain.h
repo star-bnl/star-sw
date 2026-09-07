@@ -1081,14 +1081,6 @@ Bfc_st BFC[] = { // standard chains
    "B2023a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
-  {"B2023b" ,"","",
-   "ry2023b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-   "","",                                                      "Base chain for run 2023 data (tpc)",kFALSE},
-
-  {"P2023b","" ,"",
-   "B2023b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2023 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
-
   // 2024 initial chains
   {"B2024a"  ,"","",
    "ry2024a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
@@ -1100,18 +1092,6 @@ Bfc_st BFC[] = { // standard chains
 
   {"P2024a","" ,"",
    "B2024a,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
-           "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
-
-  {"B2024b"  ,"","",
-   "ry2024b,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-    "","",                                                     "Base chain for run 2024 data (tpc)",kFALSE},
-
-  {"pp2024b","" ,"",
-   "B2024b,ITTF,BAna,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,epdhit,btof,mtd,emcDY2,ftt,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2024 pp data, using CorrY (+ l3, epd, mtd, btof, fcs, ftt, e/b-emc)",kFALSE},
-
-  {"P2024b","" ,"",
-   "B2024b,ITTF,BAna,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis",
            "","",        "Base chain for year 2024 AA data, using CorrY (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2025 initial chains
@@ -1727,6 +1707,8 @@ Bfc_st BFC[] = { // standard chains
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
   {"fcsPi0Libs","", "", "MuDst", "", "StFcsPi0FinderForEcal", "Libs for FCS Pi0 Finder",            kFALSE},
   // FTT
+  {"fttSim","fttChain","","StEvent,fttDb",
+   "StFttFastSimulatorMaker","StFttFastSimulatorMaker","Ftt Fast Simulator",                        kFALSE},
   {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain"        ,kFALSE}, 
   {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
@@ -1741,6 +1723,9 @@ Bfc_st BFC[] = { // standard chains
   {"FwdTrack","","","fcsDb","StFwdTrackMaker",
    "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
                                                                              "Forward Track Maker", kFALSE},
+  {"FcsTrackMatch","","","FwdTrack","StFcsTrackMatchMaker",
+  "StFcsTrackMatchMaker",
+                                                                "Forward Track to FCS Match Maker", kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
@@ -1857,8 +1842,7 @@ Bfc_st BFC[] = { // standard chains
   {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
                                                                                     "ETOF QA maker",kFALSE},
 
-  {"ETofA",      "",     "",          "etofdat,ETofCalib,etofhit,ETofMatch",  "",  "",  
-                                                                "... ETOF chain options for data",  kFALSE},
+  {"ETofA",  "",    "","etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain options for data",  kFALSE},
 
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
