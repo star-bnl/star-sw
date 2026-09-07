@@ -1,0 +1,45 @@
+name: clang-format Check
+on: [push, pull_request]
+
+jobs:
+  formatting-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Add upstream remote and fetch
+      run: |
+        git remote add upstream https://github.com/star-bnl/star-sw.git
+        git fetch upstream
+
+    - name: Get list of changed C/C++ files
+      id: changed-files
+      run: |
+        git diff --diff-filter=ACMR --name-only upstream/main...HEAD \
+          | grep -E '\.(cpp|cc|cxx|c|h|hpp|hh|hxx)$' > changed_files.txt || true
+        cat changed_files.txt
+
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format-15
+
+    - name: Run clang-format check
+      run: |
+        if [ -s changed_files.txt ]; then
+          echo "Checking formatting on changed files:"
+          cat changed_files.txt
+          # run clang-format in diff mode
+          FAIL=0
+          while read file; do
+            clang-format-15 --dry-run --Werror "$file" || FAIL=1
+          done < changed_files.txt
+          if [ "$FAIL" -ne 0 ]; then
+            echo "clang-format check failed"
+            exit 1
+          fi
+        else
+          echo "No C/C++ files changed."
+        fi
