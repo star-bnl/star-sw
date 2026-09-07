@@ -18,6 +18,7 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -166,7 +167,7 @@ Int_t StBFChain::Load()
 	    //LOG_QA  << "Trying to load Library " << libL << endm;
 
 
-	    iok = gSystem->Load(libL);
+	    iok = LoadSharedLibrary(libL);
 	    if (iok < 0)  {
 
 	      LOG_FATAL  << "problem with loading of " << libL.Data() << endm;
@@ -197,6 +198,22 @@ Int_t StBFChain::Load()
   LoadedLibs.Delete();
   return status;
 }
+//_____________________________________________________________________________
+// Single point for loading shared libraries
+Int_t StBFChain::LoadSharedLibrary( const char* name ) {
+#if ROOT_VERSION_CODE <= ROOT_VERSION(5,99,0)
+    return gSystem->Load(name);
+#else
+    TInterpreter::EErrorCode code;
+    gInterpreter->ProcessLine( Form("#pragma cling load(\"%s\")",name), &code );
+    // code:
+    // 0 = successful execution of the line
+    // 1 = a recoverable failure, e.g. library not found.  Result maps to -1.
+    // ... not sure what happens on mismatch ...
+    int result = code;
+    return -result;
+#endif
+};
 
 //_____________________________________________________________________________
 /// Maker-instantiation handler.
@@ -564,12 +581,12 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
       if ( GetOption("VFPPVEv") ) {
-        gSystem->Load("StBTofUtil.so");
+	LoadSharedLibrary("StBTofUtil.so");
         mk->SetAttr("VFPPVEv"      , kTRUE);
       } 
       else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
       if (GetOption("VFPPVEvNoBtof")){
-        gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
+        LoadSharedLibrary("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
       if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
