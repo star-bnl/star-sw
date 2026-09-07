@@ -85,7 +85,7 @@ shape_params = [
 
 #_all_shape_args = []
 #_tmp = {}
-#for shape,args in _shape_arglist.items():
+#for shape,args in _shape_arglist.iteritems():
 #    for a in args:
 #        _tmp[a]=1
 #for a in _tmp:
@@ -99,7 +99,11 @@ def arglist( type ):
     try:
         return _shape_arglist[ type ]
     except KeyError:
-        print("ERROR: Could not find shape with type %s"%type)
+        print "=="
+        print "=================================================================="
+        print "Could not find shape with type %s"%type
+        print "=================================================================="
+        print "=="
         raise KeyError
 
 def listOfShapes():

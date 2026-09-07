@@ -314,7 +314,7 @@ Block  TPGV is the Gas Volume placed in TPC
          P    = 1016.59 "mbar"
          PATM = 0.001*P*750.062/760. "mbar => torr => atm"
          rho  =(0.9*0.001782+0.1*0.000717) " g/cm**3 "
-* at STP (Standard Temperature and Pressure, 0deg C and one atmosphere pressure).
+* at STP (Standard Temperature and Pressure, 0°C and one atmosphere pressure).
 
          density=rho*(273.15/T)*PATM
          write(*,*) 'Corrected TPC GAS DENSITY = ',density
