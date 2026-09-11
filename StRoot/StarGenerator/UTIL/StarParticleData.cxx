@@ -84,7 +84,9 @@ StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
 
 #define CHARGE *3
   TParticlePDG *D     = pdg->AddParticle( "D",     "Deuteron", /* mass */ 1.876,        true,  0., 1.0 CHARGE, "heavyion",       hid(1,2,0),   -1, 45 );
-  TParticlePDG *He    = pdg->AddParticle( "alpha", "Alpha"   , /* mass */ 3.7273794118, true,  0., 2.0 CHARGE, "heavyion", hid(2,4,0),   -1, 47 );
+  TParticlePDG *T     = pdg->AddParticle( "T",     "Triton",   /* mass */ 2.809,        true,  0., 1.0 CHARGE, "heavyion",       hid(1,3,0),   -1, 46 );
+
+  TParticlePDG *He    = pdg->AddParticle( "alpha", "Alpha"   , /* mass */ 3.7273794118, true,  0., 2.0 CHARGE, "heavyion",       hid(2,4,0),   -1, 47 );
   TParticlePDG *He3   = pdg->AddParticle( "He3",   "Helium-3", /* mass */ 2.809,        true,  0., 2.0 CHARGE, "heavyion",       hid(2,3,0),   -1, 49 );
 
   TParticlePDG* Li    = pdg->AddParticle( "Li", "Lithium", /* mass */ 6.015,            true,  0., 3.0 CHARGE, "heavyion", hid(3,3,0), -1, 303 );
