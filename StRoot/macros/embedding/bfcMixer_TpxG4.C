@@ -541,6 +541,29 @@ void bfcMixer_TpxG4( const char* dbg ) {
     bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype, simIn, pidtype, decays, engine );
   };
 
+  if ( dbg_ == "P21icAuAu19:triton" ) {
+    const int   nevents_     = 100; 
+    const char* mydaqfile_   = "/star/data03/daq/2019/057/20057049/st_physics_adc_20057049_raw_2000003.daq";
+    const char* mytagfile_   = "/gpfs01/star/embed/tags/2019/auau19_phys/st_physics_adc_20057049_raw_2000003.tags.root" ;
+    double myptmn_           = 0.0;
+    double myptmx_           = 6.0;
+    double myetamn_          = -1.0;
+    double myetamx_          = +1.0;
+    double myvzmn_           = -145.0       ; 
+    double myvzmx_           =  145.0         ; 
+    double myvr_             = 2.0           ; 
+    int mypid_               = 46;
+    double mymult_           = 0.05           ; 
+    std::vector<int> mytriggers_  = {640001,640011,640021,640031,640041,640051} ; 
+    const char* myprodname  = "P21icAuAu19" ; 
+    const char* mykintype   = "FlatPT"      ;
+    bool simIn=false;
+    const char* pidtype="pid";
+    const std::vector<DecayMode> decays={};
+    const char* engine="G3";
+    bfcMixer_TpxG4( nevents_, mydaqfile_, mytagfile_, myptmn_, myptmx_, myetamn_, myetamx_, myvzmn_, myvzmx_, myvr_, mypid_, mymult_, mytriggers_, myprodname, mykintype, simIn, pidtype, decays, engine );
+  };
+
   /*
 /star/data101/EMBED/daq/2019/079/20079022/st_physics_adc_20079022_raw_1000005.daq
 /star/data20/tags/production_19GeV_2019/ReversedFullField/P21ic/2019/079/20079022/st_physics_adc_20079022_raw_1000005.tags.root
