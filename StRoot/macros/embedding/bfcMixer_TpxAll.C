@@ -316,11 +316,32 @@ void bfcMixer_TpxAll()
 
     g4star->SetAttr( "application:engine", engine.c_str() );
 
-    g4star->SetAttr(
+    int seed1 = 0;
+    int seed2 = 0;
+
+    // 
+    if ( gSystem->Getenv("GSL_RNG_SEED") ) {
+      seed1 = std::atoi( gSystem->Getenv("GSL_RNG_SEED") );
+    }
+    else {
+      auto ss1 = gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom");
+      seed1=std::atoi( ss1.Data() );
+    }
+    if ( gSystem->Getenv("JOBINDEX") ) {
+      seed1 = std::atoi( gSystem->Getenv("JOB_INDEX") );
+    }
+    else {
+      auto ss2 = gSystem->GetFromPipe("od -An -N4 -tu4 /dev/urandom");
+      int seed2=std::atoi( ss2.Data() );
+    }
+
+    g4star->SetAttr( 
 		    "G4UI:PREINIT", 
-		    "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
-		    "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+		    Form( "/process/eLoss/maxKinEnergy 250.0 GeV"   ";" 
+			  "/mcCrossSection/setMaxKinE  250.0 GeV"   ";"
+		          "/random/setSeeds %i %i;" , seed1, seed2 )
 		    );
+
     g4star->SetAttr(
 		    "G4UI:INIT",
 		    "/mcCrossSection/setMinKinE 1 keV "       ";"
