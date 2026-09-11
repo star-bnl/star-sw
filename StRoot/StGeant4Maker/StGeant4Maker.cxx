@@ -251,103 +251,205 @@ struct SD2Table_FST {
 
 struct SD2Table_PIX {
   void operator()( StSensitiveDetector* sd, St_g2t_pix_hit* table, St_g2t_track* track ) {
+    
+    TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+    if( !nav ) {
+      LOG_FATAL << "No Pointer to Navigator" << endm;
+      assert(0);
+    }      
+    nav->PushPath();    
+
     // Retrieve the hit collection 
     StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
       
-      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      g2t_pix_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_pix_hit_st)); 
       
+      bool success = nav->cd( hit->path );
+      if ( 0 == success ) {
+	LOG_FATAL << "Unable to cd to " << hit->path.Data() << ".  Terminating." << endm;
+	assert(0);
+      }
+
+
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
       g2t_hit.ds        = hit->ds;
+
+      double xglobal[3] = {
+        0.5 * ( hit->position_in[0] + hit->position_out[0] ),
+        0.5 * ( hit->position_in[1] + hit->position_out[1] ),
+        0.5 * ( hit->position_in[2] + hit->position_out[2] )
+      };
+
+      // yes, p is also converted
+      double pglobal[3] = {
+        0.5 * ( hit->momentum_in[0] + hit->momentum_out[0] ),
+        0.5 * ( hit->momentum_in[1] + hit->momentum_out[1] ),
+        0.5 * ( hit->momentum_in[2] + hit->momentum_out[2] )
+      };
+      double xlocal[3];
+      double plocal[3];
+      
+      nav->MasterToLocal( xglobal, xlocal );
+
+      nav->MasterToLocalVect( pglobal, plocal );
+
       for ( int i=0; i<3; i++ ) {
-	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
-	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+        g2t_hit.x[i] = xlocal[i];
+        g2t_hit.p[i] = plocal[i];
       }
+
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
      
       int idtruth = hit->idtruth;
       g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
 
-      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
-      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
-      g2t_track->n_fts_hit++;
+      g2t_hit.next_tr_hit_p = g2t_track->hit_pix_p;
+      g2t_track->hit_pix_p = hit->id;
+      g2t_track->n_pix_hit++;
 
       table -> AddAt( &g2t_hit );     
 
     }
+
+    // Restore navigator state
+    nav->PopPath();
   } 
 } sd2table_pix; 
 
 struct SD2Table_IST {
   void operator()( StSensitiveDetector* sd, St_g2t_ist_hit* table, St_g2t_track* track ) {
+    
+    TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+    if( !nav ) {
+      LOG_FATAL << "No Pointer to Navigator" << endm;
+      assert(0);
+    }      
+    nav->PushPath();    
+
     // Retrieve the hit collection 
     StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
       
-      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
-      
+      g2t_ist_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_ist_hit_st)); 
+
+      bool success = nav->cd( hit->path );
+      if ( 0 == success ) {
+	LOG_FATAL << "Unable to cd to " << hit->path.Data() << ".  Terminating." << endm;
+	assert(0);
+      }
+
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
       g2t_hit.ds        = hit->ds;
+
+      double xglobal[3] = {
+        0.5 * ( hit->position_in[0] + hit->position_out[0] ),
+        0.5 * ( hit->position_in[1] + hit->position_out[1] ),
+        0.5 * ( hit->position_in[2] + hit->position_out[2] )
+      };
+
+      // yes, p is also converted
+      double pglobal[3] = {
+        0.5 * ( hit->momentum_in[0] + hit->momentum_out[0] ),
+        0.5 * ( hit->momentum_in[1] + hit->momentum_out[1] ),
+        0.5 * ( hit->momentum_in[2] + hit->momentum_out[2] )
+      };
+      double xlocal[3];
+      double plocal[3];
+
+      nav->MasterToLocal( xglobal, xlocal );
+      nav->MasterToLocalVect( pglobal, plocal );
+
       for ( int i=0; i<3; i++ ) {
-	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
-	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+        g2t_hit.x[i] = xlocal[i];
+        g2t_hit.p[i] = plocal[i];
       }
+
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
      
       int idtruth = hit->idtruth;
       g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
 
-      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
-      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
-      g2t_track->n_fts_hit++;
+      g2t_hit.next_tr_hit_p = g2t_track->hit_pix_p;
+      g2t_track->hit_pix_p = hit->id;
+      g2t_track->n_pix_hit++;
 
       table -> AddAt( &g2t_hit );     
 
     }
+    // Restore navigator state
+    nav->PopPath();
   } 
 } sd2table_ist; 
 
 struct SD2Table_SSD {
   void operator()( StSensitiveDetector* sd, St_g2t_ssd_hit* table, St_g2t_track* track ) {
+    
+    TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+    if( !nav ) {
+      LOG_FATAL << "No Pointer to Navigator" << endm;
+      assert(0);
+    }      
+    nav->PushPath();    
+
     // Retrieve the hit collection 
     StTrackerHitCollection* collection = (StTrackerHitCollection *)sd->hits();
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
       
-      g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
+      g2t_ssd_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_ssd_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
       g2t_hit.ds        = hit->ds;
+
+      double xglobal[3] = {
+        0.5 * ( hit->position_in[0] + hit->position_out[0] ),
+        0.5 * ( hit->position_in[1] + hit->position_out[1] ),
+        0.5 * ( hit->position_in[2] + hit->position_out[2] )
+      };
+
+      // yes, p is also converted
+      double pglobal[3] = {
+        0.5 * ( hit->momentum_in[0] + hit->momentum_out[0] ),
+        0.5 * ( hit->momentum_in[1] + hit->momentum_out[1] ),
+        0.5 * ( hit->momentum_in[2] + hit->momentum_out[2] )
+      };
+      double xlocal[3];
+      double plocal[3];
+
+      nav->MasterToLocal( xglobal, xlocal );
+      nav->MasterToLocalVect( pglobal, plocal );
+
       for ( int i=0; i<3; i++ ) {
-	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
-	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
+        g2t_hit.x[i] = xlocal[i];
+        g2t_hit.p[i] = plocal[i];
       }
+      
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
      
       int idtruth = hit->idtruth;
       g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
 
-      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
-      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
-      g2t_track->n_fts_hit++;
+      g2t_hit.next_tr_hit_p = g2t_track->hit_ssd_p;
+      g2t_track->hit_ssd_p = hit->id;
+      g2t_track->n_ssd_hit++;
 
       table -> AddAt( &g2t_hit );     
 
     }
+    // Restore navigator state
+    nav->PopPath();
   } 
 } sd2table_ssd; 
 
@@ -796,7 +898,12 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 
 
   AddOption("tpchitaction",1,"0: keep all hits, 1: filter bad hits, 2: assert on bad hits");
-    
+
+
+  // Defer geometry and VMC initialization until InitRun (default=0).
+  // Set g4:initAtInitRun=1 to build geometry during InitRun, set to 0 to build geometry during Init (default).
+  AddOption("g4:initAtInitRun", 0, "Defer geometry/VMC init until InitRun: 1=yes , 0=init at Init (default)");
+
   // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
 
@@ -830,10 +937,10 @@ bool CreateGeometry(const Char_t *name="y2011") {
 }
 
 int StGeant4Maker::Init() {
-#ifndef INITIALIZE_VMC_AT_INITRUN
-  InitGeom();
-  InitVmcApp();
-#endif
+  if ( !IAttr("g4:initAtInitRun") ){
+    InitGeom();
+    InitVmcApp();
+  }
   return StMaker::Init();
 }
 int StGeant4Maker::InitVmcApp() {
@@ -990,12 +1097,12 @@ int StGeant4Maker::InitVmcApp() {
 int StGeant4Maker::InitRun( int /* run */ ){
 
   // One time initialization of the application
-#ifdef INITIALIZE_VMC_AT_INITRUN
-  if ( 0 == mVmcApplication ) {
+  if( IAttr("g4:initAtInitRun") ) {
+    if ( 0 == mVmcApplication ) {
     InitGeom();
     InitVmcApp();
+    }
   }
-#endif
 
   gGeoManager = mGeometryG4; assert(gGeoManager);
 
@@ -1270,6 +1377,8 @@ void StGeant4Maker::FillGeant4StarTable(){
 struct A { };
 struct B { };
 int StGeant4Maker::Make() {
+
+  
 
   int result = kStOK;
 
@@ -2237,7 +2346,7 @@ void StGeant4Maker::PushPrimaries() {
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::Finish() {
-
+  
   LOG_INFO << "Energy sums per sensitive volume" << endm;
   for ( auto kv : mHitSum ) {
 
