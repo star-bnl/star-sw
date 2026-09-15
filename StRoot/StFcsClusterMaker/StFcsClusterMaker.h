@@ -99,9 +99,9 @@ public:
     float mDistanceAdvantage_Ecal = 1.2;  //! for Ecal
     float mDistanceAdvantage_Hcal = 1.2;  //! for Hcal
 
-    float mTowerEThreSeed      = 1.0;     //! Tower E threshold for cluster seed [GeV]
-    float mTowerEThreSeed_Ecal = 1.0;     //! for Ecal
-    float mTowerEThreSeed_Hcal = 1.0;     //! for Hcal
+    float mTowerEThreSeed      = 0.05;    //! Tower E threshold for cluster seed [GeV]
+    float mTowerEThreSeed_Ecal = 0.05;    //! for Ecal
+    float mTowerEThreSeed_Hcal = 0.1;     //! for Hcal
 
     float mTowerEThreshold      = 0.01;   //! Tower E threshold for clustering [GeV] 
     float mTowerEThreshold_Ecal = 0.01;   //! for Ecal

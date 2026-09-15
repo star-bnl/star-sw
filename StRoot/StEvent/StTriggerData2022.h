@@ -245,7 +245,13 @@ public:
 
     unsigned int     l2ResultLength() const;
     const unsigned int*  l2Result() const;
-    
+    const unsigned int*  l1Result() const;
+    unsigned int unixTimeLastFutureGuardian() const;
+    unsigned int bunchCounterLastFutureGuardian() const;
+    unsigned int pastCorruption() const;
+    unsigned int futureCorruption() const;
+    unsigned int futureGuardianCounter() const;
+
     // StFmsHitMaker only!!!
     //void killFMS();
     

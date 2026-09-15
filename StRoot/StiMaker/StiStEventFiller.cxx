@@ -1343,8 +1343,8 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
   gTrack->setDetectorInfo(detInfo);
-  StuFixTopoMap(gTrack);
   fillFlags(gTrack);
+  StuFixTopoMap(gTrack);
   if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }

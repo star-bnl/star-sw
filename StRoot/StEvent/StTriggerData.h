@@ -416,6 +416,12 @@ public:
     virtual unsigned short* getDsm2_FMS() const;
     virtual unsigned int    l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int* l2Result() const = 0;  // Pointer to raw info
+    virtual const unsigned int* l1Result() const;
+    virtual unsigned int unixTimeLastFutureGuardian() const;
+    virtual unsigned int bunchCounterLastFutureGuardian() const;
+    virtual unsigned int pastCorruption() const;
+    virtual unsigned int futureCorruption() const;
+    virtual unsigned int futureGuardianCounter() const;
 
     // StFmsHitMaker only!!!
     virtual void killFMS();

@@ -38,7 +38,6 @@ int StFttDbMaker::Make(){
 int StFttDbMaker::InitRun(int runNumber) {
   LOG_INFO << "StFttDbMaker::InitRun - run = " << runNumber << endm;
 
-
     std::ifstream file("vmm_map.dat");
     if(file.is_open()){ // debugging / calibration only
         file.close();
@@ -56,17 +55,18 @@ int StFttDbMaker::InitRun(int runNumber) {
         }
     }
 
-
-    TDataSet *mDbDataSetDW = GetDataBase("Calibrations/ftt/fttDataWindows");
-    
-    if ( mDbDataSetDW ) {
-        St_fttDataWindows *dataset = (St_fttDataWindows*) mDbDataSetDW->Find("fttDataWindows");
-        mFttDb->loadDataWindowsFromDb( dataset );
-    } else {
-      LOG_WARN << "Cannot access `Calibrations/ftt/fttDataWindows`" << endm;
-    }
-
-  
+    loadDataWindows();
 
   return kStOK;
+}
+
+void StFttDbMaker::loadDataWindows(){
+  TDataSet *mDbDataSetDW = GetDataBase("Calibrations/ftt/fttDataWindowsB");
+
+    if ( mDbDataSetDW ) {
+        St_fttDataWindowsB *dataset = (St_fttDataWindowsB*) mDbDataSetDW->Find("fttDataWindowsB");
+        mFttDb->loadDataWindowsFromDb( dataset );
+    } else {
+      LOG_WARN << "Cannot access Calibrations/ftt/fttDataWindowsB" << endm;
+    }
 }

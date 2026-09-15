@@ -22,6 +22,7 @@ public:
     ~StFwdTrackCollection();
 
     void addTrack(StFwdTrack*);              // Add a track
+    void Clear(Option_t* = "");              // Delete all tracks and reset collection
     StSPtrVecFwdTrack& tracks();             // Return the track list
     const StSPtrVecFwdTrack& tracks() const; // Return the track list
     unsigned int numberOfTracks() const;     // Return the number of tracks

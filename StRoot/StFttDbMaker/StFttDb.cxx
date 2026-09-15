@@ -14,7 +14,7 @@
 #include <math.h>
 
 #include "tables/St_fttHardwareMap_Table.h"
-#include "tables/St_fttDataWindows_Table.h"
+#include "tables/St_fttDataWindowsB_Table.h"
 
 
 ClassImp(StFttDb)
@@ -66,11 +66,58 @@ size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) {
 
 size_t StFttDb::uuid( StFttCluster * c ) {
     // this UUID is not really universally unique
-    // it is unique up to the hardware location 
+    // it is unique up to the hardware location
 
     size_t _uuid = (size_t)c->orientation() + (nStripOrientations) * ( c->row() + nRowsPerQuad * ( c->quadrant() + nQuadPerPlane * c->plane() ) );
     return _uuid;
 }
+
+size_t StFttDb::vmmId( StFttRawHit * h ) {
+    // Calculate VMM hardware ID based on electronic readout structure
+    // VMM_ID = vmm + nVMMPerFob * (feb + nFobPerQuad * (quadrant + nQuadPerPlane * plane))
+    // Where: plane [0-3], quadrant [0-3], feb [0-5], vmm [0-3]
+    // Valid range: 0-383 (total of 384 VMMs)
+
+    u_char iPlane = h->sector() - 1;     // sector is 1-based
+    u_char iQuad  = h->rdo() - 1;        // rdo is 1-based
+    u_char iFeb   = h->feb();            // feb is 0-based
+    u_char iVmm   = h->vmm();            // vmm is 0-based
+
+    size_t vmm_id = iVmm + nVMMPerFob * ( iFeb + nFobPerQuad * ( iQuad + nQuadPerPlane * iPlane ) );
+
+    return vmm_id;
+}
+
+
+void StFttDb::getTimeCut( StFttRawHit * hit, int &mode, int &l, int &h ){
+        mode = mTimeCutMode;
+        l = mTimeCutLow;
+        h = mTimeCutHigh;
+        if (mUserDefinedTimeCut)
+            return;
+
+        // load calibrated data windows from DB
+        // NOTE: dwMap is indexed by VMM hardware ID, not geometric UUID
+        size_t hit_vmmid = vmmId( hit );
+
+        // Validate VMM ID is in expected range
+        if ( hit_vmmid >= nVMM ) {
+            LOG_WARN << "StFttDb::getTimeCut - VMM ID out of range: " << hit_vmmid
+                     << " (max=" << (nVMM-1) << ")" << endm;
+            LOG_WARN << "  Hit: plane=" << (int)plane(hit)
+                     << " quad=" << (int)quadrant(hit)
+                     << " feb=" << (int)hit->feb()
+                     << " vmm=" << (int)hit->vmm() << endm;
+            return;
+        }
+
+        if ( dwMap.count( hit_vmmid ) ){
+            mode = dwMap[ hit_vmmid ].mode;
+            l = dwMap[ hit_vmmid ].min;
+            h = dwMap[ hit_vmmid ].max;
+        }
+
+    }
 
 
 uint16_t StFttDb::packKey( int feb, int vmm, int ch ) const{
@@ -96,7 +143,7 @@ void StFttDb::unpackVal( int val, int &row, int &strip ) const{
     return;
 }
 
-void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
+void StFttDb::loadDataWindowsFromDb( St_fttDataWindowsB * dataset ) {
     if (dataset) {
         Int_t rows = dataset->GetNRows();
 
@@ -104,7 +151,7 @@ void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
 
         dwMap.clear();
 
-        fttDataWindows_st *table = dataset->GetTable();
+        fttDataWindowsB_st *table = dataset->GetTable();
         for (Int_t i = 0; i < rows; i++) {
             for ( int j = 0; j < StFttDb::nVMM; j++ ) {
                 // printf( "[feb=%d, vmm=%d, ch=%d] ==> [row=%d, strip%d]\n", table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j], table[i].row[j], table[i].strip[j] );
@@ -122,19 +169,16 @@ void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
                 fdw.anchor = table[i].anchor[j];
                 dwMap[ fdw.uuid ] = fdw;
 
-
                 // std::cout << (int)table[i].feb[j] << std::endl;
             }
             // sample output of first member variable
         }
     } else {
-        std::cout << "ERROR: dataset does not contain requested table" << std::endl;
+        LOG_ERROR << "dataset does not contain requested table" << endm;
     }
 }
 
 void StFttDb::loadDataWindowsFromFile( std::string fn ) {
-
-
 }
 
 
@@ -224,7 +268,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
     }
 
     if ( rob % 2 == 0 ){ // even rob
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // even feb
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalH;    
@@ -237,7 +281,7 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttVertical;
     } else { // odd rob
         
-        if ( feb % 2 != 0 ) { // odd
+        if ( feb % 2 == 0 ) { // even feb
             // row 3 and 4 are always diagonal
             if ( 3 == row || 4 == row )
                 return kFttDiagonalV;
@@ -250,6 +294,9 @@ UChar_t StFttDb::getOrientation( int rob, int feb, int vmm, int row ) const {
         return kFttHorizontal;
     }
     // should never get here!
+    if ( mDebug ) {
+        LOG_DEBUG << "kFttUnknownOrientation = " << kFttUnknownOrientation << endm;
+    }
     return kFttUnknownOrientation;
 }
 
@@ -344,7 +391,7 @@ void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad,
 
     // shifts
     dx = 0.0;
-    dy = 0.0;
+    dy = 6.0;
     dz = 0.0;
 
     if ( plane < 4 )

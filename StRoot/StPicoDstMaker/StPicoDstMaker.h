@@ -18,8 +18,8 @@
  *   d) Mtd - sets the first primary vertex as a default and then loops
  *      over all primary vertices. The first one that has at least
  *      2 MTD-matched primary tracks is selected.
- *   e) FXT - set the first vertex that was reconstructed in z 
- *      from 198 to 202 cm along z axis.
+ *   e) FXT - set the first primary vertex that was reconstructed in z between
+ *      +198 and +202 cm along z axis (or -182 and -178 cm for runs >= 27032000).
  * Default is NotSet. In this case the program execution will be terminated.
  * Has to be explicitly set.
  *
@@ -90,7 +90,8 @@ class StPicoDstMaker : public StMaker {
   /// \par 3 VpdOrDefault
   /// \par 4 Mtd
   /// \par 5 FXT
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
+  /// \par 6 VTXLess
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5, Vtxless=6};
 #endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
@@ -225,6 +226,12 @@ class StPicoDstMaker : public StMaker {
   void fillBbcHits();
   /// Fill ETOF information
   void fillETofHits();
+  /// Fill Fwd Track information
+  void fillFwdTracks();
+  /// Fill FcsHits information
+  void fillFcsHits();
+  /// Fill FcsClusters information
+  void fillFcsClusters();
   /// Fill MC vertex information
   void fillMcVertices();
   /// Fill MC track information
@@ -286,6 +293,9 @@ class StPicoDstMaker : public StMaker {
   StEmcGeom*       mEmcGeom[4];
   /// Pointer to the array of BEMC tower hits
   StEmcRawHit*     mEmcIndex[4800];
+
+  /// Map of StPicoFcsCluster detId + Id to index in the array for track matching
+  std::map<std::pair<int, int>, int> mMapFcsIdPairIndex;
 
   /// Magnetic field of the current event
   Float_t    mBField;

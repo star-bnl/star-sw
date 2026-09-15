@@ -155,6 +155,10 @@ long _undefined_particle_id = 2000000000; /* Unique PDG ID for each undefined pa
 #include "StHyperTriton.hh"
 #include "StHDibaryon.hh"
 #include "StHyperNuclei.hh"
+#include "StDLambda.hh"
+#include "StDSigma0.hh"
+#include "StDXiMinus.hh"
+#include "StDXiZero.hh"
 
 StParticleTable* StParticleTable::mParticleTable = 0;
 
@@ -281,6 +285,9 @@ StParticleTable::StParticleTable()
     ///@addtogroup NONSTANDARD_DECAY_MODES
     ///@{
     /// STAR Non-Standard Decay Modes 
+       Geant2Pdg( 92, +3322, Xi0  --> Lambda(constrained) + pi0  ); // helper for d-hyperon chains
+       Geant2Pdg( 93, +3312, Xi-  --> Lambda(constrained) + pi-  ); // helper for d-hyperon chains
+       Geant2Pdg( 94, +3212, Sigma0 --> Lambda(constrained) + gamma ); // helper for d-hyperon chains
        Geant2Pdg( 97, -3122, LambdaBar --> pbar + pi+ );
        Geant2Pdg( 98, +3122, Lambda --> p + pi- );       
     ///@}
@@ -428,6 +435,16 @@ StParticleTable::StParticleTable()
 
        Geant2Pdg( 60801, 801,                H0-strangelet --> proton + Sigma- );
 
+    ///@}
+
+    ///@addtogroup D_HYPERON_PSEUDOPARTICLES
+    ///Loosely bound deuteron-hyperon pseudoparticle states (GIDs 60100-60103).
+    ///Each decays to a deuteron plus a constrained hyperon intermediate.
+    ///@{
+       Geant2Pdg( 60100, kDLambda,  d + Lambda  --> d(45) + Lambda(98)           );
+       Geant2Pdg( 60101, kDSigma0,  d + Sigma0  --> d(45) + Sigma0(94)           );
+       Geant2Pdg( 60102, kDXiMinus, d + Xi-     --> d(45) + Xi-(93)              );
+       Geant2Pdg( 60103, kDXiZero,  d + Xi0     --> d(45) + Xi0(92)              );
     ///@}
 
 

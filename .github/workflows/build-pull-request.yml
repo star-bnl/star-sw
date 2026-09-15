@@ -72,8 +72,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test_id: [121, 122]
-        compiler: [gcc485]
+        test_id: [102, 121, 122]
+        compiler: [gcc485, gcc11]
     env:
       STARENV: root6-${{ matrix.compiler }}
     steps:

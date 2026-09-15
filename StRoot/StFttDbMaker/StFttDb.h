@@ -22,7 +22,7 @@ class StFttCluster;
 class StFttPoint;
 
 struct FttDataWindow {
-    UChar_t uuid;
+    Short_t uuid;
     UChar_t mode;
     Short_t min;
     Short_t max;
@@ -31,7 +31,7 @@ struct FttDataWindow {
 
 
 class St_fttHardwareMap;
-class St_fttDataWindows;
+class St_fttDataWindowsB;
 
 class StFttDb : public TDataSet {
 
@@ -49,6 +49,7 @@ public:
 
   static size_t uuid( StFttRawHit * h, bool includeStrip = false ) ;
   static size_t uuid( StFttCluster * c ) ;
+  static size_t vmmId( StFttRawHit * h ) ;
 
   // HARDWARE Mapping StFttRawHits
     uint16_t packKey( int feb, int vmm, int ch ) const;
@@ -58,7 +59,7 @@ public:
     void loadHardwareMapFromFile( std::string fn );
     void loadHardwareMapFromDb( St_fttHardwareMap * );
     void loadDataWindowsFromFile( std::string fn );
-    void loadDataWindowsFromDb( St_fttDataWindows * );
+    void loadDataWindowsFromDb( St_fttDataWindowsB * );
 
 
     UChar_t plane( StFttRawHit * hit );
@@ -126,22 +127,7 @@ public:
         mTimeCutHigh=high;
     }
 
-    void getTimeCut( StFttRawHit * hit, int &mode, int &l, int &h ){
-        mode = mTimeCutMode;
-        l = mTimeCutLow;
-        h = mTimeCutHigh;
-        if (mUserDefinedTimeCut)
-            return;
-
-        // load calibrated data windows from DB 
-        size_t hit_uuid = uuid( hit );
-        if ( dwMap.count( hit_uuid ) ){
-            mode = dwMap[ hit_uuid ].mode;
-            l = dwMap[ hit_uuid ].min;
-            h = dwMap[ hit_uuid ].max;
-        }
-    
-    }
+    void getTimeCut( StFttRawHit * hit, int &mode, int &l, int &h );
 
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
@@ -154,12 +140,10 @@ public:
 
     std :: map< uint16_t , uint16_t > mMap;
     std :: map< uint16_t , uint16_t > rMap; // reverse map 
-
     std :: map< uint16_t , FttDataWindow > dwMap;
 
   ClassDef(StFttDb,1)   //StAF chain virtual base class for Makers        
 };
 
 #endif
-  
 

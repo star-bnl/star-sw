@@ -29,6 +29,17 @@
 
 #include "StFttDbMaker/StFttDb.h"
 
+// Per-file gating of STAR logging macros via mDebug. Bypasses a leak in the
+// log4cxx pipeline (~312 B per LOG_INFO call). When mDebug==false the entire
+// LOG expression is skipped at the AST level — no allocation, no leak.
+// Affects only this translation unit. The `if (!mDebug) {} else` form guards
+// against dangling-else attaching to a caller's `if`. LOG_WARN is left
+// ungated so warnings are always emitted.
+#undef  LOG_INFO
+#undef  LOG_DEBUG
+#define LOG_INFO  if (!mDebug) {} else LOGGERMESSAGE(Info)
+#define LOG_DEBUG if (!mDebug) {} else LOGGERMESSAGE(Debug)
+
 
 //_____________________________________________________________
 StFttClusterMaker::StFttClusterMaker( const char* name )
@@ -345,9 +356,9 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     });
 
     if ( mDebug ) {
-        LOG_INFO << "m0Sum = " << m0Sum << endm; 
-        LOG_INFO << "m1Sum = " << m1Sum << endm;
-        LOG_INFO << "m2Sum = " << m2Sum << endm;
+        LOG_DEBUG << "m0Sum = " << m0Sum << endm;
+        LOG_DEBUG << "m1Sum = " << m1Sum << endm;
+        LOG_DEBUG << "m2Sum = " << m2Sum << endm;
     }
 
     // m0Sum = sumAdc
@@ -397,7 +408,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         });
 
     if ( mDebug ) {
-        LOG_INFO << "We have " << hits.size() << " hits after removing duplicates" << endm;
+        LOG_DEBUG << "We have " << hits.size() << " hits after removing duplicates" << endm;
     }
 
 
@@ -440,7 +451,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         CalculateClusterInfo( clu );
 
         if (mDebug){
-            LOG_INFO << *clu << endm;;
+            LOG_DEBUG << *clu << endm;;
         }
         clusters.push_back( clu );
 
