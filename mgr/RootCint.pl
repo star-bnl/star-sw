@@ -223,6 +223,7 @@ for my $h  (split /\s/,$sources) {
 	    if ( index($IncDirName,$h_dir) == -1 && $h_dir ne $DirName){
 		# print "=> Adding $h_dir to [$IncDirname]\n";
 		$IncDirName .= "-I$h_dir ";
+		#$IncDirName .= "-I$ENV{STAR}/$h_dir -I$h_dir ";
 	    }
 	  
 	    if ($class) {
@@ -388,7 +389,7 @@ if ($coll) { # order h-files with Collections
 
 for my $class (@classes) {	#loop over classes
   next if ! $class;
-  my $h = $class_hfile{$class};  			#print "Class: $class h: $h written: $class_written{$class} \n";
+  my $h = $class_hfile{$class}; # print "Class: $class h: $h written: $class_written{$class} \n";
   foreach my $ext ((".h",".hh")){                       #search for a few
       if (!$h) {	#No .h for class
 	  my $hfile = $DirName . "/" . $class . $ext; 	#print "1 hfile = $hfile\n";
@@ -406,7 +407,7 @@ for my $class (@classes) {	#loop over classes
 
   my $hh = " " . basename($h) . " "; 				#print "hh = $hh\n";
   if ($h_files !~ /$hh/ )  {$h_files .= $hh;}
-}#end loop over classes
+} #end loop over classes
 
 my @h_files = split ' ', $h_files;
 my $h_filesC = "";
@@ -422,25 +423,48 @@ if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
     $h_files .= " " . "LinkDef.h";
 
-
-#  $CPPFLAGS .= " -I" . $DirName;
-#  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
-
     $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
     
     my $cmd;
-    #foreach (keys %ENV){
-    #	print "DEBUG ".$_." ".$ENV{$_}."\n";
+
+    # one more loop to add -I$STAR
+    #my($STAR)=$ENV{STAR};
+    my(@minusi)=split(" ",$CPPFLAGS);
+    my($newf,$el)="";
+    my($cwd)=$ENV{PWD};
+
+    # Ideally, this should have returned teh shell path but it 
+    # expands it ... So, we will have an issue, as if it expands
+    # /star/nfs4/ as /direct/star+nfs4/, making path link tricks 
+    # and code relocation will not work. We will need to re-compile.
+    #print "-- $cwd\n";
+
+    # This should work for both when we are in $STAR or
+    # compiling private code which will also have the 
+    # same issue if dictionaries are rebuilt ...
+    #if ( $cwd eq $STAR){
+	foreach $el ( @minusi ){
+	    #print "--> $el\n";
+	    if ( $el =~ m/(-I)(.*)/ ){
+		$el = $2;
+		if ( -d "$cwd/$el"){
+		    $newf .= "-I$cwd/$el -I$el ";	
+		} else {
+		    $newf .= "-I$el ";
+		}
+	    } else {
+		$newf .= $el. " ";
+	    }
+	}
+	chomp($newf); $CPPFLAGS = $newf;
+	#print "-- would substitute with $newf\n";
+    #} else {
+    #	# print "-- not the same directory $cwd $STAR\n";
     #}
 
-    #if ( defined($ENV{ROOTCINT_CPPFLAGS}) ){
-    #	$cmd  = "rootcint -f $Cint_cxx -c  -D__NO_STRANGE_MUDST__ -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-    #	print "cmd (+extra) = ",$cmd,"\n";
-    #} else {
-    	$cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-     	print "cmd (normal)= ",$cmd,"\n";
-    #	die;
-    #}
+    $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    # print "DEBUG $CPPFLAGS\n";
+    print "cmd (normal)= ",$cmd,"\n";
 
 
     my $flag = `$cmd`; if ($?) {exit 2;}

@@ -668,7 +668,8 @@ Bool_t StEmbeddingQAUtilities::isRefMultOk(const Int_t refMult) const
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isZVertexOk(const Float_t vz) const
 {
-  return TMath::Abs(vz) < mZVertexCut ;
+  return vz < 202.0 && vz > 198.0 ; //for fxt
+  //return TMath::Abs(vz) < mZVertexCut ;
 }
 
 //__________________________________________________________________________________________

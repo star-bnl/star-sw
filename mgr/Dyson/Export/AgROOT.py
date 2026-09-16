@@ -670,11 +670,14 @@ class StarGeometry(Handler):
         static bool      List     ( const char* name = "%s");
         static void      Whitelist( const char* name, int value=1 );
         static void      InitAgML ( const char* stacker="StarTGeoStacker");
+        static void      AddDetector( const char* name ) { detectors[name]=1; }
+        static bool      HasDetector( const char* name ){ return detectors[name]; }
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
         private:
         protected:
-        static std::map<std::string,int> whitelist;                        
+        static std::map<std::string,int> whitelist;
+        static std::map<std::string,int> detectors; // list of detector tags
         ClassDef(StarGeometry,1);
         };
 
@@ -698,6 +701,7 @@ class StarGeometry(Handler):
 #include <map>
 
         std::map<std::string,int> StarGeometry::whitelist= {{"all",1}};
+        std::map<std::string,int> StarGeometry::detectors;
         
         void StarGeometry::Whitelist(const char* name, int value){ whitelist[name]=value; }
 
@@ -826,6 +830,7 @@ class Geometry( Handler ):
             document.impl( '{', unit='global' )
             document.impl( '\t%s::%s::setup();'%(subup,cfg), unit='global' )
             document.impl( '\t%s::%s::construct();'%(subup,cfg), unit='global' )
+            document.impl( '\tStarGeometry::AddDetector("%s");'%cfg, unit='global' )
             document.impl( '} //endif [%s] '%(subup), unit='global' )
         document.impl( 'return result;\n',                      unit='global' )
         document.impl( '};',                                      unit='global' )
@@ -1046,7 +1051,14 @@ class Setup( Handler ):
 
         #output = "active=true;\n"
         output  = "AgModule* _module = New();\n"
-        output += "if (_module) _module->ConstructGeometry();\n"
+        output += "if (_module) {\n"
+        try:
+            value = self.flags['simu']
+            output += "    _module->SetTrackingFlag(%s);\n"%value
+        except KeyError:
+            output += "    _module->SetTrackingFlag(1);\n"
+        output += "    _module->ConstructGeometry();\n"
+        output += "}\n"
 
         if self.topvolume:
             output += 'TGeoVolume* _top = gGeoManager->FindVolumeFast("%s");\n'%self.topvolume

@@ -1,4 +1,5 @@
 {
+
   if (TClassTable::GetDict("StMaker"))
   {
     gROOT->Macro("rootlogoff2.C");

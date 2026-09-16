@@ -1055,9 +1055,22 @@
             <Cut name="CUTGAM" value="0.00001"  />
             <Cut name="CUTELE" value="0.00001"  />
 
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
             <Do var="isec" from="1" to="nint(emcs_nslices)"  >
                 myPhi = (emcs_nslices/2-isec+0.5)*dphi + esec_jiggle(is) 
@@ -1079,9 +1092,22 @@
             <Material name="ECAL_Polystyren" isvol="0"  />
             <Attribute for="EPER" seen="1" lsty="1" colo="1"  />
             <Shape type="CONS" rmn1="(current)*tan_low-dd" rmn2="(current+megatile)*tan_low-dd" rmx2="(current+megatile)*tan_upp+dup" rmx1="(current)*tan_upp+dup" dz="megatile/2" phi2="emcs_phimax/emcs_nsector" phi1="emcs_phimin/emcs_nsector"  />
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
             curcl = current+megatile/2  
             <Do var="ie" from="1" to="nint(eetr_neta)"  >
                 etabot  = eetr_etabin(ie) 
@@ -1138,9 +1164,22 @@
             <Cut name="CUTNEU" value="0.001"  />
             <Cut name="CUTHAD" value="0.001"  />
             <Cut name="CUTMUO" value="0.001"  />
-        <Export language="Mortran">
-            Set EmCuts (ESEN) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts (ESEN) 
+            </Export>
+	    <Export language="AgROOT">	    
+	    <If expr="esen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', esen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', esen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', esen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', esen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', esen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', esen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', esen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', esen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', esen.bcutm" />
+	    </If>
+	    </Export>
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.013"  />
             <Par name="BIRK3" value="9.6E-6"  />
@@ -1180,9 +1219,22 @@
             <Cut name="CUTNEU" value="0.001"  />
             <Cut name="CUTHAD" value="0.001"  />
             <Cut name="CUTMUO" value="0.001"  />
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">	    
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -1196,9 +1248,22 @@
                    rmx2="(zslice+zwidth)*tan_upp+dup" rmx1="(zslice)*tan_upp+dup"
                    dz="emcs_front/2"                  phi2="emcs_phimax" 
                    phi1="emcs_phimin"  />
-        <Export language="Mortran">            
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">            
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -1212,9 +1277,22 @@
             <Cut name="CUTELE" value="0.00001"  />
             <Par name="LOSS" value="1."  />
             <Par name="STRA" value="1."  />
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -1364,9 +1442,22 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />
-        <Export language="Mortran">
-            Set EmCuts (ESEN) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts (ESEN) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="esen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', esen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', esen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', esen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', esen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', esen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', esen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', esen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', esen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', esen.bcutm" />
+	    </If>
+	    </Export>
 
             <Instrument block="EHMS">
                 <Hit meas="birk" nbits="0" min="0" max="10" />
@@ -1387,9 +1478,22 @@
             <Attribute for="EFLS" seen="0" lsty="1" colo="22"  />
             <Shape type="TRD1" dz="esmd_front_layer/2" dx2="esmd_base/2" dx1="esmd_base/2" dy="length/2"  />
 
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -1408,9 +1512,22 @@
             <Attribute for="EFLS" seen="0" lsty="1" colo="22"  />
             <Shape type="TRD1" dz="esmd_back_layer/2" dx2="esmd_base/2" dx1="esmd_base/2" dy="length/2"  />
 
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -1426,9 +1543,22 @@
 
             <Attribute for="EXPS" lwid="2" seen="1" lsty="1" colo="6"  />
             <Shape type="TUBS" rmin="(section)*Tan_Low-1.526" rmax="(section+msecwd)*Tan_Upp" dz="1.0/2" phi2="emcs_PhiMax/emcs_Nsupsec" phi1="emcs_PhiMin/emcs_Nsupsec"  />
-        <Export language="Mortran">
-            Set EmCuts(EABS) 
-        </Export>
+            <Export language="Mortran">
+              Set EmCuts(EABS) 
+            </Export>
+	    <Export language="AgROOT">
+	    <If expr="eabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', eabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', eabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', eabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', eabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', eabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', eabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', eabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', eabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', eabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         

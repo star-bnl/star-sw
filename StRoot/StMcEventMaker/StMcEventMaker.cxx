@@ -449,9 +449,9 @@ Int_t StMcEventMaker::Make()
     if (Debug()>=1) cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
     
-    const Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
+    const Char_t* geaTmp[]={"geant","event/geant/Event","bfcTree/geantBranch","geant4star"};
     St_DataSet* dsGeant = 0;
-    for(UInt_t i=0; i<3; i++){ 
+    for(UInt_t i=0; i<sizeof(geaTmp)/sizeof(char*); i++){ 
       dsGeant = GetDataSet(geaTmp[i]);
       if(!dsGeant || !dsGeant->GetList()) {
 	gMessMgr->Warning() << "Could not find dataset " << geaTmp[i] << endm;
@@ -878,7 +878,7 @@ Int_t StMcEventMaker::Make()
 	{for (long itrk=0; itrk<NTracks; itrk++) {
 	    iStopVtxId = (trackTable[itrk].stop_vertex_p) - 1;
 		    		
-	    if (iStopVtxId >= 0) {
+	    if (iStopVtxId >= 0 && iStopVtxId < NVertices) {
 		if (vtemp[iStopVtxId].primaryFlag == 1) {
 		    
 		    nThrownTracks++;
@@ -902,7 +902,7 @@ Int_t StMcEventMaker::Make()
 	    
 	    // point track to its stop vertex,
 	    // and tell stop vertex that this is its parent
-	    if (iStopVtxId >= 0) {
+	    if (iStopVtxId >= 0 && iStopVtxId < NVertices) {
 		t->setStopVertex(vtemp[iStopVtxId].vtx);
 		vtemp[iStopVtxId].vtx->setParent(t);
 	    }

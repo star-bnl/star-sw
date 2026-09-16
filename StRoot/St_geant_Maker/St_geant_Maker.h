@@ -153,6 +153,19 @@ class TGeoVolume;
 class St_geom_gdat;
 class TFileSet;
 class St_g2t_track;
+/**
+ * @class St_geant_Maker
+ * @brief The STAR maker for running Geant3-based simulations.
+ *
+ * This class serves as the main entry point and controller for Geant3
+ * simulations within the STAR software framework. It interfaces with the
+ * TGiant3 VMC, handles the initialization of the detector geometry, magnetic
+ * field, and physics processes. It can process events from an input file (e.g.,
+ * a FZ file) or from an internal generator. After tracking particles through
+ * the geometry, it collects the hits from various detector subsystems and fills
+ * the standard STAR `g2t` tables with simulation results, which are then
+ * available for downstream reconstruction and analysis.
+ */
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
@@ -189,8 +202,8 @@ protected:
    virtual void   SetNwPAW   (Int_t n=0) {fNwPaw   = n;}
    virtual void   SetIwtype  (Int_t n=0) {fIwType  = n;}
    virtual Int_t  GetNwGEANT () {return fNwGeant;}
-   virtual Int_t  GetNwPAW   () {return fNwPaw  ;}
-   virtual Int_t  GetIwtype  () {return fIwType ;}
+   virtual Int_t  GetNwPAW   () const {return fNwPaw  ;}
+   virtual Int_t  GetIwtype  () const {return fIwType ;}
    Bool_t  Remake() const { return fRemakeGeometry;}
    void    SetRemake(Bool_t remake=kTRUE) {fRemakeGeometry=remake;}
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
@@ -280,7 +293,7 @@ protected:
    template<typename T, typename F>
    int AddHits( std::string container, std::vector<std::string> volumes, std::string tablename, F g2t, bool verbose=false ){
        int ntotal = 0, nhits = 0;
-       for ( auto v : volumes ) { 
+       for ( const auto& v : volumes ) { 
 	 geant3->Gfnhit( container.c_str(), v.c_str(), nhits ); 
 	 std::string key = container + ":" + v;
 	 LOG_DEBUG << key << " found nhits=" << nhits << endm;
@@ -293,7 +306,7 @@ protected:
        auto* g2t_track = (St_g2t_track*)FindByName("g2t_track"); 
        g2t( g2t_track, table );
        AddData( table );
-       for ( auto hit : (*table) ) {
+       for ( const auto& hit : (*table) ) {
 	 sum += hit.de; 
        }
        mHitSum[container] = sum; 

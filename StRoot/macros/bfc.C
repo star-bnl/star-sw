@@ -10,11 +10,17 @@
 class StBFChain;        
 class StMessMgr;
 
+#pragma cling load("libTree.so")
 #pragma cling load("StarRoot")
 #pragma cling load("St_base")
+//#pragma cling load("Table")
 #pragma cling load("StChain")
 #pragma cling load("StUtilities")
 #pragma cling load("StBFChain")
+#pragma cling load("liblog4cxx")
+#pragma cling add_include_path("$STAR/StRoot/StStarLogger")
+#pragma cling load("StStarLogger.so")
+#pragma cling load("StarClassLibrary.so")
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
 
@@ -30,7 +36,7 @@ class StMessMgr;
 #include "Rtypes.h"
 #endif
 
-#if !defined(__CINT__) || defined(__CLING__)
+#if !(defined(__CINT__) || defined(__CLING__))
 // 'chain' is defined in StBFChain library (see StRoot/StBFChain.cxx)
 extern StBFChain* chain;
 #else
@@ -121,6 +127,7 @@ void Load(const Char_t *options)
     }
     cout << endl;
   }
+
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
   // Look up for the logger option
   if (gSystem->Load("liblog4cxx.so") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
@@ -135,6 +142,7 @@ void Load(const Char_t *options)
   gSystem->Load("libStChain");                                        //  StMemStat::PrintMem("load StChain");
   gSystem->Load("libStUtilities");                                    //  StMemStat::PrintMem("load StUtilities");
   gSystem->Load("libStBFChain");                                      //  StMemStat::PrintMem("load StBFChain");
+
   cout << endl;
 }
 //_____________________________________________________________________

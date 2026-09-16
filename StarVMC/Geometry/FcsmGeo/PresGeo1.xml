@@ -308,6 +308,18 @@
       <Export language="Mortran">                                                                                         
 	Set EmCuts (PCUT)                                                                                                 
       </Export>
+      <Export language="AgROOT">      
+	<Call routine="AddCut" expr="'CUTGAM', pcut.cutgam" />
+	<Call routine="AddCut" expr="'CUTELE', pcut.cutele" />
+	<Call routine="AddCut" expr="'CUTNEU', pcut.cutneu" />
+	<Call routine="AddCut" expr="'CUTHAD', pcut.cuthad" />
+	<Call routine="AddCut" expr="'CUTMUO', pcut.cutmuo" />
+	<Call routine="AddCut" expr="'DCUTE', pcut.dcute" />
+	<Call routine="AddCut" expr="'DCUTM', pcut.dcutm" />
+	<Call routine="AddCut" expr="'BCUTE', pcut.bcute" />
+	<Call routine="AddCut" expr="'BCUTM', pcut.bcutm" />
+      </Export>
+
       <Par name="BIRK1" value="1."  />
       <Par name="BIRK2" value="0.013"  />
       <Par name="BIRK3" value="9.6E-6"  />
@@ -329,6 +341,18 @@
       <Export language="Mortran">                                                                                         
 	Set EmCuts (PCUT)                                                                                                 
       </Export>
+      <Export language="AgROOT">      
+	<Call routine="AddCut" expr="'CUTGAM', pcut.cutgam" />
+	<Call routine="AddCut" expr="'CUTELE', pcut.cutele" />
+	<Call routine="AddCut" expr="'CUTNEU', pcut.cutneu" />
+	<Call routine="AddCut" expr="'CUTHAD', pcut.cuthad" />
+	<Call routine="AddCut" expr="'CUTMUO', pcut.cutmuo" />
+	<Call routine="AddCut" expr="'DCUTE', pcut.dcute" />
+	<Call routine="AddCut" expr="'DCUTM', pcut.dcutm" />
+	<Call routine="AddCut" expr="'BCUTE', pcut.bcute" />
+	<Call routine="AddCut" expr="'BCUTM', pcut.bcutm" />
+      </Export>
+
     </Block>
     
   </Module>

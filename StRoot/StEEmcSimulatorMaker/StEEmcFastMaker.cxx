@@ -49,7 +49,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
     mfixTgain[i]=getTowerGains()[i];
   }
 
-
+  SetAttr("embedding",0);
 
 }
 
@@ -70,6 +70,9 @@ StEEmcFastMaker::~StEEmcFastMaker(){
 Int_t 
 StEEmcFastMaker::Init(){
   LOG_INFO<<"::Init() \n"<<  endm; 
+
+  if ( IAttr("embedding") ) SetEmbeddingMode();
+
   if(mEmcCollectionIsLocal) { // special use
      LOG_INFO<<"::Init() use local EmcCollection\n"<<  endm; 
   }  

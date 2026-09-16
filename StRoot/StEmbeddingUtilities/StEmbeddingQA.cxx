@@ -552,12 +552,14 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     const Int_t refMult = muEvent->refMult() ;
     mhRef->Fill(refMult);
 //    const Bool_t isVertexBad = TMath::Abs(vz) >= mVertexCut
-    const Bool_t isVertexBad = !StEmbeddingQAUtilities::instance()->isZVertexOk(vz)
+    const Bool_t isVertexBad = !StEmbeddingQAUtilities::instance()->isZVertexOk(vz)      
       || !StEmbeddingQAUtilities::instance()->isRefMultOk(refMult)
       || ( TMath::Abs(vx) < 1.0e-5 && TMath::Abs(vy) < 1.0e-5 && TMath::Abs(vz) < 1.0e-5 )
       || ( TMath::Abs(vx) > 1000 || TMath::Abs(vy) > 1000 || TMath::Abs(vz) > 1000 )
       ;
     if( isVertexBad ) continue ;
+    // addition constraint fixed target beam spot
+    if(sqrt((vx-0)*(vx-0)+(vy+2)*(vy+2))>1.5)continue; //fxt
 
     /// Trigger id cut
     if( !isTriggerOk(muEvent) ) continue ;
@@ -603,7 +605,10 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
 {
-  /// Read input muDst file list and fill histograms
+
+  std::vector<int> histogram_geant_ids = {2,3,8,9,11,12,14,15};
+
+  /// Read input muDst file list and fill histograms  
 
   /// Delete StMuDstMaker if it has been defined before
   if( mMuDstMaker ) delete mMuDstMaker ;
@@ -620,6 +625,11 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
     const Int_t parentid = 0 ;       // real tracks are assumed to be primary
     const Int_t parentparentid = 0 ; // real tracks are assumed to be primary
     const Int_t geantprocess = 0 ;
+
+    for ( const auto& g3id : histogram_geant_ids ) {
+      expandHistograms(categoryid, g3id, parentid, parentparentid, geantprocess);
+    }
+#if 0
     expandHistograms(categoryid, 2, parentid, parentparentid, geantprocess);
     expandHistograms(categoryid, 3, parentid, parentparentid, geantprocess);
     expandHistograms(categoryid, 8, parentid, parentparentid, geantprocess);
@@ -628,6 +638,7 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
     expandHistograms(categoryid, 12, parentid, parentparentid, geantprocess);
     expandHistograms(categoryid, 14, parentid, parentparentid, geantprocess);
     expandHistograms(categoryid, 15, parentid, parentparentid, geantprocess);
+#endif
 
     // Make sure the input particle list
     for(vector<Int_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
@@ -1020,6 +1031,8 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
   const Char_t* categoryTitle(utility->getCategoryTitle(categoryid).Data());
 
+  LOG_INFO << "[" << categoryTitle << "] expanded histograms with geantid=" << geantid << " parentid=" << parentid << " parentparentid=" << parentparentid << " process=" << geantprocess << endm;
+
   /// Suffix for each histogram. Put parent-parentid and parentid if we have decay daughters
   const TString nameSuffix = (parentid>0) ? Form("_%d_%d_%d_%d", categoryid, parentparentid, parentid, geantid)
     : Form("_%d_%d", categoryid, geantid);
@@ -1045,7 +1058,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // NHit vs eta vs MC pt
   TString title(Form("N_{fit} distribution (|dcaGl|<3cm), %s", CategoryAndGeantId.Data()));
   if( isMc ) title = Form("N_{fit} distribution, %s", CategoryAndGeantId.Data());
-  TH3* hNhit = new TH3D(Form("hNHit%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50) ;
+  TH3* hNhit = new TH3D(Form("hNHit%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 80, 0, 80) ;
   hNhit->SetXTitle("MC p_{T} (GeV/c)");
   hNhit->SetYTitle("#eta");
   hNhit->SetZTitle("N_{fit}");
@@ -1055,7 +1068,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // Ncommon hit vs Nfit
   title = Form("N_{common} hit vs N_{fit} (|dcaGl|<3cm), %s", CategoryAndGeantId.Data());
   if( isMc ) title = Form("N_{common} hit vs N_{fit}, %s", CategoryAndGeantId.Data());
-  TH3* hNCommonHitVsNHit = new TH3D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 10, 0, 5, 50, 0, 50, 50, 0, 50) ;
+  TH3* hNCommonHitVsNHit = new TH3D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 10, 0, 5, 80, 0, 80, 80, 0, 80) ;
   hNCommonHitVsNHit->SetXTitle("p_{T} (GeV/c)");
   hNCommonHitVsNHit->SetYTitle("N_{fit}");
   hNCommonHitVsNHit->SetZTitle("N_{common}");
@@ -1067,7 +1080,8 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   if( isMc ) title = Form("Dca vs #eta vs MC p_{T}, %s", CategoryAndGeantId.Data());
   else if ( isEmbedding ) title = Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10 & N_{common}#geq10), %s", CategoryAndGeantId.Data());
 
-  TH3* hDca = new TH3D(Form("hDca%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 100, 0, 3.0);
+  //TH3* hDca = new TH3D(Form("hDca%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 100, 0, 3.0);
+  TH3* hDca = new TH3D(Form("hDca%s", nameSuffix.Data()), title, 10, 0, 5, 10, -2.0, 0.0, 100, 0, 3.0);
   hDca->SetXTitle("MC p_{T} (GeV/c)");
   hDca->SetYTitle("#eta");
   hDca->SetZTitle("Global dca (cm)");

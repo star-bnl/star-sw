@@ -1,3 +1,5 @@
+
+
 #include "StarKinematics.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
@@ -46,10 +48,64 @@ StarKinematics::StarKinematics( const Char_t *name ) : StarGenerator(name)
 { 
   mEvent = new StarGenEvent("kine"); gEvent = mEvent;
   mUser  = new StarGenEvent("user"); gUser  = mUser;
+  SetAttr("type","nada"); // nothing by default
+  SetAttr("ntrack",0);
+  SetAttr("ptlow",0.0);
+  SetAttr("pthigh",500.0);
+  SetAttr("ylow",-10.0);
+  SetAttr("yhigh",+10.0);
+  SetAttr("philow",0.0);
+  SetAttr("phihigh",TMath::TwoPi());
+
+  SetAttr("mode", "ParticlGun");
+
 }
 // ----------------------------------------------------------------------------
 Int_t StarKinematics::PreGenerate()
 {
+
+  std::string type_ = SAttr("mode");
+  int ntrack = IAttr("ntrack");
+
+  std::string particles = SAttr("particles"); // particle list
+  if ( SAttr("pid") && IAttr("pid")>0 ) {                       // and/or single pid
+    int pid = IAttr("pid");
+    auto* part = data.GetParticleG3(pid);
+    assert(part);
+    particles += part->GetName();
+    LOG_INFO << "Adding particle w/ G3 PID=" << pid << " " << part->GetName() << endm;
+  }
+  else if ( SAttr("pdg") && IAttr("pdg")!=0 ) {
+    int pdg = IAttr("pdg");
+    auto* part = data.GetParticle(pdg);
+    assert(part);
+    particles += part->GetName();    
+    LOG_INFO << "Adding particle w/ PDG PID=" << pdg << " " << part->GetName() << endm;
+  }
+  else {
+    // hopefully we have a list of particles
+  }
+  LOG_INFO << "Generating particle list: " << particles.c_str() << endm;
+  double ptlow   = DAttr("ptlow");
+  double pthigh  = DAttr("pthigh");
+  double ylow    = DAttr("etalow"); 
+  double yhigh   = DAttr("etahigh");
+  double philow  = DAttr("philow");
+  double phihigh = DAttr("phihigh");
+  double temp    = DAttr("temp");
+
+  // Generate a flat PT distribution 
+  LOG_INFO << Form("ptlow=%f pthigh=%f ylow=%f yhigh=%f philow=%f phihigh=%f",ptlow,pthigh,ylow,yhigh,philow,phihigh) << endm;
+  if ( type_ == "FlatPT" || type_ == "flatpt" ) {
+    Kine( ntrack, particles.c_str(), ptlow, pthigh, ylow, yhigh, philow, phihigh );
+    mEvent->Print();
+    return kStOK;
+  }
+
+  LOG_INFO << "FlatPT is the only \"mode\" implented" << endm;
+   
+
+
   return kStOK;
 }
 // ----------------------------------------------------------------------------
@@ -320,3 +376,13 @@ void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double 
     }
 }
 // ----------------------------------------------------------------------------
+Int_t StarKinematics::Make() {
+
+  return kStOK;
+
+};
+
+
+Int_t StarKinematics::Init() {
+  return kStOK;
+};

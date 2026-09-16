@@ -7,7 +7,7 @@
 
 #include "Stiostream.h"
 
-Int_t StMiniMcEvent::mSFirst=1; 
+//Int_t StMiniMcEvent::mSFirst=1; 
 ClassImp(StMiniMcEvent)
 
 //___________________
@@ -52,7 +52,8 @@ StMiniMcEvent::StMiniMcEvent() :
     mNSplitPair(0),
     mNGhostPair(0),
     mNContamPair(0),
-    mNMatGlobPair(0)
+  mNMatGlobPair(0),
+  mSFirst(1)
 {
   cout << "###StMiniMcEvent::StMiniMcEvent()" << endl;
   //

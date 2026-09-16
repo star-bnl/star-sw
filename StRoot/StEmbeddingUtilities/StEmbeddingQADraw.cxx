@@ -962,8 +962,19 @@ const Char_t* StEmbeddingQADraw::getMcParticleName() const
 //____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getEmbeddingParticleName(const UInt_t id, const Bool_t doSplit) const
 {
+
   if(id>=mDaughterGeantId.size()){
     Error("StEmbeddingQADraw::getEmbeddingParticleName", "Unknown daughter particle index, id=%3d", id);
+    return "";
+  }
+
+  if ( id>=mParentParentGeantId.size() ) {
+    Error("StEmbeddingQADraw::getEmbeddingParticleName", "Unknown parent parent particle index, id=%3d", id);
+    return "";
+  }
+
+  if ( id>=mParentGeantId.size() ) {
+    Error("StEmbeddingQADraw::getEmbeddingParticleName", "Unknown parent particle index, id=%3d", id);
     return "";
   }
 
