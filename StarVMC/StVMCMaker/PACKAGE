@@ -1,5 +1,0 @@
-# $Id $
-# package StVMCMaker
-# author: 
-Library:libStVMCMaker.so:LIBS +=   -lStarMagField  -l_StarVMCApplication  -lStChain  -lPhysics
-#Library:libStVMCMaker.so:LIBS +=   -lgeant3  -lStarMagField  -lStarVMCApplication  -lStChain  -lPhysics

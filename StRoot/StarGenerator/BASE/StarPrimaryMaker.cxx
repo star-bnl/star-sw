@@ -73,7 +73,6 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   SetAttr("FilterKeepHeader", int(1) );
 
-
   // Defaults to gaussian
   mVertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
   mVertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
@@ -90,6 +89,17 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   /// name = "flatABZ" throws within an eliptical cyilnder of major axis A minor axis B, rotated by Rho
 
   mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
+
+  SetAttr("PTMIN",     0.0); SetAttr("PTMAX",    -1.0);
+  SetAttr("ETAMIN",    0.0); SetAttr("ETAMAX",   -1.0);
+  SetAttr("PHIMIN",    0.0); SetAttr("PHIMAX",   -1.0);
+  SetAttr("ZMIN",   -999.0); SetAttr("ZMAX",    999.0);
+
+  SetAttr("XVERTEX", 0.0 ); SetAttr("YVERTEX", 0.0); SetAttr("ZVERTEX", 0.0);
+  SetAttr("XSIGMA",  0.01); SetAttr("YSIGMA", 0.01); SetAttr("ZSIGMA", 15.0);  SetAttr("XYRHO", 0.0);
+
+  SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
+  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYRHO") );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -115,6 +125,19 @@ Int_t StarPrimaryMaker::Init()
     AgStarReader::Instance().SetStack(mStack);
   }
 
+  if ( 0 != SAttr("output") ) {
+    mFileName = SAttr("output");
+  }
+
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
+
+  SetCuts( DAttr("PTMIN"),  DAttr("PTMAX"),
+	   DAttr("ETAMIN"), DAttr("ETAMAX"),
+	   DAttr("PHIMIN"), DAttr("PHIMAX"),
+	   DAttr("ZMIN"),   DAttr("ZMAX") );
+
+  SetVertex( DAttr("XVERTEX"), DAttr("YVERTEX"), DAttr("ZVERTEX")  );
+  SetSigma( DAttr("XSIGMA"), DAttr("YSIGMA"), DAttr("ZSIGMA"),  DAttr("XYRHO") );
 
   //
   // Initialize runtime flags
@@ -148,6 +171,8 @@ Int_t StarPrimaryMaker::Init()
   }
 
   mFile = TFile::Open( mFileName, "recreate" );
+  LOG_INFO << "mFileName = " << mFileName.Data() << endm;
+  mFile->Print();
   if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
 
   mTree = new TTree( "genevents", "TTree containing event generator information" );
@@ -212,6 +237,8 @@ Int_t StarPrimaryMaker::Finish()
   if (mFile) 
     { 
 
+      mFile->cd();
+
       // Add the instance of the particle data so we have a record of
       // the particles used as input to the generator
       TObjArray particles = StarParticleData::instance().GetParticles();
@@ -239,6 +266,9 @@ Int_t StarPrimaryMaker::Finish()
 	  stats.Dump();
 	  stats.Write(); // write to fiel
 	}
+
+      LOG_INFO << "Write the ttree" << endm;
+      mTree -> Write();
 
       mFile -> Write();
       mFile -> Close();
@@ -322,6 +352,10 @@ Int_t StarPrimaryMaker::Make()
     //
     if ( IAttr("FilterSkipRejects") ) return kStSKIP; 
 
+    if ( IAttr("verbose") ) {
+      event()->Print();
+    }
+
 
   }// infinite loop
 
@@ -337,7 +371,7 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
   
   mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
-  return StMaker::InitRun( runnumber );
+  return kStOK; //StMaker::InitRun( runnumber );
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -364,7 +398,8 @@ void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
 {
   static Int_t id = 0;
   gener->mId = ++id;
-  AddMaker(gener);
+  LOG_INFO << "AddGenerator " << gener << " " << gener->GetName() << endm;
+  StMaker::AddMaker(gener);
 }
 
 void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
@@ -372,6 +407,14 @@ void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
   mFilter = filter;
   AddData( 0, ".filter" );
   mFilter -> Shunt( GetDataSet( ".filter" ) );
+}
+
+void StarPrimaryMaker::AddMaker( StMaker* mk ) {
+  LOG_INFO << "Registering " << mk->GetName() << " with primary maker" << endm;
+  auto* gen = dynamic_cast<StarGenerator*>(mk);
+  if ( gen ) AddGenerator(gen);
+  auto* filt= dynamic_cast<StarFilterMaker*>(mk);
+  if ( filt ) AddFilter( filt );
 }
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::PreGenerate()
@@ -407,6 +450,7 @@ Int_t StarPrimaryMaker::PreGenerate()
   StarGenerator *generator = 0;
   while ( (generator=(StarGenerator *)Next()) )
     {
+      if ( IAttr("debug") ) LOG_INFO << generator->GetName() << endm;
       generator -> PreGenerateHook();
     }
   

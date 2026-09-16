@@ -10,7 +10,7 @@
 #include "TMath.h"
 #include "StdEdxModel.h"
 #include "Bichsel.h"
-#include "TCallf77.h"
+#include "St_base/StarCallf77.h" // was TGeant3/TCallf77.h
 #include "St_spline3C.h"
 #ifndef WIN32
 #define ggderiv ggderiv_

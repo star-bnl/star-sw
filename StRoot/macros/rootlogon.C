@@ -1,4 +1,14 @@
 {
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,99,0)
+  std::cout << "This is root6" << std::endl;
+#pragma cling load("libStarClassLibrary.so")
+#pragma cling load("libGeom.so")
+#pragma cling load("libTable.so")
+#pragma cling load("libPhysics.so")
+  //#pragma cling load("libEG.so")
+#pragma cling load("libStarRoot.so")
+#else
   // ROOT and XROOTD
   // some rootd default dummy stuff
   TAuthenticate::SetGlobalUser("starlib");
@@ -28,8 +38,9 @@
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
   gSystem->Load("libPhysics");
-  gSystem->Load("libEG");
+  //  gSystem->Load("libEG");
   gSystem->Load("libStarRoot");
+#endif
 
   if (gSystem->GetLibraries("*libTable*"))
   {

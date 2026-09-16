@@ -435,6 +435,26 @@ Int_t St_db_Maker::Init()
      } else {
 
 //              recreate a memory resided data-structure
+       LOG_INFO<<dir<<"\t"<<gSystem->BaseName(dir)<<endm;
+	 //gSystem->ExpandPathName(dir);
+	 //cout<<dir<<endl;
+	 Long64_t size;
+	 Long_t id, flags, modtime;
+	 const char *name= dir;
+	 if (gSystem->GetPathInfo(name, &id, &size, &flags, &modtime)==0) {
+	    LOG_INFO<<"StarDb directory Info: "<<id<<" "<<size<<" "<<flags<<" "<<modtime<<endm;
+	    if (!gSystem->OpenDirectory(dir)) {
+		 LOG_ERROR<<"StarDb directory cannot be opened!"<<endm;
+		 return kStErr;
+	    }
+	    /*
+	    UInt_t count=0;
+	    while(!gSystem->OpenDirectory(dir) && count<10){
+		 sleep(5);
+		 count++;
+	    }
+	    */
+	 }
        fileset = new TFileSet(dir,gSystem->BaseName(dir));
        if (!fileset->First()) {delete fileset; fileset = 0; continue;}
        fileset->Purge();

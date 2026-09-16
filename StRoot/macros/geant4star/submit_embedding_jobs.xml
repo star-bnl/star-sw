@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<job name="&JOBNAME;" maxFilesPerProcess="1" fileListSyntax="paths" simulateSubmission="false" nProcesses="&NJOBS;" >
+
+  <shell>singularity exec --env BATCH_SYSTEM=${BATCH_SYSTEM} -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
+
+<command>
+
+<!--RNG seed is set to the JOBINDEX for reproducibility -->
+setenv GSL_RNG_SEED ${JOBINDEX}
+
+source $HOME/.cshrc
+
+# Make sure we are using nfs not afs
+setup nfs4
+
+<!-- Load shared libraries -->
+# Setup group environment
+setenv GROUP_DIR &GROUPDIR;
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver &BASELIB; &OVERLAY;
+
+source $GROUP_DIR/star_cshrc.csh
+
+# Setup 64 bit w/ spack overlay
+setup 64b
+starver &BASELIB; &OVERLAY;
+
+module load vmc-1-0-p3-root-6.24.06-debug
+module load geant3-3-9-p1-root-6.24.06-debug
+module load geant4-10.5.1-debug
+module load geant4-data-10.5.1-debug
+module load geant4-vmc-5-0-p5-root-6.24.06-debug
+module load clhep-2.4.5.1-debug
+module unload star-table-0.1.1-root-6.24.06
+module load star-table-0.1.1-root-6.24.06
+
+#cp -R &WORKINGDIR;/.sl73_x8664_gcc485/ .
+#cp -R &WORKINGDIR;/StRoot/ .
+#cp -R &WORKINGDIR;/StarDb/ .
+#cp -R &WORKINGDIR;/StDb/ .
+#cp -R &WORKINGDIR;/StarVMC/ .
+
+#setenv STAR .
+
+mkdir StRoot
+cp -R $STAR/StRoot/macros StRoot/
+#$$$cp -R &WORKINGDIR;/StRoot/macros StRoot
+
+# Ensure that any ROOT5 library is removed from the path
+setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | awk -v RS=: -v ORS=: '/ROOT\/5/ {next} {print}'`
+
+  set tag=&TAG;
+
+  set logbase = `echo $tag | sed 's/:/_/g' | sed 's/\./p/g'`_job${JOBINDEX}
+
+  <!-- Run event generation -->
+  echo "______________________________________________________________________________________________"
+  echo "Running embedding job ${tag}"
+#perf record --output ${logbase}.gener.perfdata \
+  root.exe -q -b StRoot/macros/embedding/bfcMixer_TpxG4.C\(\"${tag}\"\)  &gt;&amp; ${logbase}.gener.log
+  echo "Finished" `date` &gt;&gt; ${logbase}.gener.log
+  echo "______________________________________________________________________________________________"
+  echo "Stage out log files"
+  cp ${logbase}*.log &LOGDIR;
+  cp ${logbase}*.perfdata &LOGDIR;
+  echo "______________________________________________________________________________________________"
+  echo "Stage out root files"
+  cp *.root &OUTDIR;
+
+</command>
+
+     <ResourceUsage>
+       <Memory>
+	 <MinMemory>4096</MinMemory>
+	 <MaxMemory>10000</MaxMemory>
+       </Memory>
+     </ResourceUsage>
+ 
+
+<!-- Define locations of ROOT files -->
+<!--
+  <output fromScratch="*.root" toURL="&OUTDIR;/"/>
+-->
+
+<!-- Define locations of log/elog files -->
+<stdout URL="file:&LOGDIR;/$JOBID.log"/>
+<stderr URL="file:&LOGDIR;/$JOBID.elog"/>
+
+<!-- Condor artifacts -->
+<Generator>
+  <Location>&JOBDIR;</Location>
+</Generator>
+
+<Action frequency="0" position="FIRST">
+  <Exec>
+    mkdir -p &LOGDIR;
+    mkdir -p &OUTDIR;
+    mkdir -p &JOBDIR;
+  </Exec>
+</Action>
+
+
+</job>
+

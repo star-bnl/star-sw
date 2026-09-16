@@ -1045,7 +1045,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // NHit vs eta vs MC pt
   TString title(Form("N_{fit} distribution (|dcaGl|<3cm), %s", CategoryAndGeantId.Data()));
   if( isMc ) title = Form("N_{fit} distribution, %s", CategoryAndGeantId.Data());
-  TH3* hNhit = new TH3D(Form("hNHit%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50) ;
+  TH3* hNhit = new TH3D(Form("hNHit%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 80, 0, 80) ;
   hNhit->SetXTitle("MC p_{T} (GeV/c)");
   hNhit->SetYTitle("#eta");
   hNhit->SetZTitle("N_{fit}");
@@ -1055,7 +1055,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // Ncommon hit vs Nfit
   title = Form("N_{common} hit vs N_{fit} (|dcaGl|<3cm), %s", CategoryAndGeantId.Data());
   if( isMc ) title = Form("N_{common} hit vs N_{fit}, %s", CategoryAndGeantId.Data());
-  TH3* hNCommonHitVsNHit = new TH3D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 10, 0, 5, 50, 0, 50, 50, 0, 50) ;
+  TH3* hNCommonHitVsNHit = new TH3D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 10, 0, 5, 80, 0, 80, 80, 0, 80) ;
   hNCommonHitVsNHit->SetXTitle("p_{T} (GeV/c)");
   hNCommonHitVsNHit->SetYTitle("N_{fit}");
   hNCommonHitVsNHit->SetZTitle("N_{common}");

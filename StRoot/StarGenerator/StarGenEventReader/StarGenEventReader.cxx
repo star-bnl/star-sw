@@ -3,12 +3,29 @@
 
 Int_t StarGenEventReader::Init()
 {
+  if ( SAttr("input") ) {
+    SetInputFile( SAttr("input"),"genevents","primaryEvent" );
+  }
   return kStOK;
 };
 
 Int_t StarGenEventReader::Generate()
 {
-  if ( mInputTree ) mInputTree -> GetEntry( mEntry++ );
-  if ( IAttr("debug") ) mEvent->Print();
-  return kStOK;
+  auto result = kStOK;
+
+  if ( mEntry < mTreeEntries ) {
+
+    if ( mInputTree ) {
+      mInputTree -> GetEntry( mEntry++ );
+    }
+    if ( IAttr("debug") ) {
+      mEvent->Print();
+    }
+  }
+  else {
+
+    result = kStEOF;
+
+  }
+  return result;
 };

@@ -179,25 +179,28 @@ Int_t StEEmcA2EMaker::Make()
 Bool_t StEEmcA2EMaker::readData()
 {
   /// Verify that we have a pointer to input data
-  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
-  if (muDst) {
-	const StMuEmcCollection *emc = muDst->muEmcCollection();
-	if (emc) {
-	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
-	    return fillFromMuDst(emc);
-	}
-  }
   const StEvent *event = (const StEvent*)GetInputDS("StEvent");
+  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
+
   if (event) {
 	const StEmcCollection *emc = event->emcCollection();
 	if (emc) {
 	    {LOG_DEBUG << "Reading from StEvent..." << endm;}
 	    return fillFromSt(emc);
 	}
-	{LOG_WARN << "Cannot find emc in the event" << endm;}
+	{LOG_WARN << "Cannot find emc collection in the event" << endm;}
 	return false;
+  }
+  else if (muDst) {
+	const StMuEmcCollection *emc = muDst->muEmcCollection();
+	if (emc) {
+	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
+	    return fillFromMuDst(emc);
+	}
+	{LOG_WARN << "Cannot find emc collection in the mudst" << endm;}
+
   } else {
-    {LOG_WARN << "Cannot find neither event or mudst" << endm;}
+    {LOG_WARN << "Cannot find either event or mudst" << endm;}
   }
   return false;
 }
