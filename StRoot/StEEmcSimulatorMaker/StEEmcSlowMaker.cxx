@@ -21,6 +21,9 @@ ClassImp(StEEmcSlowMaker)
 //________________________________________________
 StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
 : StMaker(name) {
+
+  SetAttr("embedding",0);
+
    mMip2ene = getMipdEdx()*0.7; // This is the SMD thickness of 7 mm
                             // times the minimum ionizing energy loss of
                             // 1.998 MeV/cm from the PDG book
@@ -155,6 +158,9 @@ Float_t StEEmcSlowMaker::avgNumPePerMip(Int_t stripID) {
  
 //________________________________________________
 Int_t StEEmcSlowMaker::Init() {
+
+  if ( IAttr("embedding") ) setEmbeddingMode();
+
   LOG_INFO << "mIsEmbeddingMode=" << mIsEmbeddingMode << ", mIsBFC=" << mIsBFC << endm;          
 
   if (mIsEmbeddingMode) {

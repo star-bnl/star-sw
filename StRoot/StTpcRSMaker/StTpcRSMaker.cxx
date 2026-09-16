@@ -142,6 +142,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   SETBIT(m_Mode,kBICHSEL);  // Default is Bichsel
   SETBIT(m_Mode,kdEdxCorr);
   SETBIT(m_Mode,kDistortion);
+  SetAttr("inputds","geant");
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
@@ -680,20 +681,21 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
   }
 #endif
+  TString inputds = SAttr("inputds");
   Double_t vminI = St_tpcGainCorrectionC::instance()->Struct(1)->min;
   Double_t vminO = St_tpcGainCorrectionC::instance()->Struct(0)->min;
-  St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
+  St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet(inputds+"/g2t_tpc_hit");
   if (!g2t_tpc_hit) return kStWarn;
   Int_t no_tpc_hits       = g2t_tpc_hit->GetNRows();               if (no_tpc_hits<1) return kStOK;
   if (Debug() > 1) g2t_tpc_hit->Print(0,10);
-  St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
+  St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet(inputds+"/g2t_track"); //  if (!g2t_track)    return kStWarn;
   Int_t NoTpcTracks = 0; 
   if (g2t_track) NoTpcTracks = g2t_track->GetNRows();
   mNoTpcHitsAll = TArrayI(NoTpcTracks+1);
   mNoTpcHitsReal = TArrayI(NoTpcTracks+1);
   g2t_track_st *tpc_track = 0;
   if (g2t_track) tpc_track = g2t_track->GetTable();
-  St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+  St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet(inputds+"/g2t_vertex");// if (!g2t_ver)      return kStWarn;
   g2t_vertex_st     *gver = 0;
   Int_t NV = 0;
   fgTriggerT0 = 0;

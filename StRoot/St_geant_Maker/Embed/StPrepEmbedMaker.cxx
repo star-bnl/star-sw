@@ -27,12 +27,16 @@
 #include "TTree.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StarClassLibrary/StParticleTable.hh"
+
 
 #include "tables/St_vertexSeed_Table.h"
 #include "TString.h"
 #include "TSystem.h"
 
 #include <unistd.h>
+#include <cassert>
+#include <algorithm>
 
 ClassImp(StPrepEmbedMaker)
 struct embedSettings{
@@ -530,6 +534,14 @@ Int_t StPrepEmbedMaker::Make()
   if((vfinder) && (vfinder->IsFixed())){
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
      vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
+     LOG_INFO << "StPrepEmbedMaker::Make set vertex x/y/z= " 
+	      << xyz[0] << "/" 
+	      << xyz[1] <<"/" 
+	      << xyz[2] 
+	      << " sigma x/y/z=" 
+	      << xyzerr[0] << "/" 
+	      << xyzerr[1] <<"/" 
+	      << xyzerr[2] << endm;
   }
   else {
     LOG_WARN << "StPrepEmbedMaker::Make  a fixed vertex finder is not in the chain, vertex position and errors are not set!" << endm;
@@ -617,17 +629,47 @@ void StPrepEmbedMaker::Do(const Char_t *job)
 }
 
 //____________________________________________________________________________________________________
-void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult)  
+void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult,const std::string& type)  
 { 
-  mSettings->mult=mult; mSettings->pid=pid; 
+  mSettings->mult=mult;
+  int g3_pid = 0;
+
+  auto string_lower = [](const std::string& str) -> std::string {
+    std::string lower_str = str;
+    std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(), ::tolower);
+    return lower_str;
+  };
+
+  std::string type_lower = string_lower(type);
+
+  if (type_lower == "pid") {
+    g3_pid = pid;
+  } else if (type_lower == "pdg") {
+    StParticleTable *pdgtable = StParticleTable::instance();
+    assert(pdgtable);
+    g3_pid = 9E9;
+    for ( auto id : pdgtable->geantIds(pid) ) {
+      if ( id < g3_pid ) g3_pid = id;
+    }
+    if ( g3_pid == 9E9 ) {
+      g3_pid = 0; // this will not end well...
+    }
+  } else {
+    LOG_ERROR << "StPrepEmbedMaker::SetPartOpt  Unknown type '" << type << "', expected 'pid' or 'pdg'" << endm;
+  }
+  assert(g3_pid > 0 && Form("StPrepEmbedMaker::SetPartOpt %d not found in Geant3 database", pid));
+
+  mSettings->mult=mult;
+  mSettings->pid=g3_pid; 
   LOG_INFO << "StPrepEmbedMaker::SetPartOpt mult = " << mSettings->mult
 	   << " pid = " << mSettings->pid << endm;
+
 }
 
 //____________________________________________________________________________________________________
 void StPrepEmbedMaker::SetOpt(const Double_t ptlow, const Double_t pthigh,
 			      const Double_t etalow, const Double_t etahigh, const Double_t philow,
-			      const Double_t phihigh, const TString type) 
+			      const Double_t phihigh, const char* type) 
 {
   mSettings->ptlow=ptlow;   mSettings->pthigh=pthigh; 
   mSettings->etalow=etalow; mSettings->etahigh=etahigh;
@@ -636,7 +678,7 @@ void StPrepEmbedMaker::SetOpt(const Double_t ptlow, const Double_t pthigh,
   LOG_INFO << "StPrepEmbedMaker::SetOpt ptlow = " << mSettings->ptlow << " pthigh = " << mSettings->pthigh
 	   << " etalow = " << mSettings->etalow << " etahigh = " << mSettings->etahigh
 	   << " philow = " << mSettings->philow << " phihigh = " << mSettings->phihigh
-	   <<" Mode: "<< type.Data() << endm;
+	   <<" Mode: "<< type << endm;
 }
 
 //____________________________________________________________________________________________________

@@ -261,6 +261,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
   </Block>
   
   <Block name="HSCI" comment="is a FCS HCal tower Scintillator Plate"  >
@@ -271,6 +283,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
     <Par name="BIRK1" value="1."  />
     <Par name="BIRK2" value="0.013"  />
     <Par name="BIRK3" value="9.6E-6"  />
@@ -304,6 +328,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
   </Block>
 
   <Block name="HGAP" comment="is a FCS HCal tower gap between scinti and absorber"  >
@@ -314,6 +350,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
   </Block>
 
   <Block name="HWSP" comment="is a FCS HCal tower WLS Plate"  >
@@ -324,6 +372,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
   </Block>
   
   <Block name="HSPC" comment="is a FCS HCal tower Steel Spacer"  >
@@ -334,6 +394,18 @@
     <Export language="Mortran">
       Set EmCuts (HCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', hcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', hcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', hcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', hcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', hcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', hcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', hcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', hcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', hcut.bcutm" />
+    </Export>
+
   </Block>
   
 </Module>

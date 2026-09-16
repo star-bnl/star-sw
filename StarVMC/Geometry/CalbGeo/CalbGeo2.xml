@@ -17,8 +17,7 @@
         Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );
         ENDIF ;
     </Replace>
-    
-
+   
 
     <Module name="CALBGEO2" comment=" is the geometry of the Barrel EM Calorimeter "  >
         <Author name="Maxim Potekhin BNL"  />
@@ -564,9 +563,26 @@
             <Attribute for="CSTP" seen="1" colo="1"  />
             <Shape type="BOX" dz="strap_dz" dx="strap_dx" dy="strap_dy"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+
+	    <Export language="AgROOT">
+	      <If expr="cabs.version&gt;0">
+		<Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+		<Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+		<Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+		<Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+		<Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+		<Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+		<Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+		<Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+		<Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	      </If>
+	    </Export>
+
+
+
         </Block>
         
         <Block name="CSPT" comment="is the side aluminum skin top"  >
@@ -575,9 +591,22 @@
             <Attribute for="CSPT" seen="1" colo="6"  />
             <Shape type="PCON" zi="{0,cut_length,Hleng}" rmn="{Rmin2,Rmin2,cut_radius2}" rmx="{Rmax2,Rmax2,Rmax2}" nz="3" phi1="-2.94" dphi="0.0045"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	      <If expr="cabs.version&gt;0">
+		<Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+		<Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+		<Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+		<Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+		<Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+		<Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+		<Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+		<Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+		<Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	      </If>
+	    </Export>
         </Block>
         
         <Block name="CSPB" comment="is the side aluminum skin bottom"  >
@@ -586,9 +615,22 @@
             <Attribute for="CSPB" seen="1" colo="6"  />
             <Shape type="PCON" zi="{0,cut_length,Hleng}" rmn="{Rmin2,Rmin2,cut_radius2}" rmx="{Rmax2,Rmax2,Rmax2}" nz="3" phi1="+2.94" dphi="0.0045"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSLG" comment="is a block that an author failed to adequately document"  >
@@ -597,9 +639,22 @@
             <Attribute for="CSLG" seen="1" colo="1"  />
             <Shape type="BOX" dz="slug_dz" dx="slug_dx" dy="slug_dy"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSZO" comment="is a block that an author failed to adequately document"  >
@@ -608,9 +663,22 @@
             <Attribute for="CSZO" seen="1" colo="1"  />
             <Shape type="PGON" zi="{0,ZZ0}" rmn="{Calg_Rmin,Calg_Rmin}" rmx="{Rmax,Rmax}" nz="2" npdiv="1" phi1="-DphiMod/2" dphi="DphiMod"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSZU" comment="is a block that an author failed to adequately document"  >
@@ -619,9 +687,22 @@
             <Attribute for="CSZU" seen="1" colo="1"  />
             <Shape type="PGON" zi="{cut_length2,Hleng2}" rmn="{Calg_Rmin,cut_radius}" rmx="{Calg_Rmin+zz0/cos(cutAng),cut_radius+zz0/cos(cutAng)}"  nz="2" npdiv="1" phi1="-DphiMod/2" dphi="DphiMod"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">	    
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSUP" comment="is a super layer with few layers inside"  >
@@ -636,9 +717,22 @@
             <Shape type="PGON" zi="{zz1,current_depth/tan_theta,future_depth/tan_theta}" rmn="{current_depth,current_depth,future_depth}" rmx="{future_depth,future_depth,future_depth}" nz="3" npdiv="1" phi1="-DphiMod/2" dphi="DphiMod"  />
 
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
 
             <Do var="sub" from="1" to="nint(calg_NsubLay(super))"  >
                 layer = layer + 1 
@@ -680,9 +774,22 @@
             <Attribute for="CPBP" seen="1" colo="1"  />
             <Shape type="BOX" dz="current_depth/tan_theta/2-zz1/2" dx="calg_AbsorThk" dy="current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
 
         </Block>
         
@@ -692,9 +799,22 @@
             <Attribute for="CSCI" seen="1" colo="4"  />
             <Shape type="BOX" dz="current_depth/tan_theta/2-zz1/2" dx="calg_ScintThk(super)" dy="current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="RKB2sc"  />
             <Par name="BIRK3" value="RKB3sc"  />
@@ -713,9 +833,22 @@
             <Attribute for="CBTW" seen="1" colo="6"  />
             <Shape type="BOX" dz="current_depth/tan_theta/2-zz0/2" dy="current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd"  />
             <Call expr="ag_imed,'ABSORBER'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CABS)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CABS)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="cabs.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', cabs.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', cabs.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', cabs.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', cabs.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', cabs.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', cabs.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', cabs.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', cabs.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', cabs.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSMD" comment="is the shower maximum detector envelope"  >
@@ -730,9 +863,22 @@
             <Shape type="BOX" dz="current_depth/tan_theta/2-zz0/2" dx="smd_width" dy="current_depth*tan(TwoPi/120.)-calg_CrackWd"  />
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
             <Create block="CSMG"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
 
             <Placement x="-smd_width+calg_g10SbThk+2.*calg_AbPapThk" block="CSMG"  >
             </Placement>
@@ -809,9 +955,22 @@
             <Attribute for="CSMG" seen="1" colo="1"  />
             <Shape type="BOX" dx="calg_g10SbThk"  />
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSDA" comment="is Al block with sensitive gas volume"  >
@@ -822,9 +981,22 @@
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
 
             <Create block="CSME"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSMC" comment="is the front first (last) Al rib"  >
@@ -833,9 +1005,22 @@
             <Attribute for="CSMC" seen="1" colo="6"  />
             <Shape type="BOX" dx="calg_SmAlfThk" dy="calg_SmAffWdh"  />
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSMB" comment="is the back first (last) Al rib"  >
@@ -844,9 +1029,22 @@
             <Attribute for="CSMB" seen="1" colo="6"  />
             <Shape type="BOX" dx="calg_SmAlfThk" dy="calg_SmAfbWdh"  />
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
         </Block>
         
         <Block name="CSME" comment="is the part of CSDA Al box with Ar/CO2 sensiteve gas"  >
@@ -855,9 +1053,22 @@
             <Attribute for="CSME" seen="1" colo="6"  />
             <Shape type="DIVISION" ndiv="nint(calg_NSmdAlw)" iaxis="2"  />
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
             <Do var="iCSHI" from="1" to="2"  >
                 <Create block="CSHI"  />
                 <If expr="iCSHI.eq.1"  >
@@ -891,9 +1102,22 @@
                 </Else>
                 
             </If>
-<Export language="Mortran">
-            Set EmCuts(CSEN)
-</Export>           
+	    <Export language="Mortran">
+              Set EmCuts(CSEN)
+	    </Export>           
+	    <Export language="AgROOT">
+	    <If expr="csen.version&gt;0">
+	      <Call routine="AddCut" expr="'CUTGAM', csen.cutgam" />
+	      <Call routine="AddCut" expr="'CUTELE', csen.cutele" />
+	      <Call routine="AddCut" expr="'CUTNEU', csen.cutneu" />
+	      <Call routine="AddCut" expr="'CUTHAD', csen.cuthad" />
+	      <Call routine="AddCut" expr="'CUTMUO', csen.cutmuo" />
+	      <Call routine="AddCut" expr="'DCUTE', csen.dcute" />
+	      <Call routine="AddCut" expr="'DCUTM', csen.dcutm" />
+	      <Call routine="AddCut" expr="'BCUTE', csen.bcute" />
+	      <Call routine="AddCut" expr="'BCUTM', csen.bcutm" />
+	    </If>
+	    </Export>
             <Call expr="ag_imed,'SENSITIVE'" routine="CALBPAR"  />
             <Par name="STRA" value="1.0"  />
             h_eta1=2.*(calg_Seta1Wdh+calg_Set12Wdh) 

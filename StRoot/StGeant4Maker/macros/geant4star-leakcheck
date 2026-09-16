@@ -1,0 +1,10 @@
+#!/bin/csh -f 
+
+valgrind --tool=memcheck \
+         --error-limit=no \
+	 --suppressions=$ROOTSYS/etc/valgrind-root.supp \
+	 --leak-check=yes \
+         --show-leak-kinds=all \
+root.exe -l macros/initStar.C macros/geant4star.C $argv 
+
+

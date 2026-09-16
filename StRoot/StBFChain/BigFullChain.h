@@ -25,6 +25,14 @@ ________________________________________________________________________________
  */
 #endif
 
+#include <RVersion.h>
+
+//#if ROOT_VERSION_CODE>=ROOT_VERSION(6,24,0)  // 399366
+//#define LIBVMC "libVMCLibrary.so"
+//#else
+//#define LIBVMC "libVMC.so"
+//#endif
+
 #define STAR_CHAIN_OBSOLETE "WARNING *** Option is OBSOLETE ***"
 
 //#define __NoStrangeMuDst__
@@ -63,9 +71,9 @@ Bfc_st BFC[] = { // standard chains
 #ifdef __AgMLonFly__
   {"ideal",       "",  "","",            "",           "",                       "Ideal Alignment", kFALSE},
   {"misalign",    "",  "","",            "","-AgMLideal",                    "Misaligned Geometry", kFALSE},
-  {"AgMLutil",    "",  "","",            "","StarAgmlUtil",                         "AgML support", kFALSE},
-  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib",             "AgML support", kFALSE},
-  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
+  {"AgMLutil",    "",  "","",            "","StarAgmlUtil,vmclib",                         "AgML support", kFALSE},
+  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib,vmclib",             "AgML support", kFALSE},
+  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry,vmclib"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
   {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
@@ -1185,6 +1193,7 @@ Bfc_st BFC[] = { // standard chains
   {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+  {"Geant4Out"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu"        ,""  ,"","" ,"","","Simulated Data, force to use Db time stamp from used geometry",kFALSE},
   {"HitsBranch"  ,""  ,"",""  ,"","","take out points from dst branch and put them into HitsBranch",kFALSE},
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
@@ -1289,7 +1298,14 @@ Bfc_st BFC[] = { // standard chains
   {"StarMiniCern","" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
+#if ROOT_VERSION_CODE>=399366
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMCLibrary.so,libgeant321.so", "VMC geant3",kFALSE},
+  {"vmclib"      ,"" ,"","","", "libVMCLibrary.so", "VMC",kFALSE},
+#else
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","", "libVMC.so,libgeant321.so", "VMC geant3",kFALSE},
+  {"vmclib"      ,"" ,"","","", "libVMC.so", "VMC",kFALSE},
+#endif
+
   {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
@@ -1347,28 +1363,59 @@ Bfc_st BFC[] = { // standard chains
 
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
+
+  {"geantTables","","","geomT,gen_T,sim_T","","geometry,Geom,St_db_Maker,St_g2t",    "Geant tables",kFALSE},
+
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
   {"flux"        ,"","","simu"                                           ,"","flux","Load flux lib",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
-  {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
-  {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
+#if ROOT_VERSION_CODE>=399366
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMCLibrary.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
+#else
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libfastjet.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorFilt.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
+#endif
+  {"stargen:stubs",  "", "","stargen", "", "StarGeneratorStubs.so", "Dummy starsim callbacks", false },
+  {"stargen:mk",  "", "","stargen", "StarPrimaryMaker", "",      "Setup the primary event generator maker", false },
+  {"stargen:embed",  "", "","stargen", "StarEmbedMaker", "StarGeneratorEmbed.so",      "Setup the primary event generator (embedding) maker", false },
+  {"stargen:step",  "", "","stargen", "", "StarGeneratorStep.so",      "Setup the AgUStep stepper", false },
+
+  {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
+  {"pythia6:mk",  "","","",        "StarPythia6", "",           "Create pythia6 maker", false },
+
+  {"pythia8.1.86","","","stargen,-pythia8.2.35", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
+  {"pythia8.2.35","","","stargen,-pythia8.1.86", "", "Pythia8_2_35.so",       "Load Pythia 8.2.35 generator", false },
+  {"pythia8:mk",  "","","",        "StarPythia8", "",           "Create pythia8 maker", false },
+
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
+  {"hijing:mk" ,"","","hijing1.383", "StarHijing", "",        "Load Hijing  1.383 generator", false },
   {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
+  {"kinematics:mk"  ,"","","stargen:mk,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
+  {"kinematics:embed"  ,"","","stargen:embed,kinematics", "StarKinematics", "",         "Load STAR Particle Gun", false },
   {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
+  {"genreader:mk","","","genreader", "StarGenEventReader","","StarGenerator Reader", false},
+
+
+  {"fastjet"     ,"","",""       , "", "libfastjet.so",          "Load fast jet reconstruction algo", false},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"GEANT4 Libs ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 
-  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  //  {"g4interfaces","", "", "",                     "", "libG4clhep.so,libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
+  {"g4interfaces","", "", "",                     "", "libG4global.so,libG4intercoms.so,libG4interfaces.so,libG4modeling.so,libG4vis_management.so","Load G4 libs",false},
   {"g4physics",   "", "", "",                     "", "libG4materials.so,libG4graphics_reps.so,libG4geometry.so,libG4particles.so,libG4track.so,libG4zlib.so,libG4digits_hits.so,libG4processes.so,libG4tracking.so,libG4event.so,libG4run.so,libG4physicslists.so", "Load G4",false},
   {"g4geant3",    "", "", "",                     "", "libG3toG4.so", "Load g3 to g4 support", false },
   {"geant4",      "", "", "g4physics,g4interfaces","","","Load G4 libs", false},
-
+#if ROOT_VERSION_CODE>=399366
+  {"geant4vmc",   "","", "geant4", "",                    "libVMCLibrary.so,libgeant4vmc.so", "Load G4 VMC libs", false},
+#else
+  {"geant4vmc",   "","", "geant4", "",                    "libVMC.so,libgeant4vmc.so", "Load G4 VMC libs", false},
+#endif
+  {"g4star",    "","", "stargen,geant4vmc,geant3vmc,geant4out",  "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
+  {"g4star:mk",    "","", "g4star",  "StGeant4Maker", "", "Load G4 VMC libs", false},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1625,7 +1672,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                       "New simulator for BEMC",kFALSE},
   {"EEfs"     ,"eefs","","eemcDb,EEmcUtil,MuDst","StEEmcFastMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC fast simulator",kFALSE},
-  {"EEss"     ,"eess","","-eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
+  {"EEss"     ,"eess","","eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC slow simulator",kFALSE},
   {"BEmcMixer", "","","",                          "StEmcMixerMaker","StEmcMixerMaker","BEMC mixer",kFALSE},
   {"emcAtoE"  ,"bemcA2E","" ,"db","StEmcADCtoEMaker","StEmcADCtoEMaker"
@@ -1634,7 +1681,7 @@ Bfc_st BFC[] = { // standard chains
   {"Epc"      ,"epc","","PreEcl,EmcUtil"             ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
   {"EEmcMixer", "","","",                    "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"eemcA2E","eemcA2E","" ,"db","StEEmcA2EMaker",       "StEEmcA2EMaker","E-EMC ADC to E converter",kFALSE},
-  {"eemCl"    ,"eemCl","","db","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
+  {"eemCl"    ,"eemCl","","db,eemcA2E","StEEmcClusterMaker"        ,"StEEmcClusterMaker","E-EMC clustering",kFALSE},
 
   // BTOF related chains
   {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
@@ -1654,6 +1701,7 @@ Bfc_st BFC[] = { // standard chains
                                                                                   "ETOF digi maker",kFALSE},
   {"ETofCalib", "",  "ETofChain", "db, ETofUtil, muDst", "StETofCalibMaker", "StETofCalibMaker",
                                                                                  "ETOF calibration",kFALSE},
+
   {"ETofSim" ,  "",        "ETofChain", "",                    "StETofSimMaker",  "StETofSimMaker",
                                                                                    "ETOF simulator",kFALSE},
 
@@ -1856,10 +1904,7 @@ Bfc_st BFC[] = { // standard chains
                                                                                  "ETOF match maker",kFALSE},
   {"ETofQa",     "",     "ETofChain", "db, ETofUtil, muDst", "StETofQAMaker",    "StETofQAMaker",
                                                                                     "ETOF QA maker",kFALSE},
-
-  {"ETofA",      "",     "",          "etofdat,ETofCalib,etofhit,ETofMatch",  "",  "",  
-                                                                "... ETOF chain options for data",  kFALSE},
-
+  {"ETofA",      "",     "",          "etofdat,ETofCalib,etofhit,ETofMatch","","","ETOF chain options for data",  kFALSE},
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)

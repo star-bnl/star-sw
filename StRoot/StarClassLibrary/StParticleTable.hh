@@ -54,6 +54,7 @@ typedef vector<StParticleDefinition*, allocator<StParticleDefinition*> > StVecPt
 typedef vector<StParticleDefinition*> StVecPtrParticleDefinition;
 #endif
 
+
 class StParticleTable {
 public:
     virtual ~StParticleTable();
@@ -68,9 +69,9 @@ public:
     bool contains(int) const;                         // by PDG encoding
     bool containsGeantId(int) const;                  // by Geant3 id
     
-    StParticleDefinition* findParticle(const string&)  const; // by name    
-    StParticleDefinition* findParticle(int)  const;           // by PDG encoding   
-    StParticleDefinition* findParticleByGeantId(int) const;   // by Geant3 id
+    virtual StParticleDefinition* findParticle(const string&)  const; // by name    
+    virtual StParticleDefinition* findParticle(int)  const;           // by PDG encoding   
+    virtual StParticleDefinition* findParticleByGeantId(int) const;   // by Geant3 id
     
     void insert(StParticleDefinition*);
     void erase(StParticleDefinition*);
@@ -78,6 +79,8 @@ public:
     void dump(ostream& = cout);
 
     StVecPtrParticleDefinition allParticles() const;
+
+    std::vector<int> geantIds( const int pdgId ); // return vector of geant IDs mapped to single PDG id
     
     friend class nobody;
 
@@ -107,8 +110,9 @@ private:
     mGeantPdgMapType   mGeantPdgMap;     // Geant3 IDs only
     mPdgMapType        mPdgMap;          // PDG IDs only
     mNameMapType       mNameMap;         // complete list
+
 #ifdef __ROOT__
-  ClassDef(StParticleTable,1)
+  ClassDef(StParticleTable,2)
 #endif
 };
 #endif

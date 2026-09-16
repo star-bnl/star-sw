@@ -240,6 +240,18 @@
     <Export language="Mortran">
       Set EmCuts (WCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', wcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', wcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', wcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', wcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', wcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', wcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', wcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', wcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', wcut.bcutm" />
+    </Export>
+
     <Shape type="BOX"
            dz="WGEO_DZFrontSteel/2.0"
            dx="WGEO_DX/2.0"
@@ -257,6 +269,18 @@
     <Export language="Mortran">
       Set EmCuts (WCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', wcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', wcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', wcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', wcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', wcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', wcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', wcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', wcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', wcut.bcutm" />
+    </Export>
+
     <Par name="BIRK1" value="1."  />
     <Par name="BIRK2" value="0.013"  />
     <Par name="BIRK3" value="9.6E-6"  />
@@ -296,6 +320,18 @@
     <Export language="Mortran">
       Set EmCuts (WCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', wcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', wcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', wcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', wcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', wcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', wcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', wcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', wcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', wcut.bcutm" />
+    </Export>
+
   </Block>
 
   <Block name="WPBP" comment="is a FCS ECal tower lead layer"  >
@@ -309,6 +345,18 @@
     <Export language="Mortran">
       Set EmCuts (WCUT)
     </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', wcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', wcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', wcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', wcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', wcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', wcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', wcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', wcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', wcut.bcutm" />
+    </Export>
+
   </Block>
 
   <Block name="WBPL" comment="is a FCS ECal tower back plastic plate"  >
@@ -325,6 +373,17 @@
            dy="WGEO_DY/2.0"  />
     <Export language="Mortran">
       Set EmCuts (WCUT)
+    </Export>
+    <Export language="AgROOT">
+      <Call routine="AddCut" expr="'CUTGAM', wcut.cutgam" />
+      <Call routine="AddCut" expr="'CUTELE', wcut.cutele" />
+      <Call routine="AddCut" expr="'CUTNEU', wcut.cutneu" />
+      <Call routine="AddCut" expr="'CUTHAD', wcut.cuthad" />
+      <Call routine="AddCut" expr="'CUTMUO', wcut.cutmuo" />
+      <Call routine="AddCut" expr="'DCUTE', wcut.dcute" />
+      <Call routine="AddCut" expr="'DCUTM', wcut.dcutm" />
+      <Call routine="AddCut" expr="'BCUTE', wcut.bcute" />
+      <Call routine="AddCut" expr="'BCUTM', wcut.bcutm" />
     </Export>
   </Block>
 

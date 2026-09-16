@@ -18,6 +18,8 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+#include "TGeoManager.h"
+
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -228,16 +230,20 @@ Int_t StBFChain::Instantiate()
     StMaker *myChain = 0;
     StMaker *mk = 0;
     // Require only instance for the following named makers
-    if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
-	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || maker == "StSstDbMaker" ||
+    if (maker == "St_db_Maker"       || 
+	maker == "StTpcDbMaker"      ||
+	maker == "StSvtDbMaker"      || 
+	maker == "StSsdDbMaker"      || 
+	maker == "StSstDbMaker"      ||
 	maker == "StDetectorDbMaker" ||
-	maker == "StMagFMaker"    ||
-	maker == "StEEmcDbMaker"  ||
-	maker == "St_geant_Maker" ||
+	maker == "StMagFMaker"       ||
+	maker == "StEEmcDbMaker"     ||
+	maker == "St_geant_Maker"    ||
+	maker == "StGeant4Maker"     ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
-	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
+	if (maker == "St_geant_Maker" || maker == "StVMCMaker" || maker == "StGeant4Maker" ) {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
 		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one." << endm;
 	  continue;
@@ -1017,9 +1023,17 @@ Int_t StBFChain::Init() {
 
     // force load of geometry for VMC and Sti
 
-    if (GetOption("Sti") || GetOption("StiCA") ||
-	GetOption("StiVMC") ||GetOption("VMC") ||
-	GetOption("VMCPassive")) {
+    if ( (GetOption("Sti")        || 
+	  GetOption("StiCA")      ||
+	  GetOption("StiVMC")     || 
+	  GetOption("VMC")        ||
+	  GetOption("VMCPassive") || 
+	  GetOption("g4star:mk")) 
+
+	 && gGeoManager==0
+
+	 ) {
+		   
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
 	TString dbTag("r");
@@ -1949,6 +1963,7 @@ void StBFChain::SetTreeOptions()
     treeMk->IntoBranch("McEventBranch","StMcEvent");
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
+  if (GetOption("Geant4Out")) treeMk->IntoBranch("geantBranch","geant4star");
   if (GetOption("AllEvent")) {
     if (GetOption("fzin")   ||
 	GetOption("ntin")   ||
