@@ -99,6 +99,10 @@ void StMuFcsUtil::fillMuFcsHits(StMuFcsCollection* muFcs,
 	    muFcsHit->setNPeak   ( vecHit[i]->nPeak()   );
             muFcsHit->setEnergy  ( vecHit[i]->energy()  );
 
+        for(unsigned int j=0; j<vecHit[i]->getGeantTracks().size(); j++){
+            muFcsHit->addGeantTrack(vecHit[i]->getGeantTracks()[j].first, vecHit[i]->getGeantTracks()[j].second);
+        }
+
             // store in memory map between StEvent and StMuDst version
             mMapHits[ fcscol->hits(idet)[i] ] = muFcsHit;
         } // for i
@@ -295,5 +299,8 @@ void StMuFcsUtil::fillFcsHits(StFcsCollection* fcscol,
     hit->setFitChi2 ( muHit->fitChi2() );
     hit->setNPeak   ( muHit->nPeak()   );
     hit->setEnergy  ( muHit->energy() );
+    for (unsigned int j=0; j<muHit->getGeantTracks().size(); j++){
+        hit->addGeantTrack(muHit->getGeantTracks()[j].first, muHit->getGeantTracks()[j].second);
+    }
   }  // while
 } // fillFcsHits
