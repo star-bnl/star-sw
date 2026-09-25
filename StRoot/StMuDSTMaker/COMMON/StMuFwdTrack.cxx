@@ -3,7 +3,7 @@
 
 #include "StEvent/StFwdTrack.h"
 
-StMuFwdTrack::StMuFwdTrack() : mDidFitConverge(0),mDidFitConvergeFully(0),mNumberOfFailedPoints(0),mNumberOfSeedPoints(0),mNumberOfFitPoints(0),mChi2(0),mNDF(0),mPval(0),mCharge(0),mPrimaryMomentum(0,0,0),mIdTruth(0),mQATruth(0) {
+StMuFwdTrack::StMuFwdTrack() : mDidFitConverge(0),mDidFitConvergeFully(0),mNumberOfFailedPoints(0),mNumberOfSeedPoints(0),mNumberOfFitPoints(0),mChi2(0),mNDF(0),mPval(0),mCharge(0),mPrimaryMomentum(0,0,0),mIdTruth(0),mQATruth(0),mVtxIndex(0),mTrackType(0) {
 
 }
 
@@ -44,9 +44,8 @@ void StMuFwdTrack::set( StFwdTrack * evTrack) {
     }
 
     setDCA(evTrack->dca().x(), evTrack->dca().y(), evTrack->dca().z());
-    mIdTruth = evTrack->idTruth();
-    mQATruth = evTrack->qaTruth();
-    mVtxIndex = evTrack->vertexIndex();
+    mVtxIndex  = evTrack->vertexIndex();
+    mTrackType = evTrack->trackType();
 
 }
 

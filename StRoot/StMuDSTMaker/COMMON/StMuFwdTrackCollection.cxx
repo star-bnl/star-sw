@@ -23,7 +23,7 @@ StMuFwdTrackCollection::~StMuFwdTrackCollection() {
 }
 
 void StMuFwdTrackCollection::init() {
-    mFwdTracks     = new TClonesArray("StMuFwdTracks", 0);
+    mFwdTracks     = new TClonesArray("StMuFwdTrack", 0);
 }
 
 StMuFwdTrack* StMuFwdTrackCollection::addFwdTrack(){
