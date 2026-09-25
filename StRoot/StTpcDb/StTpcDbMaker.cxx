@@ -318,7 +318,8 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   StTpcDb::instance()->SetDriftVelocity();
   
   if (IAttr("ExB")) { 
-    if(! IAttr("OSpaceFXT") && St_beamInfoC::instance()->IsFixedTarget() ) {
+    if( Attr("OSpaceZ2") && ! IAttr("OSpaceFXT") && St_beamInfoC::instance()->IsFixedTarget() ) {
+      gMessMgr->Warning() << "StTpcDbMaker:: override SpaceCharge Z2 beam-beam with FXT correction " << endm;
       SetAttr("OSpaceFXT"  , kTRUE);
       SetAttr("OSpaceZ2"   , kFALSE);
     }
