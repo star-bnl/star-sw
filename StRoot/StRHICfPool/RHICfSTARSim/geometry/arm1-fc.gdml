@@ -1,0 +1,2296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE gdml [ 
+<!ENTITY materials SYSTEM "materials.xml">
+]>
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GDML_3_1_4/schema/gdml.xsd">
+
+  <!-- ******************************* -->
+  <!-- *** Positions and Rotations *** -->
+  <!-- ******************************* -->
+  <define>
+    <!-- Common parameters -->
+    <position name="Pos-Center" unit="mm" x="0" y="0" z="0"/>
+    <rotation name="Rot-Flip" unit="deg" x="0" y="180" z="0"/>
+    <rotation name="Rot-0"   unit="deg" x="0" y="0" z="0"/>
+    <rotation name="Rot-45"  unit="deg" x="0" y="0" z="45"/>
+    <rotation name="Rot-90"  unit="deg" x="0" y="0" z="90"/>
+    <rotation name="Rot-135" unit="deg" x="0" y="0" z="135"/>
+    <rotation name="Rot-180" unit="deg" x="0" y="0" z="180"/>
+    <rotation name="Rot-270" unit="deg" x="0" y="0" z="270"/>
+    <rotation name="Rot-315" unit="deg" x="0" y="0" z="315"/>
+    <rotation name="Rot-345" unit="deg" x="0" y="0" z="345"/>
+
+    <!-- Offsets -->
+    <variable name="basey" value="34.0"/>
+    <variable name="basez" value="-100"/>
+    <variable name="fbasey" value="-17.43+10.01*sqrt(2)-basey"/>
+    <variable name="fbasez" value="+116.75+basez"/>
+    <variable name="dy" value="-80.2263"/>
+    <variable name="dz" value="-(116.75+basez)"/>
+
+    <!-- Other parameters -->
+    <variable name="theta0" value="atan2(4.5,12)"/>
+    <variable name="theta1" value="atan2(20,18.45)"/>
+    <variable name="theta2" value="25.0/180.0*pi"/>
+    <variable name="theta3" value="atan2(1.87,10)"/>
+    <variable name="theta4" value="15.0/180.0*pi"/>
+    <variable name="theta5" value="5.0/180.0*pi"/>
+
+    <rotation name="Rot-20-l" unit="rad" x="0" y="0" z="theta0"/>
+    <rotation name="Rot-20-r" unit="rad" x="0" y="0" z="-theta0"/>
+    <rotation name="Rot-5"   unit="deg" x="0" y="0" z="5"/>
+    <rotation name="Rot-335" unit="deg" x="0" y="0" z="335"/>
+    <rotation name="Rot-65"  unit="deg" x="0" y="0" z="65"/>
+    <rotation name="Rot-light-guide-large-sub-r" unit="rad" x="0" y="0" z="-theta1"/>
+    <rotation name="Rot-light-guide-large-sub-l1" unit="rad" x="0" y="0" z="-theta2"/>
+    <rotation name="Rot-light-guide-large-sub-l2" unit="rad" x="0" y="0" z="theta3"/>
+
+    <!-- ********** -->
+
+    <!-- Positions of Components (absolute) -->
+    <position name="Pos-tungsten-holder-12-lay00"       unit="mm" x="0" y="basey+dy" z="0+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay00"  unit="mm" x="0" y="basey+dy" z="5.15+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay01"       unit="mm" x="0" y="basey+dy" z="10.30+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay01"  unit="mm" x="0" y="basey+dy" z="15.45+basez+dz"/>
+    <position name="Pos-tungsten-holder-13-lay02"       unit="mm" x="0" y="basey+dy" z="20.60+basez+dz"/>
+    <position name="Pos-gsobar-holder-lay00"            unit="mm" x="0" y="basey+dy" z="26.05+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay02"  unit="mm" x="0" y="basey+dy" z="29.55+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay03"       unit="mm" x="0" y="basey+dy" z="34.70+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay03"  unit="mm" x="0" y="basey+dy" z="39.85+basez+dz"/>
+    <position name="Pos-tungsten-holder-13-lay04"       unit="mm" x="0" y="basey+dy" z="45.00+basez+dz"/>
+    <position name="Pos-gsobar-holder-lay01"            unit="mm" x="0" y="basey+dy" z="50.45+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay04"  unit="mm" x="0" y="basey+dy" z="53.95+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay05"       unit="mm" x="0" y="basey+dy" z="59.10+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay05"  unit="mm" x="0" y="basey+dy" z="64.25+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay06"       unit="mm" x="0" y="basey+dy" z="69.40+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay06"  unit="mm" x="0" y="basey+dy" z="74.55+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay07"       unit="mm" x="0" y="basey+dy" z="79.70+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay07"  unit="mm" x="0" y="basey+dy" z="84.85+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay08"       unit="mm" x="0" y="basey+dy" z="90.00+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay08"  unit="mm" x="0" y="basey+dy" z="95.15+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay09"       unit="mm" x="0" y="basey+dy" z="100.30+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay09"  unit="mm" x="0" y="basey+dy" z="105.45+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay10"       unit="mm" x="0" y="basey+dy" z="110.60+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay10"  unit="mm" x="0" y="basey+dy" z="115.75+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay11"       unit="mm" x="0" y="basey+dy" z="120.90+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay12"       unit="mm" x="0" y="basey+dy" z="128.00+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay11"  unit="mm" x="0" y="basey+dy" z="133.15+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay13"       unit="mm" x="0" y="basey+dy" z="138.30+basez+dz"/>
+    <position name="Pos-tungsten-holder-13-lay14"       unit="mm" x="0" y="basey+dy" z="145.40+basez+dz"/>
+    <position name="Pos-gsobar-holder-lay02"            unit="mm" x="0" y="basey+dy" z="150.85+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay12"  unit="mm" x="0" y="basey+dy" z="154.35+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay15"       unit="mm" x="0" y="basey+dy" z="159.50+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay16"       unit="mm" x="0" y="basey+dy" z="166.60+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay13"  unit="mm" x="0" y="basey+dy" z="171.75+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay17"       unit="mm" x="0" y="basey+dy" z="176.90+basez+dz"/>
+    <position name="Pos-tungsten-holder-13-lay18"       unit="mm" x="0" y="basey+dy" z="184.00+basez+dz"/>
+    <position name="Pos-gsobar-holder-lay03"            unit="mm" x="0" y="basey+dy" z="189.45+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay14"  unit="mm" x="0" y="basey+dy" z="192.95+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay19"       unit="mm" x="0" y="basey+dy" z="198.10+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay20"       unit="mm" x="0" y="basey+dy" z="205.20+basez+dz"/>
+    <position name="Pos-holder-scintillator-gso-lay15"  unit="mm" x="0" y="basey+dy" z="210.35+basez+dz"/>
+    <position name="Pos-tungsten-holder-12-lay21"       unit="mm" x="0" y="basey+dy" z="215.50+basez+dz"/>
+
+    <position name="Pos-frame-bottom-10"    unit="mm" x="0"     y="0+fbasey+dy"      z="0+fbasez+dz"/>
+    <position name="Pos-base-joint-1"       unit="mm" x="0"     y="10+fbasey+dy"     z="-130.15+fbasez+dz"/>
+    <position name="Pos-base-joint-2"       unit="mm" x="0"     y="10+fbasey+dy"     z="135.0+fbasez+dz"/>
+    <position name="Pos-post-1"             unit="mm" x="-39"   y="117.5+fbasey+dy"  z="-134+fbasez+dz"/>
+    <position name="Pos-post-2"             unit="mm" x="+39"   y="117.5+fbasey+dy"  z="-134+fbasez+dz"/>
+    <position name="Pos-post-3"             unit="mm" x="-39"   y="117.5+fbasey+dy"  z="+134+fbasez+dz"/>
+    <position name="Pos-post-4"             unit="mm" x="+39"   y="117.5+fbasey+dy"  z="+134+fbasez+dz"/>
+    <position name="Pos-tower-joint-1"      unit="mm" x="0"     y="127.14+fbasey+dy" z="-134+fbasez+dz"/>
+    <position name="Pos-tower-joint-2"      unit="mm" x="0"     y="127.14+fbasey+dy" z="+134+fbasez+dz"/>
+    <position name="Pos-tower-stopper"      unit="mm" x="0"     y="71.225+fbasey+dy" z="-120.8+fbasez+dz"/>
+    <position name="Pos-tangsten-holfer-5"  unit="mm" x="0"     y="71.225+fbasey+dy" z="+106.3+fbasez+dz"/>
+    <position name="Pos-tower-pole-bottom"  unit="mm" x="0"     y="11+fbasey+dy"     z="0+fbasez+dz"/>
+    <position name="Pos-tower-pole-top"     unit="mm" x="0"     y="127.14+fbasey+dy" z="0+fbasez+dz"/>
+    <position name="Pos-panel-front"        unit="mm" x="0"     y="113.5+fbasey+dy"  z="-139.5+fbasez+dz"/>
+    <position name="Pos-panel-back"         unit="mm" x="0"     y="113.5+fbasey+dy"  z="+139.5+fbasez+dz"/>
+    <position name="Pos-panel-left"         unit="mm" x="+44.5" y="113.5+fbasey+dy"  z="0+fbasez+dz"/>
+    <position name="Pos-panel-right"        unit="mm" x="-44.5" y="113.5+fbasey+dy"  z="0+fbasez+dz"/>
+
+    <!-- ********** -->
+
+    <!-- Positions for Sub-components -->
+
+    <!-- For Assembly components -->
+    <position name="Pos-assembly-hole-top" unit="mm" x="0" y="75.71+10.05*sqrt(2)-basey" z="0"/>
+    <position name="Pos-assembly-hole-bottom" unit="mm" x="0" y="-40.43+10.05*sqrt(2)-basey" z="0"/>
+
+    <!-- Tungsten Holder 12 -->
+    <position name="Pos-tungsten-holder-12" unit="mm" x="0" y="-basey" z="0"/>
+    <position name="Pos-tungsten-holder-12-small" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tungsten-holder-12-large" unit="mm" x="0" y="30.1*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-12-top" unit="mm" x="0" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-top-sub-l" unit="mm" x="-13" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-top-sub-r" unit="mm" x="+13" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-bottom" unit="mm" x="0" y="10.05*sqrt(2)-37.92785" z="0"/>
+    <position name="Pos-tungsten-holder-12-top-curve-l" unit="mm" x="-7.5*sqrt(2)" y="52.65*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-12-top-curve-r" unit="mm" x="+7.5*sqrt(2)" y="52.65*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-12-center-curve-l" unit="mm" x="-12.5*sqrt(2)" y="10.05*sqrt(2)+2.5" z="0"/>
+    <position name="Pos-tungsten-holder-12-center-curve-r" unit="mm" x="+12.5*sqrt(2)" y="10.05*sqrt(2)+2.5" z="0"/>
+    <position name="Pos-tungsten-holder-12-bottom-curve-l" unit="mm" x="-20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-bottom-curve-r" unit="mm" x="+20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-small-hole" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tungsten-holder-12-large-hole" unit="mm" x="0" y="30.1*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-12-hole-top" unit="mm" x="0" y="75.71+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-12-hole-bottom" unit="mm" x="0" y="-40.43+10.05*sqrt(2)" z="0"/>
+
+    <!-- Tungsten plates -->
+    <position name="Pos-tungsten-small" unit="mm" x="0" y="-basey" z="0"/>
+    <position name="Pos-tungsten-large" unit="mm" x="0" y="30.1*sqrt(2)+5-basey" z="0"/>
+
+    <!-- ********** -->
+
+    <!-- Tungsten Holder 13 -->
+    <position name="Pos-tungsten-holder-13" unit="mm" x="0" y="-basey" z="0"/>
+    <position name="Pos-tungsten-holder-13-small" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tungsten-holder-13-large" unit="mm" x="0" y="31.055*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-13-top" unit="mm" x="0" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-top-sub-l" unit="mm" x="-13" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-top-sub-r" unit="mm" x="+13" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-bottom" unit="mm" x="0" y="10.05*sqrt(2)-37.92785" z="0"/>
+    <position name="Pos-tungsten-holder-13-top-curve-l" unit="mm" x="-5.5*sqrt(2)" y="52.65*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-13-top-curve-r" unit="mm" x="+5.5*sqrt(2)" y="52.65*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-13-center-curve-l" unit="mm" x="-5.20*sqrt(2)" y="11.005*sqrt(2)+2.5" z="0"/>
+    <position name="Pos-tungsten-holder-13-center-curve-r" unit="mm" x="+5.20*sqrt(2)" y="11.005*sqrt(2)+2.5" z="0"/>
+    <position name="Pos-tungsten-holder-13-bottom-curve-l" unit="mm" x="-20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-bottom-curve-r" unit="mm" x="+20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-small-hole" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tungsten-holder-13-large-hole" unit="mm" x="0" y="30.1*sqrt(2)+5" z="0"/>
+    <position name="Pos-tungsten-holder-13-hole-top" unit="mm" x="0" y="75.71+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-hole-bottom" unit="mm" x="0" y="-40.43+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-tungsten-holder-13-small-mill" unit="mm" x="-7.65*sqrt(2)" y="7.4*sqrt(2)" z="3.55"/>
+    <position name="Pos-tungsten-holder-13-large-mill" unit="mm" x="-12.4*sqrt(2)" y="42.5*sqrt(2)+5" z="3.55"/>
+
+    <!-- Tungsten plates -->
+
+    <!-- ********** -->
+
+    <!-- Holder Scintillator GSO -->
+    <position name="Pos-holder-scintillator-gso" unit="mm" x="0" y="-basey" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-small" unit="mm" x="0" y="8.75" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large" unit="mm" x="30.1+2.5*sqrt(2)" y="28.07+2.5*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-top" unit="mm" x="35.77+2.5*sqrt(2)" y="64.205+2.5*sqrt(2)" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-small-top-cut" unit="mm" x="-15.1" y="32.6" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-top-cut-l" unit="mm" x="5.05+2.5*sqrt(2)" y="78.21+2.5*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-top-cut-r" unit="mm" x="52.775+2.5*sqrt(2)+19.765*sin(theta4)*sin(theta4)" y="78.21+2.5*sqrt(2)+19.765*(0.5*sin(2*theta4)-tan(theta4))" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-top-curve-l" unit="mm" x="58.15+2.5*sqrt(2)" y="47.2+2.5*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-top-curve-r" unit="mm" x="15.05+2.5*sqrt(2)" y="50.2+2.5*sqrt(2)-10*sin(0.125*pi)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-center-curve-l" unit="mm" x="18.05" y="7.1" z="0"/>
+    <position name="Pos-holder-scintillator-gso-center-curve-r" unit="mm" x="2+2.5*sqrt(2)" y="35.55" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-small-guide-hole-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-holder-scintillator-gso-small-guide-hole-sub-l" unit="mm" x="+8.25+2.25*cos(theta0)*cos(theta0)" y="2.25*cos(theta0)*sin(theta0)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-small-guide-hole-sub-r" unit="mm" x="-8.25-2.25*cos(theta0)*cos(theta0)" y="2.25*cos(theta0)*sin(theta0)" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-small-guide-hole" unit="mm" x="0" y="16.1" z="0"/>
+    <position name="Pos-holder-scintillator-gso-small-fiber-hole" unit="mm" x="0" y="22" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-large-guide-hole" unit="mm" x="30.1+2.5*sqrt(2)" y="58.22+2.5*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-guide-hole-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-guide-hole-cut-l" unit="mm" x="-22.1" y="10.05" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-guide-hole-cut-r1" unit="mm" x="20.1+10.05*(0.5*sin(2*theta5)-tan(theta5))" y="10.05*sin(theta5)*sin(theta5)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-guide-hole-cut-r2" unit="mm" x="10.05+10.05*sin(theta2)*sin(theta2)" y="10.05+10.05*(0.5*sin(2*theta2)-tan(theta2))" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-large-fiber-hole" unit="mm" x="39.661+8*sin(theta2)+2.5*sqrt(2)" y="63.812+8*cos(theta2)+2.5*sqrt(2)" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-bottom" unit="mm" x="0" y="10.05*sqrt(2)-37.92785" z="0"/>
+    <position name="Pos-holder-scintillator-gso-bottom-curve-l" unit="mm" x="-20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-bottom-curve-r" unit="mm" x="+20" y="-10.05*sqrt(2)" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-hole-top" unit="mm" x="0" y="75.71+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-hole-bottom" unit="mm" x="0" y="-40.43+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-holder-scintillator-gso-small-hole" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-holder-scintillator-gso-large-hole" unit="mm" x="0" y="30.1*sqrt(2)+5" z="0"/>
+
+    <position name="Pos-holder-scintillator-gso-top-cut" unit="mm" x="14" y="75.71+10.05*sqrt(2)" z="0"/>
+
+    <!-- GSO scitillators -->
+    <position name="Pos-gso-scintillator-small" unit="mm" x="0" y="-basey" z="0"/>
+    <position name="Pos-gso-scintillator-large" unit="mm" x="0" y="30.1*sqrt(2)+5-basey" z="0"/>
+
+    <!-- Light Guides -->
+    <position name="Pos-light-guide-small" unit="mm" x="-8*sqrt(2)" y="8*sqrt(2)-basey" z="0"/>
+    <position name="Pos-light-guide-small-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-light-guide-small-sub-l" unit="mm" x="+7.75+2.25*cos(theta0)*cos(theta0)" y="2.25*cos(theta0)*sin(theta0)" z="0"/>
+    <position name="Pos-light-guide-small-sub-r" unit="mm" x="-7.75-2.25*cos(theta0)*cos(theta0)" y="2.25*cos(theta0)*sin(theta0)" z="0"/>
+
+    <position name="Pos-light-guide-large" unit="mm" x="-14.6125*sqrt(2)" y="44.7125*sqrt(2)+5-basey" z="0"/>
+    <position name="Pos-light-guide-large-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-light-guide-large-sub-r" unit="mm" x="-10-10*cos(theta1)*cos(theta1)" y="5*sin(2*theta1)" z="0"/>
+    <position name="Pos-light-guide-large-sub-l1" unit="mm" x="10+10*sin(theta2)*sin(theta2)" y="9.225-10*tan(theta2)+5*sin(2*theta2)" z="0"/>
+    <position name="Pos-light-guide-large-sub-l2" unit="mm" x="20-9.225*(tan(theta3)-0.5*sin(2*theta3))" y="9.225*sin(theta3)*sin(theta3)" z="0"/>
+
+    <!-- ********** -->
+
+    <!-- GSObar Holder -->
+    <position name="Pos-gsobar-holder" unit="mm" x="0" y="-basey" z="0"/>
+    <position name="Pos-gsobar-holder-small" unit="mm" x="5" y="5" z="0"/>
+    <position name="Pos-gsobar-holder-large" unit="mm" x="36.92" y="36.92" z="0"/>
+    <position name="Pos-gsobar-holder-top" unit="mm" x="62.69" y="62.69" z="0"/>
+
+    <position name="Pos-gsobar-holder-bottom" unit="mm" x="0" y="10.05*sqrt(2)-37.92785" z="0"/>
+
+    <position name="Pos-gsobar-holder-bottom-curve-l" unit="mm" x="-20" y="-10.05*sqrt(2)" z="0"/>
+    <position name="Pos-gsobar-holder-bottom-curve-r" unit="mm" x="+20" y="-10.05*sqrt(2)" z="0"/>
+
+    <position name="Pos-gsobar-holder-top-curve-l" unit="mm" x="-8*sqrt(2)" y="55.4*sqrt(2)+5.2" z="0"/>
+    <position name="Pos-gsobar-holder-top-curve-r" unit="mm" x="+8*sqrt(2)" y="55.4*sqrt(2)+5.2" z="0"/>
+
+    <position name="Pos-gsobar-holder-center-curve-l" unit="mm" x="-10.5*sqrt(2)" y="17.55*sqrt(2)" z="0"/>
+    <position name="Pos-gsobar-holder-center-curve-r" unit="mm" x="+10.5*sqrt(2)" y="17.55*sqrt(2)" z="0"/>
+
+    <position name="Pos-gsobar-holder-small-mill" unit="mm" x="0" y="0" z="0.8"/>
+    <position name="Pos-gsobar-holder-small-fiber-x-mill" unit="mm" x="9.525*sqrt(2)" y="9.525*sqrt(2)" z="1.4"/>
+    <position name="Pos-gsobar-holder-small-fiber-y-mill" unit="mm" x="-9.525*sqrt(2)" y="9.525*sqrt(2)" z="0.8"/>
+    <position name="Pos-gsobar-holder-large-mill" unit="mm" x="0" y="30.1*sqrt(2)+5" z="0.8"/>
+    <position name="Pos-gsobar-holder-large-fiber-x-mill" unit="mm" x="+13.3375*sqrt(2)" y="43.4375*sqrt(2)+5" z="1.4"/>
+    <position name="Pos-gsobar-holder-large-fiber-y-mill" unit="mm" x="-13.3375*sqrt(2)" y="43.4375*sqrt(2)+5" z="0.8"/>
+
+    <position name="Pos-gsobar-holder-hole-top" unit="mm" x="0" y="75.71+10.05*sqrt(2)" z="0"/>
+    <position name="Pos-gsobar-holder-hole-bottom" unit="mm" x="0" y="-40.43+10.05*sqrt(2)" z="0"/>
+
+    <position name="Pos-gsobar-holder-large-cut-l" unit="mm" x="-26.87*sqrt(2)" y="36.92*sqrt(2)" z="0"/>
+    <position name="Pos-gsobar-holder-large-cut-r" unit="mm" x="+26.87*sqrt(2)" y="36.92*sqrt(2)" z="0"/>
+
+    <position name="Pos-gsobar-holder-top-sub-l" unit="mm" x="-13" y="46.01+30.1*sqrt(2)" z="0"/>
+    <position name="Pos-gsobar-holder-top-sub-r" unit="mm" x="+13" y="46.01+30.1*sqrt(2)" z="0"/>
+
+    <!-- GSObelt small -->
+    <position name="Pos-gsobelt-small-x" unit="mm" x="0" y="-basey" z="1.1"/>
+    <position name="Pos-gsobelt-small-y" unit="mm" x="0" y="-basey" z="0.1"/>
+    <position name="Pos-gsobar-small-00" unit="mm" x="0" y="-9.5" z="0"/>
+    <position name="Pos-gsobar-small-01" unit="mm" x="0" y="-8.5" z="0"/>
+    <position name="Pos-gsobar-small-02" unit="mm" x="0" y="-7.5" z="0"/>
+    <position name="Pos-gsobar-small-03" unit="mm" x="0" y="-6.5" z="0"/>
+    <position name="Pos-gsobar-small-04" unit="mm" x="0" y="-5.5" z="0"/>
+    <position name="Pos-gsobar-small-05" unit="mm" x="0" y="-4.5" z="0"/>
+    <position name="Pos-gsobar-small-06" unit="mm" x="0" y="-3.5" z="0"/>
+    <position name="Pos-gsobar-small-07" unit="mm" x="0" y="-2.5" z="0"/>
+    <position name="Pos-gsobar-small-08" unit="mm" x="0" y="-1.5" z="0"/>
+    <position name="Pos-gsobar-small-09" unit="mm" x="0" y="-0.5" z="0"/>
+    <position name="Pos-gsobar-small-10" unit="mm" x="0" y="+0.5" z="0"/>
+    <position name="Pos-gsobar-small-11" unit="mm" x="0" y="+1.5" z="0"/>
+    <position name="Pos-gsobar-small-12" unit="mm" x="0" y="+2.5" z="0"/>
+    <position name="Pos-gsobar-small-13" unit="mm" x="0" y="+3.5" z="0"/>
+    <position name="Pos-gsobar-small-14" unit="mm" x="0" y="+4.5" z="0"/>
+    <position name="Pos-gsobar-small-15" unit="mm" x="0" y="+5.5" z="0"/>
+    <position name="Pos-gsobar-small-16" unit="mm" x="0" y="+6.5" z="0"/>
+    <position name="Pos-gsobar-small-17" unit="mm" x="0" y="+7.5" z="0"/>
+    <position name="Pos-gsobar-small-18" unit="mm" x="0" y="+8.5" z="0"/>
+    <position name="Pos-gsobar-small-19" unit="mm" x="0" y="+9.5" z="0"/>
+
+    <!-- GSObelt large -->
+    <position name="Pos-gsobelt-large-x" unit="mm" x="0" y="30.1*sqrt(2)+5-basey" z="1.1"/>
+    <position name="Pos-gsobelt-large-y" unit="mm" x="0" y="30.1*sqrt(2)+5-basey" z="0.1"/>
+    <position name="Pos-gsobar-large-00" unit="mm" x="0" y="-19.5" z="0"/>
+    <position name="Pos-gsobar-large-01" unit="mm" x="0" y="-18.5" z="0"/>
+    <position name="Pos-gsobar-large-02" unit="mm" x="0" y="-17.5" z="0"/>
+    <position name="Pos-gsobar-large-03" unit="mm" x="0" y="-16.5" z="0"/>
+    <position name="Pos-gsobar-large-04" unit="mm" x="0" y="-15.5" z="0"/>
+    <position name="Pos-gsobar-large-05" unit="mm" x="0" y="-14.5" z="0"/>
+    <position name="Pos-gsobar-large-06" unit="mm" x="0" y="-13.5" z="0"/>
+    <position name="Pos-gsobar-large-07" unit="mm" x="0" y="-12.5" z="0"/>
+    <position name="Pos-gsobar-large-08" unit="mm" x="0" y="-11.5" z="0"/>
+    <position name="Pos-gsobar-large-09" unit="mm" x="0" y="-10.5" z="0"/>
+    <position name="Pos-gsobar-large-10" unit="mm" x="0" y="-09.5" z="0"/>
+    <position name="Pos-gsobar-large-11" unit="mm" x="0" y="-08.5" z="0"/>
+    <position name="Pos-gsobar-large-12" unit="mm" x="0" y="-07.5" z="0"/>
+    <position name="Pos-gsobar-large-13" unit="mm" x="0" y="-06.5" z="0"/>
+    <position name="Pos-gsobar-large-14" unit="mm" x="0" y="-05.5" z="0"/>
+    <position name="Pos-gsobar-large-15" unit="mm" x="0" y="-04.5" z="0"/>
+    <position name="Pos-gsobar-large-16" unit="mm" x="0" y="-03.5" z="0"/>
+    <position name="Pos-gsobar-large-17" unit="mm" x="0" y="-02.5" z="0"/>
+    <position name="Pos-gsobar-large-18" unit="mm" x="0" y="-01.5" z="0"/>
+    <position name="Pos-gsobar-large-19" unit="mm" x="0" y="-00.5" z="0"/>
+    <position name="Pos-gsobar-large-20" unit="mm" x="0" y="+00.5" z="0"/>
+    <position name="Pos-gsobar-large-21" unit="mm" x="0" y="+01.5" z="0"/>
+    <position name="Pos-gsobar-large-22" unit="mm" x="0" y="+02.5" z="0"/>
+    <position name="Pos-gsobar-large-23" unit="mm" x="0" y="+03.5" z="0"/>
+    <position name="Pos-gsobar-large-24" unit="mm" x="0" y="+04.5" z="0"/>
+    <position name="Pos-gsobar-large-25" unit="mm" x="0" y="+05.5" z="0"/>
+    <position name="Pos-gsobar-large-26" unit="mm" x="0" y="+06.5" z="0"/>
+    <position name="Pos-gsobar-large-27" unit="mm" x="0" y="+07.5" z="0"/>
+    <position name="Pos-gsobar-large-28" unit="mm" x="0" y="+08.5" z="0"/>
+    <position name="Pos-gsobar-large-29" unit="mm" x="0" y="+09.5" z="0"/>
+    <position name="Pos-gsobar-large-30" unit="mm" x="0" y="+10.5" z="0"/>
+    <position name="Pos-gsobar-large-31" unit="mm" x="0" y="+11.5" z="0"/>
+    <position name="Pos-gsobar-large-32" unit="mm" x="0" y="+12.5" z="0"/>
+    <position name="Pos-gsobar-large-33" unit="mm" x="0" y="+13.5" z="0"/>
+    <position name="Pos-gsobar-large-34" unit="mm" x="0" y="+14.5" z="0"/>
+    <position name="Pos-gsobar-large-35" unit="mm" x="0" y="+15.5" z="0"/>
+    <position name="Pos-gsobar-large-36" unit="mm" x="0" y="+16.5" z="0"/>
+    <position name="Pos-gsobar-large-37" unit="mm" x="0" y="+17.5" z="0"/>
+    <position name="Pos-gsobar-large-38" unit="mm" x="0" y="+18.5" z="0"/>
+    <position name="Pos-gsobar-large-39" unit="mm" x="0" y="+19.5" z="0"/>
+
+    <!-- ********** -->
+
+    <!-- Frames -->
+    <!-- Frame Bottom 10 -->
+    <position name="Pos-frame-bottom-10-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-frame-bottom-10-mill-front" unit="mm" x="0" y="3.5" z="-127"/>
+    <position name="Pos-frame-bottom-10-mill-rear" unit="mm" x="0" y="3.5" z="130.2"/>
+
+    <!-- Base Joint 1 -->
+    <position name="Pos-base-joint-1-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-base-joint-1-hole" unit="mm" x="0" y="1" z="0"/>
+
+    <!-- Base Joint 2 -->
+    <position name="Pos-base-joint-2-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-base-joint-2-hole" unit="mm" x="0" y="1" z="0"/>
+
+    <!-- Post -->
+
+    <!-- Tower Joint 1 -->
+    <position name="Pos-tower-joint-1-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tower-joint-1-top" unit="mm" x="0" y="0" z="8.85"/>
+    <position name="Pos-tower-joint-1-hole" unit="mm" x="0" y="0" z="0"/>
+
+    <!-- Tower Joint 2 -->
+    <position name="Pos-tower-joint-2-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tower-joint-2-hole" unit="mm" x="0" y="0" z="0"/>
+
+    <!-- Tower Stopper -->
+    <position name="Pos-tower-stopper-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tower-stopper-hole-bottom" unit="mm" x="0" y="-60.225" z="0"/>
+    <position name="Pos-tower-stopper-hole-top" unit="mm" x="0" y="55.915" z="0"/>
+
+    <!-- Tangsten Holfer 5 -->
+    <position name="Pos-tangsten-holfer-5-base" unit="mm" x="0" y="0" z="0"/>
+    <position name="Pos-tangsten-holfer-5-hole-bottom" unit="mm" x="0" y="-60.225" z="0"/>
+    <position name="Pos-tangsten-holfer-5-hole-top" unit="mm" x="0" y="55.915" z="0"/>
+    <position name="Pos-tangsten-holfer-5-arm" unit="mm" x="0" y="12.775" z="0"/>
+
+    <!-- Front Counter -->
+    <position name="Pos-frontcounter-small" unit="mm" x="0" y="-80.226" z="-141.5"/>
+    <position name="Pos-frontcounter-large" unit="mm" x="0" y="-32.780" z="-141.5"/>
+    <position name="Pos-frontcounter-front" unit="mm" x="0" y="0" z="-164.5"/>
+    <position name="Pos-frontcounter-side-l" unit="mm" x="-44.5" y="0" z="-152.5"/>
+    <position name="Pos-frontcounter-side-r" unit="mm" x="+44.5" y="0" z="-152.5"/>
+
+    <!-- Truth Counter (Not real material and detector) -->
+    <position name="Pos-TruthCounter-small" unit="mm" x="0" y="-80.226" z="-125"/>
+    <position name="Pos-TruthCounter-large" unit="mm" x="0" y="-32.780" z="-125"/>
+  </define>
+
+  <!-- the content of the materials.xml file will be included here -->
+  &materials;
+
+  <!-- *********************** -->
+  <!-- *** Logical Volumes *** -->
+  <!-- *********************** -->
+  <solids>
+    <box name="Log-Arm1" lunit="cm" x="9" y="24.3" z="34.2"/>
+    
+    <!-- ********** -->
+
+    <!-- Tungsten Holder 12 -->
+    <box name="Log-tungsten-holder-12-small" lunit="mm" x="30.1" y="30.1" z="7.1"/>
+    <box name="Log-tungsten-holder-12-large" lunit="mm" x="50.1" y="50.1" z="7.1"/>
+    <box name="Log-tungsten-holder-12-top" lunit="mm" x="82.02/sqrt(2)-40.1" y="82.02/sqrt(2)-40.1" z="7.1"/>
+    <box name="Log-tungsten-holder-12-top-sub" lunit="mm" x="10" y="10" z="7.2"/>
+    <box name="Log-tungsten-holder-12-bottom" lunit="mm" x="20" y="19.5" z="7.1"/>
+
+    <tube name="Log-tungsten-holder-12-top-curve" rmin="5.0" rmax="8.0" z="7.1" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+    <tube name="Log-tungsten-holder-12-center-curve" rmin="10.0" rmax="15.0" z="7.1" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+    <tube name="Log-tungsten-holder-12-bottom-curve" rmin="10.0" rmax="15.0" z="7.1" deltaphi="45" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-tungsten-holder-12-small-hole" lunit="mm" x="20.1" y="20.1" z="7.2"/>
+    <box name="Log-tungsten-holder-12-large-hole" lunit="mm" x="40.1" y="40.1" z="7.2"/>
+    <tube name="Log-tungsten-holder-12-hole" rmin="0.0" rmax="4.0" z="7.2" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <union name="Log-tungsten-holder-12-00">
+      <first ref="Log-tungsten-holder-12-small"/>
+      <second ref="Log-tungsten-holder-12-large"/>
+      <positionref ref="Pos-tungsten-holder-12-large"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-45"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-01">
+      <first ref="Log-tungsten-holder-12-00"/>
+      <second ref="Log-tungsten-holder-12-top"/>
+      <positionref ref="Pos-tungsten-holder-12-top"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tungsten-holder-12-02">
+      <first ref="Log-tungsten-holder-12-01"/>
+      <second ref="Log-tungsten-holder-12-top-sub"/>
+      <positionref ref="Pos-tungsten-holder-12-top-sub-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-12-03">
+      <first ref="Log-tungsten-holder-12-02"/>
+      <second ref="Log-tungsten-holder-12-top-sub"/>
+      <positionref ref="Pos-tungsten-holder-12-top-sub-r"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <union name="Log-tungsten-holder-12-04">
+      <first ref="Log-tungsten-holder-12-03"/>
+      <second ref="Log-tungsten-holder-12-bottom"/>
+      <positionref ref="Pos-tungsten-holder-12-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-05">
+      <first ref="Log-tungsten-holder-12-04"/>
+      <second ref="Log-tungsten-holder-12-top-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-top-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-06">
+      <first ref="Log-tungsten-holder-12-05"/>
+      <second ref="Log-tungsten-holder-12-top-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-top-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-07">
+      <first ref="Log-tungsten-holder-12-06"/>
+      <second ref="Log-tungsten-holder-12-center-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-center-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-08">
+      <first ref="Log-tungsten-holder-12-07"/>
+      <second ref="Log-tungsten-holder-12-center-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-center-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-09">
+      <first ref="Log-tungsten-holder-12-08"/>
+      <second ref="Log-tungsten-holder-12-bottom-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-bottom-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-12-10">
+      <first ref="Log-tungsten-holder-12-09"/>
+      <second ref="Log-tungsten-holder-12-bottom-curve"/>
+      <positionref ref="Pos-tungsten-holder-12-bottom-curve-r"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tungsten-holder-12-11">
+      <first ref="Log-tungsten-holder-12-10"/>
+      <second ref="Log-tungsten-holder-12-small-hole"/>
+      <positionref ref="Pos-tungsten-holder-12-small-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-12-12">
+      <first ref="Log-tungsten-holder-12-11"/>
+      <second ref="Log-tungsten-holder-12-large-hole"/>
+      <positionref ref="Pos-tungsten-holder-12-large-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-12-13">
+      <first ref="Log-tungsten-holder-12-12"/>
+      <second ref="Log-tungsten-holder-12-hole"/>
+      <positionref ref="Pos-tungsten-holder-12-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-12">
+      <first ref="Log-tungsten-holder-12-13"/>
+      <second ref="Log-tungsten-holder-12-hole"/>
+      <positionref ref="Pos-tungsten-holder-12-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tungsten plates -->
+    <box name="Log-tungsten-small" lunit="mm" x="20" y="20" z="7.1"/>
+    <box name="Log-tungsten-large" lunit="mm" x="40" y="40" z="7.1"/>
+
+    <!-- Tungsten Holder 12 Assembly -->
+    <box name="Log-tungsten-holder-12-assembly-base" lunit="mm" x="86" y="134.731" z="7.1"/>
+    <subtraction name="Log-tungsten-holder-12-assembly-00">
+      <first ref="Log-tungsten-holder-12-assembly-base"/>
+      <second ref="Log-tungsten-holder-12-hole"/>
+      <positionref ref="Pos-assembly-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-tungsten-holder-12-assembly">
+      <first ref="Log-tungsten-holder-12-assembly-00"/>
+      <second ref="Log-tungsten-holder-12-hole"/>
+      <positionref ref="Pos-assembly-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+
+    <!-- ********** -->
+
+    <!-- Tungsten Holder 13 -->
+    <box name="Log-tungsten-holder-13-small" lunit="mm" x="30.1" y="30.1" z="7.1"/>
+    <box name="Log-tungsten-holder-13-large" lunit="mm" x="48.19" y="48.19" z="7.1"/>
+    <box name="Log-tungsten-holder-13-top" lunit="mm" x="82.02/sqrt(2)-40.1" y="82.02/sqrt(2)-40.1" z="7.1"/>
+    <box name="Log-tungsten-holder-13-top-sub" lunit="mm" x="10" y="10" z="7.2"/>
+    <box name="Log-tungsten-holder-13-bottom" lunit="mm" x="20" y="19.5" z="7.1"/>
+
+    <tube name="Log-tungsten-holder-13-top-curve" rmin="3.0" rmax="4.5" z="7.1" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+    <tube name="Log-tungsten-holder-13-center-curve" rmin="3.0" rmax="4.5" z="7.1" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+    <tube name="Log-tungsten-holder-13-bottom-curve" rmin="10.0" rmax="15.0" z="7.1" deltaphi="45" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-tungsten-holder-13-small-hole" lunit="mm" x="20.1" y="20.1" z="7.2"/>
+    <box name="Log-tungsten-holder-13-large-hole" lunit="mm" x="40.1" y="40.1" z="7.2"/>
+    <tube name="Log-tungsten-holder-13-hole" rmin="0.0" rmax="4.0" z="7.2" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-tungsten-holder-13-small-mill" lunit="mm" x="21.50" y="10.001" z="4.0"/>
+    <box name="Log-tungsten-holder-13-large-mill" lunit="mm" x="41.50" y="10.001" z="4.0"/>
+
+    <union name="Log-tungsten-holder-13-00">
+      <first ref="Log-tungsten-holder-13-small"/>
+      <second ref="Log-tungsten-holder-13-large"/>
+      <positionref ref="Pos-tungsten-holder-13-large"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-45"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-01">
+      <first ref="Log-tungsten-holder-13-00"/>
+      <second ref="Log-tungsten-holder-13-top"/>
+      <positionref ref="Pos-tungsten-holder-13-top"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tungsten-holder-13-02">
+      <first ref="Log-tungsten-holder-13-01"/>
+      <second ref="Log-tungsten-holder-13-top-sub"/>
+      <positionref ref="Pos-tungsten-holder-13-top-sub-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13-03">
+      <first ref="Log-tungsten-holder-13-02"/>
+      <second ref="Log-tungsten-holder-13-top-sub"/>
+      <positionref ref="Pos-tungsten-holder-13-top-sub-r"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <union name="Log-tungsten-holder-13-04">
+      <first ref="Log-tungsten-holder-13-03"/>
+      <second ref="Log-tungsten-holder-13-bottom"/>
+      <positionref ref="Pos-tungsten-holder-13-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-05">
+      <first ref="Log-tungsten-holder-13-04"/>
+      <second ref="Log-tungsten-holder-13-top-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-top-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-06">
+      <first ref="Log-tungsten-holder-13-05"/>
+      <second ref="Log-tungsten-holder-13-top-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-top-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-07">
+      <first ref="Log-tungsten-holder-13-06"/>
+      <second ref="Log-tungsten-holder-13-center-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-center-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-08">
+      <first ref="Log-tungsten-holder-13-07"/>
+      <second ref="Log-tungsten-holder-13-center-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-center-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-09">
+      <first ref="Log-tungsten-holder-13-08"/>
+      <second ref="Log-tungsten-holder-13-bottom-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-bottom-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-tungsten-holder-13-10">
+      <first ref="Log-tungsten-holder-13-09"/>
+      <second ref="Log-tungsten-holder-13-bottom-curve"/>
+      <positionref ref="Pos-tungsten-holder-13-bottom-curve-r"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tungsten-holder-13-11">
+      <first ref="Log-tungsten-holder-13-10"/>
+      <second ref="Log-tungsten-holder-13-small-hole"/>
+      <positionref ref="Pos-tungsten-holder-13-small-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13-12">
+      <first ref="Log-tungsten-holder-13-11"/>
+      <second ref="Log-tungsten-holder-13-large-hole"/>
+      <positionref ref="Pos-tungsten-holder-13-large-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13-13">
+      <first ref="Log-tungsten-holder-13-12"/>
+      <second ref="Log-tungsten-holder-13-hole"/>
+      <positionref ref="Pos-tungsten-holder-13-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13-14">
+      <first ref="Log-tungsten-holder-13-13"/>
+      <second ref="Log-tungsten-holder-13-hole"/>
+      <positionref ref="Pos-tungsten-holder-13-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-tungsten-holder-13-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13-15">
+      <first ref="Log-tungsten-holder-13-14"/>
+      <second ref="Log-tungsten-holder-13-small-mill"/>
+      <positionref ref="Pos-tungsten-holder-13-small-mill"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tungsten-holder-13">
+      <first ref="Log-tungsten-holder-13-15"/>
+      <second ref="Log-tungsten-holder-13-large-mill"/>
+      <positionref ref="Pos-tungsten-holder-13-large-mill"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tungsten Holder 13 Assembly -->
+    <box name="Log-tungsten-holder-13-assembly-base" lunit="mm" x="86" y="134.731" z="7.1"/>
+    <subtraction name="Log-tungsten-holder-13-assembly-00">
+      <first ref="Log-tungsten-holder-13-assembly-base"/>
+      <second ref="Log-tungsten-holder-13-hole"/>
+      <positionref ref="Pos-assembly-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-tungsten-holder-13-assembly">
+      <first ref="Log-tungsten-holder-13-assembly-00"/>
+      <second ref="Log-tungsten-holder-13-hole"/>
+      <positionref ref="Pos-assembly-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- ********** -->
+
+    <!-- Holder Scintillator GSO -->
+    <box name="Log-holder-scintillator-gso-small" lunit="mm" x="30.10" y="47.6" z="3.2"/>
+    <box name="Log-holder-scintillator-gso-small-top-cut" lunit="mm" x="9.44*sqrt(2)" y="9.44*sqrt(2)" z="3.3"/>
+    <box name="Log-holder-scintillator-gso-large" lunit="mm" x="50.10" y="44.26" z="3.2"/>
+    <box name="Log-holder-scintillator-gso-large-top" lunit="mm" x="64.44" y="28.01" z="3.2"/>
+
+    <box name="Log-holder-scintillator-gso-large-top-cut-l" lunit="mm" x="40" y="28.01*sqrt(2)" z="3.3"/>
+    <box name="Log-holder-scintillator-gso-large-top-cut-r" lunit="mm" x="43" y="45.43*sin(theta4)" z="3.3"/>
+
+    <tube name="Log-holder-scintillator-gso-top-curve-l" rmin="3.0" rmax="4.5" z="3.2" deltaphi="90" startphi="90" aunit="deg" lunit="mm"/>
+    <tube name="Log-holder-scintillator-gso-top-curve-r" rmin="10.0" rmax="15.0" z="3.3" deltaphi="45" startphi="135" aunit="deg" lunit="mm"/>
+    <tube name="Log-holder-scintillator-gso-center-curve" rmin="3.0" rmax="4.5" z="3.2" deltaphi="90" startphi="90" aunit="deg" lunit="mm"/>
+
+    <box name="Log-holder-scintillator-gso-small-guide-hole-base" lunit="mm" x="20.2" y="12" z="1.2"/>
+    <box name="Log-holder-scintillator-gso-small-guide-hole-sub" lunit="mm" x="4.5/cos(theta0)" y="13" z="1.3"/>
+    <subtraction name="Log-holder-scintillator-gso-small-guide-hole-00">
+      <first ref="Log-holder-scintillator-gso-small-guide-hole-base"/>
+      <second ref="Log-holder-scintillator-gso-small-guide-hole-sub"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-guide-hole-sub-l"/>
+      <rotationref ref="Rot-20-l"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-holder-scintillator-gso-small-guide-hole">
+      <first ref="Log-holder-scintillator-gso-small-guide-hole-00"/>
+      <second ref="Log-holder-scintillator-gso-small-guide-hole-sub"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-guide-hole-sub-r"/>
+      <rotationref ref="Rot-20-r"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <box name="Log-holder-scintillator-gso-small-fiber-hole" lunit="mm" x="12.20" y="24" z="1.2"/>
+
+    <box name="Log-holder-scintillator-gso-large-guide-hole-base" lunit="mm" x="40.2" y="20.1" z="1.2"/>
+    <box name="Log-holder-scintillator-gso-large-guide-hole-cut-l" lunit="mm" x="29" y="20.1*sqrt(2)" z="1.3"/>
+    <box name="Log-holder-scintillator-gso-large-guide-hole-cut-r1" lunit="mm" x="20.1*sin(theta5)" y="21" z="1.3"/>
+    <box name="Log-holder-scintillator-gso-large-guide-hole-cut-r2" lunit="mm" x="23" y="20.1*sin(theta2)" z="1.3"/>
+
+    <subtraction name="Log-holder-scintillator-gso-large-guide-hole-00">
+      <first ref="Log-holder-scintillator-gso-large-guide-hole-base"/>
+      <second ref="Log-holder-scintillator-gso-large-guide-hole-cut-l"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-guide-hole-cut-l"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-holder-scintillator-gso-large-guide-hole-01">
+      <first ref="Log-holder-scintillator-gso-large-guide-hole-00"/>
+      <second ref="Log-holder-scintillator-gso-large-guide-hole-cut-r1"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-guide-hole-cut-r1"/>
+      <rotationref ref="Rot-5"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-holder-scintillator-gso-large-guide-hole">
+      <first ref="Log-holder-scintillator-gso-large-guide-hole-01"/>
+      <second ref="Log-holder-scintillator-gso-large-guide-hole-cut-r2"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-guide-hole-cut-r2"/>
+      <rotationref ref="Rot-335"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <box name="Log-holder-scintillator-gso-large-fiber-hole" lunit="mm" x="17" y="21.20" z="1.2"/>
+
+    <box name="Log-holder-scintillator-gso-bottom" lunit="mm" x="20" y="19.5" z="3.2"/>
+    <tube name="Log-holder-scintillator-gso-bottom-curve" rmin="10.0" rmax="15.0" z="3.2" deltaphi="45" startphi="0" aunit="deg" lunit="mm"/>
+
+    <tube name="Log-holder-scintillator-gso-hole" rmin="0.0" rmax="4.0" z="3.3" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-holder-scintillator-gso-small-hole" lunit="mm" x="20.20" y="20.20" z="1.2"/>
+    <box name="Log-holder-scintillator-gso-large-hole" lunit="mm" x="40.20" y="40.20" z="1.2"/>
+    <box name="Log-holder-scintillator-gso-top-cut" lunit="mm" x="12" y="16" z="3.3"/>
+
+    <union name="Log-holder-scintillator-gso-00">
+      <first ref="Log-holder-scintillator-gso-small"/>
+      <second ref="Log-holder-scintillator-gso-large"/>
+      <positionref ref="Pos-holder-scintillator-gso-large"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-holder-scintillator-gso-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-holder-scintillator-gso-01">
+      <first ref="Log-holder-scintillator-gso-00"/>
+      <second ref="Log-holder-scintillator-gso-large-top"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-holder-scintillator-gso-02">
+      <first ref="Log-holder-scintillator-gso-01"/>
+      <second ref="Log-holder-scintillator-gso-small-top-cut"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-top-cut"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-03">
+      <first ref="Log-holder-scintillator-gso-02"/>
+      <second ref="Log-holder-scintillator-gso-large-top-cut-r"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-top-cut-r"/>
+      <rotationref ref="Rot-345"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <union name="Log-holder-scintillator-gso-04">
+      <first ref="Log-holder-scintillator-gso-03"/>
+      <second ref="Log-holder-scintillator-gso-top-curve-l"/>
+      <positionref ref="Pos-holder-scintillator-gso-top-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-holder-scintillator-gso-05">
+      <first ref="Log-holder-scintillator-gso-04"/>
+      <second ref="Log-holder-scintillator-gso-top-curve-r"/>
+      <positionref ref="Pos-holder-scintillator-gso-top-curve-r"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-06">
+      <first ref="Log-holder-scintillator-gso-05"/>
+      <second ref="Log-holder-scintillator-gso-large-top-cut-l"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-top-cut-l"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <union name="Log-holder-scintillator-gso-07">
+      <first ref="Log-holder-scintillator-gso-06"/>
+      <second ref="Log-holder-scintillator-gso-center-curve"/>
+      <positionref ref="Pos-holder-scintillator-gso-center-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-holder-scintillator-gso-08">
+      <first ref="Log-holder-scintillator-gso-07"/>
+      <second ref="Log-holder-scintillator-gso-center-curve"/>
+      <positionref ref="Pos-holder-scintillator-gso-center-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-holder-scintillator-gso-09">
+      <first ref="Log-holder-scintillator-gso-08"/>
+      <second ref="Log-holder-scintillator-gso-small-guide-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-guide-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-10">
+      <first ref="Log-holder-scintillator-gso-09"/>
+      <second ref="Log-holder-scintillator-gso-small-fiber-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-fiber-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-11">
+      <first ref="Log-holder-scintillator-gso-10"/>
+      <second ref="Log-holder-scintillator-gso-large-guide-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-guide-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-12">
+      <first ref="Log-holder-scintillator-gso-11"/>
+      <second ref="Log-holder-scintillator-gso-large-fiber-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-fiber-hole"/>
+      <rotationref ref="Rot-65"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <union name="Log-holder-scintillator-gso-13">
+      <first ref="Log-holder-scintillator-gso-12"/>
+      <second ref="Log-holder-scintillator-gso-bottom"/>
+      <positionref ref="Pos-holder-scintillator-gso-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-45"/>
+    </union>
+
+    <union name="Log-holder-scintillator-gso-14">
+      <first ref="Log-holder-scintillator-gso-13"/>
+      <second ref="Log-holder-scintillator-gso-bottom-curve"/>
+      <positionref ref="Pos-holder-scintillator-gso-bottom-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-holder-scintillator-gso-15">
+      <first ref="Log-holder-scintillator-gso-14"/>
+      <second ref="Log-holder-scintillator-gso-bottom-curve"/>
+      <positionref ref="Pos-holder-scintillator-gso-bottom-curve-r"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-holder-scintillator-gso-16">
+      <first ref="Log-holder-scintillator-gso-15"/>
+      <second ref="Log-holder-scintillator-gso-small-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-small-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-17">
+      <first ref="Log-holder-scintillator-gso-16"/>
+      <second ref="Log-holder-scintillator-gso-large-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-large-hole"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-18">
+      <first ref="Log-holder-scintillator-gso-17"/>
+      <second ref="Log-holder-scintillator-gso-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso-19">
+      <first ref="Log-holder-scintillator-gso-18"/>
+      <second ref="Log-holder-scintillator-gso-hole"/>
+      <positionref ref="Pos-holder-scintillator-gso-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-holder-scintillator-gso">
+      <first ref="Log-holder-scintillator-gso-19"/>
+      <second ref="Log-holder-scintillator-gso-top-cut"/>
+      <positionref ref="Pos-holder-scintillator-gso-top-cut"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- GSO scitillators -->
+    <box name="Log-gso-scintillator-small" lunit="mm" x="20" y="20" z="1" />
+    <box name="Log-gso-scintillator-large" lunit="mm" x="40" y="40" z="1" />
+
+    <!-- Light Guides -->
+    <box name="Log-light-guide-small-base" lunit="mm" x="20" y="11.99" z="1"/>
+    <box name="Log-light-guide-small-sub" lunit="mm" x="4.5*cos(theta0)" y="13" z="1.1"/>
+
+    <subtraction name="Log-light-guide-small-00">
+      <first ref="Log-light-guide-small-base"/>
+      <second ref="Log-light-guide-small-sub"/>
+      <positionref ref="Pos-light-guide-small-sub-l"/>
+      <rotationref ref="Rot-20-l"/>
+      <firstpositionref ref="Pos-light-guide-small-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-light-guide-small">
+      <first ref="Log-light-guide-small-00"/>
+      <second ref="Log-light-guide-small-sub"/>
+      <positionref ref="Pos-light-guide-small-sub-r"/>
+      <rotationref ref="Rot-20-r"/>
+      <firstpositionref ref="Pos-light-guide-small-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <box name="Log-light-guide-large-base" lunit="mm" x="40" y="18.45" z="1"/>
+    <box name="Log-light-guide-large-sub-r" lunit="mm" x="20*cos(theta1)" y="28" z="1.1"/>
+    <box name="Log-light-guide-large-sub-l1" lunit="mm" x="23" y="20*sin(theta2)" z="1.1"/>
+    <box name="Log-light-guide-large-sub-l2" lunit="mm" x="18.45*sin(theta3)" y="21" z="1.1"/>
+
+    <subtraction name="Log-light-guide-large-00">
+      <first ref="Log-light-guide-large-base"/>
+      <second ref="Log-light-guide-large-sub-r"/>
+      <positionref ref="Pos-light-guide-large-sub-r"/>
+      <rotationref ref="Rot-light-guide-large-sub-r"/>
+      <firstpositionref ref="Pos-light-guide-large-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-light-guide-large-01">
+      <first ref="Log-light-guide-large-00"/>
+      <second ref="Log-light-guide-large-sub-l1"/>
+      <positionref ref="Pos-light-guide-large-sub-l1"/>
+      <rotationref ref="Rot-light-guide-large-sub-l1"/>
+      <firstpositionref ref="Pos-light-guide-large-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-light-guide-large">
+      <first ref="Log-light-guide-large-01"/>
+      <second ref="Log-light-guide-large-sub-l2"/>
+      <positionref ref="Pos-light-guide-large-sub-l2"/>
+      <rotationref ref="Rot-light-guide-large-sub-l2"/>
+      <firstpositionref ref="Pos-light-guide-large-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Holder Scintillator GSO Assembly -->
+    <box name="Log-holder-scintillator-gso-assembly-base" lunit="mm" x="86" y="134.731" z="3.2"/>
+    <subtraction name="Log-holder-scintillator-gso-assembly-00">
+      <first ref="Log-holder-scintillator-gso-assembly-base"/>
+      <second ref="Log-holder-scintillator-gso-hole"/>
+      <positionref ref="Pos-assembly-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-holder-scintillator-gso-assembly">
+      <first ref="Log-holder-scintillator-gso-assembly-00"/>
+      <second ref="Log-holder-scintillator-gso-hole"/>
+      <positionref ref="Pos-assembly-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- ********** -->
+
+    <!-- GSObar Holder -->
+    <box name="Log-gsobar-holder-small" lunit="mm" x="40.10" y="40.10" z="3.8"/>
+    <box name="Log-gsobar-holder-large" lunit="mm" x="53.74" y="53.74" z="3.8"/>
+
+    <box name="Log-gsobar-holder-bottom" lunit="mm" x="20" y="19.5" z="3.8"/>
+    <tube name="Log-gsobar-holder-bottom-curve" rmin="10.0" rmax="15.0" z="3.8" deltaphi="45" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-gsobar-holder-top" lunit="mm" x="17.8" y="17.8" z="3.8"/>
+    <tube name="Log-gsobar-holder-top-curve" rmin="3.0" rmax="4.5" z="3.8" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+
+    <tube name="Log-gsobar-holder-center-curve" rmin="3.0" rmax="4.5" z="3.8" deltaphi="90" startphi="315" aunit="deg" lunit="mm"/>
+
+
+    <box name="Log-gsobar-holder-small-fiber-x-mill" lunit="mm" x="20.10" y="19" z="1.2"/>
+    <box name="Log-gsobar-holder-small-fiber-y-mill" lunit="mm" x="19" y="20.10" z="2.4"/>
+    <box name="Log-gsobar-holder-small-mill" lunit="mm" x="20.10" y="20.10" z="2.4"/>
+    <box name="Log-gsobar-holder-large-fiber-x-mill" lunit="mm" x="40.35" y="14" z="1.2"/>
+    <box name="Log-gsobar-holder-large-fiber-y-mill" lunit="mm" x="14" y="40.35" z="2.4"/>
+    <box name="Log-gsobar-holder-large-mill" lunit="mm" x="40.35" y="40.35" z="2.4"/>
+
+    <tube name="Log-gsobar-holder-hole" rmin="0.0" rmax="4.0" z="3.9" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <box name="Log-gsobar-holder-large-cut" lunit="mm" x="1.5*sqrt(2)" y="5" z="3.9"/>
+    <box name="Log-gsobar-holder-top-sub" lunit="mm" x="10" y="10" z="3.9"/>
+
+
+    <union name="Log-gsobar-holder-00">
+      <first ref="Log-gsobar-holder-small"/>
+      <second ref="Log-gsobar-holder-large"/>
+      <positionref ref="Pos-gsobar-holder-large"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-gsobar-holder-small"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-01">
+      <first ref="Log-gsobar-holder-00"/>
+      <second ref="Log-gsobar-holder-top"/>
+      <positionref ref="Pos-gsobar-holder-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-02">
+      <first ref="Log-gsobar-holder-01"/>
+      <second ref="Log-gsobar-holder-bottom"/>
+      <positionref ref="Pos-gsobar-holder-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-45"/>
+    </union>
+
+    <union name="Log-gsobar-holder-03">
+      <first ref="Log-gsobar-holder-02"/>
+      <second ref="Log-gsobar-holder-bottom-curve"/>
+      <positionref ref="Pos-gsobar-holder-bottom-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-04">
+      <first ref="Log-gsobar-holder-03"/>
+      <second ref="Log-gsobar-holder-bottom-curve"/>
+      <positionref ref="Pos-gsobar-holder-bottom-curve-r"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-05">
+      <first ref="Log-gsobar-holder-04"/>
+      <second ref="Log-gsobar-holder-top-curve"/>
+      <positionref ref="Pos-gsobar-holder-top-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-06">
+      <first ref="Log-gsobar-holder-05"/>
+      <second ref="Log-gsobar-holder-top-curve"/>
+      <positionref ref="Pos-gsobar-holder-top-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-07">
+      <first ref="Log-gsobar-holder-06"/>
+      <second ref="Log-gsobar-holder-center-curve"/>
+      <positionref ref="Pos-gsobar-holder-center-curve-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <union name="Log-gsobar-holder-08">
+      <first ref="Log-gsobar-holder-07"/>
+      <second ref="Log-gsobar-holder-center-curve"/>
+      <positionref ref="Pos-gsobar-holder-center-curve-r"/>
+      <rotationref ref="Rot-180"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-gsobar-holder-09">
+      <first ref="Log-gsobar-holder-08"/>
+      <second ref="Log-gsobar-holder-small-fiber-x-mill"/>
+      <positionref ref="Pos-gsobar-holder-small-fiber-x-mill"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-10">
+      <first ref="Log-gsobar-holder-09"/>
+      <second ref="Log-gsobar-holder-small-fiber-y-mill"/>
+      <positionref ref="Pos-gsobar-holder-small-fiber-y-mill"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-11">
+      <first ref="Log-gsobar-holder-10"/>
+      <second ref="Log-gsobar-holder-small-mill"/>
+      <positionref ref="Pos-gsobar-holder-small-mill"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-12">
+      <first ref="Log-gsobar-holder-11"/>
+      <second ref="Log-gsobar-holder-large-fiber-x-mill"/>
+      <positionref ref="Pos-gsobar-holder-large-fiber-x-mill"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-13">
+      <first ref="Log-gsobar-holder-12"/>
+      <second ref="Log-gsobar-holder-large-fiber-y-mill"/>
+      <positionref ref="Pos-gsobar-holder-large-fiber-y-mill"/>
+      <rotationref ref="Rot-135"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-14">
+      <first ref="Log-gsobar-holder-13"/>
+      <second ref="Log-gsobar-holder-large-mill"/>
+      <positionref ref="Pos-gsobar-holder-large-mill"/>
+      <rotationref ref="Rot-45"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-15">
+      <first ref="Log-gsobar-holder-14"/>
+      <second ref="Log-gsobar-holder-hole"/>
+      <positionref ref="Pos-gsobar-holder-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-16">
+      <first ref="Log-gsobar-holder-15"/>
+      <second ref="Log-gsobar-holder-hole"/>
+      <positionref ref="Pos-gsobar-holder-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-17">
+      <first ref="Log-gsobar-holder-16"/>
+      <second ref="Log-gsobar-holder-large-cut"/>
+      <positionref ref="Pos-gsobar-holder-large-cut-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-18">
+      <first ref="Log-gsobar-holder-17"/>
+      <second ref="Log-gsobar-holder-large-cut"/>
+      <positionref ref="Pos-gsobar-holder-large-cut-r"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder-19">
+      <first ref="Log-gsobar-holder-18"/>
+      <second ref="Log-gsobar-holder-top-sub"/>
+      <positionref ref="Pos-gsobar-holder-top-sub-l"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-gsobar-holder">
+      <first ref="Log-gsobar-holder-19"/>
+      <second ref="Log-gsobar-holder-top-sub"/>
+      <positionref ref="Pos-gsobar-holder-top-sub-r"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- GSObelt -->
+    <box name="Log-gsobar-small" lunit="mm" x="20" y="1" z="1"/>
+    <box name="Log-gsobelt-small" lunit="mm" x="20" y="20" z="1"/>
+    <box name="Log-gsobar-large" lunit="mm" x="40" y="1" z="1"/>
+    <box name="Log-gsobelt-large" lunit="mm" x="40" y="40" z="1"/>
+
+    <!-- Holder Scintillator GSO Assembly -->
+    <box name="Log-gsobar-holder-assembly-base" lunit="mm" x="86" y="134.731" z="3.8"/>
+    <subtraction name="Log-gsobar-holder-assembly-00">
+      <first ref="Log-gsobar-holder-assembly-base"/>
+      <second ref="Log-gsobar-holder-hole"/>
+      <positionref ref="Pos-assembly-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-gsobar-holder-assembly">
+      <first ref="Log-gsobar-holder-assembly-00"/>
+      <second ref="Log-gsobar-holder-hole"/>
+      <positionref ref="Pos-assembly-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- ********** -->
+
+    <!-- Frame Bottom 10 -->
+    <box lunit="mm" name="Log-frame-bottom-10-base" x="88" y="8" z="278"/>
+    <box lunit="mm" name="Log-frame-bottom-10-mill-front" x="40.10" y="3" z="28"/>
+    <box lunit="mm" name="Log-frame-bottom-10-mill-rear" x="40.10" y="3" z="17.8"/>
+
+    <subtraction name="Log-frame-bottom-10-0">
+      <first ref="Log-frame-bottom-10-base"/>
+      <second ref="Log-frame-bottom-10-mill-front"/>
+      <positionref ref="Pos-frame-bottom-10-mill-front"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+    <subtraction name="Log-frame-bottom-10">
+      <first ref="Log-frame-bottom-10-0"/>
+      <second ref="Log-frame-bottom-10-mill-rear"/>
+      <positionref ref="Pos-frame-bottom-10-mill-rear"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Base Joint 1 -->
+    <box name="Log-base-joint-1-base" lunit="mm" x="40" y="16" z="17.7"/>
+    <tube name="Log-base-joint-1-hole" rmin="0.0" rmax="4.05" z="41.0" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <subtraction name="Log-base-joint-1">
+      <first ref="Log-base-joint-1-base"/>
+      <second ref="Log-base-joint-1-hole"/>
+      <positionref ref="Pos-base-joint-1-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Base Joint 2 -->
+    <box name="Log-base-joint-2-base" lunit="mm" x="40" y="16" z="8"/>
+    <tube name="Log-base-joint-2-hole" rmin="0.0" rmax="4.05" z="41.0" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <subtraction name="Log-base-joint-2">
+      <first ref="Log-base-joint-2-base"/>
+      <second ref="Log-base-joint-2-hole"/>
+      <positionref ref="Pos-base-joint-2-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-base-joint-2-base"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Post -->
+    <box name="Log-post" lunit="mm" x="10" y="227" z="10"/>
+
+    <!-- Tower Joint 1 -->
+    <box name="Log-tower-joint-1-base" lunit="mm" x="68" y="20" z="10"/>
+    <box name="Log-tower-joint-1-top" lunit="mm" x="20" y="20" z="7.7"/>
+    <tube name="Log-tower-joint-1-hole" rmin="0.0" rmax="4.1" z="41.0" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <union name="Log-tower-joint-1-00">
+      <first ref="Log-tower-joint-1-base"/>
+      <second ref="Log-tower-joint-1-top"/>
+      <positionref ref="Pos-tower-joint-1-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tower-joint-1">
+      <first ref="Log-tower-joint-1-00"/>
+      <second ref="Log-tower-joint-1-hole"/>
+      <positionref ref="Pos-tower-joint-1-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tower Joint 2 -->
+    <box name="Log-tower-joint-2-base" lunit="mm" x="68" y="20" z="10"/>
+    <tube name="Log-tower-joint-2-hole" rmin="0.0" rmax="4.1" z="41.0" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <subtraction name="Log-tower-joint-2">
+      <first ref="Log-tower-joint-2-base"/>
+      <second ref="Log-tower-joint-2-hole"/>
+      <positionref ref="Pos-tower-joint-2-hole"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tower Stopper -->
+    <box name="Log-tower-stopper-base" lunit="mm" x="60" y="134.45" z="1"/>
+    <tube name="Log-tower-stopper-hole" rmin="0.0" rmax="4.0" z="2" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <subtraction name="Log-tower-stopper-00">
+      <first ref="Log-tower-stopper-base"/>
+      <second ref="Log-tower-stopper-hole"/>
+      <positionref ref="Pos-tower-stopper-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tower-stopper">
+      <first ref="Log-tower-stopper-00"/>
+      <second ref="Log-tower-stopper-hole"/>
+      <positionref ref="Pos-tower-stopper-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tangsten Holfer 5 -->
+    <box name="Log-tangsten-holfer-5-base" lunit="mm" x="60" y="134.45" z="8"/>
+    <tube name="Log-tangsten-holfer-5-hole" rmin="0.0" rmax="4.0" z="9" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+    <box name="Log-tangsten-holfer-5-arm" lunit="mm" x="86" y="8" z="8"/>
+
+    <union name="Log-tangsten-holfer-5-00">
+      <first ref="Log-tangsten-holfer-5-base"/>
+      <second ref="Log-tangsten-holfer-5-arm"/>
+      <positionref ref="Pos-tangsten-holfer-5-arm"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </union>
+
+    <subtraction name="Log-tangsten-holfer-5-01">
+      <first ref="Log-tangsten-holfer-5-00"/>
+      <second ref="Log-tangsten-holfer-5-hole"/>
+      <positionref ref="Pos-tangsten-holfer-5-hole-bottom"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <subtraction name="Log-tangsten-holfer-5">
+      <first ref="Log-tangsten-holfer-5-01"/>
+      <second ref="Log-tangsten-holfer-5-hole"/>
+      <positionref ref="Pos-tangsten-holfer-5-hole-top"/>
+      <rotationref ref="Rot-0"/>
+      <firstpositionref ref="Pos-Center"/>
+      <firstrotationref ref="Rot-0"/>
+    </subtraction>
+
+    <!-- Tower Pole -->
+    <tube name="Log-tower-pole" rmin="0.0" rmax="4.0" z="275" deltaphi="360" startphi="0" aunit="deg" lunit="mm"/>
+
+    <!-- Panels -->
+    <box name="Log-panel-front-back" lunit="mm" x="88" y="235" z="1"/>
+    <box name="Log-panel-side" lunit="mm" x="1" y="235" z="278"/>
+
+    <!-- Front Counter -->
+    <box name="Log-frontcounter-small" lunit="mm" x="20" y="20" z="3"/>
+    <box name="Log-frontcounter-large" lunit="mm" x="40" y="40" z="3"/>
+    <box name="Log-frontcounter-front" lunit="mm" x="90" y="243" z="1"/>
+    <box name="Log-frontcounter-side" lunit="mm" x="1" y="243" z="23"/>
+
+    <!-- Truth Counter (Not real material and detector) -->
+    <box name="Log-TruthCounter-small" lunit="mm" x="20" y="20" z="0.0001"/>
+    <box name="Log-TruthCounter-large" lunit="mm" x="40" y="40" z="0.0001"/>
+
+    <!-- ********** -->
+  </solids>
+
+  <!-- ************************ -->
+  <!-- *** Physical Volumes *** -->
+  <!-- ************************ -->
+  <structure>
+    <!-- ********** -->
+
+    <volume name="Vol-tungsten-holder-12">
+      <materialref ref="G10"/>
+      <solidref ref="Log-tungsten-holder-12"/>
+    </volume>
+    <volume name="Vol-tungsten-small">
+      <materialref ref="Tungsten"/>
+      <solidref ref="Log-tungsten-small"/>
+    </volume>
+    <volume name="Vol-tungsten-large">
+      <materialref ref="Tungsten"/>
+      <solidref ref="Log-tungsten-large"/>
+    </volume>
+
+    <volume name="Vol-tungsten-holder-12-assembly">
+      <materialref ref="Air"/>
+      <solidref ref="Log-tungsten-holder-12-assembly"/>
+      <physvol>
+        <volumeref ref="Vol-tungsten-holder-12"/>
+        <positionref ref="Pos-tungsten-holder-12"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tungsten-small"/>
+        <positionref ref="Pos-tungsten-small"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tungsten-large"/>
+        <positionref ref="Pos-tungsten-large"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+    </volume>
+
+    <!-- ********** -->
+
+    <volume name="Vol-tungsten-holder-13">
+      <materialref ref="G10"/>
+      <solidref ref="Log-tungsten-holder-13"/>
+    </volume>
+
+    <volume name="Vol-tungsten-holder-13-assembly">
+      <materialref ref="Air"/>
+      <solidref ref="Log-tungsten-holder-13-assembly"/>
+      <physvol>
+        <volumeref ref="Vol-tungsten-holder-13"/>
+        <positionref ref="Pos-tungsten-holder-13"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tungsten-small"/>
+        <positionref ref="Pos-tungsten-small"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tungsten-large"/>
+        <positionref ref="Pos-tungsten-large"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+    </volume>
+
+    <!-- ********** -->
+
+    <volume name="Vol-holder-scintillator-gso">
+      <materialref ref="Acrylic"/>
+      <solidref ref="Log-holder-scintillator-gso"/>
+    </volume>
+
+    <volume name="Vol-gso-scintillator-small">
+      <materialref ref="GSO"/>
+      <solidref ref="Log-gso-scintillator-small"/>
+      <auxiliary auxtype="SensDet" auxvalue="GSOplate"/>
+    </volume>
+
+    <volume name="Vol-gso-scintillator-large">
+      <materialref ref="GSO"/>
+      <solidref ref="Log-gso-scintillator-large"/>
+      <auxiliary auxtype="SensDet" auxvalue="GSOplate"/>
+    </volume>
+
+    <volume name="Vol-light-guide-small">
+      <materialref ref="Quartz"/>
+      <solidref ref="Log-light-guide-small"/>
+    </volume>
+
+    <volume name="Vol-light-guide-large">
+      <materialref ref="Quartz"/>
+      <solidref ref="Log-light-guide-large"/>
+    </volume>
+
+    <volume name="Vol-holder-scintillator-gso-assembly">
+      <materialref ref="Air"/>
+      <solidref ref="Log-holder-scintillator-gso-assembly"/>
+      <physvol>
+        <volumeref ref="Vol-holder-scintillator-gso"/>
+        <positionref ref="Pos-holder-scintillator-gso"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gso-scintillator-small"/>
+        <positionref ref="Pos-gso-scintillator-small"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-light-guide-small"/>
+        <positionref ref="Pos-light-guide-small"/>
+        <rotationref ref="Rot-315"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gso-scintillator-large"/>
+        <positionref ref="Pos-gso-scintillator-large"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-light-guide-large"/>
+        <positionref ref="Pos-light-guide-large"/>
+        <rotationref ref="Rot-315"/>
+      </physvol>
+    </volume>
+
+    <!-- ********** -->
+
+    <volume name="Vol-gsobar-holder">
+      <materialref ref="Acrylic"/>
+      <solidref ref="Log-gsobar-holder"/>
+    </volume>
+
+    <!-- GSObelt small -->
+    <volume name="Vol-gsobar-small">
+      <materialref ref="GSObar"/>
+      <solidref ref="Log-gsobar-small"/>
+      <auxiliary auxtype="SensDet" auxvalue="GSObar"/>
+    </volume>
+
+    <volume name="Vol-gsobelt-small">
+      <materialref ref="Air"/>
+      <solidref ref="Log-gsobelt-small"/>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-00"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-01"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-02"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-03"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-04"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-05"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-06"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-07"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-08"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-09"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-10"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-11"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-12"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-13"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-14"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-15"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-16"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-17"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-18"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-small"/>
+        <positionref ref="Pos-gsobar-small-19"/>
+      </physvol>
+    </volume>
+
+    <!-- GSObelt large -->
+    <volume name="Vol-gsobar-large">
+      <materialref ref="GSObar"/>
+      <solidref ref="Log-gsobar-large"/>
+      <auxiliary auxtype="SensDet" auxvalue="GSObar"/>
+    </volume>
+
+    <volume name="Vol-gsobelt-large">
+      <materialref ref="Air"/>
+      <solidref ref="Log-gsobelt-large"/>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-00"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-01"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-02"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-03"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-04"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-05"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-06"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-07"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-08"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-09"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-10"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-11"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-12"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-13"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-14"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-15"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-16"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-17"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-18"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-19"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-20"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-21"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-22"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-23"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-24"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-25"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-26"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-27"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-28"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-29"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-30"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-31"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-32"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-33"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-34"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-35"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-36"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-37"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-38"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobar-large"/>
+        <positionref ref="Pos-gsobar-large-39"/>
+      </physvol>
+    </volume>
+
+    <volume name="Vol-gsobar-holder-assembly">
+      <materialref ref="Air"/>
+      <solidref ref="Log-gsobar-holder-assembly"/>
+      <physvol>
+        <volumeref ref="Vol-gsobar-holder"/>
+        <positionref ref="Pos-gsobar-holder"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobelt-small"/>
+        <positionref ref="Pos-gsobelt-small-x"/>
+        <rotationref ref="Rot-315"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobelt-small"/>
+        <positionref ref="Pos-gsobelt-small-y"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobelt-large"/>
+        <positionref ref="Pos-gsobelt-large-x"/>
+        <rotationref ref="Rot-315"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-gsobelt-large"/>
+        <positionref ref="Pos-gsobelt-large-y"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+    </volume>
+
+
+    <!-- ********** -->
+
+    <!-- Frames -->
+    <volume name="Vol-frame-bottom-10">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-frame-bottom-10"/>
+    </volume>
+    <volume name="Vol-base-joint-1">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-base-joint-1"/>
+    </volume>
+    <volume name="Vol-base-joint-2">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-base-joint-2"/>
+    </volume>
+    <volume name="Vol-post">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-post"/>
+    </volume>
+    <volume name="Vol-tower-joint-1">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-tower-joint-1"/>
+    </volume>
+    <volume name="Vol-tower-joint-2">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-tower-joint-2"/>
+    </volume>
+    <volume name="Vol-tower-stopper">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-tower-stopper"/>
+    </volume>
+    <volume name="Vol-tangsten-holfer-5">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-tangsten-holfer-5"/>
+    </volume>
+    <volume name="Vol-tower-pole">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-tower-pole"/>
+    </volume>
+    <volume name="Vol-panel-front-back">
+      <materialref ref="Duralumin"/>
+      <solidref ref="Log-panel-front-back"/>
+    </volume>
+    <volume name="Vol-panel-side">
+      <materialref ref="Duralumin"/>
+      <solidref ref="Log-panel-side"/>
+    </volume>
+
+    <volume name="Vol-frontcounter-small">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-frontcounter-small"/>
+      <auxiliary auxtype="SensDet" auxvalue="FC"/>
+    </volume>
+    <volume name="Vol-frontcounter-large">
+      <materialref ref="Scintillator"/>
+      <solidref ref="Log-frontcounter-large"/>
+      <auxiliary auxtype="SensDet" auxvalue="FC"/>
+    </volume>
+    <volume name="Vol-frontcounter-front">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-frontcounter-front"/>
+    </volume>
+    <volume name="Vol-frontcounter-side">
+      <materialref ref="Aluminium"/>
+      <solidref ref="Log-frontcounter-side"/>
+    </volume>
+
+    <volume name="Vol-TruthCounter-small">
+      <materialref ref="Galactic"/>
+      <solidref ref="Log-TruthCounter-small"/>
+      <auxiliary auxtype="SensDet" auxvalue="TruthCounter"/>
+    </volume>
+    <volume name="Vol-TruthCounter-large">
+      <materialref ref="Galactic"/>
+      <solidref ref="Log-TruthCounter-large"/>
+      <auxiliary auxtype="SensDet" auxvalue="TruthCounter"/>
+    </volume>
+
+    <!-- ******************** -->
+    <!-- *** World Volume *** -->
+    <!-- ******************** -->
+    <volume name="Vol-Arm1">
+      <materialref ref="Air"/>
+      <solidref ref="Log-Arm1"/>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay00"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay00"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay01"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay01"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-13-assembly"/>
+	<positionref ref="Pos-tungsten-holder-13-lay02"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-gsobar-holder-assembly"/>
+	<positionref ref="Pos-gsobar-holder-lay00"/>
+	<rotationref ref="Rot-Flip"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay02"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay03"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay03"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-13-assembly"/>
+	<positionref ref="Pos-tungsten-holder-13-lay04"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-gsobar-holder-assembly"/>
+	<positionref ref="Pos-gsobar-holder-lay01"/>
+	<rotationref ref="Rot-Flip"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay04"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay05"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay05"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay06"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay06"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay07"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay07"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay08"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay08"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay09"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay09"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay10"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay10"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay11"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay12"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay11"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay13"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-13-assembly"/>
+	<positionref ref="Pos-tungsten-holder-13-lay14"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-gsobar-holder-assembly"/>
+	<positionref ref="Pos-gsobar-holder-lay02"/>
+	<rotationref ref="Rot-Flip"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay12"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay15"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay16"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay13"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay17"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-13-assembly"/>
+	<positionref ref="Pos-tungsten-holder-13-lay18"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-gsobar-holder-assembly"/>
+	<positionref ref="Pos-gsobar-holder-lay03"/>
+	<rotationref ref="Rot-Flip"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay14"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay19"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay20"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-holder-scintillator-gso-assembly"/>
+	<positionref ref="Pos-holder-scintillator-gso-lay15"/>
+      </physvol>
+      <physvol>
+	<volumeref ref="Vol-tungsten-holder-12-assembly"/>
+	<positionref ref="Pos-tungsten-holder-12-lay21"/>
+      </physvol>
+
+      <physvol>
+        <volumeref ref="Vol-frame-bottom-10"/>
+        <positionref ref="Pos-frame-bottom-10"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-base-joint-1"/>
+        <positionref ref="Pos-base-joint-1"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-base-joint-2"/>
+        <positionref ref="Pos-base-joint-2"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-post"/>
+        <positionref ref="Pos-post-1"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-post"/>
+        <positionref ref="Pos-post-2"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-post"/>
+        <positionref ref="Pos-post-3"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-post"/>
+        <positionref ref="Pos-post-4"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tower-joint-1"/>
+        <positionref ref="Pos-tower-joint-1"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tower-joint-2"/>
+        <positionref ref="Pos-tower-joint-2"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tower-stopper"/>
+        <positionref ref="Pos-tower-stopper"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tangsten-holfer-5"/>
+        <positionref ref="Pos-tangsten-holfer-5"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tower-pole"/>
+        <positionref ref="Pos-tower-pole-bottom"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-tower-pole"/>
+        <positionref ref="Pos-tower-pole-top"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-panel-front-back"/>
+        <positionref ref="Pos-panel-front"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-panel-front-back"/>
+        <positionref ref="Pos-panel-back"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-panel-side"/>
+        <positionref ref="Pos-panel-left"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-panel-side"/>
+        <positionref ref="Pos-panel-right"/>
+      </physvol>
+
+      <physvol>
+        <volumeref ref="Vol-frontcounter-small"/>
+        <positionref ref="Pos-frontcounter-small"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-frontcounter-large"/>
+        <positionref ref="Pos-frontcounter-large"/>
+        <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-frontcounter-front"/>
+        <positionref ref="Pos-frontcounter-front"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-frontcounter-side"/>
+        <positionref ref="Pos-frontcounter-side-l"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="Vol-frontcounter-side"/>
+        <positionref ref="Pos-frontcounter-side-r"/>
+      </physvol>
+
+      <physvol>
+          <volumeref ref="Vol-TruthCounter-small"/>
+          <positionref ref="Pos-TruthCounter-small"/>
+          <rotationref ref="Rot-45"/>
+      </physvol>
+      <physvol>
+          <volumeref ref="Vol-TruthCounter-large"/>
+          <positionref ref="Pos-TruthCounter-large"/>
+          <rotationref ref="Rot-45"/>
+      </physvol>
+    </volume>
+
+  </structure>
+
+  <setup name="arm1" version="1.0">
+    <world ref="Vol-Arm1"/>
+  </setup>
+</gdml>
+
