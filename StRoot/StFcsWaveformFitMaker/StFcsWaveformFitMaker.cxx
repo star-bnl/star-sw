@@ -870,6 +870,7 @@ float StFcsWaveformFitMaker::highest3(TGraphAsymmErrors* g, float* res){
     //res[3]= 0.0;	  //no sigma from this	       
     //res[4]= 0.0;	  //no chi2 from this		       
     //res[5]= 0.0;        //no # of peak
+    if( fabs(res[7]) > 0.000001 ){ res[0] -= res[6]*3; }//pedestal subtraction for highest3. Since 3 timebin sum pedestal*3 is integrated pedestal
     return sum;		  //this is the 3 timebin sum
 }
 
